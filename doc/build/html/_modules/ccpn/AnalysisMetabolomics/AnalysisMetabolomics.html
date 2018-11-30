@@ -61,7 +61,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:22 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -71,20 +71,18 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="kn">from</span> <span class="nn">ccpn.framework.Framework</span> <span class="kn">import</span> <span class="n">Framework</span>
+<span class="kn">from</span> <span class="nn">ccpn.AnalysisAssign.AnalysisAssign</span> <span class="kn">import</span> <span class="n">Assign</span>
 
 
-<div class="viewcode-block" id="Metabolomics"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.AnalysisMetabolomics.Metabolomics">[docs]</a><span class="k">class</span> <span class="nc">Metabolomics</span><span class="p">(</span><span class="n">Framework</span><span class="p">):</span>
+<div class="viewcode-block" id="Metabolomics"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.AnalysisMetabolomics.Metabolomics">[docs]</a><span class="k">class</span> <span class="nc">Metabolomics</span><span class="p">(</span><span class="n">Assign</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Root class for Metabolomics application&quot;&quot;&quot;</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">applicationName</span><span class="p">,</span> <span class="n">applicationVersion</span><span class="p">,</span> <span class="n">commandLineArguments</span><span class="p">):</span>
-    <span class="n">Framework</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">applicationName</span><span class="p">,</span> <span class="n">applicationVersion</span><span class="p">,</span> <span class="n">commandLineArguments</span><span class="p">)</span>
+    <span class="n">Assign</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">applicationName</span><span class="p">,</span> <span class="n">applicationVersion</span><span class="p">,</span> <span class="n">commandLineArguments</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Metabolomics.setupMenus"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.AnalysisMetabolomics.Metabolomics.setupMenus">[docs]</a>  <span class="k">def</span> <span class="nf">setupMenus</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setupMenus</span><span class="p">(</span> <span class="p">)</span>
     <span class="n">menuSpec</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Metabolomics&#39;</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;Decomposition (PCA)&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showDecompositionModule</span><span class="p">),</span>
-                                 <span class="c1"># (&quot;Pipeline&quot;, self.showScreeningPipeline,),</span>
-                                 <span class="p">(</span><span class="s2">&quot;Peak Fitting&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showPeakFittingModule</span><span class="p">,),</span>
                                  <span class="p">(),</span>
                                  <span class="p">(</span><span class="s2">&quot;Pipeline&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showMetabolomicsPipeline</span><span class="p">,),</span>
                                  <span class="p">])</span>
@@ -112,7 +110,7 @@
   <span class="c1">#   spectrumDisplay = self.ui.mainWindow.createSpectrumDisplay(self.project.spectra[0])</span>
   <span class="c1">#   from ccpn.AnalysisMetabolomics.Integration import IntegrationTable, IntegrationWidget</span>
   <span class="c1">#   spectrumDisplay.integrationWidget = IntegrationWidget(spectrumDisplay.module,</span>
-  <span class="c1">#                                                         project=self.project, grid=(2, 0), gridSpan=(1, 4))</span>
+  <span class="c1">#                                                         mainWindow=self.ui.mainWindow, grid=(2, 0), gridSpan=(1, 4))</span>
   <span class="c1">#   spectrumDisplay.integrationTable = IntegrationTable(spectrumDisplay.module,</span>
   <span class="c1">#                                                       project=self.project, grid=(0, 4), gridSpan=(3, 1))</span>
   <span class="c1">#   self.current.strip = spectrumDisplay.strips[0]</span>
@@ -153,30 +151,32 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">decomposition</span> <span class="o">=</span> <span class="n">Decomposition</span><span class="p">(</span><span class="n">application</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">decompositionModule</span> <span class="o">=</span> <span class="n">DecompositionModule</span><span class="p">(</span><span class="n">application</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
                                                       <span class="n">interactor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decomposition</span><span class="p">,</span>
-                                                      <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">)</span>
+                                                      <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">decomposition</span><span class="o">.</span><span class="n">presenter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">decompositionModule</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">decompositionModule</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span></div>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">decompositionModule</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span></div></div>
 
 
 
-<div class="viewcode-block" id="Metabolomics.showPeakFittingModule"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.AnalysisMetabolomics.Metabolomics.showPeakFittingModule">[docs]</a>  <span class="k">def</span> <span class="nf">showPeakFittingModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="c1"># from ccpn.AnalysisMetabolomics.PeakFitting import PeakFitting</span>
-    <span class="c1"># from ccpn.AnalysisMetabolomics.ui.gui.modules.PeakFittingModule import PeakFittingModule</span>
-    <span class="c1">#</span>
-    <span class="c1"># self.peakFitting = PeakFitting(application=self)</span>
-    <span class="c1"># self.ui.peakFittingModule = PeakFittingModule(application=self,</span>
-    <span class="c1">#                                                   interactor=self.peakFitting,</span>
-    <span class="c1">#                                                   parent=self.ui)</span>
-    <span class="c1"># self.peakFitting.presenter = self.ui.peakFittingModule</span>
-    <span class="c1"># self.ui.mainWindow.moduleArea.addModule(self.ui.peakFittingModule.widget, position=&#39;bottom&#39;)</span>
 
-    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Interactive peak demo&#39;</span><span class="p">)</span>
-    <span class="c1"># from application.metabolomics.presenters.peaks import InteractiveDemoPresenter</span>
-    <span class="kn">from</span> <span class="nn">ccpn.AnalysisMetabolomics.ui.gui.modules.PeakFittingModule</span> <span class="kn">import</span> <span class="n">InteractiveDemoPresenter</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">peakDemoModule</span> <span class="o">=</span> <span class="n">InteractiveDemoPresenter</span><span class="p">(</span><span class="n">interactor</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                                                   <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
-                                                   <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peakDemoModule</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span></div></div>
+  <span class="c1"># This has not been implemented.</span>
+  <span class="c1"># def showPeakFittingModule(self):</span>
+  <span class="c1">#   from ccpn.AnalysisMetabolomics.PeakFitting import PeakFitting</span>
+  <span class="c1">#   from ccpn.AnalysisMetabolomics.ui.gui.modules.PeakFittingModule import PeakFittingModule</span>
+  <span class="c1">#</span>
+  <span class="c1">#   self.peakFitting = PeakFitting(application=self)</span>
+  <span class="c1">#   self.ui.peakFittingModule = PeakFittingModule(application=self,</span>
+  <span class="c1">#                                                     interactor=self.peakFitting,</span>
+  <span class="c1">#                                                     parent=self.ui)</span>
+  <span class="c1">#   self.peakFitting.presenter = self.ui.peakFittingModule</span>
+  <span class="c1">#   self.ui.mainWindow.moduleArea.addModule(self.ui.peakFittingModule.widget, position=&#39;bottom&#39;)</span>
+  <span class="c1">#</span>
+  <span class="c1">#   print(&#39;Interactive peak demo&#39;)</span>
+  <span class="c1">#   # from application.metabolomics.presenters.peaks import InteractiveDemoPresenter</span>
+  <span class="c1">#   from ccpn.AnalysisMetabolomics.ui.gui.modules.PeakFittingModule import InteractiveDemoPresenter</span>
+  <span class="c1">#   self.peakDemoModule = InteractiveDemoPresenter(interactor=None,</span>
+  <span class="c1">#                                                  parent=self,</span>
+  <span class="c1">#                                                  project=self.project)</span>
+  <span class="c1">#   self.ui.mainWindow.moduleArea.addModule(self.peakDemoModule.widget, position=&#39;bottom&#39;)</span>
 </pre></div>
 
           </div>

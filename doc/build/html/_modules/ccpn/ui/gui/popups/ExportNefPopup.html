@@ -58,13 +58,13 @@
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:48 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -74,42 +74,14 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ButtonList</span> <span class="kn">import</span> <span class="n">ButtonList</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.LineEdit</span> <span class="kn">import</span> <span class="n">LineEdit</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.FileDialog</span> <span class="kn">import</span> <span class="n">FileDialog</span><span class="p">,</span> <span class="n">NefFileDialog</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Frame</span> <span class="kn">import</span> <span class="n">Frame</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.LineEdit</span> <span class="kn">import</span> <span class="n">LineEdit</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.TextEditor</span> <span class="kn">import</span> <span class="n">TextEditor</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.FileDialog</span> <span class="kn">import</span> <span class="n">FileDialog</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Spacer</span> <span class="kn">import</span> <span class="n">Spacer</span>
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
-<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">expanduser</span>
-<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="p">,</span> <span class="n">QtCore</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CheckBox</span> <span class="kn">import</span> <span class="n">CheckBox</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ListWidget</span> <span class="kn">import</span> <span class="n">ListWidget</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ListWidget</span> <span class="kn">import</span> <span class="n">ListWidgetPair</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.MessageDialog</span> <span class="kn">import</span> <span class="n">showYesNoWarning</span><span class="p">,</span> <span class="n">showWarning</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ProjectTreeCheckBoxes</span> <span class="kn">import</span> <span class="n">ProjectTreeCheckBoxes</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.ExportDialog</span> <span class="kn">import</span> <span class="n">ExportDialog</span>
 
-<span class="kn">from</span> <span class="nn">ccpn.core.Chain</span> <span class="kn">import</span> <span class="n">Chain</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.ChemicalShiftList</span> <span class="kn">import</span> <span class="n">ChemicalShiftList</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.RestraintList</span> <span class="kn">import</span> <span class="n">RestraintList</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.PeakList</span> <span class="kn">import</span> <span class="n">PeakList</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.Sample</span> <span class="kn">import</span> <span class="n">Sample</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.Substance</span> <span class="kn">import</span> <span class="n">Substance</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.NmrChain</span> <span class="kn">import</span> <span class="n">NmrChain</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.DataSet</span> <span class="kn">import</span> <span class="n">DataSet</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.Complex</span> <span class="kn">import</span> <span class="n">Complex</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.SpectrumGroup</span> <span class="kn">import</span> <span class="n">SpectrumGroup</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.Note</span> <span class="kn">import</span> <span class="n">Note</span>
 
-<span class="c1"># TODO These should maybe be consolidated with the same constants in CcpnNefIo</span>
-<span class="c1"># (and likely those in Project)</span>
 <span class="n">CHAINS</span> <span class="o">=</span> <span class="s1">&#39;chains&#39;</span>
 <span class="n">NMRCHAINS</span> <span class="o">=</span> <span class="s1">&#39;nmrChains&#39;</span>
 <span class="n">RESTRAINTLISTS</span> <span class="o">=</span> <span class="s1">&#39;restraintLists&#39;</span>
@@ -118,359 +90,94 @@
 <span class="n">EXPANDSELECTION</span> <span class="o">=</span> <span class="s1">&#39;expandSelection&#39;</span>
 
 
-<div class="viewcode-block" id="ExportNefPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.ExportNefPopup.ExportNefPopup">[docs]</a><span class="k">class</span> <span class="nc">ExportNefPopup</span><span class="p">(</span><span class="n">CcpnDialog</span><span class="p">):</span>
+<div class="viewcode-block" id="ExportNefPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.ExportNefPopup.ExportNefPopup">[docs]</a><span class="k">class</span> <span class="nc">ExportNefPopup</span><span class="p">(</span><span class="n">ExportDialog</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Export to File&#39;</span><span class="p">,</span>
+                 <span class="n">fileMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AnyFile</span><span class="p">,</span>
+                 <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Export File&#39;</span><span class="p">,</span>
+                 <span class="n">acceptMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AcceptSave</span><span class="p">,</span>
+                 <span class="n">preferences</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">selectFile</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ExportNefPopup</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+                                             <span class="n">fileMode</span><span class="o">=</span><span class="n">fileMode</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="n">acceptMode</span><span class="o">=</span><span class="n">acceptMode</span><span class="p">,</span>
+                                             <span class="n">preferences</span><span class="o">=</span><span class="n">preferences</span><span class="p">,</span> <span class="n">selectFile</span><span class="o">=</span><span class="n">selectFile</span><span class="p">,</span>
+                                             <span class="nb">filter</span><span class="o">=</span><span class="nb">filter</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
-  <span class="n">checkList</span> <span class="o">=</span> <span class="p">[</span><span class="n">Chain</span><span class="o">.</span><span class="n">_pluralLinkName</span>
-              <span class="p">,</span> <span class="n">ChemicalShiftList</span><span class="o">.</span><span class="n">_pluralLinkName</span>
-              <span class="p">,</span> <span class="n">RestraintList</span><span class="o">.</span><span class="n">_pluralLinkName</span>
-              <span class="p">,</span> <span class="n">PeakList</span><span class="o">.</span><span class="n">_pluralLinkName</span>
-              <span class="p">,</span> <span class="n">Sample</span><span class="o">.</span><span class="n">_pluralLinkName</span>
-              <span class="p">,</span> <span class="n">Substance</span><span class="o">.</span><span class="n">_pluralLinkName</span>
-              <span class="p">,</span> <span class="n">NmrChain</span><span class="o">.</span><span class="n">_pluralLinkName</span>
-              <span class="p">,</span> <span class="n">DataSet</span><span class="o">.</span><span class="n">_pluralLinkName</span>
-              <span class="p">,</span> <span class="n">Complex</span><span class="o">.</span><span class="n">_pluralLinkName</span>
-              <span class="p">,</span> <span class="n">SpectrumGroup</span><span class="o">.</span><span class="n">_pluralLinkName</span>
-              <span class="p">,</span> <span class="n">Note</span><span class="o">.</span><span class="n">_pluralLinkName</span><span class="p">]</span>
+<div class="viewcode-block" id="ExportNefPopup.initialise"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.ExportNefPopup.ExportNefPopup.initialise">[docs]</a>    <span class="k">def</span> <span class="nf">initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">userFrame</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttonCCPN</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="n">userFrame</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                   <span class="n">text</span><span class="o">=</span><span class="s1">&#39;include CCPN tags&#39;</span><span class="p">,</span>
+                                   <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttonExpand</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="n">userFrame</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                                     <span class="n">text</span><span class="o">=</span><span class="s1">&#39;expand selection&#39;</span><span class="p">,</span>
+                                     <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spacer</span> <span class="o">=</span> <span class="n">Spacer</span><span class="p">(</span><span class="n">userFrame</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span>
+                             <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span>
+                             <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">treeView</span> <span class="o">=</span> <span class="n">ProjectTreeCheckBoxes</span><span class="p">(</span><span class="n">userFrame</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span></div>
 
-  <span class="n">selectList</span> <span class="o">=</span> <span class="p">[</span><span class="n">Chain</span><span class="o">.</span><span class="n">_pluralLinkName</span>
-              <span class="p">,</span> <span class="n">ChemicalShiftList</span><span class="o">.</span><span class="n">_pluralLinkName</span>
-              <span class="p">,</span> <span class="n">RestraintList</span><span class="o">.</span><span class="n">_pluralLinkName</span>
-              <span class="p">,</span> <span class="n">NmrChain</span><span class="o">.</span><span class="n">_pluralLinkName</span><span class="p">]</span>
+<div class="viewcode-block" id="ExportNefPopup.buildParameters"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.ExportNefPopup.ExportNefPopup.buildParameters">[docs]</a>    <span class="k">def</span> <span class="nf">buildParameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;build parameters dict from the user widgets, to be passed to the export method.</span>
+<span class="sd">        :return: dict - user parameters</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Export to Nef File&#39;</span>
-               <span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AnyFile</span>
-               <span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Export File&#39;</span>
-               <span class="p">,</span> <span class="n">acceptMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AcceptSave</span>
-               <span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">None</span>
-               <span class="p">,</span> <span class="n">selectFile</span><span class="o">=</span><span class="bp">None</span>
-               <span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;*&#39;</span>
-               <span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Initialise the widget</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_nefFileMode</span> <span class="o">=</span> <span class="n">fileMode</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_nefText</span> <span class="o">=</span> <span class="n">text</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_nefAcceptMode</span> <span class="o">=</span> <span class="n">acceptMode</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_nefPreferences</span> <span class="o">=</span> <span class="n">preferences</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_nefSelectFile</span> <span class="o">=</span> <span class="n">selectFile</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_nefFilter</span> <span class="o">=</span> <span class="nb">filter</span>
+        <span class="c1"># build the export dict and flags</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flags</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="n">SKIPPREFIXES</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">buttonCCPN</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>  <span class="c1"># these are negated as they are skipped flags</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="n">SKIPPREFIXES</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">CCPNTAG</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="n">EXPANDSELECTION</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buttonExpand</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
 
-    <span class="c1"># pre __init__ to process extra keywords</span>
+        <span class="c1"># new bit to read all the checked pids (contain &#39;:&#39;) from the checkboxtreewidget</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">newList</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">treeView</span><span class="o">.</span><span class="n">findItems</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MatchContains</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MatchRecursive</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">checkState</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">newList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 
-    <span class="c1"># B = {&#39;fileMode&#39;:None</span>
-    <span class="c1">#       , &#39;text&#39;:None</span>
-    <span class="c1">#       , &#39;acceptMode&#39;:None</span>
-    <span class="c1">#       , &#39;preferences&#39;:None</span>
-    <span class="c1">#       , &#39;selectFile&#39;:None</span>
-    <span class="c1">#       , &#39;filter&#39;:None}</span>
-    <span class="c1"># self.saveDict = {k:v for k, v in kw.items() if k in B}</span>
-    <span class="c1"># filterKw = {k:v for k, v in kw.items() if k not in B}</span>
+        <span class="c1"># return the parameters</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">exitFilename</span><span class="p">,</span>
+                  <span class="s1">&#39;flags&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">,</span>
+                  <span class="s1">&#39;pidList&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">newList</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">params</span></div>
 
-    <span class="n">CcpnDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+<div class="viewcode-block" id="ExportNefPopup.exportToFile"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.ExportNefPopup.ExportNefPopup.exportToFile">[docs]</a>    <span class="k">def</span> <span class="nf">exportToFile</span><span class="p">(</span><span class="n">selfself</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Export to file</span>
+<span class="sd">        :param filename: filename to export</span>
+<span class="sd">        :param params: dict - user defined paramters for export</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
+        <span class="c1"># this is empty because the writing is down after</span>
+        <span class="k">pass</span></div></div>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">buttonCCPN</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="bp">True</span>
-                               <span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;include CCPN tags&#39;</span>
-                               <span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">hAlign</span> <span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">buttonExpand</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="bp">False</span>
-                               <span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;expand selection&#39;</span>
-                               <span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">hAlign</span> <span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
-    <span class="c1"># self.spacer = Spacer(self.options, 3, 3</span>
-    <span class="c1">#                      , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding</span>
-    <span class="c1">#                      , grid=(1,1), gridSpan=(1,1))</span>
-    <span class="c1"># self._includeCCPN = True</span>
-    <span class="c1"># self._includeExpand = False</span>
-
-    <span class="c1"># put save options in this section</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">spacer</span> <span class="o">=</span> <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span>
-                         <span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span>
-                         <span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
-
-    <span class="c1"># self.labelFrame = Frame(self, setLayout=True, grid=(2,0))</span>
-    <span class="c1"># self.labelLeft = Label(self.labelFrame, text=&#39;Items in Project&#39;, grid=(1,0), hAlign=&#39;c&#39;)</span>
-    <span class="c1"># self.labelRight = Label(self.labelFrame, text=&#39;Items to Export to Nef File&#39;, grid=(1,1), hAlign=&#39;c&#39;)</span>
-    <span class="c1">#</span>
-    <span class="c1"># self.chainCopy = ListWidgetPair(self, setLayout=True, grid=(3,0), title=CHAINS, showMoveArrows=True)</span>
-    <span class="c1"># if hasattr(self.project, CHAINS):</span>
-    <span class="c1">#   self.chainCopy.setListObjects(self.project.chains)</span>
-    <span class="c1">#</span>
-    <span class="c1"># self.nmrChainCopy = ListWidgetPair(self, setLayout=True, grid=(4,0), title=NMRCHAINS, showMoveArrows=True)</span>
-    <span class="c1"># if hasattr(self.project, NMRCHAINS):</span>
-    <span class="c1">#   self.nmrChainCopy.setListObjects(self.project.nmrChains)</span>
-    <span class="c1">#</span>
-    <span class="c1"># self.restraintCopy = ListWidgetPair(self, setLayout=True, grid=(5,0), title=RESTRAINTLISTS, showMoveArrows=True)</span>
-    <span class="c1"># if hasattr(self.project, RESTRAINTLISTS):</span>
-    <span class="c1">#   self.restraintCopy.setListObjects(self.project.restraintLists)</span>
-    <span class="c1">#</span>
-    <span class="c1"># self.spacer = Spacer(self, 3, 3</span>
-    <span class="c1">#                      , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed</span>
-    <span class="c1">#                      , grid=(6,0), gridSpan=(1,1))</span>
-    <span class="c1">#</span>
-    <span class="c1"># self.spacer = Spacer(self, 3, 3</span>
-    <span class="c1">#                      , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Expanding</span>
-    <span class="c1">#                      , grid=(7,0), gridSpan=(1,1))</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">_addTreeWidget</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
-
-    <span class="c1"># file directory options here</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">openPathIcon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/directory&#39;</span><span class="p">)</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">saveFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">openPathIcon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/directory&#39;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">saveLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">saveFrame</span><span class="p">,</span> <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39; Path: &#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">hAlign</span> <span class="o">=</span> <span class="s1">&#39;c&#39;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">saveText</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">saveFrame</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">textAligment</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">saveText</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">)</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">saveText</span><span class="o">.</span><span class="n">setDisabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>   <span class="c1"># ejb - enable but need to check path on okay</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">pathEdited</span> <span class="o">=</span> <span class="bp">True</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">saveText</span><span class="o">.</span><span class="n">textEdited</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_editPath</span><span class="p">)</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">spacer</span> <span class="o">=</span> <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">saveFrame</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">3</span>
-                         <span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span>
-                         <span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">pathButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">saveFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
-                             <span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">openPathIcon</span>
-                             <span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_openFileDialog</span>
-                             <span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">buttonFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">spacer</span> <span class="o">=</span> <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buttonFrame</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span>
-                         <span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span>
-                         <span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buttonFrame</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;Cancel&#39;</span><span class="p">,</span> <span class="s1">&#39;Save&#39;</span><span class="p">],</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_rejectDialog</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_acceptDialog</span><span class="p">],</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
-
-    <span class="c1"># this show/hide button doesn&#39;t quite work yet</span>
-    <span class="c1"># self.showHide = Frame(self, setLayout=True, grid=(2,0))</span>
-    <span class="c1"># self.showHideIcon = Icon(&#39;icons/directory&#39;)               # need to change this</span>
-    <span class="c1">#</span>
-    <span class="c1"># self.spacer = Spacer(self.showHide, 3, 3</span>
-    <span class="c1">#                      , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed</span>
-    <span class="c1">#                      , grid=(0,0), gridSpan=(1,1))</span>
-    <span class="c1"># self.saveLabel2 = Label(self.showHide, text=&#39;Show/Hide saveDialog&#39;, grid=(0,1), hAlign = &#39;c&#39;)</span>
-    <span class="c1"># self.pathButton = Button(self.showHide, text=&#39;&#39;</span>
-    <span class="c1">#                          , icon=self.showHideIcon</span>
-    <span class="c1">#                          , callback=self._toggleSaveDialog</span>
-    <span class="c1">#                          , grid=(0, 2), hAlign=&#39;t&#39;)</span>
-    <span class="c1"># if &#39;selectFile&#39; in kw:</span>
-    <span class="c1">#   self.saveLabel.setText(kw[&#39;selectFile&#39;])</span>
-    <span class="c1"># else:</span>
-    <span class="c1">#   self.saveLabel.setText(&#39;None&#39;)</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">MinimumExpanding</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">MinimumExpanding</span><span class="p">)</span>
-
-    <span class="c1"># from here down is the save dialog</span>
-    <span class="c1"># can we add a hide/show button?</span>
-
-    <span class="c1"># self.fileWidget = Frame(self, setLayout=True, grid=(3,0))   # ejb -</span>
-    <span class="c1"># self.fileWidget.hide()</span>
-    <span class="c1"># self.fileSaveDialog = NefFileDialog(self.fileWidget, **self.saveDict)</span>
-    <span class="c1"># self.layout().addWidget(self.fileSaveDialog, 3,0)</span>
-    <span class="c1"># self.fileSaveDialog._setParent(self, self._acceptDialog, self._rejectDialog)  # why does this work?</span>
-
-    <span class="c1"># self.fileSaveDialog = NefFileDialog(self, **self.saveDict)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">fileSaveDialog</span> <span class="o">=</span> <span class="n">NefFileDialog</span><span class="p">(</span><span class="bp">self</span>
-                                        <span class="p">,</span> <span class="n">fileMode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nefFileMode</span>
-                                        <span class="p">,</span> <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nefText</span>
-                                        <span class="p">,</span> <span class="n">acceptMode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nefAcceptMode</span>
-                                        <span class="p">,</span> <span class="n">preferences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nefPreferences</span>
-                                        <span class="p">,</span> <span class="n">selectFile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nefSelectFile</span>
-                                        <span class="p">,</span> <span class="nb">filter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nefFilter</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">selectFile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>    <span class="c1"># and self.application.preferences.general.useNative is False:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">saveText</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileSaveDialog</span><span class="o">.</span><span class="n">selectedFile</span><span class="p">())</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">saveText</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">oldFilePath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveText</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>       <span class="c1"># set to the same for the minute</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">_saveState</span> <span class="o">=</span> <span class="bp">True</span>
-
-  <span class="k">def</span> <span class="nf">_toggleSaveDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_saveState</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">fileSaveDialog</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">fileSaveDialog</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-
-  <span class="k">def</span> <span class="nf">_acceptDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exitSaveFileName</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">exitFileName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveText</span><span class="o">.</span><span class="n">text</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>    <span class="c1"># strip the trailing whitespace</span>
-
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pathEdited</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>     <span class="c1"># self.exitFileName == self.oldFilePath:</span>
-      <span class="c1"># user has not changed the path so we can accept()</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="c1"># have edited the path so check the new file</span>
-      <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exitFileName</span><span class="p">):</span>
-        <span class="n">yes</span> <span class="o">=</span> <span class="n">showYesNoWarning</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> already exists.&#39;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exitFileName</span><span class="p">)</span>
-                            <span class="p">,</span> <span class="s1">&#39;Do you want to replace it?&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">yes</span><span class="p">:</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">exitFileName</span><span class="p">:</span>
-          <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;FileName Error:&#39;</span><span class="p">,</span> <span class="s1">&#39;Filename is empty.&#39;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
-
-  <span class="k">def</span> <span class="nf">_rejectDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">exitFileName</span> <span class="o">=</span> <span class="bp">None</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">reject</span><span class="p">()</span>
-    <span class="c1"># return None</span>
-
-<div class="viewcode-block" id="ExportNefPopup.closeEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.ExportNefPopup.ExportNefPopup.closeEvent">[docs]</a>  <span class="k">def</span> <span class="nf">closeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">QCloseEvent</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_rejectDialog</span><span class="p">()</span></div>
-
-<div class="viewcode-block" id="ExportNefPopup.show"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.ExportNefPopup.ExportNefPopup.show">[docs]</a>  <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
-    <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
-
-    <span class="c1"># build the export dict and flags</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">flags</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="n">SKIPPREFIXES</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">buttonCCPN</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>        <span class="c1"># these are negated as they are skipped flags</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="n">SKIPPREFIXES</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">CCPNTAG</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="n">EXPANDSELECTION</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buttonExpand</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
-
-    <span class="c1">#TODO:ED do final checking</span>
-
-    <span class="c1"># new bit to read all the checked pids (contain &#39;:&#39;) from the checkboxtreewidget</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">newList</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">treeView</span><span class="o">.</span><span class="n">findItems</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MatchContains</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MatchRecursive</span><span class="p">):</span>
-      <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">checkState</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">newList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">exitFileName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">newList</span>
-
-    <span class="c1"># this is the old bit that reads from the drag boxes</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">exclusionDict</span> <span class="o">=</span> <span class="p">{</span><span class="n">Chain</span><span class="o">.</span><span class="n">_pluralLinkName</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">chainCopy</span><span class="o">.</span><span class="n">getLeftList</span><span class="p">()</span>
-                         <span class="p">,</span> <span class="n">NmrChain</span><span class="o">.</span><span class="n">_pluralLinkName</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrChainCopy</span><span class="o">.</span><span class="n">getLeftList</span><span class="p">()</span>
-                         <span class="p">,</span> <span class="n">RestraintList</span><span class="o">.</span><span class="n">_pluralLinkName</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">restraintCopy</span><span class="o">.</span><span class="n">getLeftList</span><span class="p">()}</span>
-
-    <span class="c1"># from ccpn.core.Chain import Chain</span>
-    <span class="c1"># from ccpn.core.ChemicalShiftList import ChemicalShiftList</span>
-    <span class="c1"># from ccpn.core.RestraintList import RestraintList</span>
-    <span class="c1"># from ccpn.core.PeakList import PeakList</span>
-    <span class="c1"># from ccpn.core.Sample import Sample</span>
-    <span class="c1"># from ccpn.core.Substance import Substance</span>
-    <span class="c1"># from ccpn.core.NmrChain import NmrChain</span>
-    <span class="c1"># from ccpn.core.DataSet import DataSet</span>
-    <span class="c1"># from ccpn.core.Complex import Complex</span>
-    <span class="c1"># from ccpn.core.SpectrumGroup import SpectrumGroup</span>
-    <span class="c1"># from ccpn.core.Note import Note</span>
-    <span class="c1">#</span>
-    <span class="c1"># checkList = [Chain._pluralLinkName</span>
-    <span class="c1">#              , ChemicalShiftList._pluralLinkName</span>
-    <span class="c1">#              , RestraintList._pluralLinkName</span>
-    <span class="c1">#              , PeakList._pluralLinkName</span>
-    <span class="c1">#              , Sample._pluralLinkName</span>
-    <span class="c1">#              , Substance._pluralLinkName</span>
-    <span class="c1">#              , NmrChain._pluralLinkName</span>
-    <span class="c1">#              , DataSet._pluralLinkName</span>
-    <span class="c1">#              , Complex._pluralLinkName</span>
-    <span class="c1">#              , SpectrumGroup._pluralLinkName</span>
-    <span class="c1">#              , Note._pluralLinkName]</span>
-
-      <span class="c1"># CHAINS, CHEMICALSHIFTLISTS, RESTRAINTLISTS, PEAKLISTS</span>
-      <span class="c1"># , SAMPLES, SUBSTANCES, NMRCHAINS</span>
-      <span class="c1"># , DATASETS, COMPLEXES, SPECTRUMGROUPS, NOTES]</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">pidList</span> <span class="o">=</span> <span class="p">[]</span>                                <span class="c1"># start with an empty list</span>
-
-    <span class="c1"># go through the checkList above and add all objects to the list</span>
-    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">ExportNefPopup</span><span class="o">.</span><span class="n">checkList</span><span class="p">:</span>
-      <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>                   <span class="c1"># just to be safe</span>
-        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">pidList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>                 <span class="c1"># append the found items to the list</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="s1">&#39;Name not found in project: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
-
-    <span class="c1"># now remove those items that are not needed (some may be added later depending on flags)</span>
-    <span class="k">for</span> <span class="n">ky</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">exclusionDict</span><span class="p">:</span>
-      <span class="k">for</span> <span class="n">exPid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">exclusionDict</span><span class="p">[</span><span class="n">ky</span><span class="p">]:</span>
-        <span class="c1"># exPidObj = self.getByPid(exPid)</span>
-        <span class="k">if</span> <span class="n">exPid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pidList</span><span class="p">:</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">pidList</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">exPid</span><span class="p">)</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">exitFileName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pidList</span></div>
-
-  <span class="k">def</span> <span class="nf">_openFileDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">fileDialog</span> <span class="o">=</span> <span class="n">FileDialog</span><span class="p">(</span><span class="bp">self</span>                       <span class="c1"># ejb - old, , **self.saveDict)</span>
-                                 <span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nefFileMode</span>
-                                 <span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nefText</span>
-                                 <span class="p">,</span> <span class="n">acceptMode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nefAcceptMode</span>
-                                 <span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nefPreferences</span>
-                                 <span class="p">,</span> <span class="n">selectFile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">saveText</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
-                                 <span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nefFilter</span><span class="p">)</span>
-    <span class="n">selectedFile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileDialog</span><span class="o">.</span><span class="n">selectedFile</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">selectedFile</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">saveText</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">selectedFile</span><span class="p">))</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">oldFilePath</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">selectedFile</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">pathEdited</span> <span class="o">=</span> <span class="bp">False</span>                     <span class="c1"># we have reset the path</span>
-
-  <span class="k">def</span> <span class="nf">_save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
-
-  <span class="k">def</span> <span class="nf">_editPath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">pathEdited</span> <span class="o">=</span> <span class="bp">True</span>      <span class="c1"># user has manually changed the path</span>
-
-  <span class="k">def</span> <span class="nf">_addTreeWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">treeView</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidget</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">headerItem</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">item</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">()</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">treeView</span><span class="o">.</span><span class="n">header</span><span class="p">()</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-
-    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">ExportNefPopup</span><span class="o">.</span><span class="n">checkList</span><span class="p">:</span>
-      <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>                   <span class="c1"># just to be safe</span>
-
-        <span class="n">parent</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treeView</span><span class="p">)</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsTristate</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsUserCheckable</span><span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-
-          <span class="n">child</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
-          <span class="n">child</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsUserCheckable</span><span class="p">)</span>
-          <span class="n">child</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
-          <span class="n">child</span><span class="o">.</span><span class="n">setCheckState</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Unchecked</span><span class="p">)</span>
-
-        <span class="n">parent</span><span class="o">.</span><span class="n">setCheckState</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span><span class="p">)</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">setExpanded</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">setDisabled</span><span class="p">(</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ExportNefPopup</span><span class="o">.</span><span class="n">selectList</span><span class="p">)</span>
-
-    <span class="c1">#       self.pidList.append(obj.pid)                 # append the found items to the list</span>
-    <span class="c1">#</span>
-    <span class="c1"># for i in range(3):</span>
-    <span class="c1">#     parent = QtGui.QTreeWidgetItem(self.treeView)</span>
-    <span class="c1">#     parent.setText(0, &quot;Parent {}&quot;.format(i))</span>
-    <span class="c1">#     parent.setFlags(parent.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)</span>
-    <span class="c1">#     for x in range(5):</span>
-    <span class="c1">#         child = QtGui.QTreeWidgetItem(parent)</span>
-    <span class="c1">#         child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)</span>
-    <span class="c1">#         child.setText(0, &quot;Child {}&quot;.format(x))</span>
-    <span class="c1">#         child.setCheckState(0, QtCore.Qt.Unchecked)</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treeView</span><span class="p">,</span> <span class="n">grid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">grid</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
 
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Application</span> <span class="kn">import</span> <span class="n">TestApplication</span>
-  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>
-  <span class="n">app</span> <span class="o">=</span> <span class="n">TestApplication</span><span class="p">()</span>
-  <span class="n">dialog</span> <span class="o">=</span> <span class="n">ExportNefPopup</span><span class="p">(</span><span class="n">fileMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AnyFile</span>
-                          <span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Export to Nef File&quot;</span>
-                          <span class="p">,</span> <span class="n">acceptMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AcceptSave</span>
-                          <span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;*.nef&#39;</span><span class="p">)</span>
-  <span class="n">dialog</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="kn">from</span> <span class="nn">sandbox.Geerten.Refactored.framework</span> <span class="kn">import</span> <span class="n">Framework</span>
+    <span class="kn">from</span> <span class="nn">sandbox.Geerten.Refactored.programArguments</span> <span class="kn">import</span> <span class="n">Arguments</span>
 
 
+    <span class="n">_makeMainWindowVisible</span> <span class="o">=</span> <span class="bp">False</span>
+
+
+    <span class="k">class</span> <span class="nc">MyProgramme</span><span class="p">(</span><span class="n">Framework</span><span class="p">):</span>
+        <span class="s2">&quot;My first app&quot;</span>
+        <span class="k">pass</span>
+
+
+    <span class="n">myArgs</span> <span class="o">=</span> <span class="n">Arguments</span><span class="p">()</span>
+    <span class="n">myArgs</span><span class="o">.</span><span class="n">noGui</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">myArgs</span><span class="o">.</span><span class="n">debug</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="n">application</span> <span class="o">=</span> <span class="n">MyProgramme</span><span class="p">(</span><span class="s1">&#39;MyProgramme&#39;</span><span class="p">,</span> <span class="s1">&#39;3.0.0-beta3&#39;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">myArgs</span><span class="p">)</span>
+    <span class="n">ui</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">ui</span>
+    <span class="n">ui</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">_makeMainWindowVisible</span><span class="p">:</span>
+        <span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">_updateMainWindow</span><span class="p">(</span><span class="n">newProject</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">setActiveWindow</span><span class="p">(</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">)</span>
+
+    <span class="n">dialog</span> <span class="o">=</span> <span class="n">ExportNefPopup</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">application</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="n">application</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
 </pre></div>
 
           </div>

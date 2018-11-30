@@ -66,7 +66,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:55 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -77,19 +77,25 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
 
 <span class="n">NULL</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
 
+<span class="c1">#TODO: clean various methods, removing &#39;depreciated&#39; ones</span>
 
-<div class="viewcode-block" id="PulldownList"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownList.PulldownList">[docs]</a><span class="k">class</span> <span class="nc">PulldownList</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QComboBox</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
+<div class="viewcode-block" id="PulldownList"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownList.PulldownList">[docs]</a><span class="k">class</span> <span class="nc">PulldownList</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QComboBox</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">objects</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-               <span class="n">icons</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">headerText</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">headerEnabled</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">headerIcon</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+               <span class="n">icons</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+               <span class="n">backgroundText</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">headerText</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">headerEnabled</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">headerIcon</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">editable</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    :param parent:</span>
 <span class="sd">    :param texts:</span>
@@ -97,14 +103,17 @@
 <span class="sd">    :param icons:</span>
 <span class="sd">    :param callback:</span>
 <span class="sd">    :param index:</span>
+<span class="sd">    :param backgroundText: a transparent text that will disapear as soon as you click to type.</span>
+<span class="sd">                            the place holder or the transparent &quot;backgroundText&quot; will work only if the pulldown is editable.</span>
+<span class="sd">                            Otherwise use HeaderText and enabled = False if you need only a title inside the pulldown</span>
 <span class="sd">    :param headerText: text of first item of the pullDown. E.g. &#39;-- Select Item --&#39;</span>
 <span class="sd">    :param headerEnabled: True to be selectable, False to disable and be grayed out</span>
-<span class="sd">    :param kw:</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    :param editable: If True: allows for editing the value</span>
+<span class="sd">    :param kwds:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+    <span class="n">Base</span><span class="o">.</span><span class="n">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QComboBox</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
-    <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
-    
     <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">texts</span> <span class="o">=</span> <span class="p">[]</span>
@@ -112,6 +121,12 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">headerText</span> <span class="o">=</span> <span class="n">headerText</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">headerEnabled</span> <span class="o">=</span> <span class="n">headerEnabled</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">headerIcon</span> <span class="o">=</span> <span class="n">headerIcon</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">backgroundText</span> <span class="o">=</span> <span class="n">backgroundText</span>
+
+    <span class="k">if</span> <span class="n">editable</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="n">editable</span><span class="p">)</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">backgroundText</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit</span><span class="p">()</span><span class="o">.</span><span class="n">setPlaceholderText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">backgroundText</span><span class="p">))</span>
     <span class="c1"># self.setIconSize(QtCore.QSize(22,22))</span>
 
     <span class="n">PulldownList</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="p">,</span> <span class="n">objects</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">icons</span><span class="p">,</span>
@@ -122,9 +137,11 @@
 <span class="s2">      padding-top: 3px;</span>
 <span class="s2">      padding-bottom: 3px;</span>
 <span class="s2">      padding-left: 2px;</span>
+<span class="s2">      combobox-popup: 0;</span>
 <span class="s2">    }</span>
 <span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s1">&#39;currentIndexChanged(int)&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">)</span>
+    <span class="c1"># self.connect(self, QtCore.SIGNAL(&#39;currentIndexChanged(int)&#39;), self._callback)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PulldownList.showPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownList.PulldownList.showPopup">[docs]</a>  <span class="k">def</span> <span class="nf">showPopup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="nb">super</span><span class="p">(</span><span class="n">PulldownList</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">showPopup</span><span class="p">()</span></div>
@@ -259,9 +276,9 @@
 <div class="viewcode-block" id="PulldownList.addItem"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownList.PulldownList.addItem">[docs]</a>  <span class="k">def</span> <span class="nf">addItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="nb">object</span><span class="o">=</span><span class="n">NULL</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="p">):</span>
     
     <span class="k">if</span> <span class="n">icon</span><span class="p">:</span>
-      <span class="n">QtGui</span><span class="o">.</span><span class="n">QComboBox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Icon</span><span class="p">(</span><span class="n">icon</span><span class="p">),</span> <span class="n">text</span><span class="p">)</span>
+      <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QComboBox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Icon</span><span class="p">(</span><span class="n">icon</span><span class="p">),</span> <span class="n">text</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="n">QtGui</span><span class="o">.</span><span class="n">QComboBox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+      <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QComboBox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="nb">object</span> <span class="ow">is</span> <span class="n">NULL</span><span class="p">:</span>
       <span class="nb">object</span> <span class="o">=</span> <span class="n">text</span>
@@ -271,13 +288,13 @@
 
 <div class="viewcode-block" id="PulldownList.setItemText"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownList.PulldownList.setItemText">[docs]</a>  <span class="k">def</span> <span class="nf">setItemText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
   
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QComboBox</span><span class="o">.</span><span class="n">setItemText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+    <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QComboBox</span><span class="o">.</span><span class="n">setItemText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
     
     <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">text</span></div>
   
 <div class="viewcode-block" id="PulldownList.removeItem"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownList.PulldownList.removeItem">[docs]</a>  <span class="k">def</span> <span class="nf">removeItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
   
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QComboBox</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+    <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QComboBox</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="bp">None</span>
@@ -317,7 +334,7 @@
       <span class="k">return</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index</span>
     
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span> <span class="ow">and</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">):</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="bp">None</span>
@@ -326,12 +343,17 @@
       <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
       <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">texts</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">texts</span><span class="p">[</span><span class="n">index</span><span class="p">])</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">texts</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
 
 
+<div class="viewcode-block" id="PulldownList.setMaxVisibleItems"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownList.PulldownList.setMaxVisibleItems">[docs]</a>  <span class="k">def</span> <span class="nf">setMaxVisibleItems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxItems</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set the maximum height of the combobox when opened</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">PulldownList</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setMaxVisibleItems</span><span class="p">(</span><span class="n">maxItems</span><span class="p">)</span></div></div>
 
-
-
+    <span class="c1"># qt bug fix - maxVisible only works if the following is set in the stylesheet</span>
+    <span class="c1"># self.setStyleSheet(&quot;combobox-popup: 0;&quot;)</span>
+    <span class="c1"># This is currently set at the top but added here so I remember, Ed</span>
 
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
 
@@ -366,11 +388,15 @@
   <span class="c1">#policyDict = {}</span>
 
   <span class="n">pulldownList</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">popup</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="n">texts</span><span class="p">,</span> <span class="n">icons</span><span class="o">=</span><span class="n">icons</span><span class="p">,</span>
-                              <span class="n">objects</span><span class="o">=</span><span class="n">objects</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">,</span> <span class="n">addHeader</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="o">**</span><span class="n">policyDict</span>
+                              <span class="n">objects</span><span class="o">=</span><span class="n">objects</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="o">**</span><span class="n">policyDict</span>
                               <span class="p">)</span>
   <span class="n">pulldownList</span><span class="o">.</span><span class="n">insertSeparator</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
   <span class="n">pulldownList</span><span class="o">.</span><span class="n">clearEditText</span><span class="p">()</span>
 
+  <span class="n">pulldownList2</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">popup</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="n">texts</span><span class="p">,</span> <span class="n">editable</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                               <span class="n">callback</span><span class="o">=</span><span class="n">callback2</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="o">**</span><span class="n">policyDict</span>
+                              <span class="p">)</span>
+  <span class="n">pulldownList</span><span class="o">.</span><span class="n">clearEditText</span><span class="p">()</span>
 
   <span class="n">popup</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
   <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>

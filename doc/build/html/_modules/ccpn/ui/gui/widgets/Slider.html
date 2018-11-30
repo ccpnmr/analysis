@@ -61,7 +61,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:56 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -71,18 +71,19 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtWidgets</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Spinbox</span> <span class="kn">import</span> <span class="n">Spinbox</span>
 
-<div class="viewcode-block" id="Slider"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Slider.Slider">[docs]</a><span class="k">class</span> <span class="nc">Slider</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSlider</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Slider"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Slider.Slider">[docs]</a><span class="k">class</span> <span class="nc">Slider</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSlider</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">startVal</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">endVal</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">bigStep</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                <span class="n">tracking</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">showNumber</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">tickInterval</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-               <span class="n">tickPosition</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">listener</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">spinbox</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+               <span class="n">tickPosition</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">listener</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">spinbox</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
 
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QSlider</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
-    <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+    <span class="n">Base</span><span class="o">.</span><span class="n">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="o">=</span> <span class="n">callback</span>
 
@@ -121,12 +122,15 @@
 
 
     <span class="k">if</span> <span class="n">showNumber</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">tracking</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s1">&#39;sliderMoved(int)&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_redraw</span><span class="p">)</span>
+      <span class="c1"># self.connect(self, QtCore.PYQT_SIGNAL(&#39;sliderMoved(int)&#39;), self._redraw)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">sliderMoved</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_redraw</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">showNumber</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s1">&#39;sliderReleased()&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">)</span>
+      <span class="c1"># self.connect(self, QtCore.PYQT_SIGNAL(&#39;sliderReleased()&#39;), self.update)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">sliderReleased</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s1">&#39;valueChanged(int)&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">)</span>
+    <span class="c1"># self.connect(self, QtCore.PYQT_SIGNAL(&#39;valueChanged(int)&#39;), self._callback)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">listener</span><span class="p">:</span>
       <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">listener</span><span class="p">,</span> <span class="p">(</span><span class="nb">set</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
@@ -156,11 +160,11 @@
     <span class="k">if</span> <span class="n">startVal</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="n">endVal</span><span class="p">:</span>
       <span class="n">callback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">callback</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="o">=</span> <span class="bp">None</span>
-      <span class="n">QtGui</span><span class="o">.</span><span class="n">QSlider</span><span class="o">.</span><span class="n">setRange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">startVal</span><span class="p">,</span> <span class="n">endVal</span><span class="p">)</span>
+      <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSlider</span><span class="o">.</span><span class="n">setRange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">startVal</span><span class="p">,</span> <span class="n">endVal</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="o">=</span> <span class="n">callback</span>
 
     <span class="k">else</span><span class="p">:</span>
-      <span class="n">QtGui</span><span class="o">.</span><span class="n">QSlider</span><span class="o">.</span><span class="n">setRange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">startVal</span><span class="p">,</span> <span class="n">endVal</span><span class="p">)</span></div>
+      <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSlider</span><span class="o">.</span><span class="n">setRange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">startVal</span><span class="p">,</span> <span class="n">endVal</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Slider.setStep"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Slider.Slider.setStep">[docs]</a>  <span class="k">def</span> <span class="nf">setStep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">bigStep</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
 
@@ -205,10 +209,11 @@
 
 
 
-<div class="viewcode-block" id="SliderSpinBox"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Slider.SliderSpinBox">[docs]</a><span class="k">class</span> <span class="nc">SliderSpinBox</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">parent</span><span class="p">,</span> <span class="n">startVal</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">endVal</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">bigStep</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
-    <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+<div class="viewcode-block" id="SliderSpinBox"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Slider.SliderSpinBox">[docs]</a><span class="k">class</span> <span class="nc">SliderSpinBox</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">parent</span><span class="p">,</span> <span class="n">startVal</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">endVal</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">bigStep</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+    <span class="n">Base</span><span class="o">.</span><span class="n">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
       <span class="n">value</span> <span class="o">=</span> <span class="n">startVal</span>

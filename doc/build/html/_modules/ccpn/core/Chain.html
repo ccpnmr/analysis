@@ -65,7 +65,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:27 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -133,6 +133,9 @@
   <span class="k">def</span> <span class="nf">compoundName</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Short name of chemical compound (e.g. &#39;Lysozyme&#39;) making up Chain&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">name</span>
+
+  <span class="c1"># GWV: more logical attribute!</span>
+  <span class="n">name</span> <span class="o">=</span> <span class="n">compoundName</span>
     
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Project</span><span class="p">:</span>
@@ -174,6 +177,22 @@
     <span class="sd">&quot;&quot;&quot;SampleComponents matching to Chain (based on chain.compoundName)&quot;&quot;&quot;</span>
     <span class="n">compoundName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compoundName</span>
     <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">sampleComponents</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">compoundName</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">nmrChain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span><span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="s1">&#39;NmrChain&#39;</span><span class="p">]:</span>
+    <span class="s2">&quot;NmrChain to which Chain is assigned&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getNmrChain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">None</span>
+
+  <span class="c1"># GWV 20181122: removed setters between Chain/NmrChain, Residue/NmrResidue, Atom/NmrAtom</span>
+  <span class="c1"># @property.setter</span>
+  <span class="c1"># def nmrChain(self, value: &#39;NmrChain&#39;):</span>
+  <span class="c1">#   if value is None:</span>
+  <span class="c1">#     raise ValueError(&quot;nmrChain cannot be set to None&quot;)</span>
+  <span class="c1">#   else:</span>
+  <span class="c1">#     value.chain = self</span>
 
   <span class="c1"># CCPN functions</span>
 <div class="viewcode-block" id="Chain.clone"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Chain.Chain.clone">[docs]</a>  <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shortName</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -307,6 +326,42 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Only </span><span class="si">%s</span><span class="s2"> residues found in range </span><span class="si">%s</span><span class="s2"> tos </span><span class="si">%s</span><span class="s2">&quot;</span>
                                       <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">changedResidues</span><span class="p">),</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">))</span></div>
 
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">sequence</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :return: the full sequence as a single string of one letter codes</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sequence</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">residue</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">residue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">shortName</span>
+        <span class="k">if</span> <span class="n">c</span><span class="p">:</span>
+          <span class="n">sequence</span><span class="o">+=</span><span class="n">c</span>
+    <span class="k">return</span> <span class="n">sequence</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">hasAssignedAtoms</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :return: True if any of its atoms have an assignment</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">any</span><span class="p">([</span><span class="n">a</span><span class="o">.</span><span class="n">isAssigned</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">])</span>
+
+  <span class="k">def</span> <span class="nf">_toNmrChain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Makes an Nmr Chain from the chain &#39;&#39;&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">nmrChain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">newNmrChain</span><span class="p">(</span><span class="n">isConnected</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">residue</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="p">:</span>
+        <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">newNmrResidue</span><span class="p">(</span><span class="n">sequenceCode</span><span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">residueType</span><span class="p">)</span>
+        <span class="n">atomNames</span> <span class="o">=</span> <span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">residue</span><span class="o">.</span><span class="n">atoms</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">atomName</span> <span class="ow">in</span> <span class="n">atomNames</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">atomName</span><span class="p">:</span>
+            <span class="n">nmrResidue</span><span class="o">.</span><span class="n">newNmrAtom</span><span class="p">(</span><span class="n">atomName</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Error in creating an NmrChain from Chain: </span><span class="si">%s</span><span class="s2">&quot;</span>
+                                    <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+  <span class="c1">#=========================================================================================</span>
+  <span class="c1"># Implementation functions</span>
+  <span class="c1">#=========================================================================================</span>
 
   <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span><span class="n">Project</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
@@ -316,6 +371,8 @@
       <span class="k">return</span> <span class="p">[]</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="k">return</span> <span class="n">molSystem</span><span class="o">.</span><span class="n">sortedChains</span><span class="p">()</span></div>
+
+<span class="c1">#=========================================================================================</span>
 
 <span class="k">def</span> <span class="nf">_validateName</span><span class="p">(</span><span class="n">attrib</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">includeWhitespace</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
   <span class="kn">from</span> <span class="nn">ccpn.util.Common</span> <span class="kn">import</span> <span class="n">contains_whitespace</span>

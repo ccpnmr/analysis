@@ -65,7 +65,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:51 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -75,17 +75,16 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="p">,</span> <span class="n">QtCore</span>
 
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
 
-<div class="viewcode-block" id="BasePopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.BasePopup.BasePopup">[docs]</a><span class="k">class</span> <span class="nc">BasePopup</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
+<div class="viewcode-block" id="BasePopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.BasePopup.BasePopup">[docs]</a><span class="k">class</span> <span class="nc">BasePopup</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">hide</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-               <span class="n">modal</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">closeFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tipText</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+               <span class="n">modal</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">closeFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tipText</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
 
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
-    <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
     
     <span class="bp">self</span><span class="o">.</span><span class="n">closeFunc</span> <span class="o">=</span> <span class="n">closeFunc</span>
     
@@ -95,7 +94,7 @@
     <span class="k">if</span> <span class="n">tipText</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="n">tipText</span><span class="p">)</span>
 
-    <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getParent</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">parent</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">location</span><span class="p">:</span>
       <span class="n">x</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">+</span> <span class="mi">50</span>
       <span class="n">y</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="o">+</span> <span class="mi">50</span>
@@ -122,62 +121,18 @@
       
   <span class="c1"># overrides QWidget</span>
 <div class="viewcode-block" id="BasePopup.closeEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.BasePopup.BasePopup.closeEvent">[docs]</a>  <span class="k">def</span> <span class="nf">closeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
-  
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">closeFunc</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">closeFunc</span><span class="p">()</span>
-    
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">closeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span></div>
+    <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">closeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span></div>
  
 <div class="viewcode-block" id="BasePopup.open"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.BasePopup.BasePopup.open">[docs]</a>  <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
     <span class="bp">self</span><span class="o">.</span><span class="n">showNormal</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">activateWindow</span><span class="p">()</span></div>
-  
-  <span class="c1"># def setSize(self, w, h):</span>
-  <span class="c1">#</span>
-  <span class="c1">#   self.setGeometry(self.x(), self.y(), w, h)</span>
-  <span class="c1">#</span>
-  <span class="c1"># def setGeometry(self, x, y, w=None, h=None):</span>
-  <span class="c1">#</span>
-  <span class="c1">#   # this resizes / moves popup if it doesn&#39;t fit on screen</span>
-  <span class="c1">#   # not sure if we need this functionality but leave for now</span>
-  <span class="c1">#</span>
-  <span class="c1">#   if w is None:</span>
-  <span class="c1">#     w = self.rect().width()</span>
-  <span class="c1">#</span>
-  <span class="c1">#   if h is None:</span>
-  <span class="c1">#     h = self.rect().width()</span>
-  <span class="c1">#</span>
-  <span class="c1">#   screenRect = QtGui.QApplication.desktop()</span>
-  <span class="c1">#</span>
-  <span class="c1">#   sWidth = screenRect.width()</span>
-  <span class="c1">#   sHeight = screenRect.height()</span>
-  <span class="c1">#</span>
-  <span class="c1">#   w = min(sWidth, w)</span>
-  <span class="c1">#   h = min(sHeight, h)</span>
-  <span class="c1">#</span>
-  <span class="c1">#   if (x+w) &gt; sWidth:</span>
-  <span class="c1">#     if w == 1:</span>
-  <span class="c1">#       x = sWidth // 2</span>
-  <span class="c1">#     else:</span>
-  <span class="c1">#       x = sWidth - w</span>
-  <span class="c1">#   elif x &lt; 0:</span>
-  <span class="c1">#     x = 0</span>
-  <span class="c1">#</span>
-  <span class="c1">#   if (y+h) &gt; sHeight:</span>
-  <span class="c1">#     if h == 1:</span>
-  <span class="c1">#       y = sHeight // 2</span>
-  <span class="c1">#     else:</span>
-  <span class="c1">#       y = sHeight - h</span>
-  <span class="c1">#   elif y &lt; 0:</span>
-  <span class="c1">#     y = 0</span>
-  <span class="c1">#</span>
-  <span class="c1">#   QtGui.QWidget.setGeometry(self, x, y, w, h)</span>
 
 <div class="viewcode-block" id="BasePopup.body"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.BasePopup.BasePopup.body">[docs]</a>  <span class="k">def</span> <span class="nf">body</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="p">):</span>
-    
     <span class="k">pass</span> <span class="c1"># this method can be overridden in subclass</span></div></div>
+
 
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
 
@@ -200,8 +155,8 @@
       <span class="n">button</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;close&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
 
   <span class="n">popup</span> <span class="o">=</span> <span class="bp">None</span>
-  <span class="n">window</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">()</span>
-  <span class="n">layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
+  <span class="n">window</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">()</span>
+  <span class="n">layout</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
   <span class="n">window</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span>
 
   <span class="k">def</span> <span class="nf">new</span><span class="p">():</span>

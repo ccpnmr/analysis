@@ -59,28 +59,29 @@
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:33:15 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: wb104 $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-03-24 14:31:10 +0000 (Fri, March 24, 2017) $&quot;</span>
-
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
+
 <span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.util.Common</span> <span class="kn">import</span> <span class="n">checkIsotope</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+
 <span class="c1"># from memops.qtgui.MessageDialog import showError</span>
 
 <span class="kn">from</span> <span class="nn">array</span> <span class="kn">import</span> <span class="n">array</span>
@@ -117,6 +118,7 @@
 
   <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">headData</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">headerSize</span><span class="p">:</span>
     <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;NMRPipe file </span><span class="si">%s</span><span class="s1"> appears to be truncated&#39;</span>
+    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="c1"># showError(&#39;Error&#39;, msg % filePath)</span>
     <span class="k">return</span>
 
@@ -125,6 +127,7 @@
 
   <span class="k">if</span> <span class="n">floatVals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="p">:</span>
     <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;NMRPipe file </span><span class="si">%s</span><span class="s1"> appears to be corrupted&#39;</span>
+    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="c1"># showError(&#39;Error&#39;, msg % filePath)</span>
     <span class="k">return</span>
 
@@ -140,6 +143,7 @@
       
     <span class="k">else</span><span class="p">:</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;NMRPipe file </span><span class="si">%s</span><span class="s1"> appears to be corrupted&#39;</span>
+      <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
       <span class="c1"># showError(&#39;Error&#39;, msg % filePath)</span>
       <span class="k">return</span>
 
@@ -150,6 +154,7 @@
   
   <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;</span> <span class="n">ndim</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">):</span>
     <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Can only handle NMRPipe files with between 1 and 4 dimensions&#39;</span>
+    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="c1"># showError(&#39;Error&#39;, msg)</span>
     <span class="k">return</span>
 
@@ -164,12 +169,17 @@
     <span class="n">specWidths</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1000.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">ndim</span>
     <span class="n">specFreqs</span> <span class="o">=</span> <span class="p">[</span><span class="mf">500.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">ndim</span>
     <span class="n">isotopes</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">ndim</span>
-  
+
+    <span class="c1"># print indices</span>
+    <span class="c1"># print([int(floatVals[i])-1 for i in ORDER_INDEX])</span>
+    <span class="c1"># print([int(floatVals[i]) for i in COMPLEX_INDEX+(50,)])</span>
+
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ndim</span><span class="p">):</span>
       <span class="n">j</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">floatVals</span><span class="p">[</span><span class="n">ORDER_INDEX</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span> <span class="o">-</span> <span class="mi">1</span>
       <span class="n">c</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">floatVals</span><span class="p">[</span><span class="n">COMPLEX_INDEX</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
       <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;NMRPipe data is complex in dim </span><span class="si">%d</span><span class="s1">, can only cope with real data at present&#39;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;NMRPipe data is complex in dim </span><span class="si">%d</span><span class="s1">, can only cope with real data at present&#39;</span> <span class="o">%</span> <span class="n">i</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="c1"># showError(&#39;Error&#39;, msg % (i+1))</span>
         <span class="k">return</span>
       

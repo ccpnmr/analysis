@@ -58,59 +58,35 @@
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:57 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
-
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: simon $&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
 
-<div class="viewcode-block" id="ToolButton"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ToolButton.ToolButton">[docs]</a><span class="k">class</span> <span class="nc">ToolButton</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QToolButton</span><span class="p">):</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">spectrumView</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QToolButton</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">spectrumToolBar</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumView</span> <span class="o">=</span> <span class="n">spectrumView</span>
-    <span class="n">pix</span><span class="o">=</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="mi">120</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
-      <span class="n">pix</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">sliceColour</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">pix</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">positiveContourColour</span><span class="p">))</span></div>
-    <span class="c1"># spectrumItem.newAction = self.spectrumToolbar.addAction(spectrumItem.name, QtGui.QToolButton)</span>
-    <span class="c1"># self.spaction = parent.spectrumToolBar.addAction(spectrumView.spectrum.name)#, self)</span>
-    <span class="c1"># newIcon = QtGui.QIcon(pix)</span>
-    <span class="c1"># self.spaction.setIcon(newIcon)</span>
-    <span class="c1"># self.spaction.setCheckable(True)</span>
-    <span class="c1"># self.spaction.setChecked(True)</span>
 
-    <span class="c1"># for spectrumView in parent.spectrumViews:</span>
-    <span class="c1">#   if spectrumView.spectrum.dimensionCount &lt; 2:</span>
-    <span class="c1">#     self.spaction.toggled.connect(spectrumView.plot.setVisible)</span>
-    <span class="c1">#   else:</span>
-    <span class="c1"># for strip in spectrumView.strips:</span>
-    <span class="c1">#   print(strip)</span>
-    <span class="c1">#   item = spectrumView.spectrumItems[strip]</span>
-    <span class="c1">#   print(strip, item, spectrumView, self.spaction, &#39;you name it!&#39;)</span>
-    <span class="c1">#   self.spaction.toggled.connect(item.setVisible)</span>
-    <span class="c1">#   print(self.spaction)</span>
-         <span class="c1"># for peakListView in spectrumView.peakListViews:</span>
-         <span class="c1">#   spectrumView.newAction.toggled.connect(peakListView.setVisible)</span>
-    <span class="c1"># spectrumView.widget = parent.spectrumToolBar.widgetForAction(self.spaction)</span>
-    <span class="c1"># spectrumView.widget.setFixedSize(60,30)</span>
+<div class="viewcode-block" id="ToolButton"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ToolButton.ToolButton">[docs]</a><span class="k">class</span> <span class="nc">ToolButton</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QToolButton</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
 
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="n">Base</span><span class="o">.</span><span class="n">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span></div>
 </pre></div>
 
           </div>

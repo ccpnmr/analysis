@@ -54,10 +54,13 @@
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">ssl</span>
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">urllib</span>
-<span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="kn">import</span> <span class="n">urlencode</span>
+<span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="kn">import</span> <span class="n">urlencode</span><span class="p">,</span> <span class="n">quote</span>
 <span class="kn">from</span> <span class="nn">urllib.request</span> <span class="kn">import</span> <span class="n">urlopen</span>
+<span class="kn">import</span> <span class="nn">urllib3.contrib.pyopenssl</span>
+<span class="kn">import</span> <span class="nn">certifi</span>
 
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 
@@ -66,6 +69,8 @@
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets</span> <span class="kn">import</span> <span class="n">InputDialog</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets</span> <span class="kn">import</span> <span class="n">MessageDialog</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+
 
 <span class="n">SERVER</span> <span class="o">=</span> <span class="n">ccpn2Url</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span>
 <span class="n">SERVER_DB_ROOT</span> <span class="o">=</span> <span class="s1">&#39;ccpNmrUpdate&#39;</span>
@@ -85,381 +90,460 @@
 
 <span class="n">BAD_DOWNLOAD</span> <span class="o">=</span> <span class="s1">&#39;Exception: &#39;</span>
 
+
 <div class="viewcode-block" id="lastModifiedTime"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.lastModifiedTime">[docs]</a><span class="k">def</span> <span class="nf">lastModifiedTime</span><span class="p">(</span><span class="n">filePath</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filePath</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">0</span>
 
-  <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filePath</span><span class="p">):</span>
-    <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">access</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">R_OK</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">0</span>
 
-  <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">access</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">R_OK</span><span class="p">):</span>
-    <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span><span class="o">.</span><span class="n">st_mtime</span></div>
 
-  <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span><span class="o">.</span><span class="n">st_mtime</span></div>
-  
+
 <div class="viewcode-block" id="calcHashCode"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.calcHashCode">[docs]</a><span class="k">def</span> <span class="nf">calcHashCode</span><span class="p">(</span><span class="n">filePath</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filePath</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">0</span>
 
-  <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filePath</span><span class="p">):</span>
-    <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">access</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">R_OK</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">0</span>
 
-  <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">access</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">R_OK</span><span class="p">):</span>
-    <span class="k">return</span> <span class="mi">0</span>
+    <span class="c1"># fp = open(filePath, &#39;rU&#39;, encoding=&#39;utf-8&#39;)</span>
+    <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;error reading data, not Unicode&#39;</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-  <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="s1">&#39;rU&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
-  <span class="n">data</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-  <span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
+    <span class="c1"># h.update(data.encode(&#39;utf-8&#39;))</span>
+    <span class="n">h</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
-  <span class="n">h</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
-  <span class="n">h</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">h</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span></div>
 
-  <span class="k">return</span> <span class="n">h</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="downloadFile"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.downloadFile">[docs]</a><span class="k">def</span> <span class="nf">downloadFile</span><span class="p">(</span><span class="n">serverScript</span><span class="p">,</span> <span class="n">serverDbRoot</span><span class="p">,</span> <span class="n">fileName</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Download a file from the server</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fileName</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">serverDbRoot</span><span class="p">,</span> <span class="n">fileName</span><span class="p">)</span>
 
-  <span class="n">fileName</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">serverDbRoot</span><span class="p">,</span> <span class="n">fileName</span><span class="p">)</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="n">ssl</span><span class="o">.</span><span class="n">create_default_context</span><span class="p">()</span>
+    <span class="n">context</span><span class="o">.</span><span class="n">check_hostname</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">context</span><span class="o">.</span><span class="n">verify_mode</span> <span class="o">=</span> <span class="n">ssl</span><span class="o">.</span><span class="n">CERT_NONE</span>
 
-  <span class="n">addr</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">?fileName=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">serverScript</span><span class="p">,</span> <span class="n">fileName</span><span class="p">)</span>
-  <span class="n">response</span> <span class="o">=</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span>
-  <span class="n">data</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
-  <span class="n">response</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Content-type&#39;</span><span class="p">:</span> <span class="s1">&#39;application/x-www-form-urlencoded;charset=UTF-8&#39;</span><span class="p">}</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="n">urlencode</span><span class="p">({</span><span class="s1">&#39;fileName&#39;</span><span class="p">:</span> <span class="n">fileName</span><span class="p">},</span> <span class="n">quote_via</span><span class="o">=</span><span class="n">quote</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
 
-  <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">BAD_DOWNLOAD</span><span class="p">):</span>
-    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">BAD_DOWNLOAD</span><span class="p">):])</span>
+    <span class="n">urllib3</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">pyopenssl</span><span class="o">.</span><span class="n">inject_into_urllib3</span><span class="p">()</span>
+    <span class="n">http</span> <span class="o">=</span> <span class="n">urllib3</span><span class="o">.</span><span class="n">PoolManager</span><span class="p">(</span><span class="n">cert_reqs</span><span class="o">=</span><span class="s1">&#39;CERT_REQUIRED&#39;</span><span class="p">,</span>
+                               <span class="n">ca_certs</span><span class="o">=</span><span class="n">certifi</span><span class="o">.</span><span class="n">where</span><span class="p">(),</span>
+                               <span class="n">timeout</span><span class="o">=</span><span class="n">urllib3</span><span class="o">.</span><span class="n">Timeout</span><span class="p">(</span><span class="n">connect</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">read</span><span class="o">=</span><span class="mf">5.0</span><span class="p">),</span>
+                               <span class="n">retries</span><span class="o">=</span><span class="n">urllib3</span><span class="o">.</span><span class="n">Retry</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">redirect</span><span class="o">=</span><span class="bp">False</span><span class="p">))</span>
 
-  <span class="k">return</span> <span class="n">data</span></div>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">http</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="n">serverScript</span><span class="p">,</span>
+                                <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+                                <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">,</span>
+                                <span class="n">preload_content</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">BAD_DOWNLOAD</span><span class="p">):</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="ne">Exception</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">BAD_DOWNLOAD</span><span class="p">):]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">result</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Download error: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">))</span></div>
+
 
 <div class="viewcode-block" id="uploadData"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.uploadData">[docs]</a><span class="k">def</span> <span class="nf">uploadData</span><span class="p">(</span><span class="n">serverUser</span><span class="p">,</span> <span class="n">serverPassword</span><span class="p">,</span> <span class="n">serverScript</span><span class="p">,</span> <span class="n">fileData</span><span class="p">,</span> <span class="n">serverDbRoot</span><span class="p">,</span> <span class="n">fileStoredAs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Upload a file to the server</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">SERVER_PASSWORD_MD5</span> <span class="o">=</span> <span class="n">b</span><span class="s1">&#39;c Wo</span><span class="se">\xfc\x1e\x08\xfc\xd1</span><span class="s1">C</span><span class="se">\xcb</span><span class="s1">~(</span><span class="se">\x14\x8e\xdc</span><span class="s1">&#39;</span>
 
-  <span class="n">SERVER_PASSWORD_MD5</span> <span class="o">=</span> <span class="n">b</span><span class="s1">&#39;c Wo</span><span class="se">\xfc\x1e\x08\xfc\xd1</span><span class="s1">C</span><span class="se">\xcb</span><span class="s1">~(</span><span class="se">\x14\x8e\xdc</span><span class="s1">&#39;</span>
-  
-  <span class="c1"># early check on password</span>
-  <span class="kn">import</span> <span class="nn">hashlib</span>
-  <span class="n">m</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
-  <span class="n">m</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">serverPassword</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
-  <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">digest</span><span class="p">()</span> <span class="o">!=</span> <span class="n">SERVER_PASSWORD_MD5</span><span class="p">:</span>
-    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;incorrect password&#39;</span><span class="p">)</span>
-  
-  <span class="n">data</span> <span class="o">=</span> <span class="n">urlencode</span><span class="p">({</span><span class="s1">&#39;fileData&#39;</span><span class="p">:</span><span class="n">fileData</span><span class="p">,</span> <span class="s1">&#39;fileName&#39;</span><span class="p">:</span><span class="n">fileStoredAs</span><span class="p">,</span> <span class="s1">&#39;serverDbRoot&#39;</span><span class="p">:</span><span class="n">serverDbRoot</span><span class="p">})</span>
+    <span class="c1"># early check on password</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
+    <span class="n">m</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">serverPassword</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">digest</span><span class="p">()</span> <span class="o">!=</span> <span class="n">SERVER_PASSWORD_MD5</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;incorrect password&#39;</span><span class="p">)</span>
 
-  <span class="n">ss</span> <span class="o">=</span> <span class="n">serverUser</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="n">serverPassword</span>
-  <span class="n">auth</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">encodestring</span><span class="p">(</span><span class="n">ss</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-  <span class="n">authheader</span> <span class="o">=</span> <span class="s1">&#39;Basic </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">auth</span>
-  <span class="n">req</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="n">serverScript</span><span class="p">)</span>
-  <span class="n">req</span><span class="o">.</span><span class="n">add_header</span><span class="p">(</span><span class="s2">&quot;Authorization&quot;</span><span class="p">,</span> <span class="n">authheader</span><span class="p">)</span>
-  <span class="n">req</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
-  <span class="n">response</span> <span class="o">=</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
-  <span class="n">result</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+    <span class="n">ss</span> <span class="o">=</span> <span class="n">serverUser</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="n">serverPassword</span>
+    <span class="n">auth</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">encodebytes</span><span class="p">(</span><span class="n">ss</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">authheader</span> <span class="o">=</span> <span class="s1">&#39;Basic </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">auth</span>
 
-  <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">BAD_DOWNLOAD</span><span class="p">):</span>
-    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">BAD_DOWNLOAD</span><span class="p">):])</span></div>
+    <span class="n">context</span> <span class="o">=</span> <span class="n">ssl</span><span class="o">.</span><span class="n">create_default_context</span><span class="p">()</span>
+    <span class="n">context</span><span class="o">.</span><span class="n">check_hostname</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">context</span><span class="o">.</span><span class="n">verify_mode</span> <span class="o">=</span> <span class="n">ssl</span><span class="o">.</span><span class="n">CERT_NONE</span>
+
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Content-type&#39;</span><span class="p">:</span> <span class="s1">&#39;application/x-www-form-urlencoded;charset=UTF-8&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;Authorization&#39;</span><span class="p">:</span> <span class="n">authheader</span><span class="p">}</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="n">urlencode</span><span class="p">({</span><span class="s1">&#39;fileData&#39;</span><span class="p">:</span> <span class="n">fileData</span><span class="p">,</span> <span class="s1">&#39;fileName&#39;</span><span class="p">:</span> <span class="n">fileStoredAs</span><span class="p">,</span> <span class="s1">&#39;serverDbRoot&#39;</span><span class="p">:</span> <span class="n">serverDbRoot</span><span class="p">},</span>
+                     <span class="n">quote_via</span><span class="o">=</span><span class="n">quote</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+
+    <span class="n">urllib3</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">pyopenssl</span><span class="o">.</span><span class="n">inject_into_urllib3</span><span class="p">()</span>
+    <span class="n">http</span> <span class="o">=</span> <span class="n">urllib3</span><span class="o">.</span><span class="n">PoolManager</span><span class="p">(</span><span class="n">cert_reqs</span><span class="o">=</span><span class="s1">&#39;CERT_REQUIRED&#39;</span><span class="p">,</span>
+                               <span class="n">ca_certs</span><span class="o">=</span><span class="n">certifi</span><span class="o">.</span><span class="n">where</span><span class="p">(),</span>
+                               <span class="n">timeout</span><span class="o">=</span><span class="n">urllib3</span><span class="o">.</span><span class="n">Timeout</span><span class="p">(</span><span class="n">connect</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">read</span><span class="o">=</span><span class="mf">5.0</span><span class="p">),</span>
+                               <span class="n">retries</span><span class="o">=</span><span class="n">urllib3</span><span class="o">.</span><span class="n">Retry</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">redirect</span><span class="o">=</span><span class="bp">False</span><span class="p">))</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">http</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="n">serverScript</span><span class="p">,</span>
+                                <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+                                <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">,</span>
+                                <span class="n">preload_content</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">BAD_DOWNLOAD</span><span class="p">):</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="ne">Exception</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">BAD_DOWNLOAD</span><span class="p">):]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Upload error: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">))</span></div>
+
 
 <div class="viewcode-block" id="uploadFile"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.uploadFile">[docs]</a><span class="k">def</span> <span class="nf">uploadFile</span><span class="p">(</span><span class="n">serverUser</span><span class="p">,</span> <span class="n">serverPassword</span><span class="p">,</span> <span class="n">serverScript</span><span class="p">,</span> <span class="n">fileName</span><span class="p">,</span> <span class="n">serverDbRoot</span><span class="p">,</span> <span class="n">fileStoredAs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Upload a file to the server</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># fp = open(fileName, &#39;rU&#39;)</span>
+    <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">fileData</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;error reading file, not unicode&#39;</span><span class="p">)</span>
+        <span class="n">fileData</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-  <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="s1">&#39;rU&#39;</span><span class="p">)</span>
-  <span class="n">fileData</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-  <span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">uploadData</span><span class="p">(</span><span class="n">serverUser</span><span class="p">,</span> <span class="n">serverPassword</span><span class="p">,</span> <span class="n">serverScript</span><span class="p">,</span> <span class="n">fileData</span><span class="p">,</span> <span class="n">serverDbRoot</span><span class="p">,</span> <span class="n">fileStoredAs</span><span class="p">)</span></div>
 
-  <span class="n">uploadData</span><span class="p">(</span><span class="n">serverUser</span><span class="p">,</span> <span class="n">serverPassword</span><span class="p">,</span> <span class="n">serverScript</span><span class="p">,</span> <span class="n">fileData</span><span class="p">,</span> <span class="n">serverDbRoot</span><span class="p">,</span> <span class="n">fileStoredAs</span><span class="p">)</span></div>
-    
+
 <div class="viewcode-block" id="UpdateFile"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.UpdateFile">[docs]</a><span class="k">class</span> <span class="nc">UpdateFile</span><span class="p">:</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">installLocation</span><span class="p">,</span> <span class="n">serverDbRoot</span><span class="p">,</span> <span class="n">filePath</span><span class="p">,</span> <span class="n">fileServerTime</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-               <span class="n">fileStoredAs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">fileHashCode</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">shouldInstall</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">shouldCommit</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-               <span class="n">isNew</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">serverDownloadScript</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">serverUploadScript</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">installLocation</span><span class="p">,</span> <span class="n">serverDbRoot</span><span class="p">,</span> <span class="n">filePath</span><span class="p">,</span> <span class="n">fileServerTime</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">fileStoredAs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fileHashCode</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">shouldInstall</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">shouldCommit</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                 <span class="n">isNew</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">serverDownloadScript</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">serverUploadScript</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">fullFilePath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">installLocation</span><span class="p">,</span> <span class="n">filePath</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fullFilePath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">installLocation</span><span class="p">,</span> <span class="n">filePath</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">fileServerTime</span><span class="p">:</span>
-      <span class="n">fileServerTime</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">fileServerTime</span><span class="p">)</span>  <span class="c1"># from server it comes as a string</span>
+        <span class="k">if</span> <span class="n">fileServerTime</span><span class="p">:</span>
+            <span class="n">fileServerTime</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">fileServerTime</span><span class="p">)</span>  <span class="c1"># from server it comes as a string</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">fileStoredAs</span><span class="p">:</span>
-      <span class="n">fileStoredAs</span> <span class="o">=</span> <span class="n">PATH_SEP</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filePath</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">fileStoredAs</span><span class="p">:</span>
+            <span class="n">fileStoredAs</span> <span class="o">=</span> <span class="n">PATH_SEP</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filePath</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">))</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">fileHashCode</span><span class="p">:</span>
-      <span class="n">fileHashCode</span> <span class="o">=</span> <span class="n">calcHashCode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fullFilePath</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">fileHashCode</span><span class="p">:</span>
+            <span class="n">fileHashCode</span> <span class="o">=</span> <span class="n">calcHashCode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fullFilePath</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">installLocation</span> <span class="o">=</span> <span class="n">installLocation</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">serverDbRoot</span> <span class="o">=</span> <span class="n">serverDbRoot</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span> <span class="o">=</span> <span class="n">filePath</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">fileServerTime</span> <span class="o">=</span> <span class="n">fileServerTime</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">fileStoredAs</span> <span class="o">=</span> <span class="n">fileStoredAs</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">fileHashCode</span> <span class="o">=</span> <span class="n">fileHashCode</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">shouldInstall</span> <span class="o">=</span> <span class="n">shouldInstall</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">shouldCommit</span> <span class="o">=</span> <span class="n">shouldCommit</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">isNew</span> <span class="o">=</span> <span class="n">isNew</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">serverDownloadScript</span> <span class="o">=</span> <span class="n">serverDownloadScript</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">serverUploadScript</span> <span class="o">=</span> <span class="n">serverUploadScript</span>
-    
-    <span class="bp">self</span><span class="o">.</span><span class="n">fileLocalTime</span> <span class="o">=</span> <span class="n">lastModifiedTime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fullFilePath</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">installLocation</span> <span class="o">=</span> <span class="n">installLocation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">serverDbRoot</span> <span class="o">=</span> <span class="n">serverDbRoot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span> <span class="o">=</span> <span class="n">filePath</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileServerTime</span> <span class="o">=</span> <span class="n">fileServerTime</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileStoredAs</span> <span class="o">=</span> <span class="n">fileStoredAs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileHashCode</span> <span class="o">=</span> <span class="n">fileHashCode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shouldInstall</span> <span class="o">=</span> <span class="n">shouldInstall</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shouldCommit</span> <span class="o">=</span> <span class="n">shouldCommit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isNew</span> <span class="o">=</span> <span class="n">isNew</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">serverDownloadScript</span> <span class="o">=</span> <span class="n">serverDownloadScript</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">serverUploadScript</span> <span class="o">=</span> <span class="n">serverUploadScript</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">fileServerDateTime</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">fileServerTime</span><span class="p">))</span> <span class="k">if</span> <span class="n">fileServerTime</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">fileLocalDateTime</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileLocalTime</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">fileName</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">fileDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileLocalTime</span> <span class="o">=</span> <span class="n">lastModifiedTime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fullFilePath</span><span class="p">)</span>
 
-<div class="viewcode-block" id="UpdateFile.installUpdate"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.UpdateFile.installUpdate">[docs]</a>  <span class="k">def</span> <span class="nf">installUpdate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileServerDateTime</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">fileServerTime</span><span class="p">))</span> <span class="k">if</span> <span class="n">fileServerTime</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileLocalDateTime</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileLocalTime</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileName</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
 
-    <span class="n">data</span> <span class="o">=</span> <span class="n">downloadFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serverDownloadScript</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverDbRoot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileStoredAs</span><span class="p">)</span>
-    
-    <span class="n">fullFilePath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fullFilePath</span>
-    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fullFilePath</span><span class="p">):</span>
-      <span class="c1"># backup what is there just in case</span>
-      <span class="n">shutil</span><span class="o">.</span><span class="n">copyfile</span><span class="p">(</span><span class="n">fullFilePath</span><span class="p">,</span> <span class="n">fullFilePath</span> <span class="o">+</span> <span class="s1">&#39;__old&#39;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">fullFilePath</span><span class="p">)</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
-    <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fullFilePath</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
-    <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-    <span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+<div class="viewcode-block" id="UpdateFile.installUpdate"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.UpdateFile.installUpdate">[docs]</a>    <span class="k">def</span> <span class="nf">installUpdate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-<div class="viewcode-block" id="UpdateFile.commitUpdate"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.UpdateFile.commitUpdate">[docs]</a>  <span class="k">def</span> <span class="nf">commitUpdate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serverUser</span><span class="p">,</span> <span class="n">serverPassword</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">downloadFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serverDownloadScript</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverDbRoot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileStoredAs</span><span class="p">)</span>
 
-    <span class="n">uploadFile</span><span class="p">(</span><span class="n">serverUser</span><span class="p">,</span> <span class="n">serverPassword</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverUploadScript</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fullFilePath</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverDbRoot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileStoredAs</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">fileHashCode</span> <span class="o">=</span> <span class="n">calcHashCode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fullFilePath</span><span class="p">)</span></div></div>
-  
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">fullFilePath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fullFilePath</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fullFilePath</span><span class="p">):</span>
+            <span class="c1"># backup what is there just in case</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copyfile</span><span class="p">(</span><span class="n">fullFilePath</span><span class="p">,</span> <span class="n">fullFilePath</span> <span class="o">+</span> <span class="s1">&#39;__old&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">fullFilePath</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+        <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fullFilePath</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="UpdateFile.commitUpdate"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.UpdateFile.commitUpdate">[docs]</a>    <span class="k">def</span> <span class="nf">commitUpdate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serverUser</span><span class="p">,</span> <span class="n">serverPassword</span><span class="p">):</span>
+
+        <span class="n">uploadFile</span><span class="p">(</span><span class="n">serverUser</span><span class="p">,</span> <span class="n">serverPassword</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverUploadScript</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fullFilePath</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverDbRoot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileStoredAs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileHashCode</span> <span class="o">=</span> <span class="n">calcHashCode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fullFilePath</span><span class="p">)</span></div></div>
+
+
 <div class="viewcode-block" id="UpdateAgent"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.UpdateAgent">[docs]</a><span class="k">class</span> <span class="nc">UpdateAgent</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">showError</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">showInfo</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">askPassword</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-               <span class="n">serverUser</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">server</span><span class="o">=</span><span class="n">SERVER</span><span class="p">,</span> <span class="n">serverDbRoot</span><span class="o">=</span><span class="n">SERVER_DB_ROOT</span><span class="p">,</span> <span class="n">serverDbFile</span><span class="o">=</span><span class="n">SERVER_DB_FILE</span><span class="p">,</span>
-               <span class="n">serverDownloadScript</span><span class="o">=</span><span class="n">SERVER_DOWNLOAD_SCRIPT</span><span class="p">,</span> <span class="n">serverUploadScript</span><span class="o">=</span><span class="n">SERVER_UPLOAD_SCRIPT</span><span class="p">):</span>
-    
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">showError</span><span class="p">:</span>
-      <span class="n">showError</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showError</span>
+    <span class="k">def</span> <span class="nf">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">showError</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">showInfo</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">askPassword</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+              <span class="n">serverUser</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">server</span><span class="o">=</span><span class="n">SERVER</span><span class="p">,</span> <span class="n">serverDbRoot</span><span class="o">=</span><span class="n">SERVER_DB_ROOT</span><span class="p">,</span> <span class="n">serverDbFile</span><span class="o">=</span><span class="n">SERVER_DB_FILE</span><span class="p">,</span>
+              <span class="n">serverDownloadScript</span><span class="o">=</span><span class="n">SERVER_DOWNLOAD_SCRIPT</span><span class="p">,</span> <span class="n">serverUploadScript</span><span class="o">=</span><span class="n">SERVER_UPLOAD_SCRIPT</span><span class="p">):</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">showInfo</span><span class="p">:</span>
-      <span class="n">showInfo</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showInfo</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">showError</span><span class="p">:</span>
+            <span class="n">showError</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showError</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">askPassword</span><span class="p">:</span>
-      <span class="n">askPassword</span> <span class="o">=</span> <span class="n">InputDialog</span><span class="o">.</span><span class="n">askPassword</span>
-      
-    <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">showError</span> <span class="o">=</span> <span class="n">showError</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">showInfo</span> <span class="o">=</span> <span class="n">showInfo</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">askPassword</span> <span class="o">=</span> <span class="n">askPassword</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">serverUser</span> <span class="o">=</span> <span class="n">serverUser</span>  <span class="c1"># None for downloads, not None for uploads</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="n">server</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">serverDbRoot</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">serverDbRoot</span><span class="p">,</span> <span class="n">version</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">serverDbFile</span> <span class="o">=</span> <span class="n">serverDbFile</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">serverDownloadScript</span> <span class="o">=</span> <span class="n">serverDownloadScript</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">serverUploadScript</span> <span class="o">=</span> <span class="n">serverUploadScript</span>
-    <span class="c1">#self.serverDownloadScript = &#39;%s%s&#39; % (server, serverDownloadScript)</span>
-    <span class="c1">#self.serverUploadScript = &#39;%s%s&#39; % (server, serverUploadScript)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">showInfo</span><span class="p">:</span>
+            <span class="n">showInfo</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showInfo</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">installLocation</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">getTopDirectory</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">updateFiles</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">updateFileDict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">askPassword</span><span class="p">:</span>
+            <span class="n">askPassword</span> <span class="o">=</span> <span class="n">InputDialog</span><span class="o">.</span><span class="n">askPassword</span>
 
-<div class="viewcode-block" id="UpdateAgent.fetchUpdateDb"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.UpdateAgent.fetchUpdateDb">[docs]</a>  <span class="k">def</span> <span class="nf">fetchUpdateDb</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Fetch list of updates from server.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">showError</span> <span class="o">=</span> <span class="n">showError</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">showInfo</span> <span class="o">=</span> <span class="n">showInfo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">askPassword</span> <span class="o">=</span> <span class="n">askPassword</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">serverUser</span> <span class="o">=</span> <span class="n">serverUser</span>  <span class="c1"># None for downloads, not None for uploads</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="n">server</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">serverDbRoot</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">serverDbRoot</span><span class="p">,</span> <span class="n">version</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">serverDbFile</span> <span class="o">=</span> <span class="n">serverDbFile</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">serverDownloadScript</span> <span class="o">=</span> <span class="n">serverDownloadScript</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">serverUploadScript</span> <span class="o">=</span> <span class="n">serverUploadScript</span>
+        <span class="c1">#self.serverDownloadScript = &#39;%s%s&#39; % (server, serverDownloadScript)</span>
+        <span class="c1">#self.serverUploadScript = &#39;%s%s&#39; % (server, serverUploadScript)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">updateFiles</span> <span class="o">=</span> <span class="n">updateFiles</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">updateFileDict</span> <span class="o">=</span> <span class="n">updateFileDict</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">serverDownloadScript</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverDownloadScript</span><span class="p">)</span>
-    <span class="n">serverUploadScript</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverUploadScript</span><span class="p">)</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">downloadFile</span><span class="p">(</span><span class="n">serverDownloadScript</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverDbRoot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverDbFile</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">BAD_DOWNLOAD</span><span class="p">):</span>
-      <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Could not download database file from server&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">installLocation</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">getTopDirectory</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateFiles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateFileDict</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="n">lines</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">lines</span><span class="p">:</span>
-      <span class="n">version</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-      <span class="c1">#if not VERSION_RE.match(version):</span>
-      <span class="c1">#  raise Exception(&#39;First line of server database file = %s, does not match a version number&#39; % version)</span>
+<div class="viewcode-block" id="UpdateAgent.checkNumberUpdates"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.UpdateAgent.checkNumberUpdates">[docs]</a>    <span class="k">def</span> <span class="nf">checkNumberUpdates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fetchUpdateDb</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">updateFiles</span><span class="p">)</span></div>
 
-      <span class="k">if</span> <span class="n">version</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Server database version = </span><span class="si">%s</span><span class="s1"> != </span><span class="si">%s</span><span class="s1"> = program version&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">))</span>
+<div class="viewcode-block" id="UpdateAgent.fetchUpdateDb"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.UpdateAgent.fetchUpdateDb">[docs]</a>    <span class="k">def</span> <span class="nf">fetchUpdateDb</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fetch list of updates from server.&quot;&quot;&quot;</span>
 
-      <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
-        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">line</span><span class="p">:</span>
-          <span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="n">fileTime</span><span class="p">,</span> <span class="n">fileStoredAs</span><span class="p">,</span> <span class="n">fileHashCode</span><span class="p">)</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">FIELD_SEP</span><span class="p">)</span>
-          <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverUser</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">isUpdateDifferent</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="n">fileHashCode</span><span class="p">):</span>
-            <span class="n">updateFile</span> <span class="o">=</span> <span class="n">UpdateFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">installLocation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverDbRoot</span><span class="p">,</span> <span class="n">filePath</span><span class="p">,</span> <span class="n">fileTime</span><span class="p">,</span> <span class="n">fileStoredAs</span><span class="p">,</span> <span class="n">fileHashCode</span><span class="p">,</span> <span class="n">serverDownloadScript</span><span class="o">=</span><span class="n">serverDownloadScript</span><span class="p">,</span> <span class="n">serverUploadScript</span><span class="o">=</span><span class="n">serverUploadScript</span><span class="p">)</span>
-            <span class="n">updateFiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">updateFile</span><span class="p">)</span>
-            <span class="n">updateFileDict</span><span class="p">[</span><span class="n">filePath</span><span class="p">]</span> <span class="o">=</span> <span class="n">updateFile</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateFiles</span> <span class="o">=</span> <span class="n">updateFiles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateFileDict</span> <span class="o">=</span> <span class="n">updateFileDict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">serverDownloadScript</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverDownloadScript</span><span class="p">)</span>
+        <span class="n">serverUploadScript</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverUploadScript</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">downloadFile</span><span class="p">(</span><span class="n">serverDownloadScript</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverDbRoot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverDbFile</span><span class="p">)</span>
 
-<div class="viewcode-block" id="UpdateAgent.isUpdateDifferent"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.UpdateAgent.isUpdateDifferent">[docs]</a>  <span class="k">def</span> <span class="nf">isUpdateDifferent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filePath</span><span class="p">,</span> <span class="n">fileHashCode</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;See if local file is different from server file.&quot;&quot;&quot;</span>
+        <span class="c1"># if data.startswith(BAD_DOWNLOAD):</span>
+        <span class="c1">#     raise Exception(&#39;Could not download database file from server&#39;)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span>
+            <span class="k">return</span>
 
-    <span class="n">currentFilePath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">installLocation</span><span class="p">,</span> <span class="n">filePath</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">currentFilePath</span><span class="p">):</span>
-      <span class="n">currentHashCode</span> <span class="o">=</span> <span class="n">calcHashCode</span><span class="p">(</span><span class="n">currentFilePath</span><span class="p">)</span>
-      <span class="n">isDifferent</span> <span class="o">=</span> <span class="p">(</span><span class="n">currentHashCode</span> <span class="o">!=</span> <span class="n">fileHashCode</span><span class="p">)</span>
-    <span class="c1"># below means that updates in new directories will be missed</span>
-    <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">currentFilePath</span><span class="p">)):</span>
-      <span class="n">isDifferent</span> <span class="o">=</span> <span class="bp">True</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="c1"># this is a hack so that updates that don&#39;t belong are excluded</span>
-      <span class="n">isDifferent</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="n">version</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="c1">#if not VERSION_RE.match(version):</span>
+            <span class="c1">#  raise Exception(&#39;First line of server database file = %s, does not match a version number&#39; % version)</span>
 
-    <span class="k">return</span> <span class="n">isDifferent</span></div>
+            <span class="k">if</span> <span class="n">version</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Server database version = </span><span class="si">%s</span><span class="s1"> != </span><span class="si">%s</span><span class="s1"> = program version&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">))</span>
 
-<div class="viewcode-block" id="UpdateAgent.resetFromServer"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.UpdateAgent.resetFromServer">[docs]</a>  <span class="k">def</span> <span class="nf">resetFromServer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">line</span><span class="p">:</span>
+                    <span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="n">fileTime</span><span class="p">,</span> <span class="n">fileStoredAs</span><span class="p">,</span> <span class="n">fileHashCode</span><span class="p">)</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">FIELD_SEP</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverUser</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">isUpdateDifferent</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="n">fileHashCode</span><span class="p">):</span>
+                        <span class="n">updateFile</span> <span class="o">=</span> <span class="n">UpdateFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">installLocation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverDbRoot</span><span class="p">,</span> <span class="n">filePath</span><span class="p">,</span> <span class="n">fileTime</span><span class="p">,</span> <span class="n">fileStoredAs</span><span class="p">,</span> <span class="n">fileHashCode</span><span class="p">,</span>
+                                                <span class="n">serverDownloadScript</span><span class="o">=</span><span class="n">serverDownloadScript</span><span class="p">,</span> <span class="n">serverUploadScript</span><span class="o">=</span><span class="n">serverUploadScript</span><span class="p">)</span>
+                        <span class="n">updateFiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">updateFile</span><span class="p">)</span>
+                        <span class="n">updateFileDict</span><span class="p">[</span><span class="n">filePath</span><span class="p">]</span> <span class="o">=</span> <span class="n">updateFile</span></div>
 
-    <span class="k">try</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">fetchUpdateDb</span><span class="p">()</span>
-    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">showError</span><span class="p">(</span><span class="s1">&#39;Update error&#39;</span><span class="p">,</span> <span class="s1">&#39;Could not fetch updates: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span></div>
+<div class="viewcode-block" id="UpdateAgent.isUpdateDifferent"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.UpdateAgent.isUpdateDifferent">[docs]</a>    <span class="k">def</span> <span class="nf">isUpdateDifferent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filePath</span><span class="p">,</span> <span class="n">fileHashCode</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;See if local file is different from server file.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="UpdateAgent.addFiles"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.UpdateAgent.addFiles">[docs]</a>  <span class="k">def</span> <span class="nf">addFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filePaths</span><span class="p">):</span>
-
-    <span class="n">serverDownloadScript</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverDownloadScript</span><span class="p">)</span>
-    <span class="n">serverUploadScript</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverUploadScript</span><span class="p">)</span>
-    <span class="n">installLocation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">installLocation</span>
-    <span class="n">installErrorCount</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">existsErrorCount</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">filePath</span> <span class="ow">in</span> <span class="n">filePaths</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">filePath</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">installLocation</span><span class="p">):</span>
-        <span class="n">filePath</span> <span class="o">=</span> <span class="n">filePath</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">installLocation</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
-        <span class="k">if</span> <span class="n">filePath</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">updateFileDict</span><span class="p">:</span>
-          <span class="n">updateFile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">updateFileDict</span><span class="p">[</span><span class="n">filePath</span><span class="p">]</span>
-          <span class="n">updateFile</span><span class="o">.</span><span class="n">shouldCommit</span> <span class="o">=</span> <span class="bp">True</span>
-          <span class="k">print</span><span class="p">(</span><span class="s1">&#39;File </span><span class="si">%s</span><span class="s1"> already in updates&#39;</span> <span class="o">%</span> <span class="n">filePath</span><span class="p">)</span>
-          <span class="n">existsErrorCount</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">currentFilePath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">installLocation</span><span class="p">,</span> <span class="n">filePath</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">currentFilePath</span><span class="p">):</span>
+            <span class="n">currentHashCode</span> <span class="o">=</span> <span class="n">calcHashCode</span><span class="p">(</span><span class="n">currentFilePath</span><span class="p">)</span>
+            <span class="n">isDifferent</span> <span class="o">=</span> <span class="p">(</span><span class="n">currentHashCode</span> <span class="o">!=</span> <span class="n">fileHashCode</span><span class="p">)</span>
+        <span class="c1"># below means that updates in new directories will be missed</span>
+        <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">currentFilePath</span><span class="p">)):</span>
+            <span class="n">isDifferent</span> <span class="o">=</span> <span class="bp">True</span>
         <span class="k">else</span><span class="p">:</span>
-          <span class="n">updateFile</span> <span class="o">=</span> <span class="n">UpdateFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">installLocation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverDbRoot</span><span class="p">,</span> <span class="n">filePath</span><span class="p">,</span> <span class="n">shouldCommit</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">isNew</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">serverDownloadScript</span><span class="o">=</span><span class="n">serverDownloadScript</span><span class="p">,</span> <span class="n">serverUploadScript</span><span class="o">=</span><span class="n">serverUploadScript</span><span class="p">)</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">updateFiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">updateFile</span><span class="p">)</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">updateFileDict</span><span class="p">[</span><span class="n">filePath</span><span class="p">]</span> <span class="o">=</span> <span class="n">updateFile</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Ignoring &quot;</span><span class="si">%s</span><span class="s1">&quot;, not on installation path &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="n">installLocation</span><span class="p">))</span>
-        <span class="n">installErrorCount</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="c1"># this is a hack so that updates that don&#39;t belong are excluded</span>
+            <span class="n">isDifferent</span> <span class="o">=</span> <span class="bp">False</span>
 
-    <span class="k">if</span> <span class="n">installErrorCount</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">showError</span><span class="p">(</span><span class="s1">&#39;Add file error&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> file</span><span class="si">%s</span><span class="s1"> not added because not on installation path </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">installErrorCount</span><span class="p">,</span> <span class="n">installErrorCount</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="s1">&#39;s&#39;</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">installLocation</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">isDifferent</span></div>
 
-    <span class="k">if</span> <span class="n">existsErrorCount</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">showError</span><span class="p">(</span><span class="s1">&#39;Add file error&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> file</span><span class="si">%s</span><span class="s1"> not added because already in update list (but now selected for committal)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">existsErrorCount</span><span class="p">,</span> <span class="n">existsErrorCount</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="s1">&#39;s&#39;</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">))</span></div>
+<div class="viewcode-block" id="UpdateAgent.resetFromServer"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.UpdateAgent.resetFromServer">[docs]</a>    <span class="k">def</span> <span class="nf">resetFromServer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-<div class="viewcode-block" id="UpdateAgent.haveWriteAccess"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.UpdateAgent.haveWriteAccess">[docs]</a>  <span class="k">def</span> <span class="nf">haveWriteAccess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;See if can write files to local installation.&quot;&quot;&quot;</span>
-
-    <span class="n">testFile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">installLocation</span><span class="p">,</span> <span class="s1">&#39;__write_test__&#39;</span><span class="p">)</span>
-    <span class="k">try</span><span class="p">:</span>
-      <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">testFile</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
-      <span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-      <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">testFile</span><span class="p">)</span>
-      <span class="k">return</span> <span class="bp">True</span>
-    <span class="k">except</span><span class="p">:</span>
-      <span class="k">return</span> <span class="bp">False</span></div>
-
-<div class="viewcode-block" id="UpdateAgent.installChosen"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.UpdateAgent.installChosen">[docs]</a>  <span class="k">def</span> <span class="nf">installChosen</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Download chosen server files to local installation.&quot;&quot;&quot;</span>
-
-    <span class="n">updateFiles</span> <span class="o">=</span> <span class="p">[</span><span class="n">updateFile</span> <span class="k">for</span> <span class="n">updateFile</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">updateFiles</span> <span class="k">if</span> <span class="n">updateFile</span><span class="o">.</span><span class="n">shouldInstall</span><span class="p">]</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">updateFiles</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">showError</span><span class="p">(</span><span class="s1">&#39;No updates&#39;</span><span class="p">,</span> <span class="s1">&#39;No updates for installation&#39;</span><span class="p">)</span>
-      <span class="k">return</span>
-
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">haveWriteAccess</span><span class="p">():</span>
-      <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
-      <span class="k">for</span> <span class="n">updateFile</span> <span class="ow">in</span> <span class="n">updateFiles</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
-          <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Installing </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">updateFile</span><span class="o">.</span><span class="n">fullFilePath</span><span class="p">))</span>
-          <span class="n">updateFile</span><span class="o">.</span><span class="n">installUpdate</span><span class="p">()</span>
-          <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fetchUpdateDb</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-          <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Could not install </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">updateFile</span><span class="o">.</span><span class="n">fullFilePath</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">showError</span><span class="p">(</span><span class="s1">&#39;Update error&#39;</span><span class="p">,</span> <span class="s1">&#39;Could not fetch updates: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span></div>
 
-      <span class="n">ss</span> <span class="o">=</span> <span class="n">n</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">and</span> <span class="s1">&#39;s&#39;</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span>
-      <span class="k">if</span> <span class="n">n</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">updateFiles</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">showError</span><span class="p">(</span><span class="s1">&#39;Update problem&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> update</span><span class="si">%s</span><span class="s1"> installed, </span><span class="si">%d</span><span class="s1"> not installed, see console for error messages&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">ss</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">updateFiles</span><span class="p">)</span><span class="o">-</span><span class="n">n</span><span class="p">))</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">showInfo</span><span class="p">(</span><span class="s1">&#39;Update</span><span class="si">%s</span><span class="s1"> installed&#39;</span> <span class="o">%</span> <span class="n">ss</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> update</span><span class="si">%s</span><span class="s1"> installed successfully&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">ss</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">showError</span><span class="p">(</span><span class="s1">&#39;No write permission&#39;</span><span class="p">,</span> <span class="s1">&#39;You do not have write permission in the CCPN installation directory&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="UpdateAgent.addFiles"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.UpdateAgent.addFiles">[docs]</a>    <span class="k">def</span> <span class="nf">addFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filePaths</span><span class="p">):</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">resetFromServer</span><span class="p">()</span></div>
-
-<div class="viewcode-block" id="UpdateAgent.installUpdates"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.UpdateAgent.installUpdates">[docs]</a>  <span class="k">def</span> <span class="nf">installUpdates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-    <span class="k">for</span> <span class="n">updateFile</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">updateFiles</span><span class="p">:</span>
-      <span class="n">updateFile</span><span class="o">.</span><span class="n">shouldInstall</span> <span class="o">=</span> <span class="bp">True</span>
-      
-    <span class="bp">self</span><span class="o">.</span><span class="n">installChosen</span><span class="p">()</span></div>
-
-<div class="viewcode-block" id="UpdateAgent.commitChosen"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.UpdateAgent.commitChosen">[docs]</a>  <span class="k">def</span> <span class="nf">commitChosen</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Copy chosen local files to server.&quot;&quot;&quot;</span>
-
-    <span class="n">updateFiles</span> <span class="o">=</span> <span class="p">[</span><span class="n">updateFile</span> <span class="k">for</span> <span class="n">updateFile</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">updateFiles</span> <span class="k">if</span> <span class="n">updateFile</span><span class="o">.</span><span class="n">shouldCommit</span><span class="p">]</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">updateFiles</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">showError</span><span class="p">(</span><span class="s1">&#39;No updates&#39;</span><span class="p">,</span> <span class="s1">&#39;No updates chosen for committing&#39;</span><span class="p">)</span>
-      <span class="k">return</span>
-
-    <span class="n">serverPassword</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">askPassword</span><span class="p">(</span><span class="s1">&#39;Password&#39;</span><span class="p">,</span> <span class="s1">&#39;Enter password for </span><span class="si">%s</span><span class="s1"> on server&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverUser</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">serverPassword</span><span class="p">:</span>
-      <span class="k">return</span>
-    <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">updateFile</span> <span class="ow">in</span> <span class="n">updateFiles</span><span class="p">:</span>
-      <span class="k">try</span><span class="p">:</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Committing </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">updateFile</span><span class="o">.</span><span class="n">fullFilePath</span><span class="p">))</span>
-        <span class="n">updateFile</span><span class="o">.</span><span class="n">commitUpdate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serverUser</span><span class="p">,</span> <span class="n">serverPassword</span><span class="p">)</span>
-        <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
-      <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="k">raise</span>
-        <span class="c1"># seem to need str(e) below because o/w HTTPError (from bad pwd) not printed out</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Could not commit </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">updateFile</span><span class="o">.</span><span class="n">fullFilePath</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
-
-    <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;s&#39;</span>
-    <span class="k">if</span> <span class="n">n</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">updateFiles</span><span class="p">):</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">showError</span><span class="p">(</span><span class="s1">&#39;Commit problem&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> update</span><span class="si">%s</span><span class="s1"> committed, </span><span class="si">%d</span><span class="s1"> not committed, see console for error messages&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">ss</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">updateFiles</span><span class="p">)</span><span class="o">-</span><span class="n">n</span><span class="p">))</span>
-      <span class="k">return</span>
-
-    <span class="k">try</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">commitUpdateDb</span><span class="p">(</span><span class="n">serverPassword</span><span class="p">,</span> <span class="n">updateFiles</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">showError</span><span class="p">(</span><span class="s1">&#39;Commit problem&#39;</span><span class="p">,</span> <span class="s1">&#39;Commit of database to server exception: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
-      <span class="k">return</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">showInfo</span><span class="p">(</span><span class="s1">&#39;Update</span><span class="si">%s</span><span class="s1"> committed&#39;</span> <span class="o">%</span> <span class="n">ss</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> update</span><span class="si">%s</span><span class="s1"> committed successfully&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">ss</span><span class="p">))</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">resetFromServer</span><span class="p">()</span></div>
-
-<div class="viewcode-block" id="UpdateAgent.commitUpdateDb"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.UpdateAgent.commitUpdateDb">[docs]</a>  <span class="k">def</span> <span class="nf">commitUpdateDb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serverPassword</span><span class="p">,</span> <span class="n">updateFiles</span><span class="p">):</span>
-
-    <span class="c1"># in theory this could be done at the server end, only that would mean looking</span>
-    <span class="c1"># through the existing db file to see which file timestamps needed updating</span>
-    <span class="c1"># and then appending new files, so much more complicated (but less bandwidth)</span>
-    <span class="n">xx</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">]</span>
-    <span class="k">for</span> <span class="n">updateFile</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">updateFiles</span><span class="p">:</span>
-      <span class="n">fileTime</span> <span class="o">=</span> <span class="n">updateFile</span><span class="o">.</span><span class="n">fileLocalTime</span> <span class="k">if</span> <span class="n">updateFile</span> <span class="ow">in</span> <span class="n">updateFiles</span> <span class="k">else</span> <span class="n">updateFile</span><span class="o">.</span><span class="n">fileServerTime</span>
-      <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">updateFile</span><span class="o">.</span><span class="n">filePath</span><span class="p">,</span> <span class="s1">&#39;%.f&#39;</span> <span class="o">%</span> <span class="n">fileTime</span><span class="p">,</span> <span class="n">updateFile</span><span class="o">.</span><span class="n">fileStoredAs</span><span class="p">,</span> <span class="n">updateFile</span><span class="o">.</span><span class="n">fileHashCode</span><span class="p">))</span>
-      <span class="n">xx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
-
-    <span class="n">fileData</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">xx</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
-
-    <span class="n">serverUploadScript</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverUploadScript</span><span class="p">)</span>
-    <span class="n">uploadData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serverUser</span><span class="p">,</span> <span class="n">serverPassword</span><span class="p">,</span> <span class="n">serverUploadScript</span><span class="p">,</span> <span class="n">fileData</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverDbRoot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverDbFile</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="UpdateAgent.diffUpdates"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.UpdateAgent.diffUpdates">[docs]</a>  <span class="k">def</span> <span class="nf">diffUpdates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">updateFiles</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">write</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">):</span>
-
-    <span class="k">if</span> <span class="n">updateFiles</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">updateFiles</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="n">serverDownloadScript</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverDownloadScript</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">updateFile</span> <span class="ow">in</span> <span class="n">updateFiles</span><span class="p">:</span>
-      <span class="n">fullFilePath</span> <span class="o">=</span> <span class="n">updateFile</span><span class="o">.</span><span class="n">fullFilePath</span>
-      <span class="n">write</span><span class="p">(</span><span class="mi">60</span><span class="o">*</span><span class="s1">&#39;*&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-      <span class="n">write</span><span class="p">(</span><span class="s1">&#39;Diff for </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fullFilePath</span><span class="p">)</span>
-      <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">fullFilePath</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">updateFile</span><span class="o">.</span><span class="n">isNew</span><span class="p">:</span>
-          <span class="n">write</span><span class="p">(</span><span class="s1">&#39;No server copy of file</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-          <span class="n">haveDiff</span> <span class="o">=</span> <span class="bp">False</span>
-          <span class="n">localLines</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fullFilePath</span><span class="p">,</span> <span class="s1">&#39;rU&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
-          <span class="n">serverData</span> <span class="o">=</span> <span class="n">downloadFile</span><span class="p">(</span><span class="n">serverDownloadScript</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverDbRoot</span><span class="p">,</span> <span class="n">updateFile</span><span class="o">.</span><span class="n">fileStoredAs</span><span class="p">)</span>
-          <span class="k">if</span> <span class="n">serverData</span><span class="p">:</span>
-            <span class="n">serverLines</span> <span class="o">=</span> <span class="n">serverData</span><span class="o">.</span><span class="n">splitlines</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">difflib</span><span class="o">.</span><span class="n">context_diff</span><span class="p">(</span><span class="n">localLines</span><span class="p">,</span> <span class="n">serverLines</span><span class="p">,</span> <span class="n">fromfile</span><span class="o">=</span><span class="s1">&#39;local&#39;</span><span class="p">,</span> <span class="n">tofile</span><span class="o">=</span><span class="s1">&#39;server&#39;</span><span class="p">):</span>
-              <span class="n">haveDiff</span> <span class="o">=</span> <span class="bp">True</span>
-              <span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">haveDiff</span><span class="p">:</span>
-              <span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">serverDownloadScript</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverDownloadScript</span><span class="p">)</span>
+        <span class="n">serverUploadScript</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverUploadScript</span><span class="p">)</span>
+        <span class="n">installLocation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">installLocation</span>
+        <span class="n">installErrorCount</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">existsErrorCount</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">filePath</span> <span class="ow">in</span> <span class="n">filePaths</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">filePath</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">installLocation</span><span class="p">):</span>
+                <span class="n">filePath</span> <span class="o">=</span> <span class="n">filePath</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">installLocation</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]</span>
+                <span class="k">if</span> <span class="n">filePath</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">updateFileDict</span><span class="p">:</span>
+                    <span class="n">updateFile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">updateFileDict</span><span class="p">[</span><span class="n">filePath</span><span class="p">]</span>
+                    <span class="n">updateFile</span><span class="o">.</span><span class="n">shouldCommit</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;File </span><span class="si">%s</span><span class="s1"> already in updates&#39;</span> <span class="o">%</span> <span class="n">filePath</span><span class="p">)</span>
+                    <span class="n">existsErrorCount</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">updateFile</span> <span class="o">=</span> <span class="n">UpdateFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">installLocation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverDbRoot</span><span class="p">,</span> <span class="n">filePath</span><span class="p">,</span> <span class="n">shouldCommit</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">isNew</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                            <span class="n">serverDownloadScript</span><span class="o">=</span><span class="n">serverDownloadScript</span><span class="p">,</span> <span class="n">serverUploadScript</span><span class="o">=</span><span class="n">serverUploadScript</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">updateFiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">updateFile</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">updateFileDict</span><span class="p">[</span><span class="n">filePath</span><span class="p">]</span> <span class="o">=</span> <span class="n">updateFile</span>
             <span class="k">else</span><span class="p">:</span>
-              <span class="n">write</span><span class="p">(</span><span class="s1">&#39;No diff</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-          <span class="k">else</span><span class="p">:</span>
-            <span class="n">write</span><span class="p">(</span><span class="s1">&#39;No file on server&#39;</span><span class="p">)</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">write</span><span class="p">(</span><span class="s1">&#39;No local copy of file</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div></div>
+                <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Ignoring &quot;</span><span class="si">%s</span><span class="s1">&quot;, not on installation path &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="n">installLocation</span><span class="p">))</span>
+                <span class="n">installErrorCount</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">installErrorCount</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">showError</span><span class="p">(</span><span class="s1">&#39;Add file error&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> file</span><span class="si">%s</span><span class="s1"> not added because not on installation path </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">installErrorCount</span><span class="p">,</span> <span class="n">installErrorCount</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="s1">&#39;s&#39;</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">installLocation</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">existsErrorCount</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">showError</span><span class="p">(</span><span class="s1">&#39;Add file error&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> file</span><span class="si">%s</span><span class="s1"> not added because already in update list (but now selected for committal)&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">existsErrorCount</span><span class="p">,</span> <span class="n">existsErrorCount</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="s1">&#39;s&#39;</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="UpdateAgent.haveWriteAccess"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.UpdateAgent.haveWriteAccess">[docs]</a>    <span class="k">def</span> <span class="nf">haveWriteAccess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;See if can write files to local installation.&quot;&quot;&quot;</span>
+
+        <span class="n">testFile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">installLocation</span><span class="p">,</span> <span class="s1">&#39;__write_test__&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">testFile</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+            <span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">testFile</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span></div>
+
+<div class="viewcode-block" id="UpdateAgent.installChosen"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.UpdateAgent.installChosen">[docs]</a>    <span class="k">def</span> <span class="nf">installChosen</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Download chosen server files to local installation.&quot;&quot;&quot;</span>
+
+        <span class="n">updateFiles</span> <span class="o">=</span> <span class="p">[</span><span class="n">updateFile</span> <span class="k">for</span> <span class="n">updateFile</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">updateFiles</span> <span class="k">if</span> <span class="n">updateFile</span><span class="o">.</span><span class="n">shouldInstall</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">updateFiles</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">showError</span><span class="p">(</span><span class="s1">&#39;No updates&#39;</span><span class="p">,</span> <span class="s1">&#39;No updates for installation&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">haveWriteAccess</span><span class="p">():</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">updateFile</span> <span class="ow">in</span> <span class="n">updateFiles</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Installing </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">updateFile</span><span class="o">.</span><span class="n">fullFilePath</span><span class="p">))</span>
+                    <span class="n">updateFile</span><span class="o">.</span><span class="n">installUpdate</span><span class="p">()</span>
+                    <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Could not install </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">updateFile</span><span class="o">.</span><span class="n">fullFilePath</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+
+            <span class="n">ss</span> <span class="o">=</span> <span class="n">n</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">and</span> <span class="s1">&#39;s&#39;</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span>
+            <span class="k">if</span> <span class="n">n</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">updateFiles</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">showError</span><span class="p">(</span><span class="s1">&#39;Update problem&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> update</span><span class="si">%s</span><span class="s1"> installed, </span><span class="si">%d</span><span class="s1"> not installed, see console for error messages&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">ss</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">updateFiles</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">showInfo</span><span class="p">(</span><span class="s1">&#39;Update</span><span class="si">%s</span><span class="s1"> installed&#39;</span> <span class="o">%</span> <span class="n">ss</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> update</span><span class="si">%s</span><span class="s1"> installed successfully&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">ss</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">showError</span><span class="p">(</span><span class="s1">&#39;No write permission&#39;</span><span class="p">,</span> <span class="s1">&#39;You do not have write permission in the CCPN installation directory&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">resetFromServer</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="UpdateAgent.installUpdates"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.UpdateAgent.installUpdates">[docs]</a>    <span class="k">def</span> <span class="nf">installUpdates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">for</span> <span class="n">updateFile</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">updateFiles</span><span class="p">:</span>
+            <span class="n">updateFile</span><span class="o">.</span><span class="n">shouldInstall</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">installChosen</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="UpdateAgent.commitChosen"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.UpdateAgent.commitChosen">[docs]</a>    <span class="k">def</span> <span class="nf">commitChosen</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Copy chosen local files to server.&quot;&quot;&quot;</span>
+
+        <span class="n">updateFiles</span> <span class="o">=</span> <span class="p">[</span><span class="n">updateFile</span> <span class="k">for</span> <span class="n">updateFile</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">updateFiles</span> <span class="k">if</span> <span class="n">updateFile</span><span class="o">.</span><span class="n">shouldCommit</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">updateFiles</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">showError</span><span class="p">(</span><span class="s1">&#39;No updates&#39;</span><span class="p">,</span> <span class="s1">&#39;No updates chosen for committing&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">serverPassword</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">askPassword</span><span class="p">(</span><span class="s1">&#39;Password&#39;</span><span class="p">,</span> <span class="s1">&#39;Enter password for </span><span class="si">%s</span><span class="s1"> on server&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverUser</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">serverPassword</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">updateFile</span> <span class="ow">in</span> <span class="n">updateFiles</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Committing </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">updateFile</span><span class="o">.</span><span class="n">fullFilePath</span><span class="p">))</span>
+                <span class="n">updateFile</span><span class="o">.</span><span class="n">commitUpdate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serverUser</span><span class="p">,</span> <span class="n">serverPassword</span><span class="p">)</span>
+                <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span>
+                <span class="c1"># seem to need str(e) below because o/w HTTPError (from bad pwd) not printed out</span>
+                <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Could not commit </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">updateFile</span><span class="o">.</span><span class="n">fullFilePath</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+
+        <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;s&#39;</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">updateFiles</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">showError</span><span class="p">(</span><span class="s1">&#39;Commit problem&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> update</span><span class="si">%s</span><span class="s1"> committed, </span><span class="si">%d</span><span class="s1"> not committed, see console for error messages&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">ss</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">updateFiles</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">))</span>
+            <span class="k">return</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">commitUpdateDb</span><span class="p">(</span><span class="n">serverPassword</span><span class="p">,</span> <span class="n">updateFiles</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">showError</span><span class="p">(</span><span class="s1">&#39;Commit problem&#39;</span><span class="p">,</span> <span class="s1">&#39;Commit of database to server exception: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">showInfo</span><span class="p">(</span><span class="s1">&#39;Update</span><span class="si">%s</span><span class="s1"> committed&#39;</span> <span class="o">%</span> <span class="n">ss</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> update</span><span class="si">%s</span><span class="s1"> committed successfully&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">ss</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">resetFromServer</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="UpdateAgent.commitUpdateDb"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.UpdateAgent.commitUpdateDb">[docs]</a>    <span class="k">def</span> <span class="nf">commitUpdateDb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serverPassword</span><span class="p">,</span> <span class="n">updateFiles</span><span class="p">):</span>
+
+        <span class="c1"># in theory this could be done at the server end, only that would mean looking</span>
+        <span class="c1"># through the existing db file to see which file timestamps needed updating</span>
+        <span class="c1"># and then appending new files, so much more complicated (but less bandwidth)</span>
+        <span class="n">xx</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">updateFile</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">updateFiles</span><span class="p">:</span>
+            <span class="n">fileTime</span> <span class="o">=</span> <span class="n">updateFile</span><span class="o">.</span><span class="n">fileLocalTime</span> <span class="k">if</span> <span class="n">updateFile</span> <span class="ow">in</span> <span class="n">updateFiles</span> <span class="k">else</span> <span class="n">updateFile</span><span class="o">.</span><span class="n">fileServerTime</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">updateFile</span><span class="o">.</span><span class="n">filePath</span><span class="p">,</span> <span class="s1">&#39;%.f&#39;</span> <span class="o">%</span> <span class="n">fileTime</span><span class="p">,</span> <span class="n">updateFile</span><span class="o">.</span><span class="n">fileStoredAs</span><span class="p">,</span> <span class="n">updateFile</span><span class="o">.</span><span class="n">fileHashCode</span><span class="p">))</span>
+            <span class="n">xx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+        <span class="n">fileData</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">xx</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="n">serverUploadScript</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverUploadScript</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">uploadData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serverUser</span><span class="p">,</span> <span class="n">serverPassword</span><span class="p">,</span> <span class="n">serverUploadScript</span><span class="p">,</span> <span class="n">fileData</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverDbRoot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverDbFile</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_actionUpdateDb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serverPassword</span><span class="p">,</span> <span class="n">serverScript</span><span class="p">,</span> <span class="n">actionFile</span><span class="p">):</span>
+
+        <span class="c1"># in theory this could be done at the server end, only that would mean looking</span>
+        <span class="c1"># through the existing db file to see which file timestamps needed updating</span>
+        <span class="c1"># and then appending new files, so much more complicated (but less bandwidth)</span>
+
+        <span class="n">serverUploadScript</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">,</span> <span class="n">serverScript</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">uploadData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serverUser</span><span class="p">,</span> <span class="n">serverPassword</span><span class="p">,</span> <span class="n">serverUploadScript</span><span class="p">,</span> <span class="n">actionFile</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverDbRoot</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="UpdateAgent.diffUpdates"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.UpdateAgent.diffUpdates">[docs]</a>    <span class="k">def</span> <span class="nf">diffUpdates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">updateFiles</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">write</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">updateFiles</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">updateFiles</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">serverDownloadScript</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverDownloadScript</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">updateFile</span> <span class="ow">in</span> <span class="n">updateFiles</span><span class="p">:</span>
+            <span class="n">fullFilePath</span> <span class="o">=</span> <span class="n">updateFile</span><span class="o">.</span><span class="n">fullFilePath</span>
+            <span class="n">write</span><span class="p">(</span><span class="mi">60</span> <span class="o">*</span> <span class="s1">&#39;*&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">write</span><span class="p">(</span><span class="s1">&#39;Diff for </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fullFilePath</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">fullFilePath</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">updateFile</span><span class="o">.</span><span class="n">isNew</span><span class="p">:</span>
+                    <span class="n">write</span><span class="p">(</span><span class="s1">&#39;No server copy of file</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">haveDiff</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="n">localLines</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fullFilePath</span><span class="p">,</span> <span class="s1">&#39;rU&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+                    <span class="n">serverData</span> <span class="o">=</span> <span class="n">downloadFile</span><span class="p">(</span><span class="n">serverDownloadScript</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverDbRoot</span><span class="p">,</span> <span class="n">updateFile</span><span class="o">.</span><span class="n">fileStoredAs</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">serverData</span><span class="p">:</span>
+                        <span class="n">serverLines</span> <span class="o">=</span> <span class="n">serverData</span><span class="o">.</span><span class="n">splitlines</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">difflib</span><span class="o">.</span><span class="n">context_diff</span><span class="p">(</span><span class="n">localLines</span><span class="p">,</span> <span class="n">serverLines</span><span class="p">,</span> <span class="n">fromfile</span><span class="o">=</span><span class="s1">&#39;local&#39;</span><span class="p">,</span> <span class="n">tofile</span><span class="o">=</span><span class="s1">&#39;server&#39;</span><span class="p">):</span>
+                            <span class="n">haveDiff</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">haveDiff</span><span class="p">:</span>
+                            <span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">write</span><span class="p">(</span><span class="s1">&#39;No diff</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">write</span><span class="p">(</span><span class="s1">&#39;No file on server&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">write</span><span class="p">(</span><span class="s1">&#39;No local copy of file</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>

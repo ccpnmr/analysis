@@ -55,13 +55,13 @@
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Luca Mureddu $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:38 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -81,32 +81,35 @@
 <span class="kn">from</span> <span class="nn">ccpn.framework.lib.Pipe</span> <span class="kn">import</span> <span class="n">SpectraPipe</span>
 <span class="kn">from</span> <span class="nn">ccpn.pipes.lib._getNoiseLevel</span> <span class="kn">import</span> <span class="n">_getNoiseLevelForPipe</span>
 <span class="kn">from</span> <span class="nn">ccpn.pipes.lib.AreaCalculation</span> <span class="kn">import</span> <span class="n">_addAreaValuesToPeaks</span>
-<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span> <span class="p">,</span> <span class="n">_debug3</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span><span class="p">,</span> <span class="n">_debug3</span>
+
 
 <span class="c1">########################################################################################################################</span>
 <span class="c1">###   Attributes:</span>
 <span class="c1">###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe</span>
 <span class="c1">########################################################################################################################</span>
 
-<span class="n">PipeName</span> <span class="o">=</span> <span class="s1">&#39;Assign Multiplets&#39;</span>
+<span class="n">PipeName</span> <span class="o">=</span> <span class="s1">&#39;Find Multiplets&#39;</span>
 
 <span class="n">ExcludeRegions</span> <span class="o">=</span> <span class="s1">&#39;Exclude_Regions&#39;</span>
 <span class="n">ReferencePeakList</span> <span class="o">=</span> <span class="s1">&#39;Reference_PeakList&#39;</span>
 <span class="n">NoiseThreshold</span> <span class="o">=</span> <span class="s1">&#39;Noise_Threshold&#39;</span>
-<span class="n">NegativePeaks</span> <span class="o">=</span>  <span class="s1">&#39;Negative_Peaks&#39;</span>
-<span class="n">MinimalLineWidth</span> <span class="o">=</span>  <span class="s1">&#39;Minimal_LineWidth&#39;</span>
+<span class="n">NegativePeaks</span> <span class="o">=</span> <span class="s1">&#39;Negative_Peaks&#39;</span>
+<span class="n">MinimalLineWidth</span> <span class="o">=</span> <span class="s1">&#39;Minimal_LineWidth&#39;</span>
 <span class="n">EstimateNoiseThreshold</span> <span class="o">=</span> <span class="s1">&#39;Estimate_Noise_Threshold&#39;</span>
 
-<span class="n">DefaultMinimalLineWidth</span> <span class="o">=</span>  <span class="mf">0.01</span>
-<span class="n">DefaultReferencePeakList</span> <span class="o">=</span>  <span class="o">-</span><span class="mi">1</span>
+<span class="n">DefaultMinimalLineWidth</span> <span class="o">=</span> <span class="mf">0.01</span>
+<span class="n">DefaultReferencePeakList</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
 <span class="n">DefaultNoiseThreshold</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
 <span class="n">DefaultExcludeRegions</span> <span class="o">=</span> <span class="p">[[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]]</span>
+
+<span class="n">INFO</span> <span class="o">=</span> <span class="s2">&quot;This Pipe will group existing peaks in Multiplets. Volume, lineWidths,&quot;</span> \
+       <span class="s2">&quot; and position will be calculated for new multiplets or derived from the peaks values.&quot;</span>
+
 
 <span class="c1">########################################################################################################################</span>
 <span class="c1">##########################################      ALGORITHM       ########################################################</span>
 <span class="c1">########################################################################################################################</span>
-
-
 
 
 <span class="c1">########################################################################################################################</span>
@@ -114,27 +117,22 @@
 <span class="c1">########################################################################################################################</span>
 
 
+<div class="viewcode-block" id="FindMultipletsGuiPipe"><a class="viewcode-back" href="../../../ccpn/ccpn.pipes.html#ccpn.pipes.AssignMultiplets.FindMultipletsGuiPipe">[docs]</a><span class="k">class</span> <span class="nc">FindMultipletsGuiPipe</span><span class="p">(</span><span class="n">GuiPipe</span><span class="p">):</span>
+    <span class="n">preferredPipe</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">pipeName</span> <span class="o">=</span> <span class="n">PipeName</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="n">INFO</span>
 
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">pipeName</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FindMultipletsGuiPipe</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">GuiPipe</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
 
-<div class="viewcode-block" id="AssignMultipletsGuiPipe"><a class="viewcode-back" href="../../../ccpn/ccpn.pipes.html#ccpn.pipes.AssignMultiplets.AssignMultipletsGuiPipe">[docs]</a><span class="k">class</span> <span class="nc">AssignMultipletsGuiPipe</span><span class="p">(</span><span class="n">GuiPipe</span><span class="p">):</span>
-
-  <span class="n">preferredPipe</span> <span class="o">=</span> <span class="bp">True</span>
-  <span class="n">pipeName</span> <span class="o">=</span> <span class="n">PipeName</span>
-
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">pipeName</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>   <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">AssignMultipletsGuiPipe</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
-    <span class="n">GuiPipe</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span> <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
-
-    <span class="n">row</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="c1"># self.peakListLabel = Label(self.pipeFrame, ReferencePeakList, grid=(row, 0))</span>
-    <span class="c1"># setattr(self, ReferencePeakList, Spinbox(self.pipeFrame, value=0, max=0, grid=(row, 1)))</span>
-    <span class="c1"># row += 1</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">peakListLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">MinimalLineWidth</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MinimalLineWidth</span><span class="p">,</span> <span class="n">DoubleSpinbox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">DefaultMinimalLineWidth</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span></div>
-
-
-
+        <span class="n">row</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># self.peakListLabel = Label(self.pipeFrame, ReferencePeakList, grid=(row, 0))</span>
+        <span class="c1"># setattr(self, ReferencePeakList, Spinbox(self.pipeFrame, value=0, max=0, grid=(row, 1)))</span>
+        <span class="c1"># row += 1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">peakListLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">MinimalLineWidth</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MinimalLineWidth</span><span class="p">,</span> <span class="n">DoubleSpinbox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">DefaultMinimalLineWidth</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span></div>
 
 
 <span class="c1">########################################################################################################################</span>
@@ -142,56 +140,50 @@
 <span class="c1">########################################################################################################################</span>
 
 
+<div class="viewcode-block" id="FindMultipletsPipe"><a class="viewcode-back" href="../../../ccpn/ccpn.pipes.html#ccpn.pipes.AssignMultiplets.FindMultipletsPipe">[docs]</a><span class="k">class</span> <span class="nc">FindMultipletsPipe</span><span class="p">(</span><span class="n">SpectraPipe</span><span class="p">):</span>
+    <span class="n">guiPipe</span> <span class="o">=</span> <span class="n">FindMultipletsGuiPipe</span>
+    <span class="n">pipeName</span> <span class="o">=</span> <span class="n">PipeName</span>
+
+    <span class="n">_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+
+        <span class="n">ExcludeRegions</span><span class="p">:</span> <span class="n">DefaultExcludeRegions</span><span class="p">,</span>
+        <span class="n">NoiseThreshold</span><span class="p">:</span> <span class="n">DefaultNoiseThreshold</span><span class="p">,</span>
+        <span class="n">NegativePeaks</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+        <span class="n">MinimalLineWidth</span><span class="p">:</span> <span class="n">DefaultMinimalLineWidth</span><span class="p">,</span>
+        <span class="p">}</span>
+
+<div class="viewcode-block" id="FindMultipletsPipe.runPipe"><a class="viewcode-back" href="../../../ccpn/ccpn.pipes.html#ccpn.pipes.AssignMultiplets.FindMultipletsPipe.runPipe">[docs]</a>    <span class="k">def</span> <span class="nf">runPipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param data:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">NoiseThreshold</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">NoiseThreshold</span><span class="p">:</span> <span class="n">DefaultNoiseThreshold</span><span class="p">})</span>
+
+        <span class="n">positiveNoiseThreshold</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">NoiseThreshold</span><span class="p">])</span>
+        <span class="n">minimalLineWidth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">MinimalLineWidth</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
+            <span class="n">noiseThreshold</span> <span class="o">=</span> <span class="n">_getNoiseLevelForPipe</span><span class="p">(</span><span class="n">cls</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">=</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">estimateNoiseThreshold_var</span><span class="o">=</span><span class="n">EstimateNoiseThreshold</span><span class="p">,</span>
+                                                   <span class="n">noiseThreshold_var</span><span class="o">=</span><span class="n">NoiseThreshold</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">noiseThreshold</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">noiseThreshold</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">positiveNoiseThreshold</span> <span class="o">=</span> <span class="n">noiseThreshold</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="n">peakListIndex</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">DefaultReferencePeakList</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">peakListIndex</span><span class="p">:</span>
+                <span class="n">referencePeakList</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">[</span><span class="n">peakListIndex</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">referencePeakList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">referencePeakList</span><span class="o">.</span><span class="n">peaks</span><span class="p">:</span>
+                        <span class="n">_addAreaValuesToPeaks</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">referencePeakList</span><span class="p">,</span> <span class="n">noiseThreshold</span><span class="o">=</span><span class="n">positiveNoiseThreshold</span><span class="p">,</span> <span class="n">minimalLineWidth</span><span class="o">=</span><span class="n">minimalLineWidth</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Error: Found no peaks to assign a volume value. Pick peaks first.&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Error: PeakLists not found. Add a new PeakList first&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">spectra</span></div></div>
 
 
-<div class="viewcode-block" id="AssignMultipletsPipe"><a class="viewcode-back" href="../../../ccpn/ccpn.pipes.html#ccpn.pipes.AssignMultiplets.AssignMultipletsPipe">[docs]</a><span class="k">class</span> <span class="nc">AssignMultipletsPipe</span><span class="p">(</span><span class="n">SpectraPipe</span><span class="p">):</span>
-
-  <span class="n">guiPipe</span>  <span class="o">=</span> <span class="n">AssignMultipletsGuiPipe</span>
-  <span class="n">pipeName</span> <span class="o">=</span> <span class="n">PipeName</span>
-
-  <span class="n">_kwargs</span> <span class="o">=</span>       <span class="p">{</span>
-
-                    <span class="n">ExcludeRegions</span><span class="p">:</span> <span class="n">DefaultExcludeRegions</span><span class="p">,</span>
-                    <span class="n">NoiseThreshold</span><span class="p">:</span> <span class="n">DefaultNoiseThreshold</span><span class="p">,</span>
-                    <span class="n">NegativePeaks</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
-                    <span class="n">MinimalLineWidth</span><span class="p">:</span> <span class="n">DefaultMinimalLineWidth</span><span class="p">,</span>
-                   <span class="p">}</span>
-
-
-<div class="viewcode-block" id="AssignMultipletsPipe.runPipe"><a class="viewcode-back" href="../../../ccpn/ccpn.pipes.html#ccpn.pipes.AssignMultiplets.AssignMultipletsPipe.runPipe">[docs]</a>  <span class="k">def</span> <span class="nf">runPipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    :param data:</span>
-<span class="sd">    :return:</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">if</span> <span class="n">NoiseThreshold</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">NoiseThreshold</span><span class="p">:</span> <span class="n">DefaultNoiseThreshold</span><span class="p">})</span>
-
-    <span class="n">positiveNoiseThreshold</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">NoiseThreshold</span><span class="p">])</span>
-    <span class="n">minimalLineWidth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">MinimalLineWidth</span><span class="p">]</span>
-
-    <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
-      <span class="n">noiseThreshold</span> <span class="o">=</span> <span class="n">_getNoiseLevelForPipe</span><span class="p">(</span><span class="n">cls</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">=</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">estimateNoiseThreshold_var</span><span class="o">=</span><span class="n">EstimateNoiseThreshold</span><span class="p">,</span>
-                                             <span class="n">noiseThreshold_var</span><span class="o">=</span><span class="n">NoiseThreshold</span><span class="p">)</span>
-      <span class="k">if</span> <span class="n">noiseThreshold</span><span class="p">:</span>
-        <span class="n">positiveNoiseThreshold</span> <span class="o">=</span> <span class="n">noiseThreshold</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-
-      <span class="n">peakListIndex</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">DefaultReferencePeakList</span><span class="p">)</span>
-      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">referencePeakList</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">[</span><span class="n">peakListIndex</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">referencePeakList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-          <span class="k">if</span> <span class="n">referencePeakList</span><span class="o">.</span><span class="n">peaks</span><span class="p">:</span>
-            <span class="n">_addAreaValuesToPeaks</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">referencePeakList</span><span class="p">,</span> <span class="n">noiseThreshold</span><span class="o">=</span><span class="n">positiveNoiseThreshold</span><span class="p">,</span> <span class="n">minimalLineWidth</span> <span class="o">=</span> <span class="n">minimalLineWidth</span><span class="p">)</span>
-          <span class="k">else</span><span class="p">:</span>
-            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Error: Found no peaks to assign a volume value. Pick the peaks first.&#39;</span><span class="p">)</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Error: PeakLists not found. Add a new PeakList first&#39;</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">spectra</span></div></div>
-
-
-<span class="n">AssignMultipletsPipe</span><span class="o">.</span><span class="n">register</span><span class="p">()</span> <span class="c1"># Registers the pipe in the pipeline</span>
-
-
+<span class="n">FindMultipletsPipe</span><span class="o">.</span><span class="n">register</span><span class="p">()</span>  <span class="c1"># Registers the pipe in the pipeline</span>
 </pre></div>
 
           </div>

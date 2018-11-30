@@ -65,7 +65,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:52 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -76,7 +76,8 @@
 <span class="c1">#=========================================================================================</span>
 
 <span class="n">PI</span> <span class="o">=</span> <span class="mf">3.1415926535898</span>
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtSvg</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="p">,</span> <span class="n">QtSvg</span><span class="p">,</span> <span class="n">QtPrintSupport</span>
+<span class="kn">from</span>  <span class="nn">PyQt5.QtWidgets</span> <span class="kn">import</span> <span class="n">QGraphicsView</span><span class="p">,</span> <span class="n">QGraphicsScene</span>
 <span class="n">Qt</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span>
 <span class="n">QPointF</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QPointF</span>
 <span class="n">QRectF</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span>
@@ -84,16 +85,20 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.FileDialog</span> <span class="kn">import</span> <span class="n">FileDialog</span>
 
-<div class="viewcode-block" id="CompoundView"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.CompoundView">[docs]</a><span class="k">class</span> <span class="nc">CompoundView</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsView</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
+<div class="viewcode-block" id="CompoundView"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.CompoundView">[docs]</a><span class="k">class</span> <span class="nc">CompoundView</span><span class="p">(</span><span class="n">QGraphicsView</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">smiles</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">variant</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">smiles</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">variant</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
 
+    <span class="nb">super</span><span class="p">(</span><span class="n">CompoundView</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+    <span class="n">Base</span><span class="o">.</span><span class="n">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsView</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scene</span> <span class="o">=</span> <span class="n">QGraphicsScene</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">setSceneRect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setScene</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setCacheMode</span><span class="p">(</span><span class="n">QGraphicsView</span><span class="o">.</span><span class="n">CacheBackground</span><span class="p">)</span>
+    <span class="c1"># QtWidgets.QGraphicsView.__init__(self, parent)</span>
 
-    <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span> <span class="o">=</span> <span class="n">preferences</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">colourScheme</span>
@@ -102,10 +107,12 @@
       <span class="k">else</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">backgroundColor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s1">&#39;background-color: #020F31&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setAtomColorWhite</span> <span class="o">=</span> <span class="bp">True</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">bondColor</span> <span class="o">=</span> <span class="n">Qt</span><span class="o">.</span><span class="n">white</span>
     <span class="c1">#</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">backgroundColor</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">bondColor</span> <span class="o">=</span> <span class="n">Qt</span><span class="o">.</span><span class="n">white</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">bondColor</span> <span class="o">=</span> <span class="n">Qt</span><span class="o">.</span><span class="n">black</span>
+
 
     <span class="c1"># self.setCompound = self.setCompound</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">rotatePos</span> <span class="o">=</span> <span class="bp">None</span>
@@ -136,30 +143,28 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">needSelectedAtom</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">needFurtherCheck</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">contextMenu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setupContextMenu</span><span class="p">()</span>
-  
+
     <span class="c1"># self.setGeometry(20, 40, 350, 350) #[(1) &lt; left, (2) &lt; up, (3)Width, (4)Height</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setRenderHint</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="o">.</span><span class="n">Antialiasing</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setCacheMode</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsView</span><span class="o">.</span><span class="n">CacheBackground</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setResizeAnchor</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsView</span><span class="o">.</span><span class="n">AnchorViewCenter</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setDragMode</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsView</span><span class="o">.</span><span class="n">RubberBandDrag</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setViewportUpdateMode</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsView</span><span class="o">.</span><span class="n">FullViewportUpdate</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setCacheMode</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsView</span><span class="o">.</span><span class="n">CacheBackground</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setResizeAnchor</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsView</span><span class="o">.</span><span class="n">AnchorViewCenter</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setDragMode</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsView</span><span class="o">.</span><span class="n">RubberBandDrag</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setViewportUpdateMode</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsView</span><span class="o">.</span><span class="n">FullViewportUpdate</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setInteractive</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">resetView</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">scene</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsScene</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setScene</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span> <span class="o">=</span> <span class="n">SelectionBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
-    <span class="c1">#self.scene.addItem(self.selectionBox)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">editAtom</span> <span class="o">=</span> <span class="bp">None</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">editWidget</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLineEdit</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">editWidget</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QLineEdit</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">editWidget</span><span class="o">.</span><span class="n">setMaxLength</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">editWidget</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
 
-    <span class="n">effect</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsDropShadowEffect</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="n">effect</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsDropShadowEffect</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
     <span class="n">effect</span><span class="o">.</span><span class="n">setBlurRadius</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
     <span class="n">effect</span><span class="o">.</span><span class="n">setOffset</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
-    
+
     <span class="c1">#self.editWidget.setGraphicsEffect(effect)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">editWidget</span><span class="o">.</span><span class="n">returnPressed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setAtomName</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">editWidget</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
@@ -178,7 +183,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">autoChirality</span> <span class="o">=</span> <span class="bp">True</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">addGraphicsItems</span><span class="p">()</span>
-    
+
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">variant</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">showSkeletalFormula</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">variant</span><span class="o">.</span><span class="n">snapAtomsToGrid</span><span class="p">(</span><span class="mf">50.0</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">updateAll</span><span class="p">()</span>
@@ -201,10 +206,11 @@
 
 <div class="viewcode-block" id="CompoundView.resizeEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.CompoundView.resizeEvent">[docs]</a>  <span class="k">def</span> <span class="nf">resizeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
 
-    <span class="k">return</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsView</span><span class="o">.</span><span class="n">resizeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsView</span><span class="o">.</span><span class="n">resizeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span></div>
     
+  <span class="c1"># def paintEvent(self, event: QtGui.QPaintEvent):</span>
+  <span class="c1">#   return QtWidgets.QGraphicsView.paintEvent(self, event)</span>
 
-        
 <div class="viewcode-block" id="CompoundView.setAtomName"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.CompoundView.setAtomName">[docs]</a>  <span class="k">def</span> <span class="nf">setAtomName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     
     <span class="n">atom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">editAtom</span>
@@ -213,7 +219,6 @@
       <span class="k">return</span>
     
     <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">editWidget</span><span class="o">.</span><span class="n">text</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-    <span class="k">print</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s1">&#39;text&#39;</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">text</span> <span class="ow">and</span> <span class="p">(</span><span class="n">text</span> <span class="o">!=</span> <span class="n">atom</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
       <span class="n">used</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">a</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">atom</span><span class="o">.</span><span class="n">compound</span><span class="o">.</span><span class="n">atoms</span><span class="p">])</span>
@@ -246,7 +251,7 @@
 
 <div class="viewcode-block" id="CompoundView.drawForeground"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.CompoundView.drawForeground">[docs]</a>  <span class="k">def</span> <span class="nf">drawForeground</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">viewRect</span><span class="p">):</span>
   
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsView</span><span class="o">.</span><span class="n">drawForeground</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">viewRect</span><span class="p">)</span></div>
+    <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsView</span><span class="o">.</span><span class="n">drawForeground</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">viewRect</span><span class="p">)</span></div>
 
 
 
@@ -256,7 +261,7 @@
     <span class="n">scale</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">transform</span><span class="o">.</span><span class="n">m11</span><span class="p">())</span>
     <span class="n">unScale</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="n">scale</span>
     
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsView</span><span class="o">.</span><span class="n">drawBackground</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">viewRect</span><span class="p">)</span>
+    <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsView</span><span class="o">.</span><span class="n">drawBackground</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">viewRect</span><span class="p">)</span>
 
     <span class="c1"># Text</span>
     
@@ -282,8 +287,8 @@
   
 <div class="viewcode-block" id="CompoundView.setupContextMenu"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.CompoundView.setupContextMenu">[docs]</a>  <span class="k">def</span> <span class="nf">setupContextMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
   <span class="c1">#</span>
-    <span class="n">QAction</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span>
-    <span class="n">menu</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="n">QAction</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QAction</span>
+    <span class="n">menu</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
 
     <span class="n">action</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">(</span><span class="s1">&#39;Reset View&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">triggered</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">resetView</span><span class="p">)</span>
@@ -388,6 +393,7 @@
       <span class="n">items</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">scene</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
       <span class="n">items</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">editProxy</span><span class="p">)</span>
       <span class="n">items</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span><span class="p">)</span>
+      <span class="c1"># print(items)</span>
 
       <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
         <span class="n">item</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
@@ -398,8 +404,8 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">resetCachedContent</span><span class="p">()</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">variant</span> <span class="o">=</span> <span class="n">variant</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">compound</span> <span class="o">=</span> <span class="n">variant</span><span class="o">.</span><span class="n">compound</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">variant</span> <span class="o">=</span> <span class="n">variant</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">compound</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compound</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">variant</span> <span class="o">=</span> <span class="n">variant</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">compound</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compound</span>
 
       <span class="bp">self</span><span class="o">.</span><span class="n">addGraphicsItems</span><span class="p">()</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">centerView</span><span class="p">()</span></div>
@@ -480,8 +486,8 @@
     
     <span class="bp">self</span><span class="o">.</span><span class="n">atomViews</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variant</span><span class="o">.</span><span class="n">varAtoms</span><span class="p">:</span>
-      <span class="n">AtomItem</span><span class="p">(</span><span class="n">scene</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">atom</span><span class="p">)</span>
-  
+      <span class="n">a</span> <span class="o">=</span> <span class="n">AtomItem</span><span class="p">(</span><span class="n">scene</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">atom</span><span class="p">)</span>
+      <span class="n">scene</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
     <span class="c1"># Draw bonds</span>
     <span class="n">done</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">bondItems</span> <span class="o">=</span> <span class="n">bondDict</span> <span class="o">=</span> <span class="p">{}</span>
@@ -491,7 +497,10 @@
         <span class="k">pass</span>
         
       <span class="n">bondItem</span> <span class="o">=</span> <span class="n">BondItem</span><span class="p">(</span><span class="n">scene</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">bond</span><span class="p">)</span>
+      <span class="n">scene</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">bondItem</span><span class="p">)</span>
       <span class="n">done</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span></div>
+
+
 
  
 <div class="viewcode-block" id="CompoundView.centroid"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.CompoundView.centroid">[docs]</a>  <span class="k">def</span> <span class="nf">centroid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">views</span><span class="p">):</span>
@@ -537,7 +546,7 @@
 <div class="viewcode-block" id="CompoundView.exportPdf"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.CompoundView.exportPdf">[docs]</a>  <span class="k">def</span> <span class="nf">exportPdf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">compound</span><span class="p">:</span>
-      <span class="n">printer</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPrinter</span><span class="p">()</span>
+      <span class="n">printer</span> <span class="o">=</span> <span class="n">QtPrintSupport</span><span class="o">.</span><span class="n">QPrinter</span><span class="p">()</span>
       <span class="n">oldRes</span> <span class="o">=</span> <span class="n">printer</span><span class="o">.</span><span class="n">resolution</span><span class="p">()</span>
       <span class="n">newRes</span> <span class="o">=</span> <span class="mf">600.0</span>
       <span class="n">fRes</span> <span class="o">=</span> <span class="n">oldRes</span><span class="o">/</span><span class="n">newRes</span>
@@ -545,23 +554,25 @@
 
       <span class="n">fType</span> <span class="o">=</span> <span class="s1">&#39;PDF (*.pdf)&#39;</span>
       <span class="n">dialog</span> <span class="o">=</span> <span class="n">FileDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acceptMode</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="n">fType</span><span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="p">)</span>
-      <span class="n">filePath</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">selectedFiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">filePaths</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">selectedFiles</span><span class="p">()</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filePaths</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+        <span class="n">filePath</span> <span class="o">=</span> <span class="n">filePaths</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-      <span class="k">if</span> <span class="n">filePath</span><span class="p">:</span>
-        <span class="n">printer</span><span class="o">.</span><span class="n">setOutputFileName</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
-        <span class="n">pdfPainter</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="p">(</span><span class="n">printer</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bondColor</span> <span class="o">=</span> <span class="n">Qt</span><span class="o">.</span><span class="n">black</span>
-        <span class="n">scene</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span>
-        <span class="n">items</span> <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-        <span class="n">cache</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">items</span><span class="p">):</span>
-          <span class="n">cache</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">cacheMode</span><span class="p">()</span>
-          <span class="n">item</span><span class="o">.</span><span class="n">setCacheMode</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">NoCache</span><span class="p">)</span>
-        <span class="n">scene</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">pdfPainter</span><span class="p">)</span>
-        <span class="n">pdfPainter</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bondColor</span> <span class="o">=</span> <span class="n">Qt</span><span class="o">.</span><span class="n">white</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)):</span>
-          <span class="n">items</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">setCacheMode</span><span class="p">(</span><span class="n">cache</span><span class="p">[</span><span class="n">i</span><span class="p">])</span></div>
+        <span class="k">if</span> <span class="n">filePath</span><span class="p">:</span>
+          <span class="n">printer</span><span class="o">.</span><span class="n">setOutputFileName</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
+          <span class="n">pdfPainter</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="p">(</span><span class="n">printer</span><span class="p">)</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">bondColor</span> <span class="o">=</span> <span class="n">Qt</span><span class="o">.</span><span class="n">black</span>
+          <span class="n">scene</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span>
+          <span class="n">items</span> <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+          <span class="n">cache</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+          <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">items</span><span class="p">):</span>
+            <span class="n">cache</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">cacheMode</span><span class="p">()</span>
+            <span class="n">item</span><span class="o">.</span><span class="n">setCacheMode</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">NoCache</span><span class="p">)</span>
+          <span class="n">scene</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">pdfPainter</span><span class="p">)</span>
+          <span class="n">pdfPainter</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">bondColor</span> <span class="o">=</span> <span class="n">Qt</span><span class="o">.</span><span class="n">white</span>
+          <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)):</span>
+            <span class="n">items</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">setCacheMode</span><span class="p">(</span><span class="n">cache</span><span class="p">[</span><span class="n">i</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="CompoundView.exportSvg"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.CompoundView.exportSvg">[docs]</a>  <span class="k">def</span> <span class="nf">exportSvg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -577,7 +588,7 @@
       <span class="n">printer</span><span class="o">.</span><span class="n">setSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="n">paperWidth</span><span class="o">*</span><span class="n">resolution</span><span class="p">,</span> <span class="n">paperHeight</span><span class="o">*</span><span class="n">resolution</span><span class="p">))</span>
 
       <span class="n">fType</span> <span class="o">=</span> <span class="s1">&#39;SVG (*.svg)&#39;</span>
-      <span class="n">dialog</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span>
+      <span class="n">dialog</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFileDialog</span>
       <span class="n">filePath</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">getSaveFileName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="nb">filter</span><span class="o">=</span><span class="n">fType</span><span class="p">)</span>
 
       <span class="k">if</span> <span class="n">filePath</span><span class="p">:</span>
@@ -684,7 +695,7 @@
   
 <div class="viewcode-block" id="CompoundView.wheelEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.CompoundView.wheelEvent">[docs]</a>  <span class="k">def</span> <span class="nf">wheelEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
     
-    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">delta</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">angleDelta</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
       <span class="n">fac</span> <span class="o">=</span> <span class="mf">0.8333</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">fac</span> <span class="o">=</span> <span class="mf">1.2</span>
@@ -699,7 +710,7 @@
 
 <div class="viewcode-block" id="CompoundView.mousePressEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.CompoundView.mousePressEvent">[docs]</a>  <span class="k">def</span> <span class="nf">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
    
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsView</span><span class="o">.</span><span class="n">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+    <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsView</span><span class="o">.</span><span class="n">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
     
     <span class="n">button</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span>
     <span class="n">pos</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span>
@@ -800,7 +811,7 @@
     <span class="k">else</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span><span class="o">.</span><span class="n">updateRegion</span><span class="p">(</span><span class="n">end</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mapToScene</span><span class="p">(</span><span class="n">pos</span><span class="p">))</span>
     
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsView</span><span class="o">.</span><span class="n">mouseMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span></div>
+    <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsView</span><span class="o">.</span><span class="n">mouseMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="CompoundView.mouseReleaseEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.CompoundView.mouseReleaseEvent">[docs]</a>  <span class="k">def</span> <span class="nf">mouseReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
 
@@ -830,7 +841,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">movePos</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
 
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsView</span><span class="o">.</span><span class="n">mouseReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span></div>
+    <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsView</span><span class="o">.</span><span class="n">mouseReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="CompoundView.getStats"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.CompoundView.getStats">[docs]</a>  <span class="k">def</span> <span class="nf">getStats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">pass</span></div></div>
@@ -1216,10 +1227,10 @@
 <span class="n">AURA_OFFSET</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">AURA_RADIUS</span> <span class="o">=</span> <span class="mi">4</span>
 
-<span class="n">ItemIsMovable</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">ItemIsMovable</span>
-<span class="n">ItemIsSelectable</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">ItemIsSelectable</span>
-<span class="n">ItemPositionChange</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">ItemPositionChange</span>
-<span class="n">ItemSendsGeometryChanges</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">ItemSendsGeometryChanges</span>
+<span class="n">ItemIsMovable</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">ItemIsMovable</span>
+<span class="n">ItemIsSelectable</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">ItemIsSelectable</span>
+<span class="n">ItemPositionChange</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">ItemPositionChange</span>
+<span class="n">ItemSendsGeometryChanges</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">ItemSendsGeometryChanges</span>
 
 <span class="n">REGION_PEN</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPen</span><span class="p">(</span><span class="n">HIGHLIGHT</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">SolidLine</span><span class="p">)</span>
 
@@ -1231,13 +1242,15 @@
                     <span class="s1">&#39;triple&#39;</span><span class="p">:</span><span class="s1">&#39;single&#39;</span><span class="p">,</span>
                     <span class="s1">&#39;dative&#39;</span><span class="p">:</span><span class="s1">&#39;single&#39;</span><span class="p">}</span>
 
-<div class="viewcode-block" id="AtomLabel"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.AtomLabel">[docs]</a><span class="k">class</span> <span class="nc">AtomLabel</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="p">):</span>
+<div class="viewcode-block" id="AtomLabel"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.AtomLabel">[docs]</a><span class="k">class</span> <span class="nc">AtomLabel</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="p">):</span>
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scene</span><span class="p">,</span> <span class="n">atomView</span><span class="p">,</span> <span class="n">compoundView</span><span class="p">,</span> <span class="n">atom</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">AtomLabel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
 
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scene</span><span class="o">=</span><span class="n">scene</span><span class="p">)</span>
+    <span class="c1"># QtWidgets.QGraphicsItem.__init__(self)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scene</span> <span class="o">=</span> <span class="n">scene</span>
 
-    <span class="c1">#effect = QtGui.QGraphicsDropShadowEffect(compoundView)</span>
+    <span class="c1">#effect = QtWidgets.QGraphicsDropShadowEffect(compoundView)</span>
     <span class="c1">#effect.setBlurRadius(SHADOW_RADIUS)</span>
     <span class="c1">#effect.setColor(SHADOW_COLOR)</span>
     <span class="c1">#effect.setOffset(*SHADOW_OFFSET)</span>
@@ -1274,7 +1287,7 @@
 
     <span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="o">.</span><span class="n">queryAtomName</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">mouseDoubleClickEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">mouseDoubleClickEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="AtomLabel.syncLabel"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.AtomLabel.syncLabel">[docs]</a>  <span class="k">def</span> <span class="nf">syncLabel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -1347,7 +1360,7 @@
       <span class="n">painter</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">ELEMENT_FONT</span><span class="p">)</span>
       <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hover</span><span class="p">:</span>
         <span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">white</span><span class="p">)</span>
-      <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="p">):</span>
+      <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="p">,</span> <span class="s1">&#39;setAtomColorWhite&#39;</span><span class="p">):</span>
           <span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">white</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1357,11 +1370,14 @@
     <span class="n">painter</span><span class="o">.</span><span class="n">setRenderHint</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="o">.</span><span class="n">Antialiasing</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="SelectionBox"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.SelectionBox">[docs]</a><span class="k">class</span> <span class="nc">SelectionBox</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="p">):</span>
+<div class="viewcode-block" id="SelectionBox"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.SelectionBox">[docs]</a><span class="k">class</span> <span class="nc">SelectionBox</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="p">):</span>
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scene</span><span class="p">,</span> <span class="n">compoundView</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">SelectionBox</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+    <span class="c1"># QtWidgets.QGraphicsItem.__init__(self)</span>
+    <span class="c1"># self._scene = scene</span>
+    <span class="c1"># print(self.scene(), scene, &#39;TEST&#39;)</span>
 
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scene</span><span class="o">=</span><span class="n">scene</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setZValue</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span> <span class="o">=</span> <span class="n">compoundView</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">begin</span> <span class="o">=</span> <span class="bp">None</span>
@@ -1402,11 +1418,12 @@
       <span class="n">painter</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">HIGHLIGHT_BG</span><span class="p">)</span>
       <span class="n">painter</span><span class="o">.</span><span class="n">drawRect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">region</span> <span class="p">)</span></div></div>
 
-<div class="viewcode-block" id="AtomGroupItem"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.AtomGroupItem">[docs]</a><span class="k">class</span> <span class="nc">AtomGroupItem</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="p">):</span>
+<div class="viewcode-block" id="AtomGroupItem"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.AtomGroupItem">[docs]</a><span class="k">class</span> <span class="nc">AtomGroupItem</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="p">):</span>
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scene</span><span class="p">,</span> <span class="n">compoundView</span><span class="p">,</span> <span class="n">atomGroup</span><span class="p">):</span>
-
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scene</span><span class="o">=</span><span class="n">scene</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">AtomGroupItem</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+    <span class="c1"># QtWidgets.QGraphicsItem.__init__(self)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scene</span> <span class="o">=</span> <span class="n">scene</span>
 
     <span class="n">compoundView</span><span class="o">.</span><span class="n">groupItems</span><span class="p">[</span><span class="n">atomGroup</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
 
@@ -1611,11 +1628,13 @@
     <span class="n">painter</span><span class="o">.</span><span class="n">drawEllipse</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="AtomItem"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.AtomItem">[docs]</a><span class="k">class</span> <span class="nc">AtomItem</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="p">):</span>
+<div class="viewcode-block" id="AtomItem"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.AtomItem">[docs]</a><span class="k">class</span> <span class="nc">AtomItem</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="p">):</span>
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scene</span><span class="p">,</span> <span class="n">compoundView</span><span class="p">,</span> <span class="n">atom</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">AtomItem</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
 
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scene</span><span class="o">=</span><span class="n">scene</span><span class="p">)</span>
+    <span class="c1"># QtWidgets.QGraphicsItem.__init__(self)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scene</span> <span class="o">=</span> <span class="n">scene</span>
 
     <span class="n">compoundView</span><span class="o">.</span><span class="n">atomViews</span><span class="p">[</span><span class="n">atom</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
 
@@ -1641,7 +1660,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">gradient2</span><span class="o">.</span><span class="n">setColorAt</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">.</span><span class="n">darker</span><span class="p">()</span><span class="o">.</span><span class="n">darker</span><span class="p">())</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">gradient2</span><span class="o">.</span><span class="n">setColorAt</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">color</span><span class="o">.</span><span class="n">darker</span><span class="p">())</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">gradient2</span><span class="o">.</span><span class="n">setColorAt</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="p">)</span>
-    <span class="c1">#effect = QtGui.QGraphicsDropShadowEffect(compoundView)</span>
+    <span class="c1">#effect = QtWidgets.QGraphicsDropShadowEffect(compoundView)</span>
     <span class="c1">#effect.setBlurRadius(SHADOW_RADIUS)</span>
     <span class="c1">#effect.setColor(SHADOW_COLOR)</span>
     <span class="c1">#effect.setOffset(*SHADOW_OFFSET)</span>
@@ -1656,7 +1675,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">freeDrag</span> <span class="o">=</span> <span class="bp">False</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">atomLabel</span> <span class="o">=</span> <span class="n">AtomLabel</span><span class="p">(</span><span class="n">scene</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">compoundView</span><span class="p">,</span> <span class="n">atom</span><span class="p">)</span>
-    <span class="c1">#compoundView.scene.addItem(self.atomLabel)</span>
+    <span class="n">compoundView</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atomLabel</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">syncToAtom</span><span class="p">()</span>
 
@@ -1740,7 +1759,7 @@
           <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">prefAngles</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span><span class="c1"># or self.atom.atomInSameRing(prevAtom):</span>
             <span class="n">value</span><span class="o">.</span><span class="n">setX</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span>
             <span class="n">value</span><span class="o">.</span><span class="n">setY</span><span class="p">(</span><span class="n">y0</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">itemChange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">itemChange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
           <span class="n">prevAngle</span> <span class="o">=</span> <span class="n">radians</span><span class="p">(</span><span class="n">prevAngle</span><span class="p">)</span>
           <span class="n">currAngle</span> <span class="o">=</span> <span class="p">(</span><span class="n">prevAtom</span><span class="o">.</span><span class="n">getBondAngle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atom</span><span class="p">)</span> <span class="o">-</span> <span class="n">prevAngle</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">PI</span><span class="p">)</span>
@@ -1763,7 +1782,7 @@
           <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">bestAngle</span> <span class="o">-</span> <span class="n">currAngle</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.001</span><span class="p">:</span>
             <span class="n">value</span><span class="o">.</span><span class="n">setX</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span>
             <span class="n">value</span><span class="o">.</span><span class="n">setY</span><span class="p">(</span><span class="n">y0</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">itemChange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">itemChange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
           <span class="n">bestAngle</span> <span class="o">+=</span> <span class="n">prevAngle</span>
           <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom</span><span class="o">.</span><span class="n">element</span> <span class="o">==</span> <span class="s1">&#39;H&#39;</span><span class="p">:</span>
@@ -1862,7 +1881,7 @@
 
       <span class="bp">self</span><span class="o">.</span><span class="n">atomLabel</span><span class="o">.</span><span class="n">syncLabel</span><span class="p">()</span>
 
-    <span class="k">return</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">itemChange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">itemChange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="AtomItem.moveAtom"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.AtomItem.moveAtom">[docs]</a>  <span class="k">def</span> <span class="nf">moveAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
 
@@ -2029,7 +2048,7 @@
 
 <div class="viewcode-block" id="AtomItem.mousePressEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.AtomItem.mousePressEvent">[docs]</a>  <span class="k">def</span> <span class="nf">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
 
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+    <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
 
     <span class="n">selected</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="o">.</span><span class="n">selectedViews</span><span class="p">)</span>
 
@@ -2061,7 +2080,7 @@
       <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">select</span><span class="p">()</span>
 
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">mouseMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+    <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">mouseMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">freeDrag</span> <span class="o">=</span> <span class="bp">False</span></div>
 
@@ -2105,7 +2124,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
 
 
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">mouseDoubleClickEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span></div>
+    <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">mouseDoubleClickEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="AtomItem.mouseReleaseEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.AtomItem.mouseReleaseEvent">[docs]</a>  <span class="k">def</span> <span class="nf">mouseReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
@@ -2114,7 +2133,7 @@
     <span class="n">atom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom</span>
     <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">coords</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="p">):</span>
       <span class="n">w</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
       <span class="n">h</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
@@ -2185,7 +2204,7 @@
 
       <span class="bp">self</span><span class="o">.</span><span class="n">atom</span><span class="o">.</span><span class="n">updateValences</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="p">):</span>
       <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">showSkeletalFormula</span><span class="p">:</span>
         <span class="n">parent</span><span class="o">.</span><span class="n">alignMolecule</span><span class="p">()</span>
       <span class="k">else</span><span class="p">:</span>
@@ -2194,7 +2213,7 @@
 
     <span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="o">.</span><span class="n">updateAll</span><span class="p">()</span> <span class="c1"># Render new objs</span>
 
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">mouseReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+    <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">mouseReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="AtomItem.paint"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.AtomItem.paint">[docs]</a>  <span class="k">def</span> <span class="nf">paint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">option</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
@@ -2228,7 +2247,7 @@
     <span class="n">painter</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">ELEMENT_FONT</span><span class="p">)</span>
 
     <span class="n">color</span> <span class="o">=</span> <span class="n">ELEMENT_DATA</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span>  <span class="n">ELEMENT_DEFAULT</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="p">):</span>
       <span class="c1"># SpecView</span>
       <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="o">.</span><span class="n">container</span><span class="p">:</span>
         <span class="n">backgroundColor</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">glWidget</span><span class="o">.</span><span class="n">_hexToRgba</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">mainApp</span><span class="o">.</span><span class="n">colors</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
@@ -2357,7 +2376,7 @@
       <span class="n">w2</span> <span class="o">=</span> <span class="n">bbox</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="o">/</span><span class="mf">2.0</span>
 
       <span class="k">if</span> <span class="ow">not</span> <span class="n">skeletalColor</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="p">):</span>
           <span class="c1"># SpecView</span>
           <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="o">.</span><span class="n">container</span><span class="p">:</span>
             <span class="n">color</span> <span class="o">=</span> <span class="n">foregroundColor</span>
@@ -2591,15 +2610,17 @@
 
     <span class="bp">self</span><span class="o">.</span><span class="n">highlights</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span></div></div>
 
-<div class="viewcode-block" id="BondItem"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.BondItem">[docs]</a><span class="k">class</span> <span class="nc">BondItem</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="p">):</span>
+<div class="viewcode-block" id="BondItem"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.BondItem">[docs]</a><span class="k">class</span> <span class="nc">BondItem</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="p">):</span>
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scene</span><span class="p">,</span> <span class="n">compoundView</span><span class="p">,</span> <span class="n">bond</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">BondItem</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
 
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scene</span><span class="o">=</span><span class="n">scene</span><span class="p">)</span>
+    <span class="c1"># QtWidgets.QGraphicsItem.__init__(self)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scene</span> <span class="o">=</span> <span class="n">scene</span>
 
     <span class="n">compoundView</span><span class="o">.</span><span class="n">bondItems</span><span class="p">[</span><span class="n">bond</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
 
-    <span class="n">effect</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsDropShadowEffect</span><span class="p">(</span><span class="n">compoundView</span><span class="p">)</span>
+    <span class="n">effect</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsDropShadowEffect</span><span class="p">(</span><span class="n">compoundView</span><span class="p">)</span>
     <span class="n">effect</span><span class="o">.</span><span class="n">setBlurRadius</span><span class="p">(</span><span class="n">SHADOW_RADIUS</span><span class="p">)</span>
     <span class="n">effect</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">SHADOW_COLOR</span><span class="p">)</span>
     <span class="n">effect</span><span class="o">.</span><span class="n">setOffset</span><span class="p">(</span><span class="o">*</span><span class="n">SHADOW_OFFSET</span><span class="p">)</span>
@@ -2818,7 +2839,7 @@
     <span class="n">atomItemA</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
     <span class="n">atomItemB</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
 
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span></div>
+    <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BondItem.mouseDoubleClickEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.BondItem.mouseDoubleClickEvent">[docs]</a>  <span class="k">def</span> <span class="nf">mouseDoubleClickEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
 
@@ -2869,7 +2890,7 @@
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected</span><span class="p">:</span>
       <span class="n">color</span> <span class="o">=</span> <span class="n">HIGHLIGHT</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="p">):</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="p">):</span>
       <span class="c1"># SpecView</span>
       <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="o">.</span><span class="n">container</span><span class="p">:</span>
         <span class="n">color</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">glWidget</span><span class="o">.</span><span class="n">_hexToRgba</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">mainApp</span><span class="o">.</span><span class="n">colors</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
@@ -3040,9 +3061,9 @@
 <span class="n">organicAtoms</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;O&quot;</span><span class="p">,</span> <span class="s2">&quot;P&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;F&quot;</span><span class="p">,</span> <span class="s2">&quot;Cl&quot;</span><span class="p">,</span> <span class="s2">&quot;Br&quot;</span><span class="p">,</span> <span class="s2">&quot;I&quot;</span><span class="p">])</span>
 <span class="n">cnos</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;O&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">])</span>
 
-<div class="viewcode-block" id="importSmiles"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.importSmiles">[docs]</a><span class="k">def</span> <span class="nf">importSmiles</span><span class="p">(</span><span class="n">smilesString</span><span class="p">):</span>
+<div class="viewcode-block" id="importSmiles"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.importSmiles">[docs]</a><span class="k">def</span> <span class="nf">importSmiles</span><span class="p">(</span><span class="n">smilesString</span><span class="p">,</span> <span class="n">compoundName</span><span class="o">=</span><span class="s1">&#39;Unnamed&#39;</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
 
-  <span class="n">compound</span> <span class="o">=</span> <span class="n">Compound</span><span class="p">(</span><span class="s1">&#39;Unnamed&#39;</span><span class="p">)</span>
+  <span class="n">compound</span> <span class="o">=</span> <span class="n">Compound</span><span class="p">(</span><span class="n">compoundName</span><span class="p">)</span>
   <span class="n">var</span> <span class="o">=</span> <span class="n">Variant</span><span class="p">(</span><span class="n">compound</span><span class="p">)</span>
   <span class="n">compound</span><span class="o">.</span><span class="n">defaultVars</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
 
@@ -3467,6 +3488,16 @@
   <span class="n">var</span><span class="o">.</span><span class="n">minimise2d</span><span class="p">(</span><span class="n">maxCycles</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
   <span class="n">var</span><span class="o">.</span><span class="n">checkBaseValences</span><span class="p">()</span>
   <span class="c1">#var.shuffleStereo()</span>
+  <span class="k">if</span> <span class="n">project</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">nmrChain</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">newNmrChain</span><span class="p">(</span><span class="n">compoundName</span><span class="p">)</span>
+      <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">newNmrResidue</span><span class="p">(</span><span class="n">compoundName</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">compound</span><span class="o">.</span><span class="n">atoms</span><span class="p">:</span>
+        <span class="n">nmrAtom</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">fetchNmrAtom</span><span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">nmrAtom</span><span class="o">.</span><span class="n">_compoundViewAtom</span> <span class="o">=</span> <span class="n">atom</span>
+      <span class="n">nmrResidue</span><span class="o">.</span><span class="n">_compoundViewCompound</span> <span class="o">=</span> <span class="n">compound</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+      <span class="k">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
 
   <span class="k">return</span> <span class="n">compound</span></div>
 
@@ -6962,6 +6993,28 @@
 
     <span class="k">return</span> <span class="n">hydrogens</span></div></div>
 
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+
+  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Application</span> <span class="kn">import</span> <span class="n">TestApplication</span>
+  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>
+
+  <span class="n">app</span> <span class="o">=</span> <span class="n">TestApplication</span><span class="p">()</span>
+  <span class="n">popup</span> <span class="o">=</span> <span class="n">CcpnDialog</span><span class="p">(</span><span class="n">windowTitle</span><span class="o">=</span><span class="s1">&#39;Test Table&#39;</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+  <span class="n">smilesText</span> <span class="o">=</span> <span class="s1">&#39;CC(=O)OC1=CC=CC=C1C(=O)O&#39;</span>
+  <span class="n">compoundView</span> <span class="o">=</span> <span class="n">CompoundView</span><span class="p">(</span><span class="n">popup</span><span class="p">,</span> <span class="n">smiles</span><span class="o">=</span><span class="n">smilesText</span><span class="p">,)</span>
+  <span class="n">c</span> <span class="o">=</span> <span class="n">compoundView</span><span class="o">.</span><span class="n">compound</span>
+  <span class="k">print</span><span class="p">([</span><span class="n">a</span><span class="o">.</span><span class="n">groupType</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">atomGroups</span><span class="p">])</span>
+  <span class="k">print</span><span class="p">([</span><span class="n">a</span><span class="o">.</span><span class="n">varAtoms</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">atomGroups</span><span class="p">])</span>
+  <span class="k">print</span><span class="p">([</span><span class="n">a</span><span class="o">.</span><span class="n">subGroups</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">atomGroups</span><span class="p">])</span>
+  <span class="n">popup</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">compoundView</span><span class="p">)</span>
+  <span class="n">compoundView</span><span class="o">.</span><span class="n">centerView</span><span class="p">()</span>
+  <span class="n">compoundView</span><span class="o">.</span><span class="n">updateAll</span><span class="p">()</span>
+
+  <span class="n">popup</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+  <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+  <span class="n">app</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 </pre></div>
 
           </div>

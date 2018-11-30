@@ -58,13 +58,13 @@
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:47 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -74,30 +74,42 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
 
-<div class="viewcode-block" id="CcpnDialog"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.Dialog.CcpnDialog">[docs]</a><span class="k">class</span> <span class="nc">CcpnDialog</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
-    <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="n">setLayout</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="n">windowTitle</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_updateGl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumList</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.OpenGL.CcpnOpenGL</span> <span class="kn">import</span> <span class="n">GLNotifier</span>
 
-    <span class="c1"># self.mainLayout = QtGui.QGridLayout()   # ejb - handled inside Base</span>
-    <span class="c1"># self.setLayout(self.mainLayout)</span>
+    <span class="c1"># # spawn a redraw of the contours</span>
+    <span class="c1"># for spec in spectrumList:</span>
+    <span class="c1">#     for specViews in spec.spectrumViews:</span>
+    <span class="c1">#         specViews.buildContours = True</span>
 
-<div class="viewcode-block" id="CcpnDialog.fixedSize"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.Dialog.CcpnDialog.fixedSize">[docs]</a>  <span class="k">def</span> <span class="nf">fixedSize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">sizePolicy</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">sizePolicy</span><span class="o">.</span><span class="n">setHorizontalStretch</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">sizePolicy</span><span class="o">.</span><span class="n">setVerticalStretch</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sizePolicy</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maximumWidth</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximumHeight</span><span class="p">())</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setSizeGripEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span></div></div>
+    <span class="n">GLSignals</span> <span class="o">=</span> <span class="n">GLNotifier</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+    <span class="n">GLSignals</span><span class="o">.</span><span class="n">emitPaintEvent</span><span class="p">()</span>
 
-  <span class="c1">#TODO:ED include widget here for self.centralWidget, self.buttonWidget and undo functionality</span>
+
+<div class="viewcode-block" id="CcpnDialog"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.Dialog.CcpnDialog">[docs]</a><span class="k">class</span> <span class="nc">CcpnDialog</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="n">Base</span><span class="o">.</span><span class="n">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="n">setLayout</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="n">windowTitle</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="o">*</span><span class="n">size</span><span class="p">)</span>
+
+        <span class="c1"># self.mainLayout = QtWidgets.QGridLayout()   # ejb - handled inside Base</span>
+        <span class="c1"># self.setLayout(self.mainLayout)</span>
+
+<div class="viewcode-block" id="CcpnDialog.fixedSize"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.Dialog.CcpnDialog.fixedSize">[docs]</a>    <span class="k">def</span> <span class="nf">fixedSize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sizePolicy</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sizePolicy</span><span class="o">.</span><span class="n">setHorizontalStretch</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sizePolicy</span><span class="o">.</span><span class="n">setVerticalStretch</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sizePolicy</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maximumWidth</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximumHeight</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setSizeGripEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>

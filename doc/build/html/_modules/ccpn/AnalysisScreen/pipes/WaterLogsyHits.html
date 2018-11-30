@@ -55,13 +55,13 @@
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Luca Mureddu $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:26 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -73,7 +73,7 @@
 
 
 <span class="c1">#### GUI IMPORTS</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PipelineWidgets</span> <span class="kn">import</span> <span class="n">GuiPipe</span> <span class="p">,</span> <span class="n">_getWidgetByAtt</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PipelineWidgets</span> <span class="kn">import</span> <span class="n">GuiPipe</span><span class="p">,</span> <span class="n">_getWidgetByAtt</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
 <span class="kn">from</span> <span class="nn">ccpn.AnalysisScreen.gui.widgets</span> <span class="kn">import</span> <span class="n">HitFinderWidgets</span> <span class="k">as</span> <span class="n">hw</span>
@@ -83,7 +83,9 @@
 <span class="kn">from</span> <span class="nn">ccpn.framework.lib.Pipe</span> <span class="kn">import</span> <span class="n">SpectraPipe</span>
 <span class="kn">from</span> <span class="nn">ccpn.AnalysisScreen.lib.experimentAnalysis</span> <span class="kn">import</span> <span class="n">WaterLogsy</span> <span class="k">as</span> <span class="n">wl</span>
 <span class="kn">from</span> <span class="nn">ccpn.AnalysisScreen.lib.experimentAnalysis.NewHit</span> <span class="kn">import</span> <span class="n">_addNewHit</span><span class="p">,</span> <span class="n">_getReferencesFromSample</span>
-<span class="kn">from</span> <span class="nn">ccpn.AnalysisScreen.lib.experimentAnalysis.MatchPositions</span> <span class="kn">import</span>  <span class="n">matchHitToReference</span>
+<span class="kn">from</span> <span class="nn">ccpn.AnalysisScreen.lib.experimentAnalysis.MatchPositions</span> <span class="kn">import</span> <span class="n">matchHitToReference</span>
+
+
 <span class="c1">########################################################################################################################</span>
 <span class="c1">###   Attributes:</span>
 <span class="c1">###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe</span>
@@ -93,11 +95,11 @@
 <span class="c1">## Widget variables and/or _kwargs keys</span>
 <span class="n">ReferenceSpectrumGroup</span> <span class="o">=</span> <span class="s1">&#39;Reference_SpectrumGroup&#39;</span>
 <span class="n">SCasRef</span> <span class="o">=</span> <span class="s1">&#39;Use_SampleComponents_as_References&#39;</span>
-<span class="n">TargetSpectrumGroup</span>    <span class="o">=</span> <span class="s1">&#39;WL_Target_SpectrumGroup&#39;</span>
-<span class="n">ControlSpectrumGroup</span>   <span class="o">=</span> <span class="s1">&#39;WL_Control_SpectrumGroup&#39;</span>
+<span class="n">TargetSpectrumGroup</span> <span class="o">=</span> <span class="s1">&#39;WL_Target_SpectrumGroup&#39;</span>
+<span class="n">ControlSpectrumGroup</span> <span class="o">=</span> <span class="s1">&#39;WL_Control_SpectrumGroup&#39;</span>
 <span class="n">SGVarNames</span> <span class="o">=</span> <span class="p">[</span><span class="n">ControlSpectrumGroup</span><span class="p">,</span> <span class="n">TargetSpectrumGroup</span><span class="p">,</span> <span class="n">ReferenceSpectrumGroup</span><span class="p">]</span>
 
-<span class="n">MatchPeaksWithin</span>  <span class="o">=</span>  <span class="s1">&#39;Match_Peaks_Within_(ppm)&#39;</span>
+<span class="n">MatchPeaksWithin</span> <span class="o">=</span> <span class="s1">&#39;Match_Peaks_Within_(ppm)&#39;</span>
 <span class="n">RefPLIndex</span> <span class="o">=</span> <span class="s1">&#39;Reference_PeakList&#39;</span>
 <span class="n">TargetPeakListIndex</span> <span class="o">=</span> <span class="s1">&#39;Target_PeakList&#39;</span>
 <span class="n">MinEfficiency</span> <span class="o">=</span> <span class="s1">&#39;Minimal_Intensity_Change&#39;</span>
@@ -111,6 +113,7 @@
 <span class="c1">## PipeName</span>
 <span class="n">PipeName</span> <span class="o">=</span> <span class="s1">&#39;WaterLogsy Hits&#39;</span>
 
+
 <span class="c1">########################################################################################################################</span>
 <span class="c1">##########################################      ALGORITHM       ########################################################</span>
 <span class="c1">########################################################################################################################</span>
@@ -123,41 +126,38 @@
 
 
 <div class="viewcode-block" id="WaterLogsyHitFinderGuiPipe"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.pipes.html#ccpn.AnalysisScreen.pipes.WaterLogsyHits.WaterLogsyHitFinderGuiPipe">[docs]</a><span class="k">class</span> <span class="nc">WaterLogsyHitFinderGuiPipe</span><span class="p">(</span><span class="n">GuiPipe</span><span class="p">):</span>
+    <span class="n">preferredPipe</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">applicationSpecificPipe</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">pipeName</span> <span class="o">=</span> <span class="n">PipeName</span>
 
-  <span class="n">preferredPipe</span> <span class="o">=</span> <span class="bp">False</span>
-  <span class="n">applicationSpecificPipe</span> <span class="o">=</span> <span class="bp">True</span>
-  <span class="n">pipeName</span> <span class="o">=</span> <span class="n">PipeName</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">pipeName</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">WaterLogsyHitFinderGuiPipe</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">GuiPipe</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
 
+        <span class="n">row</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modeLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">ModeHit</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ModeHit</span><span class="p">,</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="n">wl</span><span class="o">.</span><span class="n">MODES</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_modeCallback</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">pipeName</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>   <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">WaterLogsyHitFinderGuiPipe</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
-    <span class="n">GuiPipe</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span> <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">hw</span><span class="o">.</span><span class="n">_addSGpulldowns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">SGVarNames</span><span class="p">)</span>
 
-    <span class="n">row</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">modeLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">ModeHit</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ModeHit</span><span class="p">,</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="n">wl</span><span class="o">.</span><span class="n">MODES</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_modeCallback</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">row</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">SGVarNames</span><span class="p">)</span>
+        <span class="n">hw</span><span class="o">.</span><span class="n">_addCommonHitFinderWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">ReferenceSpectrumGroup</span><span class="p">,</span> <span class="n">SCasRef</span><span class="p">,</span> <span class="n">MatchPeaksWithin</span><span class="p">,</span>
+                                      <span class="n">DefaultMinDist</span><span class="p">,</span> <span class="n">MinEfficiency</span><span class="p">,</span> <span class="n">DefaultEfficiency</span><span class="p">)</span>
 
-    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="n">hw</span><span class="o">.</span><span class="n">_addSGpulldowns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">SGVarNames</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_updateWidgets</span><span class="p">()</span>
 
-    <span class="n">row</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">SGVarNames</span><span class="p">)</span>
-    <span class="n">hw</span><span class="o">.</span><span class="n">_addCommonHitFinderWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">ReferenceSpectrumGroup</span><span class="p">,</span> <span class="n">SCasRef</span><span class="p">,</span> <span class="n">MatchPeaksWithin</span><span class="p">,</span>
-                                  <span class="n">DefaultMinDist</span><span class="p">,</span> <span class="n">MinEfficiency</span><span class="p">,</span> <span class="n">DefaultEfficiency</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_updateWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setSpectrumGroupPullDowns</span><span class="p">(</span><span class="n">SGVarNames</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_updateWidgets</span><span class="p">()</span>
-
-  <span class="k">def</span> <span class="nf">_updateWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_setSpectrumGroupPullDowns</span><span class="p">(</span><span class="n">SGVarNames</span><span class="p">)</span>
-
-
-  <span class="k">def</span> <span class="nf">_modeCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selected</span><span class="p">):</span>
-    <span class="s1">&#39;manages the spectrumgroups pullDown&#39;</span>
-    <span class="k">if</span> <span class="n">selected</span> <span class="o">==</span> <span class="n">wl</span><span class="o">.</span><span class="n">PositiveOnly</span><span class="p">:</span>
-      <span class="n">_getWidgetByAtt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ControlSpectrumGroup</span><span class="p">)</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-      <span class="n">_getWidgetByAtt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ControlSpectrumGroup</span><span class="p">)</span><span class="o">.</span><span class="n">_clear</span><span class="p">()</span>
-    <span class="k">elif</span> <span class="n">selected</span> <span class="o">==</span> <span class="n">wl</span><span class="o">.</span><span class="n">IntensityChanged</span> <span class="ow">or</span> <span class="n">selected</span> <span class="o">==</span> <span class="n">wl</span><span class="o">.</span><span class="n">SignChanged</span><span class="p">:</span>
-      <span class="n">_getWidgetByAtt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ControlSpectrumGroup</span><span class="p">)</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span></div>
+    <span class="k">def</span> <span class="nf">_modeCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selected</span><span class="p">):</span>
+        <span class="s1">&#39;manages the spectrumgroups pullDown&#39;</span>
+        <span class="k">if</span> <span class="n">selected</span> <span class="o">==</span> <span class="n">wl</span><span class="o">.</span><span class="n">PositiveOnly</span><span class="p">:</span>
+            <span class="n">_getWidgetByAtt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ControlSpectrumGroup</span><span class="p">)</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">_getWidgetByAtt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ControlSpectrumGroup</span><span class="p">)</span><span class="o">.</span><span class="n">_clear</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">selected</span> <span class="o">==</span> <span class="n">wl</span><span class="o">.</span><span class="n">IntensityChanged</span> <span class="ow">or</span> <span class="n">selected</span> <span class="o">==</span> <span class="n">wl</span><span class="o">.</span><span class="n">SignChanged</span><span class="p">:</span>
+            <span class="n">_getWidgetByAtt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ControlSpectrumGroup</span><span class="p">)</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span></div>
 
 
 <span class="c1">########################################################################################################################</span>
@@ -166,123 +166,87 @@
 
 
 <div class="viewcode-block" id="WaterLogsyHitFinderPipe"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.pipes.html#ccpn.AnalysisScreen.pipes.WaterLogsyHits.WaterLogsyHitFinderPipe">[docs]</a><span class="k">class</span> <span class="nc">WaterLogsyHitFinderPipe</span><span class="p">(</span><span class="n">SpectraPipe</span><span class="p">):</span>
+    <span class="n">guiPipe</span> <span class="o">=</span> <span class="n">WaterLogsyHitFinderGuiPipe</span>
+    <span class="n">pipeName</span> <span class="o">=</span> <span class="n">PipeName</span>
 
-  <span class="n">guiPipe</span> <span class="o">=</span> <span class="n">WaterLogsyHitFinderGuiPipe</span>
-  <span class="n">pipeName</span> <span class="o">=</span> <span class="n">PipeName</span>
+    <span class="n">_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">ReferenceSpectrumGroup</span><span class="p">:</span> <span class="s1">&#39;spectrumGroup.pid&#39;</span><span class="p">,</span>
+        <span class="n">TargetSpectrumGroup</span><span class="p">:</span> <span class="s1">&#39;spectrumGroup.pid&#39;</span><span class="p">,</span>
+        <span class="n">ControlSpectrumGroup</span><span class="p">:</span> <span class="s1">&#39;spectrumGroup.pid&#39;</span><span class="p">,</span>
+        <span class="n">SCasRef</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+        <span class="n">MatchPeaksWithin</span><span class="p">:</span> <span class="n">DefaultMinDist</span><span class="p">,</span>
+        <span class="n">MinEfficiency</span><span class="p">:</span> <span class="n">MinEfficiency</span><span class="p">,</span>
+        <span class="p">}</span>
 
-  <span class="n">_kwargs</span>  <span class="o">=</span>   <span class="p">{</span>
-                <span class="n">ReferenceSpectrumGroup</span><span class="p">:</span>  <span class="s1">&#39;spectrumGroup.pid&#39;</span><span class="p">,</span>
-                <span class="n">TargetSpectrumGroup</span><span class="p">:</span>     <span class="s1">&#39;spectrumGroup.pid&#39;</span><span class="p">,</span>
-                <span class="n">ControlSpectrumGroup</span><span class="p">:</span>    <span class="s1">&#39;spectrumGroup.pid&#39;</span><span class="p">,</span>
-                <span class="n">SCasRef</span><span class="p">:</span>                  <span class="bp">False</span><span class="p">,</span>
-                <span class="n">MatchPeaksWithin</span><span class="p">:</span>        <span class="n">DefaultMinDist</span><span class="p">,</span>
-                <span class="n">MinEfficiency</span><span class="p">:</span>           <span class="n">MinEfficiency</span><span class="p">,</span>
-               <span class="p">}</span>
-
-
-<div class="viewcode-block" id="WaterLogsyHitFinderPipe.runPipe"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.pipes.html#ccpn.AnalysisScreen.pipes.WaterLogsyHits.WaterLogsyHitFinderPipe.runPipe">[docs]</a>  <span class="k">def</span> <span class="nf">runPipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    :param spectra: inputData</span>
-<span class="sd">    :return: aligned spectra</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="c1"># TODO FIXME REWRITE THIS FUNCTION ASAP 4/07/2017 !!!!!</span>
-    <span class="n">referenceSpectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">ReferenceSpectrumGroup</span><span class="p">])</span>
-    <span class="n">wLcontrolSpectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">ControlSpectrumGroup</span><span class="p">])</span>
-    <span class="n">wLtargetSpectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">TargetSpectrumGroup</span><span class="p">])</span>
-    <span class="n">sampleComponents_as_References</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">SCasRef</span><span class="p">]</span>
-
-    <span class="n">minimumDistance</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">MatchPeaksWithin</span><span class="p">])</span>
-    <span class="n">minimumEfficiency</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">MinEfficiency</span><span class="p">])</span>
-
-    <span class="n">mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">ModeHit</span><span class="p">]</span>
-    <span class="n">references</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">if</span> <span class="n">wLcontrolSpectrumGroup</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="c1"># if no control is given. Find hits just by positive peaks in the target spectrum</span>
-      <span class="n">mode</span> <span class="o">=</span> <span class="n">wl</span><span class="o">.</span><span class="n">PositiveOnly</span>
-
-      <span class="k">if</span> <span class="n">wLtargetSpectrumGroup</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">targetSpectrum</span> <span class="ow">in</span> <span class="n">wLtargetSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
-          <span class="k">if</span> <span class="n">targetSpectrum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">targetSpectrum</span><span class="o">.</span><span class="n">experimentType</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-              <span class="n">targetSpectrum</span><span class="o">.</span><span class="n">experimentType</span> <span class="o">=</span> <span class="s1">&#39;Water-LOGSY.H&#39;</span>
-
-            <span class="k">if</span> <span class="n">sampleComponents_as_References</span><span class="p">:</span>
-              <span class="n">references</span> <span class="o">=</span> <span class="n">_getReferencesFromSample</span><span class="p">(</span><span class="n">targetSpectrum</span><span class="p">)</span>
+<div class="viewcode-block" id="WaterLogsyHitFinderPipe.runPipe"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.pipes.html#ccpn.AnalysisScreen.pipes.WaterLogsyHits.WaterLogsyHitFinderPipe.runPipe">[docs]</a>    <span class="k">def</span> <span class="nf">runPipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param spectra: inputData</span>
+<span class="sd">        :return: spectra. Add Hits to project</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">referenceSpectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">ReferenceSpectrumGroup</span><span class="p">])</span>
+        <span class="n">wLcontrolSpectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">ControlSpectrumGroup</span><span class="p">])</span>
+        <span class="n">wLtargetSpectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">TargetSpectrumGroup</span><span class="p">])</span>
+        <span class="n">minimumDistance</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">MatchPeaksWithin</span><span class="p">])</span>
+        <span class="n">references</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">wLtargetSpectrumGroup</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">targetSpectra</span> <span class="o">=</span> <span class="n">wLtargetSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span>
+            <span class="k">if</span> <span class="n">wLcontrolSpectrumGroup</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>  <span class="c1"># if no control is given. Find hits just by positive peaks in the target spectrum</span>
+                <span class="n">controlSpectra</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">targetSpectra</span><span class="p">)</span>
+                <span class="n">mode</span> <span class="o">=</span> <span class="n">wl</span><span class="o">.</span><span class="n">PositiveOnly</span>
             <span class="k">else</span><span class="p">:</span>
-              <span class="k">if</span> <span class="n">referenceSpectrumGroup</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="n">references</span> <span class="o">=</span> <span class="n">referenceSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span>
+                <span class="n">controlSpectra</span> <span class="o">=</span> <span class="n">wLcontrolSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span>
+                <span class="n">mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">ModeHit</span><span class="p">]</span>
 
-              <span class="n">hits</span> <span class="o">=</span> <span class="n">wl</span><span class="o">.</span><span class="n">findWaterLogsyHits</span><span class="p">(</span><span class="n">wLTarget</span><span class="o">=</span><span class="n">targetSpectrum</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">limitRange</span><span class="o">=</span><span class="n">minimumDistance</span><span class="p">,</span>
-                                           <span class="n">limitIntensityChange</span><span class="o">=</span><span class="n">minimumEfficiency</span><span class="p">)</span>
-              <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">hits</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">targetSpectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-                  <span class="n">matchedRef</span> <span class="o">=</span> <span class="n">matchHitToReference</span><span class="p">(</span><span class="n">targetSpectrum</span><span class="p">,</span> <span class="n">references</span><span class="p">,</span> <span class="n">limitRange</span><span class="o">=</span><span class="n">minimumDistance</span><span class="p">,</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">controlSpectra</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">targetSpectra</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">targetSpectrum</span><span class="p">,</span> <span class="n">controlSpectrum</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">targetSpectra</span><span class="p">,</span> <span class="n">controlSpectra</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">targetSpectrum</span><span class="o">.</span><span class="n">experimentType</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">targetSpectrum</span><span class="o">.</span><span class="n">experimentType</span> <span class="o">=</span> <span class="s1">&#39;Water-LOGSY.H&#39;</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">SCasRef</span><span class="p">]:</span>  <span class="c1"># sampleComponents as References</span>
+                        <span class="n">references</span> <span class="o">=</span> <span class="n">_getReferencesFromSample</span><span class="p">(</span><span class="n">targetSpectrum</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">referenceSpectrumGroup</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                            <span class="n">references</span> <span class="o">=</span> <span class="n">referenceSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span>
+                    <span class="n">hits</span> <span class="o">=</span> <span class="n">wl</span><span class="o">.</span><span class="n">findWaterLogsyHits</span><span class="p">(</span><span class="n">wLTarget</span><span class="o">=</span><span class="n">targetSpectrum</span><span class="p">,</span> <span class="n">wLControl</span><span class="o">=</span><span class="n">controlSpectrum</span><span class="p">,</span>
+                                                 <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">limitRange</span><span class="o">=</span><span class="n">minimumDistance</span><span class="p">,</span> <span class="n">limitIntensityChange</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">MinEfficiency</span><span class="p">]))</span>
+                    <span class="n">filtered</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filterNewHits</span><span class="p">(</span><span class="n">hits</span><span class="p">,</span> <span class="n">targetSpectrum</span><span class="p">,</span> <span class="n">references</span><span class="p">,</span> <span class="n">minimumDistance</span><span class="p">)</span>
+
+                    <span class="c1"># quick hack for demo on EM Symposium</span>
+                    <span class="k">if</span> <span class="n">filtered</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filtered</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="kn">from</span> <span class="nn">ccpn.AnalysisScreen.gui.modules.HitAnalyis</span> <span class="kn">import</span> <span class="n">HitsAnalysis</span>
+
+                            <span class="n">hitModule</span> <span class="o">=</span> <span class="n">HitsAnalysis</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">)</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="n">hitModule</span><span class="p">)</span>
+
+        <span class="n">SGSpectra</span> <span class="o">=</span> <span class="p">[</span><span class="n">sp</span> <span class="k">for</span> <span class="n">sg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroups</span> <span class="k">if</span> <span class="n">sg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">sg</span><span class="o">.</span><span class="n">spectra</span><span class="p">]</span>
+        <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">spectra</span><span class="p">)</span> <span class="o">+</span> <span class="n">SGSpectra</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_filterNewHits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hits</span><span class="p">,</span> <span class="n">targetSpectrum</span><span class="p">,</span> <span class="n">references</span><span class="p">,</span> <span class="n">minimumDistance</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">hits</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">targetSpectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">matchedRef</span> <span class="o">=</span> <span class="n">matchHitToReference</span><span class="p">(</span><span class="n">targetSpectrum</span><span class="p">,</span> <span class="n">references</span><span class="p">,</span> <span class="n">limitRange</span><span class="o">=</span><span class="n">minimumDistance</span><span class="p">,</span>
                                                  <span class="n">refPeakListIndex</span><span class="o">=</span><span class="n">DefaultPeakListIndex</span><span class="p">)</span>
-                  <span class="n">matchedRef</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">hit</span> <span class="ow">in</span> <span class="n">matchedRef</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">hit</span><span class="p">]</span>  <span class="c1"># clean up the empty sublists</span>
-                  <span class="n">matchedHit</span> <span class="o">=</span> <span class="p">[]</span>
-                  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">matchedRef</span><span class="p">:</span>
+                <span class="n">matchedRef</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">hit</span> <span class="ow">in</span> <span class="n">matchedRef</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">hit</span><span class="p">]</span>  <span class="c1"># clean up the empty sublists</span>
+                <span class="n">matchedHit</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">matchedRef</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                      <span class="n">rp</span><span class="p">,</span><span class="n">tp</span><span class="p">,</span><span class="n">pos_i</span> <span class="o">=</span> <span class="n">i</span>
-                      <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">hits</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                          <span class="n">rp</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">pos_j</span> <span class="o">=</span> <span class="n">j</span>
-                          <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">pos_i</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+                        <span class="n">rp</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">pos_i</span> <span class="o">=</span> <span class="n">i</span>
+                        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">hits</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                                <span class="n">rp</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">pos_j</span> <span class="o">=</span> <span class="n">j</span>
+                                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">pos_i</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+                                    <span class="n">pos_i</span> <span class="o">=</span> <span class="n">pos_i</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+                                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pos_i</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                                        <span class="n">pos_i</span> <span class="o">=</span> <span class="n">pos_i</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
-                            <span class="n">pos_i</span> <span class="o">=</span> <span class="n">pos_i</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
-                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pos_i</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-                              <span class="n">pos_i</span> <span class="o">=</span> <span class="n">pos_i</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-
-                          <span class="k">if</span> <span class="nb">float</span><span class="p">(</span><span class="n">pos_j</span><span class="p">)</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span><span class="n">pos_i</span><span class="p">):</span>
-                            <span class="n">matchedHit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-
-
-    <span class="k">else</span><span class="p">:</span><span class="c1"># if control is given. Find hits  by any mode</span>
-      <span class="k">if</span> <span class="n">wLtargetSpectrumGroup</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">wLtargetSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">wLcontrolSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">):</span>
-          <span class="k">for</span> <span class="n">targetSpectrum</span><span class="p">,</span> <span class="n">controlSpectrum</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">wLtargetSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">,</span> <span class="n">wLcontrolSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">targetSpectrum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-              <span class="k">if</span> <span class="n">targetSpectrum</span><span class="o">.</span><span class="n">experimentType</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="n">targetSpectrum</span><span class="o">.</span><span class="n">experimentType</span> <span class="o">=</span> <span class="s1">&#39;Water-LOGSY.H&#39;</span>
-
-              <span class="k">if</span> <span class="n">sampleComponents_as_References</span><span class="p">:</span>
-                <span class="n">references</span> <span class="o">=</span> <span class="n">_getReferencesFromSample</span><span class="p">(</span><span class="n">targetSpectrum</span><span class="p">)</span>
-              <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">referenceSpectrumGroup</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                  <span class="n">references</span> <span class="o">=</span> <span class="n">referenceSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span>
-
-              <span class="n">hits</span> <span class="o">=</span> <span class="n">wl</span><span class="o">.</span><span class="n">findWaterLogsyHits</span><span class="p">(</span><span class="n">wLTarget</span><span class="o">=</span><span class="n">targetSpectrum</span><span class="p">,</span> <span class="n">wLControl</span><span class="o">=</span><span class="n">controlSpectrum</span><span class="p">,</span>
-                                           <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">limitRange</span><span class="o">=</span><span class="n">minimumDistance</span><span class="p">,</span> <span class="n">limitIntensityChange</span><span class="o">=</span><span class="n">minimumEfficiency</span><span class="p">)</span>
-              <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">hits</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">targetSpectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                  <span class="n">matchedRef</span> <span class="o">=</span> <span class="n">matchHitToReference</span><span class="p">(</span><span class="n">targetSpectrum</span><span class="p">,</span> <span class="n">references</span><span class="p">,</span> <span class="n">limitRange</span><span class="o">=</span><span class="n">minimumDistance</span><span class="p">,</span>
-                                                   <span class="n">refPeakListIndex</span><span class="o">=</span><span class="n">DefaultPeakListIndex</span><span class="p">)</span>
-                  <span class="n">matchedHit</span> <span class="o">=</span> <span class="p">[]</span>
-                  <span class="n">matchedRef</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">hit</span> <span class="ow">in</span> <span class="n">matchedRef</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">hit</span><span class="p">]</span>
-                  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">matchedRef</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                      <span class="n">rp</span><span class="p">,</span><span class="n">tp</span><span class="p">,</span><span class="n">pos_i</span> <span class="o">=</span> <span class="n">i</span>
-                      <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">hits</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                          <span class="n">rp</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">pos_j</span> <span class="o">=</span> <span class="n">j</span>
-                          <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">pos_i</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-
-                            <span class="n">pos_i</span> <span class="o">=</span> <span class="n">pos_i</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
-                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pos_i</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-                              <span class="n">pos_i</span> <span class="o">=</span> <span class="n">pos_i</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-
-                          <span class="k">if</span> <span class="nb">float</span><span class="p">(</span><span class="n">pos_j</span><span class="p">)</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span><span class="n">pos_i</span><span class="p">):</span>
-                            <span class="n">matchedHit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-
-                  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matchedHit</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                      <span class="n">_addNewHit</span><span class="p">(</span><span class="n">targetSpectrum</span><span class="p">,</span> <span class="n">matchedHit</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="nb">float</span><span class="p">(</span><span class="n">pos_j</span><span class="p">)</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span><span class="n">pos_i</span><span class="p">):</span>
+                                    <span class="n">matchedHit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matchedHit</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">_addNewHit</span><span class="p">(</span><span class="n">targetSpectrum</span><span class="p">,</span> <span class="n">matchedHit</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">matchedHit</span></div>
 
 
-    <span class="n">SGSpectra</span> <span class="o">=</span> <span class="p">[</span><span class="n">sp</span> <span class="k">for</span> <span class="n">sg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroups</span> <span class="k">if</span> <span class="n">sg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">sg</span><span class="o">.</span><span class="n">spectra</span><span class="p">]</span>
-    <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">spectra</span><span class="p">)</span> <span class="o">+</span> <span class="n">SGSpectra</span><span class="p">)</span></div></div>
-
-<span class="n">WaterLogsyHitFinderPipe</span><span class="o">.</span><span class="n">register</span><span class="p">()</span> <span class="c1"># Registers the pipe in the pipeline</span>
-
-
+<span class="n">WaterLogsyHitFinderPipe</span><span class="o">.</span><span class="n">register</span><span class="p">()</span>  <span class="c1"># Registers the pipe in the pipeline</span>
 </pre></div>
 
           </div>

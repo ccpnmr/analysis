@@ -58,13 +58,13 @@
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:49 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -74,7 +74,7 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="p">,</span> <span class="n">QtCore</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
@@ -87,154 +87,80 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.RadioButtons</span> <span class="kn">import</span> <span class="n">RadioButtons</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ScrollArea</span> <span class="kn">import</span> <span class="n">ScrollArea</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Frame</span> <span class="kn">import</span> <span class="n">Frame</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CustomExportDialog</span> <span class="kn">import</span> <span class="n">CustomExportDialog</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>      <span class="c1"># ejb</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CustomExportDialog</span> <span class="kn">import</span> <span class="n">CustomGLExportDialog</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>  <span class="c1"># ejb</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Spacer</span> <span class="kn">import</span> <span class="n">Spacer</span>
+
 
 <div class="viewcode-block" id="SelectSpectrumDisplayPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.PrintSpectrumPopup.SelectSpectrumDisplayPopup">[docs]</a><span class="k">class</span> <span class="nc">SelectSpectrumDisplayPopup</span><span class="p">(</span><span class="n">CcpnDialog</span><span class="p">):</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
-    <span class="n">CcpnDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="s1">&#39;Select Spectrum Display&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">CcpnDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="s1">&#39;Print to File&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QCoreApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">_ccpnApplication</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">None</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1"># L,T,R,B</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="mi">400</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">300</span><span class="p">)</span>
+        <span class="c1"># self.project = project</span>
+        <span class="c1"># self.application = QtCore.QCoreApplication.instance()._ccpnApplication</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span> <span class="o">=</span> <span class="n">ScrollArea</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span><span class="c1">#QtGui.QFrame()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1"># L,T,R,B</span>
+        <span class="c1"># self.setFixedWidth(400)</span>
+        <span class="c1"># self.setFixedHeight(300)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplayIds</span> <span class="o">=</span> <span class="p">[</span><span class="n">sd</span><span class="o">.</span><span class="n">title</span> <span class="k">for</span> <span class="n">sd</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">spectrumDisplays</span><span class="p">]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplayPids</span> <span class="o">=</span> <span class="p">[</span><span class="n">sd</span><span class="o">.</span><span class="n">pid</span> <span class="k">for</span> <span class="n">sd</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">spectrumDisplays</span><span class="p">]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">radioButtonBox</span> <span class="o">=</span> <span class="n">RadioButtons</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span>
-                                       <span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplayIds</span>
-                                       <span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">)</span>
-    <span class="c1"># self.spectrumSelectionWidget = SpectrumDisplaySelectionWidget(self._sequenceGraphScrollArea, project, setLayout=True)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">buttonBox</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">reject</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDisplayToPrint</span><span class="p">],</span>
-                                <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Cancel&#39;</span><span class="p">,</span> <span class="s1">&#39;Select Display&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Select Strip to Print&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                           <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;centre&#39;</span><span class="p">,</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;centre&#39;</span><span class="p">)</span>
+        <span class="c1"># self.scrollArea = ScrollArea(self, grid=(2, 0), gridSpan=(2, 2), setLayout=True)</span>
 
-  <span class="k">def</span> <span class="nf">_getViewBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumDisplay</span><span class="p">):</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">viewBox</span>
+        <span class="c1"># self._spacer = Spacer(self, 5, 5,</span>
+        <span class="c1">#                        QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,</span>
+        <span class="c1">#                        grid=(2, 1), gridSpan=(1, 1))</span>
 
-  <span class="k">def</span> <span class="nf">_getSelection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">reject</span><span class="p">()</span> <span class="c1">#close the popup, not needed anymore</span>
-    <span class="n">pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDisplayToPrint</span><span class="p">()</span>
-    <span class="n">spectrumDisplay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">spectrumDisplay</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">is1D</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_open1DExporter</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="p">)</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">printToFile</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="p">)</span>
+        <span class="c1"># self.scrollArea.setWidgetResizable(True)</span>
+        <span class="c1"># self.scrollAreaWidgetContents = Frame(self, setLayout=True)#QtWidgets.QFrame()</span>
+        <span class="c1">#</span>
+        <span class="c1"># self.scrollArea.setWidget(self.scrollAreaWidgetContents)</span>
 
-<div class="viewcode-block" id="SelectSpectrumDisplayPopup.getDisplayToPrint"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.PrintSpectrumPopup.SelectSpectrumDisplayPopup.getDisplayToPrint">[docs]</a>  <span class="k">def</span> <span class="nf">getDisplayToPrint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">pIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">radioButtonBox</span><span class="o">.</span><span class="n">getIndex</span><span class="p">()</span>
-    <span class="n">thisPid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplayPids</span><span class="p">[</span><span class="n">pIndex</span><span class="p">]</span>
-    <span class="n">spectrumDisplay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">thisPid</span><span class="p">)</span>
+        <span class="c1"># TODO:ED remove scroll area</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stripIds</span> <span class="o">=</span> <span class="p">[</span><span class="n">sd</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">sd</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">strips</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stripPids</span> <span class="o">=</span> <span class="p">[</span><span class="n">sd</span><span class="o">.</span><span class="n">pid</span> <span class="k">for</span> <span class="n">sd</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">strips</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radioButtonBox</span> <span class="o">=</span> <span class="n">RadioButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="c1">#self.scrollAreaWidgetContents</span>
+                                           <span class="bp">self</span><span class="o">.</span><span class="n">stripIds</span><span class="p">,</span>
+                                           <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                                           <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">reject</span><span class="p">()</span> <span class="c1">#close the popup, not needed anymore</span>
-    <span class="k">if</span> <span class="n">spectrumDisplay</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">is1D</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_open1DExporter</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="p">)</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">printToFile</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="p">)</span></div>
+        <span class="c1"># self.radioButtonBox.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,</span>
+        <span class="c1">#                                   QtWidgets.QSizePolicy.MinimumExpanding)</span>
 
-  <span class="k">def</span> <span class="nf">_open1DExporter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumDisplay</span><span class="p">):</span>
-    <span class="n">viewBox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getViewBox</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="p">)</span>
-    <span class="n">scene</span> <span class="o">=</span> <span class="n">viewBox</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">exportDialog</span> <span class="o">=</span> <span class="n">CustomExportDialog</span><span class="p">(</span><span class="n">scene</span><span class="p">,</span> <span class="n">titleName</span><span class="o">=</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">spectrumDimension</span><span class="o">=</span><span class="s1">&#39;1D&#39;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">exportDialog</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">viewBox</span><span class="p">)</span></div>
+        <span class="c1"># self.scrollArea.setWidget(self.radioButtonBox)</span>
 
+        <span class="c1"># self.spectrumSelectionWidget = SpectrumDisplaySelectionWidget(self._sequenceGraphScrollArea, project, setLayout=True)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttonBox</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">reject</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">getStripToPrint</span><span class="p">],</span>
+                                    <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Cancel&#39;</span><span class="p">,</span> <span class="s1">&#39;Select Strip&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">radioButtonBox</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">radioButtonBox</span><span class="o">.</span><span class="n">setMinimumSize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radioButtonBox</span><span class="o">.</span><span class="n">sizeHint</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radioButtonBox</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>  <span class="c1"># L,T,R,B</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sizeHint</span><span class="p">())</span>
 
-<span class="c1">#</span>
-<span class="c1"># class PrintSpectrumDisplayPopup(QtGui.QDialog, Base):</span>
-<span class="c1">#   def __init__(self, parent=None, project=None, **kw):</span>
-<span class="c1">#     super(PrintSpectrumDisplayPopup, self).__init__(parent)</span>
-<span class="c1">#     Base.__init__(self, **kw)</span>
-<span class="c1">#</span>
-<span class="c1">#     self.setWindowTitle(&#39;Print Spectrum Display&#39;)</span>
-<span class="c1">#</span>
-<span class="c1">#     filePathLabel = Label(self, &#39;Image Path&#39;, grid=(1, 0))</span>
-<span class="c1">#     self.filePathLineEdit = LineEdit(self, grid=(1, 1))</span>
-<span class="c1">#     self.pathButton = Button(self, grid=(1, 2), callback=self._getSpectrumFile, icon=&#39;icons/applications-system&#39;)</span>
-<span class="c1">#     _sequenceGraphScrollArea = ScrollArea(self, grid=(2, 0), gridSpan=(2, 2))</span>
-<span class="c1">#</span>
-<span class="c1">#     self.project = project</span>
-<span class="c1">#     self.spectrumSelectionWidget = SpectrumDisplaySelectionWidget(_sequenceGraphScrollArea, project)</span>
-<span class="c1">#     _sequenceGraphScrollArea.setWidgetResizable(True)</span>
-<span class="c1">#     _sequenceGraphScrollArea.setWidget(self.spectrumSelectionWidget)</span>
-<span class="c1">#</span>
-<span class="c1">#     self.buttonBox = ButtonList(self, grid=(5, 1), callbacks=[self.reject, self.printSpectrum],</span>
-<span class="c1">#                                 texts=[&#39;Cancel&#39;, &#39;Print Display&#39;], gridSpan=(1, 2))</span>
-<span class="c1">#</span>
-<span class="c1">#</span>
-<span class="c1">#</span>
-<span class="c1">#   def printSpectrum(self):</span>
-<span class="c1">#</span>
-<span class="c1">#     spectrumDisplay = self.project.getByPid(self.spectrumSelectionWidget.getDisplayToPrint())</span>
-<span class="c1">#     if self.filePathLineEdit.text():</span>
-<span class="c1">#       self.project._appBase.ui.mainWindow.printToFile(spectrumDisplayOrStrip=spectrumDisplay, path=self.filePathLineEdit.text())</span>
-<span class="c1">#       self.accept()</span>
-<span class="c1">#     else:</span>
-<span class="c1">#       showWarning(&#39;No path specified&#39;, &#39;File path to save image has not been specified.&#39;)</span>
-<span class="c1">#       return</span>
-<span class="c1">#</span>
-<span class="c1">#   def _getSpectrumFile(self):</span>
-<span class="c1">#     if os.path.exists(&#39;/&#39;.join(self.filePathLineEdit.text().split(&#39;/&#39;)[:-1])):</span>
-<span class="c1">#       currentSpectrumDirectory = &#39;/&#39;.join(self.filePathLineEdit.text().split(&#39;/&#39;)[:-1])</span>
-<span class="c1">#     elif self.project._appBase.preferences.general.dataPath:</span>
-<span class="c1">#       currentSpectrumDirectory = self.project._appBase.preferences.general.dataPath</span>
-<span class="c1">#     else:</span>
-<span class="c1">#       currentSpectrumDirectory = os.path.expanduser(&#39;~&#39;)</span>
-<span class="c1">#</span>
-<span class="c1">#     dialog = FileDialog(parent=self, fileMode=FileDialog.AnyFile, text=&#39;Print to File&#39;, directory=currentSpectrumDirectory,</span>
-<span class="c1">#                           acceptMode=FileDialog.AcceptSave, preferences=self.project._appBase.preferences.general, filter=&#39;SVG (*.svg)&#39;)</span>
-<span class="c1">#     path = dialog.selectedFile()</span>
-<span class="c1">#     if path:</span>
-<span class="c1">#       self.filePathLineEdit.setText(path)</span>
+<div class="viewcode-block" id="SelectSpectrumDisplayPopup.getStripToPrint"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.PrintSpectrumPopup.SelectSpectrumDisplayPopup.getStripToPrint">[docs]</a>    <span class="k">def</span> <span class="nf">getStripToPrint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">pIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">radioButtonBox</span><span class="o">.</span><span class="n">getIndex</span><span class="p">()</span>
+        <span class="n">thisPid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stripPids</span><span class="p">[</span><span class="n">pIndex</span><span class="p">]</span>
+        <span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">thisPid</span><span class="p">)</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">reject</span><span class="p">()</span>  <span class="c1">#close the popup, not needed anymore</span>
+        <span class="k">if</span> <span class="n">strip</span><span class="p">:</span>
+            <span class="n">glWidget</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">_CcpnGLWidget</span>
 
-<span class="c1"># class SpectrumDisplaySelectionWidget(QtGui.QWidget, Base):</span>
-<span class="c1">#</span>
-<span class="c1">#   def __init__(self, parent, project, **kw):</span>
-<span class="c1">#     QtGui.QWidget.__init__(self, parent)</span>
-<span class="c1">#     Base.__init__(self, **kw)</span>
-<span class="c1">#</span>
-<span class="c1">#     current = project._appBase.current</span>
-<span class="c1">#     # if current.spectrumDisplay:</span>
-<span class="c1">#     #   self.currentSpectrumDisplay = current.spectrumDisplay</span>
-<span class="c1">#     if current.strip:</span>
-<span class="c1">#       self.currentSpectrumDisplay = current.strip.spectrumDisplay</span>
-<span class="c1">#     else:</span>
-<span class="c1">#       self.currentSpectrumDisplay = project.spectrumDisplays[0]</span>
-<span class="c1">#     radioButton = RadioButton(self, text=self.currentSpectrumDisplay.pid, grid=(0, 0))</span>
-<span class="c1">#     self.ii=1</span>
-<span class="c1">#     self.radioButtons = [radioButton]</span>
-<span class="c1">#     self.spectrumDisplayIds = [sd.pid for sd in project.spectrumDisplays if sd is not self.currentSpectrumDisplay]</span>
-<span class="c1">#     radioButton.setChecked(True)</span>
-<span class="c1">#</span>
-<span class="c1">#     for spectrumDisplayId in self.spectrumDisplayIds:</span>
-<span class="c1">#       self.addSpectrumDisplay(spectrumDisplayId)</span>
-<span class="c1">#</span>
-<span class="c1">#   def addSpectrumDisplay(self, spectrumDisplayId):</span>
-<span class="c1">#     radioButton = RadioButton(self, text=spectrumDisplayId, grid=(self.ii, 0))</span>
-<span class="c1">#     self.radioButtons.append(radioButton)</span>
-<span class="c1">#     self.ii+=1</span>
-<span class="c1">#</span>
-<span class="c1">#   def getDisplayToPrint(self):</span>
-<span class="c1">#     for radioButton in self.radioButtons:</span>
-<span class="c1">#       if radioButton.isChecked():</span>
-<span class="c1">#         index = self.radioButtons.index(radioButton)</span>
-<span class="c1">#</span>
-<span class="c1">#     if index == 0:</span>
-<span class="c1">#       return self.currentSpectrumDisplay.pid</span>
-<span class="c1">#     else:</span>
-<span class="c1">#       return self.spectrumDisplayIds[index-1]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exportDialog</span> <span class="o">=</span> <span class="n">CustomGLExportDialog</span><span class="p">(</span><span class="n">glWidget</span><span class="p">,</span> <span class="n">titleName</span><span class="o">=</span><span class="n">strip</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exportDialog</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">viewBox</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>

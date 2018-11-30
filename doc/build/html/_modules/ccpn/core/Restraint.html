@@ -57,14 +57,14 @@
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:29 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -84,309 +84,315 @@
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr</span> <span class="kn">import</span> <span class="n">NmrConstraint</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib</span> <span class="kn">import</span> <span class="n">Util</span> <span class="k">as</span> <span class="n">modelUtil</span>
 
+
 <div class="viewcode-block" id="Restraint"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Restraint.Restraint">[docs]</a><span class="k">class</span> <span class="nc">Restraint</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Restraint. The type is defined in the containing RestraintList.</span>
+    <span class="sd">&quot;&quot;&quot;Restraint. The type is defined in the containing RestraintList.</span>
 
-<span class="sd">  Most of the values are the consensus of the values in the contained</span>
-<span class="sd">  RestraintContributions. In the normal case, where you have only one</span>
-<span class="sd">  RestraintContribution per Restraint, you can get and set the values</span>
-<span class="sd">  directly from the Restraint without reference to the RestraintContributions. &quot;&quot;&quot;</span>
-  
-  <span class="c1">#: Short class name, for PID.</span>
-  <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;RE&#39;</span>
-  <span class="c1"># Attribute it necessary as subclasses must use superclass className</span>
-  <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;Restraint&#39;</span>
+<span class="sd">    Most of the values are the consensus of the values in the contained</span>
+<span class="sd">    RestraintContributions. In the normal case, where you have only one</span>
+<span class="sd">    RestraintContribution per Restraint, you can get and set the values</span>
+<span class="sd">    directly from the Restraint without reference to the RestraintContributions. &quot;&quot;&quot;</span>
 
-  <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">RestraintList</span>
+    <span class="c1">#: Short class name, for PID.</span>
+    <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;RE&#39;</span>
+    <span class="c1"># Attribute it necessary as subclasses must use superclass className</span>
+    <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;Restraint&#39;</span>
 
-  <span class="c1">#: Name of plural link to instances of class</span>
-  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s1">&#39;restraints&#39;</span>
+    <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">RestraintList</span>
 
-  <span class="c1">#: List of child classes.</span>
-  <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1">#: Name of plural link to instances of class</span>
+    <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s1">&#39;restraints&#39;</span>
 
-  <span class="c1"># Qualified name of matching API class</span>
-  <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">NmrConstraint</span><span class="o">.</span><span class="n">AbstractConstraint</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+    <span class="c1">#: List of child classes.</span>
+    <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
 
-  <span class="c1"># CCPN properties</span>
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">_apiConstraint</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NmrConstraint</span><span class="o">.</span><span class="n">AbstractConstraint</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; CCPN API Constraint matching Restraint&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="c1"># Qualified name of matching API class</span>
+    <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">NmrConstraint</span><span class="o">.</span><span class="n">AbstractConstraint</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RestraintList</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;RestraintList object containing restraint.&quot;&quot;&quot;</span>
-    <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">parentList</span><span class="p">]</span>
+    <span class="c1"># CCPN properties</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_apiConstraint</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NmrConstraint</span><span class="o">.</span><span class="n">AbstractConstraint</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; CCPN API Constraint matching Restraint&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
 
-  <span class="n">restraintList</span> <span class="o">=</span> <span class="n">_parent</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RestraintList</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;RestraintList object containing restraint.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">parentList</span><span class="p">]</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;id string - serial number converted to string&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">serial</span><span class="p">)</span>
+    <span class="n">restraintList</span> <span class="o">=</span> <span class="n">_parent</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">serial</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;serial number of Restraint, used in Pid and to identify the Restraint. &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">serial</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;id string - serial number converted to string&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">serial</span><span class="p">)</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Free-form text comment&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span>
-    
-  <span class="nd">@comment.setter</span>
-  <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">serial</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;serial number of Restraint, used in Pid and to identify the Restraint. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">serial</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">peaks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Peak</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;peaks used to derive restraint&quot;&quot;&quot;</span>
-    <span class="n">ff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span>
-    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">ff</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">peaks</span><span class="p">))</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Free-form text comment&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span>
 
-  <span class="nd">@peaks.setter</span>
-  <span class="k">def</span> <span class="nf">peaks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="n">Sequence</span><span class="p">):</span>
-    <span class="n">value</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">peaks</span> <span class="o">=</span>  <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+    <span class="nd">@comment.setter</span>
+    <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span> <span class="o">=</span> <span class="n">value</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">targetValue</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;target value of constraint - consensus of all contributions or None&quot;&quot;&quot;</span>
-    <span class="n">aSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">targetValue</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">aSet</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">aSet</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">return</span> <span class="bp">None</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">peaks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Peak</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;peaks used to derive restraint&quot;&quot;&quot;</span>
+        <span class="n">ff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">ff</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">peaks</span><span class="p">))</span>
 
-  <span class="nd">@targetValue.setter</span>
-  <span class="k">def</span> <span class="nf">targetValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">:</span>
-      <span class="n">contribution</span><span class="o">.</span><span class="n">targetValue</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="nd">@peaks.setter</span>
+    <span class="k">def</span> <span class="nf">peaks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">peaks</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;standard error of restraint - consensus of all contributions or None&quot;&quot;&quot;</span>
-    <span class="n">aSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">error</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">aSet</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">aSet</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">return</span> <span class="bp">None</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">targetValue</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;target value of constraint - consensus of all contributions or None&quot;&quot;&quot;</span>
+        <span class="n">aSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">targetValue</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">aSet</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">aSet</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
 
-  <span class="nd">@error.setter</span>
-  <span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">:</span>
-      <span class="n">contribution</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="nd">@targetValue.setter</span>
+    <span class="k">def</span> <span class="nf">targetValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">:</span>
+            <span class="n">contribution</span><span class="o">.</span><span class="n">targetValue</span> <span class="o">=</span> <span class="n">value</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">weight</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;weight of restraint - consensus of all contributions or None&quot;&quot;&quot;</span>
-    <span class="n">aSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">weight</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">aSet</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">aSet</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">return</span> <span class="bp">None</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;standard error of restraint - consensus of all contributions or None&quot;&quot;&quot;</span>
+        <span class="n">aSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">error</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">aSet</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">aSet</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
 
-  <span class="nd">@weight.setter</span>
-  <span class="k">def</span> <span class="nf">weight</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">:</span>
-      <span class="n">contribution</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="nd">@error.setter</span>
+    <span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">:</span>
+            <span class="n">contribution</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="n">value</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">upperLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;upperLimit of restraint - consensus of all contributions or None&quot;&quot;&quot;</span>
-    <span class="n">aSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">upperLimit</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">aSet</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">aSet</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">return</span> <span class="bp">None</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">weight</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;weight of restraint - consensus of all contributions or None&quot;&quot;&quot;</span>
+        <span class="n">aSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">weight</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">aSet</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">aSet</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
 
-  <span class="nd">@upperLimit.setter</span>
-  <span class="k">def</span> <span class="nf">upperLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">:</span>
-      <span class="n">contribution</span><span class="o">.</span><span class="n">upperLimit</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="nd">@weight.setter</span>
+    <span class="k">def</span> <span class="nf">weight</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">:</span>
+            <span class="n">contribution</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">value</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">lowerLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;lowerLimit of restraint - consensus of all contributions or None&quot;&quot;&quot;</span>
-    <span class="n">aSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">lowerLimit</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">aSet</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">aSet</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">return</span> <span class="bp">None</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">upperLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;upperLimit of restraint - consensus of all contributions or None&quot;&quot;&quot;</span>
+        <span class="n">aSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">upperLimit</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">aSet</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">aSet</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
 
-  <span class="nd">@lowerLimit.setter</span>
-  <span class="k">def</span> <span class="nf">lowerLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">:</span>
-      <span class="n">contribution</span><span class="o">.</span><span class="n">lowerLimit</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="nd">@upperLimit.setter</span>
+    <span class="k">def</span> <span class="nf">upperLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">:</span>
+            <span class="n">contribution</span><span class="o">.</span><span class="n">upperLimit</span> <span class="o">=</span> <span class="n">value</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">additionalUpperLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;additionalUpperLimit of restraint - consensus of all contributions or None.</span>
-<span class="sd">    Used for potential functions that require more than one parameter, typically for</span>
-<span class="sd">    parabolic-linear potentials where the additionalUpperLimit marks the transition from</span>
-<span class="sd">    parabolic to linear potential&quot;&quot;&quot;</span>
-    <span class="n">aSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">additionalUpperLimit</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">aSet</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">aSet</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">return</span> <span class="bp">None</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">lowerLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;lowerLimit of restraint - consensus of all contributions or None&quot;&quot;&quot;</span>
+        <span class="n">aSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">lowerLimit</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">aSet</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">aSet</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
 
-  <span class="nd">@additionalUpperLimit.setter</span>
-  <span class="k">def</span> <span class="nf">additionalUpperLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">:</span>
-      <span class="n">contribution</span><span class="o">.</span><span class="n">additionalUpperLimit</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="nd">@lowerLimit.setter</span>
+    <span class="k">def</span> <span class="nf">lowerLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">:</span>
+            <span class="n">contribution</span><span class="o">.</span><span class="n">lowerLimit</span> <span class="o">=</span> <span class="n">value</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">additionalLowerLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;additionalLowerLimit of restraint - consensus of all contributions or None</span>
-<span class="sd">    Used for potential functions that require more than one parameter, typically for</span>
-<span class="sd">    parabolic-linear potentials where the additionalLowerLimit marks the transition from</span>
-<span class="sd">    parabolic to linear potential&quot;&quot;&quot;</span>
-    <span class="n">aSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">additionalLowerLimit</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">aSet</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">aSet</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">return</span> <span class="bp">None</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">additionalUpperLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;additionalUpperLimit of restraint - consensus of all contributions or None.</span>
+<span class="sd">        Used for potential functions that require more than one parameter, typically for</span>
+<span class="sd">        parabolic-linear potentials where the additionalUpperLimit marks the transition from</span>
+<span class="sd">        parabolic to linear potential&quot;&quot;&quot;</span>
+        <span class="n">aSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">additionalUpperLimit</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">aSet</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">aSet</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
 
-  <span class="nd">@additionalLowerLimit.setter</span>
-  <span class="k">def</span> <span class="nf">additionalLowerLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">:</span>
-      <span class="n">contribution</span><span class="o">.</span><span class="n">additionalLowerLimit</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="nd">@additionalUpperLimit.setter</span>
+    <span class="k">def</span> <span class="nf">additionalUpperLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">:</span>
+            <span class="n">contribution</span><span class="o">.</span><span class="n">additionalUpperLimit</span> <span class="o">=</span> <span class="n">value</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">vectorLength</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Reference vector length, where applicable. (Mainly?) for Rdc&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">vectorLength</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">additionalLowerLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;additionalLowerLimit of restraint - consensus of all contributions or None</span>
+<span class="sd">        Used for potential functions that require more than one parameter, typically for</span>
+<span class="sd">        parabolic-linear potentials where the additionalLowerLimit marks the transition from</span>
+<span class="sd">        parabolic to linear potential&quot;&quot;&quot;</span>
+        <span class="n">aSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">additionalLowerLimit</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">aSet</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">aSet</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
 
-  <span class="nd">@vectorLength.setter</span>
-  <span class="k">def</span> <span class="nf">vectorLength</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">vectorLength</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="nd">@additionalLowerLimit.setter</span>
+    <span class="k">def</span> <span class="nf">additionalLowerLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">:</span>
+            <span class="n">contribution</span><span class="o">.</span><span class="n">additionalLowerLimit</span> <span class="o">=</span> <span class="n">value</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">figureOfMerit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Restraint figure of merit, between 0.0 and 1.0 inclusive.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">figureOfMerit</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">vectorLength</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Reference vector length, where applicable. (Mainly?) for Rdc&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">vectorLength</span>
 
-  <span class="nd">@figureOfMerit.setter</span>
-  <span class="k">def</span> <span class="nf">figureOfMerit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">figureOfMerit</span> <span class="o">=</span> <span class="n">value</span>
-    
-  <span class="c1"># Implementation functions</span>
-  <span class="nd">@classmethod</span>
-  <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span><span class="n">RestraintList</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;get wrappedData - all Constraint children of parent ConstraintList&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedConstraints</span><span class="p">()</span></div>
+    <span class="nd">@vectorLength.setter</span>
+    <span class="k">def</span> <span class="nf">vectorLength</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">vectorLength</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">figureOfMerit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Restraint figure of merit, between 0.0 and 1.0 inclusive.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">figureOfMerit</span>
+
+    <span class="nd">@figureOfMerit.setter</span>
+    <span class="k">def</span> <span class="nf">figureOfMerit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">figureOfMerit</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="c1"># Implementation functions</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">RestraintList</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;get wrappedData - all Constraint children of parent ConstraintList&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedConstraints</span><span class="p">()</span></div>
 
 
-<span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Peak</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Restraint</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
-  <span class="n">getDataObj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span>
-  <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">apiPeak</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
-  <span class="k">for</span> <span class="n">restraintList</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">restraintLists</span><span class="p">:</span>
-    <span class="k">for</span> <span class="n">apiRestraint</span> <span class="ow">in</span> <span class="n">restraintList</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">constraints</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">apiPeak</span> <span class="ow">in</span> <span class="n">apiRestraint</span><span class="o">.</span><span class="n">peaks</span><span class="p">:</span>
-        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">getDataObj</span><span class="p">(</span><span class="n">apiRestraint</span><span class="p">))</span>
-  <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
-<span class="k">def</span> <span class="nf">setter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Peak</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="n">Sequence</span><span class="p">):</span>
-  <span class="n">apiPeak</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
-  <span class="k">for</span> <span class="n">restraint</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">restraints</span><span class="p">:</span>
-    <span class="n">restraint</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">removePeak</span><span class="p">(</span><span class="n">apiPeak</span><span class="p">)</span>
-  <span class="k">for</span> <span class="n">restraint</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
-    <span class="n">restraint</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">addPeak</span><span class="p">(</span><span class="n">apiPeak</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Peak</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Restraint</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+    <span class="n">getDataObj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">apiPeak</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">for</span> <span class="n">restraintList</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">restraintLists</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">apiRestraint</span> <span class="ow">in</span> <span class="n">restraintList</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">constraints</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">apiPeak</span> <span class="ow">in</span> <span class="n">apiRestraint</span><span class="o">.</span><span class="n">peaks</span><span class="p">:</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">getDataObj</span><span class="p">(</span><span class="n">apiRestraint</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">setter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Peak</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">):</span>
+    <span class="n">apiPeak</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">for</span> <span class="n">restraint</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">restraints</span><span class="p">:</span>
+        <span class="n">restraint</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">removePeak</span><span class="p">(</span><span class="n">apiPeak</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">restraint</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+        <span class="n">restraint</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">addPeak</span><span class="p">(</span><span class="n">apiPeak</span><span class="p">)</span>
+
+
 <span class="n">Peak</span><span class="o">.</span><span class="n">restraints</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="n">setter</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
-                          <span class="s2">&quot;Restraints corresponding to Peak&quot;</span><span class="p">)</span>
+                           <span class="s2">&quot;Restraints corresponding to Peak&quot;</span><span class="p">)</span>
 <span class="k">del</span> <span class="n">getter</span>
 <span class="k">del</span> <span class="n">setter</span>
 
+
 <span class="c1"># Connections to parents:</span>
-<span class="k">def</span> <span class="nf">_newRestraint</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">RestraintList</span><span class="p">,</span> <span class="n">figureOfMerit</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                  <span class="n">peaks</span><span class="p">:</span><span class="n">Sequence</span><span class="o">=</span><span class="p">(),</span> <span class="n">vectorLength</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">serial</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Restraint</span><span class="p">:</span>
-  <span class="sd">&quot;&quot;&quot;Create new Restraint within RestraintList.</span>
+<span class="k">def</span> <span class="nf">_newRestraint</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">RestraintList</span><span class="p">,</span> <span class="n">figureOfMerit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                  <span class="n">peaks</span><span class="p">:</span> <span class="n">Sequence</span> <span class="o">=</span> <span class="p">(),</span> <span class="n">vectorLength</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">serial</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Restraint</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Create new Restraint within RestraintList.</span>
 
-<span class="sd">  ADVANCED: Note that you just create at least one RestraintContribution afterwards in order to</span>
-<span class="sd">  have valid data. Use the simpler createSimpleRestraint instead, unless you have specific</span>
-<span class="sd">  reasons for needing newRestraint&quot;&quot;&quot;</span>
-  <span class="c1"># Default values for &#39;new&#39; function, as used for echoing to console</span>
+<span class="sd">    ADVANCED: Note that you just create at least one RestraintContribution afterwards in order to</span>
+<span class="sd">    have valid data. Use the simpler createSimpleRestraint instead, unless you have specific</span>
+<span class="sd">    reasons for needing newRestraint&quot;&quot;&quot;</span>
+    <span class="c1"># Default values for &#39;new&#39; function, as used for echoing to console</span>
 
-  <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span>
-    <span class="p">(</span>
-      <span class="p">(</span><span class="s1">&#39;figureOfMerit&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;peaks&#39;</span><span class="p">,()),</span> <span class="p">(</span><span class="s1">&#39;vectorLength&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
-      <span class="p">(</span><span class="s1">&#39;serial&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
-    <span class="p">)</span>
-  <span class="p">)</span>
-  <span class="k">if</span> <span class="n">peaks</span><span class="p">:</span>
-    <span class="n">getByPid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getByPid</span>
-    <span class="n">peaks</span> <span class="o">=</span> <span class="p">[(</span><span class="n">getByPid</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">]</span>
+    <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="p">(</span><span class="s1">&#39;figureOfMerit&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;peaks&#39;</span><span class="p">,</span> <span class="p">()),</span> <span class="p">(</span><span class="s1">&#39;vectorLength&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+                <span class="p">(</span><span class="s1">&#39;serial&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+    <span class="k">if</span> <span class="n">peaks</span><span class="p">:</span>
+        <span class="n">getByPid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getByPid</span>
+        <span class="n">peaks</span> <span class="o">=</span> <span class="p">[(</span><span class="n">getByPid</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">]</span>
 
-  <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;newRestraint&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
-                              <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newRestraint&#39;</span><span class="p">)</span>
-  <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">blankNotification</span><span class="p">()</span> <span class="c1"># delay notifiers till Restraint is fully ready</span>
-  <span class="k">try</span><span class="p">:</span>
-    <span class="n">dd</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;figureOfMerit&#39;</span><span class="p">:</span><span class="n">figureOfMerit</span><span class="p">,</span> <span class="s1">&#39;vectorLength&#39;</span><span class="p">:</span><span class="n">vectorLength</span><span class="p">,</span> <span class="s1">&#39;details&#39;</span><span class="p">:</span><span class="n">comment</span><span class="p">,</span>
-          <span class="s1">&#39;peaks&#39;</span><span class="p">:</span><span class="n">peaks</span><span class="p">}</span>
-    <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">newGenericConstraint</span><span class="p">(</span><span class="o">**</span><span class="n">dd</span><span class="p">)</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;newRestraint&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
+                                <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newRestraint&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">blankNotification</span><span class="p">()</span>  <span class="c1"># delay notifiers till Restraint is fully ready</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">dd</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;figureOfMerit&#39;</span><span class="p">:</span> <span class="n">figureOfMerit</span><span class="p">,</span> <span class="s1">&#39;vectorLength&#39;</span><span class="p">:</span> <span class="n">vectorLength</span><span class="p">,</span> <span class="s1">&#39;details&#39;</span><span class="p">:</span> <span class="n">comment</span><span class="p">,</span>
+              <span class="s1">&#39;peaks&#39;</span><span class="p">:</span> <span class="n">peaks</span><span class="p">}</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">newGenericConstraint</span><span class="p">(</span><span class="o">**</span><span class="n">dd</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">serial</span><span class="p">)</span>
+                <span class="c1"># modelUtil.resetSerial(obj, serial, &#39;constraints&#39;)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Could not reset serial of </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2"> - keeping original value&quot;</span>
+                                             <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">serial</span><span class="p">))</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">unblankNotification</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
+
+    <span class="c1"># Do creation notifications</span>
     <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">try</span><span class="p">:</span>
-        <span class="n">result</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">serial</span><span class="p">)</span>
-        <span class="c1"># modelUtil.resetSerial(obj, serial, &#39;constraints&#39;)</span>
-      <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Could not reset serial of </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2"> - keeping original value&quot;</span>
-                                     <span class="o">%</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">serial</span><span class="p">))</span>
-  <span class="k">finally</span><span class="p">:</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">unblankNotification</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
-
-  <span class="c1"># Do creation notifications</span>
-  <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-    <span class="n">result</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">)</span>
-  <span class="n">result</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;create&#39;</span><span class="p">)</span>
-  <span class="c1">#</span>
-  <span class="k">return</span> <span class="n">result</span>
-
-<div class="viewcode-block" id="createSimpleRestraint"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Restraint.createSimpleRestraint">[docs]</a><span class="k">def</span> <span class="nf">createSimpleRestraint</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">RestraintList</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">figureOfMerit</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                          <span class="n">peaks</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Peak</span><span class="p">]</span><span class="o">=</span><span class="p">(),</span>  <span class="n">targetValue</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                          <span class="n">weight</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">upperLimit</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>  <span class="n">lowerLimit</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                          <span class="n">additionalUpperLimit</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">additionalLowerLimit</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                          <span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">vectorLength</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">restraintItems</span><span class="p">:</span><span class="n">Sequence</span><span class="o">=</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Restraint</span><span class="p">:</span>
-  <span class="sd">&quot;&quot;&quot;Create a Restraint with a single RestraintContribution within the RestraintList.</span>
-<span class="sd">  The function takes all the information needed and creates the RestraintContribution as</span>
-<span class="sd">  well as the Restraint proper.</span>
-
-<span class="sd">  This function should be used routinely, unless there is a need to create more complex</span>
-<span class="sd">  Restraints.&quot;&quot;&quot;</span>
-
-  <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span>
-    <span class="p">(</span>
-      <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;figureOfMerit&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;peaks&#39;</span><span class="p">,()),</span> <span class="p">(</span><span class="s1">&#39;targetValue&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;weight&#39;</span><span class="p">,</span><span class="mf">1.0</span><span class="p">),</span>
-      <span class="p">(</span><span class="s1">&#39;upperLimit&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;lowerLimit&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;additionalUpperLimit&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
-      <span class="p">(</span><span class="s1">&#39;additionalLowerLimit&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;scale&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;vectorLength&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;restraintItems&#39;</span><span class="p">,()),</span>
-    <span class="p">)</span>
-  <span class="p">)</span>
-  <span class="n">values</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-  <span class="k">if</span> <span class="n">peaks</span><span class="p">:</span>
-    <span class="n">getByPid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getByPid</span>
-    <span class="n">peaks</span> <span class="o">=</span> <span class="p">[(</span><span class="n">getByPid</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">]</span>
-    <span class="n">values</span><span class="p">[</span><span class="s1">&#39;peaks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">pid</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">)</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">)</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;create&#39;</span><span class="p">)</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">result</span>
 
 
+<div class="viewcode-block" id="createSimpleRestraint"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Restraint.createSimpleRestraint">[docs]</a><span class="k">def</span> <span class="nf">createSimpleRestraint</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">RestraintList</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">figureOfMerit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                          <span class="n">peaks</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Peak</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span> <span class="n">targetValue</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                          <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">upperLimit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">lowerLimit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                          <span class="n">additionalUpperLimit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">additionalLowerLimit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                          <span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">vectorLength</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">restraintItems</span><span class="p">:</span> <span class="n">Sequence</span> <span class="o">=</span> <span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Restraint</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Create a Restraint with a single RestraintContribution within the RestraintList.</span>
+<span class="sd">    The function takes all the information needed and creates the RestraintContribution as</span>
+<span class="sd">    well as the Restraint proper.</span>
 
-  <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;createSimpleRestraint&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">values</span><span class="p">,</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
-                              <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newRestraint&#39;</span><span class="p">)</span>
-  <span class="k">try</span><span class="p">:</span>
-    <span class="n">restraint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newRestraint</span><span class="p">(</span><span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">,</span> <span class="n">peaks</span><span class="o">=</span><span class="n">peaks</span><span class="p">,</span> <span class="n">figureOfMerit</span><span class="o">=</span><span class="n">figureOfMerit</span><span class="p">,</span>
-                                  <span class="n">vectorLength</span><span class="o">=</span><span class="n">vectorLength</span><span class="p">,</span> <span class="p">)</span>
-    <span class="n">restraint</span><span class="o">.</span><span class="n">newRestraintContribution</span><span class="p">(</span><span class="n">targetValue</span><span class="o">=</span><span class="n">targetValue</span><span class="p">,</span><span class="n">error</span><span class="o">=</span><span class="n">error</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span>
-                              <span class="n">upperLimit</span><span class="o">=</span><span class="n">upperLimit</span><span class="p">,</span> <span class="n">lowerLimit</span><span class="o">=</span><span class="n">lowerLimit</span><span class="p">,</span>
-                              <span class="n">additionalUpperLimit</span><span class="o">=</span><span class="n">additionalUpperLimit</span><span class="p">,</span>
-                              <span class="n">additionalLowerLimit</span><span class="o">=</span><span class="n">additionalLowerLimit</span><span class="p">,</span><span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span>
-                              <span class="n">restraintItems</span><span class="o">=</span><span class="n">restraintItems</span><span class="p">)</span>
-  <span class="k">finally</span><span class="p">:</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
-  <span class="c1">#</span>
-  <span class="k">return</span> <span class="n">restraint</span></div>
+<span class="sd">    This function should be used routinely, unless there is a need to create more complex</span>
+<span class="sd">    Restraints.&quot;&quot;&quot;</span>
+
+    <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;figureOfMerit&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;peaks&#39;</span><span class="p">,</span> <span class="p">()),</span> <span class="p">(</span><span class="s1">&#39;targetValue&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;weight&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+                <span class="p">(</span><span class="s1">&#39;upperLimit&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;lowerLimit&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;additionalUpperLimit&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+                <span class="p">(</span><span class="s1">&#39;additionalLowerLimit&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;scale&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;vectorLength&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;restraintItems&#39;</span><span class="p">,</span> <span class="p">()),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">peaks</span><span class="p">:</span>
+        <span class="n">getByPid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getByPid</span>
+        <span class="n">peaks</span> <span class="o">=</span> <span class="p">[(</span><span class="n">getByPid</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">]</span>
+        <span class="n">values</span><span class="p">[</span><span class="s1">&#39;peaks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">pid</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;createSimpleRestraint&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">values</span><span class="p">,</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
+                                <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newRestraint&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">restraint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newRestraint</span><span class="p">(</span><span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">,</span> <span class="n">peaks</span><span class="o">=</span><span class="n">peaks</span><span class="p">,</span> <span class="n">figureOfMerit</span><span class="o">=</span><span class="n">figureOfMerit</span><span class="p">,</span>
+                                      <span class="n">vectorLength</span><span class="o">=</span><span class="n">vectorLength</span><span class="p">,</span> <span class="p">)</span>
+        <span class="n">restraint</span><span class="o">.</span><span class="n">newRestraintContribution</span><span class="p">(</span><span class="n">targetValue</span><span class="o">=</span><span class="n">targetValue</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">error</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span>
+                                           <span class="n">upperLimit</span><span class="o">=</span><span class="n">upperLimit</span><span class="p">,</span> <span class="n">lowerLimit</span><span class="o">=</span><span class="n">lowerLimit</span><span class="p">,</span>
+                                           <span class="n">additionalUpperLimit</span><span class="o">=</span><span class="n">additionalUpperLimit</span><span class="p">,</span>
+                                           <span class="n">additionalLowerLimit</span><span class="o">=</span><span class="n">additionalLowerLimit</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span>
+                                           <span class="n">restraintItems</span><span class="o">=</span><span class="n">restraintItems</span><span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">restraint</span></div>
+
 
 <span class="n">RestraintList</span><span class="o">.</span><span class="n">newRestraint</span> <span class="o">=</span> <span class="n">_newRestraint</span>
 <span class="k">del</span> <span class="n">_newRestraint</span>
@@ -394,12 +400,12 @@
 
 <span class="c1"># Notifiers:</span>
 <span class="k">for</span> <span class="n">clazz</span> <span class="ow">in</span> <span class="n">NmrConstraint</span><span class="o">.</span><span class="n">ConstraintPeakContrib</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">getNonAbstractSubtypes</span><span class="p">():</span>
-  <span class="n">className</span> <span class="o">=</span> <span class="n">clazz</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
-  <span class="n">Project</span><span class="o">.</span><span class="n">_apiNotifiers</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-    <span class="p">(</span> <span class="p">(</span><span class="s1">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;classNames&#39;</span><span class="p">:(</span><span class="s1">&#39;Peak&#39;</span><span class="p">,</span> <span class="s1">&#39;Restraint&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s1">&#39;delete&#39;</span><span class="p">),</span>
-      <span class="p">(</span><span class="s1">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;classNames&#39;</span><span class="p">:(</span><span class="s1">&#39;Peak&#39;</span><span class="p">,</span> <span class="s1">&#39;Restraint&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s1">&#39;create&#39;</span><span class="p">),</span>
-    <span class="p">)</span>
-  <span class="p">)</span>
+    <span class="n">className</span> <span class="o">=</span> <span class="n">clazz</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+    <span class="n">Project</span><span class="o">.</span><span class="n">_apiNotifiers</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+            <span class="p">((</span><span class="s1">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;classNames&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;Peak&#39;</span><span class="p">,</span> <span class="s1">&#39;Restraint&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s1">&#39;delete&#39;</span><span class="p">),</span>
+             <span class="p">(</span><span class="s1">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;classNames&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;Peak&#39;</span><span class="p">,</span> <span class="s1">&#39;Restraint&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s1">&#39;create&#39;</span><span class="p">),</span>
+             <span class="p">)</span>
+            <span class="p">)</span>
 </pre></div>
 
           </div>

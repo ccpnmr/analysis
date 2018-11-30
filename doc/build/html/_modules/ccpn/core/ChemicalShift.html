@@ -57,14 +57,14 @@
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:27 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -84,141 +84,146 @@
 <span class="kn">from</span> <span class="nn">ccpn.core.NmrAtom</span> <span class="kn">import</span> <span class="n">NmrAtom</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr</span> <span class="kn">import</span> <span class="n">Nmr</span>
 
+
 <div class="viewcode-block" id="ChemicalShift"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.ChemicalShift.ChemicalShift">[docs]</a><span class="k">class</span> <span class="nc">ChemicalShift</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Chemical Shift, containing a ChemicalShift value for the NmrAtom they belong to.</span>
+    <span class="sd">&quot;&quot;&quot;Chemical Shift, containing a ChemicalShift value for the NmrAtom they belong to.</span>
 
-<span class="sd">  Chemical shift values are continuously averaged over peaks assigned to the NmrAtom,</span>
-<span class="sd">  unless this behaviour is turned off. If the NmrAtom is reassigned, the ChemcalShift</span>
-<span class="sd">  is reassigned with it.</span>
+<span class="sd">    Chemical shift values are continuously averaged over peaks assigned to the NmrAtom,</span>
+<span class="sd">    unless this behaviour is turned off. If the NmrAtom is reassigned, the ChemcalShift</span>
+<span class="sd">    is reassigned with it.</span>
 
-<span class="sd">  ChemicalShift objects sort as the NmrAtom they belong to.&quot;&quot;&quot;</span>
-  
-  <span class="c1">#: Short class name, for PID.</span>
-  <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;CS&#39;</span>
-  <span class="c1"># Attribute it necessary as subclasses must use superclass className</span>
-  <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;ChemicalShift&#39;</span>
+<span class="sd">    ChemicalShift objects sort as the NmrAtom they belong to.&quot;&quot;&quot;</span>
 
-  <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">ChemicalShiftList</span>
+    <span class="c1">#: Short class name, for PID.</span>
+    <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;CS&#39;</span>
+    <span class="c1"># Attribute it necessary as subclasses must use superclass className</span>
+    <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;ChemicalShift&#39;</span>
 
-  <span class="c1">#: Name of plural link to instances of class</span>
-  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s1">&#39;chemicalShifts&#39;</span>
-  
-  <span class="c1">#: List of child classes.</span>
-  <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">ChemicalShiftList</span>
 
-  <span class="c1"># Qualified name of matching API class</span>
-  <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">Nmr</span><span class="o">.</span><span class="n">Shift</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+    <span class="c1">#: Name of plural link to instances of class</span>
+    <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s1">&#39;chemicalShifts&#39;</span>
 
-  <span class="c1"># CCPN properties  </span>
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">_apiShift</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Nmr</span><span class="o">.</span><span class="n">Shift</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; CCPN Chemical Shift matching ChemicalShift&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
-    
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;identifier - assignment string&quot;&quot;&quot;</span>
-    <span class="c1"># return &#39;,&#39;.join(x or &#39;&#39; for x in self.nmrAtom.assignment)</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">_id</span>
+    <span class="c1">#: List of child classes.</span>
+    <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">_localCcpnSortKey</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Local sorting key, in context of parent.&quot;&quot;&quot;</span>
+    <span class="c1"># Qualified name of matching API class</span>
+    <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">Nmr</span><span class="o">.</span><span class="n">Shift</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
 
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">_ccpnSortKey</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
-    
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Project</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;ChemicalShiftList containing ChemicalShift.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">parentList</span><span class="p">]</span>
-  
-  <span class="n">chemicalShiftList</span> <span class="o">=</span> <span class="n">_parent</span>
-  
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;shift value of ChemicalShift, in unit as defined in the ChemicalShiftList&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">value</span>
-    
-  <span class="nd">@value.setter</span>
-  <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="c1"># CCPN properties</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_apiShift</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Nmr</span><span class="o">.</span><span class="n">Shift</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; CCPN Chemical Shift matching ChemicalShift&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">valueError</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;shift valueError of ChemicalShift, in unit as defined in the ChemicalShiftList&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">error</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;identifier - assignment string&quot;&quot;&quot;</span>
+        <span class="c1"># return &#39;,&#39;.join(x or &#39;&#39; for x in self.nmrAtom.assignment)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">_id</span>
 
-  <span class="nd">@valueError.setter</span>
-  <span class="k">def</span> <span class="nf">valueError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_localCcpnSortKey</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Local sorting key, in context of parent.&quot;&quot;&quot;</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">figureOfMerit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Figure of Merit for ChemicalShift, between 0.0 and 1.0 inclusive.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">figOfMerit</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">_ccpnSortKey</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
 
-  <span class="nd">@figureOfMerit.setter</span>
-  <span class="k">def</span> <span class="nf">figureOfMerit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">figOfMerit</span> <span class="o">=</span> <span class="n">value</span>
-  
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Free-form text comment&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span>
-    
-  <span class="nd">@comment.setter</span>
-  <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Project</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;ChemicalShiftList containing ChemicalShift.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">parentList</span><span class="p">]</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">nmrAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NmrAtom</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;NmrAtom that the shift belongs to&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">resonance</span><span class="p">)</span>
-    
-  <span class="c1"># Implementation functions</span>
-  <span class="nd">@classmethod</span>
-  <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">ChemicalShiftList</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;get wrappedData (ApiShift) for all ChemicalShift children of parent ChemicalShiftList&quot;&quot;&quot;</span>
-    <span class="c1"># NB this is NOT the right sorting order, but sorting on atomId is not possible at the API level</span>
-    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">measurements</span><span class="p">,</span>
-                  <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="s1">&#39;resonance.serial&#39;</span><span class="p">))</span></div>
+    <span class="n">chemicalShiftList</span> <span class="o">=</span> <span class="n">_parent</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;shift value of ChemicalShift, in unit as defined in the ChemicalShiftList&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="nd">@value.setter</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">valueError</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;shift valueError of ChemicalShift, in unit as defined in the ChemicalShiftList&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">error</span>
+
+    <span class="nd">@valueError.setter</span>
+    <span class="k">def</span> <span class="nf">valueError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">figureOfMerit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Figure of Merit for ChemicalShift, between 0.0 and 1.0 inclusive.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">figOfMerit</span>
+
+    <span class="nd">@figureOfMerit.setter</span>
+    <span class="k">def</span> <span class="nf">figureOfMerit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">figOfMerit</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Free-form text comment&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span>
+
+    <span class="nd">@comment.setter</span>
+    <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nmrAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NmrAtom</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;NmrAtom that the shift belongs to&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">resonance</span><span class="p">)</span>
+
+    <span class="c1"># Implementation functions</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">ChemicalShiftList</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;get wrappedData (ApiShift) for all ChemicalShift children of parent ChemicalShiftList&quot;&quot;&quot;</span>
+        <span class="c1"># NB this is NOT the right sorting order, but sorting on atomId is not possible at the API level</span>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">measurements</span><span class="p">,</span>
+                      <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="s1">&#39;resonance.serial&#39;</span><span class="p">))</span></div>
+
 
 <span class="c1"># Connections to parents:</span>
 
-<span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">NmrAtom</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ChemicalShift</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
-  <span class="n">getDataObj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span>
-  <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">getDataObj</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">shifts</span><span class="p">))</span>
+<span class="c1"># GWV 20181122: Moved to NmrAtom class</span>
+<span class="c1"># def getter(self:NmrAtom) -&gt; Tuple[ChemicalShift, ...]:</span>
+<span class="c1">#   getDataObj = self._project._data2Obj.get</span>
+<span class="c1">#   return tuple(sorted(getDataObj(x) for x in self._wrappedData.shifts))</span>
+<span class="c1">#</span>
+<span class="c1"># NmrAtom.chemicalShifts = property(getter, None, None, &quot;Returns ChemicalShift objects connected to NmrAtom&quot;)</span>
+<span class="c1">#</span>
+<span class="c1"># del getter</span>
 
-<span class="n">NmrAtom</span><span class="o">.</span><span class="n">chemicalShifts</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s2">&quot;Chemical shifts belonging to NmrAtom&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_newChemicalShift</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ChemicalShiftList</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">nmrAtom</span><span class="p">:</span> <span class="n">NmrAtom</span><span class="p">,</span>
+                      <span class="n">valueError</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">figureOfMerit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+                      <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ChemicalShift</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Create new ChemicalShift within ChemicalShiftList.&quot;&quot;&quot;</span>
 
-<span class="k">del</span> <span class="n">getter</span>
+    <span class="n">nmrAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">nmrAtom</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nmrAtom</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">nmrAtom</span>
+    <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="s1">&#39;valueError&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;figureOfMerit&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+                                        <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;newChemicalShift&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">nmrAtom</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span>
+                                <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span> <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newChemicalShift&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">newShift</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span>
+                                         <span class="n">resonance</span><span class="o">=</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">_wrappedData</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">valueError</span><span class="p">,</span>
+                                         <span class="n">figOfMerit</span><span class="o">=</span><span class="n">figureOfMerit</span><span class="p">,</span> <span class="n">details</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 
-<span class="k">def</span> <span class="nf">_newChemicalShift</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">ChemicalShiftList</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">nmrAtom</span><span class="p">:</span><span class="n">NmrAtom</span><span class="p">,</span>
-                     <span class="n">valueError</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">figureOfMerit</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-                     <span class="n">comment</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ChemicalShift</span><span class="p">:</span>
-  <span class="sd">&quot;&quot;&quot;Create new ChemicalShift within ChemicalShiftList.&quot;&quot;&quot;</span>
-
-  <span class="n">nmrAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">nmrAtom</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nmrAtom</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">nmrAtom</span>
-  <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="s1">&#39;valueError&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;figureOfMerit&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
-                                      <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">)))</span>
-  <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;newChemicalShift&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">nmrAtom</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span>
-                              <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span> <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newChemicalShift&#39;</span><span class="p">)</span>
-  <span class="k">try</span><span class="p">:</span>
-    <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">newShift</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span>
-                                     <span class="n">resonance</span><span class="o">=</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">_wrappedData</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">valueError</span><span class="p">,</span>
-                                     <span class="n">figOfMerit</span><span class="o">=</span><span class="n">figureOfMerit</span><span class="p">,</span> <span class="n">details</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
-  <span class="k">finally</span><span class="p">:</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
-  <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 
 <span class="n">ChemicalShiftList</span><span class="o">.</span><span class="n">newChemicalShift</span> <span class="o">=</span> <span class="n">_newChemicalShift</span>
 <span class="k">del</span> <span class="n">_newChemicalShift</span>
 
 <span class="c1"># Notifiers:</span>
-<span class="c1"># rename chemicalShifts when atom is renamed</span>
-<span class="n">NmrAtom</span><span class="o">.</span><span class="n">_setupCoreNotifier</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="n">AbstractWrapperObject</span><span class="o">.</span><span class="n">_finaliseRelatedObjectFromRename</span><span class="p">,</span>
-                          <span class="p">{</span><span class="s1">&#39;pathToObject&#39;</span><span class="p">:</span><span class="s1">&#39;chemicalShifts&#39;</span><span class="p">,</span> <span class="s1">&#39;action&#39;</span><span class="p">:</span><span class="s1">&#39;rename&#39;</span><span class="p">})</span>
-<span class="c1"># NB The link to NmrAtom is immutable - does need a link notifier</span>
+<span class="c1"># GWV 20181122: refactored as explicit call in NmrAtom._finalise</span>
+<span class="c1"># # rename chemicalShifts when atom is renamed</span>
+<span class="c1"># NmrAtom._setupCoreNotifier(&#39;rename&#39;, AbstractWrapperObject._finaliseRelatedObjectFromRename,</span>
+<span class="c1">#                           {&#39;pathToObject&#39;:&#39;chemicalShifts&#39;, &#39;action&#39;:&#39;rename&#39;})</span>
+<span class="c1"># # NB The link to NmrAtom is immutable - does need a link notifier</span>
 </pre></div>
 
           </div>

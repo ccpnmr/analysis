@@ -55,13 +55,13 @@
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Luca Mureddu $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:58 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -76,12 +76,12 @@
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">isfile</span><span class="p">,</span> <span class="n">join</span>
 <span class="kn">import</span> <span class="nn">pathlib</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span> <span class="p">,</span> <span class="n">_debug3</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span><span class="p">,</span> <span class="n">_debug3</span>
+
 
 <span class="c1">################################       Excel Headers Warning      ######################################################</span>
 <span class="sd">&quot;&quot;&quot;The excel headers for sample, sampleComponents, substances properties are named as the appear on the wrapper.</span>
 <span class="sd">Changing these will fail to set the attribute&quot;&quot;&quot;</span>
-
 
 <span class="c1"># SHEET NAMES</span>
 <span class="n">SUBSTANCE</span> <span class="o">=</span> <span class="s1">&#39;Substance&#39;</span>
@@ -95,7 +95,7 @@
 <span class="n">SUBSTANCE_NAME</span> <span class="o">=</span> <span class="s1">&#39;substanceName&#39;</span>
 
 <span class="c1">### Substance properties: # do not change these names</span>
-<span class="n">comment</span>  <span class="o">=</span> <span class="s1">&#39;comment&#39;</span>
+<span class="n">comment</span> <span class="o">=</span> <span class="s1">&#39;comment&#39;</span>
 <span class="n">smiles</span> <span class="o">=</span> <span class="s1">&#39;smiles&#39;</span>
 <span class="n">synonyms</span> <span class="o">=</span> <span class="s1">&#39;synonyms&#39;</span>
 <span class="n">molecularMass</span> <span class="o">=</span> <span class="s1">&#39;molecularMass&#39;</span>
@@ -127,340 +127,317 @@
 <span class="n">rowNumber</span> <span class="o">=</span> <span class="s1">&#39;rowNumber&#39;</span>
 <span class="n">columnNumber</span> <span class="o">=</span> <span class="s1">&#39;columnNumber&#39;</span>
 
+<span class="n">SAMPLE_PROPERTIES</span> <span class="o">=</span> <span class="p">[</span><span class="n">comment</span><span class="p">,</span> <span class="n">pH</span><span class="p">,</span> <span class="n">ionicStrength</span><span class="p">,</span> <span class="n">amount</span><span class="p">,</span> <span class="n">amountUnit</span><span class="p">,</span> <span class="n">isHazardous</span><span class="p">,</span> <span class="n">creationDate</span><span class="p">,</span> <span class="n">batchIdentifier</span><span class="p">,</span>
+                     <span class="n">plateIdentifier</span><span class="p">,</span> <span class="n">rowNumber</span><span class="p">,</span> <span class="n">columnNumber</span><span class="p">]</span>
 
-<span class="n">SAMPLE_PROPERTIES</span> <span class="o">=</span>     <span class="p">[</span><span class="n">comment</span><span class="p">,</span> <span class="n">pH</span><span class="p">,</span> <span class="n">ionicStrength</span><span class="p">,</span>  <span class="n">amount</span> <span class="p">,</span> <span class="n">amountUnit</span><span class="p">,</span><span class="n">isHazardous</span><span class="p">,</span><span class="n">creationDate</span><span class="p">,</span> <span class="n">batchIdentifier</span><span class="p">,</span>
-                         <span class="n">plateIdentifier</span><span class="p">,</span><span class="n">rowNumber</span><span class="p">,</span><span class="n">columnNumber</span><span class="p">]</span>
-
-<span class="n">SUBSTANCE_PROPERTIES</span> <span class="o">=</span>  <span class="p">[</span><span class="n">comment</span><span class="p">,</span><span class="n">smiles</span><span class="p">,</span><span class="n">synonyms</span><span class="p">,</span><span class="n">molecularMass</span><span class="p">,</span><span class="n">empiricalFormula</span><span class="p">,</span><span class="n">atomCount</span><span class="p">,</span>
-                         <span class="n">hBondAcceptorCount</span><span class="p">,</span><span class="n">hBondDonorCount</span><span class="p">,</span> <span class="n">bondCount</span><span class="p">,</span><span class="n">ringCount</span><span class="p">,</span><span class="n">polarSurfaceArea</span><span class="p">,</span>
-                         <span class="n">logPartitionCoefficient</span><span class="p">,</span><span class="n">userCode</span><span class="p">,]</span>
-
+<span class="n">SUBSTANCE_PROPERTIES</span> <span class="o">=</span> <span class="p">[</span><span class="n">comment</span><span class="p">,</span> <span class="n">smiles</span><span class="p">,</span> <span class="n">synonyms</span><span class="p">,</span> <span class="n">molecularMass</span><span class="p">,</span> <span class="n">empiricalFormula</span><span class="p">,</span> <span class="n">atomCount</span><span class="p">,</span>
+                        <span class="n">hBondAcceptorCount</span><span class="p">,</span> <span class="n">hBondDonorCount</span><span class="p">,</span> <span class="n">bondCount</span><span class="p">,</span> <span class="n">ringCount</span><span class="p">,</span> <span class="n">polarSurfaceArea</span><span class="p">,</span>
+                        <span class="n">logPartitionCoefficient</span><span class="p">,</span> <span class="n">userCode</span><span class="p">,</span> <span class="p">]</span>
 
 
 <div class="viewcode-block" id="ExcelReader"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.ExcelReader.ExcelReader">[docs]</a><span class="k">class</span> <span class="nc">ExcelReader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">excelPath</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    :param project: the ccpnmr Project object</span>
-<span class="sd">    :param excelPath: excel file path</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">excelPath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param project: the ccpnmr Project object</span>
+<span class="sd">        :param excelPath: excel file path</span>
 
-<span class="sd">    This reader will process excel files containing one or more sheets.</span>
-<span class="sd">    The file needs to contain  either the word Substances or Samples in the sheets name.</span>
+<span class="sd">        This reader will process excel files containing one or more sheets.</span>
+<span class="sd">        The file needs to contain  either the word Substances or Samples in the sheets name.</span>
 
-<span class="sd">    The user can load a file only with Substances or Samples sheet or both. Or a file with enumerate sheets</span>
-<span class="sd">    called eg Samples_Exp_1000, Samples_Exp_1001 etc.</span>
+<span class="sd">        The user can load a file only with Substances or Samples sheet or both. Or a file with enumerate sheets</span>
+<span class="sd">        called eg Samples_Exp_1000, Samples_Exp_1001 etc.</span>
 
-<span class="sd">    The project will create new Substances and/or Samples and SpectrumGroups only once for a given name.</span>
-<span class="sd">    Therefore, dropping twice the same file, or giving two sheets with same sample/substance/spectrumGroup name</span>
-<span class="sd">    will fail to create new objects.</span>
-
-
-
-<span class="sd">    Reader Steps:</span>
-
-<span class="sd">    - Parse the sheet/s and return a dataframe for each sheet containing at least the str name Substances or Samples</span>
-<span class="sd">    - Create Substances and/or samples if not existing in the project else skip with warning</span>
-<span class="sd">    - For each row create a dict and link to the obj eg. {Substance: {its dataframe row as dict}</span>
-<span class="sd">    - Create SpectrumGroups if not existing in the project else add a suffix </span>
-<span class="sd">    - Load spectra on project and dispatch to the object. (e.g. SU.referenceSpectra, SA.spectra, SG.spectra)</span>
-<span class="sd">    - set all attributes for each object as in the wrapper</span>
-
-
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="o">=</span> <span class="n">project</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">excelPath</span> <span class="o">=</span> <span class="n">excelPath</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">pandasFile</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">ExcelFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">excelPath</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">sheets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getSheets</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pandasFile</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">dataframes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getDataFrameFromSheets</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sheets</span><span class="p">)</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">substancesDicts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_createSubstancesDataFrames</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataframes</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">samplesDicts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_createSamplesDataDicts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataframes</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_createSpectrumGroups</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataframes</span><span class="p">)</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">_dispatchAttrsToObjs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">substancesDicts</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_loadSpectraForSheet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">substancesDicts</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_dispatchAttrsToObjs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">samplesDicts</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_loadSpectraForSheet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">samplesDicts</span><span class="p">)</span>
+<span class="sd">        The project will create new Substances and/or Samples and SpectrumGroups only once for a given name.</span>
+<span class="sd">        Therefore, dropping twice the same file, or giving two sheets with same sample/substance/spectrumGroup name</span>
+<span class="sd">        will fail to create new objects.</span>
 
 
 
-  <span class="c1">######################################################################################################################</span>
-  <span class="c1">######################                  PARSE EXCEL                     ##############################################</span>
-  <span class="c1">######################################################################################################################</span>
+<span class="sd">        Reader Steps:</span>
 
-  <span class="k">def</span> <span class="nf">_getSheets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pandasfile</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;return: list of the sheet names&#39;&#39;&#39;</span>
-    <span class="k">return</span>  <span class="n">pandasfile</span><span class="o">.</span><span class="n">sheet_names</span>
-
-  <span class="k">def</span> <span class="nf">_getDataFrameFromSheet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sheetName</span><span class="p">):</span>
-    <span class="s1">&#39;Creates the dataframe for the sheet. If Values are not set, fills None with NOTGIVEN (otherwise can give errors)&#39;</span>
-    <span class="n">dataFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pandasFile</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">sheetName</span><span class="p">)</span>
-    <span class="n">dataFrame</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">NOTGIVEN</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">dataFrame</span>
-
-  <span class="k">def</span> <span class="nf">_getDataFrameFromSheets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sheetNamesList</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Reads sheets containing the names SUBSTANCES or SAMPLES and creates a dataFrame for each&#39;&#39;&#39;</span>
-
-    <span class="n">dataFrames</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">sheetName</span> <span class="ow">in</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">sheetNamesList</span> <span class="k">if</span> <span class="n">SUBSTANCE</span> <span class="ow">in</span> <span class="n">name</span><span class="p">]:</span>
-      <span class="n">dataFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getDataFrameFromSheet</span><span class="p">(</span><span class="n">sheetName</span><span class="p">))</span>
-    <span class="k">for</span> <span class="n">sheetName</span> <span class="ow">in</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">sheetNamesList</span> <span class="k">if</span> <span class="n">SAMPLE</span> <span class="ow">in</span> <span class="n">name</span><span class="p">]:</span>
-      <span class="n">dataFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getDataFrameFromSheet</span><span class="p">(</span><span class="n">sheetName</span><span class="p">))</span>
-
-    <span class="k">return</span> <span class="n">dataFrames</span>
+<span class="sd">        - Parse the sheet/s and return a dataframe for each sheet containing at least the str name Substances or Samples</span>
+<span class="sd">        - Create Substances and/or samples if not existing in the project else skip with warning</span>
+<span class="sd">        - For each row create a dict and link to the obj eg. {Substance: {its dataframe row as dict}</span>
+<span class="sd">        - Create SpectrumGroups if not existing in the project else add a suffix</span>
+<span class="sd">        - Load spectra on project and dispatch to the object. (e.g. SU.referenceSpectra, SA.spectra, SG.spectra)</span>
+<span class="sd">        - set all attributes for each object as in the wrapper</span>
 
 
+<span class="sd">        &quot;&quot;&quot;</span>
 
-  <span class="c1">######################################################################################################################</span>
-  <span class="c1">######################                  CREATE SUBSTANCES               ##############################################</span>
-  <span class="c1">######################################################################################################################</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="o">=</span> <span class="n">project</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">excelPath</span> <span class="o">=</span> <span class="n">excelPath</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pandasFile</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">ExcelFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">excelPath</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sheets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getSheets</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pandasFile</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataframes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getDataFrameFromSheets</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sheets</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">_createSubstancesDataFrames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataframesList</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Creates substances in the project if not already present, For each substance link a dictionary of all its values</span>
-<span class="sd">     from the dataframe row. &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">substancesDicts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_createSubstancesDataFrames</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataframes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">samplesDicts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_createSamplesDataDicts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataframes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_createSpectrumGroups</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataframes</span><span class="p">)</span>
 
-    <span class="n">substancesDataFrames</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">dataFrame</span> <span class="ow">in</span> <span class="n">dataframesList</span><span class="p">:</span>
-      <span class="k">for</span> <span class="n">dataFrameAsDict</span> <span class="ow">in</span> <span class="n">dataFrame</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">SUBSTANCE_NAME</span> <span class="ow">in</span> <span class="n">dataFrame</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-          <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dataFrameAsDict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">SUBSTANCE_NAME</span><span class="p">:</span>
-              <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SU:&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;.&#39;</span><span class="p">):</span>
-                  <span class="n">substance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">newSubstance</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
-                  <span class="n">substancesDataFrames</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="n">substance</span><span class="p">:</span><span class="n">dataFrameAsDict</span><span class="p">})</span>
-                <span class="k">else</span><span class="p">:</span>
-                  <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Impossible to create substance </span><span class="si">%s</span><span class="s1">. A substance with the same name already &#39;</span>
-                                      <span class="s1">&#39;exsists in the project. &#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dispatchAttrsToObjs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">substancesDicts</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loadSpectraForSheet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">substancesDicts</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dispatchAttrsToObjs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">samplesDicts</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loadSpectraForSheet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">samplesDicts</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">substancesDataFrames</span>
+    <span class="c1">######################################################################################################################</span>
+    <span class="c1">######################                  PARSE EXCEL                     ##############################################</span>
+    <span class="c1">######################################################################################################################</span>
 
+    <span class="k">def</span> <span class="nf">_getSheets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pandasfile</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;return: list of the sheet names&#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">pandasfile</span><span class="o">.</span><span class="n">sheet_names</span>
 
+    <span class="k">def</span> <span class="nf">_getDataFrameFromSheet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sheetName</span><span class="p">):</span>
+        <span class="s1">&#39;Creates the dataframe for the sheet. If Values are not set, fills None with NOTGIVEN (otherwise can give errors)&#39;</span>
+        <span class="n">dataFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pandasFile</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">sheetName</span><span class="p">)</span>
+        <span class="n">dataFrame</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">NOTGIVEN</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dataFrame</span>
 
-  <span class="c1">######################################################################################################################</span>
-  <span class="c1">######################                  CREATE SAMPLES                  ##############################################</span>
-  <span class="c1">######################################################################################################################</span>
+    <span class="k">def</span> <span class="nf">_getDataFrameFromSheets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sheetNamesList</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Reads sheets containing the names SUBSTANCES or SAMPLES and creates a dataFrame for each&#39;&#39;&#39;</span>
 
-  <span class="k">def</span> <span class="nf">_createSamplesDataDicts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataframesList</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Creates samples in the project if not already present , For each sample link a dictionary of all its values</span>
-<span class="sd">     from the dataframe row. &#39;&#39;&#39;</span>
-    <span class="n">samplesDataFrames</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="c1">## first creates samples without duplicates,</span>
-    <span class="n">samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_createSamples</span><span class="p">(</span><span class="n">dataframesList</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-      <span class="c1">## Second creates dataframes to dispatch the properties,</span>
-      <span class="k">for</span> <span class="n">dataFrame</span> <span class="ow">in</span> <span class="n">dataframesList</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">dataFrameAsDict</span> <span class="ow">in</span> <span class="n">dataFrame</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-          <span class="k">if</span> <span class="n">SAMPLE_NAME</span> <span class="ow">in</span> <span class="n">dataFrame</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dataFrameAsDict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-              <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">SAMPLE_NAME</span><span class="p">:</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                  <span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SA:&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
-                  <span class="k">if</span> <span class="n">sample</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                    <span class="n">samplesDataFrames</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="n">sample</span><span class="p">:</span> <span class="n">dataFrameAsDict</span><span class="p">})</span>
+        <span class="n">dataFrames</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">sheetName</span> <span class="ow">in</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">sheetNamesList</span> <span class="k">if</span> <span class="n">SUBSTANCE</span> <span class="ow">in</span> <span class="n">name</span><span class="p">]:</span>
+            <span class="n">dataFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getDataFrameFromSheet</span><span class="p">(</span><span class="n">sheetName</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">sheetName</span> <span class="ow">in</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">sheetNamesList</span> <span class="k">if</span> <span class="n">SAMPLE</span> <span class="ow">in</span> <span class="n">name</span><span class="p">]:</span>
+            <span class="n">dataFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getDataFrameFromSheet</span><span class="p">(</span><span class="n">sheetName</span><span class="p">))</span>
 
-    <span class="k">return</span> <span class="n">samplesDataFrames</span>
+        <span class="k">return</span> <span class="n">dataFrames</span>
 
-  <span class="k">def</span> <span class="nf">_createSamples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataframesList</span><span class="p">):</span>
-    <span class="n">samples</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">dataFrame</span> <span class="ow">in</span> <span class="n">dataframesList</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">SAMPLE_NAME</span> <span class="ow">in</span> <span class="n">dataFrame</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">((</span><span class="n">dataFrame</span><span class="p">[</span><span class="n">SAMPLE_NAME</span><span class="p">]))):</span>
-          <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SA:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)):</span>
-            <span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">newSample</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
-            <span class="n">samples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+    <span class="c1">######################################################################################################################</span>
+    <span class="c1">######################                  CREATE SUBSTANCES               ##############################################</span>
+    <span class="c1">######################################################################################################################</span>
 
-          <span class="k">else</span><span class="p">:</span>
-            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Impossible to create sample </span><span class="si">%s</span><span class="s1">. A sample with the same name already &#39;</span>
-                                <span class="s1">&#39;exsists in the project. &#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">samples</span>
+    <span class="k">def</span> <span class="nf">_createSubstancesDataFrames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataframesList</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Creates substances in the project if not already present, For each substance link a dictionary of all its values</span>
+<span class="sd">         from the dataframe row. &#39;&#39;&#39;</span>
 
+        <span class="n">substancesDataFrames</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">dataFrame</span> <span class="ow">in</span> <span class="n">dataframesList</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">dataFrameAsDict</span> <span class="ow">in</span> <span class="n">dataFrame</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">SUBSTANCE_NAME</span> <span class="ow">in</span> <span class="n">dataFrame</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dataFrameAsDict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">SUBSTANCE_NAME</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SU:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span><span class="p">):</span>
+                                    <span class="n">substance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">newSubstance</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+                                    <span class="n">substancesDataFrames</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="n">substance</span><span class="p">:</span> <span class="n">dataFrameAsDict</span><span class="p">})</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Impossible to create substance </span><span class="si">%s</span><span class="s1">. A substance with the same name already &#39;</span>
+                                                        <span class="s1">&#39;exsists in the project. &#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">)</span>
 
-  <span class="c1">######################################################################################################################</span>
-  <span class="c1">######################            CREATE SPECTRUM GROUPS                ##############################################</span>
-  <span class="c1">######################################################################################################################</span>
+        <span class="k">return</span> <span class="n">substancesDataFrames</span>
 
+    <span class="c1">######################################################################################################################</span>
+    <span class="c1">######################                  CREATE SAMPLES                  ##############################################</span>
+    <span class="c1">######################################################################################################################</span>
 
+    <span class="k">def</span> <span class="nf">_createSamplesDataDicts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataframesList</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Creates samples in the project if not already present, For each sample link a dictionary of all its values</span>
+<span class="sd">         from the dataframe row. &#39;&#39;&#39;</span>
+        <span class="n">samplesDataFrames</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1">## first creates samples without duplicates,</span>
+        <span class="n">samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_createSamples</span><span class="p">(</span><span class="n">dataframesList</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1">## Second creates dataframes to dispatch the properties,</span>
+            <span class="k">for</span> <span class="n">dataFrame</span> <span class="ow">in</span> <span class="n">dataframesList</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">dataFrameAsDict</span> <span class="ow">in</span> <span class="n">dataFrame</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">SAMPLE_NAME</span> <span class="ow">in</span> <span class="n">dataFrame</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dataFrameAsDict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">SAMPLE_NAME</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                                    <span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SA:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+                                    <span class="k">if</span> <span class="n">sample</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                                        <span class="n">samplesDataFrames</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="n">sample</span><span class="p">:</span> <span class="n">dataFrameAsDict</span><span class="p">})</span>
 
-  <span class="k">def</span> <span class="nf">_createSpectrumGroups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataframesList</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Creates SpectrumGroup in the project if not already present. Otherwise finds another name a creates new one.</span>
-<span class="sd">    dropping the same file over and over will create new spectrum groups each time&#39;&#39;&#39;</span>
-    <span class="n">spectrumGroups</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">dataFrame</span> <span class="ow">in</span> <span class="n">dataframesList</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">SPECTRUM_GROUP_NAME</span> <span class="ow">in</span> <span class="n">dataFrame</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">groupName</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">((</span><span class="n">dataFrame</span><span class="p">[</span><span class="n">SPECTRUM_GROUP_NAME</span><span class="p">]))):</span>
-          <span class="c1"># name = self._checkDuplicatedSpectrumGroupName(groupName)</span>
-          <span class="n">newSG</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_createNewSpectrumGroup</span><span class="p">(</span><span class="n">groupName</span><span class="p">)</span>
-          <span class="n">spectrumGroups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newSG</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">spectrumGroups</span>
+        <span class="k">return</span> <span class="n">samplesDataFrames</span>
 
-  <span class="c1">##keep this code</span>
-  <span class="c1"># def _checkDuplicatedSpectrumGroupName(self, name):</span>
-  <span class="c1">#   &#39;Checks in the preject if a spectrumGroup name exists already and returns a new available name &#39;</span>
-  <span class="c1">#   if self._project:</span>
-  <span class="c1">#     for sg in self._project.spectrumGroups:</span>
-  <span class="c1">#       if sg.name == name:</span>
-  <span class="c1">#         name += &#39;@&#39;</span>
-  <span class="c1">#     return name</span>
+    <span class="k">def</span> <span class="nf">_createSamples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataframesList</span><span class="p">):</span>
+        <span class="n">samples</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">dataFrame</span> <span class="ow">in</span> <span class="n">dataframesList</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">SAMPLE_NAME</span> <span class="ow">in</span> <span class="n">dataFrame</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">((</span><span class="n">dataFrame</span><span class="p">[</span><span class="n">SAMPLE_NAME</span><span class="p">]))):</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SA:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)):</span>
+                        <span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">newSample</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+                        <span class="n">samples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">_createNewSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="p">:</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SG:&#39;</span> <span class="o">+</span> <span class="n">name</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">newSpectrumGroup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Impossible to create the spectrumGroup </span><span class="si">%s</span><span class="s1">. A spectrumGroup with the same name already &#39;</span>
-                            <span class="s1">&#39;exsists in the project. &#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Impossible to create sample </span><span class="si">%s</span><span class="s1">. A sample with the same name already &#39;</span>
+                                            <span class="s1">&#39;exsists in the project. &#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">samples</span>
 
-        <span class="c1"># name = self._checkDuplicatedSpectrumGroupName(name)</span>
-        <span class="c1"># self._createNewSpectrumGroup(name)</span>
+    <span class="c1">######################################################################################################################</span>
+    <span class="c1">######################            CREATE SPECTRUM GROUPS                ##############################################</span>
+    <span class="c1">######################################################################################################################</span>
 
+    <span class="k">def</span> <span class="nf">_createSpectrumGroups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataframesList</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Creates SpectrumGroup in the project if not already present. Otherwise finds another name a creates new one.</span>
+<span class="sd">        dropping the same file over and over will create new spectrum groups each time&#39;&#39;&#39;</span>
+        <span class="n">spectrumGroups</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">dataFrame</span> <span class="ow">in</span> <span class="n">dataframesList</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">SPECTRUM_GROUP_NAME</span> <span class="ow">in</span> <span class="n">dataFrame</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">groupName</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">((</span><span class="n">dataFrame</span><span class="p">[</span><span class="n">SPECTRUM_GROUP_NAME</span><span class="p">]))):</span>
+                    <span class="c1"># name = self._checkDuplicatedSpectrumGroupName(groupName)</span>
+                    <span class="n">newSG</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_createNewSpectrumGroup</span><span class="p">(</span><span class="n">groupName</span><span class="p">)</span>
+                    <span class="n">spectrumGroups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newSG</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">spectrumGroups</span>
 
-  <span class="c1">######################################################################################################################</span>
-  <span class="c1">######################             LOAD SPECTRA ON PROJECT              ##############################################</span>
-  <span class="c1">######################################################################################################################</span>
+    <span class="c1">##keep this code</span>
+    <span class="c1"># def _checkDuplicatedSpectrumGroupName(self, name):</span>
+    <span class="c1">#   &#39;Checks in the preject if a spectrumGroup name exists already and returns a new available name &#39;</span>
+    <span class="c1">#   if self._project:</span>
+    <span class="c1">#     for sg in self._project.spectrumGroups:</span>
+    <span class="c1">#       if sg.name == name:</span>
+    <span class="c1">#         name += &#39;@&#39;</span>
+    <span class="c1">#     return name</span>
 
+    <span class="k">def</span> <span class="nf">_createNewSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SG:&#39;</span> <span class="o">+</span> <span class="n">name</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">newSpectrumGroup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Impossible to create the spectrumGroup </span><span class="si">%s</span><span class="s1">. A spectrumGroup with the same name already &#39;</span>
+                                    <span class="s1">&#39;exsists in the project. &#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">_loadSpectraForSheet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dictLists</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    If only the file name is given:</span>
-<span class="sd">    - All paths are relative to the excel file! So the spectrum file of bruker top directory must be in the same directory</span>
-<span class="sd">    of the excel file.</span>
-<span class="sd">    If the full path is given, from the root to the spectrum file name, then it uses that.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">for</span> <span class="n">objDict</span> <span class="ow">in</span> <span class="n">dictLists</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">obj</span> <span class="p">,</span> <span class="n">dct</span> <span class="ow">in</span> <span class="n">objDict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-          <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dct</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">SPECTRUM_PATH</span><span class="p">:</span>
-              <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>                     <span class="c1">### the full path is given:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_addSpectrum</span><span class="p">(</span><span class="n">filePath</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">dct</span><span class="o">=</span><span class="n">dct</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+                <span class="c1"># name = self._checkDuplicatedSpectrumGroupName(name)</span>
+                <span class="c1"># self._createNewSpectrumGroup(name)</span>
 
-              <span class="k">else</span><span class="p">:</span>                                        <span class="c1">### needs to find the path from the excel file:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">directoryPath</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">excelPath</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
-                <span class="n">filePath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">directoryPath</span><span class="o">+</span><span class="s1">&#39;/&#39;</span><span class="o">+</span><span class="n">value</span>
-                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filePath</span><span class="p">):</span>               <span class="c1">### is a folder, e.g Bruker type. The project can handle.</span>
-                  <span class="bp">self</span><span class="o">.</span><span class="n">_addSpectrum</span><span class="p">(</span><span class="n">filePath</span><span class="o">=</span><span class="n">filePath</span><span class="p">,</span> <span class="n">dct</span><span class="o">=</span><span class="n">dct</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+    <span class="c1">######################################################################################################################</span>
+    <span class="c1">######################             LOAD SPECTRA ON PROJECT              ##############################################</span>
+    <span class="c1">######################################################################################################################</span>
 
+    <span class="k">def</span> <span class="nf">_loadSpectraForSheet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dictLists</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        If only the file name is given:</span>
+<span class="sd">        - All paths are relative to the excel file! So the spectrum file of bruker top directory must be in the same directory</span>
+<span class="sd">        of the excel file.</span>
+<span class="sd">        If the full path is given, from the root to the spectrum file name, then it uses that.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">objDict</span> <span class="ow">in</span> <span class="n">dictLists</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">obj</span><span class="p">,</span> <span class="n">dct</span> <span class="ow">in</span> <span class="n">objDict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dct</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">SPECTRUM_PATH</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+                                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>  <span class="c1"># means it&#39;s a pathlike str### the full path is given:</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">_addSpectrum</span><span class="p">(</span><span class="n">filePath</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">dct</span><span class="o">=</span><span class="n">dct</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
 
-                <span class="k">else</span><span class="p">:</span>                       <span class="c1">### is a spectrum file, The project needs to get the extension: e.g .hdf5</span>
-                  <span class="n">newFilePath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
-                  <span class="k">try</span><span class="p">:</span>
-                    <span class="n">filesWithExtension</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">newFilePath</span><span class="p">)</span> <span class="k">if</span> <span class="n">isfile</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">newFilePath</span><span class="p">,</span> <span class="n">f</span><span class="p">))]</span>
-                    <span class="k">for</span> <span class="n">fileWithExtension</span> <span class="ow">in</span> <span class="n">filesWithExtension</span><span class="p">:</span>
-                      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">fileWithExtension</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="s1">&#39;/&#39;</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span> <span class="c1"># is a relative path from the excel plus file without extension</span>
-                          <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">fileWithExtension</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">value</span><span class="p">:</span>
-                          <span class="n">filePath</span> <span class="o">=</span> <span class="n">newFilePath</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">fileWithExtension</span>
-                          <span class="bp">self</span><span class="o">.</span><span class="n">_addSpectrum</span><span class="p">(</span><span class="n">filePath</span><span class="o">=</span><span class="n">filePath</span><span class="p">,</span> <span class="n">dct</span><span class="o">=</span><span class="n">dct</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
-                  <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-
-
-
-  <span class="k">def</span> <span class="nf">_addSpectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filePath</span><span class="p">,</span> <span class="n">dct</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-
-<span class="sd">    :param filePath: spectrum full file path</span>
-<span class="sd">    :param dct:  dict with information for the spectrum. eg EXP type</span>
-<span class="sd">    :obj: obj to link the spectrum to. E.g. Sample or Substance,</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_linkSpectrumToObj</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dct</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">EXP_TYPE</span> <span class="ow">in</span> <span class="n">dct</span><span class="p">:</span>
-          <span class="k">try</span><span class="p">:</span>
-            <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">experimentType</span> <span class="o">=</span> <span class="n">dct</span><span class="p">[</span><span class="n">EXP_TYPE</span><span class="p">]</span>
-          <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">_debug3</span><span class="p">(</span><span class="n">getLogger</span><span class="p">(),</span> <span class="n">msg</span><span class="o">=</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dct</span><span class="p">[</span><span class="n">EXP_TYPE</span><span class="p">]))</span>
-
-  <span class="c1">######################################################################################################################</span>
-  <span class="c1">######################              ADD SPECTRUM TO RELATIVE OBJECTS              ####################################</span>
-  <span class="c1">######################################################################################################################</span>
+                            <span class="k">else</span><span class="p">:</span>  <span class="c1">### needs to find the path from the excel file:</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">directoryPath</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">excelPath</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+                                <span class="n">filePath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">directoryPath</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filePath</span><span class="p">):</span>  <span class="c1">### is a folder, e.g Bruker type. The project can handle.</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">_addSpectrum</span><span class="p">(</span><span class="n">filePath</span><span class="o">=</span><span class="n">filePath</span><span class="p">,</span> <span class="n">dct</span><span class="o">=</span><span class="n">dct</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
 
 
-  <span class="k">def</span> <span class="nf">_linkSpectrumToObj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">,</span> <span class="n">dct</span><span class="p">):</span>
-    <span class="kn">from</span> <span class="nn">ccpn.core.Sample</span> <span class="kn">import</span> <span class="n">Sample</span>
-    <span class="kn">from</span> <span class="nn">ccpn.core.Substance</span> <span class="kn">import</span> <span class="n">Substance</span>
+                                <span class="k">else</span><span class="p">:</span>  <span class="c1">### is a spectrum file, The project needs to get the extension: e.g .hdf5</span>
+                                    <span class="n">newFilePath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
+                                    <span class="k">try</span><span class="p">:</span>
+                                        <span class="n">filesWithExtension</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">newFilePath</span><span class="p">)</span> <span class="k">if</span> <span class="n">isfile</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">newFilePath</span><span class="p">,</span> <span class="n">f</span><span class="p">))]</span>
+                                        <span class="k">for</span> <span class="n">fileWithExtension</span> <span class="ow">in</span> <span class="n">filesWithExtension</span><span class="p">:</span>
+                                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">fileWithExtension</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                                                <span class="k">if</span> <span class="s1">&#39;/&#39;</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>  <span class="c1"># is a relative path from the excel plus file without extension</span>
+                                                    <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                                                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">fileWithExtension</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">value</span><span class="p">:</span>
+                                                    <span class="n">filePath</span> <span class="o">=</span> <span class="n">newFilePath</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">fileWithExtension</span>
+                                                    <span class="bp">self</span><span class="o">.</span><span class="n">_addSpectrum</span><span class="p">(</span><span class="n">filePath</span><span class="o">=</span><span class="n">filePath</span><span class="p">,</span> <span class="n">dct</span><span class="o">=</span><span class="n">dct</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+                                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Substance</span><span class="p">):</span>
-      <span class="n">obj</span><span class="o">.</span><span class="n">referenceSpectra</span> <span class="o">+=</span> <span class="p">(</span><span class="n">spectrum</span><span class="p">,)</span>
+    <span class="k">def</span> <span class="nf">_addSpectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filePath</span><span class="p">,</span> <span class="n">dct</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Sample</span><span class="p">):</span>
-      <span class="n">obj</span><span class="o">.</span><span class="n">spectra</span> <span class="o">+=</span> <span class="p">(</span><span class="n">spectrum</span><span class="p">,)</span>
+<span class="sd">        :param filePath: spectrum full file path</span>
+<span class="sd">        :param dct:  dict with information for the spectrum. eg EXP type</span>
+<span class="sd">        :obj: obj to link the spectrum to. E.g. Sample or Substance,</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_linkSpectrumToObj</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dct</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">EXP_TYPE</span> <span class="ow">in</span> <span class="n">dct</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">experimentType</span> <span class="o">=</span> <span class="n">dct</span><span class="p">[</span><span class="n">EXP_TYPE</span><span class="p">]</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="k">print</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">dct</span><span class="p">)</span>
+                        <span class="c1"># _debug3(getLogger(), msg=(e, data[0], dct[EXP_TYPE]))</span>
 
-    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dct</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-      <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">SPECTRUM_GROUP_NAME</span><span class="p">:</span>
-        <span class="n">spectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SG:&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
-        <span class="k">if</span> <span class="n">spectrumGroup</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-          <span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span> <span class="o">+=</span> <span class="p">(</span><span class="n">spectrum</span><span class="p">,)</span>
+    <span class="c1">######################################################################################################################</span>
+    <span class="c1">######################              ADD SPECTRUM TO RELATIVE OBJECTS              ####################################</span>
+    <span class="c1">######################################################################################################################</span>
 
+    <span class="k">def</span> <span class="nf">_linkSpectrumToObj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">,</span> <span class="n">dct</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.Sample</span> <span class="kn">import</span> <span class="n">Sample</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.Substance</span> <span class="kn">import</span> <span class="n">Substance</span>
 
-  <span class="c1">######################################################################################################################</span>
-  <span class="c1">######################            DISPATCH ATTRIBUTES TO RELATIVE OBJECTS         ####################################</span>
-  <span class="c1">######################################################################################################################</span>
-
-
-  <span class="k">def</span> <span class="nf">_dispatchAttrsToObjs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataDicts</span><span class="p">):</span>
-    <span class="kn">from</span> <span class="nn">ccpn.core.Sample</span> <span class="kn">import</span> <span class="n">Sample</span>
-    <span class="kn">from</span> <span class="nn">ccpn.core.Substance</span> <span class="kn">import</span> <span class="n">Substance</span>
-
-    <span class="k">for</span> <span class="n">objDict</span> <span class="ow">in</span> <span class="n">dataDicts</span><span class="p">:</span>
-      <span class="k">for</span> <span class="n">obj</span><span class="p">,</span> <span class="n">dct</span> <span class="ow">in</span> <span class="n">objDict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Substance</span><span class="p">):</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">_setWrapperProperties</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">SUBSTANCE_PROPERTIES</span><span class="p">,</span> <span class="n">dct</span><span class="p">)</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">referenceSpectra</span> <span class="o">+=</span> <span class="p">(</span><span class="n">spectrum</span><span class="p">,)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Sample</span><span class="p">):</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">_setWrapperProperties</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">SAMPLE_PROPERTIES</span><span class="p">,</span> <span class="n">dct</span><span class="p">)</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">_createSampleComponents</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">dct</span><span class="p">)</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">spectra</span> <span class="o">+=</span> <span class="p">(</span><span class="n">spectrum</span><span class="p">,)</span>
 
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dct</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">SPECTRUM_GROUP_NAME</span><span class="p">:</span>
+                <span class="n">spectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SG:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">spectrumGroup</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span> <span class="o">+=</span> <span class="p">(</span><span class="n">spectrum</span><span class="p">,)</span>
 
-  <span class="k">def</span> <span class="nf">_setWrapperProperties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wrapperObject</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">attr</span> <span class="o">==</span> <span class="n">synonyms</span><span class="p">:</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getDFValue</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-          <span class="nb">setattr</span><span class="p">(</span><span class="n">wrapperObject</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="p">(</span><span class="n">value</span><span class="p">,))</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-          <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">wrapperObject</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">wrapperObject</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="nb">setattr</span><span class="p">(</span><span class="n">wrapperObject</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getDFValue</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">))</span>
+    <span class="c1">######################################################################################################################</span>
+    <span class="c1">######################            DISPATCH ATTRIBUTES TO RELATIVE OBJECTS         ####################################</span>
+    <span class="c1">######################################################################################################################</span>
 
-        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span> <span class="c1">#wrapper needs a int</span>
-          <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getDFValue</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">)</span>
-          <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="nb">setattr</span><span class="p">(</span><span class="n">wrapperObject</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">_dispatchAttrsToObjs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataDicts</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.Sample</span> <span class="kn">import</span> <span class="n">Sample</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.Substance</span> <span class="kn">import</span> <span class="n">Substance</span>
 
-        <span class="k">except</span><span class="p">:</span>
-          <span class="k">print</span><span class="p">(</span> <span class="s1">&#39;Value  not set for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span><span class="n">attr</span><span class="p">)</span>
-          <span class="n">_debug3</span><span class="p">(</span><span class="n">getLogger</span><span class="p">(),</span> <span class="n">msg</span><span class="o">=</span><span class="p">(</span> <span class="s1">&#39;Value  not set for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span><span class="n">attr</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">objDict</span> <span class="ow">in</span> <span class="n">dataDicts</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">obj</span><span class="p">,</span> <span class="n">dct</span> <span class="ow">in</span> <span class="n">objDict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Substance</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_setWrapperProperties</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">SUBSTANCE_PROPERTIES</span><span class="p">,</span> <span class="n">dct</span><span class="p">)</span>
 
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Sample</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_setWrapperProperties</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">SAMPLE_PROPERTIES</span><span class="p">,</span> <span class="n">dct</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_createSampleComponents</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">dct</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">_setWrapperProperties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wrapperObject</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">attr</span> <span class="o">==</span> <span class="n">synonyms</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getDFValue</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="n">wrapperObject</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="p">(</span><span class="n">value</span><span class="p">,))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">wrapperObject</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">wrapperObject</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="nb">setattr</span><span class="p">(</span><span class="n">wrapperObject</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getDFValue</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">))</span>
 
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1">#wrapper needs a int</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getDFValue</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="nb">setattr</span><span class="p">(</span><span class="n">wrapperObject</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
 
-  <span class="k">def</span> <span class="nf">_getDFValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-    <span class="n">value</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-                     <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">header</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="n">NOTGIVEN</span><span class="p">]</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Value  not set for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">attr</span><span class="p">)</span>
+                    <span class="n">_debug3</span><span class="p">(</span><span class="n">getLogger</span><span class="p">(),</span> <span class="n">msg</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Value  not set for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">attr</span><span class="p">))</span>
 
+    <span class="k">def</span> <span class="nf">_getDFValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                 <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">header</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="n">NOTGIVEN</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
 
+    <span class="c1">######################################################################################################################</span>
+    <span class="c1">######################                    ADD SAMPLE COMPONENTS                   ####################################</span>
+    <span class="c1">######################################################################################################################</span>
 
-
-  <span class="c1">######################################################################################################################</span>
-  <span class="c1">######################                    ADD SAMPLE COMPONENTS                   ####################################</span>
-  <span class="c1">######################################################################################################################</span>
-
-  <span class="k">def</span> <span class="nf">_createSampleComponents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-    <span class="n">sampleComponentsNames</span> <span class="o">=</span> <span class="p">[[</span><span class="n">header</span><span class="p">,</span> <span class="n">sampleComponentName</span><span class="p">]</span> <span class="k">for</span> <span class="n">header</span><span class="p">,</span> <span class="n">sampleComponentName</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span>
-                        <span class="n">header</span> <span class="o">==</span> <span class="n">SAMPLE_COMPONENTS</span> <span class="ow">and</span> <span class="n">sampleComponentName</span> <span class="o">!=</span> <span class="n">NOTGIVEN</span><span class="p">]</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sample</span><span class="o">.</span><span class="n">sampleComponents</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sampleComponentsNames</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">sampleComponentsNames</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">):</span>
-          <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SC:&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)):</span>
-            <span class="n">sampleComponent</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">newSampleComponent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)))</span>
-            <span class="n">sampleComponent</span><span class="o">.</span><span class="n">role</span> <span class="o">=</span> <span class="s1">&#39;Compound&#39;</span></div>
+    <span class="k">def</span> <span class="nf">_createSampleComponents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="n">sampleComponentsNames</span> <span class="o">=</span> <span class="p">[[</span><span class="n">header</span><span class="p">,</span> <span class="n">sampleComponentName</span><span class="p">]</span> <span class="k">for</span> <span class="n">header</span><span class="p">,</span> <span class="n">sampleComponentName</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span>
+                                 <span class="n">header</span> <span class="o">==</span> <span class="n">SAMPLE_COMPONENTS</span> <span class="ow">and</span> <span class="n">sampleComponentName</span> <span class="o">!=</span> <span class="n">NOTGIVEN</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sample</span><span class="o">.</span><span class="n">sampleComponents</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sampleComponentsNames</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">sampleComponentsNames</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SC:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)):</span>
+                        <span class="n">sampleComponent</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">newSampleComponent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)))</span>
+                        <span class="n">sampleComponent</span><span class="o">.</span><span class="n">role</span> <span class="o">=</span> <span class="s1">&#39;Compound&#39;</span></div>
 </pre></div>
 
           </div>

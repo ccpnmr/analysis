@@ -64,37 +64,37 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:50 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: simon $&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>      <span class="c1"># ejb</span>
 
 
 <div class="viewcode-block" id="TabDialog"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.testtabbed.TabDialog">[docs]</a><span class="k">class</span> <span class="nc">TabDialog</span><span class="p">(</span><span class="n">CcpnDialog</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileName</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Tab Dialog&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
-        <span class="n">CcpnDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileName</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Tab Dialog&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">CcpnDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
         <span class="n">fileInfo</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QFileInfo</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span>
 
-        <span class="n">tabWidget</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTabWidget</span><span class="p">()</span>
+        <span class="n">tabWidget</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QTabWidget</span><span class="p">()</span>
         <span class="n">tabWidget</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="n">GeneralTab</span><span class="p">(</span><span class="n">fileInfo</span><span class="p">),</span> <span class="s2">&quot;General&quot;</span><span class="p">)</span>
         <span class="n">tabWidget</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="n">PermissionsTab</span><span class="p">(</span><span class="n">fileInfo</span><span class="p">),</span> <span class="s2">&quot;Permissions&quot;</span><span class="p">)</span>
         <span class="n">tabWidget</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="n">ApplicationsTab</span><span class="p">(</span><span class="n">fileInfo</span><span class="p">),</span> <span class="s2">&quot;Applications&quot;</span><span class="p">)</span>
 
-        <span class="n">buttonBox</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDialogButtonBox</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialogButtonBox</span><span class="o">.</span><span class="n">Ok</span> <span class="o">|</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDialogButtonBox</span><span class="o">.</span><span class="n">Cancel</span><span class="p">)</span>
+        <span class="n">buttonBox</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QDialogButtonBox</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QDialogButtonBox</span><span class="o">.</span><span class="n">Ok</span> <span class="o">|</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QDialogButtonBox</span><span class="o">.</span><span class="n">Cancel</span><span class="p">)</span>
 
         <span class="n">buttonBox</span><span class="o">.</span><span class="n">accepted</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">)</span>
         <span class="n">buttonBox</span><span class="o">.</span><span class="n">rejected</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reject</span><span class="p">)</span>
 
-        <span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
         <span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">tabWidget</span><span class="p">)</span>
         <span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">buttonBox</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">mainLayout</span><span class="p">)</span>
@@ -102,31 +102,31 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s2">&quot;Tab Dialog&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="GeneralTab"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.testtabbed.GeneralTab">[docs]</a><span class="k">class</span> <span class="nc">GeneralTab</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+<div class="viewcode-block" id="GeneralTab"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.testtabbed.GeneralTab">[docs]</a><span class="k">class</span> <span class="nc">GeneralTab</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileInfo</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">GeneralTab</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
 
-        <span class="n">fileNameLabel</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;File Name:&quot;</span><span class="p">)</span>
-        <span class="n">fileNameEdit</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLineEdit</span><span class="p">(</span><span class="n">fileInfo</span><span class="o">.</span><span class="n">fileName</span><span class="p">())</span>
+        <span class="n">fileNameLabel</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;File Name:&quot;</span><span class="p">)</span>
+        <span class="n">fileNameEdit</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QLineEdit</span><span class="p">(</span><span class="n">fileInfo</span><span class="o">.</span><span class="n">fileName</span><span class="p">())</span>
 
-        <span class="n">pathLabel</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;Path:&quot;</span><span class="p">)</span>
-        <span class="n">pathValueLabel</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="n">fileInfo</span><span class="o">.</span><span class="n">absoluteFilePath</span><span class="p">())</span>
-        <span class="n">pathValueLabel</span><span class="o">.</span><span class="n">setFrameStyle</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Panel</span> <span class="o">|</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Sunken</span><span class="p">)</span>
+        <span class="n">pathLabel</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;Path:&quot;</span><span class="p">)</span>
+        <span class="n">pathValueLabel</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="n">fileInfo</span><span class="o">.</span><span class="n">absoluteFilePath</span><span class="p">())</span>
+        <span class="n">pathValueLabel</span><span class="o">.</span><span class="n">setFrameStyle</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Panel</span> <span class="o">|</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Sunken</span><span class="p">)</span>
 
-        <span class="n">sizeLabel</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;Size:&quot;</span><span class="p">)</span>
+        <span class="n">sizeLabel</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;Size:&quot;</span><span class="p">)</span>
         <span class="n">size</span> <span class="o">=</span> <span class="n">fileInfo</span><span class="o">.</span><span class="n">size</span><span class="p">()</span> <span class="o">//</span> <span class="mi">1024</span>
-        <span class="n">sizeValueLabel</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2"> K&quot;</span> <span class="o">%</span> <span class="n">size</span><span class="p">)</span>
-        <span class="n">sizeValueLabel</span><span class="o">.</span><span class="n">setFrameStyle</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Panel</span> <span class="o">|</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Sunken</span><span class="p">)</span>
+        <span class="n">sizeValueLabel</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2"> K&quot;</span> <span class="o">%</span> <span class="n">size</span><span class="p">)</span>
+        <span class="n">sizeValueLabel</span><span class="o">.</span><span class="n">setFrameStyle</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Panel</span> <span class="o">|</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Sunken</span><span class="p">)</span>
 
-        <span class="n">lastReadLabel</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;Last Read:&quot;</span><span class="p">)</span>
-        <span class="n">lastReadValueLabel</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="n">fileInfo</span><span class="o">.</span><span class="n">lastRead</span><span class="p">()</span><span class="o">.</span><span class="n">toString</span><span class="p">())</span>
-        <span class="n">lastReadValueLabel</span><span class="o">.</span><span class="n">setFrameStyle</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Panel</span> <span class="o">|</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Sunken</span><span class="p">)</span>
+        <span class="n">lastReadLabel</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;Last Read:&quot;</span><span class="p">)</span>
+        <span class="n">lastReadValueLabel</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="n">fileInfo</span><span class="o">.</span><span class="n">lastRead</span><span class="p">()</span><span class="o">.</span><span class="n">toString</span><span class="p">())</span>
+        <span class="n">lastReadValueLabel</span><span class="o">.</span><span class="n">setFrameStyle</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Panel</span> <span class="o">|</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Sunken</span><span class="p">)</span>
 
-        <span class="n">lastModLabel</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;Last Modified:&quot;</span><span class="p">)</span>
-        <span class="n">lastModValueLabel</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="n">fileInfo</span><span class="o">.</span><span class="n">lastModified</span><span class="p">()</span><span class="o">.</span><span class="n">toString</span><span class="p">())</span>
-        <span class="n">lastModValueLabel</span><span class="o">.</span><span class="n">setFrameStyle</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Panel</span> <span class="o">|</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Sunken</span><span class="p">)</span>
+        <span class="n">lastModLabel</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;Last Modified:&quot;</span><span class="p">)</span>
+        <span class="n">lastModValueLabel</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="n">fileInfo</span><span class="o">.</span><span class="n">lastModified</span><span class="p">()</span><span class="o">.</span><span class="n">toString</span><span class="p">())</span>
+        <span class="n">lastModValueLabel</span><span class="o">.</span><span class="n">setFrameStyle</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Panel</span> <span class="o">|</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Sunken</span><span class="p">)</span>
 
-        <span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
         <span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">fileNameLabel</span><span class="p">)</span>
         <span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">fileNameEdit</span><span class="p">)</span>
         <span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">pathLabel</span><span class="p">)</span>
@@ -141,61 +141,61 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">mainLayout</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="PermissionsTab"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.testtabbed.PermissionsTab">[docs]</a><span class="k">class</span> <span class="nc">PermissionsTab</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+<div class="viewcode-block" id="PermissionsTab"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.testtabbed.PermissionsTab">[docs]</a><span class="k">class</span> <span class="nc">PermissionsTab</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileInfo</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">PermissionsTab</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
 
-        <span class="n">permissionsGroup</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGroupBox</span><span class="p">(</span><span class="s2">&quot;Permissions&quot;</span><span class="p">)</span>
+        <span class="n">permissionsGroup</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGroupBox</span><span class="p">(</span><span class="s2">&quot;Permissions&quot;</span><span class="p">)</span>
 
-        <span class="n">readable</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QCheckBox</span><span class="p">(</span><span class="s2">&quot;Readable&quot;</span><span class="p">)</span>
+        <span class="n">readable</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QCheckBox</span><span class="p">(</span><span class="s2">&quot;Readable&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">fileInfo</span><span class="o">.</span><span class="n">isReadable</span><span class="p">():</span>
             <span class="n">readable</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
 
-        <span class="n">writable</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QCheckBox</span><span class="p">(</span><span class="s2">&quot;Writable&quot;</span><span class="p">)</span>
+        <span class="n">writable</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QCheckBox</span><span class="p">(</span><span class="s2">&quot;Writable&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">fileInfo</span><span class="o">.</span><span class="n">isWritable</span><span class="p">():</span>
             <span class="n">writable</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
 
-        <span class="n">executable</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QCheckBox</span><span class="p">(</span><span class="s2">&quot;Executable&quot;</span><span class="p">)</span>
+        <span class="n">executable</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QCheckBox</span><span class="p">(</span><span class="s2">&quot;Executable&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">fileInfo</span><span class="o">.</span><span class="n">isExecutable</span><span class="p">():</span>
             <span class="n">executable</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
 
-        <span class="n">ownerGroup</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGroupBox</span><span class="p">(</span><span class="s2">&quot;Ownership&quot;</span><span class="p">)</span>
+        <span class="n">ownerGroup</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGroupBox</span><span class="p">(</span><span class="s2">&quot;Ownership&quot;</span><span class="p">)</span>
 
-        <span class="n">ownerLabel</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;Owner&quot;</span><span class="p">)</span>
-        <span class="n">ownerValueLabel</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="n">fileInfo</span><span class="o">.</span><span class="n">owner</span><span class="p">())</span>
-        <span class="n">ownerValueLabel</span><span class="o">.</span><span class="n">setFrameStyle</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Panel</span> <span class="o">|</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Sunken</span><span class="p">)</span>
+        <span class="n">ownerLabel</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;Owner&quot;</span><span class="p">)</span>
+        <span class="n">ownerValueLabel</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="n">fileInfo</span><span class="o">.</span><span class="n">owner</span><span class="p">())</span>
+        <span class="n">ownerValueLabel</span><span class="o">.</span><span class="n">setFrameStyle</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Panel</span> <span class="o">|</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Sunken</span><span class="p">)</span>
 
-        <span class="n">groupLabel</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;Group&quot;</span><span class="p">)</span>
-        <span class="n">groupValueLabel</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="n">fileInfo</span><span class="o">.</span><span class="n">group</span><span class="p">())</span>
-        <span class="n">groupValueLabel</span><span class="o">.</span><span class="n">setFrameStyle</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Panel</span> <span class="o">|</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Sunken</span><span class="p">)</span>
+        <span class="n">groupLabel</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;Group&quot;</span><span class="p">)</span>
+        <span class="n">groupValueLabel</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="n">fileInfo</span><span class="o">.</span><span class="n">group</span><span class="p">())</span>
+        <span class="n">groupValueLabel</span><span class="o">.</span><span class="n">setFrameStyle</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Panel</span> <span class="o">|</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Sunken</span><span class="p">)</span>
 
-        <span class="n">permissionsLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="n">permissionsLayout</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
         <span class="n">permissionsLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">readable</span><span class="p">)</span>
         <span class="n">permissionsLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">writable</span><span class="p">)</span>
         <span class="n">permissionsLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">executable</span><span class="p">)</span>
         <span class="n">permissionsGroup</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">permissionsLayout</span><span class="p">)</span>
 
-        <span class="n">ownerLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="n">ownerLayout</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
         <span class="n">ownerLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">ownerLabel</span><span class="p">)</span>
         <span class="n">ownerLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">ownerValueLabel</span><span class="p">)</span>
         <span class="n">ownerLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">groupLabel</span><span class="p">)</span>
         <span class="n">ownerLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">groupValueLabel</span><span class="p">)</span>
         <span class="n">ownerGroup</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">ownerLayout</span><span class="p">)</span>
 
-        <span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
         <span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">permissionsGroup</span><span class="p">)</span>
         <span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">ownerGroup</span><span class="p">)</span>
         <span class="n">mainLayout</span><span class="o">.</span><span class="n">addStretch</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">mainLayout</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="ApplicationsTab"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.testtabbed.ApplicationsTab">[docs]</a><span class="k">class</span> <span class="nc">ApplicationsTab</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+<div class="viewcode-block" id="ApplicationsTab"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.testtabbed.ApplicationsTab">[docs]</a><span class="k">class</span> <span class="nc">ApplicationsTab</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileInfo</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ApplicationsTab</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
 
-        <span class="n">topLabel</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;Open with:&quot;</span><span class="p">)</span>
+        <span class="n">topLabel</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;Open with:&quot;</span><span class="p">)</span>
 
-        <span class="n">applicationsListBox</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QListWidget</span><span class="p">()</span>
+        <span class="n">applicationsListBox</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QListWidget</span><span class="p">()</span>
         <span class="n">applications</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">31</span><span class="p">):</span>
@@ -203,16 +203,16 @@
 
         <span class="n">applicationsListBox</span><span class="o">.</span><span class="n">insertItems</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">applications</span><span class="p">)</span>
 
-        <span class="n">alwaysCheckBox</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QCheckBox</span><span class="p">()</span>
+        <span class="n">alwaysCheckBox</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QCheckBox</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">fileInfo</span><span class="o">.</span><span class="n">suffix</span><span class="p">():</span>
-            <span class="n">alwaysCheckBox</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QCheckBox</span><span class="p">(</span><span class="s2">&quot;Always use this application to &quot;</span>
+            <span class="n">alwaysCheckBox</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QCheckBox</span><span class="p">(</span><span class="s2">&quot;Always use this application to &quot;</span>
                     <span class="s2">&quot;open files with the extension &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="n">fileInfo</span><span class="o">.</span><span class="n">suffix</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">alwaysCheckBox</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QCheckBox</span><span class="p">(</span><span class="s2">&quot;Always use this application to &quot;</span>
+            <span class="n">alwaysCheckBox</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QCheckBox</span><span class="p">(</span><span class="s2">&quot;Always use this application to &quot;</span>
                     <span class="s2">&quot;open this type of file&quot;</span><span class="p">)</span>
 
-        <span class="n">layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
         <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">topLabel</span><span class="p">)</span>
         <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">applicationsListBox</span><span class="p">)</span>
         <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">alwaysCheckBox</span><span class="p">)</span>
@@ -223,7 +223,7 @@
 
     <span class="kn">import</span> <span class="nn">sys</span>
 
-    <span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
         <span class="n">fileName</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>

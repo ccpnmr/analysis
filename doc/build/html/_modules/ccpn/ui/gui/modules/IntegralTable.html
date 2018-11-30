@@ -55,13 +55,13 @@
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Luca Mureddu $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:45 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -72,314 +72,405 @@
 <span class="c1">#=========================================================================================</span>
 
 
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.CcpnModule</span> <span class="kn">import</span> <span class="n">CcpnModule</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Spacer</span> <span class="kn">import</span> <span class="n">Spacer</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CompoundWidgets</span> <span class="kn">import</span> <span class="n">CheckBoxCompoundWidget</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CompoundWidgets</span> <span class="kn">import</span> <span class="n">ListCompoundWidget</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Table</span> <span class="kn">import</span> <span class="n">ObjectTable</span><span class="p">,</span> <span class="n">Column</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.LinearRegionsPlot</span> <span class="kn">import</span> <span class="n">LinearRegionsPlot</span>
+<span class="c1"># from ccpn.ui.gui.widgets.Table import ObjectTable, Column</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.QuickTable</span> <span class="kn">import</span> <span class="n">QuickTable</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Column</span> <span class="kn">import</span> <span class="n">Column</span><span class="p">,</span> <span class="n">ColumnClass</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib.Notifiers</span> <span class="kn">import</span> <span class="n">Notifier</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownListsForObjects</span> <span class="kn">import</span> <span class="n">IntegralListPulldown</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.IntegralList</span> <span class="kn">import</span> <span class="n">IntegralList</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Integral</span> <span class="kn">import</span> <span class="n">Integral</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.DropBase</span> <span class="kn">import</span> <span class="n">DropBase</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.GuiNotifier</span> <span class="kn">import</span> <span class="n">GuiNotifier</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ScrollArea</span> <span class="kn">import</span> <span class="n">ScrollArea</span>
+
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">()</span>
 <span class="n">ALL</span> <span class="o">=</span> <span class="s1">&#39;&lt;all&gt;&#39;</span>
 
 
 <div class="viewcode-block" id="IntegralTableModule"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.IntegralTable.IntegralTableModule">[docs]</a><span class="k">class</span> <span class="nc">IntegralTableModule</span><span class="p">(</span><span class="n">CcpnModule</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  This class implements the module by wrapping a integralTable instance</span>
-<span class="sd">  &quot;&quot;&quot;</span>
-  <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">False</span>
-  <span class="n">maxSettingsState</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># states are defined as: 0: invisible, 1: both visible, 2: only settings visible</span>
-  <span class="n">settingsPosition</span> <span class="o">=</span> <span class="s1">&#39;top&#39;</span>
-
-  <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;IntegralTableModule&#39;</span>
-
-  <span class="c1"># we are subclassing this Module, hence some more arguments to the init</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Integral Table&#39;</span><span class="p">,</span> <span class="n">integralList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Initialise the Module widgets</span>
+<span class="sd">    This class implements the module by wrapping a integralTable instance</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">CcpnModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">maxSettingsState</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># states are defined as: 0: invisible, 1: both visible, 2: only settings visible</span>
+    <span class="n">settingsPosition</span> <span class="o">=</span> <span class="s1">&#39;top&#39;</span>
 
-    <span class="c1"># Derive application, project, and current from mainWindow</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
+    <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;IntegralTableModule&#39;</span>
+
+    <span class="c1"># we are subclassing this Module, hence some more arguments to the init</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Integral Table&#39;</span><span class="p">,</span> <span class="n">integralList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialise the Module widgets</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">CcpnModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="c1"># Derive application, project, and current from mainWindow</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">integralTable</span> <span class="o">=</span> <span class="n">IntegralTable</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span>
+                                           <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span>
+                                           <span class="n">moduleParent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
+                                           <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                           <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">integralList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selectIntegralList</span><span class="p">(</span><span class="n">integralList</span><span class="p">)</span>
+
+        <span class="c1"># install the event filter to handle maximising from floated dock</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">installMaximiseEventHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_maximise</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_maximise</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Maximise the attached table</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">integralTable</span><span class="o">.</span><span class="n">_maximise</span><span class="p">()</span>
+
+<div class="viewcode-block" id="IntegralTableModule.selectIntegralList"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.IntegralTable.IntegralTableModule.selectIntegralList">[docs]</a>    <span class="k">def</span> <span class="nf">selectIntegralList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">integralList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Manually select a IL from the pullDown</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">integralTable</span><span class="o">.</span><span class="n">_selectIntegralList</span><span class="p">(</span><span class="n">integralList</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_closeModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        CCPN-INTERNAL: used to close the module</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">integralTable</span><span class="o">.</span><span class="n">_close</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">()</span>
+
+<div class="viewcode-block" id="IntegralTableModule.close"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.IntegralTable.IntegralTableModule.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Close the table from the commandline</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">()</span></div></div>
 
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_ITwidget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                            <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
-
-
-    
-    <span class="bp">self</span><span class="o">.</span><span class="n">integralTable</span> <span class="o">=</span> <span class="n">IntegralTable</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span>
-                                         <span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span>
-                                         <span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span>
-                                         <span class="p">,</span> <span class="n">moduleParent</span><span class="o">=</span><span class="bp">self</span>
-                                         <span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-    <span class="c1"># settingsWidget</span>
-
-
-    <span class="k">if</span> <span class="n">integralList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">selectIntegralList</span><span class="p">(</span><span class="n">integralList</span><span class="p">)</span>
-
-<div class="viewcode-block" id="IntegralTableModule.selectIntegralList"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.IntegralTable.IntegralTableModule.selectIntegralList">[docs]</a>  <span class="k">def</span> <span class="nf">selectIntegralList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">integralList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="IntegralTable"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.IntegralTable.IntegralTable">[docs]</a><span class="k">class</span> <span class="nc">IntegralTable</span><span class="p">(</span><span class="n">QuickTable</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Manually select a IL from the pullDown</span>
+<span class="sd">    Class to present a IntegralTable pulldown list, wrapped in a Widget</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">integralTable</span><span class="o">.</span><span class="n">_selectIntegralList</span><span class="p">(</span><span class="n">integralList</span><span class="p">)</span></div>
+    <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;IntegralTable&#39;</span>
+    <span class="n">attributeName</span> <span class="o">=</span> <span class="s1">&#39;integralLists&#39;</span>
 
+    <span class="n">OBJECT</span> <span class="o">=</span> <span class="s1">&#39;object&#39;</span>
+    <span class="n">TABLE</span> <span class="o">=</span> <span class="s1">&#39;table&#39;</span>
 
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">moduleParent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">integralList</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialise the widgets for the module.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Derive application, project, and current from mainWindow</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
+        <span class="k">if</span> <span class="n">mainWindow</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">IntegralTable</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span>
 
-  <span class="k">def</span> <span class="nf">_closeModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    CCPN-INTERNAL: used to close the module</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">integralTable</span><span class="o">.</span><span class="n">_close</span><span class="p">()</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">IntegralTableModule</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">()</span>
+        <span class="n">kwds</span><span class="p">[</span><span class="s1">&#39;setLayout&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>  <span class="c1">## Assure we have a layout with the widget</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">integralList</span> <span class="o">=</span> <span class="bp">None</span>
 
-<div class="viewcode-block" id="IntegralTableModule.close"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.IntegralTable.IntegralTableModule.close">[docs]</a>  <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Close the table from the commandline</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">()</span></div></div>
+        <span class="c1"># strange, need to do this when using scrollArea, but not a Widget</span>
+        <span class="n">parent</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">setHorizontalSpacing</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span> <span class="o">=</span> <span class="n">ScrollArea</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">scrollBarPolicies</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;never&#39;</span><span class="p">,</span> <span class="s1">&#39;never&#39;</span><span class="p">),</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">MinimumExpanding</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">)</span>
 
+        <span class="c1"># create the column objects</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ITcolumns</span> <span class="o">=</span> <span class="n">ColumnClass</span><span class="p">([</span>
+            <span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">integral</span><span class="p">:</span> <span class="n">integral</span><span class="o">.</span><span class="n">serial</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Pid&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">integral</span><span class="p">:</span> <span class="n">integral</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="s1">&#39;Pid of integral&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;_object&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">integral</span><span class="p">:</span> <span class="n">integral</span><span class="p">,</span> <span class="s1">&#39;Object&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Value&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">integral</span><span class="p">:</span> <span class="n">integral</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Lower Limit&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">integral</span><span class="p">:</span> <span class="n">IntegralTable</span><span class="o">.</span><span class="n">_getLowerLimit</span><span class="p">(</span><span class="n">integral</span><span class="p">),</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Higher Limit&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">integral</span><span class="p">:</span> <span class="n">IntegralTable</span><span class="o">.</span><span class="n">_getHigherLimit</span><span class="p">(</span><span class="n">integral</span><span class="p">),</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;ValueError&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">integral</span><span class="p">:</span> <span class="n">integral</span><span class="o">.</span><span class="n">valueError</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Bias&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">integral</span><span class="p">:</span> <span class="n">integral</span><span class="o">.</span><span class="n">bias</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;FigureOfMerit&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">integral</span><span class="p">:</span> <span class="n">integral</span><span class="o">.</span><span class="n">figureOfMerit</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Slopes&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">integral</span><span class="p">:</span> <span class="n">integral</span><span class="o">.</span><span class="n">slopes</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Annotation&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">integral</span><span class="p">:</span> <span class="n">integral</span><span class="o">.</span><span class="n">annotation</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Comment&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">integral</span><span class="p">:</span> <span class="n">integral</span><span class="o">.</span><span class="n">annotation</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">]</span>
+                <span class="p">)</span>  <span class="c1">#      [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]</span>
 
-<div class="viewcode-block" id="IntegralTable"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.IntegralTable.IntegralTable">[docs]</a><span class="k">class</span> <span class="nc">IntegralTable</span><span class="p">(</span><span class="n">ObjectTable</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  Class to present a IntegralTable pulldown list, wrapped in a Widget</span>
-<span class="sd">  &quot;&quot;&quot;</span>
-  <span class="n">columnDefs</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">integral</span><span class="p">:</span> <span class="n">integral</span><span class="o">.</span><span class="n">serial</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-                <span class="p">(</span><span class="s1">&#39;Value&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">integral</span><span class="p">:</span> <span class="n">integral</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-                <span class="p">(</span><span class="s1">&#39;Lower Limit&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">integral</span><span class="p">:</span> <span class="n">IntegralTable</span><span class="o">.</span><span class="n">_getLowerLimit</span><span class="p">(</span><span class="n">integral</span><span class="p">),</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-                <span class="p">(</span><span class="s1">&#39;Higher Limit&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">integral</span><span class="p">:</span><span class="n">IntegralTable</span><span class="o">.</span><span class="n">_getHigherLimit</span><span class="p">(</span><span class="n">integral</span><span class="p">),</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-                <span class="p">(</span><span class="s1">&#39;ValueError&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">integral</span><span class="p">:</span> <span class="n">integral</span><span class="o">.</span><span class="n">valueError</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-                <span class="p">(</span><span class="s1">&#39;Bias&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">integral</span><span class="p">:</span> <span class="n">integral</span><span class="o">.</span><span class="n">bias</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-                <span class="p">(</span><span class="s1">&#39;FigureOfMerit&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">integral</span><span class="p">:</span> <span class="n">integral</span><span class="o">.</span><span class="n">figureOfMerit</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-                <span class="p">(</span><span class="s1">&#39;Slopes&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">integral</span><span class="p">:</span> <span class="n">integral</span><span class="o">.</span><span class="n">slopes</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-                <span class="p">(</span><span class="s1">&#39;Annotation&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">integral</span><span class="p">:</span> <span class="n">integral</span><span class="o">.</span><span class="n">annotation</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-                <span class="p">(</span><span class="s1">&#39;Comment&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">integral</span><span class="p">:</span> <span class="n">integral</span><span class="o">.</span><span class="n">annotation</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+        <span class="c1"># create the table; objects are added later via the displayTableForIntegrals method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spacer</span> <span class="o">=</span> <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span>
+                             <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span>
+                             <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">itWidget</span> <span class="o">=</span> <span class="n">IntegralListPulldown</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">,</span>
+                                             <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                             <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">minimumWidths</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+                                             <span class="n">showSelectName</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                             <span class="n">sizeAdjustPolicy</span><span class="o">=</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QComboBox</span><span class="o">.</span><span class="n">AdjustToContents</span><span class="p">,</span>
+                                             <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectionPulldownCallback</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spacer</span> <span class="o">=</span> <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span>
+                             <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span>
+                             <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">35</span><span class="p">)</span>
 
+        <span class="c1"># initialise the currently attached dataFrame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hiddenColumns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Pid&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataFrameObject</span> <span class="o">=</span> <span class="bp">None</span>
 
-                 <span class="p">]</span>
-  <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;IntegralTable&#39;</span>
-  <span class="n">attributeName</span> <span class="o">=</span> <span class="s1">&#39;integralLists&#39;</span>
+        <span class="c1"># initialise the table</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span>
+                            <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span>
+                            <span class="n">dataFrameObject</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                            <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                            <span class="n">autoResize</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                            <span class="n">selectionCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectionCallback</span><span class="p">,</span>
+                            <span class="n">actionCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_actionCallback</span><span class="p">,</span>
+                            <span class="n">multiSelect</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                            <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">moduleParent</span> <span class="o">=</span> <span class="n">moduleParent</span>
 
-  <span class="n">OBJECT</span> <span class="o">=</span> <span class="s1">&#39;object&#39;</span>
-  <span class="n">TABLE</span> <span class="o">=</span> <span class="s1">&#39;table&#39;</span>
+        <span class="k">if</span> <span class="n">integralList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_selectIntegralList</span><span class="p">(</span><span class="n">integralList</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">application</span><span class="p">,</span> <span class="n">moduleParent</span><span class="p">,</span> <span class="n">integralList</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Initialise the widgets for the module.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">moduleParent</span> <span class="o">=</span> <span class="n">moduleParent</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_application</span> <span class="o">=</span> <span class="n">application</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">project</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_current</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">current</span>
-    <span class="n">kwds</span><span class="p">[</span><span class="s1">&#39;setLayout&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>  <span class="c1">## Assure we have a layout with the widget</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">integralList</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setTableNotifiers</span><span class="p">(</span><span class="n">tableClass</span><span class="o">=</span><span class="n">IntegralList</span><span class="p">,</span>
+                               <span class="n">rowClass</span><span class="o">=</span><span class="n">Integral</span><span class="p">,</span>
+                               <span class="n">cellClassNames</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                               <span class="n">tableName</span><span class="o">=</span><span class="s1">&#39;integralList&#39;</span><span class="p">,</span> <span class="n">rowName</span><span class="o">=</span><span class="s1">&#39;integral&#39;</span><span class="p">,</span>
+                               <span class="n">changeFunc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">displayTableForIntegralList</span><span class="p">,</span>
+                               <span class="n">className</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">attributeName</span><span class="p">,</span>
+                               <span class="n">updateFunc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_update</span><span class="p">,</span>
+                               <span class="n">tableSelection</span><span class="o">=</span><span class="s1">&#39;integralList&#39;</span><span class="p">,</span>
+                               <span class="n">pullDownWidget</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ITcolumns</span><span class="p">,</span>
+                               <span class="n">callBackClass</span><span class="o">=</span><span class="n">Integral</span><span class="p">,</span>
+                               <span class="n">selectCurrentCallBack</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectOnTableCurrentIntegralsNotifierCallback</span><span class="p">,</span>
+                               <span class="n">moduleParent</span><span class="o">=</span><span class="n">moduleParent</span><span class="p">)</span>
 
-    <span class="c1"># create the column objects</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">ITcolumns</span> <span class="o">=</span> <span class="p">[</span><span class="n">Column</span><span class="p">(</span><span class="n">colName</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">tipText</span><span class="o">=</span><span class="n">tipText</span><span class="p">,</span> <span class="n">setEditValue</span><span class="o">=</span><span class="n">editValue</span><span class="p">)</span> <span class="k">for</span>
-                      <span class="n">colName</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">tipText</span><span class="p">,</span> <span class="n">editValue</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">columnDefs</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">droppedNotifier</span> <span class="o">=</span> <span class="n">GuiNotifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                           <span class="p">[</span><span class="n">GuiNotifier</span><span class="o">.</span><span class="n">DROPEVENT</span><span class="p">],</span> <span class="p">[</span><span class="n">DropBase</span><span class="o">.</span><span class="n">PIDS</span><span class="p">],</span>
+                                           <span class="bp">self</span><span class="o">.</span><span class="n">_processDroppedItems</span><span class="p">)</span>
 
-    <span class="c1"># create the table; objects are added later via the displayTableForIntegrals method</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">spacer</span> <span class="o">=</span> <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span>
-                         <span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span>
-                         <span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">itWidget</span> <span class="o">=</span> <span class="n">IntegralListPulldown</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span>
-                                         <span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span>
-                                         <span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">minimumWidths</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
-                                         <span class="p">,</span> <span class="n">showSelectName</span><span class="o">=</span><span class="bp">True</span>
-                                         <span class="p">,</span> <span class="n">sizeAdjustPolicy</span><span class="o">=</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QComboBox</span><span class="o">.</span><span class="n">AdjustToContentsOnFirstShow</span>
-                                         <span class="p">,</span> <span class="n">callback</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selectionPulldownCallback</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">spacer</span> <span class="o">=</span> <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span>
-                         <span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span>
-                         <span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-    <span class="n">ObjectTable</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                         <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ITcolumns</span><span class="p">,</span> <span class="n">objects</span><span class="o">=</span><span class="p">[],</span>
-                         <span class="n">autoResize</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                         <span class="n">selectionCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectionCallback</span><span class="p">,</span>
-                         <span class="n">actionCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_actionCallback</span><span class="p">,</span>
-                         <span class="n">multiSelect</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                         <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
-                         <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_processDroppedItems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        CallBack for Drop events</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pids</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;pids&#39;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_handleDroppedItems</span><span class="p">(</span><span class="n">pids</span><span class="p">,</span> <span class="n">IntegralList</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">itWidget</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_integralListNotifier</span> <span class="o">=</span> <span class="bp">None</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_integralNotifier</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">def</span> <span class="nf">_selectIntegralList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">integralList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Manually select a IntegralList from the pullDown</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">integralList</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;select: No IntegralList selected&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;select: No IntegralList selected&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">integralList</span><span class="p">,</span> <span class="n">IntegralList</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;select: Object is not of type IntegralList&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;select: Object is not of type IntegralList&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">widgetObj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">itWidget</span><span class="o">.</span><span class="n">textList</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">integralList</span><span class="o">.</span><span class="n">pid</span> <span class="o">==</span> <span class="n">widgetObj</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">integralList</span> <span class="o">=</span> <span class="n">integralList</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">itWidget</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">integralList</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">_getPullDownSelection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">itWidget</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_updateSilence</span> <span class="o">=</span> <span class="bp">False</span>  <span class="c1"># flag to silence updating of the table</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_setNotifiers</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">_selectPullDown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">itWidget</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">integralList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_selectIntegralList</span><span class="p">(</span><span class="n">integralList</span><span class="p">)</span>
+<div class="viewcode-block" id="IntegralTable.displayTableForIntegralList"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.IntegralTable.IntegralTable.displayTableForIntegralList">[docs]</a>    <span class="k">def</span> <span class="nf">displayTableForIntegralList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">integralList</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Display the table for the IntegralList&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">itWidget</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">integralList</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update</span><span class="p">(</span><span class="n">integralList</span><span class="p">)</span></div>
 
+    <span class="k">def</span> <span class="nf">_updateCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Notifier callback for updating the table</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">thisIntegralList</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">THEOBJECT</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">attributeName</span><span class="p">)</span>  <span class="c1"># get the integralList</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">integralList</span> <span class="ow">in</span> <span class="n">thisIntegralList</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">displayTableForIntegralList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">integralList</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clearTable</span><span class="p">()</span>
 
-  <span class="k">def</span> <span class="nf">_selectIntegralList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">integralList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Manually select a IntegralList from the pullDown</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">integralList</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;select: No IntegralList selected&#39;</span><span class="p">)</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;select: No IntegralList selected&#39;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">integralList</span><span class="p">,</span> <span class="n">IntegralList</span><span class="p">):</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;select: Object is not of type IntegralList&#39;</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;select: Object is not of type IntegralList&#39;</span><span class="p">)</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">widgetObj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">itWidget</span><span class="o">.</span><span class="n">textList</span><span class="p">:</span>
-          <span class="k">if</span> <span class="n">integralList</span><span class="o">.</span><span class="n">pid</span> <span class="o">==</span> <span class="n">widgetObj</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">integralList</span> <span class="o">=</span> <span class="n">integralList</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">itWidget</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">integralList</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_maximise</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Redraw the table on a maximise event</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">integralList</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">displayTableForIntegralList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">integralList</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
-<div class="viewcode-block" id="IntegralTable.displayTableForIntegralList"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.IntegralTable.IntegralTable.displayTableForIntegralList">[docs]</a>  <span class="k">def</span> <span class="nf">displayTableForIntegralList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">integralList</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Display the table for the IntegralList&quot;</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">itWidget</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">integralList</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_update</span><span class="p">(</span><span class="n">integralList</span><span class="p">)</span></div>
+    <span class="k">def</span> <span class="nf">_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">integralList</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the table</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">blankNotification</span><span class="p">()</span>
+        <span class="n">objs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSelectedObjects</span><span class="p">()</span>
 
-  <span class="k">def</span> <span class="nf">_updateCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Notifier callback for updating the table</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">thisIntegralList</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">THEOBJECT</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">attributeName</span><span class="p">)</span>  <span class="c1"># get the integralList</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">integralList</span> <span class="ow">in</span> <span class="n">thisIntegralList</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">displayTableForIntegralList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">integralList</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">clearTable</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dataFrameObject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDataFrameFromList</span><span class="p">(</span><span class="n">table</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
+                                                          <span class="n">buildList</span><span class="o">=</span><span class="n">integralList</span><span class="o">.</span><span class="n">integrals</span><span class="p">,</span>
+                                                          <span class="n">colDefs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ITcolumns</span><span class="p">,</span>
+                                                          <span class="n">hiddenColumns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_hiddenColumns</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">integralList</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Update the table</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_updateSilence</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">setColumns</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ITcolumns</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">setObjects</span><span class="p">(</span><span class="n">integralList</span><span class="o">.</span><span class="n">integrals</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="c1"># populate from the Pandas dataFrame inside the dataFrameObject</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setTableFromDataFrameObject</span><span class="p">(</span><span class="n">dataFrameObject</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dataFrameObject</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_highLightObjs</span><span class="p">(</span><span class="n">objs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">unblankNotification</span><span class="p">()</span>
 
-<div class="viewcode-block" id="IntegralTable.setUpdateSilence"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.IntegralTable.IntegralTable.setUpdateSilence">[docs]</a>  <span class="k">def</span> <span class="nf">setUpdateSilence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">silence</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Silences/unsilences the update of the table until switched again</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_updateSilence</span> <span class="o">=</span> <span class="n">silence</span></div>
+<div class="viewcode-block" id="IntegralTable.setUpdateSilence"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.IntegralTable.IntegralTable.setUpdateSilence">[docs]</a>    <span class="k">def</span> <span class="nf">setUpdateSilence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">silence</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Silences/unsilences the update of the table until switched again</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_updateSilence</span> <span class="o">=</span> <span class="n">silence</span></div>
 
+    <span class="c1"># def _clearRegions(self):</span>
+    <span class="c1">#     strip = self.current.strip</span>
+    <span class="c1">#     if strip:</span>
+    <span class="c1">#         strip.plotWidget.viewBox._clearIntegralRegions()</span>
 
+    <span class="c1"># def _showRegions(self):</span>
+    <span class="c1">#     strip = self.current.strip</span>
+    <span class="c1">#     if strip:</span>
+    <span class="c1">#         strip.plotWidget.viewBox._showIntegralLines()</span>
 
-  <span class="k">def</span> <span class="nf">_selectionCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">integrals</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    set as current the selected integrals on the table</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">integrals</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_current</span><span class="o">.</span><span class="n">clearIntegrals</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_current</span><span class="o">.</span><span class="n">integrals</span> <span class="o">=</span> <span class="n">integrals</span>
+    <span class="k">def</span> <span class="nf">_selectionCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set as current the selected integrals on the table</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">integrals</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
 
+        <span class="c1"># self._clearRegions()</span>
+        <span class="k">if</span> <span class="n">integrals</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">clearIntegrals</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">integrals</span> <span class="o">=</span> <span class="n">integrals</span>
 
-  <span class="k">def</span> <span class="nf">_actionCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">kw</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Notifier DoubleClick action on item in table</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">NotImplemented</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">_actionCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Notifier DoubleClick action on item in table</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">integral</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
 
-  <span class="k">def</span> <span class="nf">_selectionPulldownCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Notifier Callback for selecting integral from the pull down menu</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">integralList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">integralList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">displayTableForIntegralList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">integralList</span><span class="p">)</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">clearTable</span><span class="p">()</span>
+        <span class="c1"># self._showRegions()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_navigateToPosition</span><span class="p">()</span>
 
+        <span class="c1"># logger.debug(str(NotImplemented))</span>
 
-  <span class="nd">@staticmethod</span>
-  <span class="k">def</span> <span class="nf">_getHigherLimit</span><span class="p">(</span><span class="n">integral</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns HigherLimit</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">integral</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">integral</span><span class="o">.</span><span class="n">limits</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-        <span class="n">limits</span> <span class="o">=</span> <span class="n">integral</span><span class="o">.</span><span class="n">limits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">limits</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-          <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">limits</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">_selectionPulldownCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Notifier Callback for selecting integral from the pull down menu</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">integralList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">integralList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">displayTableForIntegralList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">integralList</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">clearTable</span><span class="p">()</span>
 
-  <span class="nd">@staticmethod</span>
-  <span class="k">def</span> <span class="nf">_getLowerLimit</span><span class="p">(</span><span class="n">integral</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns Lower Limit</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">integral</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">integral</span><span class="o">.</span><span class="n">limits</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">limits</span> <span class="o">=</span> <span class="n">integral</span><span class="o">.</span><span class="n">limits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">limits</span><span class="p">:</span>
-          <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">limits</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">_selectOnTableCurrentIntegralsNotifierCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;callback from a notifier to select the current Integrals  &quot;&quot;&quot;</span>
+        <span class="n">currentIntegrals</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_selectOnTableCurrentIntegrals</span><span class="p">(</span><span class="n">currentIntegrals</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">_selectOnTableCurrentIntegrals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentIntegrals</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; highlight current integrals on the opened integral table &quot;&quot;&quot;</span>
 
-  <span class="nd">@staticmethod</span>
-  <span class="k">def</span> <span class="nf">_getCommentText</span><span class="p">(</span><span class="n">integral</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    CCPN-INTERNAL: Get a comment from ObjectTable</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">try</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">integral</span><span class="o">.</span><span class="n">comment</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">integral</span><span class="o">.</span><span class="n">comment</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">integral</span><span class="o">.</span><span class="n">comment</span>
-    <span class="k">except</span><span class="p">:</span>
-      <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+        <span class="c1"># print(currentIntegrals)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">currentIntegrals</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_highLightObjs</span><span class="p">(</span><span class="n">currentIntegrals</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clearSelection</span><span class="p">()</span>
 
-  <span class="nd">@staticmethod</span>
-  <span class="k">def</span> <span class="nf">_setComment</span><span class="p">(</span><span class="n">integral</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    CCPN-INTERNAL: Insert a comment into ObjectTable</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">integral</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="c1">##### Action callback: Lines on plot</span>
 
-  <span class="k">def</span> <span class="nf">_setNotifiers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Set a Notifier to call when an object is created/deleted/renamed/changed</span>
-<span class="sd">    rename calls on name</span>
-<span class="sd">    change calls on any other attribute</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_clearNotifiers</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_integralListNotifier</span> <span class="o">=</span> <span class="n">Notifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
-                                           <span class="p">,</span> <span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">CREATE</span><span class="p">,</span> <span class="n">Notifier</span><span class="o">.</span><span class="n">DELETE</span><span class="p">,</span> <span class="n">Notifier</span><span class="o">.</span><span class="n">RENAME</span><span class="p">]</span>
-                                           <span class="p">,</span> <span class="n">IntegralList</span><span class="o">.</span><span class="n">__name__</span>
-                                           <span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_updateCallback</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_integralNotifier</span> <span class="o">=</span> <span class="n">Notifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
-                                       <span class="p">,</span> <span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">CREATE</span><span class="p">,</span> <span class="n">Notifier</span><span class="o">.</span><span class="n">DELETE</span><span class="p">,</span> <span class="n">Notifier</span><span class="o">.</span><span class="n">RENAME</span><span class="p">,</span> <span class="n">Notifier</span><span class="o">.</span><span class="n">CHANGE</span><span class="p">]</span>
-                                       <span class="p">,</span> <span class="n">Integral</span><span class="o">.</span><span class="n">__name__</span>
-                                       <span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_updateCallback</span><span class="p">)</span>
+    <span class="c1"># def _showLines(self, integral):</span>
+    <span class="c1">#</span>
+    <span class="c1">#   if self.application is not None:</span>
+    <span class="c1">#     self.strip = self.current.strip</span>
+    <span class="c1">#     if self.strip is not None:</span>
+    <span class="c1">#       self.plotWidget = self.strip.plotWidget</span>
+    <span class="c1">#       if len(integral.limits) == 1:</span>
+    <span class="c1">#         self.linearRegions.setLines(integral.limits[0])</span>
+    <span class="c1">#       self.plotWidget.addItem(self.linearRegions)</span>
 
-  <span class="k">def</span> <span class="nf">_clearNotifiers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    clean up the notifiers</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_integralListNotifier</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_integralListNotifier</span><span class="o">.</span><span class="n">unRegister</span><span class="p">()</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_integralNotifier</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_integralNotifier</span><span class="o">.</span><span class="n">unRegister</span><span class="p">()</span>
+    <span class="c1"># def _clearLines(self):</span>
+    <span class="c1">#   if self.application is not None:</span>
+    <span class="c1">#     self.strip = self.current.strip</span>
+    <span class="c1">#     if self.strip is not None:</span>
+    <span class="c1">#       self.plotWidget = self.strip.plotWidget</span>
+    <span class="c1">#       self.plotWidget.removeItem(self.linearRegions)</span>
+    <span class="c1">#</span>
+    <span class="c1"># def _lineMoved(self):</span>
+    <span class="c1">#   integral = self.current.integral</span>
+    <span class="c1">#   values = []</span>
+    <span class="c1">#   for line in self.linearRegions.lines:</span>
+    <span class="c1">#       values.append(line.pos().x())</span>
+    <span class="c1">#   if integral is not None:</span>
+    <span class="c1">#     integral.limits = [[min(values),max(values)],]</span>
 
-  <span class="k">def</span> <span class="nf">_close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Cleanup the notifiers when the window is closed</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_clearNotifiers</span><span class="p">()</span></div>
+    <span class="k">def</span> <span class="nf">_navigateToPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; If current strip contains the double clicked peak will navigateToPositionInStrip &#39;&#39;&#39;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.Strip</span> <span class="kn">import</span> <span class="n">navigateToPositionInStrip</span><span class="p">,</span> <span class="n">_getCurrentZoomRatio</span>
 
+        <span class="n">integral</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">integral</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">widths</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">widths</span> <span class="o">=</span> <span class="n">_getCurrentZoomRatio</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">viewRange</span><span class="p">())</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">integral</span><span class="o">.</span><span class="n">limits</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">positions</span> <span class="o">=</span> <span class="n">integral</span><span class="o">.</span><span class="n">limits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">navigateToPositionInStrip</span><span class="p">(</span><span class="n">strip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="p">,</span> <span class="n">positions</span><span class="o">=</span><span class="n">positions</span><span class="p">,</span> <span class="n">widths</span><span class="o">=</span><span class="n">widths</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Impossible to navigate to peak position.&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Impossible to navigate to peak position. Set a current strip first&#39;</span><span class="p">)</span>
 
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_getHigherLimit</span><span class="p">(</span><span class="n">integral</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns HigherLimit</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># FIXME Wrapper? BUG if limits is None</span>
+        <span class="k">if</span> <span class="n">integral</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">integral</span><span class="o">.</span><span class="n">limits</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">limits</span> <span class="o">=</span> <span class="n">integral</span><span class="o">.</span><span class="n">limits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">limits</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">limits</span><span class="p">))</span>
 
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_getLowerLimit</span><span class="p">(</span><span class="n">integral</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns Lower Limit</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">integral</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">integral</span><span class="o">.</span><span class="n">limits</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">limits</span> <span class="o">=</span> <span class="n">integral</span><span class="o">.</span><span class="n">limits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">limits</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">limits</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cleanup the notifiers when the window is closed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># self.clearTableNotifiers()</span>
+        <span class="c1"># self._clearRegions()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_close</span><span class="p">()</span></div>
 </pre></div>
 
           </div>

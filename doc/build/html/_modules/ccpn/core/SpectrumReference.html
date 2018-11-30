@@ -57,14 +57,14 @@
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Wayne Boucher $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:30 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -84,248 +84,252 @@
 
 
 <div class="viewcode-block" id="SpectrumReference"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Spectrum.SpectrumReference">[docs]</a><span class="k">class</span> <span class="nc">SpectrumReference</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot; ADVANCED. A **SpectrumReference** holds detailed information about axes and referencing</span>
-<span class="sd">  needed for e.g. multple-quantum, projection, and reduced-dimensionality experiments.</span>
+    <span class="sd">&quot;&quot;&quot; ADVANCED. A **SpectrumReference** holds detailed information about axes and referencing</span>
+<span class="sd">    needed for e.g. multple-quantum, projection, and reduced-dimensionality experiments.</span>
 
 
-<span class="sd">  SpectrumRefefences can only exist for Fourier transformed dimensions.</span>
-<span class="sd">  Required for describing experiments with assignable splittings (e.g. J-coupling, RDC),</span>
-<span class="sd">  reduced dimensionality, more than one nucleus per axis,</span>
-<span class="sd">  or multi-atom parameters (J-dimensions, MQ dimensions).&quot;&quot;&quot;</span>
+<span class="sd">    SpectrumRefefences can only exist for Fourier transformed dimensions.</span>
+<span class="sd">    Required for describing experiments with assignable splittings (e.g. J-coupling, RDC),</span>
+<span class="sd">    reduced dimensionality, more than one nucleus per axis,</span>
+<span class="sd">    or multi-atom parameters (J-dimensions, MQ dimensions).&quot;&quot;&quot;</span>
 
-  <span class="c1">#: Short class name, for PID.</span>
-  <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;SR&#39;</span>
-  <span class="c1"># Attribute it necessary as subclasses must use superclass className</span>
-  <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;SpectrumReference&#39;</span>
+    <span class="c1">#: Short class name, for PID.</span>
+    <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;SR&#39;</span>
+    <span class="c1"># Attribute it necessary as subclasses must use superclass className</span>
+    <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;SpectrumReference&#39;</span>
 
-  <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">Spectrum</span>
+    <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">Spectrum</span>
 
-  <span class="c1"># Type of dimension. Always &#39;Frequency&#39; for frequency (Fourier transformed) dimension</span>
-  <span class="n">dimensionType</span> <span class="o">=</span> <span class="s1">&#39;Frequency&#39;</span>
+    <span class="c1"># Type of dimension. Always &#39;Frequency&#39; for frequency (Fourier transformed) dimension</span>
+    <span class="n">dimensionType</span> <span class="o">=</span> <span class="s1">&#39;Frequency&#39;</span>
 
-  <span class="c1">#: Name of plural link to instances of class</span>
-  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s1">&#39;spectrumReferences&#39;</span>
+    <span class="c1">#: Name of plural link to instances of class</span>
+    <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s1">&#39;spectrumReferences&#39;</span>
 
-  <span class="c1">#: List of child classes.</span>
-  <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1">#: List of child classes.</span>
+    <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
 
-  <span class="c1"># Qualified name of matching API class</span>
-  <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">Nmr</span><span class="o">.</span><span class="n">DataDimRef</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+    <span class="c1"># Qualified name of matching API class</span>
+    <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">Nmr</span><span class="o">.</span><span class="n">DataDimRef</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
 
-  <span class="c1"># CCPN properties</span>
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">_apiSpectrumReference</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Nmr</span><span class="o">.</span><span class="n">DataDimRef</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; CCPN DataDimRef matching Spectrum&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="c1"># CCPN properties</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_apiSpectrumReference</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Nmr</span><span class="o">.</span><span class="n">DataDimRef</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; CCPN DataDimRef matching Spectrum&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;object identifier, used for id&quot;&quot;&quot;</span>
+        <span class="n">dataDimRef</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+        <span class="k">return</span> <span class="n">Pid</span><span class="o">.</span><span class="n">createId</span><span class="p">(</span><span class="n">dataDimRef</span><span class="o">.</span><span class="n">dataDim</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span> <span class="n">dataDimRef</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">serial</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_localCcpnSortKey</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Local sorting key, in context of parent.&quot;&quot;&quot;</span>
+        <span class="n">dataDimRef</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">dataDimRef</span><span class="o">.</span><span class="n">dataDim</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span> <span class="n">dataDimRef</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">serial</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Spectrum</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Spectrum containing spectrumReference.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">dataDim</span><span class="o">.</span><span class="n">dataSource</span><span class="p">]</span>
+
+    <span class="n">spectrum</span> <span class="o">=</span> <span class="n">_parent</span>
+
+    <span class="c1"># Attributes of DataSource and Experiment:</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;dimension number&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">dataDim</span><span class="o">.</span><span class="n">dim</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">referenceSerial</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Spectrum reference serial number&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">serial</span>
+
+    <span class="c1"># Attributes belonging to ExpDimRef and DataDimRef</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">spectrometerFrequency</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Absolute frequency at carrier (or at splitting 0.0). In MHz or dimensionless.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">sf</span>
+
+    <span class="nd">@spectrometerFrequency.setter</span>
+    <span class="k">def</span> <span class="nf">spectrometerFrequency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">sf</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">measurementType</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Type of NMR measurement referred to by this reference. Legal values are:</span>
+<span class="sd">        &#39;Shift&#39;,&#39;ShiftAnisotropy&#39;,&#39;JCoupling&#39;,&#39;Rdc&#39;,&#39;TROESY&#39;,&#39;DipolarCoupling&#39;,</span>
+<span class="sd">        &#39;MQShift&#39;,&#39;T1&#39;,&#39;T2&#39;,&#39;T1rho&#39;,&#39;T1zz&#39;&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">measurementType</span>
+
+    <span class="nd">@measurementType.setter</span>
+    <span class="k">def</span> <span class="nf">measurementType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">measurementType</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">maxAliasedFrequency</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;maximum possible peak frequency (in ppm) for this reference &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">maxAliasedFreq</span>
+
+    <span class="nd">@maxAliasedFrequency.setter</span>
+    <span class="k">def</span> <span class="nf">maxAliasedFrequency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">maxAliasedFreq</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">minAliasedFrequency</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;minimum possible peak frequency (in ppm) for this reference &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">minAliasedFreq</span>
+
+    <span class="nd">@minAliasedFrequency.setter</span>
+    <span class="k">def</span> <span class="nf">minAliasedFrequency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">minAliasedFreq</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">isotopeCodes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Isotope identification strings for isotopes.</span>
+<span class="sd">        NB there can be several isotopes for e.g. J-coupling or multiple quantum coherence.&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">isotopeCodes</span>
+
+    <span class="nd">@isotopeCodes.setter</span>
+    <span class="k">def</span> <span class="nf">isotopeCodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">isotopeCodes</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">foldingMode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;folding mode matching reference (values: &#39;aliased&#39;, &#39;folded&#39;, None)&quot;&quot;&quot;</span>
+        <span class="n">dd</span> <span class="o">=</span> <span class="p">{</span><span class="bp">True</span><span class="p">:</span> <span class="s1">&#39;folded&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">:</span> <span class="s1">&#39;aliased&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">dd</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">isFolded</span><span class="p">]</span>
+
+    <span class="nd">@foldingMode.setter</span>
+    <span class="k">def</span> <span class="nf">foldingMode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">dd</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;aliased&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span> <span class="s1">&#39;folded&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">None</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">isFolded</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="n">value</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">axisCode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Reference axisCode &quot;&quot;&quot;</span>
+        <span class="n">expDimRef</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span>
+        <span class="n">dataDim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">dataDim</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">expDimRef</span><span class="o">.</span><span class="n">axisCode</span>
+        <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">dataDim</span><span class="o">.</span><span class="n">dataSource</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">resetAxisCodes</span><span class="p">()</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">expDimRef</span><span class="o">.</span><span class="n">axisCode</span>
+        <span class="c1">#</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="nd">@axisCode.setter</span>
+    <span class="k">def</span> <span class="nf">axisCode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">axisCode</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">axisUnit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;unit for transformed data using thei reference (most commonly &#39;ppm&#39;)&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">unit</span>
+
+    <span class="nd">@axisUnit.setter</span>
+    <span class="k">def</span> <span class="nf">axisUnit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="c1"># Attributes belonging to DataDimRef</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">referencePoint</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;point used for axis (chemical shift) referencing.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">refPoint</span>
+
+    <span class="nd">@referencePoint.setter</span>
+    <span class="k">def</span> <span class="nf">referencePoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">refPoint</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">referenceValue</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;value used for axis (chemical shift) referencing.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">refValue</span>
+
+    <span class="nd">@referenceValue.setter</span>
+    <span class="k">def</span> <span class="nf">referenceValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">refValue</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">spectralWidth</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;spectral width after processing (generally in ppm) &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">spectralWidth</span>
+
+    <span class="nd">@spectralWidth.setter</span>
+    <span class="k">def</span> <span class="nf">spectralWidth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Attempt to set spectralWidth to </span><span class="si">%s</span><span class="s2">&quot;</span>
+                             <span class="o">%</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># We assume that the number of points is constant, so setting SW changes valuePerPoint</span>
+            <span class="n">dataDimRef</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+            <span class="n">swold</span> <span class="o">=</span> <span class="n">dataDimRef</span><span class="o">.</span><span class="n">spectralWidth</span>
+            <span class="k">if</span> <span class="n">dataDimRef</span><span class="o">.</span><span class="n">localValuePerPoint</span><span class="p">:</span>
+                <span class="n">dataDimRef</span><span class="o">.</span><span class="n">localValuePerPoint</span> <span class="o">*=</span> <span class="p">(</span><span class="n">value</span> <span class="o">/</span> <span class="n">swold</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dataDimRef</span><span class="o">.</span><span class="n">dataDim</span><span class="o">.</span><span class="n">valuePerPoint</span> <span class="o">*=</span> <span class="p">(</span><span class="n">value</span> <span class="o">/</span> <span class="n">swold</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">isAcquisition</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;True if this dimension is the acquisition dimension?&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">dataDim</span><span class="o">.</span><span class="n">expDim</span><span class="o">.</span><span class="n">isAquisition</span>
+
+    <span class="nd">@isAcquisition.setter</span>
+    <span class="k">def</span> <span class="nf">isAcquisition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">dataDim</span><span class="o">.</span><span class="n">expDim</span><span class="o">.</span><span class="n">isAquisition</span> <span class="o">=</span> <span class="n">value</span>
+
+<div class="viewcode-block" id="SpectrumReference.pointToValue"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Spectrum.SpectrumReference.pointToValue">[docs]</a>    <span class="k">def</span> <span class="nf">pointToValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Axis (ppm) value corresponding to point&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">pointToValue</span><span class="p">(</span><span class="n">point</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SpectrumReference.valueToPoint"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Spectrum.SpectrumReference.valueToPoint">[docs]</a>    <span class="k">def</span> <span class="nf">valueToPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Point number (float) corresponding to (ppm) value&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">valueToPoint</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+    <span class="c1">#=========================================================================================</span>
+    <span class="c1"># Implementation functions</span>
+    <span class="c1">#=========================================================================================</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Spectrum</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;get wrappedData (Nmr.DataDimRefs) for all Spectrum children of parent Spectrum&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">y</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedDataDims</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s1">&#39;dataDimRefs&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">sortedDataDimRefs</span><span class="p">()]</span>
+
+    <span class="k">def</span> <span class="nf">_finaliseAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;change&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">peaks</span><span class="p">:</span>
+                <span class="n">peak</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;change&#39;</span><span class="p">)</span></div>
 
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;object identifier, used for id&quot;&quot;&quot;</span>
-    <span class="n">dataDimRef</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
-    <span class="k">return</span> <span class="n">Pid</span><span class="o">.</span><span class="n">createId</span><span class="p">(</span><span class="n">dataDimRef</span><span class="o">.</span><span class="n">dataDim</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span> <span class="n">dataDimRef</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">serial</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_newSpectrumReference</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Spectrum</span><span class="p">,</span> <span class="n">dimension</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">spectrometerFrequency</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                          <span class="n">isotopeCodes</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">axisCode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">measurementType</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Shift&#39;</span><span class="p">,</span>
+                          <span class="n">maxAliasedFrequency</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">minAliasedFrequency</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                          <span class="n">foldingMode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">axisUnit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">referencePoint</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+                          <span class="n">referenceValue</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SpectrumReference</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Create new SpectrumReference within Spectrum&quot;&quot;&quot;</span>
+    <span class="n">dataSource</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="n">dataDim</span> <span class="o">=</span> <span class="n">dataSource</span><span class="o">.</span><span class="n">findFirstDataDim</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="n">dimension</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dataDim</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot create SpectrumReference for non-existent dimension: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">dimension</span><span class="p">)</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">_localCcpnSortKey</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Local sorting key, in context of parent.&quot;&quot;&quot;</span>
-    <span class="n">dataDimRef</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
-    <span class="k">return</span><span class="p">(</span><span class="n">dataDimRef</span><span class="o">.</span><span class="n">dataDim</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span> <span class="n">dataDimRef</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">serial</span><span class="p">)</span>
+    <span class="n">expDimRef</span> <span class="o">=</span> <span class="n">dataDim</span><span class="o">.</span><span class="n">expDim</span><span class="o">.</span><span class="n">newExpDimRef</span><span class="p">(</span><span class="n">sf</span><span class="o">=</span><span class="n">spectrometerFrequency</span><span class="p">,</span> <span class="n">isotopeCodes</span><span class="o">=</span><span class="n">isotopeCodes</span><span class="p">,</span>
+                                            <span class="n">measurementType</span><span class="o">=</span><span class="n">measurementType</span><span class="p">,</span>
+                                            <span class="n">isFolded</span><span class="o">=</span><span class="p">(</span><span class="n">foldingMode</span> <span class="o">!=</span> <span class="s1">&#39;folded&#39;</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="n">axisCode</span><span class="p">,</span>
+                                            <span class="n">unit</span><span class="o">=</span><span class="n">axisUnit</span><span class="p">,</span> <span class="n">minAliasedFreq</span><span class="o">=</span><span class="n">minAliasedFrequency</span><span class="p">,</span>
+                                            <span class="n">maxAliasedFreq</span><span class="o">=</span><span class="n">maxAliasedFrequency</span><span class="p">,</span> <span class="p">)</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Spectrum</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Spectrum containing spectrumReference.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">dataDim</span><span class="o">.</span><span class="n">dataSource</span><span class="p">]</span>
+    <span class="n">dataDimRef</span> <span class="o">=</span> <span class="n">dataDim</span><span class="o">.</span><span class="n">newDataDimRef</span><span class="p">(</span><span class="n">expDimRef</span><span class="o">=</span><span class="n">expDimRef</span><span class="p">,</span> <span class="n">refPoint</span><span class="o">=</span><span class="n">referencePoint</span><span class="p">,</span>
+                                       <span class="n">refValue</span><span class="o">=</span><span class="n">referenceValue</span><span class="p">)</span>
 
-  <span class="n">spectrum</span> <span class="o">=</span> <span class="n">_parent</span>
-
-  <span class="c1"># Attributes of DataSource and Experiment:</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;dimension number&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">dataDim</span><span class="o">.</span><span class="n">dim</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">referenceSerial</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Spectrum reference serial number&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">serial</span>
-
-
-  <span class="c1"># Attributes belonging to ExpDimRef and DataDimRef</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">spectrometerFrequency</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Absolute frequency at carrier (or at splitting 0.0). In MHz or dimensionless.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">sf</span>
-
-  <span class="nd">@spectrometerFrequency.setter</span>
-  <span class="k">def</span> <span class="nf">spectrometerFrequency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-     <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">sf</span> <span class="o">=</span> <span class="n">value</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">measurementType</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Type of NMR measurement referred to by this reference. Legal values are:</span>
-<span class="sd">    &#39;Shift&#39;,&#39;ShiftAnisotropy&#39;,&#39;JCoupling&#39;,&#39;Rdc&#39;,&#39;TROESY&#39;,&#39;DipolarCoupling&#39;,</span>
-<span class="sd">    &#39;MQShift&#39;,&#39;T1&#39;,&#39;T2&#39;,&#39;T1rho&#39;,&#39;T1zz&#39;&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">measurementType</span>
-
-  <span class="nd">@measurementType.setter</span>
-  <span class="k">def</span> <span class="nf">measurementType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-     <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">measurementType</span> <span class="o">=</span> <span class="n">value</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">maxAliasedFrequency</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;maximum possible peak frequency (in ppm) for this reference &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">maxAliasedFreq</span>
-
-  <span class="nd">@maxAliasedFrequency.setter</span>
-  <span class="k">def</span> <span class="nf">maxAliasedFrequency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-     <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">maxAliasedFreq</span> <span class="o">=</span> <span class="n">value</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">minAliasedFrequency</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;minimum possible peak frequency (in ppm) for this reference &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">minAliasedFreq</span>
-
-  <span class="nd">@minAliasedFrequency.setter</span>
-  <span class="k">def</span> <span class="nf">minAliasedFrequency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-     <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">minAliasedFreq</span> <span class="o">=</span> <span class="n">value</span>
-
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">isotopeCodes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Isotope identification strings for isotopes.</span>
-<span class="sd">    NB there can be several isotopes for e.g. J-coupling or multiple quantum coherence.&quot;&quot;&quot;</span>
-
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">isotopeCodes</span>
-
-  <span class="nd">@isotopeCodes.setter</span>
-  <span class="k">def</span> <span class="nf">isotopeCodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">):</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">isotopeCodes</span> <span class="o">=</span> <span class="n">value</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">foldingMode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;folding mode matching reference (values: &#39;aliased&#39;, &#39;folded&#39;, None)&quot;&quot;&quot;</span>
-    <span class="n">dd</span> <span class="o">=</span> <span class="p">{</span><span class="bp">True</span><span class="p">:</span><span class="s1">&#39;folded&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">:</span><span class="s1">&#39;aliased&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">:</span><span class="bp">None</span><span class="p">}</span>
-    <span class="k">return</span> <span class="n">dd</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">isFolded</span><span class="p">]</span>
-
-  <span class="nd">@foldingMode.setter</span>
-  <span class="k">def</span> <span class="nf">foldingMode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-    <span class="n">dd</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;aliased&#39;</span><span class="p">:</span><span class="bp">False</span><span class="p">,</span> <span class="s1">&#39;folded&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span> <span class="bp">None</span><span class="p">:</span><span class="bp">None</span><span class="p">}</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">isFolded</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="n">value</span><span class="p">]</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">axisCode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Reference axisCode &quot;&quot;&quot;</span>
-    <span class="n">expDimRef</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span>
-    <span class="n">dataDim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">dataDim</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="n">expDimRef</span><span class="o">.</span><span class="n">axisCode</span>
-    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">dataDim</span><span class="o">.</span><span class="n">dataSource</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">resetAxisCodes</span><span class="p">()</span>
-      <span class="n">result</span> <span class="o">=</span> <span class="n">expDimRef</span><span class="o">.</span><span class="n">axisCode</span>
-    <span class="c1">#</span>
-    <span class="k">return</span> <span class="n">result</span>
-
-  <span class="nd">@axisCode.setter</span>
-  <span class="k">def</span> <span class="nf">axisCode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">axisCode</span> <span class="o">=</span> <span class="n">value</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">axisUnit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;unit for transformed data using thei reference (most commonly &#39;ppm&#39;)&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">unit</span>
-
-  <span class="nd">@axisUnit.setter</span>
-  <span class="k">def</span> <span class="nf">axisUnit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="n">value</span>
-
-  <span class="c1"># Attributes belonging to DataDimRef</span>
-
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">referencePoint</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;point used for axis (chemical shift) referencing.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">refPoint</span>
-
-  <span class="nd">@referencePoint.setter</span>
-  <span class="k">def</span> <span class="nf">referencePoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">refPoint</span> <span class="o">=</span> <span class="n">value</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">referenceValue</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;value used for axis (chemical shift) referencing.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">refValue</span>
-
-  <span class="nd">@referenceValue.setter</span>
-  <span class="k">def</span> <span class="nf">referenceValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">refValue</span> <span class="o">=</span> <span class="n">value</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">spectralWidth</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;spectral width after processing (generally in ppm) &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">spectralWidth</span>
-
-  <span class="nd">@spectralWidth.setter</span>
-  <span class="k">def</span> <span class="nf">spectralWidth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Attempt to set spectralWidth to </span><span class="si">%s</span><span class="s2">&quot;</span>
-                     <span class="o">%</span> <span class="n">value</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="c1"># We assume that the number of points is constant, so setting SW changes valuePerPoint</span>
-      <span class="n">dataDimRef</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
-      <span class="n">swold</span> <span class="o">=</span> <span class="n">dataDimRef</span><span class="o">.</span><span class="n">spectralWidth</span>
-      <span class="k">if</span> <span class="n">dataDimRef</span><span class="o">.</span><span class="n">localValuePerPoint</span><span class="p">:</span>
-        <span class="n">dataDimRef</span><span class="o">.</span><span class="n">localValuePerPoint</span> <span class="o">*=</span> <span class="p">(</span><span class="n">value</span><span class="o">/</span><span class="n">swold</span><span class="p">)</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">dataDimRef</span><span class="o">.</span><span class="n">dataDim</span><span class="o">.</span><span class="n">valuePerPoint</span> <span class="o">*=</span> <span class="p">(</span><span class="n">value</span><span class="o">/</span><span class="n">swold</span><span class="p">)</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">isAcquisition</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;True if this dimension is the acquisition dimension?&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">dataDim</span><span class="o">.</span><span class="n">expDim</span><span class="o">.</span><span class="n">isAquisition</span>
-
-  <span class="nd">@isAcquisition.setter</span>
-  <span class="k">def</span> <span class="nf">isAcquisition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">dataDim</span><span class="o">.</span><span class="n">expDim</span><span class="o">.</span><span class="n">isAquisition</span> <span class="o">=</span> <span class="n">value</span>
-
-<div class="viewcode-block" id="SpectrumReference.pointToValue"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Spectrum.SpectrumReference.pointToValue">[docs]</a>  <span class="k">def</span> <span class="nf">pointToValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Axis (ppm) value corresponding to point&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">pointToValue</span><span class="p">(</span><span class="n">point</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="SpectrumReference.valueToPoint"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Spectrum.SpectrumReference.valueToPoint">[docs]</a>  <span class="k">def</span> <span class="nf">valueToPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Point number (float) corresponding to (ppm) value&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">valueToPoint</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
-
-  <span class="c1"># Implementation functions</span>
-
-  <span class="nd">@classmethod</span>
-  <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Spectrum</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;get wrappedData (Nmr.DataDimRefs) for all Spectrum children of parent Spectrum&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">y</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedDataDims</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s1">&#39;dataDimRefs&#39;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">sortedDataDimRefs</span><span class="p">()]</span></div>
-
-
-<span class="k">def</span> <span class="nf">_newSpectrumReference</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Spectrum</span><span class="p">,</span> <span class="n">dimension</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">spectrometerFrequency</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span>
-                       <span class="n">isotopeCodes</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">axisCode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">measurementType</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;Shift&#39;</span><span class="p">,</span>
-                       <span class="n">maxAliasedFrequency</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">minAliasedFrequency</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                       <span class="n">foldingMode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">axisUnit</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">referencePoint</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-                       <span class="n">referenceValue</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SpectrumReference</span><span class="p">:</span>
-  <span class="sd">&quot;&quot;&quot;Create new SpectrumReference within Spectrum&quot;&quot;&quot;</span>
-  <span class="n">dataSource</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
-  <span class="n">dataDim</span> <span class="o">=</span> <span class="n">dataSource</span><span class="o">.</span><span class="n">findFirstDataDim</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="n">dimension</span><span class="p">)</span>
-  <span class="k">if</span> <span class="n">dataDim</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot create SpectrumReference for non-existent dimension: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">dimension</span><span class="p">)</span>
-
-  <span class="n">expDimRef</span> <span class="o">=</span> <span class="n">dataDim</span><span class="o">.</span><span class="n">expDim</span><span class="o">.</span><span class="n">newExpDimRef</span><span class="p">(</span><span class="n">sf</span><span class="o">=</span><span class="n">spectrometerFrequency</span><span class="p">,</span> <span class="n">isotopeCodes</span><span class="o">=</span><span class="n">isotopeCodes</span><span class="p">,</span>
-                                          <span class="n">measurementType</span><span class="o">=</span><span class="n">measurementType</span><span class="p">,</span>
-                                          <span class="n">isFolded</span><span class="o">=</span><span class="p">(</span><span class="n">foldingMode</span><span class="o">!=</span><span class="s1">&#39;folded&#39;</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="n">axisCode</span><span class="p">,</span>
-                                          <span class="n">unit</span><span class="o">=</span><span class="n">axisUnit</span><span class="p">,</span> <span class="n">minAliasedFreq</span><span class="o">=</span><span class="n">minAliasedFrequency</span><span class="p">,</span>
-                                          <span class="n">maxAliasedFreq</span><span class="o">=</span><span class="n">maxAliasedFrequency</span><span class="p">,)</span>
-
-  <span class="n">dataDimRef</span> <span class="o">=</span> <span class="n">dataDim</span><span class="o">.</span><span class="n">newDataDimRef</span><span class="p">(</span><span class="n">expDimRef</span><span class="o">=</span><span class="n">expDimRef</span><span class="p">,</span> <span class="n">refPoint</span><span class="o">=</span><span class="n">referencePoint</span><span class="p">,</span>
-                                     <span class="n">refValue</span><span class="o">=</span><span class="n">referenceValue</span><span class="p">)</span>
-
-  <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">dataDimRef</span><span class="p">]</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">dataDimRef</span><span class="p">]</span>
 
 
 <span class="c1"># Connections to parents:</span>
@@ -333,31 +337,37 @@
 <span class="n">Spectrum</span><span class="o">.</span><span class="n">newSpectrumReference</span> <span class="o">=</span> <span class="n">_newSpectrumReference</span>
 <span class="k">del</span> <span class="n">_newSpectrumReference</span>
 
-<div class="viewcode-block" id="getter"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Spectrum.getter">[docs]</a><span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Spectrum</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">SpectrumReference</span><span class="p">]]:</span>
-  <span class="n">data2Obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span>
-  <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="k">else</span> <span class="bp">None</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mainDataDimRefs</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="getter"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Spectrum.getter">[docs]</a><span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Spectrum</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">SpectrumReference</span><span class="p">]]:</span>
+    <span class="n">data2Obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="k">else</span> <span class="bp">None</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mainDataDimRefs</span><span class="p">())</span></div>
+
+
 <span class="n">Spectrum</span><span class="o">.</span><span class="n">mainSpectrumReferences</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
-    <span class="s2">&quot;Main SpectrumReference for each dimension (value is None for non-frequency dimensions&quot;</span>
-    <span class="p">)</span>
+                                           <span class="s2">&quot;Main SpectrumReference for each dimension (value is None for non-frequency dimensions&quot;</span>
+                                           <span class="p">)</span>
+
 
 <span class="c1"># Notifiers:</span>
-<span class="k">def</span> <span class="nf">_isAcquisitionHasChanged</span><span class="p">(</span><span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">apiExpDim</span><span class="p">:</span><span class="n">Nmr</span><span class="o">.</span><span class="n">ExpDim</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Refresh SpectrumReference when ExpDim.isAcquisition has changed&quot;&quot;&quot;</span>
-  <span class="k">for</span> <span class="n">dataDim</span> <span class="ow">in</span> <span class="n">apiExpDim</span><span class="o">.</span><span class="n">dataDims</span><span class="p">:</span>
-    <span class="k">for</span> <span class="n">dataDimRef</span> <span class="ow">in</span> <span class="n">dataDim</span><span class="o">.</span><span class="n">dataDimRefs</span><span class="p">:</span>
-      <span class="n">project</span><span class="o">.</span><span class="n">_modifiedApiObject</span><span class="p">(</span><span class="n">dataDimRef</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_isAcquisitionHasChanged</span><span class="p">(</span><span class="n">project</span><span class="p">:</span> <span class="n">Project</span><span class="p">,</span> <span class="n">apiExpDim</span><span class="p">:</span> <span class="n">Nmr</span><span class="o">.</span><span class="n">ExpDim</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Refresh SpectrumReference when ExpDim.isAcquisition has changed&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">dataDim</span> <span class="ow">in</span> <span class="n">apiExpDim</span><span class="o">.</span><span class="n">dataDims</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">dataDimRef</span> <span class="ow">in</span> <span class="n">dataDim</span><span class="o">.</span><span class="n">dataDimRefs</span><span class="p">:</span>
+            <span class="n">project</span><span class="o">.</span><span class="n">_modifiedApiObject</span><span class="p">(</span><span class="n">dataDimRef</span><span class="p">)</span>
+
+
 <span class="n">Project</span><span class="o">.</span><span class="n">_setupApiNotifier</span><span class="p">(</span><span class="n">_isAcquisitionHasChanged</span><span class="p">,</span> <span class="n">Nmr</span><span class="o">.</span><span class="n">ExpDim</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
 <span class="k">del</span> <span class="n">_isAcquisitionHasChanged</span>
 
 <span class="n">Project</span><span class="o">.</span><span class="n">_apiNotifiers</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-  <span class="p">(</span> <span class="p">(</span><span class="s1">&#39;_notifyRelatedApiObject&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;pathToObject&#39;</span><span class="p">:</span><span class="s1">&#39;dataDimRefs&#39;</span><span class="p">,</span> <span class="s1">&#39;action&#39;</span><span class="p">:</span><span class="s1">&#39;change&#39;</span><span class="p">},</span>
-     <span class="n">Nmr</span><span class="o">.</span><span class="n">ExpDimRef</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">(),</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
-  <span class="p">)</span>
-<span class="p">)</span>
+        <span class="p">((</span><span class="s1">&#39;_notifyRelatedApiObject&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;pathToObject&#39;</span><span class="p">:</span> <span class="s1">&#39;dataDimRefs&#39;</span><span class="p">,</span> <span class="s1">&#39;action&#39;</span><span class="p">:</span> <span class="s1">&#39;change&#39;</span><span class="p">},</span>
+          <span class="n">Nmr</span><span class="o">.</span><span class="n">ExpDimRef</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">(),</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+         <span class="p">)</span>
+        <span class="p">)</span>
 <span class="n">className</span> <span class="o">=</span> <span class="n">Nmr</span><span class="o">.</span><span class="n">FreqDataDim</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
 <span class="n">Project</span><span class="o">.</span><span class="n">_apiNotifiers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-  <span class="p">(</span><span class="s1">&#39;_notifyRelatedApiObject&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;pathToObject&#39;</span><span class="p">:</span><span class="s1">&#39;dataDimRefs&#39;</span><span class="p">,</span> <span class="s1">&#39;action&#39;</span><span class="p">:</span><span class="s1">&#39;change&#39;</span><span class="p">},</span> <span class="n">className</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
-<span class="p">)</span>
+        <span class="p">(</span><span class="s1">&#39;_notifyRelatedApiObject&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;pathToObject&#39;</span><span class="p">:</span> <span class="s1">&#39;dataDimRefs&#39;</span><span class="p">,</span> <span class="s1">&#39;action&#39;</span><span class="p">:</span> <span class="s1">&#39;change&#39;</span><span class="p">},</span> <span class="n">className</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+        <span class="p">)</span>
 </pre></div>
 
           </div>

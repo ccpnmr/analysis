@@ -65,7 +65,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:52 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -76,7 +76,7 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
 
 <div class="viewcode-block" id="inverseGrey"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ColourDialog.inverseGrey">[docs]</a><span class="k">def</span> <span class="nf">inverseGrey</span><span class="p">(</span><span class="n">colour</span><span class="p">):</span>
 
@@ -94,22 +94,22 @@
   <span class="k">return</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="ColourDialog"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ColourDialog.ColourDialog">[docs]</a><span class="k">class</span> <span class="nc">ColourDialog</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColorDialog</span><span class="p">):</span>
+<div class="viewcode-block" id="ColourDialog"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ColourDialog.ColourDialog">[docs]</a><span class="k">class</span> <span class="nc">ColourDialog</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QColorDialog</span><span class="p">):</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">doAlpha</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">doAlpha</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
 
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QColorDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">setOption</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ShowAlphaChannel</span><span class="p">,</span> <span class="n">doAlpha</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setOption</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColorDialog</span><span class="o">.</span><span class="n">DontUseNativeDialog</span><span class="p">,</span>  <span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setOption</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QColorDialog</span><span class="o">.</span><span class="n">DontUseNativeDialog</span><span class="p">,</span>  <span class="bp">True</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">aborted</span> <span class="o">=</span> <span class="bp">False</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">rejected</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">quit</span><span class="p">)</span>
 
-
 <div class="viewcode-block" id="ColourDialog.set"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ColourDialog.ColourDialog.set">[docs]</a>  <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">colour</span><span class="p">):</span>
-
     <span class="bp">self</span><span class="o">.</span><span class="n">setColour</span><span class="p">(</span><span class="n">colour</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="ColourDialog.get"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ColourDialog.ColourDialog.get">[docs]</a>  <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getColor</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="ColourDialog.getColor"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ColourDialog.ColourDialog.getColor">[docs]</a>  <span class="k">def</span> <span class="nf">getColor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initialColour</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
 
@@ -164,7 +164,6 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">setCurrentColor</span><span class="p">(</span><span class="n">qColour</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ColourDialog.quit"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ColourDialog.ColourDialog.quit">[docs]</a>  <span class="k">def</span> <span class="nf">quit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
     <span class="bp">self</span><span class="o">.</span><span class="n">aborted</span> <span class="o">=</span> <span class="bp">True</span></div></div>
 
 </pre></div>

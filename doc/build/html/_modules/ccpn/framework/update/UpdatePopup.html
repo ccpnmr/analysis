@@ -47,7 +47,35 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.framework.update.UpdatePopup</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module Documentation Here</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:20 +0100 (Fri, July 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Created</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:40 +0000 (Fri, April 07, 2017) $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ButtonList</span> <span class="kn">import</span> <span class="n">ButtonList</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Frame</span> <span class="kn">import</span> <span class="n">Frame</span>
@@ -55,88 +83,111 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>
 <span class="c1">#from ccpn.ui.gui.widgets.Table import ObjectTable, Column</span>
 
-<span class="kn">from</span> <span class="nn">ccpn.framework.update.UpdateAgent</span> <span class="kn">import</span> <span class="n">UpdateAgent</span>
+<span class="c1"># from ccpn.framework.update.UpdateAgent import UpdateAgent</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Update</span> <span class="kn">import</span> <span class="n">UpdateAgent</span>
 
 
-<span class="c1"># class UpdatePopup(QtGui.QDialog, UpdateAgent):</span>
 <div class="viewcode-block" id="UpdatePopup"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdatePopup.UpdatePopup">[docs]</a><span class="k">class</span> <span class="nc">UpdatePopup</span><span class="p">(</span><span class="n">CcpnDialog</span><span class="p">,</span> <span class="n">UpdateAgent</span><span class="p">):</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Update CCPN code&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
-    <span class="n">CcpnDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Update CCPN code&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">CcpnDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
-    <span class="n">version</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QCoreApplication</span><span class="o">.</span><span class="n">applicationVersion</span><span class="p">()</span>
-    <span class="c1"># QtGui.QDialog.__init__(self, parent=parent)</span>
-    <span class="n">UpdateAgent</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">)</span>
+        <span class="c1"># keep focus on this window</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setModal</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
 
-    <span class="c1">#self.appName = QtCore.QCoreApplication.applicationName()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+        <span class="n">version</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QCoreApplication</span><span class="o">.</span><span class="n">applicationVersion</span><span class="p">()</span>
+        <span class="n">UpdateAgent</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">)</span>
 
-    <span class="c1"># frame = Frame(self, setLayout=True)   # ejb</span>
-    <span class="n">row</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
 
-    <span class="c1">#label = Label(self, &#39;Server location:&#39;, grid=(row, 0))</span>
-    <span class="c1">#label = Label(self, self.server, grid=(row, 1))</span>
-    <span class="c1">#row += 1</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Installation location:&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-    <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">installLocation</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1">#label = Label(self, &#39;Server location:&#39;, grid=(row, 0))</span>
+        <span class="c1">#label = Label(self, self.server, grid=(row, 1))</span>
+        <span class="c1">#row += 1</span>
 
-    <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Version:&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-    <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">version</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Installation location:&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">installLocation</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
 
-    <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Number of updates:&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">updatesLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;TBD&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Version:&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">version</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
 
+        <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Number of updates:&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updatesLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;TBD&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
 
-    <span class="n">texts</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Refresh Updates Information&#39;</span><span class="p">,</span> <span class="s1">&#39;Download and Install Updates&#39;</span><span class="p">,</span> <span class="s1">&#39;Close&#39;</span><span class="p">)</span>
-    <span class="n">callbacks</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resetFromServer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">installUpdates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hide</span><span class="p">)</span>
-    <span class="n">tipTexts</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Refresh the updates information by querying server and comparing with what is installed locally&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;Install the updates from the server&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;Close update dialog&#39;</span><span class="p">)</span>
-    <span class="n">icons</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;icons/null.png&#39;</span><span class="p">,</span> <span class="s1">&#39;icons/dialog-apply.png&#39;</span><span class="p">,</span> <span class="s1">&#39;icons/window-close.png&#39;</span><span class="p">)</span>
-    <span class="n">buttonList</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="n">texts</span><span class="p">,</span> <span class="n">tipTexts</span><span class="o">=</span><span class="n">tipTexts</span><span class="p">,</span> <span class="n">callbacks</span><span class="o">=</span><span class="n">callbacks</span><span class="p">,</span> <span class="n">icons</span><span class="o">=</span><span class="n">icons</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
-    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Installing updates will require a restart of the program.&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">600</span><span class="p">,</span><span class="mi">200</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">resetFromServer</span><span class="p">()</span>
- 
-<div class="viewcode-block" id="UpdatePopup.resetFromServer"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdatePopup.UpdatePopup.resetFromServer">[docs]</a>  <span class="k">def</span> <span class="nf">resetFromServer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">texts</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Refresh Updates Information&#39;</span><span class="p">,</span> <span class="s1">&#39;Download and Install Updates&#39;</span><span class="p">,</span> <span class="s1">&#39;Close&#39;</span><span class="p">)</span>
+        <span class="n">callbacks</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resetFromServer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_install</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accept</span><span class="p">)</span>
+        <span class="n">tipTexts</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Refresh the updates information by querying server and comparing with what is installed locally&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Install the updates from the server&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Close update dialog&#39;</span><span class="p">)</span>
+        <span class="n">icons</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;icons/null.png&#39;</span><span class="p">,</span> <span class="s1">&#39;icons/dialog-apply.png&#39;</span><span class="p">,</span> <span class="s1">&#39;icons/window-close.png&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttonList</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="n">texts</span><span class="p">,</span> <span class="n">tipTexts</span><span class="o">=</span><span class="n">tipTexts</span><span class="p">,</span> <span class="n">callbacks</span><span class="o">=</span><span class="n">callbacks</span><span class="p">,</span> <span class="n">icons</span><span class="o">=</span><span class="n">icons</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
 
-    <span class="n">UpdateAgent</span><span class="o">.</span><span class="n">resetFromServer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    if self.updateFiles:</span>
-<span class="sd">      n = len(self.updateFiles)</span>
-<span class="sd">      msg = &#39;%d update%s available&#39; % (n, n &gt; 1 and &#39;s&#39; or &#39;&#39;)</span>
-<span class="sd">    else:</span>
-<span class="sd">      msg = &#39;No new updates available&#39;</span>
-<span class="sd">    #self.messageLabel.set(msg)</span>
-<span class="sd">    print(msg)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    
-    <span class="c1">#self.updateTable.setObjects(self.updateFiles)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">updatesLabel</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">updateFiles</span><span class="p">))</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="mi">750</span><span class="p">,</span> <span class="mi">150</span><span class="p">)</span>
 
-  <span class="c1">#def update(self):</span>
+        <span class="c1"># initialise the popup</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resetFromServer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_numUpdatesInstalled</span> <span class="o">=</span> <span class="mi">0</span>
 
-  <span class="c1">#  self.updateTable.update()</span>
+    <span class="k">def</span> <span class="nf">_install</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The update button has been clicked. Install updates and flag that files have been changed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_numUpdatesInstalled</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">updateFiles</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">installUpdates</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttonList</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;Close and Exit&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_closeProgram</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Call the mainWindow close function giving user option to save, then close program</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">_closeEvent</span><span class="p">()</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">_exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_accept</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Close button has been clicked, close if files have been updated or close dialog</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_numUpdatesInstalled</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_closeProgram</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+
+<div class="viewcode-block" id="UpdatePopup.reject"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdatePopup.UpdatePopup.reject">[docs]</a>    <span class="k">def</span> <span class="nf">reject</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Dialog-frame close button has been clicked, close if files have been updated or close dialog</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_numUpdatesInstalled</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_closeProgram</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">UpdatePopup</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">reject</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="UpdatePopup.resetFromServer"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdatePopup.UpdatePopup.resetFromServer">[docs]</a>    <span class="k">def</span> <span class="nf">resetFromServer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get current number of updates from the server</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">UpdateAgent</span><span class="o">.</span><span class="n">resetFromServer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updatesLabel</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">updateFiles</span><span class="p">))</span></div></div>
+
 
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
 
-  <span class="kn">import</span> <span class="nn">sys</span>
 
-  <span class="n">qtApp</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">([</span><span class="s1">&#39;Update&#39;</span><span class="p">])</span>
+    <span class="n">qtApp</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="p">([</span><span class="s1">&#39;Update&#39;</span><span class="p">])</span>
 
-  <span class="n">QtCore</span><span class="o">.</span><span class="n">QCoreApplication</span><span class="o">.</span><span class="n">setApplicationName</span><span class="p">(</span><span class="s1">&#39;Update&#39;</span><span class="p">)</span>
-  <span class="n">QtCore</span><span class="o">.</span><span class="n">QCoreApplication</span><span class="o">.</span><span class="n">setApplicationVersion</span><span class="p">(</span><span class="s1">&#39;3.0&#39;</span><span class="p">)</span>
+    <span class="n">QtCore</span><span class="o">.</span><span class="n">QCoreApplication</span><span class="o">.</span><span class="n">setApplicationName</span><span class="p">(</span><span class="s1">&#39;Update&#39;</span><span class="p">)</span>
+    <span class="n">QtCore</span><span class="o">.</span><span class="n">QCoreApplication</span><span class="o">.</span><span class="n">setApplicationVersion</span><span class="p">(</span><span class="s1">&#39;3.0&#39;</span><span class="p">)</span>
 
-  <span class="n">popup</span> <span class="o">=</span> <span class="n">UpdatePopup</span><span class="p">()</span>
-  <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
-  <span class="n">popup</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="n">popup</span> <span class="o">=</span> <span class="n">UpdatePopup</span><span class="p">()</span>
+    <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+    <span class="n">popup</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
-  <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">qtApp</span><span class="o">.</span><span class="n">exec_</span><span class="p">())</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">qtApp</span><span class="o">.</span><span class="n">exec_</span><span class="p">())</span>
 </pre></div>
 
           </div>

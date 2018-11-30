@@ -59,14 +59,14 @@
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:41 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -77,113 +77,339 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="p">,</span> <span class="n">QtCore</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Font</span> <span class="kn">import</span> <span class="n">Font</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.decorators</span> <span class="kn">import</span> <span class="n">singleton</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Colour</span> <span class="kn">import</span> <span class="n">allColours</span><span class="p">,</span> <span class="n">hexToRgbRatio</span><span class="p">,</span> <span class="n">autoCorrectHexColour</span><span class="p">,</span> <span class="n">spectrumHexDarkColours</span><span class="p">,</span> <span class="n">spectrumHexLightColours</span>
+
 
 <span class="c1"># fonts</span>
-<span class="n">monaco12</span>              <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Monaco&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
+<span class="n">monaco12</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Monaco&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
+<span class="n">monaco16</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Monaco&#39;</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+<span class="n">monaco20</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Monaco&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
 
-<span class="n">helvetica10</span>           <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
-<span class="n">helveticaItalic10</span>     <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">italic</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">helveticaBold10</span>       <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">helvetica8</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+<span class="n">helveticaItalic8</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="n">italic</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">helveticaBold8</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
-<span class="n">helvetica12</span>           <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
-<span class="n">helveticaItalic12</span>     <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="n">italic</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">helveticaBold12</span>       <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">helveticaUnderline12</span>  <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="n">underline</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">helveticaStrikeout12</span>  <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="n">strikeout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">helvetica10</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">helveticaItalic10</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">italic</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">helveticaBold10</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
-<span class="n">helvetica14</span>           <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">14</span><span class="p">)</span>
-<span class="n">helveticaBold14</span>       <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">helvetica12</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
+<span class="n">helveticaItalic12</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="n">italic</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">helveticaBold12</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">helveticaUnderline12</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="n">underline</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">helveticaStrikeout12</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="n">strikeout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
-<span class="n">helvetica20</span>           <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
-<span class="n">helveticaBold20</span>       <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">helvetica14</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">14</span><span class="p">)</span>
+<span class="n">helveticaBold14</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
-<span class="n">lucidaGrande12</span>        <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Lucida Grande&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
-<span class="n">lucidaGrande14</span>        <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Lucida Grande&#39;</span><span class="p">,</span> <span class="mi">14</span><span class="p">)</span>
+<span class="n">helvetica20</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+<span class="n">helveticaBold20</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="n">lucidaGrande12</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Lucida Grande&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
+<span class="n">lucidaGrande14</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Lucida Grande&#39;</span><span class="p">,</span> <span class="mi">14</span><span class="p">)</span>
 
 <span class="c1"># widgets and modules</span>
-<span class="n">textFontSmall</span>   <span class="o">=</span> <span class="n">helvetica10</span>        <span class="c1"># general text font</span>
-<span class="n">textFont</span>        <span class="o">=</span> <span class="n">helvetica12</span>        <span class="c1"># general text font</span>
-<span class="n">textFontBold</span>    <span class="o">=</span> <span class="n">helveticaBold12</span>    <span class="c1"># general text font bold</span>
-<span class="n">textFontLarge</span>   <span class="o">=</span> <span class="n">helvetica14</span>        <span class="c1"># general text font large</span>
+<span class="n">textFontTiny</span> <span class="o">=</span> <span class="n">helvetica8</span>  <span class="c1"># general text font</span>
+<span class="n">textFontTinyBold</span> <span class="o">=</span> <span class="n">helveticaBold8</span>  <span class="c1"># general text font</span>
+<span class="n">textFontSmall</span> <span class="o">=</span> <span class="n">helvetica10</span>  <span class="c1"># general text font</span>
+<span class="n">textFontSmallBold</span> <span class="o">=</span> <span class="n">helveticaBold10</span>  <span class="c1"># general text font</span>
+<span class="n">textFont</span> <span class="o">=</span> <span class="n">helvetica12</span>  <span class="c1"># general text font</span>
+<span class="n">textFontBold</span> <span class="o">=</span> <span class="n">helveticaBold12</span>  <span class="c1"># general text font bold</span>
+<span class="n">textFontLarge</span> <span class="o">=</span> <span class="n">helvetica14</span>  <span class="c1"># general text font large</span>
 <span class="n">textFontLargeBold</span> <span class="o">=</span> <span class="n">helveticaBold14</span>  <span class="c1"># general text font large bold</span>
-<span class="n">textFontHuge</span>    <span class="o">=</span> <span class="n">helvetica20</span>        <span class="c1"># general text font huge</span>
-<span class="n">textFontHugeBold</span> <span class="o">=</span> <span class="n">helveticaBold20</span>   <span class="c1"># general text font huge bold</span>
+<span class="n">textFontHuge</span> <span class="o">=</span> <span class="n">helvetica20</span>  <span class="c1"># general text font huge</span>
+<span class="n">textFontHugeBold</span> <span class="o">=</span> <span class="n">helveticaBold20</span>  <span class="c1"># general text font huge bold</span>
 
-<span class="n">fixedWidthFont</span>  <span class="o">=</span> <span class="n">monaco12</span>           <span class="c1"># for TextEditor, ipythonconsole</span>
-<span class="n">moduleLabelFont</span> <span class="o">=</span> <span class="n">helvetica12</span>        <span class="c1"># for text of left-label of modules</span>
-<span class="n">sidebarFont</span>     <span class="o">=</span> <span class="n">lucidaGrande12</span>     <span class="c1"># sidebar</span>
-<span class="n">menuFont</span>        <span class="o">=</span> <span class="n">lucidaGrande14</span>     <span class="c1"># Menus</span>
-<span class="n">messageFont</span>     <span class="o">=</span> <span class="n">helvetica14</span>        <span class="c1"># use in popup messages; does not seem to affect the dialog on OSX</span>
+<span class="n">textFontTinySpacing</span> <span class="o">=</span> <span class="mi">7</span>
+<span class="n">textFontSmallSpacing</span> <span class="o">=</span> <span class="mi">9</span>
+<span class="n">textFontSpacing</span> <span class="o">=</span> <span class="mi">11</span>
+<span class="n">textFontLargeSpacing</span> <span class="o">=</span> <span class="mi">13</span>
+<span class="n">textFontHugeSpacing</span> <span class="o">=</span> <span class="mi">18</span>
+
+<span class="n">fixedWidthFont</span> <span class="o">=</span> <span class="n">monaco12</span>  <span class="c1"># for TextEditor, ipythonconsole</span>
+<span class="n">fixedWidthLargeFont</span> <span class="o">=</span> <span class="n">monaco16</span>
+<span class="n">fixedWidthHugeFont</span> <span class="o">=</span> <span class="n">monaco20</span>
+<span class="n">moduleLabelFont</span> <span class="o">=</span> <span class="n">helvetica12</span>  <span class="c1"># for text of left-label of modules</span>
+<span class="n">sidebarFont</span> <span class="o">=</span> <span class="n">lucidaGrande12</span>  <span class="c1"># sidebar</span>
+<span class="n">menuFont</span> <span class="o">=</span> <span class="n">lucidaGrande14</span>  <span class="c1"># Menus</span>
+<span class="n">messageFont</span> <span class="o">=</span> <span class="n">helvetica14</span>  <span class="c1"># used in popup messages;</span>
+<span class="n">messageFontBold</span> <span class="o">=</span> <span class="n">helveticaBold14</span>  <span class="c1"># used in popup messages;</span>
 
 <span class="c1"># Colours</span>
 <span class="n">LIGHT</span> <span class="o">=</span> <span class="s1">&#39;light&#39;</span>
 <span class="n">DARK</span> <span class="o">=</span> <span class="s1">&#39;dark&#39;</span>
-<span class="n">COLOUR_SCHEMES</span> <span class="o">=</span> <span class="p">(</span><span class="n">LIGHT</span><span class="p">,</span> <span class="n">DARK</span><span class="p">)</span>
+<span class="n">DEFAULT</span> <span class="o">=</span> <span class="s1">&#39;default&#39;</span>
+<span class="n">MARKS_COLOURS</span> <span class="o">=</span> <span class="s1">&#39;marksColours&#39;</span>
+<span class="n">COLOUR_SCHEMES</span> <span class="o">=</span> <span class="p">(</span><span class="n">LIGHT</span><span class="p">,</span> <span class="n">DARK</span><span class="p">,</span> <span class="n">DEFAULT</span><span class="p">)</span>
+
+<span class="n">SPECTRUM_HEXCOLOURS</span> <span class="o">=</span> <span class="s1">&#39;spectrumHexColours&#39;</span>
 
 <span class="n">MARK_LINE_COLOUR_DICT</span> <span class="o">=</span> <span class="p">{</span>
-  <span class="s1">&#39;CA&#39;</span><span class="p">:</span> <span class="s1">&#39;#0000FF&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;CB&#39;</span><span class="p">:</span> <span class="s1">&#39;#0024FF&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;CG&#39;</span><span class="p">:</span> <span class="s1">&#39;#0048FF&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;CD&#39;</span><span class="p">:</span> <span class="s1">&#39;#006DFF&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;CE&#39;</span><span class="p">:</span> <span class="s1">&#39;#0091FF&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;CZ&#39;</span><span class="p">:</span> <span class="s1">&#39;#00B6FF&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;CH&#39;</span><span class="p">:</span> <span class="s1">&#39;#00DAFF&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="s1">&#39;#00FFFF&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;HA&#39;</span><span class="p">:</span> <span class="s1">&#39;#FF0000&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;HB&#39;</span><span class="p">:</span> <span class="s1">&#39;#FF0024&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;HG&#39;</span><span class="p">:</span> <span class="s1">&#39;#FF0048&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;HD&#39;</span><span class="p">:</span> <span class="s1">&#39;#FF006D&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;HE&#39;</span><span class="p">:</span> <span class="s1">&#39;#FF0091&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;HZ&#39;</span><span class="p">:</span> <span class="s1">&#39;#FF00B6&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;HH&#39;</span><span class="p">:</span> <span class="s1">&#39;#FF00DA&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;H&#39;</span><span class="p">:</span> <span class="s1">&#39;#FF00FF&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;N&#39;</span><span class="p">:</span> <span class="s1">&#39;#00FF00&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;ND&#39;</span><span class="p">:</span> <span class="s1">&#39;#3FFF00&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;NE&#39;</span><span class="p">:</span> <span class="s1">&#39;#7FFF00&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;NZ&#39;</span><span class="p">:</span> <span class="s1">&#39;#BFFF00&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;NH&#39;</span><span class="p">:</span> <span class="s1">&#39;#FFFF00&#39;</span><span class="p">,</span>
-<span class="p">}</span>
+    <span class="s1">&#39;CA&#39;</span><span class="p">:</span> <span class="s1">&#39;#0080FF&#39;</span><span class="p">,</span>  <span class="c1"># aqua</span>
+    <span class="s1">&#39;CB&#39;</span><span class="p">:</span> <span class="s1">&#39;#6666FF&#39;</span><span class="p">,</span>  <span class="c1"># orchid</span>
+    <span class="s1">&#39;CG&#39;</span><span class="p">:</span> <span class="s1">&#39;#0048FF&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;CD&#39;</span><span class="p">:</span> <span class="s1">&#39;#006DFF&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;CE&#39;</span><span class="p">:</span> <span class="s1">&#39;#0091FF&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;CZ&#39;</span><span class="p">:</span> <span class="s1">&#39;#00B6FF&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;CH&#39;</span><span class="p">:</span> <span class="s1">&#39;#00DAFF&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="s1">&#39;#00FFFF&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Cn&#39;</span><span class="p">:</span> <span class="s1">&#39;#00FFFF&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;HA&#39;</span><span class="p">:</span> <span class="s1">&#39;#FF0000&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;HB&#39;</span><span class="p">:</span> <span class="s1">&#39;#FF0024&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;HG&#39;</span><span class="p">:</span> <span class="s1">&#39;#FF0048&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;HD&#39;</span><span class="p">:</span> <span class="s1">&#39;#FF006D&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;HE&#39;</span><span class="p">:</span> <span class="s1">&#39;#FF0091&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;HZ&#39;</span><span class="p">:</span> <span class="s1">&#39;#FF00B6&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;HH&#39;</span><span class="p">:</span> <span class="s1">&#39;#FF00DA&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;H&#39;</span><span class="p">:</span> <span class="s1">&#39;#FF00FF&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Hn&#39;</span><span class="p">:</span> <span class="s1">&#39;#FF00FF&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;N&#39;</span><span class="p">:</span> <span class="s1">&#39;#00FF00&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Nh&#39;</span><span class="p">:</span> <span class="s1">&#39;#00FF00&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;ND&#39;</span><span class="p">:</span> <span class="s1">&#39;#3FFF00&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;NE&#39;</span><span class="p">:</span> <span class="s1">&#39;#7FFF00&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;NZ&#39;</span><span class="p">:</span> <span class="s1">&#39;#BFFF00&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;NH&#39;</span><span class="p">:</span> <span class="s1">&#39;#FFFF00&#39;</span><span class="p">,</span>
+    <span class="n">DEFAULT</span><span class="p">:</span> <span class="s1">&#39;#e0e0e0&#39;</span>
+    <span class="p">}</span>
+
+<span class="c1"># Widget definitions</span>
+<span class="n">CCPNMODULELABEL_FOREGROUND</span> <span class="o">=</span> <span class="s1">&#39;CCPNMODULELABEL_FOREGROUND&#39;</span>
+<span class="n">CCPNMODULELABEL_BACKGROUND</span> <span class="o">=</span> <span class="s1">&#39;CCPNMODULELABEL_BACKGROUND&#39;</span>
+
+<span class="c1"># Spectrum GL base class</span>
+<span class="n">CCPNGLWIDGET_HEXBACKGROUND</span> <span class="o">=</span> <span class="s1">&#39;CCPNGLWIDGET_HEXBACKGROUND&#39;</span>
+<span class="n">CCPNGLWIDGET_BACKGROUND</span> <span class="o">=</span> <span class="s1">&#39;CCPNGLWIDGET_BACKGROUND&#39;</span>
+<span class="n">CCPNGLWIDGET_FOREGROUND</span> <span class="o">=</span> <span class="s1">&#39;CCPNGLWIDGET_FOREGROUND&#39;</span>
+<span class="n">CCPNGLWIDGET_PICKCOLOUR</span> <span class="o">=</span> <span class="s1">&#39;CCPNGLWIDGET_PICKCOLOUR&#39;</span>
+<span class="n">CCPNGLWIDGET_GRID</span> <span class="o">=</span> <span class="s1">&#39;CCPNGLWIDGET_GRID&#39;</span>
+<span class="n">CCPNGLWIDGET_HIGHLIGHT</span> <span class="o">=</span> <span class="s1">&#39;CCPNGLWIDGET_HIGHLIGHT&#39;</span>
+<span class="n">CCPNGLWIDGET_LABELLING</span> <span class="o">=</span> <span class="s1">&#39;CCPNGLWIDGET_LABELLING&#39;</span>
+<span class="n">CCPNGLWIDGET_PHASETRACE</span> <span class="o">=</span> <span class="s1">&#39;CCPNGLWIDGET_PHASETRACE&#39;</span>
+<span class="n">CCPNGLWIDGET_MULTIPLETLINK</span> <span class="o">=</span> <span class="s1">&#39;CCPNGLWIDGET_MULTIPLETLINK&#39;</span>
+
+<span class="n">CCPNGLWIDGET_ZOOMAREA</span> <span class="o">=</span> <span class="s1">&#39;CCPNGLWIDGET_ZOOMAREA&#39;</span>
+<span class="n">CCPNGLWIDGET_PICKAREA</span> <span class="o">=</span> <span class="s1">&#39;CCPNGLWIDGET_PICKAREA&#39;</span>
+<span class="n">CCPNGLWIDGET_SELECTAREA</span> <span class="o">=</span> <span class="s1">&#39;CCPNGLWIDGET_SELECTAREA&#39;</span>
+<span class="n">CCPNGLWIDGET_ZOOMLINE</span> <span class="o">=</span> <span class="s1">&#39;CCPNGLWIDGET_ZOOMLINE&#39;</span>
+<span class="n">CCPNGLWIDGET_MOUSEMOVELINE</span> <span class="o">=</span> <span class="s1">&#39;CCPNGLWIDGET_MOUSEMOVELINE&#39;</span>
+<span class="n">CCPNGLWIDGET_HARDSHADE</span> <span class="o">=</span> <span class="mf">0.9</span>
+
+<span class="n">GUICHAINLABEL_TEXT</span> <span class="o">=</span> <span class="s1">&#39;GUICHAINLABEL_TEXT&#39;</span>
+
+<span class="n">GUICHAINRESIDUE_UNASSIGNED</span> <span class="o">=</span> <span class="s1">&#39;GUICHAINRESIDUE_UNASSIGNED&#39;</span>
+<span class="n">GUICHAINRESIDUE_ASSIGNED</span> <span class="o">=</span> <span class="s1">&#39;GUICHAINRESIDUE_ASSIGNED&#39;</span>
+<span class="n">GUICHAINRESIDUE_POSSIBLE</span> <span class="o">=</span> <span class="s1">&#39;GUICHAINRESIDUE_POSSIBLE&#39;</span>
+<span class="n">GUICHAINRESIDUE_WARNING</span> <span class="o">=</span> <span class="s1">&#39;GUICHAINRESIDUE_WARNING&#39;</span>
+<span class="n">GUICHAINRESIDUE_DRAGENTER</span> <span class="o">=</span> <span class="s1">&#39;GUICHAINRESIDUE_DRAGENTER&#39;</span>
+<span class="n">GUICHAINRESIDUE_DRAGLEAVE</span> <span class="o">=</span> <span class="s1">&#39;GUICHAINRESIDUE_DRAGLEAVE&#39;</span>
+
+<span class="n">GUINMRATOM_SELECTED</span> <span class="o">=</span> <span class="s1">&#39;GUINMRATOM_SELECTED&#39;</span>
+<span class="n">GUINMRATOM_NOTSELECTED</span> <span class="o">=</span> <span class="s1">&#39;GUINMRATOM_NOTSELECTED&#39;</span>
+
+<span class="n">GUINMRRESIDUE</span> <span class="o">=</span> <span class="s1">&#39;GUINMRRESIDUE&#39;</span>
+
+<span class="n">GUISTRIP_PIVOT</span> <span class="o">=</span> <span class="s1">&#39;GUISTRIP_PIVOT&#39;</span>
+
+<span class="n">LABEL_FOREGROUND</span> <span class="o">=</span> <span class="s1">&#39;LABEL_FOREGROUND&#39;</span>
+<span class="n">DIVIDER</span> <span class="o">=</span> <span class="s1">&#39;DIVIDER&#39;</span>
+
+<span class="n">SEQUENCEGRAPHMODULE_LINE</span> <span class="o">=</span> <span class="s1">&#39;SEQUENCEGRAPHMODULE_LINE&#39;</span>
+<span class="n">SEQUENCEGRAPHMODULE_TEXT</span> <span class="o">=</span> <span class="s1">&#39;SEQUENCEGRAPHMODULE_TEXT&#39;</span>
+
+<span class="n">SEQUENCEMODULE_DRAGMOVE</span> <span class="o">=</span> <span class="s1">&#39;SEQUENCEMODULE_DRAGMOVE&#39;</span>
+<span class="n">SEQUENCEMODULE_TEXT</span> <span class="o">=</span> <span class="s1">&#39;SEQUENCEMODULE_TEXT&#39;</span>
+
+<span class="c1"># used in QuickTable stylesheet (cannot change definition)</span>
+<span class="n">QUICKTABLE_BACKGROUND</span> <span class="o">=</span> <span class="s1">&#39;QUICKTABLE_BACKGROUND&#39;</span>
+<span class="n">QUICKTABLE_ALT_BACKGROUND</span> <span class="o">=</span> <span class="s1">&#39;QUICKTABLE_ALT_BACKGROUND&#39;</span>
+<span class="n">QUICKTABLE_ITEM_FOREGROUND</span> <span class="o">=</span> <span class="s1">&#39;QUICKTABLE_ITEM_FOREGROUND&#39;</span>
+<span class="n">QUICKTABLE_SELECTED_FOREGROUND</span> <span class="o">=</span> <span class="s1">&#39;QUICKTABLE_SELECTED_FOREGROUND&#39;</span>
+<span class="n">QUICKTABLE_SELECTED_BACKGROUND</span> <span class="o">=</span> <span class="s1">&#39;QUICKTABLE_SELECTED_BACKGROUND&#39;</span>
+
+<span class="c1"># strip header colours</span>
+<span class="n">STRIPHEADER_FOREGROUND</span> <span class="o">=</span> <span class="s1">&#39;STRIPHEADER_FOREGROUND&#39;</span>
+<span class="n">STRIPHEADER_BACKGROUND</span> <span class="o">=</span> <span class="s1">&#39;STRIPHEADER_BACKGROUND&#39;</span>
+
+<span class="c1"># Colours</span>
+<span class="n">TEXT_COLOUR</span> <span class="o">=</span> <span class="s1">&#39;#555D85&#39;</span>
+<span class="n">LIGHT_GREY</span> <span class="o">=</span> <span class="s1">&#39;rgb(250,250,250)&#39;</span>
+<span class="n">STEEL</span> <span class="o">=</span> <span class="s1">&#39;rgb(102,102,102)&#39;</span>  <span class="c1"># from apple</span>
+<span class="n">MARISHINO</span> <span class="o">=</span> <span class="s1">&#39;#004D81&#39;</span>  <span class="c1"># rgb(0,77,129) ; red colour (from apple)</span>
+<span class="n">MEDIUM_BLUE</span> <span class="o">=</span> <span class="s1">&#39;#7777FF&#39;</span>
+<span class="n">GREEN1</span> <span class="o">=</span> <span class="s1">&#39;#009a00&#39;</span>
+<span class="n">WARNING_RED</span> <span class="o">=</span> <span class="s1">&#39;#e01010&#39;</span>
+<span class="n">FIREBRICK</span> <span class="o">=</span> <span class="n">hexToRgbRatio</span><span class="p">([</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">allColours</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="o">==</span> <span class="s1">&#39;firebrick&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">LIGHTCORAL</span> <span class="o">=</span> <span class="n">hexToRgbRatio</span><span class="p">([</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">allColours</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="o">==</span> <span class="s1">&#39;lightcoral&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="c1"># Shades</span>
+<span class="n">CCPNGLWIDGET_REGIONSHADE</span> <span class="o">=</span> <span class="mf">0.30</span>
+<span class="n">CCPNGLWIDGET_INTEGRALSHADE</span> <span class="o">=</span> <span class="mf">0.1</span>
+
+<span class="c1"># Colour schemes definitions</span>
+<span class="n">colourSchemes</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1"># all colours defined here</span>
+    <span class="n">DEFAULT</span><span class="p">:</span> <span class="p">{</span>
+
+        <span class="n">CCPNGLWIDGET_HEXBACKGROUND</span><span class="p">:</span> <span class="s1">&#39;#FFFFFF&#39;</span><span class="p">,</span>
+        <span class="n">CCPNGLWIDGET_BACKGROUND</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.99</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+        <span class="n">CCPNGLWIDGET_FOREGROUND</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>  <span class="c1">#&#39;#080000&#39;</span>
+        <span class="n">CCPNGLWIDGET_PICKCOLOUR</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+        <span class="n">CCPNGLWIDGET_GRID</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>  <span class="c1">#&#39;#080000&#39;</span>
+        <span class="n">CCPNGLWIDGET_HIGHLIGHT</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.23</span><span class="p">,</span> <span class="mf">0.23</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>  <span class="c1">#&#39;#3333ff&#39;</span>
+        <span class="n">CCPNGLWIDGET_LABELLING</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+        <span class="n">CCPNGLWIDGET_PHASETRACE</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+        <span class="n">CCPNGLWIDGET_ZOOMAREA</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">),</span>
+        <span class="n">CCPNGLWIDGET_PICKAREA</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">),</span>
+        <span class="n">CCPNGLWIDGET_SELECTAREA</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">),</span>
+        <span class="n">CCPNGLWIDGET_ZOOMLINE</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+        <span class="n">CCPNGLWIDGET_MOUSEMOVELINE</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+
+        <span class="n">CCPNGLWIDGET_MULTIPLETLINK</span><span class="p">:</span> <span class="n">FIREBRICK</span><span class="p">,</span>
+
+        <span class="n">CCPNMODULELABEL_BACKGROUND</span><span class="p">:</span> <span class="s1">&#39;#FFFFFF&#39;</span><span class="p">,</span>
+        <span class="n">CCPNMODULELABEL_FOREGROUND</span><span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
+
+        <span class="n">GUICHAINLABEL_TEXT</span><span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
+
+        <span class="n">GUICHAINRESIDUE_UNASSIGNED</span><span class="p">:</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span>
+        <span class="n">GUICHAINRESIDUE_ASSIGNED</span><span class="p">:</span> <span class="n">GREEN1</span><span class="p">,</span>
+        <span class="n">GUICHAINRESIDUE_POSSIBLE</span><span class="p">:</span> <span class="s1">&#39;orange&#39;</span><span class="p">,</span>
+        <span class="n">GUICHAINRESIDUE_WARNING</span><span class="p">:</span> <span class="n">WARNING_RED</span><span class="p">,</span>
+        <span class="n">GUICHAINRESIDUE_DRAGENTER</span><span class="p">:</span> <span class="n">MARISHINO</span><span class="p">,</span>
+        <span class="n">GUICHAINRESIDUE_DRAGLEAVE</span><span class="p">:</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span>  <span class="c1"># &#39;#666e98&#39;,</span>
+
+        <span class="n">GUINMRATOM_SELECTED</span><span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
+        <span class="n">GUINMRATOM_NOTSELECTED</span><span class="p">:</span> <span class="s1">&#39;#FDFDFC&#39;</span><span class="p">,</span>
+
+        <span class="n">GUINMRRESIDUE</span><span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
+
+        <span class="n">GUISTRIP_PIVOT</span><span class="p">:</span> <span class="n">MARISHINO</span><span class="p">,</span>
+
+        <span class="n">LABEL_FOREGROUND</span><span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
+        <span class="n">DIVIDER</span><span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
+
+        <span class="n">SEQUENCEGRAPHMODULE_LINE</span><span class="p">:</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span>
+        <span class="n">SEQUENCEGRAPHMODULE_TEXT</span><span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
+
+        <span class="n">SEQUENCEMODULE_DRAGMOVE</span><span class="p">:</span> <span class="n">MEDIUM_BLUE</span><span class="p">,</span>
+        <span class="n">SEQUENCEMODULE_TEXT</span><span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
+
+        <span class="n">QUICKTABLE_BACKGROUND</span><span class="p">:</span> <span class="s1">&#39;white&#39;</span><span class="p">,</span>
+        <span class="n">QUICKTABLE_ALT_BACKGROUND</span><span class="p">:</span> <span class="n">LIGHT_GREY</span><span class="p">,</span>
+        <span class="n">QUICKTABLE_ITEM_FOREGROUND</span><span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
+        <span class="n">QUICKTABLE_SELECTED_FOREGROUND</span><span class="p">:</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span>
+        <span class="n">QUICKTABLE_SELECTED_BACKGROUND</span><span class="p">:</span> <span class="s1">&#39;#FFFCBA&#39;</span><span class="p">,</span>
+
+        <span class="n">STRIPHEADER_FOREGROUND</span><span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
+        <span class="n">STRIPHEADER_BACKGROUND</span><span class="p">:</span> <span class="s1">&#39;#ebebeb&#39;</span><span class="p">,</span>
+
+        <span class="n">MARKS_COLOURS</span><span class="p">:</span> <span class="n">MARK_LINE_COLOUR_DICT</span><span class="p">,</span>
+        <span class="n">SPECTRUM_HEXCOLOURS</span><span class="p">:</span> <span class="n">spectrumHexDarkColours</span>
+        <span class="p">},</span>
+
+    <span class="c1"># Overridden for dark colour scheme</span>
+    <span class="n">DARK</span><span class="p">:</span> <span class="p">{</span>
+
+        <span class="n">CCPNGLWIDGET_HEXBACKGROUND</span><span class="p">:</span> <span class="s1">&#39;#0F0F0F&#39;</span><span class="p">,</span>
+        <span class="n">CCPNGLWIDGET_BACKGROUND</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+        <span class="n">CCPNGLWIDGET_FOREGROUND</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>  <span class="c1">#&#39;#f7ffff&#39;</span>
+        <span class="n">CCPNGLWIDGET_PICKCOLOUR</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+        <span class="n">CCPNGLWIDGET_GRID</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>  <span class="c1">#&#39;#f7ffff&#39;</span>
+        <span class="n">CCPNGLWIDGET_HIGHLIGHT</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>  <span class="c1">#&#39;#00ff00&#39;</span>
+        <span class="n">CCPNGLWIDGET_LABELLING</span><span class="p">:</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+        <span class="n">CCPNGLWIDGET_PHASETRACE</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+        <span class="n">CCPNGLWIDGET_ZOOMLINE</span><span class="p">:</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+        <span class="n">CCPNGLWIDGET_MULTIPLETLINK</span><span class="p">:</span> <span class="n">LIGHTCORAL</span><span class="p">,</span>
+
+        <span class="n">SPECTRUM_HEXCOLOURS</span><span class="p">:</span> <span class="n">spectrumHexLightColours</span>
+        <span class="p">},</span>
+
+    <span class="c1"># Overridden for light colour scheme</span>
+    <span class="n">LIGHT</span><span class="p">:</span> <span class="p">{</span>
+
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+<span class="c1"># adjust the default marks for the light/dark colour schemes</span>
+<span class="n">MARK_LINE_COLOUR_DICT_LIGHT</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">k</span><span class="p">,</span> <span class="n">autoCorrectHexColour</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">colourSchemes</span><span class="p">[</span><span class="n">DEFAULT</span><span class="p">][</span><span class="n">CCPNGLWIDGET_HEXBACKGROUND</span><span class="p">],</span>
+                                                             <span class="n">addNewColour</span><span class="o">=</span><span class="bp">False</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">MARK_LINE_COLOUR_DICT</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+<span class="n">MARK_LINE_COLOUR_DICT_DARK</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">k</span><span class="p">,</span> <span class="n">autoCorrectHexColour</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">colourSchemes</span><span class="p">[</span><span class="n">DARK</span><span class="p">][</span><span class="n">CCPNGLWIDGET_HEXBACKGROUND</span><span class="p">],</span>
+                                                            <span class="n">addNewColour</span><span class="o">=</span><span class="bp">False</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">MARK_LINE_COLOUR_DICT</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+
+<span class="c1"># insert the marks colours into colourScheme</span>
+<span class="n">colourSchemes</span><span class="p">[</span><span class="n">LIGHT</span><span class="p">][</span><span class="n">MARKS_COLOURS</span><span class="p">]</span> <span class="o">=</span> <span class="n">MARK_LINE_COLOUR_DICT_LIGHT</span>
+<span class="n">colourSchemes</span><span class="p">[</span><span class="n">DARK</span><span class="p">][</span><span class="n">MARKS_COLOURS</span><span class="p">]</span> <span class="o">=</span> <span class="n">MARK_LINE_COLOUR_DICT_DARK</span>
 
 <div class="viewcode-block" id="getColourScheme"><a class="viewcode-back" href="../../../../ccpn/ccpn.ui.gui.html#ccpn.ui.gui.guiSettings.getColourScheme">[docs]</a><span class="k">def</span> <span class="nf">getColourScheme</span><span class="p">():</span>
-  <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  :return: colourScheme</span>
-<span class="sd">  &quot;&quot;&quot;</span>
-  <span class="n">app</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QCoreApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
-  <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">app</span><span class="p">,</span><span class="s1">&#39;_ccpnApplication&#39;</span><span class="p">):</span>
-    <span class="n">application</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">app</span><span class="p">,</span><span class="s1">&#39;_ccpnApplication&#39;</span><span class="p">)</span>
-    <span class="n">colourScheme</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">colourScheme</span>
-    <span class="k">if</span> <span class="n">colourScheme</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">COLOUR_SCHEMES</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Undefined colour scheme&#39;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">colourScheme</span>
-  <span class="c1"># for now to make the tests run</span>
-  <span class="k">else</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">LIGHT</span></div>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :return: colourScheme</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QCoreApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="s1">&#39;_ccpnApplication&#39;</span><span class="p">):</span>
+        <span class="n">application</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="s1">&#39;_ccpnApplication&#39;</span><span class="p">)</span>
+        <span class="n">colourScheme</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">colourScheme</span>
+        <span class="k">if</span> <span class="n">colourScheme</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">COLOUR_SCHEMES</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Undefined colour scheme&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">DEFAULT</span>
+        <span class="k">return</span> <span class="n">colourScheme</span>
+    <span class="c1"># for now to make the tests run</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">DEFAULT</span></div>
+
+
+<div class="viewcode-block" id="setColourScheme"><a class="viewcode-back" href="../../../../ccpn/ccpn.ui.gui.html#ccpn.ui.gui.guiSettings.setColourScheme">[docs]</a><span class="k">def</span> <span class="nf">setColourScheme</span><span class="p">(</span><span class="n">colourScheme</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;set the current colourScheme</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QCoreApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="s1">&#39;_ccpnApplication&#39;</span><span class="p">):</span>
+        <span class="n">application</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="s1">&#39;_ccpnApplication&#39;</span><span class="p">)</span>
+        <span class="c1"># colourScheme = application.colourScheme</span>
+        <span class="k">if</span> <span class="n">colourScheme</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">COLOUR_SCHEMES</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Undefined colour scheme&#39;</span><span class="p">)</span>
+
+        <span class="n">application</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">=</span> <span class="n">colourScheme</span>
+        <span class="n">ColourDict</span><span class="p">(</span><span class="n">colourScheme</span><span class="p">)</span><span class="o">.</span><span class="n">setColourScheme</span><span class="p">(</span><span class="n">colourScheme</span><span class="p">)</span></div>
+
+
+<span class="nd">@singleton</span>
+<div class="viewcode-block" id="ColourDict"><a class="viewcode-back" href="../../../../ccpn/ccpn.ui.gui.html#ccpn.ui.gui.guiSettings.ColourDict">[docs]</a><span class="k">class</span> <span class="nc">ColourDict</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Singleton Class to store colours;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">colourScheme</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="c1"># assure always default values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setColourScheme</span><span class="p">(</span><span class="n">DEFAULT</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">colourScheme</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setColourScheme</span><span class="p">(</span><span class="n">colourScheme</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setColourScheme</span><span class="p">(</span><span class="n">getColourScheme</span><span class="p">())</span>
+
+<div class="viewcode-block" id="ColourDict.setColourScheme"><a class="viewcode-back" href="../../../../ccpn/ccpn.ui.gui.html#ccpn.ui.gui.guiSettings.ColourDict.setColourScheme">[docs]</a>    <span class="k">def</span> <span class="nf">setColourScheme</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">colourScheme</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">colourScheme</span> <span class="ow">in</span> <span class="n">COLOUR_SCHEMES</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">colourSchemes</span><span class="p">[</span><span class="n">DEFAULT</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">colourSchemes</span><span class="p">[</span><span class="n">colourScheme</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">=</span> <span class="n">colourScheme</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;undefined colourScheme &quot;</span><span class="si">%s</span><span class="s1">&quot;, retained &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">colourScheme</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span><span class="p">))</span></div></div>
+
+
+<span class="c1">#end class</span>
 
 
 <div class="viewcode-block" id="getColours"><a class="viewcode-back" href="../../../../ccpn/ccpn.ui.gui.html#ccpn.ui.gui.guiSettings.getColours">[docs]</a><span class="k">def</span> <span class="nf">getColours</span><span class="p">():</span>
-  <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  Return colour for the different schemes</span>
-<span class="sd">  :return: colourDict</span>
-<span class="sd">  &quot;&quot;&quot;</span>
-  <span class="n">colourScheme</span> <span class="o">=</span> <span class="n">getColourScheme</span><span class="p">()</span>
-  <span class="n">colourDict</span> <span class="o">=</span> <span class="p">{}</span>
-
-  <span class="k">if</span> <span class="n">colourScheme</span> <span class="o">==</span> <span class="n">DARK</span><span class="p">:</span>
-    <span class="n">textColour</span> <span class="o">=</span> <span class="s1">&#39;#f7ffff&#39;</span>
-    <span class="n">colourDict</span><span class="p">[</span><span class="s1">&#39;LabelFG&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">textColour</span>
-    <span class="n">colourDict</span><span class="p">[</span><span class="s1">&#39;LabelBG&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;#2a3358&#39;</span>
-
-  <span class="k">elif</span> <span class="n">colourScheme</span> <span class="o">==</span> <span class="n">LIGHT</span><span class="p">:</span>
-    <span class="n">textColour</span> <span class="o">=</span> <span class="s1">&#39;#555D85&#39;</span>
-    <span class="n">colourDict</span><span class="p">[</span><span class="s1">&#39;LabelFG&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">textColour</span>
-    <span class="n">colourDict</span><span class="p">[</span><span class="s1">&#39;LabelBG&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;#FBF4CC&#39;</span>
-
-  <span class="k">else</span><span class="p">:</span>
-    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Undefined colour scheme&#39;</span><span class="p">)</span>
-
-  <span class="k">return</span> <span class="n">colourDict</span></div>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return colour for the different schemes</span>
+<span class="sd">    :return: colourDict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">colourScheme</span> <span class="o">=</span> <span class="n">getColourScheme</span><span class="p">()</span>
+    <span class="n">colourDict</span> <span class="o">=</span> <span class="n">ColourDict</span><span class="p">(</span><span class="n">colourScheme</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">colourDict</span></div>
 </pre></div>
 
           </div>

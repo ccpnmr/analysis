@@ -65,7 +65,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:56 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -77,29 +77,101 @@
 <span class="c1">#=========================================================================================</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="p">,</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtPrintSupport</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.FileDialog</span> <span class="kn">import</span> <span class="n">FileDialog</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Action</span> <span class="kn">import</span> <span class="n">Action</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">fixedWidthFont</span>
 
-<div class="viewcode-block" id="TextEditor"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.TextEditor.TextEditor">[docs]</a><span class="k">class</span> <span class="nc">TextEditor</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTextEdit</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
+<div class="viewcode-block" id="TextEditor"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.TextEditor.TextEditor">[docs]</a><span class="k">class</span> <span class="nc">TextEditor</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QTextEdit</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
+  <span class="n">editingFinished</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">()</span>
+  <span class="n">receivedFocus</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">()</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">TextEditor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
-    <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+    <span class="n">Base</span><span class="o">.</span><span class="n">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">fixedWidthFont</span><span class="p">)</span>
-    <span class="c1"># if self.filename is not None:</span>
-    <span class="c1">#</span>
-    <span class="c1">#   fileData = self.filename.read()</span>
-    <span class="c1">#   print(fileData)</span>
-    <span class="c1">#   self.setText(fileData)</span>
-    <span class="c1">#</span>
-    <span class="c1"># self.show()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_changed</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setTabChangesFocus</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">textChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_handle_text_changed</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">setContextMenuPolicy</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">CustomContextMenu</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">customContextMenuRequested</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context_menu</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TextEditor.context_menu"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.TextEditor.TextEditor.context_menu">[docs]</a>  <span class="k">def</span> <span class="nf">context_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createStandardContextMenu</span><span class="p">()</span>
+    <span class="n">actions</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">actions</span><span class="p">()</span>
+    <span class="n">edit</span> <span class="o">=</span> <span class="n">Action</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Fonts&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_setFont</span><span class="p">)</span>
+    <span class="n">a</span><span class="o">.</span><span class="n">insertAction</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">edit</span><span class="p">)</span>
+    <span class="n">a</span><span class="o">.</span><span class="n">exec_</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QCursor</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span></div>
+
+  <span class="k">def</span> <span class="nf">_setFont</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">font</span><span class="p">,</span> <span class="n">ok</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFontDialog</span><span class="o">.</span><span class="n">getFont</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">font</span><span class="p">(),</span> <span class="bp">self</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ok</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TextEditor.focusInEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.TextEditor.TextEditor.focusInEvent">[docs]</a>  <span class="k">def</span> <span class="nf">focusInEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">TextEditor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">focusInEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">receivedFocus</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="TextEditor.focusOutEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.TextEditor.TextEditor.focusOutEvent">[docs]</a>  <span class="k">def</span> <span class="nf">focusOutEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_changed</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">editingFinished</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">TextEditor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">focusOutEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span></div>
+
+  <span class="k">def</span> <span class="nf">_handle_text_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_changed</span> <span class="o">=</span> <span class="bp">True</span>
+
+<div class="viewcode-block" id="TextEditor.setTextChanged"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.TextEditor.TextEditor.setTextChanged">[docs]</a>  <span class="k">def</span> <span class="nf">setTextChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_changed</span> <span class="o">=</span> <span class="n">state</span></div>
+
+<div class="viewcode-block" id="TextEditor.setHtml"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.TextEditor.TextEditor.setHtml">[docs]</a>  <span class="k">def</span> <span class="nf">setHtml</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">html</span><span class="p">):</span>
+    <span class="n">QtGui</span><span class="o">.</span><span class="n">TextEditor</span><span class="o">.</span><span class="n">setHtml</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">html</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_changed</span> <span class="o">=</span> <span class="bp">False</span></div>
 
 <div class="viewcode-block" id="TextEditor.get"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.TextEditor.TextEditor.get">[docs]</a>  <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span></div></div>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="TextEditor.set"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.TextEditor.TextEditor.set">[docs]</a>  <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TextEditor.zoom"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.TextEditor.TextEditor.zoom">[docs]</a>  <span class="k">def</span> <span class="nf">zoom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delta</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">delta</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">zoomOut</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">delta</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">zoomIn</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TextEditor.saveToPDF"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.TextEditor.TextEditor.saveToPDF">[docs]</a>  <span class="k">def</span> <span class="nf">saveToPDF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileName</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+    <span class="n">dialog</span> <span class="o">=</span> <span class="n">FileDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AnyFile</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Save Macro As...&#39;</span><span class="p">,</span>
+                        <span class="n">acceptMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AcceptSave</span><span class="p">,</span> <span class="n">selectFile</span><span class="o">=</span><span class="n">fileName</span><span class="p">,</span>
+                         <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;*.pdf&#39;</span><span class="p">)</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">selectedFile</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">filename</span><span class="p">:</span>
+      <span class="n">printer</span> <span class="o">=</span> <span class="n">QtPrintSupport</span><span class="o">.</span><span class="n">QPrinter</span><span class="p">(</span><span class="n">QtPrintSupport</span><span class="o">.</span><span class="n">QPrinter</span><span class="o">.</span><span class="n">HighResolution</span><span class="p">)</span>
+      <span class="n">printer</span><span class="o">.</span><span class="n">setPageSize</span><span class="p">(</span><span class="n">QtPrintSupport</span><span class="o">.</span><span class="n">QPrinter</span><span class="o">.</span><span class="n">A4</span><span class="p">)</span>
+      <span class="n">printer</span><span class="o">.</span><span class="n">setColorMode</span><span class="p">(</span><span class="n">QtPrintSupport</span><span class="o">.</span><span class="n">QPrinter</span><span class="o">.</span><span class="n">Color</span><span class="p">)</span>
+      <span class="n">printer</span><span class="o">.</span><span class="n">setOutputFormat</span><span class="p">(</span><span class="n">QtPrintSupport</span><span class="o">.</span><span class="n">QPrinter</span><span class="o">.</span><span class="n">PdfFormat</span><span class="p">)</span>
+      <span class="n">printer</span><span class="o">.</span><span class="n">setOutputFileName</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="p">()</span><span class="o">.</span><span class="n">print_</span><span class="p">(</span><span class="n">printer</span><span class="p">)</span></div></div>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Application</span> <span class="kn">import</span> <span class="n">TestApplication</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
+
+    <span class="n">app</span> <span class="o">=</span> <span class="n">TestApplication</span><span class="p">()</span>
+
+    <span class="n">popup</span> <span class="o">=</span> <span class="n">CcpnDialog</span><span class="p">(</span><span class="n">windowTitle</span><span class="o">=</span><span class="s1">&#39;Test widget&#39;</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">TextEditor</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">popup</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+
+    <span class="n">popup</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 </pre></div>
 
           </div>

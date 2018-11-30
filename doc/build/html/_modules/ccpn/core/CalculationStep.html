@@ -48,6 +48,7 @@
             
   <h1>Source code for ccpn.core.CalculationStep</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module documentation here</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
@@ -57,23 +58,23 @@
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:27 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
+
+
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span>
 <span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint</span> <span class="kn">import</span> <span class="n">CalculationStep</span> <span class="k">as</span> <span class="n">ApiCalculationStep</span>
@@ -82,201 +83,205 @@
 
 
 <div class="viewcode-block" id="CalculationStep"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.CalculationStep.CalculationStep">[docs]</a><span class="k">class</span> <span class="nc">CalculationStep</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;CalculationStep information, for tracking successive calculations.</span>
-<span class="sd">  Ordered from oldest to newest&quot;&quot;&quot;</span>
-  
-  <span class="c1">#: Short class name, for PID.</span>
-  <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;DC&#39;</span>
-  <span class="c1"># Attribute it necessary as subclasses must use superclass className</span>
-  <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;CalculationStep&#39;</span>
+    <span class="sd">&quot;&quot;&quot;CalculationStep information, for tracking successive calculations.</span>
+<span class="sd">    Ordered from oldest to newest&quot;&quot;&quot;</span>
 
-  <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">DataSet</span>
+    <span class="c1">#: Short class name, for PID.</span>
+    <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;DC&#39;</span>
+    <span class="c1"># Attribute it necessary as subclasses must use superclass className</span>
+    <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;CalculationStep&#39;</span>
 
-  <span class="c1">#: Name of plural link to instances of class</span>
-  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s1">&#39;calculationSteps&#39;</span>
+    <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">DataSet</span>
 
-  <span class="c1">#: List of child classes.</span>
-  <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1">#: Name of plural link to instances of class</span>
+    <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s1">&#39;calculationSteps&#39;</span>
 
-  <span class="c1"># Qualified name of matching API class</span>
-  <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">ApiCalculationStep</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+    <span class="c1">#: List of child classes.</span>
+    <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
 
-  <span class="c1"># CCPN properties</span>
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">_apiCalculationStep</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ApiCalculationStep</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; CCPN CalculationStep matching CalculationStep&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="c1"># Qualified name of matching API class</span>
+    <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">ApiCalculationStep</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;id string - serial number converted to string&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">serial</span><span class="p">)</span>
+    <span class="c1"># CCPN properties</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_apiCalculationStep</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ApiCalculationStep</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; CCPN CalculationStep matching CalculationStep&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">serial</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;serial number of CalculationStep, used in Pid and to identify the CalculationStep. &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">serial</span>
-    
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataSet</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;DataSet containing RestraintList.&quot;&quot;&quot;</span>
-    <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">nmrConstraintStore</span><span class="p">]</span>
-  
-  <span class="n">dataSet</span> <span class="o">=</span> <span class="n">_parent</span>
-  
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">programName</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Name of program doing calculation&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">programName</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;id string - serial number converted to string&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">serial</span><span class="p">)</span>
 
-  <span class="nd">@programName.setter</span>
-  <span class="k">def</span> <span class="nf">programName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">programName</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">serial</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;serial number of CalculationStep, used in Pid and to identify the CalculationStep. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">serial</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">programVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Version of program doing calculation&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">programVersion</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataSet</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;DataSet containing RestraintList.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">nmrConstraintStore</span><span class="p">]</span>
 
-  <span class="nd">@programVersion.setter</span>
-  <span class="k">def</span> <span class="nf">programVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">programVersion</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="n">dataSet</span> <span class="o">=</span> <span class="n">_parent</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">scriptName</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Name of script used for calculation&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">scriptName</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">programName</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Name of program doing calculation&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">programName</span>
 
-  <span class="nd">@scriptName.setter</span>
-  <span class="k">def</span> <span class="nf">scriptName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">scriptName</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="nd">@programName.setter</span>
+    <span class="k">def</span> <span class="nf">programName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">programName</span> <span class="o">=</span> <span class="n">value</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">script</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Text of script used for calculation&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">script</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">programVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Version of program doing calculation&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">programVersion</span>
 
-  <span class="nd">@script.setter</span>
-  <span class="k">def</span> <span class="nf">script</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">script</span> <span class="o">=</span> <span class="n">value</span>
-  
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">inputDataUuid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Universal identifier (uuid) for calculation input data set.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">inputDataUuid</span>
+    <span class="nd">@programVersion.setter</span>
+    <span class="k">def</span> <span class="nf">programVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">programVersion</span> <span class="o">=</span> <span class="n">value</span>
 
-  <span class="nd">@inputDataUuid.setter</span>
-  <span class="k">def</span> <span class="nf">inputDataUuid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">inputDataUuid</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">scriptName</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Name of script used for calculation&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">scriptName</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">outputDataUuid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Universal identifier (uuid) for calculation output data set&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">outputDataUuid</span>
+    <span class="nd">@scriptName.setter</span>
+    <span class="k">def</span> <span class="nf">scriptName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">scriptName</span> <span class="o">=</span> <span class="n">value</span>
 
-  <span class="nd">@outputDataUuid.setter</span>
-  <span class="k">def</span> <span class="nf">outputDataUuid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">outputDataUuid</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">script</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Text of script used for calculation&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">script</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">inputDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DataSet</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Calculation input data set.&quot;&quot;&quot;</span>
-    <span class="n">uuid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">inputDataUuid</span>
-    <span class="n">apiDataSet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">findFirstNmrConstraintStore</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">apiDataSet</span><span class="p">:</span>
-      <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">apiDataSet</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">return</span> <span class="bp">None</span>
+    <span class="nd">@script.setter</span>
+    <span class="k">def</span> <span class="nf">script</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">script</span> <span class="o">=</span> <span class="n">value</span>
 
-  <span class="nd">@inputDataSet.setter</span>
-  <span class="k">def</span> <span class="nf">inputDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">inputDataUuid</span> <span class="o">=</span> <span class="n">value</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">value</span><span class="o">.</span><span class="n">uuid</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">inputDataUuid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Universal identifier (uuid) for calculation input data set.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">inputDataUuid</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">outputDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DataSet</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Calculation output data set.&quot;&quot;&quot;</span>
-    <span class="n">uuid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">outputDataUuid</span>
-    <span class="n">apiDataSet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">findFirstNmrConstraintStore</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">apiDataSet</span><span class="p">:</span>
-      <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">apiDataSet</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">return</span> <span class="bp">None</span>
+    <span class="nd">@inputDataUuid.setter</span>
+    <span class="k">def</span> <span class="nf">inputDataUuid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">inputDataUuid</span> <span class="o">=</span> <span class="n">value</span>
 
-  <span class="nd">@outputDataSet.setter</span>
-  <span class="k">def</span> <span class="nf">outputDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">outputDataUuid</span> <span class="o">=</span> <span class="n">value</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">value</span><span class="o">.</span><span class="n">uuid</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">outputDataUuid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Universal identifier (uuid) for calculation output data set&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">outputDataUuid</span>
 
+    <span class="nd">@outputDataUuid.setter</span>
+    <span class="k">def</span> <span class="nf">outputDataUuid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">outputDataUuid</span> <span class="o">=</span> <span class="n">value</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">inputDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DataSet</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Calculation input data set.&quot;&quot;&quot;</span>
+        <span class="n">uuid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">inputDataUuid</span>
+        <span class="n">apiDataSet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">findFirstNmrConstraintStore</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">apiDataSet</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">apiDataSet</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
 
-  <span class="nd">@classmethod</span>
-  <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span><span class="n">DataSet</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;get wrappedData - all ConstraintList children of parent NmrConstraintStore&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedCalculationSteps</span><span class="p">()</span></div>
+    <span class="nd">@inputDataSet.setter</span>
+    <span class="k">def</span> <span class="nf">inputDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">inputDataUuid</span> <span class="o">=</span> <span class="n">value</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">value</span><span class="o">.</span><span class="n">uuid</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">outputDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DataSet</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Calculation output data set.&quot;&quot;&quot;</span>
+        <span class="n">uuid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">outputDataUuid</span>
+        <span class="n">apiDataSet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">findFirstNmrConstraintStore</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">apiDataSet</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">apiDataSet</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="nd">@outputDataSet.setter</span>
+    <span class="k">def</span> <span class="nf">outputDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">outputDataUuid</span> <span class="o">=</span> <span class="n">value</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">value</span><span class="o">.</span><span class="n">uuid</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">DataSet</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;get wrappedData - all ConstraintList children of parent NmrConstraintStore&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedCalculationSteps</span><span class="p">()</span></div>
+
 
 <span class="c1"># Connections to parents:</span>
 
-<span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">DataSet</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">CalculationStep</span><span class="p">]:</span>
-  <span class="n">uuid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uuid</span>
-  <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">calculationSteps</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">inputDataUuid</span> <span class="o">==</span> <span class="n">uuid</span><span class="p">]</span>
-<span class="n">DataSet</span><span class="o">.</span><span class="n">outputCalculationSteps</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
-                          <span class="s2">&quot;ccpn.CalculationSteps (from other DataSets) that used DataSet as input&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DataSet</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">CalculationStep</span><span class="p">]:</span>
+    <span class="n">uuid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uuid</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">calculationSteps</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">inputDataUuid</span> <span class="o">==</span> <span class="n">uuid</span><span class="p">]</span>
 
-<span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">DataSet</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">CalculationStep</span><span class="p">]:</span>
-  <span class="n">uuid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uuid</span>
-  <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculationSteps</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">outputDataUuid</span> <span class="o">==</span> <span class="n">uuid</span><span class="p">]</span>
+
+<span class="n">DataSet</span><span class="o">.</span><span class="n">outputCalculationSteps</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+                                          <span class="s2">&quot;ccpn.CalculationSteps (from other DataSets) that used DataSet as input&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DataSet</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">CalculationStep</span><span class="p">]:</span>
+    <span class="n">uuid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uuid</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculationSteps</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">outputDataUuid</span> <span class="o">==</span> <span class="n">uuid</span><span class="p">]</span>
+
+
 <span class="n">DataSet</span><span class="o">.</span><span class="n">inputCalculationSteps</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
-                          <span class="s2">&quot;ccpn.CalculationSteps (from this DataSet) that yielded DataSet as output&quot;</span>
-                          <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">NB there can be more than one, because the DataSet may result from</span><span class="se">\n</span><span class="s2">&quot;</span>
-                          <span class="s2">&quot;multiple calculations that do not have intermediate DataSets stored&quot;</span><span class="p">)</span>
+                                         <span class="s2">&quot;ccpn.CalculationSteps (from this DataSet) that yielded DataSet as output&quot;</span>
+                                         <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">NB there can be more than one, because the DataSet may result from</span><span class="se">\n</span><span class="s2">&quot;</span>
+                                         <span class="s2">&quot;multiple calculations that do not have intermediate DataSets stored&quot;</span><span class="p">)</span>
 <span class="k">del</span> <span class="n">getter</span>
 
-<span class="k">def</span> <span class="nf">_newCalculationStep</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">DataSet</span><span class="p">,</span> <span class="n">programName</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">programVersion</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                        <span class="n">scriptName</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">script</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                        <span class="n">inputDataUuid</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">outputDataUuid</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                        <span class="n">inputDataSet</span><span class="p">:</span><span class="n">DataSet</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">outputDataSet</span><span class="p">:</span><span class="n">DataSet</span><span class="o">=</span><span class="bp">None</span><span class="p">,)</span> <span class="o">-&gt;</span> <span class="n">CalculationStep</span><span class="p">:</span>
-  <span class="sd">&quot;&quot;&quot;Create new CalculationStep within DataSet&quot;&quot;&quot;</span>
 
+<span class="k">def</span> <span class="nf">_newCalculationStep</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DataSet</span><span class="p">,</span> <span class="n">programName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">programVersion</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                        <span class="n">scriptName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">script</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                        <span class="n">inputDataUuid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">outputDataUuid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                        <span class="n">inputDataSet</span><span class="p">:</span> <span class="n">DataSet</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">outputDataSet</span><span class="p">:</span> <span class="n">DataSet</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CalculationStep</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Create new CalculationStep within DataSet&quot;&quot;&quot;</span>
 
-  <span class="c1"># Default values for &#39;new&#39; function, as used for echoing to console</span>
-  <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span>
-    <span class="p">((</span><span class="s1">&#39;programName&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;programVersion&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;scriptName&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;script&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
-     <span class="p">(</span><span class="s1">&#39;inputDataUuid&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;outputDataUuid&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
-    <span class="p">)</span>
-  <span class="p">)</span>
+    <span class="c1"># Default values for &#39;new&#39; function, as used for echoing to console</span>
+    <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span>
+            <span class="p">((</span><span class="s1">&#39;programName&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;programVersion&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;scriptName&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;script&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+             <span class="p">(</span><span class="s1">&#39;inputDataUuid&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;outputDataUuid&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+             <span class="p">)</span>
+            <span class="p">)</span>
 
-  <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span>
-  <span class="n">programName</span> <span class="o">=</span> <span class="n">programName</span> <span class="ow">or</span> <span class="n">project</span><span class="o">.</span><span class="n">programName</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span>
+    <span class="n">programName</span> <span class="o">=</span> <span class="n">programName</span> <span class="ow">or</span> <span class="n">project</span><span class="o">.</span><span class="n">programName</span>
 
-  <span class="k">if</span> <span class="n">inputDataSet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">inputDataUuid</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">inputDataUuid</span> <span class="o">=</span> <span class="n">inputDataSet</span><span class="o">.</span><span class="n">uuid</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either inputDataSet or inputDataUuid must be None - values were </span><span class="si">%s</span><span class="s2"> and </span><span class="si">%s</span><span class="s2">&quot;</span>
-                      <span class="o">%</span> <span class="p">(</span><span class="n">inputDataSet</span><span class="p">,</span> <span class="n">inputDataUuid</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">inputDataSet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">inputDataUuid</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">inputDataUuid</span> <span class="o">=</span> <span class="n">inputDataSet</span><span class="o">.</span><span class="n">uuid</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either inputDataSet or inputDataUuid must be None - values were </span><span class="si">%s</span><span class="s2"> and </span><span class="si">%s</span><span class="s2">&quot;</span>
+                             <span class="o">%</span> <span class="p">(</span><span class="n">inputDataSet</span><span class="p">,</span> <span class="n">inputDataUuid</span><span class="p">))</span>
 
-  <span class="k">if</span> <span class="n">outputDataSet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">outputDataUuid</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">outputDataUuid</span> <span class="o">=</span> <span class="n">outputDataSet</span><span class="o">.</span><span class="n">uuid</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either outputDataSet or inputDataUuid must be None - values were </span><span class="si">%s</span><span class="s2"> and </span><span class="si">%s</span><span class="s2">&quot;</span>
-                      <span class="o">%</span> <span class="p">(</span><span class="n">outputDataSet</span><span class="p">,</span> <span class="n">outputDataUuid</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">outputDataSet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">outputDataUuid</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">outputDataUuid</span> <span class="o">=</span> <span class="n">outputDataSet</span><span class="o">.</span><span class="n">uuid</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either outputDataSet or inputDataUuid must be None - values were </span><span class="si">%s</span><span class="s2"> and </span><span class="si">%s</span><span class="s2">&quot;</span>
+                             <span class="o">%</span> <span class="p">(</span><span class="n">outputDataSet</span><span class="p">,</span> <span class="n">outputDataUuid</span><span class="p">))</span>
 
-  <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;newCalculationStep&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
-                              <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newCalculationStep&#39;</span><span class="p">)</span>
-  <span class="k">try</span><span class="p">:</span>
-    <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">newCalculationStep</span><span class="p">(</span><span class="n">programName</span><span class="o">=</span><span class="n">programName</span><span class="p">,</span> <span class="n">programVersion</span><span class="o">=</span><span class="n">programVersion</span><span class="p">,</span>
-                                               <span class="n">scriptName</span><span class="o">=</span><span class="n">scriptName</span><span class="p">,</span> <span class="n">script</span><span class="o">=</span><span class="n">script</span><span class="p">,</span>
-                                               <span class="n">inputDataUuid</span><span class="o">=</span><span class="n">inputDataUuid</span><span class="p">,</span>
-                                               <span class="n">outputDataUuid</span><span class="o">=</span><span class="n">outputDataUuid</span><span class="p">)</span>
-  <span class="k">finally</span><span class="p">:</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
-  <span class="k">return</span> <span class="n">project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;newCalculationStep&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
+                                <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newCalculationStep&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">newCalculationStep</span><span class="p">(</span><span class="n">programName</span><span class="o">=</span><span class="n">programName</span><span class="p">,</span> <span class="n">programVersion</span><span class="o">=</span><span class="n">programVersion</span><span class="p">,</span>
+                                                   <span class="n">scriptName</span><span class="o">=</span><span class="n">scriptName</span><span class="p">,</span> <span class="n">script</span><span class="o">=</span><span class="n">script</span><span class="p">,</span>
+                                                   <span class="n">inputDataUuid</span><span class="o">=</span><span class="n">inputDataUuid</span><span class="p">,</span>
+                                                   <span class="n">outputDataUuid</span><span class="o">=</span><span class="n">outputDataUuid</span><span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
 
 <span class="n">DataSet</span><span class="o">.</span><span class="n">newCalculationStep</span> <span class="o">=</span> <span class="n">_newCalculationStep</span>
 <span class="k">del</span> <span class="n">_newCalculationStep</span>
 
 <span class="c1"># Notifiers:</span>
-
 </pre></div>
 
           </div>

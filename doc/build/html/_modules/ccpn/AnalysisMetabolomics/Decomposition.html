@@ -61,7 +61,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:22 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -74,7 +74,7 @@
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
-
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.AnalysisMetabolomics.lib</span> <span class="kn">import</span> <span class="n">normalisation</span>
@@ -122,7 +122,11 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;Spectrum&#39;</span><span class="p">,</span> <span class="s1">&#39;create&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">refreshSourceDataOptions</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;Spectrum&#39;</span><span class="p">,</span> <span class="s1">&#39;change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">refreshSourceDataOptions</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;Spectrum&#39;</span><span class="p">,</span> <span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">refreshSourceDataOptions</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;Spectrum&#39;</span><span class="p">,</span> <span class="s1">&#39;delete&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">refreshSourceDataOptions</span><span class="p">)</span></div>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;Spectrum&#39;</span><span class="p">,</span> <span class="s1">&#39;delete&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">refreshSourceDataOptions</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;SpectrumGroup&#39;</span><span class="p">,</span> <span class="s1">&#39;create&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">refreshSpectrumGroupFilter</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;SpectrumGroup&#39;</span><span class="p">,</span> <span class="s1">&#39;change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">refreshSpectrumGroupFilter</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;SpectrumGroup&#39;</span><span class="p">,</span> <span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">refreshSpectrumGroupFilter</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;SpectrumGroup&#39;</span><span class="p">,</span> <span class="s1">&#39;delete&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">refreshSpectrumGroupFilter</span><span class="p">)</span></div>
 
 
   <span class="c1"># def deRegisterNotifiers(self):</span>
@@ -140,6 +144,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">__presenter</span> <span class="o">=</span> <span class="n">value</span>
     <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">refreshSourceDataOptions</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">refreshSpectrumGroupFilter</span><span class="p">()</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -159,6 +164,13 @@
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">presenter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">presenter</span><span class="o">.</span><span class="n">setSourceDataOptions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getSourceData</span><span class="p">())</span></div>
 
+<div class="viewcode-block" id="Decomposition.refreshSpectrumGroupFilter"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.refreshSpectrumGroupFilter">[docs]</a>  <span class="k">def</span> <span class="nf">refreshSpectrumGroupFilter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">presenter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">presenter</span><span class="o">.</span><span class="n">setSpectrumGroups</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getSpectrumGroups</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="Decomposition.getSpectrumGroups"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.getSpectrumGroups">[docs]</a>  <span class="k">def</span> <span class="nf">getSpectrumGroups</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">sg</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectrumGroups</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">sg</span></div>
 
 <div class="viewcode-block" id="Decomposition.getSourceData"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.getSourceData">[docs]</a>  <span class="k">def</span> <span class="nf">getSourceData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">sd</span> <span class="o">=</span> <span class="p">[]</span>
@@ -169,6 +181,7 @@
     <span class="c1"># print(self.project.spectra)</span>
     <span class="c1"># print(list([s.axisCodes for s in self.project.spectra]))</span>
     <span class="c1"># print(sd)</span>
+
     <span class="k">return</span> <span class="n">sd</span></div>
 
 
@@ -227,9 +240,13 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">__sourcesChanged</span> <span class="o">=</span> <span class="bp">False</span>
     <span class="n">sd</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sources</span><span class="p">:</span>
-      <span class="n">sd</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SP:{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">d</span><span class="p">))</span><span class="o">.</span><span class="n">get1dSpectrumData</span><span class="p">()</span>
-    <span class="n">l</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">sd</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="n">sd</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">keys</span><span class="p">())]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">__data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span></div>
+      <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SP:{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">d</span><span class="p">))</span>
+      <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">spectrum</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">intensities</span><span class="p">])</span>
+      <span class="n">sd</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">sd</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">keys</span><span class="p">())]</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">__data</span> <span class="o">=</span>  <span class="n">data</span></div>
 
 <div class="viewcode-block" id="Decomposition.normalize"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.normalize">[docs]</a>  <span class="k">def</span> <span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;PQN&#39;</span><span class="p">:</span>
@@ -281,7 +298,13 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">normalize</span><span class="p">()</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="p">()</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">()</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">decomposition</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__decomp</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">)</span>
+      <span class="c1"># self.__decomp --&gt;   PCA decomposition</span>
+      <span class="c1"># decomposition --&gt;  module &#39;ccpn.AnalysisMetabolomics.lib.decomposition</span>
+      <span class="c1"># self.__data --&gt; intensities as array</span>
+
+      <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">decomposition</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__decomp</span><span class="p">)(</span><span class="n">data</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">setAvailablePlotData</span><span class="p">()</span></div>
 
 

@@ -55,13 +55,13 @@
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Luca Mureddu $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:38 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -73,15 +73,19 @@
 
 
 <span class="c1">#### GUI IMPORTS</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PipelineWidgets</span> <span class="kn">import</span> <span class="n">GuiPipe</span> <span class="p">,</span> <span class="n">_getWidgetByAtt</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PipelineWidgets</span> <span class="kn">import</span> <span class="n">GuiPipe</span><span class="p">,</span> <span class="n">_getWidgetByAtt</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.DoubleSpinbox</span> <span class="kn">import</span> <span class="n">ScientificDoubleSpinBox</span><span class="p">,</span> <span class="n">DoubleSpinbox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.GLLinearRegionsPlot</span> <span class="kn">import</span> <span class="n">GLTargetButtonSpinBoxes</span>
 
 <span class="c1">#### NON GUI IMPORTS</span>
 <span class="kn">from</span> <span class="nn">ccpn.framework.lib.Pipe</span> <span class="kn">import</span> <span class="n">SpectraPipe</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">signal</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span> <span class="p">,</span> <span class="n">_debug3</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span><span class="p">,</span> <span class="n">_debug3</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
 
 
 <span class="c1">########################################################################################################################</span>
@@ -90,35 +94,109 @@
 <span class="c1">########################################################################################################################</span>
 
 <span class="n">ReferenceSpectrum</span> <span class="o">=</span> <span class="s1">&#39;Reference_Spectrum&#39;</span>
-<span class="n">PipeName</span> <span class="o">=</span> <span class="s1">&#39;AlignSpectra&#39;</span>
+<span class="n">PipeName</span> <span class="o">=</span> <span class="s1">&#39;Align Spectra&#39;</span>
 <span class="n">HeaderText</span> <span class="o">=</span> <span class="s1">&#39;-- Select Spectrum --&#39;</span>
+<span class="n">ReferenceRegion</span> <span class="o">=</span> <span class="s1">&#39;Reference_Region&#39;</span>
+<span class="n">DefaultReferenceRegion</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">EnginesVar</span> <span class="o">=</span> <span class="s1">&#39;Engines&#39;</span>
+<span class="n">IndividualMode</span> <span class="o">=</span> <span class="s1">&#39;individual&#39;</span>
+<span class="n">Median</span> <span class="o">=</span> <span class="s1">&#39;median&#39;</span>
+<span class="n">Mode</span> <span class="o">=</span> <span class="s1">&#39;mode&#39;</span>
+<span class="n">Mean</span> <span class="o">=</span> <span class="s1">&#39;mean&#39;</span>
+<span class="n">Engines</span> <span class="o">=</span> <span class="p">[</span><span class="n">IndividualMode</span><span class="p">,</span> <span class="n">Mean</span><span class="p">,</span> <span class="n">Mode</span><span class="p">,</span> <span class="n">Median</span><span class="p">]</span>
+<span class="n">EnginesCallables</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">&#39;median&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;mode&#39;</span><span class="p">,</span> <span class="n">stats</span><span class="o">.</span><span class="n">mode</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">),</span>
+    <span class="p">])</span>
+
+<span class="n">DefaultEngine</span> <span class="o">=</span> <span class="s1">&#39;median&#39;</span>
+<span class="n">NotAvailable</span> <span class="o">=</span> <span class="s1">&#39;Not Available&#39;</span>
+
+
 <span class="c1">########################################################################################################################</span>
 <span class="c1">##########################################      ALGORITHM       ########################################################</span>
 <span class="c1">########################################################################################################################</span>
 
 
 <span class="k">def</span> <span class="nf">_getShift</span><span class="p">(</span><span class="n">ref_x</span><span class="p">,</span> <span class="n">ref_y</span><span class="p">,</span> <span class="n">target_y</span><span class="p">):</span>
-  <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">  :param ref_x: X array of the reference spectra (positions)</span>
-<span class="sd">  :param ref_y: Y array of the reference spectra (intensities)</span>
-<span class="sd">  :param target_y: Y array of the target spectra (intensities)</span>
-<span class="sd">  :return: the shift needed to align the two spectra.</span>
-<span class="sd">  To align the target spectrum to its reference: add the shift to the x array.</span>
-<span class="sd">  E.g. target_y += shift</span>
-<span class="sd">  &#39;&#39;&#39;</span>
-  <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">correlate</span><span class="p">(</span><span class="n">ref_y</span><span class="p">,</span> <span class="n">target_y</span><span class="p">))</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_y</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">ref_x</span><span class="p">))</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    :param ref_x: X array of the reference spectra (positions)</span>
+<span class="sd">    :param ref_y: Y array of the reference spectra (intensities)</span>
+<span class="sd">    :param target_y: Y array of the target spectra (intensities)</span>
+<span class="sd">    :return: the shift needed to align the two spectra.</span>
+<span class="sd">    Global alignment. This can give unpredictable results if the signal intensities are very different</span>
+<span class="sd">    To align the target spectrum to its reference: add the shift to the x array.</span>
+<span class="sd">    E.g. target_y += shift</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">correlate</span><span class="p">(</span><span class="n">ref_y</span><span class="p">,</span> <span class="n">target_y</span><span class="p">))</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_y</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">ref_x</span><span class="p">))</span>
 
 
-<span class="k">def</span> <span class="nf">_alignSpectra</span><span class="p">(</span><span class="n">referenceSpectrum</span><span class="p">,</span> <span class="n">spectra</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_getShiftForSpectra</span><span class="p">(</span><span class="n">referenceSpectrum</span><span class="p">,</span> <span class="n">spectra</span><span class="p">,</span> <span class="n">referenceRegion</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;median&#39;</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    :param referenceSpectrum:</span>
+<span class="sd">    :param spectra:</span>
+<span class="sd">    :param referenceRegion:</span>
+<span class="sd">    :param intensityFactor:</span>
+<span class="sd">    :param engine: one of &#39;median&#39;, &#39;mode&#39;, &#39;mean&#39;</span>
+<span class="sd">    :return: shift float</span>
+<span class="sd">    alignment of spectra. It aligns based on a specified region of the reference spectrum</span>
+<span class="sd">    &#39;&#39;&#39;</span>
 
-  <span class="n">alignedSpectra</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
-    <span class="n">shift</span> <span class="o">=</span> <span class="n">_getShift</span><span class="p">(</span><span class="n">ref_x</span><span class="o">=</span><span class="n">referenceSpectrum</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span> <span class="n">ref_y</span><span class="o">=</span><span class="n">referenceSpectrum</span><span class="o">.</span><span class="n">intensities</span><span class="p">,</span> <span class="n">target_y</span><span class="o">=</span><span class="n">sp</span><span class="o">.</span><span class="n">intensities</span><span class="p">)</span>
-    <span class="n">sp</span><span class="o">.</span><span class="n">_positions</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">positions</span>
-    <span class="n">sp</span><span class="o">.</span><span class="n">_positions</span> <span class="o">+=</span> <span class="n">shift</span>
-    <span class="n">alignedSpectra</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span>
-  <span class="k">return</span> <span class="n">alignedSpectra</span>
+    <span class="n">shifts</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">point1</span><span class="p">,</span> <span class="n">point2</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">referenceRegion</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">referenceRegion</span><span class="p">)</span>
+    <span class="n">xRef</span><span class="p">,</span> <span class="n">yRef</span> <span class="o">=</span> <span class="n">referenceSpectrum</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span> <span class="n">referenceSpectrum</span><span class="o">.</span><span class="n">intensities</span>
+    <span class="n">ref_x_filtered</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">xRef</span> <span class="o">&lt;=</span> <span class="n">point1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">xRef</span> <span class="o">&gt;=</span> <span class="n">point2</span><span class="p">))</span>  <span class="c1">#only the region of interest for the reference spectrum</span>
 
+    <span class="n">ref_y_filtered</span> <span class="o">=</span> <span class="n">yRef</span><span class="p">[</span><span class="n">ref_x_filtered</span><span class="p">]</span>
+    <span class="n">maxYRef</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">ref_y_filtered</span><span class="p">)</span>  <span class="c1">#Find the highest signal in the region of interest for the reference spectrum. All spectra will be aligned to this point.</span>
+    <span class="n">boolsRefMax</span> <span class="o">=</span> <span class="n">yRef</span> <span class="o">==</span> <span class="n">maxYRef</span>
+    <span class="n">refIndices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">boolsRefMax</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">refIndices</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">refPos</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">xRef</span><span class="p">[</span><span class="n">refIndices</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectra</span><span class="p">)</span> <span class="k">if</span> <span class="n">engine</span> <span class="o">==</span> <span class="n">IndividualMode</span> <span class="k">else</span> <span class="mi">0</span>  <span class="c1"># cannot align without a reference intensity signal</span>
+
+    <span class="c1">#  find the shift for each spectrum for the selected region</span>
+    <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
+        <span class="n">xTarg</span><span class="p">,</span> <span class="n">yTarg</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">intensities</span>
+        <span class="n">x_TargetFilter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">xTarg</span> <span class="o">&lt;=</span> <span class="n">point1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">xTarg</span> <span class="o">&gt;=</span> <span class="n">point2</span><span class="p">))</span>  <span class="c1"># filter only the region of interest for the target spectrum</span>
+
+        <span class="n">y_TargetValues</span> <span class="o">=</span> <span class="n">yTarg</span><span class="p">[</span><span class="n">x_TargetFilter</span><span class="p">]</span>
+        <span class="n">maxYTarget</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">y_TargetValues</span><span class="p">)</span>
+        <span class="n">boolsMax</span> <span class="o">=</span> <span class="n">yTarg</span> <span class="o">==</span> <span class="n">maxYTarget</span>  <span class="c1">#Find the highest signal in the region of interest</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">boolsMax</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">tarPos</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">xTarg</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+            <span class="n">shift</span> <span class="o">=</span> <span class="n">tarPos</span> <span class="o">-</span> <span class="n">refPos</span>
+            <span class="n">shifts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shift</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shifts</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectra</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">engine</span> <span class="o">==</span> <span class="n">IndividualMode</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">shifts</span>
+
+    <span class="c1"># get a common shift from all the shifts found</span>
+    <span class="k">if</span> <span class="n">engine</span> <span class="ow">in</span> <span class="n">EnginesCallables</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">shift</span> <span class="o">=</span> <span class="n">EnginesCallables</span><span class="p">[</span><span class="n">engine</span><span class="p">](</span><span class="n">shifts</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">shift</span><span class="p">,</span> <span class="n">stats</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">ModeResult</span><span class="p">):</span>
+            <span class="n">shift</span> <span class="o">=</span> <span class="n">shift</span><span class="o">.</span><span class="n">mode</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">shift</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="addIndividualShiftToSpectra"><a class="viewcode-back" href="../../../ccpn/ccpn.pipes.html#ccpn.pipes.AlignSpectra.addIndividualShiftToSpectra">[docs]</a><span class="k">def</span> <span class="nf">addIndividualShiftToSpectra</span><span class="p">(</span><span class="n">spectra</span><span class="p">,</span> <span class="n">shifts</span><span class="p">):</span>
+    <span class="n">alignedSpectra</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">sp</span><span class="p">,</span> <span class="n">shift</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">spectra</span><span class="p">,</span> <span class="n">shifts</span><span class="p">):</span>
+        <span class="n">sp</span><span class="o">.</span><span class="n">positions</span> <span class="o">-=</span> <span class="n">shift</span>
+        <span class="n">alignedSpectra</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">alignedSpectra</span></div>
+
+
+<div class="viewcode-block" id="addShiftToSpectra"><a class="viewcode-back" href="../../../ccpn/ccpn.pipes.html#ccpn.pipes.AlignSpectra.addShiftToSpectra">[docs]</a><span class="k">def</span> <span class="nf">addShiftToSpectra</span><span class="p">(</span><span class="n">spectra</span><span class="p">,</span> <span class="n">shift</span><span class="p">):</span>
+    <span class="n">alignedSpectra</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
+        <span class="n">sp</span><span class="o">.</span><span class="n">positions</span> <span class="o">-=</span> <span class="n">shift</span>
+        <span class="n">alignedSpectra</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">alignedSpectra</span></div>
 
 
 <span class="c1">########################################################################################################################</span>
@@ -127,29 +205,66 @@
 
 
 <div class="viewcode-block" id="AlignSpectraGuiPipe"><a class="viewcode-back" href="../../../ccpn/ccpn.pipes.html#ccpn.pipes.AlignSpectra.AlignSpectraGuiPipe">[docs]</a><span class="k">class</span> <span class="nc">AlignSpectraGuiPipe</span><span class="p">(</span><span class="n">GuiPipe</span><span class="p">):</span>
+    <span class="n">preferredPipe</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">pipeName</span> <span class="o">=</span> <span class="n">PipeName</span>
 
-  <span class="n">preferredPipe</span> <span class="o">=</span> <span class="bp">True</span>
-  <span class="n">pipeName</span> <span class="o">=</span> <span class="n">PipeName</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">pipeName</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AlignSpectraGuiPipe</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">GuiPipe</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">pipeName</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>   <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">AlignSpectraGuiPipe</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
-    <span class="n">GuiPipe</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span> <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">ReferenceSpectrum</span><span class="p">,</span>  <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
-    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ReferenceSpectrum</span><span class="p">,</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">headerText</span><span class="o">=</span><span class="n">HeaderText</span><span class="p">,</span> <span class="n">headerIcon</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_warningIcon</span><span class="p">,</span>  <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span> <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_updateWidgets</span><span class="p">()</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1">#  Reference Spectrum</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spectrumLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">ReferenceSpectrum</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ReferenceSpectrum</span><span class="p">,</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">headerText</span><span class="o">=</span><span class="n">HeaderText</span><span class="p">,</span>
+                                                      <span class="n">headerIcon</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_warningIcon</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_estimateShift</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
 
-  <span class="k">def</span> <span class="nf">_updateWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_setDataReferenceSpectrum</span><span class="p">()</span>
+        <span class="c1"># target region</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tregionLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">ReferenceRegion</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ReferenceRegion</span><span class="p">,</span> <span class="n">GLTargetButtonSpinBoxes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="p">,</span>
+                                                               <span class="n">values</span><span class="o">=</span><span class="n">DefaultReferenceRegion</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">,</span>
+                                                               <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
 
+        <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1">#  Engines</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enginesLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">EnginesVar</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">EnginesVar</span><span class="p">,</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="n">Engines</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
 
-  <span class="k">def</span> <span class="nf">_setDataReferenceSpectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputData</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-      <span class="n">_getWidgetByAtt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ReferenceSpectrum</span><span class="p">)</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="n">sp</span><span class="o">.</span><span class="n">pid</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">data</span><span class="p">],</span> <span class="n">objects</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">headerText</span><span class="o">=</span><span class="n">HeaderText</span><span class="p">,</span> <span class="n">headerIcon</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_warningIcon</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">_getWidgetByAtt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ReferenceSpectrum</span><span class="p">)</span><span class="o">.</span><span class="n">_clear</span><span class="p">()</span></div>
+        <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">estimateShiftLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="s1">&#39;Estimated_shift&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimateShift</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">NotAvailable</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_updateWidgets</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_estimateShift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Only to show on the Gui pipe &#39;&#39;&#39;</span>
+        <span class="n">referenceRegion</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ReferenceRegion</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="n">engine</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">EnginesVar</span><span class="p">)</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span>
+        <span class="n">referenceSpectrum</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ReferenceSpectrum</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">referenceSpectrum</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">spectra</span> <span class="o">=</span> <span class="p">[</span><span class="n">sp</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">inputData</span> <span class="k">if</span> <span class="n">sp</span> <span class="o">!=</span> <span class="n">referenceSpectrum</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">engine</span> <span class="o">==</span> <span class="n">IndividualMode</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">estimateShift</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">estimateShift</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">NotAvailable</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">shift</span> <span class="o">=</span> <span class="n">_getShiftForSpectra</span><span class="p">(</span><span class="n">referenceSpectrum</span><span class="p">,</span> <span class="n">spectra</span><span class="p">,</span>
+                                            <span class="n">referenceRegion</span><span class="o">=</span><span class="n">referenceRegion</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">estimateShift</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">estimateShift</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">shift</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_updateWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setDataReferenceSpectrum</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_setDataReferenceSpectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">inputData</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">_getWidgetByAtt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ReferenceSpectrum</span><span class="p">)</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="n">sp</span><span class="o">.</span><span class="n">pid</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">data</span><span class="p">],</span> <span class="n">objects</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                                             <span class="n">headerText</span><span class="o">=</span><span class="n">HeaderText</span><span class="p">,</span> <span class="n">headerIcon</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_warningIcon</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_getWidgetByAtt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ReferenceSpectrum</span><span class="p">)</span><span class="o">.</span><span class="n">_clear</span><span class="p">()</span></div>
 
 
 <span class="c1">########################################################################################################################</span>
@@ -157,37 +272,51 @@
 <span class="c1">########################################################################################################################</span>
 
 
-
-
 <div class="viewcode-block" id="AlignSpectra"><a class="viewcode-back" href="../../../ccpn/ccpn.pipes.html#ccpn.pipes.AlignSpectra.AlignSpectra">[docs]</a><span class="k">class</span> <span class="nc">AlignSpectra</span><span class="p">(</span><span class="n">SpectraPipe</span><span class="p">):</span>
+    <span class="n">guiPipe</span> <span class="o">=</span> <span class="n">AlignSpectraGuiPipe</span>
+    <span class="n">pipeName</span> <span class="o">=</span> <span class="n">PipeName</span>
 
-  <span class="n">guiPipe</span> <span class="o">=</span> <span class="n">AlignSpectraGuiPipe</span>
-  <span class="n">pipeName</span> <span class="o">=</span> <span class="n">PipeName</span>
+    <span class="n">_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">ReferenceSpectrum</span><span class="p">:</span> <span class="s1">&#39;spectrum.pid&#39;</span><span class="p">,</span>
+        <span class="n">ReferenceRegion</span><span class="p">:</span> <span class="n">DefaultReferenceRegion</span><span class="p">,</span>
+        <span class="n">EnginesVar</span><span class="p">:</span> <span class="n">DefaultEngine</span>
+        <span class="p">}</span>
 
-  <span class="n">_kwargs</span>  <span class="o">=</span>   <span class="p">{</span>
-               <span class="n">ReferenceSpectrum</span><span class="p">:</span> <span class="s1">&#39;spectrum.pid&#39;</span>
-               <span class="p">}</span>
+<div class="viewcode-block" id="AlignSpectra.runPipe"><a class="viewcode-back" href="../../../ccpn/ccpn.pipes.html#ccpn.pipes.AlignSpectra.AlignSpectra.runPipe">[docs]</a>    <span class="k">def</span> <span class="nf">runPipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param spectra: inputData</span>
+<span class="sd">        :return: aligned spectra</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">referenceRegion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">ReferenceRegion</span><span class="p">]</span>
+        <span class="n">engine</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">EnginesVar</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">referenceSpectrumPid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">ReferenceSpectrum</span><span class="p">]</span>
+            <span class="n">referenceSpectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">referenceSpectrumPid</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">referenceSpectrum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">spectraToAlign</span> <span class="o">=</span> <span class="p">[</span><span class="n">spectrum</span> <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectra</span> <span class="k">if</span> <span class="n">spectrum</span> <span class="o">!=</span> <span class="n">referenceSpectrum</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">spectraToAlign</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">engine</span> <span class="o">==</span> <span class="n">IndividualMode</span><span class="p">:</span>
+                        <span class="n">shifts</span> <span class="o">=</span> <span class="n">_getShiftForSpectra</span><span class="p">(</span><span class="n">referenceSpectrum</span><span class="p">,</span> <span class="n">spectraToAlign</span><span class="p">,</span>
+                                                     <span class="n">referenceRegion</span><span class="o">=</span><span class="n">referenceRegion</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
+                        <span class="n">addIndividualShiftToSpectra</span><span class="p">(</span><span class="n">spectraToAlign</span><span class="p">,</span> <span class="n">shifts</span><span class="p">)</span>
+                        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Alignment: applied individual shift to all spectra&#39;</span><span class="p">)</span>
+
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">shift</span> <span class="o">=</span> <span class="n">_getShiftForSpectra</span><span class="p">(</span><span class="n">referenceSpectrum</span><span class="p">,</span> <span class="n">spectraToAlign</span><span class="p">,</span>
+                                                    <span class="n">referenceRegion</span><span class="o">=</span><span class="n">referenceRegion</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
+                        <span class="n">addShiftToSpectra</span><span class="p">(</span><span class="n">spectraToAlign</span><span class="p">,</span> <span class="n">shift</span><span class="p">)</span>
+                        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Alignment: applied shift to all spectra of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">shift</span><span class="p">)</span>
+
+                    <span class="k">return</span> <span class="n">spectra</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Spectra not Aligned. Returned original spectra&#39;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">spectra</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Spectra not Aligned. Returned original spectra&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">spectra</span></div></div>
 
 
-
-<div class="viewcode-block" id="AlignSpectra.runPipe"><a class="viewcode-back" href="../../../ccpn/ccpn.pipes.html#ccpn.pipes.AlignSpectra.AlignSpectra.runPipe">[docs]</a>  <span class="k">def</span> <span class="nf">runPipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    :param spectra: inputData</span>
-<span class="sd">    :return: aligned spectra</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">referenceSpectrumPid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">ReferenceSpectrum</span><span class="p">]</span>
-      <span class="n">referenceSpectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">referenceSpectrumPid</span><span class="p">)</span>
-      <span class="k">if</span> <span class="n">referenceSpectrum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">spectra</span> <span class="o">=</span> <span class="p">[</span><span class="n">spectrum</span> <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectra</span> <span class="k">if</span> <span class="n">spectrum</span> <span class="o">!=</span> <span class="n">referenceSpectrum</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">spectra</span><span class="p">:</span>
-          <span class="k">return</span> <span class="n">_alignSpectra</span><span class="p">(</span><span class="n">referenceSpectrum</span><span class="p">,</span> <span class="n">spectra</span><span class="p">)</span>
-
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Spectra not Aligned. Returned original spectra&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">spectra</span></div></div>
-
-<span class="n">AlignSpectra</span><span class="o">.</span><span class="n">register</span><span class="p">()</span> <span class="c1"># Registers the pipe in the pipeline</span>
+<span class="n">AlignSpectra</span><span class="o">.</span><span class="n">register</span><span class="p">()</span>  <span class="c1"># Registers the pipe in the pipeline</span>
 </pre></div>
 
           </div>

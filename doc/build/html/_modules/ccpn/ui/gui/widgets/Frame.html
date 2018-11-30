@@ -57,7 +57,7 @@
 <span class="sd">ScrollableFrame(parent=None, showBorder=False, fShape=None, fShadow=None,</span>
 <span class="sd">                minimumSizes=(50,50), scrollBarPolicies=(&#39;asNeeded&#39;,&#39;asNeeded&#39;), **kwds)</span>
 
-<span class="sd">  From: http://pyqt.sourceforge.net/Docs/PyQt4/qframe.html#details</span>
+<span class="sd">  From: http://pyqt.sourceforge.net/Docs/PyQt5/qframe.html#details</span>
 
 <span class="sd">  The QFrame class is the base class of widgets that can have a frame. More...</span>
 
@@ -101,235 +101,237 @@
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:53 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: Geerten Vuister $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="p">,</span> <span class="n">QtCore</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ScrollArea</span> <span class="kn">import</span> <span class="n">ScrollArea</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
 
 
-<div class="viewcode-block" id="Frame"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Frame.Frame">[docs]</a><span class="k">class</span> <span class="nc">Frame</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
+<div class="viewcode-block" id="Frame"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Frame.Frame">[docs]</a><span class="k">class</span> <span class="nc">Frame</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
+    <span class="n">FRAME_DICT</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="c1"># Shadow</span>
+        <span class="s1">&#39;plain&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Plain</span><span class="p">,</span>
+        <span class="s1">&#39;raised&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Raised</span><span class="p">,</span>
+        <span class="s1">&#39;sunken&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Sunken</span><span class="p">,</span>
+        <span class="c1"># Shapes</span>
+        <span class="s1">&#39;noFrame&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">NoFrame</span><span class="p">,</span>
+        <span class="s1">&#39;box&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Box</span><span class="p">,</span>
+        <span class="s1">&#39;panel&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Panel</span><span class="p">,</span>
+        <span class="s1">&#39;styledPanel&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">StyledPanel</span><span class="p">,</span>
+        <span class="s1">&#39;hLine&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">HLine</span><span class="p">,</span>
+        <span class="s1">&#39;vLine&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">VLine</span><span class="p">,</span>
+        <span class="p">}</span>
 
-  <span class="n">FRAME_DICT</span> <span class="o">=</span> <span class="p">{</span>
-      <span class="c1"># Shadow</span>
-      <span class="s1">&#39;plain&#39;</span><span class="p">:</span>       <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Plain</span><span class="p">,</span>
-      <span class="s1">&#39;raised&#39;</span><span class="p">:</span>      <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Raised</span><span class="p">,</span>
-      <span class="s1">&#39;sunken&#39;</span><span class="p">:</span>      <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Sunken</span><span class="p">,</span>
-      <span class="c1"># Shapes</span>
-      <span class="s1">&#39;noFrame&#39;</span><span class="p">:</span>     <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">NoFrame</span><span class="p">,</span>
-      <span class="s1">&#39;box&#39;</span><span class="p">:</span>         <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Box</span><span class="p">,</span>
-      <span class="s1">&#39;panel&#39;</span><span class="p">:</span>       <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Panel</span><span class="p">,</span>
-      <span class="s1">&#39;styledPanel&#39;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">StyledPanel</span><span class="p">,</span>
-      <span class="s1">&#39;hLine&#39;</span><span class="p">:</span>       <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">HLine</span><span class="p">,</span>
-      <span class="s1">&#39;vLine&#39;</span><span class="p">:</span>       <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">VLine</span><span class="p">,</span>
-  <span class="p">}</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">showBorder</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">fShape</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fShadow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">setLayout</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialise a Frame with optional border and layout</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">showBorder</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">fShape</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fShadow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                     <span class="n">setLayout</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Initialise a Frame with optional border and layout</span>
+<span class="sd">        :param fShape:   frame shape options: noFrame, box, styledPanel, hLine, vLine</span>
+<span class="sd">        :param fShadow:  frame shadow options: plain, raised, sunken</span>
 
-<span class="sd">    :param fShape:   frame shape options: noFrame, box, styledPanel, hLine, vLine</span>
-<span class="sd">    :param fShadow:  frame shadow options: plain, raised, sunken</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="n">Base</span><span class="o">.</span><span class="n">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="n">setLayout</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_thisparent</span> <span class="o">=</span> <span class="n">parent</span>
 
-    <span class="c1">#TODO: replace with proper stylesheet routines once inplemented</span>
-    <span class="n">styleSheet</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-    <span class="k">if</span> <span class="s1">&#39;bgColor&#39;</span> <span class="ow">in</span> <span class="n">kwds</span><span class="p">:</span>
-      <span class="c1">#rgb = QtGui.QColor(kwds[&quot;bgColor&quot;]).getRgb()[:3]</span>
-      <span class="n">styleSheet</span> <span class="o">+=</span> <span class="s2">&quot;background-color: rgb(</span><span class="si">%d</span><span class="s2">, </span><span class="si">%d</span><span class="s2">, </span><span class="si">%d</span><span class="s2">); &quot;</span> <span class="o">%</span> <span class="n">kwds</span><span class="p">[</span><span class="s2">&quot;bgColor&quot;</span><span class="p">]</span>
-      <span class="k">del</span><span class="p">(</span><span class="n">kwds</span><span class="p">[</span><span class="s1">&#39;bgColor&#39;</span><span class="p">])</span>
-    <span class="k">if</span> <span class="s1">&#39;fgColor&#39;</span> <span class="ow">in</span> <span class="n">kwds</span><span class="p">:</span>
-      <span class="n">styleSheet</span> <span class="o">+=</span> <span class="s2">&quot;foreground-color: rgb(</span><span class="si">%d</span><span class="s2">, </span><span class="si">%d</span><span class="s2">, </span><span class="si">%d</span><span class="s2">); &quot;</span> <span class="o">%</span> <span class="n">kwds</span><span class="p">[</span><span class="s2">&quot;fgColor&quot;</span><span class="p">]</span>
-      <span class="k">del</span> <span class="p">(</span><span class="n">kwds</span><span class="p">[</span><span class="s1">&#39;fgColor&#39;</span><span class="p">])</span>
-    <span class="k">if</span> <span class="n">showBorder</span><span class="p">:</span>
-      <span class="n">styleSheet</span> <span class="o">+=</span> <span class="s2">&quot;border: 1px solid black; &quot;</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">styleSheet</span> <span class="o">+=</span> <span class="s2">&quot;border: 0px; &quot;</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">styleSheet</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="c1">#print(&#39;&gt;&gt;&#39;, styleSheet)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s1">&#39;QFrame {&#39;</span> <span class="o">+</span> <span class="n">styleSheet</span> <span class="o">+</span> <span class="s1">&#39;}&#39;</span><span class="p">)</span>
+        <span class="c1">#TODO: replace with proper stylesheet routines once inplemented</span>
+        <span class="n">styleSheet</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">if</span> <span class="s1">&#39;bgColor&#39;</span> <span class="ow">in</span> <span class="n">kwds</span><span class="p">:</span>
+            <span class="c1">#rgb = QtGui.QColor(kwds[&quot;bgColor&quot;]).getRgb()[:3]</span>
+            <span class="n">styleSheet</span> <span class="o">+=</span> <span class="s2">&quot;background-color: rgb(</span><span class="si">%d</span><span class="s2">, </span><span class="si">%d</span><span class="s2">, </span><span class="si">%d</span><span class="s2">); &quot;</span> <span class="o">%</span> <span class="n">kwds</span><span class="p">[</span><span class="s2">&quot;bgColor&quot;</span><span class="p">]</span>
+            <span class="k">del</span> <span class="p">(</span><span class="n">kwds</span><span class="p">[</span><span class="s1">&#39;bgColor&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="s1">&#39;fgColor&#39;</span> <span class="ow">in</span> <span class="n">kwds</span><span class="p">:</span>
+            <span class="n">styleSheet</span> <span class="o">+=</span> <span class="s2">&quot;foreground-color: rgb(</span><span class="si">%d</span><span class="s2">, </span><span class="si">%d</span><span class="s2">, </span><span class="si">%d</span><span class="s2">); &quot;</span> <span class="o">%</span> <span class="n">kwds</span><span class="p">[</span><span class="s2">&quot;fgColor&quot;</span><span class="p">]</span>
+            <span class="k">del</span> <span class="p">(</span><span class="n">kwds</span><span class="p">[</span><span class="s1">&#39;fgColor&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">showBorder</span><span class="p">:</span>
+            <span class="n">styleSheet</span> <span class="o">+=</span> <span class="s2">&quot;border: 1px solid black; &quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">styleSheet</span> <span class="o">+=</span> <span class="s2">&quot;border: 0px; &quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">styleSheet</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1">#print(&#39;&gt;&gt;&#39;, styleSheet)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s1">&#39;QFrame {&#39;</span> <span class="o">+</span> <span class="n">styleSheet</span> <span class="o">+</span> <span class="s1">&#39;}&#39;</span><span class="p">)</span>
 
-    <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="n">setLayout</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
-    <span class="c1"># define frame styles</span>
-    <span class="k">if</span> <span class="n">fShape</span> <span class="ow">or</span> <span class="n">fShadow</span><span class="p">:</span>
-      <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">      Define frame properties:</span>
-<span class="sd">      &quot;&quot;&quot;</span>
-      <span class="c1">#TODO:GEERTEN: routine is called but appears not to change much in the appearance on OSX</span>
-      <span class="n">shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FRAME_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fShape</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">NoFrame</span><span class="p">)</span>
-      <span class="n">shadow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FRAME_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fShadow</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-      <span class="c1">#print(&#39;&gt;&gt;&#39;, shape, shadow)</span>
-      <span class="c1">#print(&#39;Frame.framestyle&gt;&#39;, shape | shadow)</span>
-      <span class="c1">#self.setFrameStyle(shape | shadow)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">setFrameShape</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">setFrameShadow</span><span class="p">(</span><span class="n">shadow</span><span class="p">)</span>
-      <span class="c1">#self.setLineWidth(3)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">setMidLineWidth</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span></div>
+        <span class="c1"># define frame styles</span>
+        <span class="k">if</span> <span class="n">fShape</span> <span class="ow">or</span> <span class="n">fShadow</span><span class="p">:</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Define frame properties:</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="c1">#TODO:GEERTEN: routine is called but appears not to change much in the appearance on OSX</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FRAME_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fShape</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">NoFrame</span><span class="p">)</span>
+            <span class="n">shadow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FRAME_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fShadow</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="c1">#print(&#39;&gt;&gt;&#39;, shape, shadow)</span>
+            <span class="c1">#print(&#39;Frame.framestyle&gt;&#39;, shape | shadow)</span>
+            <span class="c1">#self.setFrameStyle(shape | shadow)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setFrameShape</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setFrameShadow</span><span class="p">(</span><span class="n">shadow</span><span class="p">)</span>
+            <span class="c1">#self.setLineWidth(3)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setMidLineWidth</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span></div>
 
+    <span class="c1"># def dragMoveEvent(self, ev):</span>
+    <span class="c1">#     print(&#39;&gt;&gt;&gt;dragMoveEvent Frame&#39;, repr(self))</span>
+    <span class="c1">#     # self._thisparent.dragMoveEvent(ev)</span>
 
 <div class="viewcode-block" id="ScrollableFrame"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Frame.ScrollableFrame">[docs]</a><span class="k">class</span> <span class="nc">ScrollableFrame</span><span class="p">(</span><span class="n">Frame</span><span class="p">):</span>
-  <span class="s2">&quot;A scrollable frame&quot;</span>
+    <span class="s2">&quot;A scrollable frame&quot;</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                     <span class="n">setLayout</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">showBorder</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">fShape</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fShadow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                     <span class="n">minimumSizes</span><span class="o">=</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span><span class="mi">50</span><span class="p">),</span> <span class="n">scrollBarPolicies</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;asNeeded&#39;</span><span class="p">,</span><span class="s1">&#39;asNeeded&#39;</span><span class="p">),</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">setLayout</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">showBorder</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">fShape</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fShadow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">minimumSizes</span><span class="o">=</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span> <span class="n">scrollBarPolicies</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;asNeeded&#39;</span><span class="p">,</span> <span class="s1">&#39;asNeeded&#39;</span><span class="p">),</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
 
-    <span class="c1"># define a scroll area; check kwds if these apply to gridding</span>
-    <span class="n">kw1</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="s1">&#39;grid gridSpan stretch hAlign vAlign&#39;</span><span class="o">.</span><span class="n">split</span><span class="p">():</span>
-      <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">kwds</span><span class="p">:</span>
-        <span class="n">kw1</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwds</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-        <span class="k">del</span><span class="p">(</span><span class="n">kwds</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
-    <span class="n">kw1</span><span class="p">[</span><span class="s1">&#39;setLayout&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span> <span class="c1">## always assure a layout for the scrollarea</span>
+        <span class="c1"># define a scroll area; check kwds if these apply to gridding</span>
+        <span class="n">kw1</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="s1">&#39;grid gridSpan stretch hAlign vAlign&#39;</span><span class="o">.</span><span class="n">split</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">kwds</span><span class="p">:</span>
+                <span class="n">kw1</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwds</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                <span class="k">del</span> <span class="p">(</span><span class="n">kwds</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="n">kw1</span><span class="p">[</span><span class="s1">&#39;setLayout&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>  <span class="c1">## always assure a layout for the scrollarea</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span> <span class="o">=</span> <span class="n">ScrollArea</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span>
-                                 <span class="n">scrollBarPolicies</span><span class="o">=</span><span class="n">scrollBarPolicies</span><span class="p">,</span> <span class="n">minimumSizes</span><span class="o">=</span><span class="n">minimumSizes</span><span class="p">,</span>
-                                 <span class="o">**</span><span class="n">kw1</span>
-                                <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span> <span class="o">=</span> <span class="n">ScrollArea</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span>
+                                     <span class="n">scrollBarPolicies</span><span class="o">=</span><span class="n">scrollBarPolicies</span><span class="p">,</span> <span class="n">minimumSizes</span><span class="o">=</span><span class="n">minimumSizes</span><span class="p">,</span>
+                                     <span class="o">**</span><span class="n">kw1</span>
+                                     <span class="p">)</span>
 
-    <span class="c1"># initialise the frame</span>
-    <span class="n">Frame</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="n">setLayout</span><span class="p">,</span>
-                         <span class="n">showBorder</span><span class="o">=</span><span class="n">showBorder</span><span class="p">,</span> <span class="n">fShape</span> <span class="o">=</span> <span class="n">fShape</span><span class="p">,</span> <span class="n">fShadow</span> <span class="o">=</span> <span class="n">fShadow</span><span class="p">,</span>
-                         <span class="o">**</span><span class="n">kwds</span>
-                  <span class="p">)</span>
-    <span class="c1"># add it to the _sequenceGraphScrollArea</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="c1"># initialise the frame</span>
+        <span class="n">Frame</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="n">setLayout</span><span class="p">,</span>
+                       <span class="n">showBorder</span><span class="o">=</span><span class="n">showBorder</span><span class="p">,</span> <span class="n">fShape</span><span class="o">=</span><span class="n">fShape</span><span class="p">,</span> <span class="n">fShadow</span><span class="o">=</span><span class="n">fShadow</span><span class="p">,</span>
+                       <span class="o">**</span><span class="n">kwds</span>
+                       <span class="p">)</span>
+        <span class="c1"># add it to the _sequenceGraphScrollArea</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-    <span class="c1"># configure the scroll area to allow all available space without margins</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">)</span>
-    <span class="c1">#self._sequenceGraphScrollArea.setWidgetResizable(True)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setScrollBarPolicies</span><span class="p">(</span><span class="n">scrollBarPolicies</span><span class="p">)</span>
-    <span class="c1"># GWV: tried for GuiSpectrumDisplay scrolling error on strip: no effect</span>
-    <span class="c1"># self._sequenceGraphScrollArea.ensureWidgetVisible(self, xMargin=200, yMargin=200)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="c1"># configure the scroll area to allow all available space without margins</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">)</span>
+        <span class="c1">#self._sequenceGraphScrollArea.setWidgetResizable(True)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setScrollBarPolicies</span><span class="p">(</span><span class="n">scrollBarPolicies</span><span class="p">)</span>
+        <span class="c1"># GWV: tried for GuiSpectrumDisplay scrolling error on strip: no effect</span>
+        <span class="c1"># self._sequenceGraphScrollArea.ensureWidgetVisible(self, xMargin=200, yMargin=200)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
-<div class="viewcode-block" id="ScrollableFrame.setScrollBarPolicies"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Frame.ScrollableFrame.setScrollBarPolicies">[docs]</a>  <span class="k">def</span> <span class="nf">setScrollBarPolicies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scrollBarPolicies</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;asNeeded&#39;</span><span class="p">,</span><span class="s1">&#39;asNeeded&#39;</span><span class="p">)):</span>
-    <span class="s2">&quot;Set the scrolbar policy: always, never, asNeeded&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">setScrollBarPolicies</span><span class="p">(</span><span class="n">scrollBarPolicies</span><span class="p">)</span></div>
+<div class="viewcode-block" id="ScrollableFrame.setScrollBarPolicies"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Frame.ScrollableFrame.setScrollBarPolicies">[docs]</a>    <span class="k">def</span> <span class="nf">setScrollBarPolicies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scrollBarPolicies</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;asNeeded&#39;</span><span class="p">,</span> <span class="s1">&#39;asNeeded&#39;</span><span class="p">)):</span>
+        <span class="s2">&quot;Set the scrolbar policy: always, never, asNeeded&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">setScrollBarPolicies</span><span class="p">(</span><span class="n">scrollBarPolicies</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ScrollableFrame.getScrollArea"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Frame.ScrollableFrame.getScrollArea">[docs]</a>  <span class="k">def</span> <span class="nf">getScrollArea</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="s2">&quot;Return the scrollbar widget; for external usage&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span></div></div>
+<div class="viewcode-block" id="ScrollableFrame.getScrollArea"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Frame.ScrollableFrame.getScrollArea">[docs]</a>    <span class="k">def</span> <span class="nf">getScrollArea</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Return the scrollbar widget; for external usage&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span></div></div>
 
 
 <div class="viewcode-block" id="ScrollableFrame2"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Frame.ScrollableFrame2">[docs]</a><span class="k">class</span> <span class="nc">ScrollableFrame2</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
-  <span class="s2">&quot;A scrollable frame&quot;</span>
+    <span class="s2">&quot;A scrollable frame&quot;</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                     <span class="n">setLayout</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">showBorder</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">fShape</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fShadow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                     <span class="n">minimumSizes</span><span class="o">=</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span><span class="mi">50</span><span class="p">),</span> <span class="n">scrollBarPolicies</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;asNeeded&#39;</span><span class="p">,</span><span class="s1">&#39;asNeeded&#39;</span><span class="p">),</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">setLayout</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">showBorder</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">fShape</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fShadow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">minimumSizes</span><span class="o">=</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span> <span class="n">scrollBarPolicies</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;asNeeded&#39;</span><span class="p">,</span> <span class="s1">&#39;asNeeded&#39;</span><span class="p">),</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
 
-    <span class="c1"># check kwds if these apply to gridding</span>
-    <span class="n">kw1</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="s1">&#39;grid gridSpan stretch hAlign vAlign&#39;</span><span class="o">.</span><span class="n">split</span><span class="p">():</span>
-      <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">kwds</span><span class="p">:</span>
-        <span class="n">kw1</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwds</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-        <span class="k">del</span><span class="p">(</span><span class="n">kwds</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="c1"># check kwds if these apply to gridding</span>
+        <span class="n">kw1</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="s1">&#39;grid gridSpan stretch hAlign vAlign&#39;</span><span class="o">.</span><span class="n">split</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">kwds</span><span class="p">:</span>
+                <span class="n">kw1</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwds</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                <span class="k">del</span> <span class="p">(</span><span class="n">kwds</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
 
-    <span class="n">Widget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kw1</span><span class="p">)</span>
+        <span class="n">Widget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kw1</span><span class="p">)</span>
 
-    <span class="c1"># define a scroll area;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_scrollArea</span> <span class="o">=</span> <span class="n">ScrollArea</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                                  <span class="n">scrollBarPolicies</span><span class="o">=</span><span class="n">scrollBarPolicies</span><span class="p">,</span> <span class="n">minimumSizes</span><span class="o">=</span><span class="n">minimumSizes</span><span class="p">,</span>
-                                 <span class="p">)</span>
+        <span class="c1"># define a scroll area;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scrollArea</span> <span class="o">=</span> <span class="n">ScrollArea</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                      <span class="n">scrollBarPolicies</span><span class="o">=</span><span class="n">scrollBarPolicies</span><span class="p">,</span> <span class="n">minimumSizes</span><span class="o">=</span><span class="n">minimumSizes</span><span class="p">,</span>
+                                      <span class="p">)</span>
 
-    <span class="c1"># initialise a frame</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_frame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_scrollArea</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="n">setLayout</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
-                                       <span class="n">showBorder</span><span class="o">=</span><span class="n">showBorder</span><span class="p">,</span> <span class="n">fShape</span> <span class="o">=</span> <span class="n">fShape</span><span class="p">,</span> <span class="n">fShadow</span> <span class="o">=</span> <span class="n">fShadow</span><span class="p">,</span>
-                                       <span class="o">**</span><span class="n">kwds</span>
-                       <span class="p">)</span>
+        <span class="c1"># initialise a frame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_frame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_scrollArea</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="n">setLayout</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                            <span class="n">showBorder</span><span class="o">=</span><span class="n">showBorder</span><span class="p">,</span> <span class="n">fShape</span><span class="o">=</span><span class="n">fShape</span><span class="p">,</span> <span class="n">fShadow</span><span class="o">=</span><span class="n">fShadow</span><span class="p">,</span>
+                            <span class="o">**</span><span class="n">kwds</span>
+                            <span class="p">)</span>
 
-    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frame</span><span class="p">)</span>
-    <span class="c1"># add it to the _sequenceGraphScrollArea</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_scrollArea</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_frame</span><span class="p">)</span>
-    <span class="c1"># self._settingsScrollArea.setWidgetResizable(True)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frame</span><span class="p">)</span>
+        <span class="c1"># add it to the _sequenceGraphScrollArea</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scrollArea</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_frame</span><span class="p">)</span>
+        <span class="c1"># self._settingsScrollArea.setWidgetResizable(True)</span>
 
-    <span class="c1"># configure the scroll area to allow all available space without margins</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_scrollArea</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_scrollArea</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setScrollBarPolicies</span><span class="p">(</span><span class="n">scrollBarPolicies</span><span class="p">)</span>
-    <span class="c1"># self._sequenceGraphScrollArea.ensureWidgetVisible(self, xMargin=200, yMargin=200)</span>
-    <span class="c1">#self.show()</span>
+        <span class="c1"># configure the scroll area to allow all available space without margins</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scrollArea</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scrollArea</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setScrollBarPolicies</span><span class="p">(</span><span class="n">scrollBarPolicies</span><span class="p">)</span>
+        <span class="c1"># self._sequenceGraphScrollArea.ensureWidgetVisible(self, xMargin=200, yMargin=200)</span>
+        <span class="c1">#self.show()</span>
 
-<div class="viewcode-block" id="ScrollableFrame2.setScrollBarPolicies"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Frame.ScrollableFrame2.setScrollBarPolicies">[docs]</a>  <span class="k">def</span> <span class="nf">setScrollBarPolicies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scrollBarPolicies</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;asNeeded&#39;</span><span class="p">,</span><span class="s1">&#39;asNeeded&#39;</span><span class="p">)):</span>
-    <span class="s2">&quot;Set the scrolbar policy: always, never, asNeeded&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_scrollArea</span><span class="o">.</span><span class="n">setScrollBarPolicies</span><span class="p">(</span><span class="n">scrollBarPolicies</span><span class="p">)</span></div>
+<div class="viewcode-block" id="ScrollableFrame2.setScrollBarPolicies"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Frame.ScrollableFrame2.setScrollBarPolicies">[docs]</a>    <span class="k">def</span> <span class="nf">setScrollBarPolicies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scrollBarPolicies</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;asNeeded&#39;</span><span class="p">,</span> <span class="s1">&#39;asNeeded&#39;</span><span class="p">)):</span>
+        <span class="s2">&quot;Set the scrolbar policy: always, never, asNeeded&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scrollArea</span><span class="o">.</span><span class="n">setScrollBarPolicies</span><span class="p">(</span><span class="n">scrollBarPolicies</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ScrollableFrame2.getScrollArea"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Frame.ScrollableFrame2.getScrollArea">[docs]</a>  <span class="k">def</span> <span class="nf">getScrollArea</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="s2">&quot;Return the scrollbar widget; for external usage&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scrollArea</span></div>
+<div class="viewcode-block" id="ScrollableFrame2.getScrollArea"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Frame.ScrollableFrame2.getScrollArea">[docs]</a>    <span class="k">def</span> <span class="nf">getScrollArea</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Return the scrollbar widget; for external usage&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scrollArea</span></div>
 
-<div class="viewcode-block" id="ScrollableFrame2.getFrame"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Frame.ScrollableFrame2.getFrame">[docs]</a>  <span class="k">def</span> <span class="nf">getFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="s2">&quot;Return the frame widget; for external usage&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frame</span></div></div>
+<div class="viewcode-block" id="ScrollableFrame2.getFrame"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Frame.ScrollableFrame2.getFrame">[docs]</a>    <span class="k">def</span> <span class="nf">getFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Return the frame widget; for external usage&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frame</span></div></div>
 
 
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Application</span> <span class="kn">import</span> <span class="n">TestApplication</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.BasePopup</span> <span class="kn">import</span> <span class="n">BasePopup</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
 
-  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Application</span> <span class="kn">import</span> <span class="n">TestApplication</span>
-  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.BasePopup</span> <span class="kn">import</span> <span class="n">BasePopup</span>
-  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
 
-  <span class="k">class</span> <span class="nc">TestPopup</span><span class="p">(</span><span class="n">BasePopup</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">body</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
-      <span class="n">widget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-      <span class="n">policyDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-        <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">,</span>
-        <span class="n">stretch</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
-        <span class="c1">#hPolicy = &#39;center&#39;,</span>
-        <span class="c1">#vPolicy = &#39;center&#39;</span>
-      <span class="p">)</span>
+    <span class="k">class</span> <span class="nc">TestPopup</span><span class="p">(</span><span class="n">BasePopup</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">body</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+            <span class="n">widget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">policyDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">,</span>
+                    <span class="n">stretch</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                    <span class="c1">#hPolicy = &#39;center&#39;,</span>
+                    <span class="c1">#vPolicy = &#39;center&#39;</span>
+                    <span class="p">)</span>
 
-      <span class="c1">#TODO: find the cause of the empty space between the widgets</span>
-      <span class="c1">#frame3 = ScrollableFrame(parent=parent, showBorder=True, bgColor=(255, 0, 255), grid=(2,0))</span>
-      <span class="n">frame1</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">widget</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">showBorder</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">bgColor</span><span class="o">=</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="o">**</span><span class="n">policyDict</span><span class="p">)</span>
-      <span class="n">label1</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">frame1</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;FRAME-1&quot;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">textColour</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">textSize</span><span class="o">=</span><span class="s1">&#39;32&#39;</span><span class="p">)</span>
+            <span class="c1">#TODO: find the cause of the empty space between the widgets</span>
+            <span class="c1">#frame3 = ScrollableFrame(parent=parent, showBorder=True, bgColor=(255, 0, 255), grid=(2,0))</span>
+            <span class="n">frame1</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">widget</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">showBorder</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">bgColor</span><span class="o">=</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="o">**</span><span class="n">policyDict</span><span class="p">)</span>
+            <span class="n">label1</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">frame1</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;FRAME-1&quot;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">textColour</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">textSize</span><span class="o">=</span><span class="s1">&#39;32&#39;</span><span class="p">)</span>
 
-      <span class="n">frame2</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">widget</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">showBorder</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">bgColor</span><span class="o">=</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-                     <span class="n">fShape</span><span class="o">=</span><span class="s1">&#39;styledPanel&#39;</span><span class="p">,</span> <span class="n">fShadow</span><span class="o">=</span><span class="s1">&#39;raised&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">policyDict</span><span class="p">)</span>
-      <span class="n">label2</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">frame2</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;FRAME-2&quot;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">textColour</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">textSize</span><span class="o">=</span><span class="s1">&#39;32&#39;</span><span class="p">)</span>
+            <span class="n">frame2</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">widget</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">showBorder</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">bgColor</span><span class="o">=</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                           <span class="n">fShape</span><span class="o">=</span><span class="s1">&#39;styledPanel&#39;</span><span class="p">,</span> <span class="n">fShadow</span><span class="o">=</span><span class="s1">&#39;raised&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">policyDict</span><span class="p">)</span>
+            <span class="n">label2</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">frame2</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;FRAME-2&quot;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">textColour</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">textSize</span><span class="o">=</span><span class="s1">&#39;32&#39;</span><span class="p">)</span>
 
- <span class="c1">#     scroll4 = ScrollableFrame2(parent=widget, grid=(2,0), setLayout=True)</span>
-      <span class="n">scroll4</span> <span class="o">=</span> <span class="n">ScrollArea</span><span class="p">(</span><span class="n">scrollBarPolicies</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;always&#39;</span><span class="p">,</span><span class="s1">&#39;always&#39;</span><span class="p">))</span>
-      <span class="k">print</span><span class="p">(</span><span class="n">scroll4</span><span class="p">)</span>
-      <span class="n">label4</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span>
-                     <span class="n">text</span><span class="o">=</span><span class="s2">&quot;ScrollableFrame&quot;</span><span class="p">,</span>  <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">textColour</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">textSize</span><span class="o">=</span><span class="s1">&#39;32&#39;</span><span class="p">,</span>
-                     <span class="o">**</span><span class="n">policyDict</span><span class="p">,</span>
-                   <span class="p">)</span>
-      <span class="n">scroll4</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="n">label4</span><span class="p">)</span>
-      <span class="n">widget</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">scroll4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+            <span class="c1">#     scroll4 = ScrollableFrame2(parent=widget, grid=(2,0), setLayout=True)</span>
+            <span class="n">scroll4</span> <span class="o">=</span> <span class="n">ScrollArea</span><span class="p">(</span><span class="n">scrollBarPolicies</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;always&#39;</span><span class="p">,</span> <span class="s1">&#39;always&#39;</span><span class="p">))</span>
+            <span class="k">print</span><span class="p">(</span><span class="n">scroll4</span><span class="p">)</span>
+            <span class="n">label4</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span>
+                    <span class="n">text</span><span class="o">=</span><span class="s2">&quot;ScrollableFrame&quot;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">textColour</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">textSize</span><span class="o">=</span><span class="s1">&#39;32&#39;</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">policyDict</span><span class="p">,</span>
+                    <span class="p">)</span>
+            <span class="n">scroll4</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="n">label4</span><span class="p">)</span>
+            <span class="n">widget</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">scroll4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
-  <span class="n">app</span> <span class="o">=</span> <span class="n">TestApplication</span><span class="p">()</span>
-  <span class="n">popup</span> <span class="o">=</span> <span class="n">TestPopup</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Test Frame&#39;</span><span class="p">)</span>
-  <span class="n">popup</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
-  <span class="n">app</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
+    <span class="n">app</span> <span class="o">=</span> <span class="n">TestApplication</span><span class="p">()</span>
+    <span class="n">popup</span> <span class="o">=</span> <span class="n">TestPopup</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Test Frame&#39;</span><span class="p">)</span>
+    <span class="n">popup</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 </pre></div>
 
           </div>

@@ -66,6 +66,7 @@
   <span class="n">mixturesDict</span> <span class="o">=</span> <span class="p">{}</span>
   <span class="n">n</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">mixtures</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">compounds</span><span class="p">),</span><span class="mi">0</span><span class="p">,[]</span>
   <span class="n">compounds</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">compounds</span><span class="p">)</span>
+  <span class="n">compounds</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">compounds</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">compounds</span><span class="p">))</span>
   <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nMixtures</span><span class="p">):</span>
       <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">b</span><span class="p">,</span> <span class="n">b</span> <span class="o">+</span> <span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="n">k</span><span class="p">)</span><span class="o">//</span><span class="n">nMixtures</span>
       <span class="n">key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;-&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
@@ -279,13 +280,14 @@
         <span class="n">bestIteration</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">currScore</span><span class="p">:</span> <span class="n">copyNewMixtures</span><span class="p">})</span>
         <span class="n">startingScore</span> <span class="o">=</span> <span class="n">currScore</span>
       <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bestIteration</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-      <span class="n">bestMixtures</span> <span class="o">=</span> <span class="n">findBestMixtures</span><span class="p">(</span><span class="n">bestIteration</span><span class="p">)</span>
-      <span class="k">return</span> <span class="n">bestMixtures</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">print</span><span class="p">(</span><span class="s1">&#39;No Better Iteration found, original mixtures are returned&#39;</span><span class="p">)</span>
-      <span class="n">sc</span> <span class="o">=</span> <span class="n">calculateTotalScore</span><span class="p">(</span><span class="n">copyMixtures</span><span class="p">,</span> <span class="n">minDistance</span><span class="p">)</span>
-      <span class="k">return</span> <span class="n">copyMixtures</span></div>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bestIteration</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="n">bestMixtures</span> <span class="o">=</span> <span class="n">findBestMixtures</span><span class="p">(</span><span class="n">bestIteration</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">bestMixtures</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;No Better Iteration found, original mixtures are returned&#39;</span><span class="p">)</span>
+    <span class="n">sc</span> <span class="o">=</span> <span class="n">calculateTotalScore</span><span class="p">(</span><span class="n">copyMixtures</span><span class="p">,</span> <span class="n">minDistance</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">copyMixtures</span></div>
+
 
 
 <div class="viewcode-block" id="showScoresPerMixture"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.SimulatedAnnealing.showScoresPerMixture">[docs]</a><span class="k">def</span> <span class="nf">showScoresPerMixture</span><span class="p">(</span><span class="n">mixtures</span><span class="p">,</span><span class="n">minDistance</span><span class="p">):</span>

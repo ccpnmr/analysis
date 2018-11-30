@@ -55,13 +55,13 @@
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:32 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -71,41 +71,344 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+
+<span class="n">POSITIONS</span> <span class="o">=</span> <span class="s1">&#39;positions&#39;</span>
+<span class="n">HEIGHT</span> <span class="o">=</span> <span class="s1">&#39;height&#39;</span>
+<span class="n">VOLUME</span> <span class="o">=</span> <span class="s1">&#39;volume&#39;</span>
+<span class="n">LINEWIDTHS</span> <span class="o">=</span> <span class="s1">&#39;lineWidths&#39;</span>
+
+<span class="n">MODES</span> <span class="o">=</span> <span class="p">[</span><span class="n">POSITIONS</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">VOLUME</span><span class="p">,</span> <span class="n">LINEWIDTHS</span><span class="p">]</span>
+
+<span class="n">OTHER</span> <span class="o">=</span> <span class="s1">&#39;Other&#39;</span>
+<span class="n">H</span> <span class="o">=</span> <span class="s1">&#39;H&#39;</span>
+<span class="n">N</span> <span class="o">=</span> <span class="s1">&#39;N&#39;</span>
+<span class="n">C</span> <span class="o">=</span> <span class="s1">&#39;C&#39;</span>
+<span class="n">DefaultAtomWeights</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="n">H</span><span class="p">,</span> <span class="mf">7.00</span><span class="p">),</span> <span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mf">1.00</span><span class="p">),</span> <span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="mf">4.00</span><span class="p">),</span> <span class="p">(</span><span class="n">OTHER</span><span class="p">,</span> <span class="mf">1.00</span><span class="p">)))</span>
+
+
+<div class="viewcode-block" id="getMultipletPosition"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.peakUtils.getMultipletPosition">[docs]</a><span class="k">def</span> <span class="nf">getMultipletPosition</span><span class="p">(</span><span class="n">multiplet</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;ppm&#39;</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">multiplet</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1">#&quot;*NOT SET*&quot;</span>
+
+        <span class="k">elif</span> <span class="n">unit</span> <span class="o">==</span> <span class="s1">&#39;ppm&#39;</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">multiplet</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+
+        <span class="c1">#  NOT implemented for multiplets</span>
+        <span class="c1"># elif unit == &#39;point&#39;:</span>
+        <span class="c1">#   value = multiplet.pointPosition[dim]</span>
+
+        <span class="k">elif</span> <span class="n">unit</span> <span class="o">==</span> <span class="s1">&#39;Hz&#39;</span><span class="p">:</span>
+            <span class="c1"># value = peak.position[dim]*peak._apiPeak.sortedPeakDims()[dim].dataDimRef.expDimRef.sf</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">multiplet</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">*</span> <span class="n">multiplet</span><span class="o">.</span><span class="n">multipletList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">spectrometerFrequencies</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># sampled</span>
+            <span class="c1"># value = unit.pointValues[int(peak._apiPeak.sortedPeakDims()[dim].position)-1]</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unit passed to getPeakPosition must be &#39;ppm&#39;, &#39;point&#39;, or &#39;Hz&#39;, was </span><span class="si">%s</span><span class="s2">&quot;</span>
+                             <span class="o">%</span> <span class="n">unit</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="s1">&#39;{0:.2f}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Error on setting Position. </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span></div>
+
+
+<span class="c1"># return None</span>
+
+<div class="viewcode-block" id="getMultipletLinewidth"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.peakUtils.getMultipletLinewidth">[docs]</a><span class="k">def</span> <span class="nf">getMultipletLinewidth</span><span class="p">(</span><span class="n">peak</span><span class="p">,</span> <span class="n">dim</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">dim</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">lineWidths</span><span class="p">):</span>
+        <span class="n">lw</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">lineWidths</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">lw</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">lw</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="getPeakPosition"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.peakUtils.getPeakPosition">[docs]</a><span class="k">def</span> <span class="nf">getPeakPosition</span><span class="p">(</span><span class="n">peak</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;ppm&#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">dimensionNmrAtoms</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">dim</span><span class="p">:</span>
+        <span class="c1"># peakDim = peak.position[dim]</span>
 
-  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">dimensionNmrAtoms</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">dim</span><span class="p">:</span>
-    <span class="c1"># peakDim = peak.position[dim]</span>
+        <span class="k">if</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1">#&quot;*NOT SET*&quot;</span>
 
-    <span class="k">if</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;*NOT SET*&quot;</span>
+        <span class="k">elif</span> <span class="n">unit</span> <span class="o">==</span> <span class="s1">&#39;ppm&#39;</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
 
-    <span class="k">elif</span> <span class="n">unit</span> <span class="o">==</span> <span class="s1">&#39;ppm&#39;</span><span class="p">:</span>
-      <span class="n">value</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">unit</span> <span class="o">==</span> <span class="s1">&#39;point&#39;</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">pointPosition</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
 
-    <span class="k">elif</span> <span class="n">unit</span> <span class="o">==</span> <span class="s1">&#39;point&#39;</span><span class="p">:</span>
-      <span class="n">value</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">pointPosition</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">unit</span> <span class="o">==</span> <span class="s1">&#39;Hz&#39;</span><span class="p">:</span>
+            <span class="c1"># value = peak.position[dim]*peak._apiPeak.sortedPeakDims()[dim].dataDimRef.expDimRef.sf</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">*</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">spectrometerFrequencies</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
 
-    <span class="k">elif</span> <span class="n">unit</span> <span class="o">==</span> <span class="s1">&#39;Hz&#39;</span><span class="p">:</span>
-      <span class="c1"># value = peak.position[dim]*peak._apiPeak.sortedPeakDims()[dim].dataDimRef.expDimRef.sf</span>
-      <span class="n">value</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">*</span><span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">spectrometerFrequencies</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># sampled</span>
+            <span class="c1"># value = unit.pointValues[int(peak._apiPeak.sortedPeakDims()[dim].position)-1]</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unit passed to getPeakPosition must be &#39;ppm&#39;, &#39;point&#39;, or &#39;Hz&#39;, was </span><span class="si">%s</span><span class="s2">&quot;</span>
+                             <span class="o">%</span> <span class="n">unit</span><span class="p">)</span>
 
-    <span class="k">else</span><span class="p">:</span> <span class="c1"># sampled</span>
-      <span class="c1"># value = unit.pointValues[int(peak._apiPeak.sortedPeakDims()[dim].position)-1]</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unit passed to getPeakPosition must be &#39;ppm&#39;, &#39;point&#39;, or &#39;Hz&#39;, was </span><span class="si">%s</span><span class="s2">&quot;</span>
-                     <span class="o">%</span> <span class="n">unit</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="s1">&#39;{0:.2f}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">float</span><span class="p">:</span>
-      <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%7.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">None</span></div>
+
+        <span class="c1"># if isinstance(value, [int, float]):</span>
+        <span class="c1"># # if type(value) is int or type(value) in (float, float32, float64):</span>
+        <span class="c1">#   return &#39;%7.2f&#39; % float(value)</span>
+
 
 <div class="viewcode-block" id="getPeakAnnotation"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.peakUtils.getPeakAnnotation">[docs]</a><span class="k">def</span> <span class="nf">getPeakAnnotation</span><span class="p">(</span><span class="n">peak</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="s1">&#39;, &#39;</span><span class="p">):</span>
-  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">dimensionNmrAtoms</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">dim</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">separator</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">dna</span><span class="o">.</span><span class="n">pid</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">dna</span> <span class="ow">in</span> <span class="n">peak</span><span class="o">.</span><span class="n">dimensionNmrAtoms</span><span class="p">[</span><span class="n">dim</span><span class="p">]])</span></div>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">dimensionNmrAtoms</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">dim</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">separator</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">dna</span><span class="o">.</span><span class="n">pid</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">dna</span> <span class="ow">in</span> <span class="n">peak</span><span class="o">.</span><span class="n">dimensionNmrAtoms</span><span class="p">[</span><span class="n">dim</span><span class="p">]])</span></div>
+
 
 <div class="viewcode-block" id="getPeakLinewidth"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.peakUtils.getPeakLinewidth">[docs]</a><span class="k">def</span> <span class="nf">getPeakLinewidth</span><span class="p">(</span><span class="n">peak</span><span class="p">,</span> <span class="n">dim</span><span class="p">):</span>
-  <span class="n">lw</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">lineWidths</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
-  <span class="k">if</span> <span class="n">lw</span><span class="p">:</span>
-    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">lw</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="n">dim</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">lineWidths</span><span class="p">):</span>
+        <span class="n">lw</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">lineWidths</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">lw</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">lw</span><span class="p">)</span></div>
 
+
+<span class="k">def</span> <span class="nf">_get1DPeaksPosAndHeightAsArray</span><span class="p">(</span><span class="n">peakList</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+    <span class="n">positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">peakList</span><span class="o">.</span><span class="n">peaks</span><span class="p">])</span>
+    <span class="n">heights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">peak</span><span class="o">.</span><span class="n">height</span> <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">peakList</span><span class="o">.</span><span class="n">peaks</span><span class="p">])</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">positions</span><span class="p">,</span> <span class="n">heights</span><span class="p">]</span>
+
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">NaN</span><span class="p">,</span> <span class="n">Inf</span><span class="p">,</span> <span class="n">arange</span><span class="p">,</span> <span class="n">isscalar</span><span class="p">,</span> <span class="n">asarray</span><span class="p">,</span> <span class="n">array</span>
+
+
+<div class="viewcode-block" id="peakdet"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.peakUtils.peakdet">[docs]</a><span class="k">def</span> <span class="nf">peakdet</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">delta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converted from MATLAB script at http://billauer.co.il/peakdet.html</span>
+<span class="sd">    % Eli Billauer, 3.4.05 (Explicitly not copyrighted).</span>
+<span class="sd">    % This function is released to the public domain; Any use is allowed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># import time</span>
+    <span class="c1">#</span>
+    <span class="c1"># start = time.time()</span>
+
+    <span class="n">maxtab</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">mintab</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">mn</span><span class="p">,</span> <span class="n">mx</span> <span class="o">=</span> <span class="n">Inf</span><span class="p">,</span> <span class="o">-</span><span class="n">Inf</span>
+    <span class="n">mnpos</span><span class="p">,</span> <span class="n">mxpos</span> <span class="o">=</span> <span class="n">NaN</span><span class="p">,</span> <span class="n">NaN</span>
+    <span class="n">lookformax</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)):</span>
+        <span class="n">this</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">this</span> <span class="o">&gt;</span> <span class="n">mx</span><span class="p">:</span>
+            <span class="n">mx</span> <span class="o">=</span> <span class="n">this</span>
+            <span class="n">mxpos</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">this</span> <span class="o">&lt;</span> <span class="n">mn</span><span class="p">:</span>
+            <span class="n">mn</span> <span class="o">=</span> <span class="n">this</span>
+            <span class="n">mnpos</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">lookformax</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">this</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">mx</span> <span class="o">-</span> <span class="n">delta</span><span class="p">:</span>  <span class="c1">#changed to abs for STDs test</span>
+                <span class="n">maxtab</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="nb">float</span><span class="p">(</span><span class="n">mxpos</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">mx</span><span class="p">)))</span>
+                <span class="n">mn</span> <span class="o">=</span> <span class="n">this</span>
+                <span class="n">mnpos</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">lookformax</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">this</span> <span class="o">&gt;</span> <span class="n">mn</span> <span class="o">+</span> <span class="n">delta</span><span class="p">:</span>
+                <span class="n">mintab</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="nb">float</span><span class="p">(</span><span class="n">mnpos</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">mn</span><span class="p">)))</span>
+                <span class="n">mx</span> <span class="o">=</span> <span class="n">this</span>
+                <span class="n">mxpos</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">lookformax</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">return</span> <span class="n">maxtab</span><span class="p">,</span> <span class="n">mintab</span></div>
+
+
+<span class="k">def</span> <span class="nf">_estimateDeltaPeakDetect</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">xPercent</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+    <span class="n">deltas</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">deltas</span><span class="p">))</span>
+    <span class="c1"># just on the noisy part of spectrum</span>
+    <span class="n">partialYpercent</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">*</span> <span class="n">xPercent</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span>
+    <span class="n">partialY</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:</span><span class="nb">int</span><span class="p">(</span><span class="n">partialYpercent</span><span class="p">)]</span>
+    <span class="n">partialDeltas</span> <span class="o">=</span> <span class="n">partialY</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">partialY</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">partialDelta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">partialDeltas</span><span class="p">))</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">partialDelta</span> <span class="o">+</span> <span class="n">delta</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="k">return</span> <span class="n">delta</span>
+
+
+<span class="k">def</span> <span class="nf">_estimateDeltaPeakDetectSTD</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">xPercent</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    :param y: intensities of spectrum</span>
+<span class="sd">    :param xPercent: the percentage of the spectra points to use as training to calculate delta.</span>
+<span class="sd">    :return: a delta intesities of the required percentage of the spectra</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+    <span class="c1"># just on the noisy part of spectrum</span>
+    <span class="n">partialYpercent</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">*</span> <span class="n">xPercent</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span>
+    <span class="n">partialY</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:</span><span class="nb">int</span><span class="p">(</span><span class="n">partialYpercent</span><span class="p">)]</span>
+    <span class="n">partialDeltas</span> <span class="o">=</span> <span class="n">partialY</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">partialY</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">partialDelta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">partialDeltas</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">partialDelta</span>
+
+
+<span class="k">def</span> <span class="nf">_pairIntersectionPoints</span><span class="p">(</span><span class="n">intersectionPoints</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Yield successive pair chunks from list of intersectionPoints &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">intersectionPoints</span><span class="p">),</span> <span class="mi">2</span><span class="p">):</span>
+        <span class="n">pair</span> <span class="o">=</span> <span class="n">intersectionPoints</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pair</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">pair</span>
+
+
+<span class="k">def</span> <span class="nf">_getIntersectionPoints</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    :param line: x points of line to intersect y points</span>
+<span class="sd">    :return: list of intersecting points</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">line</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">cross</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">z</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">z</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+
+    <span class="n">x_intersect</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">dx</span> <span class="o">/</span> <span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">z</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">z</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">negatives</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">cross</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="n">x_intersect</span><span class="p">[</span><span class="n">negatives</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">points</span>
+
+
+<span class="k">def</span> <span class="nf">_getAtomWeight</span><span class="p">(</span><span class="n">axisCode</span><span class="p">,</span> <span class="n">atomWeights</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="ow">or</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">    :param axisCode: str of peak axis code</span>
+<span class="sd">    :param atomWeights: dictionary of atomWeights eg {&#39;H&#39;: 7.00, &#39;N&#39;: 1.00, &#39;C&#39;: 4.00, &#39;Other&#39;: 1.00}</span>
+<span class="sd">    :return: float or int from dict atomWeights</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">axisCode</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">firstLetterAxisCode</span> <span class="o">=</span> <span class="n">axisCode</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">firstLetterAxisCode</span> <span class="ow">in</span> <span class="n">atomWeights</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">atomWeights</span><span class="p">[</span><span class="n">firstLetterAxisCode</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">OTHER</span> <span class="ow">in</span> <span class="n">atomWeights</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">atomWeights</span><span class="p">[</span><span class="n">OTHER</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">atomWeights</span><span class="p">[</span><span class="n">OTHER</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+    <span class="k">return</span> <span class="n">value</span>
+
+
+<span class="k">def</span> <span class="nf">_traverse</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">tree_types</span><span class="o">=</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+    <span class="sd">&#39;&#39;&#39;used to flat the state in a long list &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">tree_types</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">o</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">subvalue</span> <span class="ow">in</span> <span class="n">_traverse</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">tree_types</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">subvalue</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">o</span>
+
+
+<span class="k">def</span> <span class="nf">__filterPeaksBySelectedNmrAtomOption</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">nmrAtomsNames</span><span class="p">,</span> <span class="n">spectra</span><span class="p">):</span>
+    <span class="n">peaks</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">nmrAtoms</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">nmrAtomName</span> <span class="ow">in</span> <span class="n">nmrAtomsNames</span><span class="p">:</span>
+        <span class="n">nmrAtom</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">getNmrAtom</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">nmrAtomName</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">nmrAtom</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">nmrAtoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nmrAtom</span><span class="p">)</span>
+    <span class="n">filteredPeaks</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">nmrAtomsNamesAvailable</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">nmrAtom</span> <span class="ow">in</span> <span class="n">nmrAtoms</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">assignedPeaks</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">nmrAtomsNames</span><span class="p">:</span>
+                    <span class="n">filteredPeaks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peak</span><span class="p">)</span>
+                    <span class="n">nmrAtomsNamesAvailable</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">filteredPeaks</span><span class="p">)))</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectra</span><span class="p">):</span>  <span class="c1"># deals when a residue is assigned to multiple peaks</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">nmrAtomsNamesAvailable</span><span class="p">)))</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">nmrAtomsNames</span><span class="p">):</span>
+            <span class="n">peaks</span> <span class="o">+=</span> <span class="n">filteredPeaks</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">filteredPeaks</span><span class="p">:</span>
+            <span class="n">assignedNmrAtoms</span> <span class="o">=</span> <span class="n">_traverse</span><span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">assignedNmrAtoms</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">assignedNmrAtoms</span><span class="p">):</span>
+                <span class="n">assignedNmrAtoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">na</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">na</span> <span class="ow">in</span> <span class="n">assignedNmrAtoms</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">assignedNmrAtoms</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">list</span><span class="p">(</span><span class="n">assignedNmrAtoms</span><span class="p">)</span> <span class="o">==</span> <span class="n">nmrAtomsNames</span><span class="p">:</span>
+                        <span class="n">peaks</span> <span class="o">+=</span> <span class="p">[</span><span class="n">peak</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nmrAtomsNames</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">nmrAtomsNames</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">assignedNmrAtoms</span><span class="p">:</span>
+                        <span class="n">peaks</span> <span class="o">+=</span> <span class="p">[</span><span class="n">peak</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">peaks</span>
+
+
+<div class="viewcode-block" id="getNmrResidueDeltas"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.peakUtils.getNmrResidueDeltas">[docs]</a><span class="k">def</span> <span class="nf">getNmrResidueDeltas</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">nmrAtomsNames</span><span class="p">,</span> <span class="n">spectra</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">POSITIONS</span><span class="p">,</span> <span class="n">atomWeights</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">    :param nmrResidue:</span>
+<span class="sd">    :param nmrAtomsNames: nmr Atoms to compare. str &#39;H&#39;, &#39;N&#39;, &#39;CA&#39; etc</span>
+<span class="sd">    :param spectra: compare peaks only from given spectra</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">deltas</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectra</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">peaks</span> <span class="o">=</span> <span class="n">__filterPeaksBySelectedNmrAtomOption</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">nmrAtomsNames</span><span class="p">,</span> <span class="n">spectra</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">atomWeights</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">atomWeights</span> <span class="o">=</span> <span class="n">DefaultAtomWeights</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">peaks</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>  <span class="c1">#some None value can get in here</span>
+                    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">POSITIONS</span><span class="p">:</span>
+                        <span class="n">delta</span> <span class="o">=</span> <span class="bp">None</span>
+                        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">axisCode</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">axisCode</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">axisCode</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">nmrAtomsNames</span><span class="p">):</span>
+                                    <span class="n">weight</span> <span class="o">=</span> <span class="n">_getAtomWeight</span><span class="p">(</span><span class="n">axisCode</span><span class="p">,</span> <span class="n">atomWeights</span><span class="p">)</span>
+                                    <span class="k">if</span> <span class="n">delta</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                                        <span class="n">delta</span> <span class="o">=</span> <span class="mf">0.0</span>
+                                    <span class="n">delta</span> <span class="o">+=</span> <span class="p">((</span><span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="nb">list</span><span class="p">(</span><span class="n">peaks</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="n">weight</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+                        <span class="k">if</span> <span class="n">delta</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                            <span class="n">delta</span> <span class="o">=</span> <span class="n">delta</span> <span class="o">**</span> <span class="mf">0.5</span>
+                            <span class="n">deltas</span> <span class="o">+=</span> <span class="p">[</span><span class="n">delta</span><span class="p">]</span>
+
+                    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">VOLUME</span><span class="p">:</span>
+                        <span class="n">delta1Atoms</span> <span class="o">=</span> <span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">volume</span> <span class="o">-</span> <span class="nb">list</span><span class="p">(</span><span class="n">peaks</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">volume</span><span class="p">)</span>
+                        <span class="n">deltas</span> <span class="o">+=</span> <span class="p">[((</span><span class="n">delta1Atoms</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">,</span> <span class="p">]</span>
+
+                    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">HEIGHT</span><span class="p">:</span>
+                        <span class="n">delta1Atoms</span> <span class="o">=</span> <span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">height</span> <span class="o">-</span> <span class="nb">list</span><span class="p">(</span><span class="n">peaks</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
+                        <span class="n">deltas</span> <span class="o">+=</span> <span class="p">[((</span><span class="n">delta1Atoms</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">,</span> <span class="p">]</span>
+
+                    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">LINEWIDTHS</span><span class="p">:</span>
+                        <span class="n">delta</span> <span class="o">=</span> <span class="bp">None</span>
+                        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">axisCode</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="n">axisCode</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">axisCode</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                                    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">axisCode</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">nmrAtomsNames</span><span class="p">):</span>
+                                        <span class="n">weight</span> <span class="o">=</span> <span class="n">_getAtomWeight</span><span class="p">(</span><span class="n">axisCode</span><span class="p">,</span> <span class="n">atomWeights</span><span class="p">)</span>
+                                        <span class="k">if</span> <span class="n">delta</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                                            <span class="n">delta</span> <span class="o">=</span> <span class="mf">0.0</span>
+                                        <span class="n">delta</span> <span class="o">+=</span> <span class="p">((</span><span class="n">peak</span><span class="o">.</span><span class="n">lineWidths</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="nb">list</span><span class="p">(</span><span class="n">peaks</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lineWidths</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="n">weight</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+                        <span class="k">if</span> <span class="n">delta</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                            <span class="n">delta</span> <span class="o">=</span> <span class="n">delta</span> <span class="o">**</span> <span class="mf">0.5</span>
+                            <span class="n">deltas</span> <span class="o">+=</span> <span class="p">[</span><span class="n">delta</span><span class="p">]</span>
+
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Error for calculation mode: </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1"> and </span><span class="si">%s</span><span class="s1">. &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">peak</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">peaks</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">deltas</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">in</span> <span class="n">deltas</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">deltas</span><span class="p">)),</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="k">return</span></div>
 </pre></div>
 
           </div>

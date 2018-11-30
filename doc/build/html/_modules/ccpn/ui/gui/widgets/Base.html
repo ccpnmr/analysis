@@ -62,13 +62,13 @@
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:51 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -78,7 +78,8 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">Qt</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="p">,</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">Qt</span>
 
 <span class="kn">from</span> <span class="nn">pyqtgraph.dockarea</span> <span class="kn">import</span> <span class="n">Dock</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.DropBase</span> <span class="kn">import</span> <span class="n">DropBase</span>
@@ -86,181 +87,207 @@
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
 <span class="n">HALIGN_DICT</span> <span class="o">=</span> <span class="p">{</span>
-  <span class="s1">&#39;left&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span><span class="p">,</span>
-  <span class="s1">&#39;right&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignRight</span><span class="p">,</span>
-  <span class="s1">&#39;center&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignHCenter</span><span class="p">,</span>
-  <span class="s1">&#39;centre&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignHCenter</span><span class="p">,</span>
-  <span class="s1">&#39;l&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span><span class="p">,</span>
-  <span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignRight</span><span class="p">,</span>
-  <span class="s1">&#39;c&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignHCenter</span><span class="p">,</span>
-<span class="p">}</span>
+    <span class="s1">&#39;left&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span><span class="p">,</span>
+    <span class="s1">&#39;right&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignRight</span><span class="p">,</span>
+    <span class="s1">&#39;center&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignHCenter</span><span class="p">,</span>
+    <span class="s1">&#39;centre&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignHCenter</span><span class="p">,</span>
+    <span class="s1">&#39;l&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span><span class="p">,</span>
+    <span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignRight</span><span class="p">,</span>
+    <span class="s1">&#39;c&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignHCenter</span><span class="p">,</span>
+    <span class="p">}</span>
 
 <span class="n">VALIGN_DICT</span> <span class="o">=</span> <span class="p">{</span>
-  <span class="s1">&#39;top&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignTop</span><span class="p">,</span>
-  <span class="s1">&#39;bottom&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignBottom</span><span class="p">,</span>
-  <span class="s1">&#39;center&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">,</span>
-  <span class="s1">&#39;centre&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">,</span>
-  <span class="s1">&#39;t&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignTop</span><span class="p">,</span>
-  <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignBottom</span><span class="p">,</span>
-  <span class="s1">&#39;c&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">,</span>
-<span class="p">}</span>
+    <span class="s1">&#39;top&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignTop</span><span class="p">,</span>
+    <span class="s1">&#39;bottom&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignBottom</span><span class="p">,</span>
+    <span class="s1">&#39;center&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">,</span>
+    <span class="s1">&#39;centre&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">,</span>
+    <span class="s1">&#39;t&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignTop</span><span class="p">,</span>
+    <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignBottom</span><span class="p">,</span>
+    <span class="s1">&#39;c&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">,</span>
+    <span class="p">}</span>
 
 <span class="n">POLICY_DICT</span> <span class="o">=</span> <span class="p">{</span>
-  <span class="s1">&#39;fixed&#39;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span>
-  <span class="s1">&#39;minimum&#39;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Minimum</span><span class="p">,</span>
-  <span class="s1">&#39;maximum&#39;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Maximum</span><span class="p">,</span>
-  <span class="s1">&#39;preferred&#39;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Preferred</span><span class="p">,</span>
-  <span class="s1">&#39;expanding&#39;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span>
-  <span class="s1">&#39;minimumExpanding&#39;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">MinimumExpanding</span><span class="p">,</span>
-  <span class="s1">&#39;ignored&#39;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Ignored</span><span class="p">,</span>
-<span class="p">}</span>
+    <span class="s1">&#39;fixed&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span>
+    <span class="s1">&#39;minimum&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Minimum</span><span class="p">,</span>
+    <span class="s1">&#39;maximum&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Maximum</span><span class="p">,</span>
+    <span class="s1">&#39;preferred&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Preferred</span><span class="p">,</span>
+    <span class="s1">&#39;expanding&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span>
+    <span class="s1">&#39;minimumExpanding&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">MinimumExpanding</span><span class="p">,</span>
+    <span class="s1">&#39;ignored&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Ignored</span><span class="p">,</span>
+    <span class="p">}</span>
 
 
 <div class="viewcode-block" id="Base"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Base.Base">[docs]</a><span class="k">class</span> <span class="nc">Base</span><span class="p">(</span><span class="n">DropBase</span><span class="p">):</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">isFloatWidget</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                     <span class="n">tipText</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                     <span class="n">bgColor</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fgColor</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+    <span class="c1"># Base._init(**kwds) should be called from every widget</span>
+    <span class="c1"># We don&#39;t use __init__ as it messes up the super() methods resolution and the</span>
+    <span class="c1"># destroy signal when closing  the windows</span>
+    <span class="k">def</span> <span class="nf">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">isFloatWidget</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+              <span class="n">tipText</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+              <span class="n">bgColor</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fgColor</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
 
-                     <span class="c1"># keywords related to optional layout</span>
-                     <span class="n">setLayout</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                     <span class="n">hPolicy</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">vPolicy</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">margins</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">spacing</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="mi">7</span><span class="p">),</span>
+              <span class="c1"># keywords related to optional layout</span>
+              <span class="n">setLayout</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+              <span class="c1"># hPolicy=None, vPolicy=None, margins=(0,0,0,0), spacing=(12,7),</span>
+              <span class="n">hPolicy</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">vPolicy</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">margins</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">spacing</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
 
-                     <span class="c1"># keywords for adding to parent</span>
-                     <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">stretch</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
-                     <span class="n">hAlign</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">vAlign</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+              <span class="c1"># keywords for adding to parent</span>
+              <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">stretch</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+              <span class="n">hAlign</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">vAlign</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
 
-                     <span class="c1"># keywords related to dropable properties</span>
-                     <span class="n">acceptDrops</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-               <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    </span>
-<span class="sd">    :param tipText:  add tiptext to widget</span>
-<span class="sd">    :param grid:     insert widget at (row,col) of parent layout (if available)</span>
-<span class="sd">    :param gridSpan: extend widget over (rows,cols); default (1,1)</span>
-<span class="sd">    :param stretch:  stretch factor (row,col) of widget; default (0, 0)</span>
-<span class="sd">    :param hAlign:   horizontal alignment: left, right, centre (center, l, r, c)</span>
-<span class="sd">    :param vAlign:   vertical alignment: top, bottom, centre (center, t, b. c)</span>
-<span class="sd">    :param hPolicy:  horizontal policy of widget: fixed, minimum, maximum, preferred, expanding, minimumExpanding, ignored</span>
-<span class="sd">    :param vPolicy:  vertical policy of widget: fixed, minimum, maximum, preferred, expanding, minimumExpanding, ignored</span>
-<span class="sd">    :param bgColor:  background RGB colour tuple; depreciated: use styleSheet routines instead</span>
-<span class="sd">    :param fgColor:  foreground RGB colour tuple; depreciated: use styleSheet routines instead</span>
-<span class="sd">    :param isFloatWidget: indicates widget to be floating</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+              <span class="c1"># keywords related to dropable properties</span>
+              <span class="n">acceptDrops</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
 
-    <span class="c1"># define the &#39;droppable&#39; methods</span>
-    <span class="n">DropBase</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acceptDrops</span><span class="o">=</span><span class="n">acceptDrops</span><span class="p">)</span>
+              <span class="n">objectName</span><span class="o">=</span><span class="bp">None</span>
+              <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 
-    <span class="c1"># Tool tips</span>
-    <span class="k">if</span> <span class="n">tipText</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="n">tipText</span><span class="p">)</span>
+<span class="sd">        :param tipText:  add tiptext to widget</span>
+<span class="sd">        :param grid:     insert widget at (row,col) of parent layout (if available)</span>
+<span class="sd">        :param gridSpan: extend widget over (rows,cols); default (1,1)</span>
+<span class="sd">        :param stretch:  stretch factor (row,col) of widget; default (0, 0)</span>
+<span class="sd">        :param hAlign:   horizontal alignment: left, right, centre (center, l, r, c)</span>
+<span class="sd">        :param vAlign:   vertical alignment: top, bottom, centre (center, t, b. c)</span>
+<span class="sd">        :param hPolicy:  horizontal policy of widget: fixed, minimum, maximum, preferred, expanding, minimumExpanding, ignored</span>
+<span class="sd">        :param vPolicy:  vertical policy of widget: fixed, minimum, maximum, preferred, expanding, minimumExpanding, ignored</span>
+<span class="sd">        :param bgColor:  background RGB colour tuple; depreciated: use styleSheet routines instead</span>
+<span class="sd">        :param fgColor:  foreground RGB colour tuple; depreciated: use styleSheet routines instead</span>
+<span class="sd">        :param isFloatWidget: indicates widget to be floating</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Dock</span><span class="p">):</span>
-      <span class="k">return</span>
+        <span class="c1"># print(&#39;DEBUG Base %r: acceptDrops=%s, setLayout=%s&#39; % (self, acceptDrops, setLayout))</span>
 
-    <span class="k">if</span> <span class="n">hPolicy</span> <span class="ow">or</span> <span class="n">vPolicy</span><span class="p">:</span>
-      <span class="n">hPolicy</span> <span class="o">=</span> <span class="n">POLICY_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">hPolicy</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-      <span class="n">vPolicy</span> <span class="o">=</span> <span class="n">POLICY_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vPolicy</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">hPolicy</span><span class="p">,</span> <span class="n">vPolicy</span><span class="p">)</span>
+        <span class="c1"># define the &#39;droppable&#39; methods</span>
+        <span class="c1"># DropBase._init(self, acceptDrops=acceptDrops)</span>
+        <span class="n">DropBase</span><span class="o">.</span><span class="n">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acceptDrops</span><span class="o">=</span><span class="n">acceptDrops</span><span class="p">)</span>
+        <span class="c1"># super().__init__(acceptDrops=acceptDrops)</span>
 
-    <span class="c1"># Setup colour overrides (styles used primarily)</span>
-    <span class="c1">##3 depreciated</span>
-    <span class="k">if</span> <span class="n">bgColor</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">setAutoFillBackground</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-      <span class="c1">#rgb = QtGui.QColor(bgColor).getRgb()[:3]</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;background-color: rgb(</span><span class="si">%d</span><span class="s2">, </span><span class="si">%d</span><span class="s2">, </span><span class="si">%d</span><span class="s2">);&quot;</span> <span class="o">%</span>  <span class="n">bgColor</span><span class="p">)</span>
+        <span class="c1"># Tool tips</span>
+        <span class="k">if</span> <span class="n">tipText</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="n">tipText</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">fgColor</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">setAutoFillBackground</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-      <span class="c1">#rgb = QtGui.QColor(fgColor).getRgb()[:3]</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;foreground-color: rgb(</span><span class="si">%d</span><span class="s2">, </span><span class="si">%d</span><span class="s2">, </span><span class="si">%d</span><span class="s2">);&quot;</span> <span class="o">%</span>  <span class="n">fgColor</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Dock</span><span class="p">):</span>
+            <span class="k">return</span>
 
-    <span class="k">if</span> <span class="n">setLayout</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">setGridLayout</span><span class="p">(</span><span class="n">margins</span><span class="o">=</span><span class="n">margins</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="n">spacing</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s1">&#39;padding: 0px;&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">hPolicy</span> <span class="ow">or</span> <span class="n">vPolicy</span><span class="p">:</span>
+            <span class="n">hPolicy</span> <span class="o">=</span> <span class="n">POLICY_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">hPolicy</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">vPolicy</span> <span class="o">=</span> <span class="n">POLICY_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vPolicy</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">hPolicy</span><span class="p">,</span> <span class="n">vPolicy</span><span class="p">)</span>
 
-    <span class="c1"># add the widget to parent if it is not a float widget and either grid[0] (horizontal)</span>
-    <span class="c1"># or grid[1] (vertical) are defined</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">isFloatWidget</span> <span class="ow">and</span> <span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">grid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_addToParent</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span> <span class="n">gridSpan</span><span class="o">=</span><span class="n">gridSpan</span><span class="p">,</span> <span class="n">stretch</span><span class="o">=</span><span class="n">stretch</span><span class="p">,</span>
-                        <span class="n">hAlign</span><span class="o">=</span><span class="n">hAlign</span><span class="p">,</span> <span class="n">vAlign</span><span class="o">=</span><span class="n">vAlign</span><span class="p">)</span>
+        <span class="c1"># Setup colour overrides (styles used primarily)</span>
+        <span class="c1">##3 depreciated</span>
+        <span class="k">if</span> <span class="n">bgColor</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setAutoFillBackground</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="c1">#rgb = QtGui.QColor(bgColor).getRgb()[:3]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;background-color: rgb(</span><span class="si">%d</span><span class="s2">, </span><span class="si">%d</span><span class="s2">, </span><span class="si">%d</span><span class="s2">);&quot;</span> <span class="o">%</span> <span class="n">bgColor</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Base.setGridLayout"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Base.Base.setGridLayout">[docs]</a>  <span class="k">def</span> <span class="nf">setGridLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">margins</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">spacing</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)):</span>
-    <span class="s2">&quot;Add a QGridlayout to self&quot;</span>
-    <span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>  <span class="c1"># use _getLayout as we do not want any message; if there is no</span>
-                                    <span class="c1"># layout, we are going to add one</span>
-    <span class="k">if</span> <span class="n">layout</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-      <span class="n">layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="o">*</span><span class="n">margins</span><span class="p">)</span>
-      <span class="n">layout</span><span class="o">.</span><span class="n">setHorizontalSpacing</span><span class="p">(</span><span class="n">spacing</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-      <span class="n">layout</span><span class="o">.</span><span class="n">setVerticalSpacing</span><span class="p">(</span><span class="n">spacing</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Widget </span><span class="si">%s</span><span class="s1"> already has a layout!&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">fgColor</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setAutoFillBackground</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="c1">#rgb = QtGui.QColor(fgColor).getRgb()[:3]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;foreground-color: rgb(</span><span class="si">%d</span><span class="s2">, </span><span class="si">%d</span><span class="s2">, </span><span class="si">%d</span><span class="s2">);&quot;</span> <span class="o">%</span> <span class="n">fgColor</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Base.getLayout"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Base.Base.getLayout">[docs]</a>  <span class="k">def</span> <span class="nf">getLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="s2">&quot;return the layout of self&quot;</span>
-    <span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">layout</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Unable to query layout of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">layout</span></div>
+        <span class="k">if</span> <span class="n">setLayout</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setGridLayout</span><span class="p">(</span><span class="n">margins</span><span class="o">=</span><span class="n">margins</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="n">spacing</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s1">&#39;padding: 0px;&#39;</span><span class="p">)</span>
 
-  <span class="nd">@staticmethod</span>
-  <span class="k">def</span> <span class="nf">_getLayout</span><span class="p">(</span><span class="n">widget</span><span class="p">):</span>
-    <span class="s2">&quot;return the layout of widget&quot;</span>
-    <span class="n">layout</span> <span class="o">=</span> <span class="bp">None</span>
-    <span class="k">try</span><span class="p">:</span>
-      <span class="n">layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">layout</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
-    <span class="k">except</span><span class="p">:</span>
-      <span class="k">pass</span>
-    <span class="k">return</span> <span class="n">layout</span>
+        <span class="c1"># add the widget to parent if it is not a float widget and either grid[0] (horizontal)</span>
+        <span class="c1"># or grid[1] (vertical) are defined</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_col</span> <span class="o">=</span> <span class="n">grid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_row</span> <span class="o">=</span> <span class="n">grid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span> <span class="o">=</span> <span class="n">grid</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">isFloatWidget</span> <span class="ow">and</span> <span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">grid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_addToParent</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span> <span class="n">gridSpan</span><span class="o">=</span><span class="n">gridSpan</span><span class="p">,</span> <span class="n">stretch</span><span class="o">=</span><span class="n">stretch</span><span class="p">,</span>
+                              <span class="n">hAlign</span><span class="o">=</span><span class="n">hAlign</span><span class="p">,</span> <span class="n">vAlign</span><span class="o">=</span><span class="n">vAlign</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">_addToParent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">gridSpan</span><span class="p">,</span> <span class="n">stretch</span><span class="p">,</span> <span class="n">hAlign</span><span class="p">,</span> <span class="n">vAlign</span><span class="p">):</span>
-    <span class="s2">&quot;Add widget to parent of self (if can be obtained)&quot;</span>
+        <span class="c1"># connect destruction of widget to onDestroyed method,</span>
+        <span class="c1"># which subsequently can be subclassed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">destroyed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onDestroyed</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 
-    <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;parent&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="bp">None</span> <span class="c1"># Not all Qt objects have a parent</span>
-    <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;No parent: Cannot add widget </span><span class="si">%s</span><span class="s1"> (grid=</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">grid</span><span class="p">))</span>
-      <span class="k">return</span>
+    <span class="nd">@staticmethod</span>  <span class="c1"># has to be a static method</span>
+<div class="viewcode-block" id="Base.onDestroyed"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Base.Base.onDestroyed">[docs]</a>    <span class="k">def</span> <span class="nf">onDestroyed</span><span class="p">(</span><span class="n">widget</span><span class="p">):</span>
+        <span class="c1"># print(&quot;DEBUG on destroyed:&quot;, widget)</span>
+        <span class="k">pass</span></div>
 
-    <span class="c1"># have to use _getLayout() functionality as not all widget descend from Base;</span>
-    <span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getLayout</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">layout</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;No layout for parent widget </span><span class="si">%s</span><span class="s1"> of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">parent</span><span class="p">,</span><span class="bp">self</span><span class="p">))</span>
-      <span class="k">return</span>
+<div class="viewcode-block" id="Base.setGridLayout"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Base.Base.setGridLayout">[docs]</a>    <span class="k">def</span> <span class="nf">setGridLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">margins</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">spacing</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)):</span>
+        <span class="s2">&quot;Add a QGridlayout to self&quot;</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>  <span class="c1"># use _getLayout as we do not want any message; if there is no</span>
+        <span class="c1"># layout, we are going to add one</span>
+        <span class="k">if</span> <span class="n">layout</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">layout</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="n">layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="o">*</span><span class="n">margins</span><span class="p">)</span>
+            <span class="n">layout</span><span class="o">.</span><span class="n">setHorizontalSpacing</span><span class="p">(</span><span class="n">spacing</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">layout</span><span class="o">.</span><span class="n">setVerticalSpacing</span><span class="p">(</span><span class="n">spacing</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Widget </span><span class="si">%s</span><span class="s1"> already has a layout!&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span></div>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">):</span>
-      <span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getRowCol</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="n">grid</span><span class="p">)</span>
-      <span class="n">rowStr</span><span class="p">,</span> <span class="n">colStr</span> <span class="o">=</span> <span class="n">stretch</span>
-      <span class="n">layout</span><span class="o">.</span><span class="n">setRowStretch</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">rowStr</span><span class="p">)</span>
-      <span class="n">layout</span><span class="o">.</span><span class="n">setColumnStretch</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">colStr</span><span class="p">)</span>
+<div class="viewcode-block" id="Base.getLayout"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Base.Base.getLayout">[docs]</a>    <span class="k">def</span> <span class="nf">getLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;return the layout of self&quot;</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">layout</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Unable to query layout of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">layout</span></div>
 
-      <span class="n">rowSpan</span><span class="p">,</span> <span class="n">colSpan</span> <span class="o">=</span> <span class="n">gridSpan</span>
-      <span class="n">hAlign</span> <span class="o">=</span> <span class="n">HALIGN_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">hAlign</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_getLayout</span><span class="p">(</span><span class="n">widget</span><span class="p">):</span>
+        <span class="s2">&quot;return the layout of widget&quot;</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">layout</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">layout</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">layout</span>
 
-      <span class="n">vAlign</span> <span class="o">=</span> <span class="n">VALIGN_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vAlign</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-      <span class="n">align</span> <span class="o">=</span> <span class="n">hAlign</span> <span class="o">|</span> <span class="n">vAlign</span>
-      <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">rowSpan</span><span class="p">,</span> <span class="n">colSpan</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Alignment</span><span class="p">(</span><span class="n">align</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">_addToParent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">gridSpan</span><span class="p">,</span> <span class="n">stretch</span><span class="p">,</span> <span class="n">hAlign</span><span class="p">,</span> <span class="n">vAlign</span><span class="p">):</span>
+        <span class="s2">&quot;Add widget to parent of self (if can be obtained)&quot;</span>
 
-  <span class="nd">@staticmethod</span>
-  <span class="k">def</span> <span class="nf">_getRowCol</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="n">grid</span><span class="p">):</span>
-    <span class="s2">&quot;Returns (row, col) tuple from layout, using grid or using current rowCount&quot;</span>
-    <span class="k">if</span> <span class="n">layout</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Layout is None, cannot get (row, col) tuple&#39;</span><span class="p">)</span>
-      <span class="k">return</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">grid</span><span class="p">:</span>
-      <span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="o">=</span> <span class="n">grid</span>
-      <span class="k">if</span> <span class="n">row</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">row</span> <span class="o">=</span> <span class="mi">0</span>
-      <span class="k">if</span> <span class="n">col</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">col</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">row</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span>
-      <span class="n">col</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">return</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span></div>
+        <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;parent&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="bp">None</span>  <span class="c1"># Not all Qt objects have a parent</span>
+        <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;No parent: Cannot add widget </span><span class="si">%s</span><span class="s1"> (grid=</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">))</span>
+            <span class="k">return</span>
 
+        <span class="c1"># have to use _getLayout() functionality as not all widget descend from Base;</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getLayout</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">layout</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;No layout for parent widget </span><span class="si">%s</span><span class="s1"> of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+            <span class="k">return</span>
 
- 
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">):</span>
+            <span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getRowCol</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="n">grid</span><span class="p">)</span>
+            <span class="n">rowStr</span><span class="p">,</span> <span class="n">colStr</span> <span class="o">=</span> <span class="n">stretch</span>
+            <span class="n">layout</span><span class="o">.</span><span class="n">setRowStretch</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">rowStr</span><span class="p">)</span>
+            <span class="n">layout</span><span class="o">.</span><span class="n">setColumnStretch</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">colStr</span><span class="p">)</span>
+
+            <span class="n">rowSpan</span><span class="p">,</span> <span class="n">colSpan</span> <span class="o">=</span> <span class="n">gridSpan</span>
+            <span class="n">hAlign</span> <span class="o">=</span> <span class="n">HALIGN_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">hAlign</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+            <span class="n">vAlign</span> <span class="o">=</span> <span class="n">VALIGN_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vAlign</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">align</span> <span class="o">=</span> <span class="n">hAlign</span> <span class="o">|</span> <span class="n">vAlign</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_col</span> <span class="o">=</span> <span class="n">col</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_row</span> <span class="o">=</span> <span class="n">row</span>
+            <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">rowSpan</span><span class="p">,</span> <span class="n">colSpan</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Alignment</span><span class="p">(</span><span class="n">align</span><span class="p">))</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_getRowCol</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="n">grid</span><span class="p">):</span>
+        <span class="s2">&quot;Returns (row, col) tuple from layout, using grid or using current rowCount&quot;</span>
+        <span class="k">if</span> <span class="n">layout</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Layout is None, cannot get (row, col) tuple&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">grid</span><span class="p">:</span>
+            <span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="o">=</span> <span class="n">grid</span>
+            <span class="k">if</span> <span class="n">row</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">row</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="n">col</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">col</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span>
+            <span class="n">col</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span>
+
+<div class="viewcode-block" id="Base.getParent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Base.Base.getParent">[docs]</a>    <span class="k">def</span> <span class="nf">getParent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A method to return the parent of a widget</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span></div></div>
 </pre></div>
 
           </div>

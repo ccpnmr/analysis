@@ -299,7 +299,6 @@ class Framework:
             self.preferences.general.colourScheme = 'dark'
         elif self.args.lightColourScheme:
             self.preferences.general.colourScheme = 'light'
-        self._storedState = None
 
         self._registrationDict = {}
         self._setLanguage()

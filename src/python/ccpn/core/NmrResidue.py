@@ -36,6 +36,8 @@ from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 from ccpnmodel.ccpncore.lib.Constants import defaultNmrChainCode
 from ccpn.core import _importOrder
+from ccpn.util.decorators import logCommand
+from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter
 from ccpn.util.Logging import getLogger
 
 
@@ -267,7 +269,7 @@ class NmrResidue(AbstractWrapperObject):
         #
         return result
 
-    def connectNext(self, value: typing.Union['NmrResidue', str]) -> NmrChain:
+    def connectNext(self, nmrResidue: typing.Union['NmrResidue', str]) -> NmrChain:
         """Connect free end of self to free end of next residue in sequence,
         and return resulting connected NmrChain
 
@@ -281,94 +283,59 @@ class NmrResidue(AbstractWrapperObject):
 
         project = self._project
 
-        if value is None:
+        if nmrResidue is None:
             raise ValueError("Cannot connect to value: None")
-        elif isinstance(value, str):
-            xx = project.getByPid(value)
+        elif isinstance(nmrResidue, str):
+            xx = project.getByPid(nmrResidue)
             if xx is None:
-                raise ValueError("No object found matching Pid %s" % value)
+                raise ValueError("No object found matching Pid %s" % nmrResidue)
             else:
-                value = xx
+                nmrResidue = xx
 
-        apiValueNmrChain = value._wrappedData.nmrChain
+        apiValueNmrChain = nmrResidue._wrappedData.nmrChain
 
         if self.relativeOffset is not None:
             raise ValueError("Cannot connect from offset residue")
 
-        elif value.relativeOffset is not None:
+        elif nmrResidue.relativeOffset is not None:
             raise ValueError("Cannot connect to offset NmrResidue")
 
         elif self.residue is not None:
             raise ValueError("Cannot connect assigned NmrResidue - assign the value instead")
 
-        elif value.residue is not None:
+        elif nmrResidue.residue is not None:
             raise ValueError("Cannot connect to assigned NmrResidue - assign the NmrResidue instead")
 
         elif self.nextNmrResidue is not None:
             raise ValueError("Cannot connect next NmrResidue - it is already connected")
 
-        elif value.previousNmrResidue is not None:
+        elif nmrResidue.previousNmrResidue is not None:
             raise ValueError("Cannot connect to next NmrResidue - it is already connected")
 
         elif apiNmrChain.isConnected and apiValueNmrChain is apiNmrChain:
             raise ValueError("Cannot make cyclical connected NmrChain")
 
-        self._startCommandEchoBlock('connectNext', value)
-        try:
+        from ccpn.core.lib.ContextManagers import logCommandBlock
+
+        with logCommandBlock(get='self') as log:
+            log('connectNext', nmrResidue=repr(nmrResidue.pid))
+
             if apiNmrChain.isConnected:
                 # At this point, self must be the last NmrResidue in a connected chain
                 if apiValueNmrChain.isConnected:
-
-                    # [connected:NmrChain] -> [connected:Value]
-                    # undo = project._undo
-                    # if undo is not None:
-                    #   undo.increaseBlocking()
-                    # try:
-                    #   # Value is first NmrResidue in a connected NmrChain
-                    #   for rg in apiValueNmrChain.mainResonanceGroups:
-                    #     rg.moveDirectNmrChain(apiNmrChain, 'tail')
-                    #   apiValueNmrChain.delete()
-                    #
-                    # except Exception as es:
-                    #   getLogger().debug('Error %s' % str(es))
-                    # finally:
-                    #   if undo is not None:
-                    #     undo.decreaseBlocking()
-                    #
-                    # if undo is not None:
-                    #   undo.newItem(self.disconnectNext, self.connectNext, redoArgs=(value,))
-
                     for rg in apiValueNmrChain.mainResonanceGroups:
                         rg.moveDirectNmrChain(apiNmrChain, 'tail')
                     apiValueNmrChain.delete()
 
                 else:
                     # [connected:NmrChain] -> [Value]
-                    value._wrappedData.moveDirectNmrChain(apiNmrChain, 'tail')
+                    nmrResidue._wrappedData.moveDirectNmrChain(apiNmrChain, 'tail')
                 result = self.nmrChain
 
             else:
                 # self is unassigned, unconnected NmrResidue
                 if apiValueNmrChain.isConnected:
                     # At this point value must be the first NmrResidue in a connected NmrChain
-
-                    # [NmrChain] -> [connected:Value]
-                    # undo = apiValueNmrChain.root._undo
-                    #
-                    # if undo is not None:
-                    #   undo.increaseBlocking()
-                    # try:
-                    #   apiResonanceGroup.directNmrChain = apiValueNmrChain
-                    #   # Move self from last to first in target NmrChain
-                    #   ll = apiValueNmrChain.__dict__['mainResonanceGroups']
-                    #   ll.insert(0, ll.pop())
-                    # finally:
-                    #   if undo is not None:
-                    #     undo.decreaseBlocking()
-                    #
-                    # if undo is not None:
-                    #   undo.newItem(apiResonanceGroup.setDirectNmrChain,
-                    #                self.connectNext, undoArgs=(apiNmrChain,), redoArgs=(value,))
 
                     apiResonanceGroup.moveDirectNmrChain(apiValueNmrChain, 'head')
 
@@ -377,30 +344,21 @@ class NmrResidue(AbstractWrapperObject):
 
                     newApiNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
                     apiResonanceGroup.directNmrChain = newApiNmrChain
-                    value._wrappedData.directNmrChain = newApiNmrChain
+                    nmrResidue._wrappedData.directNmrChain = newApiNmrChain
 
-                result = value.nmrChain
-        except Exception as es:
-            getLogger().warning(str(es))
-        finally:
-            self._endCommandEchoBlock()
-        #
+                result = nmrResidue.nmrChain
+
         return result
 
     def deassignNmrChain(self):
-        self._startCommandEchoBlock('deassignNmrChain')
-        try:
+        from ccpn.core.lib.ContextManagers import logCommandBlock
 
+        with logCommandBlock(get='self') as log:
+            log('deassignNmrChain')
             if self.residue is not None:  # assigned to chain
                 self._deassignNmrChain()
             else:
                 getLogger().warning('Cannot deassign an unassigned chain')
-
-        except Exception as es:
-            # getLogger().warning(str(es))
-            raise es
-        finally:
-            self._endCommandEchoBlock()
 
     def _deassignNmrChain(self):
         # nmrList = self._getAllConnectedList()
@@ -433,19 +391,14 @@ class NmrResidue(AbstractWrapperObject):
         return None
 
     def disconnectAll(self):
-        self._startCommandEchoBlock('disconnectAll')
-        try:
+        from ccpn.core.lib.ContextManagers import logCommandBlock
 
+        with logCommandBlock(get='self') as log:
+            log('disconnectAll')
             if self.residue is not None:  # assigned to chain
                 self._disconnectAssignedAll(assigned=True)
             else:
                 self._disconnectAssignedAll(assigned=False)
-
-        except Exception as es:
-            # getLogger().warning(str(es))
-            raise es
-        finally:
-            self._endCommandEchoBlock()
 
     def _disconnectAssignedAll(self, assigned=False):
         # disconnect all and return to the @- chain
@@ -453,20 +406,14 @@ class NmrResidue(AbstractWrapperObject):
             nmr._deassignSingle()
 
     def disconnectNext(self) -> typing.Optional['NmrChain']:
-        self._startCommandEchoBlock('disconnectNext')
-        newNmrChain = None
-        try:
+        from ccpn.core.lib.ContextManagers import logCommandBlock
 
+        with logCommandBlock(get='self') as log:
+            log('disconnectNext')
             if self.residue is not None:  # assigned to chain
                 newNmrChain = self._disconnectAssignedNext()
             else:
                 newNmrChain = self._disconnectNext()
-
-        except Exception as es:
-            # getLogger().warning(str(es))
-            raise es
-        finally:
-            self._endCommandEchoBlock()
             return newNmrChain
 
     def _disconnectAssignedNext(self) -> typing.Optional['NmrChain']:
@@ -577,7 +524,7 @@ class NmrResidue(AbstractWrapperObject):
 
         return result
 
-    def connectPrevious(self, value) -> NmrChain:
+    def connectPrevious(self, nmrResidue=None) -> NmrChain:
         """Connect free end of self to free end of previous residue in sequence,
         and return resulting connected NmrChain
 
@@ -592,41 +539,44 @@ class NmrResidue(AbstractWrapperObject):
 
         project = self._project
 
-        if value is None:
+        if nmrResidue is None:
             raise ValueError("Cannot connect to value: None")
 
-        elif isinstance(value, str):
-            xx = project.getByPid(value)
+        elif isinstance(nmrResidue, str):
+            xx = project.getByPid(nmrResidue)
             if xx is None:
-                raise ValueError("No object found matching Pid %s" % value)
+                raise ValueError("No object found matching Pid %s" % nmrResidue)
             else:
-                value = xx
+                nmrResidue = xx
 
-        apiValueNmrChain = value._wrappedData.nmrChain
+        apiValueNmrChain = nmrResidue._wrappedData.nmrChain
 
         if self.relativeOffset is not None:
             raise ValueError("Cannot connect from offset residue")
 
-        elif value.relativeOffset is not None:
+        elif nmrResidue.relativeOffset is not None:
             raise ValueError("Cannot connect to offset NmrResidue")
 
         elif self.residue is not None:
             raise ValueError("Cannot connect assigned NmrResidue - assign the value instead")
 
-        elif value.residue is not None:
+        elif nmrResidue.residue is not None:
             raise ValueError("Cannot connect to assigned NmrResidue - assign the NmrResidue instead")
 
         elif self.previousNmrResidue is not None:
             raise ValueError("Cannot connect previous NmrResidue - it is already connected")
 
-        elif value.nextNmrResidue is not None:
+        elif nmrResidue.nextNmrResidue is not None:
             raise ValueError("Cannot connect to previous NmrResidue - it is already connected")
 
         elif apiNmrChain.isConnected and apiValueNmrChain is apiNmrChain:
             raise ValueError("Cannot make cyclical connected NmrChain")
 
-        self._startCommandEchoBlock('connectPrevious', value)
-        try:
+        from ccpn.core.lib.ContextManagers import logCommandBlock
+
+        with logCommandBlock(get='self') as log:
+            log('connectPrevious', nmrResidue=repr(nmrResidue.pid))
+
             if apiNmrChain.isConnected:
                 # At this point, self must be the first NmrResidue in a connected chain
                 undo = apiValueNmrChain.root._undo
@@ -634,69 +584,12 @@ class NmrResidue(AbstractWrapperObject):
 
                     ll = apiNmrChain.__dict__['mainResonanceGroups']
                     if apiValueNmrChain.isConnected:
-
-                        # if undo is not None:
-                        #   undo.increaseBlocking()
-
-                        # [connected:Value] <- [connected:NmrChain]
-                        # # original bit that required the insert/pop
-                        # # Value is last NmrResidue in a connected NmrChain
-                        # for rg in reversed(apiValueNmrChain.mainResonanceGroups):
-                        #   # rg.__dict__['insertAtHead'] = True  # ejb = fix
-                        #   rg.directNmrChain = apiNmrChain
-                        #   # del rg.__dict__['insertAtHead']
-                        #   #
-                        #   # if undo is not None:
-                        #   #   undo.decreaseBlocking()
-                        #   #   undo.newItem(rg.setDirectNmrChain,        rg.setDirectNmrChain,
-                        #   #                undoArgs=(apiValueNmrChain,), redoArgs=(apiNmrChain,))
-                        #   #
-                        #   #
-                        #   ll.insert(0, ll.pop())
-                        #
-                        #   if undo is not None:
-                        #   #   undo.increaseBlocking()
-                        #   # if undo is not None:
-                        #   #   undo.decreaseBlocking()
-                        #     undo.newItem(self._bubbleTail, self._bubbleHead,
-                        #                  undoArgs=(ll, ), redoArgs=(ll, ))
-
                         for rg in reversed(apiValueNmrChain.mainResonanceGroups):
                             rg.moveDirectNmrChain(apiNmrChain, 'head')
 
                         apiValueNmrChain.delete()
-
-                        # if undo is not None:
-                        #   undo.decreaseBlocking()
-
-                        # if undo is not None:
-                        #   undo.newItem(self.disconnectPrevious,
-                        #                self.connectPrevious, redoArgs=(value,))
                     else:
-
-                        # [Value] <- [connected:NmrChain]
-                        # # original bit that required the insert/pop
-                        # if undo is not None:
-                        #   undo.increaseBlocking()
-                        # #
-                        # # value._wrappedData.__dict__['insertAtHead'] = True    # ejb = fix
-                        # value._wrappedData.directNmrChain = apiNmrChain
-                        # # del value._wrappedData.__dict__['insertAtHead']
-                        # # Move value from last to first in target NmrChain
-                        # ll.insert(0, ll.pop())
-                        #
-                        # #
-                        # if undo is not None:
-                        #   undo.decreaseBlocking()
-                        #
-                        # if undo is not None:
-                        #   undo.newItem(value._wrappedData.setDirectNmrChain, self.connectPrevious,
-                        #                undoArgs=(apiValueNmrChain,), redoArgs=(value,))
-                        #
-                        #   # undo.newItem(value._wrappedData.setDirectNmrChain, value._wrappedData.setDirectNmrChain,
-                        #   #              undoArgs=(apiValueNmrChain,), redoArgs=(apiNmrChain,))
-
-                        value._wrappedData.moveDirectNmrChain(apiNmrChain, 'head')
+                        nmrResidue._wrappedData.moveDirectNmrChain(apiNmrChain, 'head')
 
                 finally:
                     result = self.nmrChain
@@ -712,18 +605,13 @@ class NmrResidue(AbstractWrapperObject):
 
                     # [Value] <- [NmrChain]
                     newApiNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
-                    value._wrappedData.directNmrChain = newApiNmrChain
+                    nmrResidue._wrappedData.directNmrChain = newApiNmrChain
                     # newApiNmrChain.__dict__['mainResonanceGroups'].reverse()
                     apiResonanceGroup.directNmrChain = newApiNmrChain
                     # apiResonanceGroup.moveToNmrChain(newApiNmrChain)
 
-                result = value.nmrChain
+                result = nmrResidue.nmrChain
 
-        except Exception as es:
-            getLogger().warning(str(es))
-        finally:
-            self._endCommandEchoBlock()
-        #
         return result
 
     def _bubbleHead(self, ll):
@@ -733,45 +621,30 @@ class NmrResidue(AbstractWrapperObject):
         ll.append(ll.pop(0))
 
     def unlinkPreviousNmrResidue(self):
-        self._startCommandEchoBlock('UnlinkPrevious')
-        try:
+        from ccpn.core.lib.ContextManagers import logCommandBlock
 
+        with logCommandBlock(get='self') as log:
+            log('unlinkPreviousNmrResidue')
             if self.residue is not None:  # assigned to chain
                 self._disconnectAssignedPrevious()
 
-        except Exception as es:
-            # getLogger().warning(str(es))
-            raise es
-        finally:
-            self._endCommandEchoBlock()
-
     def unlinkNextNmrResidue(self):
-        self._startCommandEchoBlock('unlinkNext')
-        try:
+        from ccpn.core.lib.ContextManagers import logCommandBlock
 
+        with logCommandBlock(get='self') as log:
+            log('unlinkNextNmrResidue')
             if self.residue is not None:  # assigned to chain
                 self._disconnectAssignedNext()
 
-        except Exception as es:
-            # getLogger().warning(str(es))
-            raise es
-        finally:
-            self._endCommandEchoBlock()
-
     def disconnectPrevious(self):
-        self._startCommandEchoBlock('disconnectPrevious')
-        try:
+        from ccpn.core.lib.ContextManagers import logCommandBlock
 
+        with logCommandBlock(get='self') as log:
+            log('disconnectPrevious')
             if self.residue is not None:  # assigned to chain
                 self._disconnectAssignedPrevious()
             else:
                 self._disconnectPrevious()
-
-        except Exception as es:
-            # getLogger().warning(str(es))
-            raise es
-        finally:
-            self._endCommandEchoBlock()
 
     def _disconnectAssignedPrevious(self) -> typing.Optional['NmrChain']:
         """Cut connected NmrChain after NmrResidue, creating new connected NmrChain if necessary"""
@@ -855,19 +728,14 @@ class NmrResidue(AbstractWrapperObject):
                 return newNmrChain
 
     def disconnect(self):
-        self._startCommandEchoBlock('disconnect')
-        try:
+        from ccpn.core.lib.ContextManagers import logCommandBlock
 
+        with logCommandBlock(get='self') as log:
+            log('disconnect')
             if self.residue is not None:  # assigned to chain
                 self._disconnectAssigned()
             else:
                 self._disconnect()
-
-        except Exception as es:
-            # getLogger().warning(str(es))
-            raise es
-        finally:
-            self._endCommandEchoBlock()
 
     def _deassignSingle(self):
         # disconnect a single residue - return to @- chain
@@ -926,8 +794,6 @@ class NmrResidue(AbstractWrapperObject):
         apiNmrChain = apiResonanceGroup.directNmrChain
         defaultChain = apiNmrChain.nmrProject.findFirstNmrChain(code=defaultNmrChainCode)
 
-        # self._startCommandEchoBlock('disconnect')
-        # try:
         if apiNmrChain is None:
             # offset residue: no-op
             return
@@ -966,10 +832,6 @@ class NmrResidue(AbstractWrapperObject):
                     nmrChain = self.nmrChain
                     nr1 = data2Obj[stretch[1]]
                     nr2 = data2Obj[stretch[2]]
-                    # nmrChain.reverse()
-                    # nr1._disconnectNext()
-                    # nr2._disconnectNext()
-                    # nmrChain.reverse()
 
                     nr1._disconnectPrevious()
                     nr2._disconnectPrevious()
@@ -977,11 +839,6 @@ class NmrResidue(AbstractWrapperObject):
                 else:
                     self._disconnectNext()
                     apiResonanceGroup.directNmrChain = defaultChain
-
-        # except Exception as es:
-        #   getLogger().warning(str(es))
-        # finally:
-        #   self._endCommandEchoBlock()
 
     @property
     def probableResidues(self) -> typing.Tuple[typing.Tuple[Residue, float], ...]:
@@ -993,6 +850,8 @@ class NmrResidue(AbstractWrapperObject):
         return tuple((getDataObj(tt[1]), tt[0] / totalWeight) for tt in reversed(ll))
 
     @probableResidues.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def probableResidues(self, value):
         apiResonanceGroup = self._wrappedData
         for residueProb in apiResonanceGroup.residueProbs:
@@ -1009,6 +868,8 @@ class NmrResidue(AbstractWrapperObject):
         return tuple((tt[1].code3Letter, tt[0] / totalWeight) for tt in reversed(ll))
 
     @probableResidueTypes.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def probableResidueTypes(self, value):
         apiResonanceGroup = self._wrappedData
         root = apiResonanceGroup.root
@@ -1023,15 +884,13 @@ class NmrResidue(AbstractWrapperObject):
 
     def deassign(self):
         """Reset sequenceCode and residueType assignment to default values"""
-        self._startCommandEchoBlock('deassign')
-        try:
+        from ccpn.core.lib.ContextManagers import logCommandBlock
+
+        with logCommandBlock(get='self') as log:
+            log('deassign')
             apiResonanceGroup = self._apiResonanceGroup
             apiResonanceGroup.sequenceCode = None
             apiResonanceGroup.resetResidueType(None)
-        except Exception as es:
-            getLogger().warning(str(es))
-        finally:
-            self._endCommandEchoBlock()
 
     def rename(self, value: str = None):
         """Rename NmrResidue. changing its sequenceCode, residueType, or both.
@@ -1061,14 +920,12 @@ class NmrResidue(AbstractWrapperObject):
             if ll and ll != [self]:
                 raise ValueError("Cannot rename %s to %s.%s - assignment already exists" % (self, self.nmrChain.id, value))
         #
-        self._startCommandEchoBlock('rename', value)
-        try:
+        from ccpn.core.lib.ContextManagers import logCommandBlock
+
+        with logCommandBlock(get='self') as log:
+            log('rename')
             apiResonanceGroup.sequenceCode = sequenceCode
             apiResonanceGroup.resetResidueType(residueType)
-        except Exception as es:
-            getLogger().warning(str(es))
-        finally:
-            self._endCommandEchoBlock()
 
     def moveToNmrChain(self, newNmrChain: typing.Union['NmrChain', str] = '@-', sequenceCode: str = None, residueType: str = None):
         """Move residue to newNmrChain, breaking connected NmrChain if necessary.
@@ -1097,33 +954,33 @@ class NmrResidue(AbstractWrapperObject):
         nmrChain = self.nmrChain
 
         #print('>>> start try')
-        self._startCommandEchoBlock('moveToNmrChain', values=values)
-        try:
-            # if needed: move self to newNmrChain
-            movedChain = False
-            if newNmrChain != nmrChain:
-                apiResonanceGroup.moveToNmrChain(newNmrChain._wrappedData)
-                movedChain = True
-            # optionally rename
-            if self.sequenceCode != sequenceCode or self.residueType != residueType:
-                if sequenceCode is None:
-                    sequenceCode = self.sequenceCode
-                if residueType is None:
-                    residueType = self.residueType
-                newSeqCode = '.'.join((sequenceCode, residueType))
-                self.rename(newSeqCode)
+        from ccpn.core.lib.ContextManagers import logCommandBlock
 
-        except Exception as es:
-            #print('>>> exception')
-            getLogger().warning(str(es))
-            if movedChain:
-                # Need to undo this
-                apiResonanceGroup.moveToNmrChain(nmrChain._wrappedData)
-            raise es
+        with logCommandBlock(get='self') as log:
+            log('moveToNmrChain')
 
-        finally:
-            #print('>>> finally')
-            self._endCommandEchoBlock()
+            try:
+                # if needed: move self to newNmrChain
+                movedChain = False
+                if newNmrChain != nmrChain:
+                    apiResonanceGroup.moveToNmrChain(newNmrChain._wrappedData)
+                    movedChain = True
+                # optionally rename
+                if self.sequenceCode != sequenceCode or self.residueType != residueType:
+                    if sequenceCode is None:
+                        sequenceCode = self.sequenceCode
+                    if residueType is None:
+                        residueType = self.residueType
+                    newSeqCode = '.'.join((sequenceCode, residueType))
+                    self.rename(newSeqCode)
+
+            except Exception as es:
+                #print('>>> exception')
+                getLogger().warning(str(es))
+                if movedChain:
+                    # Need to undo this
+                    apiResonanceGroup.moveToNmrChain(nmrChain._wrappedData)
+                raise es
 
     def assignTo(self, chainCode: str = None, sequenceCode: typing.Union[int, str] = None,
                  residueType: str = None, mergeToExisting: bool = False) -> 'NmrResidue':
@@ -1148,21 +1005,15 @@ class NmrResidue(AbstractWrapperObject):
         will cause an error. Use moveToNmrChain(newNmrChainOrPid) instead
         """
 
-        # Get parameter string for console echo - before parameters are changed
-        defaults = collections.OrderedDict(
-                (('chainCode', None), ('sequenceCode', None),
-                 ('residueType', None), ('mergeToExisting', False)
-                 )
-                )
-
         oldPid = self.longPid
         apiResonanceGroup = self._wrappedData
         clearUndo = False
         undo = apiResonanceGroup.root._undo
 
-        self._startCommandEchoBlock('assignTo', values=locals(), defaults=defaults,
-                                    parName='mergedNmrResidue')
-        try:
+        from ccpn.core.lib.ContextManagers import logCommandBlock
+
+        with logCommandBlock(prefix='mergedNmrResidue=', get='self') as log:
+            log('assignTo')
 
             sequenceCode = str(sequenceCode) if sequenceCode else None
             # apiResonanceGroup = self._apiResonanceGroup
@@ -1252,16 +1103,12 @@ class NmrResidue(AbstractWrapperObject):
                     raise ValueError("Cannot assign to %s.%s.%s: NR:%s.%s.%s already exists"
                                      % (chainCode, sequenceCode, residueType,
                                         chainCode, sequenceCode, result.residueType))
-            #
+
             if clearUndo:
                 self._project._logger.warning("Merging NmrAtoms from %s into %s. Merging is NOT undoable."
                                               % (oldPid, result.longPid))
                 if undo is not None:
                     undo.clear()
-        except Exception as es:
-            getLogger().warning(str(es))
-        finally:
-            self._endCommandEchoBlock()
 
         return result
 
@@ -1363,10 +1210,18 @@ del getter
 del setter
 
 
+@newObject(NmrResidue)
 def _newNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None, residueType: str = None,
                    comment: str = None) -> NmrResidue:
     """Create new NmrResidue within NmrChain.
-    If NmrChain is connected, append the new NmrResidue to the end of the stretch."""
+
+    If NmrChain is connected, append the new NmrResidue to the end of the stretch.
+
+    :param sequenceCode:
+    :param residueType:
+    :param comment:
+    :return: a new NmrResidue instance.
+    """
 
     originalSequenceCode = sequenceCode
 
@@ -1383,80 +1238,90 @@ def _newNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None, 
     dd = {'name': residueType, 'details': comment,
           'residueType': residueType, 'directNmrChain': apiNmrChain}
 
-    self._startCommandEchoBlock('newNmrResidue', values=locals(), defaults=defaults,
-                                parName='newNmrResidue')
-    self._project.blankNotification()  # delay notifiers till NmrResidue is fully ready
-    result = None
-    try:
+    # self._startCommandEchoBlock('newNmrResidue', values=locals(), defaults=defaults,
+    #                             parName='newNmrResidue')
+    # self._project.blankNotification()  # delay notifiers till NmrResidue is fully ready
+    # result = None
+    # try:
 
-        # Convert value to string, and check
-        if isinstance(sequenceCode, int):
-            sequenceCode = str(sequenceCode)
-        elif sequenceCode is not None and not isinstance(sequenceCode, str):
-            raise ValueError("Invalid sequenceCode %s must be int, str, or None" % repr(sequenceCode))
+    # Convert value to string, and check
+    if isinstance(sequenceCode, int):
+        sequenceCode = str(sequenceCode)
+    elif sequenceCode is not None and not isinstance(sequenceCode, str):
+        raise ValueError("Invalid sequenceCode %s must be int, str, or None" % repr(sequenceCode))
 
-        serial = None
-        if sequenceCode:
+    serial = None
+    if sequenceCode:
 
-            # Check the sequenceCode is not taken already
-            partialId = '%s.%s.' % (self._id, sequenceCode.translate(Pid.remapSeparators))
-            ll = self._project.getObjectsByPartialId(className='NmrResidue', idStartsWith=partialId)
-            if ll:
-                raise ValueError("Existing %s clashes with id %s.%s.%s" %
-                                 (ll[0].longPid, self.shortName, sequenceCode, residueType or ''))
+        # Check the sequenceCode is not taken already
+        partialId = '%s.%s.' % (self._id, sequenceCode.translate(Pid.remapSeparators))
+        ll = self._project.getObjectsByPartialId(className='NmrResidue', idStartsWith=partialId)
+        if ll:
+            raise ValueError("Existing %s clashes with id %s.%s.%s" %
+                             (ll[0].longPid, self.shortName, sequenceCode, residueType or ''))
 
-            # Handle reserved names
-            if sequenceCode[0] == '@' and sequenceCode[1:].isdigit():
-                # this is a reserved name
-                serial = int(sequenceCode[1:])
-                if nmrProject.findFirstResonanceGroup(serial=serial) is None:
-                    # The implied serial is free - we can set it
-                    sequenceCode = None
-                else:
-                    # Name clashes with existing NmrResidue
-                    tempSerial = nmrProject.findFirstResonanceGroup(serial=serial)  # ejb - error here
-                    raise ValueError("Cannot create NmrResidue with reserved name %s" % sequenceCode)
+        # Handle reserved names
+        if sequenceCode[0] == '@' and sequenceCode[1:].isdigit():
+            # this is a reserved name
+            serial = int(sequenceCode[1:])
+            if nmrProject.findFirstResonanceGroup(serial=serial) is None:
+                # The implied serial is free - we can set it
+                sequenceCode = None
+            else:
+                # Name clashes with existing NmrResidue
+                tempSerial = nmrProject.findFirstResonanceGroup(serial=serial)  # ejb - error here
+                raise ValueError("Cannot create NmrResidue with reserved name %s" % sequenceCode)
 
-        else:
-            # Just create new ResonanceGroup with default-type name
-            sequenceCode = None
+    else:
+        # Just create new ResonanceGroup with default-type name
+        sequenceCode = None
 
-        # Create ResonanceGroup
-        dd['sequenceCode'] = sequenceCode
-        obj = nmrProject.newResonanceGroup(**dd)
-        result = self._project._data2Obj.get(obj)
-        if serial is not None:
-            try:
-                result.resetSerial(serial)
-                # modelUtil.resetSerial(obj, serial, 'resonanceGroups')
-            except ValueError:
-                self.project._logger.warning(
-                        "Could not set sequenceCode of %s to %s - keeping default value"
-                        % (result, originalSequenceCode)
-                        )
+    # Create ResonanceGroup
+    dd['sequenceCode'] = sequenceCode
+    apiResonanceGroup = nmrProject.newResonanceGroup(**dd)
+    result = self._project._data2Obj.get(apiResonanceGroup)
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+            # modelUtil.resetSerial(obj, serial, 'resonanceGroups')
+        except ValueError:
+            self.project._logger.warning(
+                    "Could not set sequenceCode of %s to %s - keeping default value"
+                    % (result, originalSequenceCode)
+                    )
 
-        if residueType is not None:
-            # get chem comp ID strings from residue type
-            tt = self._project._residueName2chemCompId.get(residueType)
-            #tt = MoleculeQuery.fetchStdResNameMap(self._wrappedData.root).get(residueType)
-            if tt is not None:
-                obj.molType, obj.ccpCode = tt
-    except Exception as es:
-        getLogger().warning(str(es))
-    finally:
-        self._project.unblankNotification()
-        self._endCommandEchoBlock()
+    if residueType is not None:
+        # get chem comp ID strings from residue type
+        tt = self._project._residueName2chemCompId.get(residueType)
+        #tt = MoleculeQuery.fetchStdResNameMap(self._wrappedData.root).get(residueType)
+        if tt is not None:
+            apiResonanceGroup.molType, apiResonanceGroup.ccpCode = tt
 
-    # Do creation notifications
-    if result:
-        if serial is not None:
-            result._finaliseAction('rename')
-            # If we have reset serial above this is needed
-        result._finaliseAction('create')
+    # except Exception as es:
+    #     getLogger().warning(str(es))
+    # finally:
+    #     self._project.unblankNotification()
+    #     self._endCommandEchoBlock()
 
-        return result
+    # # Do creation notifications
+    # if result:
+    #     if serial is not None:
+    #         result._finaliseAction('rename')
+    #         # If we have reset serial above this is needed
+    #     result._finaliseAction('create')
+
+    if result is None:
+        raise RuntimeError('Unable to generate new NmrResidue item')
+
+    return result
 
 
+#=========================================================================================
+
+
+# new nmrResidue functions
+
+@newObject(NmrResidue)
 def _fetchNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None,
                      residueType: str = None) -> NmrResidue:
     """Fetch NmrResidue with sequenceCode=sequenceCode and residueType=residueType,
@@ -1465,53 +1330,55 @@ def _fetchNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None
     if sequenceCode is None will create a new NmrResidue
 
     if bool(residueType)  is False will return any existing NmrResidue that matches the sequenceCode
+
+    :param sequenceCode:
+    :param residueType:
+    :return: a new NmrResidue instance.
     """
-
-    defaults = collections.OrderedDict((('sequenceCode', None), ('residueType', None)))
-
-    self._startCommandEchoBlock('fetchNmrResidue', values=locals(), defaults=defaults,
-                                parName='newNmrResidue')
-    try:
-        if sequenceCode is None:
-            # Make new NmrResidue always
-            result = self.newNmrResidue(sequenceCode=None, residueType=residueType)
-        else:
-            # First see if we have the sequenceCode already
-            partialId = '%s.%s.' % (self._id, str(sequenceCode).translate(Pid.remapSeparators))
-            ll = self._project.getObjectsByPartialId(className='NmrResidue', idStartsWith=partialId)
-
-            if ll:
-                # there can never be more than one
-                result = ll[0]
-            else:
-                result = None
-
-            # Code below superseded as it was extremely slow
-            # # Should not be necessary, but it is an easy mistake to pass it as integer instead of string
-            # sequenceCode = str(sequenceCode)
-            #
-            # apiResult = self._wrappedData.findFirstResonanceGroup(sequenceCode=sequenceCode)
-            # result = apiResult and self._project._data2Obj[apiResult]
-
-            if result is None:
-                # NB - if this cannot be created we get the error from newNmrResidue
-                result = self.newNmrResidue(sequenceCode=sequenceCode, residueType=residueType)
-
-            else:
-                if residueType and result.residueType != residueType:
-                    # Residue types clash - error:
-                    raise ValueError(
-                            "Existing %s does not match residue type %s" % (result.longPid, repr(residueType))
-                            )
-
-                    # test - missing residueType when loading Nef file
-                    # result.residueType = residueType      # can't set attribute,so error when creating
-
-    except Exception as es:
-        getLogger().warning(str(es))
-    finally:
-        self._endCommandEchoBlock()
+    # defaults = collections.OrderedDict((('sequenceCode', None), ('residueType', None)))
     #
+    # self._startCommandEchoBlock('fetchNmrResidue', values=locals(), defaults=defaults,
+    #                             parName='newNmrResidue')
+    # try:
+
+    if sequenceCode is None:
+        # Make new NmrResidue always
+        result = self.newNmrResidue(sequenceCode=None, residueType=residueType)
+    else:
+        # First see if we have the sequenceCode already
+        partialId = '%s.%s.' % (self._id, str(sequenceCode).translate(Pid.remapSeparators))
+        partialObj = self._project.getObjectsByPartialId(className='NmrResidue', idStartsWith=partialId)
+
+        if partialObj:
+            # there can never be more than one
+            result = partialObj[0]
+        else:
+            result = None
+
+        # Code below superseded as it was extremely slow
+        # # Should not be necessary, but it is an easy mistake to pass it as integer instead of string
+        # sequenceCode = str(sequenceCode)
+        #
+        # apiResult = self._wrappedData.findFirstResonanceGroup(sequenceCode=sequenceCode)
+        # result = apiResult and self._project._data2Obj[apiResult]
+
+        if result is None:
+            # NB - if this cannot be created we get the error from newNmrResidue
+            result = self.newNmrResidue(sequenceCode=sequenceCode, residueType=residueType)
+
+        else:
+            if residueType and result.residueType != residueType:
+                # Residue types clash - error:
+                raise ValueError(
+                        "Existing %s does not match residue type %s" % (result.longPid, repr(residueType))
+                        )
+
+                # test - missing residueType when loading Nef file
+                # result.residueType = residueType      # can't set attribute,so error when creating
+
+    if result is None:
+        raise RuntimeError('Unable to generate new NmrResidue item')
+
     return result
 
 

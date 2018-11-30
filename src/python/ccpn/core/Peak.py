@@ -571,7 +571,7 @@ class Peak(AbstractWrapperObject):
 #=========================================================================================
 
 
-# newPeak functions
+# new Peak functions
 
 @newObject(Peak)
 def _newPeak(self: PeakList, height: float = None, volume: float = None,
@@ -602,7 +602,7 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
     :param lineWidths:
     :param serial:
 
-    :return peak instance
+    :return: a new Peak instance
     """
     #EJB 20181126: minor refactoring
 

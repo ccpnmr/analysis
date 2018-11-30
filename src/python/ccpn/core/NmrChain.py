@@ -38,6 +38,8 @@ from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrChain as ApiNmrChain
 from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.lib import Constants
+from ccpn.util.decorators import logCommand
+from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter
 
 
 class NmrChain(AbstractWrapperObject):
@@ -331,6 +333,12 @@ class NmrChain(AbstractWrapperObject):
     def _getAllWrappedData(cls, parent: Project) -> list:
         """get wrappedData (Nmr.NmrChains) for all NmrChain children of parent Project"""
         return parent._wrappedData.sortedNmrChains()
+
+
+    #===========================================================================================
+    # new'Object' and other methods
+    # Call appropriate routines in their respective locations
+    #===========================================================================================
 
 
 # GWV 20181122: moved to Chain class

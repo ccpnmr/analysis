@@ -75,8 +75,20 @@
 <dd></dd></dl>
 
 </div>
-<div class="section" id="module-ccpn.framework.lib.Pipe">
-<span id="ccpn-framework-lib-pipe-module"></span><h2>ccpn.framework.lib.Pipe module<a class="headerlink" href="#module-ccpn.framework.lib.Pipe" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="ccpn-framework-lib-pipe-module">
+<h2>ccpn.framework.lib.Pipe module<a class="headerlink" href="#ccpn-framework-lib-pipe-module" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-ccpn.framework.lib.Pipe"></span><dl class="class">
+<dt id="ccpn.framework.lib.Pipe.NumpyPipe">
+<em class="property">class </em><code class="descclassname">ccpn.framework.lib.Pipe.</code><code class="descname">NumpyPipe</code><span class="sig-paren">(</span><em>application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/lib/Pipe.html#NumpyPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.lib.Pipe.NumpyPipe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.framework.lib.Pipe.Pipe" title="ccpn.framework.lib.Pipe.Pipe"><code class="xref py py-class docutils literal"><span class="pre">ccpn.framework.lib.Pipe.Pipe</span></code></a></p>
+<p>A pipe where the run method accepts a numpy Array and returns a numpy Array</p>
+<dl class="method">
+<dt id="ccpn.framework.lib.Pipe.NumpyPipe.runPipe">
+<code class="descname">runPipe</code><span class="sig-paren">(</span><em>npArray: &lt;built-in function array&gt;</em><span class="sig-paren">)</span> &rarr; &lt;built-in function array&gt;<a class="reference internal" href="../_modules/ccpn/framework/lib/Pipe.html#NumpyPipe.runPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.lib.Pipe.NumpyPipe.runPipe" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="class">
 <dt id="ccpn.framework.lib.Pipe.PandasPipe">
 <em class="property">class </em><code class="descclassname">ccpn.framework.lib.Pipe.</code><code class="descname">PandasPipe</code><span class="sig-paren">(</span><em>application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/lib/Pipe.html#PandasPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.lib.Pipe.PandasPipe" title="Permalink to this definition">¶</a></dt>
@@ -140,7 +152,7 @@
 <p>A pipe where the run method accepts a list of spectra and returns a list of spectra</p>
 <dl class="method">
 <dt id="ccpn.framework.lib.Pipe.SpectraPipe.runPipe">
-<code class="descname">runPipe</code><span class="sig-paren">(</span><em>spectra</em><span class="sig-paren">)</span> &rarr; List[Spectrum]<a class="reference internal" href="../_modules/ccpn/framework/lib/Pipe.html#SpectraPipe.runPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.lib.Pipe.SpectraPipe.runPipe" title="Permalink to this definition">¶</a></dt>
+<code class="descname">runPipe</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/lib/Pipe.html#SpectraPipe.runPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.lib.Pipe.SpectraPipe.runPipe" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -151,10 +163,15 @@
 <p>Module Documentation here</p>
 <dl class="class">
 <dt id="ccpn.framework.lib.Pipeline.Pipeline">
-<em class="property">class </em><code class="descclassname">ccpn.framework.lib.Pipeline.</code><code class="descname">Pipeline</code><span class="sig-paren">(</span><em>application=None</em>, <em>pipelineName=None</em>, <em>pipes=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/lib/Pipeline.html#Pipeline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.lib.Pipeline.Pipeline" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.framework.lib.Pipeline.</code><code class="descname">Pipeline</code><span class="sig-paren">(</span><em>application</em>, <em>pipelineName=None</em>, <em>pipes=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/lib/Pipeline.html#Pipeline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.lib.Pipeline.Pipeline" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Pipeline class.
 To run insert the pipes in the queue.</p>
+<dl class="attribute">
+<dt id="ccpn.framework.lib.Pipeline.Pipeline.className">
+<code class="descname">className</code><em class="property"> = 'Pipeline'</em><a class="headerlink" href="#ccpn.framework.lib.Pipeline.Pipeline.className" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.framework.lib.Pipeline.Pipeline.pipes">
 <code class="descname">pipes</code><a class="headerlink" href="#ccpn.framework.lib.Pipeline.Pipeline.pipes" title="Permalink to this definition">¶</a></dt>
@@ -226,6 +243,11 @@ Iterable(Iterables(str, object)) : PulldownList where the object is passed inste
 <dd><p>- <em>None</em>, <em>immutable</em> -</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="ccpn.framework.lib.Plugin.Plugin.UiPlugin">
+<code class="descname">UiPlugin</code><em class="property"> = False</em><a class="headerlink" href="#ccpn.framework.lib.Plugin.Plugin.UiPlugin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="ccpn.framework.lib.Plugin.Plugin.cleanup">
 <code class="descname">cleanup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/lib/Plugin.html#Plugin.cleanup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.lib.Plugin.Plugin.cleanup" title="Permalink to this definition">¶</a></dt>
@@ -265,6 +287,12 @@ Iterable(Iterables(str, object)) : PulldownList where the object is passed inste
 <code class="descname">params</code><em class="property"> = None</em><a class="headerlink" href="#ccpn.framework.lib.Plugin.Plugin.params" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="classmethod">
+<dt id="ccpn.framework.lib.Plugin.Plugin.register">
+<em class="property">classmethod </em><code class="descname">register</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/lib/Plugin.html#Plugin.register"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.lib.Plugin.Plugin.register" title="Permalink to this definition">¶</a></dt>
+<dd><p>method to register the pipe in the loaded pipes to appear in the pipeline</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="ccpn.framework.lib.Plugin.Plugin.run">
 <code class="descname">run</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/lib/Plugin.html#Plugin.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.lib.Plugin.Plugin.run" title="Permalink to this definition">¶</a></dt>
@@ -274,6 +302,11 @@ Iterable(Iterables(str, object)) : PulldownList where the object is passed inste
 <dl class="attribute">
 <dt id="ccpn.framework.lib.Plugin.Plugin.settings">
 <code class="descname">settings</code><em class="property"> = None</em><a class="headerlink" href="#ccpn.framework.lib.Plugin.Plugin.settings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.framework.lib.Plugin.Plugin.widgetsState">
+<code class="descname">widgetsState</code><em class="property"> = None</em><a class="headerlink" href="#ccpn.framework.lib.Plugin.Plugin.widgetsState" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -305,7 +338,7 @@ Iterable(Iterables(str, object)) : PulldownList where the object is passed inste
 <li><a class="reference internal" href="#">ccpn.framework.lib package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-ccpn.framework.lib.ExtensionLoader">ccpn.framework.lib.ExtensionLoader module</a></li>
-<li><a class="reference internal" href="#module-ccpn.framework.lib.Pipe">ccpn.framework.lib.Pipe module</a></li>
+<li><a class="reference internal" href="#ccpn-framework-lib-pipe-module">ccpn.framework.lib.Pipe module</a></li>
 <li><a class="reference internal" href="#module-ccpn.framework.lib.Pipeline">ccpn.framework.lib.Pipeline module</a></li>
 <li><a class="reference internal" href="#module-ccpn.framework.lib.Plugin">ccpn.framework.lib.Plugin module</a></li>
 <li><a class="reference internal" href="#module-ccpn.framework.lib.SvnRevision">ccpn.framework.lib.SvnRevision module</a></li>

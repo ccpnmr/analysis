@@ -299,6 +299,7 @@ class Framework:
             self.preferences.general.colourScheme = 'dark'
         elif self.args.lightColourScheme:
             self.preferences.general.colourScheme = 'light'
+        self._storedState = None
 
         self._registrationDict = {}
         self._setLanguage()
@@ -773,9 +774,10 @@ class Framework:
             # set undo step
             undo.newWaypoint()  # DO NOT CHANGE
 
+            # _blockedSideBar is a project override
             if not self.project._blockSideBar and not undo._blocked:
                 if undo._waypointBlockingLevel < 1 and self.ui and self.ui.mainWindow:
-                    self._storedState = self.ui.mainWindow.sideBar._saveExpandedState()
+                    self.ui.mainWindow.sideBar._saveExpandedState()
 
             undo.increaseWaypointBlocking()
 
@@ -821,7 +823,7 @@ class Framework:
 
             if not self.project._blockSideBar and not undo._blocked:
                 if undo._waypointBlockingLevel < 1 and self.ui and self.ui.mainWindow:
-                    self.ui.mainWindow.sideBar._restoreExpandedState(self._storedState)
+                    self.ui.mainWindow.sideBar._restoreExpandedState()
 
         # if self._echoBlocking > 0:
         #   # If statement should always be True, but to avoid weird behaviour in error situations we check
@@ -1680,9 +1682,9 @@ class Framework:
     #             self.ui.echoCommands(['application.undo()'])
     #             self._echoBlocking += 1
     #
-    #             expandedState = self.ui.mainWindow.sideBar._saveExpandedState()
+    #             self.ui.mainWindow.sideBar._saveExpandedState()
     #             self.project._undo.undo()
-    #             self.ui.mainWindow.sideBar._restoreExpandedState(expandedState)
+    #             self.ui.mainWindow.sideBar._restoreExpandedState()
     #
     #             # TODO:ED this is a hack until guiNotifiers are working
     #             try:
@@ -1700,9 +1702,9 @@ class Framework:
     #             self.ui.echoCommands(['application.redo()'])
     #             self._echoBlocking += 1
     #
-    #             expandedState = self.ui.mainWindow.sideBar._saveExpandedState()
+    #             self.ui.mainWindow.sideBar._saveExpandedState()
     #             self.project._undo.redo()
-    #             self.ui.mainWindow.sideBar._restoreExpandedState(expandedState)
+    #             self.ui.mainWindow.sideBar._restoreExpandedState()
     #
     #             # TODO:ED this is a hack until guiNotifiers are working
     #             try:

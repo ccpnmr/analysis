@@ -1,4 +1,5 @@
 """
+Module documentation here
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -65,12 +66,8 @@ class NmrResidue(AbstractWrapperObject):
     NmrResidue objects behave in there different ways when sorted:
 
       - If they are assigned to a Residue they sort like the Residue, in sequential order
-
-      - If they belong to a connected NmrChain, they sort by the order they appear in the
-      NmrChain.
-
+      - If they belong to a connected NmrChain, they sort by the order they appear in the NmrChain.
       - In other 4cases they sort by creation order.
-
       - Offset NmrResidues in all cases sort alongside their main NmrResidue, by offset.
 
     """

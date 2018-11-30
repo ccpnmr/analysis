@@ -1560,10 +1560,12 @@ class Spectrum(AbstractWrapperObject):
         return values
 
     def getByAxisCodes(self, attributeName: str, axisCodes: Sequence[str] = None, exactMatch: bool = False):
-        """Return values defined by attributeName in order defined by axisCodes :
-           (default order if None)
-            perform a mapping if exactMatch=False (eg. 'H' to 'Hn')
-           NB: Use getByDimensions for dimensions (1..dimensionCount) based access
+        """Return values defined by attributeName in order defined by axisCodes:
+        (default order if None).
+
+        Perform a mapping if exactMatch=False (eg. 'H' to 'Hn')
+
+        NB: Use getByDimensions for dimensions (1..dimensionCount) based access
         """
         if not hasattr(self, attributeName):
             raise AttributeError('Spectrum object does not have attribute "%s"' % attributeName)
@@ -1578,10 +1580,12 @@ class Spectrum(AbstractWrapperObject):
         return values
 
     def setByAxisCodes(self, attributeName: str, values: Sequence, axisCodes: Sequence[str] = None, exactMatch: bool = False):
-        """Set attributeName to values in order defined by axisCodes
-           (default order if None)
-            perform a mapping if exactMatch=False (eg. 'H' to 'Hn')
-           NB: Use setByDimensions for dimensions (1..dimensionCount) based access
+        """Set attributeName to values in order defined by axisCodes:
+        (default order if None)
+
+        Perform a mapping if exactMatch=False (eg. 'H' to 'Hn')
+
+        NB: Use setByDimensions for dimensions (1..dimensionCount) based access
         """
         if not hasattr(self, attributeName):
             raise AttributeError('Spectrum object does not have attribute "%s"' % attributeName)
@@ -1731,7 +1735,9 @@ class Spectrum(AbstractWrapperObject):
                     textColour: str = None, **kwds):
         """Create new empty PeakList within Spectrum
 
-        See the PeakList class for details
+        See the PeakList class for details.
+
+        Optional keyword arguments can be passed in; see PeakList._newPeakList for details.
 
         :param title:
         :param comment:
@@ -1739,9 +1745,7 @@ class Spectrum(AbstractWrapperObject):
         :param symbolStyle:
         :param symbolColour:
         :param textColour:
-        :return a new PeakList attached to the spectrum.
-
-        optional keyword arguments can be passed in; see PeakList._newPeakList for details.
+        :return: a new PeakList attached to the spectrum.
         """
         from ccpn.core.PeakList import _newPeakList
 
@@ -1754,16 +1758,16 @@ class Spectrum(AbstractWrapperObject):
                          textColour: str = None, comment: str = None, **kwds):
         """Create new IntegralList within Spectrum.
 
-        See the IntegralList class for details
+        See the IntegralList class for details.
+
+        Optional keyword arguments can be passed in; see IntegralList._newIntegralList for details.
 
         :param self:
         :param title:
         :param symbolColour:
         :param textColour:
         :param comment:
-        :return a new IntegralList attached to the spectrum.
-
-        optional keyword arguments can be passed in; see IntegralList._newIntegralList for details.
+        :return: a new IntegralList attached to the spectrum.
         """
         from ccpn.core.IntegralList import _newIntegralList
 
@@ -1778,7 +1782,9 @@ class Spectrum(AbstractWrapperObject):
                           comment: str = None, multiplets: ['Multiplet'] = None, **kwds):
         """Create new MultipletList within Spectrum
 
-        See the MultipletList class for details
+        See the MultipletList class for details.
+
+        Optional keyword arguments can be passed in; see MultipletList._newMultipletList for details.
 
         :param self:
         :param title:
@@ -1788,9 +1794,7 @@ class Spectrum(AbstractWrapperObject):
         :param multipletAveraging:
         :param comment:
         :param multiplets:
-        :return a new MultipletList attached to the Spectrum.
-
-        optional keyword arguments can be passed in; see MultipletList._newMultipletList for details.
+        :return: a new MultipletList attached to the Spectrum.
         """
         from ccpn.core.MultipletList import _newMultipletList
 

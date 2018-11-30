@@ -17,4 +17,12 @@ ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule module
     :undoc-members:
     :show-inheritance:
 
+ccpn.AnalysisMetabolomics.ui.gui.modules.MetaboliteFinder module
+----------------------------------------------------------------
+
+.. automodule:: ccpn.AnalysisMetabolomics.ui.gui.modules.MetaboliteFinder
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 

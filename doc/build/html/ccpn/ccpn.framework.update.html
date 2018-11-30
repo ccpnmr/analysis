@@ -65,11 +65,16 @@
 <span id="ccpn-framework-update-updateagent-module"></span><h2>ccpn.framework.update.UpdateAgent module<a class="headerlink" href="#module-ccpn.framework.update.UpdateAgent" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="ccpn.framework.update.UpdateAgent.UpdateAgent">
-<em class="property">class </em><code class="descclassname">ccpn.framework.update.UpdateAgent.</code><code class="descname">UpdateAgent</code><span class="sig-paren">(</span><em>version</em>, <em>showError=None</em>, <em>showInfo=None</em>, <em>askPassword=None</em>, <em>serverUser=None</em>, <em>server='http://www2.ccpn.ac.uk/'</em>, <em>serverDbRoot='ccpNmrUpdate'</em>, <em>serverDbFile='__UpdateData.db'</em>, <em>serverDownloadScript='cgi-bin/update/downloadFile'</em>, <em>serverUploadScript='cgi-bin/updateadmin/uploadFile'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdateAgent.html#UpdateAgent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdateAgent.UpdateAgent" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.framework.update.UpdateAgent.</code><code class="descname">UpdateAgent</code><a class="reference internal" href="../_modules/ccpn/framework/update/UpdateAgent.html#UpdateAgent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdateAgent.UpdateAgent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <dl class="method">
 <dt id="ccpn.framework.update.UpdateAgent.UpdateAgent.addFiles">
 <code class="descname">addFiles</code><span class="sig-paren">(</span><em>filePaths</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdateAgent.html#UpdateAgent.addFiles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdateAgent.UpdateAgent.addFiles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.framework.update.UpdateAgent.UpdateAgent.checkNumberUpdates">
+<code class="descname">checkNumberUpdates</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdateAgent.html#UpdateAgent.checkNumberUpdates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdateAgent.UpdateAgent.checkNumberUpdates" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -148,7 +153,8 @@
 <dl class="function">
 <dt id="ccpn.framework.update.UpdateAgent.downloadFile">
 <code class="descclassname">ccpn.framework.update.UpdateAgent.</code><code class="descname">downloadFile</code><span class="sig-paren">(</span><em>serverScript</em>, <em>serverDbRoot</em>, <em>fileName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdateAgent.html#downloadFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdateAgent.downloadFile" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Download a file from the server</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="ccpn.framework.update.UpdateAgent.lastModifiedTime">
@@ -158,24 +164,34 @@
 <dl class="function">
 <dt id="ccpn.framework.update.UpdateAgent.uploadData">
 <code class="descclassname">ccpn.framework.update.UpdateAgent.</code><code class="descname">uploadData</code><span class="sig-paren">(</span><em>serverUser</em>, <em>serverPassword</em>, <em>serverScript</em>, <em>fileData</em>, <em>serverDbRoot</em>, <em>fileStoredAs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdateAgent.html#uploadData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdateAgent.uploadData" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Upload a file to the server</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="ccpn.framework.update.UpdateAgent.uploadFile">
 <code class="descclassname">ccpn.framework.update.UpdateAgent.</code><code class="descname">uploadFile</code><span class="sig-paren">(</span><em>serverUser</em>, <em>serverPassword</em>, <em>serverScript</em>, <em>fileName</em>, <em>serverDbRoot</em>, <em>fileStoredAs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdateAgent.html#uploadFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdateAgent.uploadFile" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Upload a file to the server</p>
+</dd></dl>
 
 </div>
 <div class="section" id="module-ccpn.framework.update.UpdatePopup">
 <span id="ccpn-framework-update-updatepopup-module"></span><h2>ccpn.framework.update.UpdatePopup module<a class="headerlink" href="#module-ccpn.framework.update.UpdatePopup" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation Here</p>
 <dl class="class">
 <dt id="ccpn.framework.update.UpdatePopup.UpdatePopup">
-<em class="property">class </em><code class="descclassname">ccpn.framework.update.UpdatePopup.</code><code class="descname">UpdatePopup</code><span class="sig-paren">(</span><em>parent=None</em>, <em>title='Update CCPN code'</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdatePopup.html#UpdatePopup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdatePopup.UpdatePopup" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.Dialog.CcpnDialog" title="ccpn.ui.gui.popups.Dialog.CcpnDialog"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.popups.Dialog.CcpnDialog</span></code></a>, <a class="reference internal" href="#ccpn.framework.update.UpdateAgent.UpdateAgent" title="ccpn.framework.update.UpdateAgent.UpdateAgent"><code class="xref py py-class docutils literal"><span class="pre">ccpn.framework.update.UpdateAgent.UpdateAgent</span></code></a></p>
+<em class="property">class </em><code class="descclassname">ccpn.framework.update.UpdatePopup.</code><code class="descname">UpdatePopup</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>title='Update CCPN code'</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdatePopup.html#UpdatePopup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdatePopup.UpdatePopup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.Dialog.CcpnDialog" title="ccpn.ui.gui.popups.Dialog.CcpnDialog"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.popups.Dialog.CcpnDialog</span></code></a>, <a class="reference internal" href="ccpn.util.html#ccpn.util.Update.UpdateAgent" title="ccpn.util.Update.UpdateAgent"><code class="xref py py-class docutils literal"><span class="pre">ccpn.util.Update.UpdateAgent</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.framework.update.UpdatePopup.UpdatePopup.reject">
+<code class="descname">reject</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdatePopup.html#UpdatePopup.reject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdatePopup.UpdatePopup.reject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dialog-frame close button has been clicked, close if files have been updated or close dialog</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="ccpn.framework.update.UpdatePopup.UpdatePopup.resetFromServer">
 <code class="descname">resetFromServer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdatePopup.html#UpdatePopup.resetFromServer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdatePopup.UpdatePopup.resetFromServer" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get current number of updates from the server</p>
+</dd></dl>
 
 </dd></dl>
 

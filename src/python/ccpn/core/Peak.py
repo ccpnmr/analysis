@@ -29,7 +29,7 @@ import collections
 import operator
 from typing import Optional, Tuple, Union, Sequence, TypeVar, Any
 
-from ccpn.util import Undo
+from ccpn.core.lib import Undo
 from ccpn.util import Common as commonUtil
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project

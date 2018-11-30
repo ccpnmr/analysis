@@ -104,6 +104,22 @@ ccpn.core.Model module
     :undoc-members:
     :show-inheritance:
 
+ccpn.core.Multiplet module
+--------------------------
+
+.. automodule:: ccpn.core.Multiplet
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.core.MultipletList module
+------------------------------
+
+.. automodule:: ccpn.core.MultipletList
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.core.NmrAtom module
 ------------------------
 
@@ -140,6 +156,14 @@ ccpn.core.Peak module
 ---------------------
 
 .. automodule:: ccpn.core.Peak
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.core.PeakCluster module
+----------------------------
+
+.. automodule:: ccpn.core.PeakCluster
     :members:
     :undoc-members:
     :show-inheritance:

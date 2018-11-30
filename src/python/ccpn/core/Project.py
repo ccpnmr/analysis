@@ -35,7 +35,7 @@ from time import time
 from ccpn.util.Common import _traverse, _getChildren
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
-from ccpn.util import Undo
+from ccpn.core.lib import Undo
 from ccpn.util import Logging
 from ccpn.util.ExcelReader import ExcelReader
 from ccpn.util.nef.GenericStarParser import DataBlock
@@ -81,8 +81,9 @@ class Project(AbstractWrapperObject):
     There are eleven top-level data objects directly within a project, of which seven have child
     objects of their own, namely Spectrum, Sample, Chain, NmrChain, ChemicalShiftList, DataSet
     and StructureEnsemble. The child data objects are organised in a logical hierarchy; for example,
-    a Spectrum has PeakLists, which in turn, are made up of Peaks, whereas a Chain is made up of
-    -Residues, which are made up of Atoms. """
+    a Spectrum has PeakLists, which in turn, are made up of Peaks, whereas a Chain is made up of Residues,
+    which are made up of Atoms.
+    """
 
     #: Short class name, for PID.
     shortClassName = 'PR'

@@ -28,7 +28,7 @@ import itertools
 import collections
 import operator
 
-from ccpn.util import Undo
+from ccpn.core.lib import Undo
 from ccpn.util import Common as commonUtil
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
@@ -335,18 +335,18 @@ class Multiplet(AbstractWrapperObject):
     # Implementation functions
     #=========================================================================================
 
-    from ccpnmodel.ccpncore.api.memops import Implementation as ApiImplementation
-
-    def __init__(self, project: 'Project', wrappedData: ApiImplementation.DataObject):
-        super().__init__(project, wrappedData)
-
-        # attach a notifier to the peaks
-        from ccpn.core.lib.Notifiers import Notifier
-
-        for pp in self.peaks:
-            Notifier(pp, ['observe'], Notifier.ANY,
-                     callback=self._propagateAction,
-                     onceOnly=True, debug=True)
+    # from ccpnmodel.ccpncore.api.memops import Implementation as ApiImplementation
+    #
+    # def __init__(self, project: 'Project', wrappedData: ApiImplementation.DataObject):
+    #     super().__init__(project, wrappedData)
+    #
+    #     # attach a notifier to the peaks
+    #     from ccpn.core.lib.Notifiers import Notifier
+    #
+    #     for pp in self.peaks:
+    #         Notifier(pp, ['observe'], Notifier.ANY,
+    #                  callback=self._propagateAction,
+    #                  onceOnly=True, debug=True)
 
     @classmethod
     def _getAllWrappedData(cls, parent: MultipletList) -> Tuple[apiMultiplet, ...]:
@@ -510,7 +510,7 @@ def _newMultiplet(self: MultipletList,
 # EJB 20181128: removed, to be added to multiplet __init__?
 # Notify Multiplets when the contents of peaks have changed
 # i.e PeakDim references
-# Project._apiNotifiers.append(
-#         ('_notifyRelatedApiObject', {'pathToObject': 'peak.multiplets', 'action': 'change'},
-#          Nmr.PeakDim._metaclass.qualifiedName(), '')
-#         )
+Project._apiNotifiers.append(
+        ('_notifyRelatedApiObject', {'pathToObject': 'peak.multiplets', 'action': 'change'},
+         Nmr.PeakDim._metaclass.qualifiedName(), '')
+        )

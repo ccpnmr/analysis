@@ -217,20 +217,13 @@ ChemicalShift objects sort as the NmrAtom they belong to.
 NmrResidue objects behave in there different ways:
 
   - If they are assigned to a Residue they sort like the Residue, in sequential order
-
-  - If they belong to a connected NmrChain, they sort by the order they appear in the
-  NmrChain.
-
+  - If they belong to a connected NmrChain, they sort by the order they appear in the NmrChain.
   - In other 4cases they sort by creation order.
-
   - Offset NmrResidues in all cases sort alongside their main NmrResidue, by offset.
 
 """
 
-
-
 # Previous documentation with links to top level functions. Kept here to serve as example
-
 
 
 # All data are organised in Projects. The standard ways of starting a project are:
@@ -267,7 +260,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -295,13 +288,13 @@ import collections
 # NB this list will be added to from other modules that also add to _coreClassMap
 # in practice ccpn.ui.gui.Gui
 _coreImportOrder = (
-  'Project',  'Spectrum',  'SpectrumReference',  'SpectrumGroup',  'PeakList',  'Peak',
-  'IntegralList',  'Integral',  'PseudoDimension',  'SpectrumHit',  'Sample',  'SampleComponent',
-  'Substance',  'Chain',  'Residue', 'Atom',  'Complex', 'NmrChain',  'NmrResidue',  'NmrAtom',
-  'ChemicalShiftList',  'ChemicalShift',  'DataSet',  'RestraintList',  'Restraint',
-  'RestraintContribution',  'CalculationStep',  'Data',  'StructureEnsemble',  'Model', 'Note',
-  'PeakCluster',  'MultipletList',  'Multiplet'
-)
+    'Project', 'Spectrum', 'SpectrumReference', 'SpectrumGroup', 'PeakList', 'Peak',
+    'IntegralList', 'Integral', 'PseudoDimension', 'SpectrumHit', 'Sample', 'SampleComponent',
+    'Substance', 'Chain', 'Residue', 'Atom', 'Complex', 'NmrChain', 'NmrResidue', 'NmrAtom',
+    'ChemicalShiftList', 'ChemicalShift', 'DataSet', 'RestraintList', 'Restraint',
+    'RestraintContribution', 'CalculationStep', 'Data', 'StructureEnsemble', 'Model', 'Note',
+    'PeakCluster', 'MultipletList', 'Multiplet'
+    )
 
 # This list includes ui classes (added below)
 _importOrder = list(_coreImportOrder)
@@ -311,25 +304,27 @@ _coreClassMap = collections.OrderedDict()
 
 # Main data classes
 for className in _coreImportOrder:
-  cls = getattr(importlib.import_module('ccpn.core.%s' % className), className)
-  parentClass = cls._parentClass
-  if parentClass is not None:
-    if cls not in parentClass._childClasses:
-      # Should not be necessary to check, but apparently this code can be executed twice
-      parentClass._childClasses.append(cls)
-  _coreClassMap[className] = cls
+    cls = getattr(importlib.import_module('ccpn.core.%s' % className), className)
+    parentClass = cls._parentClass
+    if parentClass is not None:
+        if cls not in parentClass._childClasses:
+            # Should not be necessary to check, but apparently this code can be executed twice
+            parentClass._childClasses.append(cls)
+    _coreClassMap[className] = cls
 
 # Wrapped graphics data classes
 from ccpn.ui._implementation import _uiImportOrder
+
+
 _importOrder.extend(_uiImportOrder)
 for className in _uiImportOrder:
-  cls = getattr(importlib.import_module('ccpn.ui._implementation.%s' % className), className)
-  parentClass = cls._parentClass
-  if parentClass is not None:
-    if cls not in parentClass._childClasses:
-      # Should not be necessary to check, but apparently this code can be executed twice
-      parentClass._childClasses.append(cls)
-  _coreClassMap[className] = cls
+    cls = getattr(importlib.import_module('ccpn.ui._implementation.%s' % className), className)
+    parentClass = cls._parentClass
+    if parentClass is not None:
+        if cls not in parentClass._childClasses:
+            # Should not be necessary to check, but apparently this code can be executed twice
+            parentClass._childClasses.append(cls)
+    _coreClassMap[className] = cls
 
 # connect classes to project
 # NB - customisation for different UIs is done by inserting _factoryFunctions

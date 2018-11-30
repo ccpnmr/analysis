@@ -67,7 +67,7 @@
 <span id="ccpn-analysismetabolomics-ui-gui-modules-decompositionmodule-module"></span><h2>ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule module<a class="headerlink" href="#module-ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule.DecompositionModule">
-<em class="property">class </em><code class="descclassname">ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule.</code><code class="descname">DecompositionModule</code><span class="sig-paren">(</span><em>application</em>, <em>parent=None</em>, <em>interactor=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/ui/gui/modules/DecompositionModule.html#DecompositionModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule.DecompositionModule" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule.</code><code class="descname">DecompositionModule</code><span class="sig-paren">(</span><em>application</em>, <em>mainWindow</em>, <em>interactor=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/ui/gui/modules/DecompositionModule.html#DecompositionModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule.DecompositionModule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>The bridge between the Qt world and the python world.</p>
 <p>Ideally, there are no Qt or pyqtgrpah specific calls here.</p>
@@ -96,6 +96,11 @@
 <code class="descname">getSourceDataColors</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/ui/gui/modules/DecompositionModule.html#DecompositionModule.getSourceDataColors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule.DecompositionModule.getSourceDataColors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Should this move to the interactors???</p>
 </dd></dl>
+
+<dl class="method">
+<dt id="ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule.DecompositionModule.getSpectra">
+<code class="descname">getSpectra</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/ui/gui/modules/DecompositionModule.html#DecompositionModule.getSpectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule.DecompositionModule.getSpectra" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule.DecompositionModule.plot">
@@ -143,8 +148,42 @@
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule.DecompositionModule.setSpectrumGroups">
+<code class="descname">setSpectrumGroups</code><span class="sig-paren">(</span><em>spectrumGroups=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/ui/gui/modules/DecompositionModule.html#DecompositionModule.setSpectrumGroups"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule.DecompositionModule.setSpectrumGroups" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule.DecompositionModule.setupWidget">
 <code class="descname">setupWidget</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/ui/gui/modules/DecompositionModule.html#DecompositionModule.setupWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule.DecompositionModule.setupWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.AnalysisMetabolomics.ui.gui.modules.MetaboliteFinder">
+<span id="ccpn-analysismetabolomics-ui-gui-modules-metabolitefinder-module"></span><h2>ccpn.AnalysisMetabolomics.ui.gui.modules.MetaboliteFinder module<a class="headerlink" href="#module-ccpn.AnalysisMetabolomics.ui.gui.modules.MetaboliteFinder" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ccpn.AnalysisMetabolomics.ui.gui.modules.MetaboliteFinder.MetaboliteFinderModule">
+<em class="property">class </em><code class="descclassname">ccpn.AnalysisMetabolomics.ui.gui.modules.MetaboliteFinder.</code><code class="descname">MetaboliteFinderModule</code><span class="sig-paren">(</span><em>mainWindow</em>, <em>name='BMRB Metabolite Finder'</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/ui/gui/modules/MetaboliteFinder.html#MetaboliteFinderModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.ui.gui.modules.MetaboliteFinder.MetaboliteFinderModule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
+<dl class="attribute">
+<dt id="ccpn.AnalysisMetabolomics.ui.gui.modules.MetaboliteFinder.MetaboliteFinderModule.className">
+<code class="descname">className</code><em class="property"> = 'MetaboliteFinderModule'</em><a class="headerlink" href="#ccpn.AnalysisMetabolomics.ui.gui.modules.MetaboliteFinder.MetaboliteFinderModule.className" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.AnalysisMetabolomics.ui.gui.modules.MetaboliteFinder.MetaboliteFinderModule.includeSettingsWidget">
+<code class="descname">includeSettingsWidget</code><em class="property"> = False</em><a class="headerlink" href="#ccpn.AnalysisMetabolomics.ui.gui.modules.MetaboliteFinder.MetaboliteFinderModule.includeSettingsWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.AnalysisMetabolomics.ui.gui.modules.MetaboliteFinder.MetaboliteFinderModule.maxSettingsState">
+<code class="descname">maxSettingsState</code><em class="property"> = 2</em><a class="headerlink" href="#ccpn.AnalysisMetabolomics.ui.gui.modules.MetaboliteFinder.MetaboliteFinderModule.maxSettingsState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.AnalysisMetabolomics.ui.gui.modules.MetaboliteFinder.MetaboliteFinderModule.settingsPosition">
+<code class="descname">settingsPosition</code><em class="property"> = 'top'</em><a class="headerlink" href="#ccpn.AnalysisMetabolomics.ui.gui.modules.MetaboliteFinder.MetaboliteFinderModule.settingsPosition" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -163,6 +202,7 @@
 <li><a class="reference internal" href="#">ccpn.AnalysisMetabolomics.ui.gui.modules package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule">ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule module</a></li>
+<li><a class="reference internal" href="#module-ccpn.AnalysisMetabolomics.ui.gui.modules.MetaboliteFinder">ccpn.AnalysisMetabolomics.ui.gui.modules.MetaboliteFinder module</a></li>
 </ul>
 </li>
 </ul>

@@ -17,18 +17,26 @@ ccpn.AnalysisAssign.modules.AssignmentInspectorModule module
     :undoc-members:
     :show-inheritance:
 
-ccpn.AnalysisAssign.modules.AtomSelector module
------------------------------------------------
-
-.. automodule:: ccpn.AnalysisAssign.modules.AtomSelector
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ccpn.AnalysisAssign.modules.BackboneAssignmentModule module
 -----------------------------------------------------------
 
 .. automodule:: ccpn.AnalysisAssign.modules.BackboneAssignmentModule
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.AnalysisAssign.modules.NmrAtomAssigner module
+--------------------------------------------------
+
+.. automodule:: ccpn.AnalysisAssign.modules.NmrAtomAssigner
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.AnalysisAssign.modules.PeakAssigner module
+-----------------------------------------------
+
+.. automodule:: ccpn.AnalysisAssign.modules.PeakAssigner
     :members:
     :undoc-members:
     :show-inheritance:

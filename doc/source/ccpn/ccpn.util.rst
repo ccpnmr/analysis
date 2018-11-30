@@ -57,6 +57,14 @@ ccpn.util.Constants module
     :undoc-members:
     :show-inheritance:
 
+ccpn.util.ContextManagers module
+--------------------------------
+
+.. automodule:: ccpn.util.ContextManagers
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.util.ExcelReader module
 ----------------------------
 
@@ -85,6 +93,14 @@ ccpn.util.Hdf5 module
 ---------------------
 
 .. automodule:: ccpn.util.Hdf5
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.Layout module
+-----------------------
+
+.. automodule:: ccpn.util.Layout
     :members:
     :undoc-members:
     :show-inheritance:
@@ -149,6 +165,14 @@ ccpn.util.Register module
 -------------------------
 
 .. automodule:: ccpn.util.Register
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.Report module
+-----------------------
+
+.. automodule:: ccpn.util.Report
     :members:
     :undoc-members:
     :show-inheritance:
@@ -225,14 +249,6 @@ ccpn.util.Time module
     :undoc-members:
     :show-inheritance:
 
-ccpn.util.Undo module
----------------------
-
-.. automodule:: ccpn.util.Undo
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ccpn.util.Update module
 -----------------------
 
@@ -249,10 +265,42 @@ ccpn.util.Url module
     :undoc-members:
     :show-inheritance:
 
+ccpn.util.convertPaths module
+-----------------------------
+
+.. automodule:: ccpn.util.convertPaths
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.decorators module
+---------------------------
+
+.. automodule:: ccpn.util.decorators
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.floatUtils module
+---------------------------
+
+.. automodule:: ccpn.util.floatUtils
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.util.jsonIo module
 -----------------------
 
 .. automodule:: ccpn.util.jsonIo
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.pluginManager module
+------------------------------
+
+.. automodule:: ccpn.util.pluginManager
     :members:
     :undoc-members:
     :show-inheritance:

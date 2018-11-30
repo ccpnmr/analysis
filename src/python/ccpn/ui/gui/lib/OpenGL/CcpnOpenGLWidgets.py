@@ -310,7 +310,7 @@ class GLInfiniteLine(GLRegion):
 
 class GLExternalRegion(GLVertexArray):
     def __init__(self, project=None, GLContext=None, spectrumView=None, integralListView=None):
-        super(GLExternalRegion, self).__init__(renderMode=GLRENDERMODE_REBUILD, blendMode=True,
+        super().__init__(renderMode=GLRENDERMODE_REBUILD, blendMode=True,
                                                GLContext=GLContext, drawMode=GL.GL_QUADS,
                                                dimension=2)
         self.project = project
@@ -549,7 +549,7 @@ class GLExternalRegion(GLVertexArray):
 
 class GLIntegralRegion(GLExternalRegion):
     def __init__(self, project=None, GLContext=None, spectrumView=None, integralListView=None):
-        super(GLIntegralRegion, self).__init__(project=project, GLContext=GLContext,
+        super().__init__(project=project, GLContext=GLContext,
                                                spectrumView=spectrumView, integralListView=integralListView)
 
     def _addRegion(self, values=None, axisCode=None, orientation=None,

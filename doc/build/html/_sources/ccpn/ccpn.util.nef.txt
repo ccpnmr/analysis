@@ -9,22 +9,6 @@ ccpn.util.nef package
 Submodules
 ----------
 
-ccpn.util.nef.Ccpn module
--------------------------
-
-.. automodule:: ccpn.util.nef.Ccpn
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ccpn.util.nef.CingCcpn module
------------------------------
-
-.. automodule:: ccpn.util.nef.CingCcpn
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ccpn.util.nef.CompareNef module
 -------------------------------
 
@@ -33,10 +17,26 @@ ccpn.util.nef.CompareNef module
     :undoc-members:
     :show-inheritance:
 
+ccpn.util.nef.ErrorLog module
+-----------------------------
+
+.. automodule:: ccpn.util.nef.ErrorLog
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.util.nef.GenericStarParser module
 --------------------------------------
 
 .. automodule:: ccpn.util.nef.GenericStarParser
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.nef.NefImporter module
+--------------------------------
+
+.. automodule:: ccpn.util.nef.NefImporter
     :members:
     :undoc-members:
     :show-inheritance:
@@ -61,6 +61,14 @@ ccpn.util.nef.StarTokeniser module
 ----------------------------------
 
 .. automodule:: ccpn.util.nef.StarTokeniser
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.nef.Validator module
+------------------------------
+
+.. automodule:: ccpn.util.nef.Validator
     :members:
     :undoc-members:
     :show-inheritance:

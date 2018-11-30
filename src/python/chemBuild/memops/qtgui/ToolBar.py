@@ -4,11 +4,11 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 
 from .Base import Base
 
-class ToolBar(QtGui.QToolBar, Base):
+class ToolBar(QtWidgets.QToolBar, Base):
 
   def __init__(self, parent=None, **kw):
 
-    QtGui.QToolBar.__init__(self, parent)
+    QtWidgets.QToolBar.__init__(self, parent)
     Base.__init__(self, parent, **kw)
 
 if __name__ == '__main__':

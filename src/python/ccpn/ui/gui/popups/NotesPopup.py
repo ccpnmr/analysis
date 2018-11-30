@@ -29,7 +29,7 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
-from ccpn.util import Undo
+from ccpn.core.lib import Undo
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 class NotesPopup(CcpnDialog):

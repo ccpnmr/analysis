@@ -750,22 +750,20 @@ class PeakList(AbstractWrapperObject):
     @logCommand(get='self')
     def newPeak(self, ppmPositions: Sequence[float] = (), height: float = None,
                 comment: str = None, **kwds):
-        """Create a new Peak within a peakList
+        """Create a new Peak within a peakList.
 
-        See the Peak class for details
+        See the Peak class for details.
 
-        :param ppmPositions: peak position in ppm for each dimension (related attributes: positionError, pointPosition)
-        :param height: height of the peak (related attributes: volume, volumeError, lineWidths)
-        :param comment: optional comment string
-
-        :return peak instance
-
-        optional keyword arguments can be passed in; see Peak._newPeak for details.
+        Optional keyword arguments can be passed in; see Peak._newPeak for details.
 
         NB you must create the peak before you can assign it. The assignment attributes are:
         - assignments (assignedNmrAtoms) - A tuple of all (e.g.) assignment triplets for a 3D spectrum
         - assignmentsByDimensions (dimensionNmrAtoms) - A tuple of tuples of assignments, one for each dimension
 
+        :param ppmPositions: peak position in ppm for each dimension (related attributes: positionError, pointPosition)
+        :param height: height of the peak (related attributes: volume, volumeError, lineWidths)
+        :param comment: optional comment string
+        :return: a new Peak instance.
         """
         from ccpn.core.Peak import _newPeak  # imported here to avoid circular imports
 
@@ -797,7 +795,6 @@ def _newPeakList(self: Spectrum, title: str = None, comment: str = None,
     :return: a new PeakList attached to the spectrum.
     """
 
-    apiDataSource = self._apiDataSource
     dd = {'name': title, 'details': comment, 'isSimulated': isSimulated}
     if symbolColour:
         dd['symbolColour'] = symbolColour
@@ -806,6 +803,7 @@ def _newPeakList(self: Spectrum, title: str = None, comment: str = None,
     if textColour:
         dd['textColour'] = textColour
 
+    apiDataSource = self._apiDataSource
     apiPeakList = apiDataSource.newPeakList(**dd)
     result = self._project._data2Obj.get(apiPeakList)
     if result is None:

@@ -218,15 +218,15 @@ class MultipletList(AbstractWrapperObject):
 
     @logCommand(get='self')
     def newMultiplet(self, peaks: ['Peak'] = (), comment: str = None, **kwds):
-        """Create a new Multiplet within a multipletList
+        """Create a new Multiplet within a multipletList.
+
+        See the Multiplet class for details.
+
+        Optional keyword arguments can be passed in; see Multiplet._newMultiplet for details.
 
         :param peaks: list of peaks as objects, or pids
         :param comment: optional comment string
-
-        :return: new multiplet instance.
-
-        optional keyword arguments can be passed in; see Multiplet._newMultiplet for details.
-
+        :return: a new Multiplet instance.
         """
         from ccpn.core.Multiplet import _newMultiplet     # imported here to avoid circular imports
 
@@ -265,8 +265,8 @@ def _newMultipletList(self: Spectrum, title: str = None,
     if multiplets:
         dd['multiplets'] = multiplets
 
-    apiParent = self._apiDataSource
-    apiMultipletList = apiParent.newMultipletList(**dd)
+    apiDataSource = self._apiDataSource
+    apiMultipletList = apiDataSource.newMultipletList(**dd)
     result = self._project._data2Obj.get(apiMultipletList)
     if result is None:
         raise RuntimeError('Unable to generate new MultipletList item')

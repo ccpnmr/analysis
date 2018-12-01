@@ -294,11 +294,11 @@ class GuiMultipletListView(QtWidgets.QGraphicsItem):
         #     self.setVisible(False)
 
         # attach a notifier to the peaks
-        from ccpn.core.lib.Notifiers import Notifier
+        # from ccpn.core.lib.Notifiers import Notifier
 
-        Notifier(self.multipletList, ['observe'], Notifier.ANY,
-                 callback=self._propagateAction,
-                 onceOnly=True, debug=True)
+        # Notifier(self.multipletList, ['observe'], Notifier.ANY,
+        #          callback=self._propagateAction,
+        #          onceOnly=True, debug=True)
 
 
     # def _printToFile(self, printer):

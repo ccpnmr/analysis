@@ -721,7 +721,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 indices = spectrumView.spectrum.getByAxisCodes('indices', self.strip.axisCodes[0:2],
                                                                exactMatch=(self._preferences.matchAxisCode == 1))
         else:
-            indices = (0,)              # spectrumView.spectrum.getByAxisCodes('indices', self.strip.axisCodes)
+            indices = (0,)  # spectrumView.spectrum.getByAxisCodes('indices', self.strip.axisCodes)
 
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX] = indices
 
@@ -2126,7 +2126,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # draw the spectra, need to reset the viewport
         self.viewports.setViewport(self._currentView)
-        self.drawSpectra()
+        self.drawSpectra(currentShader)
 
         if not self._stackingMode:
             self._GLPeaks.drawSymbols(self._spectrumSettings)
@@ -2289,7 +2289,7 @@ class CcpnGLWidget(QOpenGLWidget):
         if rebuildFlag:
             self.rebuildTraces()
 
-    def drawSpectra(self):
+    def drawSpectra(self, currentShader):
         if self.strip.isDeleted:
             return
 
@@ -2308,10 +2308,10 @@ class CcpnGLWidget(QOpenGLWidget):
                 if spectrumView.spectrum.dimensionCount > 1:
                     if spectrumView in self._spectrumSettings.keys():
                         # set correct transform when drawing this contour
-                        self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
-                                                                            1, GL.GL_FALSE,
-                                                                            self._spectrumSettings[spectrumView][
-                                                                                GLDefs.SPECTRUM_MATRIX])
+                        currentShader.setGLUniformMatrix4fv('mvMatrix',
+                                                            1, GL.GL_FALSE,
+                                                            self._spectrumSettings[spectrumView][
+                                                                GLDefs.SPECTRUM_MATRIX])
 
                         # draw the spectrum - call the existing glCallList
                         # spectrumView._paintContoursNoClip()
@@ -2328,10 +2328,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
                         if self._stackingMode:
                             # use the stacking matrix to offset the 1D spectra
-                            self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
-                                                                                1, GL.GL_FALSE,
-                                                                                self._spectrumSettings[spectrumView][
-                                                                                    GLDefs.SPECTRUM_STACKEDMATRIX])
+                            currentShader.setGLUniformMatrix4fv('mvMatrix',
+                                                                1, GL.GL_FALSE,
+                                                                self._spectrumSettings[spectrumView][
+                                                                    GLDefs.SPECTRUM_STACKEDMATRIX])
 
                         # self._contourList[spectrumView].drawVertexColor()
                         self._contourList[spectrumView].drawVertexColorVBO(enableVBO=True)
@@ -2344,7 +2344,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 #   self._makeSpectrumArray(spectrumView, self._testSpectrum)
 
         # set transform back to identity - ensures only the pMatrix is applied
-        self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
+        currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
 
         # draw the bounding boxes
         GL.glEnable(GL.GL_BLEND)

@@ -768,7 +768,7 @@ def deleteObject():
                 if hasattr(self, CURRENT_ATTRIBUTE_NAME):
                     storeObj = _ObjectStore(self)
 
-                    # store the current state - check because current is already empty
+                    # store the current state - check because item already removed from current?
                     storeObj._storeCurrentSelectedObject()
 
                     # add it to the stack

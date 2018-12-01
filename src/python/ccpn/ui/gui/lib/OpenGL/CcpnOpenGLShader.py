@@ -117,8 +117,12 @@ class ShaderProgram(object):
 
     def setGLUniformMatrix4fv(self, uniformLocation=None, count=1, transpose=GL.GL_FALSE, value=None):
         if uniformLocation in self.uniformLocations:
-            GL.glUniformMatrix4fv(self.uniformLocations[uniformLocation],
-                                   count, transpose, value)
+            try:
+                GL.glUniformMatrix4fv(self.uniformLocations[uniformLocation],
+                                       count, transpose, value)
+            except Exception as es:
+                pass
+
         else:
             raise RuntimeError('Error setting setGLUniformMatrix4fv: %s' % uniformLocation)
 

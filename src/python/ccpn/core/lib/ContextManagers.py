@@ -767,8 +767,13 @@ def deleteObject():
 
                 if hasattr(self, CURRENT_ATTRIBUTE_NAME):
                     storeObj = _ObjectStore(self)
-                    addUndoItem(undo=storeObj._storeCurrentSelectedObject,
-                                redo=storeObj._restoreCurrentSelectedObject
+
+                    # store the current state - check because current is already empty
+                    storeObj._storeCurrentSelectedObject()
+
+                    # add it to the stack
+                    addUndoItem(undo=storeObj._restoreCurrentSelectedObject,
+                                redo=storeObj._storeCurrentSelectedObject
                                 )
 
                 # retrieve list of created items from the api

@@ -798,7 +798,7 @@ class Framework:
             if not quiet:
                 self.ui.echoCommands(commands)
 
-        self._echoBlocking += 1
+        self._increaseNotificationBlocking()
         getLogger().debug('command=%s, echoBlocking=%s, undo.blocking=%s'
                           % (command, self._echoBlocking, undo.blocking))
 
@@ -811,8 +811,9 @@ class Framework:
         getLogger().debug('echoBlocking=%s' % self._echoBlocking)
         undo = self.project._undo
 
-        if self._echoBlocking > 0:
-            self._echoBlocking -= 1
+        # if self._echoBlocking > 0:
+        #     self._echoBlocking -= 1
+        self._decreaseNotificationBlocking()
 
         if not self._echoBlocking:
             self.project.resumeNotification()

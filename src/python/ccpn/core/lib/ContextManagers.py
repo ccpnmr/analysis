@@ -242,7 +242,6 @@ def undoBlock(application=None):
 # #=========================================================================================
 
 from contextlib import contextmanager
-# from sandbox.Geerten.Refactored.logger import getLogger
 from ccpn.util.Logging import getLogger
 
 
@@ -341,7 +340,7 @@ def logCommandBlock(prefix='', get=None, isProperty=False, showArguments=[], log
     application = getApplication()
 
     def log(funcName, *args, **kwargs):  # remember _undoBlocked, as first parameter
-        if logger._loggingCommandBlock > 1:  # or _undoBlocked:
+        if application._echoBlocking > 1:  # already increased before entry
             return
 
         # get the caller from the getframe stack
@@ -351,7 +350,7 @@ def logCommandBlock(prefix='', get=None, isProperty=False, showArguments=[], log
 
         # make a list for modifying the log string with more readable labels
         checkList = [(application, 'application.'),
-                     (application.mainWindow, 'mainWindow.'),
+                     (application.ui.mainWindow, 'mainWindow.'),
                      (application.project, 'project.'),
                      (application.current, 'current.')]
         for obj, label in checkList:
@@ -398,11 +397,12 @@ def logCommandBlock(prefix='', get=None, isProperty=False, showArguments=[], log
             logs = logs.rstrip(', ')
             logs += ')'
 
-        logger.log(logs)
+        # logger.log(logs)
+        logger.info(logs)
 
     # log commands to the registered outputs
     logger = getLogger()
-    logger._loggingCommandBlock += 1
+    application._increaseNotificationBlocking()
 
     try:
         if logCommandOnly:
@@ -418,7 +418,7 @@ def logCommandBlock(prefix='', get=None, isProperty=False, showArguments=[], log
 
     finally:
         # clean up log command block
-        logger._loggingCommandBlock -= 1
+        application._decreaseNotificationBlocking()
 
 
 @contextmanager

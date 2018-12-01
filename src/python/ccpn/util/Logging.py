@@ -64,8 +64,10 @@ def getLogger():
   global logger, defaultLogger
 
   if not logger:
+    defaultLogger._loggingCommandBlock = 0
     return defaultLogger
 
+  logger._loggingCommandBlock = 0
   return logger
 
 def _debugGLError(logger, msg, *args, **kwargs):

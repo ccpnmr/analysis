@@ -532,30 +532,39 @@ class AbstractWrapperObject(NotifierBase):
         # NBNB some child classes must override this function
         self._wrappedData.delete()
 
-    def getByPid(self, pidstring: str):
+    def getByPid(self, pid: str):
         """Get an arbitrary data object from either its pid (e.g. 'SP:HSQC2') or its longPid
-        (e.g. 'Spectrum:HSQC2'
+        (e.g. 'Spectrum:HSQC2')
 
         Returns None for invalid or unrecognised input strings.
         """
-        #TODO:RASMUS: Raise exception when this is a deleted project
-        if pidstring is None:
+        if pid is None or len(pid) is None:
             return None
 
-        tt = pidstring.split(Pid.PREFIXSEP, 1)
-        if len(tt) == 2:
-            if tt[0] in ('GM', 'Mark', 'GA', 'Axis', 'GO', 'Module', 'GS', 'Strip',
-                         'GL', 'PeakListView', 'GI', 'IntegralListView', 'GU', 'MultipletListView',
-                         'GD', 'SpectrumDisplay', 'GW', 'Window',
-                         'GV', 'SpectrumView', 'GT', 'Task'):
-                from warnings import warn
-                warn('ui.getByGid should be used for getting graphics ({})'.format(pidstring),
-                     category=DeprecationWarning)
-            dd = self._project._pid2Obj.get(tt[0])
-            if dd:
-                return dd.get(tt[1])
-        #
-        return None
+        obj = None
+        pid = Pid(pid)
+        dd = self._project._pid2Obj.get(pid.type)
+        if dd is not None:
+            obj = dd.get(pid.id)
+        if obj is not None and obj.isDeleted:
+            raise RuntimeError('Pid "%s" defined a deleted object' % pid)
+        return obj
+
+        # GWV 20181201: refactored
+        # tt = pidstring.split(Pid.PREFIXSEP, 1)
+        # if len(tt) == 2:
+        #     if tt[0] in ('GM', 'Mark', 'GA', 'Axis', 'GO', 'Module', 'GS', 'Strip',
+        #                  'GL', 'PeakListView', 'GI', 'IntegralListView', 'GU', 'MultipletListView',
+        #                  'GD', 'SpectrumDisplay', 'GW', 'Window',
+        #                  'GV', 'SpectrumView', 'GT', 'Task'):
+        #         from warnings import warn
+        #         warn('ui.getByGid should be used for getting graphics ({})'.format(pidstring),
+        #              category=DeprecationWarning)
+        #     dd = self._project._pid2Obj.get(tt[0])
+        #     if dd:
+        #         return dd.get(tt[1])
+        # #
+        # return None
 
     # CCPN Implementation methods
 
@@ -677,7 +686,6 @@ class AbstractWrapperObject(NotifierBase):
         """Get descendant of class cls with relative key relativeId
          Implementation function, used to generate getCls functions
          """
-
         dd = self._project._pid2Obj.get(cls.className)
         if dd:
             if self is self._project:
@@ -826,15 +834,10 @@ class AbstractWrapperObject(NotifierBase):
                 undo.decreaseBlocking()
 
     def _getDirectChildren(self):
-        """Get list of all objects that have self as a parent"""
-
+        """Get list of all objects that have self as a parent
+        """
         getDataObj = self._project._data2Obj.get
         result = list(getDataObj(y) for x in self._childClasses for y in x._getAllWrappedData(self))
-        # Removed: Sorting is irrelevant for this function, thaat gives children of ALL classes
-        # if self.className == 'NmrChain':
-        #   # Special case - NmrResidues must always be sorted
-        #   result.sort()
-
         return result
 
     # Notifiers and related functions:
@@ -954,9 +957,6 @@ class AbstractWrapperObject(NotifierBase):
             else:
                 for dd in iterator:
                     for notifier in dd:
-                        # GWV: Maybe only at the highest debug level
-                        self._project._logger.debug('Notifier: %s; %s; %s'
-                                                    % (action, self, notifier))
                         notifier(self)
 
     def resetSerial(self, newSerial: int):

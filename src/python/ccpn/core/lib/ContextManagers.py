@@ -721,7 +721,7 @@ def newObject(klass):
                 if not isinstance(result, klass):
                     raise RuntimeError('Expected an object of class %s, obtained %s' % (klass, result.__class__))
 
-                # retrieve list of created items from the api
+                # retrieve list of created api objects from the result
                 apiObjectsCreated = result._getApiObjectTree()
                 addUndoItem(undo=BlankedPartial(Undo._deleteAllApiObjects,
                                                 obj=result, trigger='delete', preExecution=True,

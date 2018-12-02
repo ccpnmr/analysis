@@ -32,7 +32,6 @@ import typing
 import os
 from collections import OrderedDict
 from ccpn.util.Logging import getLogger
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Chain import Chain
 from ccpn.core.Residue import Residue
 from ccpn.core.NmrChain import NmrChain
@@ -322,7 +321,7 @@ class Current:
             getLogger().debug('Impossible to restore current. %s' % e)
 
     @classmethod
-    def _addClassField(cls, param: typing.Union[str, AbstractWrapperObject]):
+    def _addClassField(cls, param):
         """Add new 'current' field with necessary function for input
         param (wrapper class or field name)"""
 

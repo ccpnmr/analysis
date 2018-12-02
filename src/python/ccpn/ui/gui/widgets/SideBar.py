@@ -979,7 +979,9 @@ class SideBar(QtWidgets.QTreeWidget, Base, NotifierBase):
             new_dict[ky] = classesInSideBar[ky]
 
         for className, cls in new_dict.items():  # ejb - classesInSideBar.items()
-            for obj in getattr(project, cls._pluralLinkName):
+            # print('Sidebar._fillSideBar:', className, cls)
+            objs = getattr(project, cls._pluralLinkName)
+            for obj in objs:
                 self._createItem({Notifier.OBJECT: obj})
             # dd = pid2Obj.get(className)
             # if dd:

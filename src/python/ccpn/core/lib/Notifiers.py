@@ -48,8 +48,6 @@ import sys
 from functools import partial
 from collections import OrderedDict
 from typing import Callable, Any
-from ccpn.framework.Current import Current
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 
 from ccpn.util.Logging import getLogger
 
@@ -226,6 +224,9 @@ class Notifier(NotifierABC):
         :param debug: set debug
         :param **kwargs: optional keyword,value arguments to callback
         """
+        from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject # local import to avoid cycles
+        from ccpn.framework.Current import Current # local import to avoid cycles
+
         super().__init__(theObject=theObject, triggers=triggers, targetName=targetName, debug=debug,
                          callback=callback, **kwargs
                          )
@@ -471,7 +472,7 @@ class NotifierBase(object):
                               )
         return objNotifiers
 
-    def setNotifier(self, theObject:AbstractWrapperObject, triggers: list, targetName: str, callback: Callable[..., str], *args, **kwargs) -> Notifier:
+    def setNotifier(self, theObject:'AbstractWrapperObject', triggers: list, targetName: str, callback: Callable[..., str], **kwargs) -> Notifier:
         """
         Set Notifier for Ccpn V3 object theObject
 
@@ -479,13 +480,12 @@ class NotifierBase(object):
         :param triggers: list of triggers to trigger callback
         :param targetName: valid className, attributeName or None (See Notifier doc string for details)
         :param callback: callback function with signature: callback(obj, parameter2 [, *args] [, **kwargs])
-        :param *args: optional arguments
-        :param **kwargs: optional keyword,value arguments
+        :param **kwargs: optional keyword,value arguments to call back
         :return: a Notifier instance
         """
         objNotifiers = self._getObjectNotifiersDict()
         notifier = Notifier(theObject=theObject, triggers=triggers, targetName=targetName,
-                            callback=callback, *args, **kwargs)
+                            callback=callback, **kwargs)
         id = notifier.id
         # this should never happen; hence just a check
         if id in objNotifiers:
@@ -494,7 +494,7 @@ class NotifierBase(object):
         objNotifiers[id] = notifier
         return notifier
 
-    def setGuiNotifier(self, theObject:AbstractWrapperObject, triggers: list, targetName: str, callback: Callable[..., str], *args, **kwargs) -> Notifier:
+    def setGuiNotifier(self, theObject:'AbstractWrapperObject', triggers: list, targetName: str, callback: Callable[..., str], **kwargs) -> Notifier:
         """
         Set Notifier for Ccpn V3 object theObject
 
@@ -502,8 +502,7 @@ class NotifierBase(object):
         :param triggers: list of triggers to trigger callback
         :param targetName: valid className, attributeName or None (See Notifier doc string for details)
         :param callback: callback function with signature: callback(obj, parameter2 [, *args] [, **kwargs])
-        :param *args: optional arguments
-        :param **kwargs: optional keyword,value arguments
+        :param **kwargs: optional keyword,value arguments to callback
 
         :return: a GuiNotifier instance
 
@@ -512,7 +511,7 @@ class NotifierBase(object):
 
         objNotifiers = self._getObjectNotifiersDict()
         notifier = GuiNotifier(theObject=theObject, triggers=triggers, targetName=targetName,
-                               callback=callback, *args, **kwargs)
+                               callback=callback, **kwargs)
         id = notifier.id
         # this should never happen; hence just a check
         if id in objNotifiers:
@@ -536,7 +535,7 @@ class NotifierBase(object):
 
     def hasNotifier(self, notifier: Notifier=None) -> bool:
         """
-        return True if object has set notifier or
+        return True if theObject has set notifier or
         has any notifier (when notifier==None)
 
         :param notifier: Notifier instance or None
@@ -570,7 +569,8 @@ class NotifierBase(object):
             self.deleteNotifier(notifier)
 
     def setBlankingAllNotifiers(self, flag):
-        """Set blanking of all the notifiers to flag"""
+        """Set blanking of all the notifiers of theObject to flag
+        """
         if not self.hasNotifier(None):
             return
         objNotifiers = self._getObjectNotifiersDict()

@@ -302,25 +302,15 @@ class Project(AbstractWrapperObject):
     def deleteObjects(self, *objs: typing.Sequence[typing.Union[Pid.Pid, AbstractWrapperObject]]):
         """Delete one or more objects, given as either objects or Pids
         """
-
         getByPid = self.getByPid
-
         objs = [getByPid(x) if isinstance(x, str) else x for x in objs]
+
         apiObjs = [x._wrappedData for x in objs]
         self._startDeleteCommandBlock(*apiObjs)
         try:
             for obj in objs:
                 if obj and not obj.isDeleted:
                     # If statement in case deleting one obj triggers the deletion of another
-
-                    # if the object is a Spectrum then delete peak/integralLists
-                    if obj.pid.startswith('SP'):
-                        for peakList in obj.peakLists:
-                            peakList.delete()
-                        for integralList in obj.integralLists:
-                            integralList.delete()
-                        for multipletList in obj.multipletLists:
-                            multipletList.delete()
                     obj.delete()
 
         finally:
@@ -721,6 +711,7 @@ class Project(AbstractWrapperObject):
             # TODO:ED check this!
             # self.suspendNotification()
 
+        # GWV 20181123: chnged to logCOmmand decoraor in calling routine's
         # if not self._appBase._echoBlocking:
         #
         #     getDataObj = self._data2Obj.get
@@ -738,16 +729,13 @@ class Project(AbstractWrapperObject):
     def _endDeleteCommandBlock(self, *dummyWrappedData):
         """End block for delete command echoing
 
-        MUST be paired with _startDeleteCommandBlock call - use try ... finally to ensure both are called"""
+        MUST be paired with _startDeleteCommandBlock call - use try ... finally to ensure both are called
+        """
         undo = self._undo
         if undo is not None:
             # TODO:ED check this!
             # self.resumeNotification()
             undo.decreaseWaypointBlocking()
-
-        # if self._appBase._echoBlocking > 0:
-        #     # If statement should always be True, but to avoid weird behaviour in error situations we check
-        #     self._appBase._echoBlocking -= 1
 
     def _newApiObject(self, wrappedData, cls: AbstractWrapperObject):
         """Create new wrapper object of class cls, associated with wrappedData.

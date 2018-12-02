@@ -643,8 +643,7 @@ class AbstractWrapperObject(NotifierBase):
             Project = cls
             ll = Project._allLinkedWrapperClasses
             if ll:
-                print("DEBUG initialisation attempted more than once")
-                return
+                raise RuntimeError("ERROR: initialisation attempted more than once")
             newAncestors = [cls]
             ll.append(Project)
 
@@ -735,8 +734,8 @@ class AbstractWrapperObject(NotifierBase):
             # NB: the returned list of NmrResidues is sorted; if not: breaks the programme
             if descendantClasses[0].className == NmrResidue.className:
                 objs.sort()
-            print('_allDecendants for %-30s of class %-20r: %s' % \
-                  (self, descendantClasses[0].__name__, objs))
+            # print('_allDecendants for %-30s of class %-20r: %s' % \
+            #       (self, descendantClasses[0].__name__, objs))
             return objs
 
         # we are not at the end; traverse down the tree

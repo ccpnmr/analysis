@@ -38,10 +38,11 @@ from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.memops import Implementation as ApiImplementation
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.ContextManagers import deleteObject
+from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 
 
 @functools.total_ordering
-class AbstractWrapperObject():
+class AbstractWrapperObject(NotifierBase):
     """Abstract class containing common functionality for subclasses.
 
     ADVANCED. Core programmers only.
@@ -111,7 +112,8 @@ class AbstractWrapperObject():
     #: List of child classes. Must be overridden for each subclass.
     _childClasses = []
 
-    # GWV 20181123: deactivated
+    _isGuiClass = False  # Overridden by Gui classes
+
     # Wrapper-level notifiers that are set up on code import and
     # registered afresh for every new project
     # _coreNotifiers = []
@@ -139,8 +141,8 @@ class AbstractWrapperObject():
         # Check if object is already wrapped
         data2Obj = project._data2Obj
         if wrappedData in data2Obj:
-            raise ValueError("Cannot create new object for underlying %s: One  already exists"
-                             % wrappedData)
+            raise ValueError(
+                'Cannot create new object "%s": one already exists for "%s"' % (self.className, wrappedData))
 
         # initialise
         self._project = project
@@ -197,14 +199,6 @@ class AbstractWrapperObject():
         else:
             return id(self) < id(other)
 
-    def __repr__(self):
-        """String representation"""
-        return "<ccpn.core.%s>" % self.longPid
-
-    def __str__(self):
-        """Readable string representation"""
-        return "<%s>" % self.pid
-
     def __eq__(self, other):
         """Python 2 behaviour - objects equal only to themselves."""
         return self is other
@@ -212,6 +206,14 @@ class AbstractWrapperObject():
     def __ne__(self, other):
         """Python 2 behaviour - objects equal only to themselves."""
         return self is not other
+
+    def __repr__(self):
+        """Object quoted string representation; compatible with application.get()"""
+        return "'<%s>'" % (self.longPid)
+
+    def __str__(self):
+        """Readable string representation; potentially subclassed"""
+        return "<%s>" % self.pid
 
     __hash__ = object.__hash__
 
@@ -688,30 +690,63 @@ class AbstractWrapperObject():
             return None
 
     def _allDescendants(self, descendantClasses):
-        """get all descendants of a given class , following descendantClasses down the data tree
-        Implementation function, used to generate child and descendant links
-        descendantClasses is a list of classes going down from the class of self down the data tree.
+        """get all descendants of type decendantClasses[-1] of self,
+        following descendantClasses down the data tree.
+
         E.g. if called on a chain with descendantClass == [Residue,Atom] the function returns
-        a sorted list of all Atoms in a Chain"""
-        project = self._project
-        data2Obj = project._data2Obj
-        objects = [self]
+        a list of all Atoms in a Chain
 
-        for cls in descendantClasses:
+        NB: the returned list of NmrResidues is sorted; if not: breaks the programme
+        """
 
-            # function gets wrapped data for all children starting from parent
-            func = cls._getAllWrappedData
-            # data is iterator of wrapped data for children starting from all parents
-            ll = itertools.chain(*(func(x) for x in objects))
-            # objects is all wrapper objects for next child level down
-            # NB this may sometimes (during undo/redo) get called when not all objects
-            # are finalised - hence the test if y is None
-            objects = list(y for y in (data2Obj.get(x) for x in ll) if y is not None)
-            if cls.className == 'NmrResidue':
-                # These must always be sorted
-                objects.sort()
+        # GWV 20181201: refactored to use _getChildren and recursion
+        # project = self._project
+        # data2Obj = project._data2Obj
+        # objects = [self]
         #
-        return objects
+        # for cls in descendantClasses:
+        #
+        #     # function gets wrapped data for all children starting from parent
+        #     func = cls._getAllWrappedData
+        #     # data is iterator of wrapped data for children starting from all parents
+        #     ll = itertools.chain(*(func(x) for x in objects))
+        #     # objects is all wrapper objects for next child level down
+        #     # NB this may sometimes (during undo/redo) get called when not all objects
+        #     # are finalised - hence the test if y is None
+        #     objects = list(y for y in (data2Obj.get(x) for x in ll) if y is not None)
+        #     if cls.className == 'NmrResidue':
+        #         # These must always be sorted
+        #         objects.sort()
+        # #
+        # return objects
+        from ccpn.core.NmrResidue import NmrResidue  # Local import to avoid cycles
+
+        if descendantClasses is None or len(descendantClasses) == 0:
+            # we should never be here
+            raise RuntimeError('Error getting all decendants from %s; decendants tree is empty' % self)
+
+        if len(descendantClasses) == 1:
+            # we are at the end of the recursion tree; return the children of type decendantClass[0] of self
+            if descendantClasses[0] not in self._childClasses:
+                raise RuntimeError('Invalid decentdantClass %s for %s' % (descendantClasses[0], self))
+            className = descendantClasses[0].className
+            # Passing the 'classes' argument limits the dict to className only (for speed)
+            objs = self._getChildren(classes=[className])[className]
+            # NB: the returned list of NmrResidues is sorted; if not: breaks the programme
+            if descendantClasses[0].className == NmrResidue.className:
+                objs.sort()
+            print('_allDecendants for %-30s of class %-20r: %s' % \
+                  (self, descendantClasses[0].__name__, objs))
+            return objs
+
+        # we are not at the end; traverse down the tree
+        objs = []
+        className = descendantClasses[0].className
+        # Passing the 'classes' argument limits the dict to className only (for speed)
+        for obj in self._getChildren(classes=className)[className]:
+            children = AbstractWrapperObject._allDescendants(obj, descendantClasses=descendantClasses[1:])
+            objs.extend(children)
+        return objs
 
     def _initializeAll(self):
         """Initialize children, using existing objects in data model"""

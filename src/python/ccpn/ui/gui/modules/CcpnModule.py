@@ -142,6 +142,8 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                       OR __init__ with closeFunc=<your close function>
     """
     moduleName = ''
+    className = ''
+
     HORIZONTAL = 'horizontal'
     VERTICAL = 'vertical'
     labelOrientation = HORIZONTAL  # toplabel orientation
@@ -149,10 +151,10 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     # overide in specific module implementations
     includeSettingsWidget = False
     maxSettingsState = 3  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
+    defaultSettingsState = 0  # default state of the settings widget
     settingsPosition = 'top'
     settingsMinimumSizes = (100, 50)
     _restored = False
-    className = ''
 
     # _instances = set()
 
@@ -240,7 +242,6 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         #self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
         # optional settings widget area
-        self.settingsState = 0  # current state (not shown)
         self.settingsWidget = None
         if self.includeSettingsWidget:
             # self.settingsWidget = ScrollableWidget(parent=self.widgetArea, setLayout=True,
@@ -358,8 +359,11 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         # self.mainWidget.dragLeaveEvent = self.dragLeaveEvent
         # self.mainWidget.dropEvent = self.dropEvent
 
-        # always explicitly show the mainWidget
+        # always explicitly show the mainWidget and/or settings widget
+        # default state (increased by one by settingsCallback)
+        self.settingsState = self.defaultSettingsState - 1
         self.mainWidget.show()
+        self._settingsCallback()
 
         # set parenting relations
         if self.mainWindow is not None:
@@ -678,20 +682,21 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         # delete any notifiers initiated with this Module
         self.deleteAllNotifiers()
 
-        # Try de-registering any notifiers or object with unRegister() method for notifiers
-        try:
-            notifiers = [n for n in self.__dict__.values()
-                           if (isinstance(n, Notifier) or
-                               isinstance(n, GuiNotifier) or
-                               isinstance(n, _PulldownABC)
-                               )]
-            logger = getLogger()
-            logger.debug3('>>> notifiers of %s: %s' % (self, notifiers))
-            for notifier in notifiers:
-                logger.debug3('>>> unregistering: %s' % notifier)
-                notifier.unRegister()
-        except:
-            pass
+        # GWV 20181201: diabled; bad idea (I put it here!)
+        # # Try de-registering any notifiers or object with unRegister() method for notifiers
+        # try:
+        #     notifiers = [n for n in self.__dict__.values()
+        #                    if (isinstance(n, Notifier) or
+        #                        isinstance(n, GuiNotifier) or
+        #                        isinstance(n, _PulldownABC)
+        #                        )]
+        #     logger = getLogger()
+        #     logger.debug3('>>> notifiers of %s: %s' % (self, notifiers))
+        #     for notifier in notifiers:
+        #         logger.debug3('>>> unregistering: %s' % notifier)
+        #         notifier.unRegister()
+        # except:
+        #     pass
 
         # if ref(self) in self._instances:
         #   self._instances.remove(ref(self))
@@ -705,7 +710,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                         if isinstance(i, Container):
                             self._container = i
         # try:
-        super(CcpnModule, self).close()
+        super().close()
         # self.deleteLater()   # ejb - remove recursion when closing table from commandline
         # except Exception as es:
         #   getLogger().debug('>>>delete CcpnModule Error %s' %es)
@@ -872,6 +877,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     def resizeEvent(self, ev):
         self._selectedOverlay._resize()
         super().resizeEvent(ev)
+
 
 class CcpnModuleLabel(DockLabel):
     """

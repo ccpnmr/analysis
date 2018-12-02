@@ -70,7 +70,8 @@ MultipletMenu = 'MultipletMenu'
 PhasingMenu = 'PhasingMenu'
 
 
-class GuiStrip(NotifierBase, Frame):
+class GuiStrip(Frame):
+    # inherits NotifierBase
 
     def __init__(self, spectrumDisplay, useOpenGL=False):
         """

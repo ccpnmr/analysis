@@ -62,8 +62,6 @@ from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 #from collections import OrderedDict
 
 
-#TODO:WAYNE: incorporate most functionality from GuiWindow and
-#TODO:TJ: functionality from FrameWork
 # For readability there should be a class:
 # _MainWindowShortCuts which (Only!) has the shortcut definitions and the callbacks to initiate them.
 # The latter should all be private methods!
@@ -74,7 +72,8 @@ from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 # The docstring of GuiMainWindow should detail how this setup is
 
 
-class GuiMainWindow(GuiWindow, NotifierBase, QtWidgets.QMainWindow):
+class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
+    # inherits NotifierBase
 
     def __init__(self, application=None):
 
@@ -266,20 +265,7 @@ class GuiMainWindow(GuiWindow, NotifierBase, QtWidgets.QMainWindow):
                           'loadProject': self.application.loadProject,
                           'newProject': self.application.newProject,
                           }
-
         self.pythonConsole = IpythonConsole(self)
-
-        #TODO:LUCA: find out where the string is stored when you type '?' in the console; prepend this string
-        #     self.pythonConsole.ipythonWidget.__doc__ = \
-        # """
-        # CcpNmr IPython Console Area (shortcut 'PY' to toggle)
-        #
-        # Access to:
-        #
-        #     application, project, current, ui, mainWindow, preferences
-        #     redo(), undo(), loadProject(), newProject()
-        #
-        # """ + self.pythonConsole.ipythonWidget.__doc__
 
         # create the sidebar
         self.sideBar = SideBar(parent=self)

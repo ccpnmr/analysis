@@ -1,5 +1,5 @@
 """
-Module Documentation here
+Module containing functions for defining GLSL shaders.
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -35,7 +35,7 @@ try:
     from OpenGL import GL, GLU, GLUT
 except ImportError:
     app = QtWidgets.QApplication(sys.argv)
-    QtWidgets.QMessageBox.critical(None, "OpenGL hellogl",
+    QtWidgets.QMessageBox.critical(None, "OpenGL CCPN",
                                    "PyOpenGL must be installed to run this example.")
     sys.exit(1)
 
@@ -43,8 +43,8 @@ except ImportError:
 class ShaderProgram(object):
     def __init__(self, vertex, fragment, attributes):
         self.program_id = GL.glCreateProgram()
-        self.vs_id = self.add_shader(vertex, GL.GL_VERTEX_SHADER)
-        self.frag_id = self.add_shader(fragment, GL.GL_FRAGMENT_SHADER)
+        self.vs_id = self.addGLShader(vertex, GL.GL_VERTEX_SHADER)
+        self.frag_id = self.addGLShader(fragment, GL.GL_FRAGMENT_SHADER)
         self.attributes = attributes
         self.uniformLocations = {}
 
@@ -117,12 +117,8 @@ class ShaderProgram(object):
 
     def setGLUniformMatrix4fv(self, uniformLocation=None, count=1, transpose=GL.GL_FALSE, value=None):
         if uniformLocation in self.uniformLocations:
-            try:
-                GL.glUniformMatrix4fv(self.uniformLocations[uniformLocation],
+            GL.glUniformMatrix4fv(self.uniformLocations[uniformLocation],
                                        count, transpose, value)
-            except Exception as es:
-                pass
-
         else:
             raise RuntimeError('Error setting setGLUniformMatrix4fv: %s' % uniformLocation)
 
@@ -146,18 +142,12 @@ class ShaderProgram(object):
         else:
             raise RuntimeError('Error setting setGLUniformMatrix4fv: %s' % uniformLocation)
 
-    def add_shader(self, source, shader_type):
-        """ Helper function for compiling a GLSL shader
-        Parameters
-        ----------
-        source : str
-            String containing shader source code
-        shader_type : valid OpenGL shader type
-            Type of shader to compile
-        Returns
-        -------
-        value : int
-            Identifier for shader if compilation is successful
+    def addGLShader(self, source, shader_type):
+        """Function for compiling a GLSL shader
+
+        :param source: String containing shader source code
+        :param shader_type: valid OpenGL shader type: GL_VERTEX_SHADER or GL_FRAGMENT_SHADER
+        :return: int; Identifier for shader if compilation is successful
         """
         shader_id = 0
         try:
@@ -175,28 +165,18 @@ class ShaderProgram(object):
             GL.glDeleteShader(shader_id)
             raise
 
-    def uniform_location(self, name):
-        """ Helper function to get location of an OpenGL uniform variable
-        Parameters
-        ----------
-        name : str
-            Name of the variable for which location is to be returned
-        Returns
-        -------
-        value : int
-            Integer describing location
+    def uniformLocation(self, name):
+        """Function to get location of an OpenGL uniform variable
+
+        :param name: String, name of the variable for which location is to be returned
+        :return: int; integer describing location
         """
         return GL.glGetUniformLocation(self.program_id, name)
 
-    def attribute_location(self, name):
-        """ Helper function to get location of an OpenGL attribute variable
-        Parameters
-        ----------
-        name : str
-            Name of the variable for which location is to be returned
-        Returns
-        -------
-        value : int
-            Integer describing location
+    def attributeLocation(self, name):
+        """Function to get location of an OpenGL attribute variable
+
+        :param name: String, name of the variable for which location is to be returned
+        :return: int; integer describing location
         """
         return GL.glGetAttribLocation(self.program_id, name)

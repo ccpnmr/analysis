@@ -403,7 +403,6 @@ class GuiPeakListView(QtWidgets.QGraphicsItem):
             getLogger().warning('Error: peakList does not exist in spectrum')
 
     def _changedPeakListView(self):
-        pass
 
         for peakItem in self.peakItems.values():
             if isinstance(peakItem, PeakNd):
@@ -411,7 +410,10 @@ class GuiPeakListView(QtWidgets.QGraphicsItem):
                 peakItem.annotation.setupPeakAnnotationItem(peakItem)
 
     def setVisible(self, visible):
-        super(GuiPeakListView, self).setVisible(visible)
+        super().setVisible(visible)
+
+        # change visibility list for the strip
+        self.spectrumView.strip._updateVisibility()
 
         # repaint all displays - this is called for each spectrumView in the spectrumDisplay
         # all are attached to the same click

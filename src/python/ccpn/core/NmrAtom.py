@@ -39,6 +39,9 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.lib import Constants
 from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpn.util.Common import name2IsotopeCode
+from ccpn.util.decorators import logCommand
+from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, deleteObject, logCommandBlock
+from ccpn.util.Logging import getLogger
 
 
 class NmrAtom(AbstractWrapperObject):
@@ -62,6 +65,9 @@ class NmrAtom(AbstractWrapperObject):
 
     #: Name of plural link to instances of class
     _pluralLinkName = 'nmrAtoms'
+
+    # the attribute name used by current
+    _currentAttributeName = 'nmrAtoms'
 
     #: List of child classes.
     _childClasses = []
@@ -185,8 +191,9 @@ class NmrAtom(AbstractWrapperObject):
 
         # NB This is a VERY special case
         # - API code and notifiers will take care of resetting id and Pid
-        self._startCommandEchoBlock('rename', value)
-        try:
+
+        with logCommandBlock(get='self') as log:
+            log('rename')
             if value is None:
                 self.deassign()
 
@@ -201,18 +208,16 @@ class NmrAtom(AbstractWrapperObject):
                         self._wrappedData.isotopeCode = newIsotopeCode
                     elif newIsotopeCode != isotopeCode:
                         raise ValueError("Cannot rename %s type NmrAtom to %s" % (isotopeCode, value))
-                #
+
                 self._wrappedData.name = value
-        finally:
-            self._endCommandEchoBlock()
 
     def deassign(self):
         """Reset NmrAtom back to its originalName, cutting all assignment links"""
-        self._startCommandEchoBlock('deassign')
-        try:
+        from ccpn.core.lib.ContextManagers import logCommandBlock
+
+        with logCommandBlock(get='self') as log:
+            log('deassign')
             self._wrappedData.name = None
-        finally:
-            self._endCommandEchoBlock()
 
     def assignTo(self, chainCode: str = None, sequenceCode: Union[int, str] = None,
                  residueType: str = None, name: str = None, mergeToExisting=False) -> 'NmrAtom':
@@ -393,14 +398,21 @@ class NmrAtom(AbstractWrapperObject):
 # del setter
 
 
+@newObject(NmrAtom)
 def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
-                comment: str = None) -> NmrAtom:
+                comment: str = None, serial=None) -> NmrAtom:
     """Create new NmrAtom within NmrResidue. If name is None, use default name
-    (of form e.g. 'H@211', 'N@45', ...)"""
+        (of form e.g. 'H@211', 'N@45', ...)
+
+    See the NmrAtom class for details
+
+    :param name: string name of the new nmrAtom
+    :param isotopeCode: isotope code
+    :param comment: optional string comment
+    :return: a new NmrAtom instance.
+    """
     nmrProject = self._project._wrappedData
     resonanceGroup = self._wrappedData
-
-    defaults = collections.OrderedDict((('name', None), ('isotopeCode', None)))
 
     # Set isotopeCode if empty
     if not isotopeCode:
@@ -410,7 +422,7 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
             isotopeCode = '?'
 
     # Deal with reserved names
-    serial = None
+    # serial = None
     if name:
         # Check for name clashes
 
@@ -450,56 +462,49 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
     if comment is None:
         dd['details'] = name
 
-    self._startCommandEchoBlock('newNmrAtom', values=locals(), defaults=defaults,
-                                parName='newNmrAtom')
-    result = None
-    try:
-        obj = nmrProject.newResonance(**dd)
-        result = self._project._data2Obj.get(obj)
-        if serial is not None:
-            try:
-                result.resetSerial(serial)
-                # modelUtil.resetSerial(obj, serial, 'resonances')
-            except ValueError:
-                self.project._logger.warning(
-                        "Could not set (reserved) name of %s to %s - set to %s instead"
-                        % (result, name, result.name))
-            result._finaliseAction('rename')
-    finally:
-        self._endCommandEchoBlock()
-    #
-    return result
+    obj = nmrProject.newResonance(**dd)
+    result = self._project._data2Obj.get(obj)
+    if result is None:
+        raise RuntimeError('Unable to generate new NmrAtom item')
+
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
+                                % (result, serial))
 
 
 def _fetchNmrAtom(self: NmrResidue, name: str):
-    """Fetch NmrAtom with name=name, creating it if necessary"""
+    """Fetch NmrAtom with name=name, creating it if necessary
+
+    :param name: string name for new nmrAto if created
+    :return: new or existing nmrAtom
+    """
     # resonanceGroup = self._wrappedData
-    self._startCommandEchoBlock('fetchNmrAtom', name, parName='newNmrAtom')
-    try:
-        # self.getNmrAtom(name.translate(Pid.remapSeparators))
+
+    with logCommandBlock(prefix='newmrAtom=', get='self') as log:
+        log('fetchNmrAtom')
+
         result = (self.getNmrAtom(name.translate(Pid.remapSeparators)) or
                   self.newNmrAtom(name=name))
-        # result = (self._project._data2Obj.get(resonanceGroup.findFirstResonance(name=name)) or
-        #         self.newNmrAtom(name=name))
-    finally:
-        self._endCommandEchoBlock()
-    #
+
+        if result is None:
+            raise RuntimeError('Unable to generate new NmrAtom item')
+
     return result
 
 
 def _produceNmrAtom(self: Project, atomId: str = None, chainCode: str = None,
                     sequenceCode: Union[int, str] = None,
                     residueType: str = None, name: str = None) -> NmrAtom:
-    """get chainCode, sequenceCode, residueType and atomName from dot-separated  atomId or Pid
+    """Get chainCode, sequenceCode, residueType and atomName from dot-separated atomId or Pid
     or explicit parameters, and find or create an NmrAtom that matches
     Empty chainCode gets NmrChain:@- ; empty sequenceCode get a new NmrResidue"""
 
-    defaults = collections.OrderedDict((('atomId', None), ('chainCode', None), ('sequenceCode', None),
-                                        ('residueType', None), ('name', None),))
+    with logCommandBlock(prefix='newmrAtom=', get='self') as log:
+        log('_produceNmrAtom')
 
-    self._startCommandEchoBlock('_produceNmrAtom', values=locals(), defaults=defaults,
-                                parName='newNmrAtom')
-    try:
         # Get ID parts to use
         if sequenceCode is not None:
             sequenceCode = str(sequenceCode) or None
@@ -525,17 +530,20 @@ def _produceNmrAtom(self: Project, atomId: str = None, chainCode: str = None,
         nmrChain = self.fetchNmrChain(shortName=chainCode or Constants.defaultNmrChainCode)
         nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=sequenceCode, residueType=residueType)
         result = nmrResidue.fetchNmrAtom(name)
-    finally:
-        self._endCommandEchoBlock()
+
+        if result is None:
+            raise RuntimeError('Unable to generate new NmrAtom item')
+
     return result
 
 
 # Connections to parents:
-NmrResidue.newNmrAtom = _newNmrAtom
-del _newNmrAtom
-NmrResidue.fetchNmrAtom = _fetchNmrAtom
+# NmrResidue.newNmrAtom = _newNmrAtom
+# del _newNmrAtom
+# NmrResidue.fetchNmrAtom = _fetchNmrAtom
 
-Project._produceNmrAtom = _produceNmrAtom
+#EJB 20181203: moved to nmrAtom
+# Project._produceNmrAtom = _produceNmrAtom
 
 # Notifiers:
 className = Nmr.Resonance._metaclass.qualifiedName()

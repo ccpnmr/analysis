@@ -155,11 +155,15 @@ class GuiIntegralListView(QtWidgets.QGraphicsItem):
     #     #         integralItem.annotation.setupIntegralAnnotationItem(integralItem)
 
     def setVisible(self, visible):
-        super(GuiIntegralListView, self).setVisible(visible)
+        super().setVisible(visible)
+
+        # change visibility list for the strip
+        self.spectrumView.strip._updateVisibility()
 
         # repaint all displays - this is called for each spectrumView in the spectrumDisplay
         # all are attached to the same click
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
         GLSignals = GLNotifier(parent=self)
         GLSignals.emitPaintEvent()
 

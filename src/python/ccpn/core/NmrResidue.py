@@ -1110,6 +1110,38 @@ class NmrResidue(AbstractWrapperObject):
         """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""
         return parent._wrappedData.sortedResonanceGroups()
 
+    #===========================================================================================
+    # new'Object' and other methods
+    # Call appropriate routines in their respective locations
+    #===========================================================================================
+
+    @logCommand(get='self')
+    def newNmrAtom(self, name: str = None, isotopeCode: str = None,
+                    comment: str = None, **kwds):
+        """Create new NmrAtom within NmrResidue. If name is None, use default name
+            (of form e.g. 'H@211', 'N@45', ...)
+
+        See the NmrAtom class for details
+
+        :param name: string name of the new nmrAtom
+        :param isotopeCode: isotope code
+        :param comment: optional string comment
+        :return: a new NmrAtom instance.
+        """
+        from ccpn.core.NmrAtom import _newNmrAtom  # imported here to avoid circular imports
+
+        return _newNmrAtom(self, name=name, isotopeCode=isotopeCode, comment=comment, **kwds)
+
+    def fetchNmrAtom(self, name: str):
+        """Fetch NmrAtom with name=name, creating it if necessary
+
+        :param name: string name for new nmrAto if created
+        :return: new or existing nmrAtom
+        """
+        from ccpn.core.NmrAtom import _fetchNmrAtom  # imported here to avoid circular imports
+
+        return _fetchNmrAtom(name=name)
+
 #=========================================================================================
 # GWV 20181122: Moved to Residue class
 # def getter(self:Residue) -> typing.Optional[NmrResidue]:
@@ -1184,6 +1216,11 @@ NmrChain.mainNmrResidues = property(getter, setter, None, """NmrResidues belongi
 del getter
 del setter
 
+
+#=========================================================================================
+
+
+# new nmrResidue functions
 
 @newObject(NmrResidue)
 def _newNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None, residueType: str = None,
@@ -1291,11 +1328,6 @@ def _newNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None, 
     return result
 
 
-#=========================================================================================
-
-
-# new nmrResidue functions
-
 def _fetchNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None,
                      residueType: str = None) -> NmrResidue:
     """Fetch NmrResidue with sequenceCode=sequenceCode and residueType=residueType,
@@ -1390,5 +1422,3 @@ Project._apiNotifiers.extend(
          ('_finaliseApiRename', {}, className, 'addResonance'),
          )
         )
-
-

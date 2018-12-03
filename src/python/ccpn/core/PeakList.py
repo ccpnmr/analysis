@@ -738,7 +738,7 @@ class PeakList(AbstractWrapperObject):
         """
         super()._finaliseAction(action=action)
 
-        if action in ['change']:
+        if action in ['change', 'create']:
             for plv in self.peakListViews:
                 plv._finaliseAction(action=action)
 

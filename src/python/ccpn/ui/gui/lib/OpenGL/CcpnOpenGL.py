@@ -388,6 +388,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self.resetRangeLimits()
 
         self._ordering = []
+        self._visibleSpectrumViewsChange = False
+
         self.glReady = True
 
     def close(self):
@@ -560,7 +562,7 @@ class CcpnGLWidget(QOpenGLWidget):
         stackCount = 0
         self.resetRangeLimits(allLimits=False)
 
-        for spectrumView in self.strip.spectrumViews:  #.orderedSpectrumViews():
+        for spectrumView in self._ordering:                             # _ordering:                             # strip.spectrumViews:  #.orderedSpectrumViews():
             # self._spectrumSettings[spectrumView] = {}
 
             if spectrumView.isDeleted:
@@ -577,7 +579,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.strip.project._undo.decreaseBlocking()
 
     def _maximiseRegions(self):
-        for spectrumView in self.strip.spectrumViews:  #.orderedSpectrumViews():
+        for spectrumView in self._ordering:                             # strip.spectrumViews:  #.orderedSpectrumViews():
             if spectrumView.isDeleted:
                 self._spectrumSettings[spectrumView] = {}
                 continue
@@ -794,7 +796,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # def between(val, l, r):
         #   return (l-val)*(r-val) <= 0
 
-        if self.strip and not self.strip.spectrumViews:
+        if self.strip and not self._ordering:                             # strip.spectrumViews:
             event.accept()
             return
 
@@ -1339,11 +1341,16 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def _resetAxisRange(self, xAxis=True, yAxis=True):
         """
-    reset the axes to the limits of the spectra in this view
-    """
-        axisLimits = []
+        reset the axes to the limits of the spectra in this view
+        """
+        # set a default empty axisRange
+        axisLimits = [-1.0, 1.0, -1.0, 1.0]
 
-        for spectrumView in self.strip.spectrumViews:
+        # iterate over spectrumViews
+        for spectrumView in self._ordering:                             # strip.spectrumViews:
+            if spectrumView.isDeleted:
+                continue
+
             if not axisLimits:
                 axisLimits = [self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MAXXALIAS],
                               self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MINXALIAS],
@@ -1355,17 +1362,17 @@ class CcpnGLWidget(QOpenGLWidget):
                 axisLimits[2] = max(axisLimits[2], self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MAXYALIAS])
                 axisLimits[3] = min(axisLimits[3], self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MINYALIAS])
 
-        if xAxis:
-            if self.INVERTXAXIS:
-                self.axisL, self.axisR = axisLimits[0:2]
-            else:
-                self.axisR, self.axisL = axisLimits[0:2]
+            if xAxis:
+                if self.INVERTXAXIS:
+                    self.axisL, self.axisR = axisLimits[0:2]
+                else:
+                    self.axisR, self.axisL = axisLimits[0:2]
 
-        if yAxis:
-            if self.INVERTYAXIS:
-                self.axisB, self.axisT = axisLimits[2:4]
-            else:
-                self.axisT, self.axisB = axisLimits[2:4]
+            if yAxis:
+                if self.INVERTYAXIS:
+                    self.axisB, self.axisT = axisLimits[2:4]
+                else:
+                    self.axisT, self.axisB = axisLimits[2:4]
 
     def initializeGL(self):
         # GLversionFunctions = self.context().versionFunctions()
@@ -1484,6 +1491,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self.globalGL._shaderProgramTex.setBlendEnabled(0)
 
         if self.strip:
+            self.updateVisibleSpectrumViews()
+
             self.initialiseAxes(self.strip)
             self.initialiseTraces()
 
@@ -1895,7 +1904,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def mouseMoveEvent(self, event):
         if self.strip.isDeleted:
             return
-        if not self.strip.spectrumViews:
+        if not self._ordering:                             # strip.spectrumViews:
             return
 
         if abs(self.axisL - self.axisR) < 1.0e-6 or abs(self.axisT - self.axisB) < 1.0e-6:
@@ -2090,6 +2099,18 @@ class CcpnGLWidget(QOpenGLWidget):
         self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0, 1.0, -1.0, 1.0)
         self.globalGL._shaderProgramTex.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
+    def updateVisibleSpectrumViews(self):
+        self._visibleSpectrumViewsChange = True
+        self.update()
+
+    def _updateVisibleSpectrumViews(self):
+        """Update the list of visible spectrumViews when change occurs
+        """
+        self._ordering = self.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
+        self._GLPeaks.setListViews(self._ordering)
+        self._GLIntegrals.setListViews(self._ordering)
+        self._GLMultiplets.setListViews(self._ordering)
+
     def paintGL(self):
         w = self.w
         h = self.h
@@ -2105,10 +2126,15 @@ class CcpnGLWidget(QOpenGLWidget):
         # stop notifiers interfering with paint event
         self.project.blankNotification()
 
-        self._ordering = self.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
-        self._GLPeaks.setListViews(self._ordering)
-        self._GLIntegrals.setListViews(self._ordering)
-        self._GLMultiplets.setListViews(self._ordering)
+        # check whether the visible spectra list needs updating
+        if self._visibleSpectrumViewsChange:
+            self._visibleSpectrumViewsChange = False
+            self._updateVisibleSpectrumViews()
+
+        # self._ordering = self.spectrumDisplay.orderedSpectrumViews(self._ordering:                             # strip.spectrumViews)
+        # self._GLPeaks.setListViews(self._ordering)
+        # self._GLIntegrals.setListViews(self._ordering)
+        # self._GLMultiplets.setListViews(self._ordering)
 
         currentShader = self.globalGL._shaderProgram1.makeCurrent()
 
@@ -2241,8 +2267,9 @@ class CcpnGLWidget(QOpenGLWidget):
         # GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
 
     def buildAllContours(self):
-        for spectrumView in self.strip.spectrumViews:
-            spectrumView.buildContours = True
+        for spectrumView in self._ordering:                             # strip.spectrumViews:
+            if not spectrumView.isDeleted:
+                spectrumView.buildContours = True
 
     def buildSpectra(self):
         if self.strip.isDeleted:
@@ -2250,7 +2277,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # self._spectrumSettings = {}
         rebuildFlag = False
-        for spectrumView in self.strip.spectrumViews:
+        for spectrumView in self._ordering:                             # strip.spectrumViews:
+            if spectrumView.isDeleted:
+                continue
 
             if spectrumView.buildContours or spectrumView.buildContoursOnly:
 
@@ -2298,7 +2327,7 @@ class CcpnGLWidget(QOpenGLWidget):
         GL.glLineWidth(1.0)
         GL.glDisable(GL.GL_BLEND)
 
-        for spectrumView in self._ordering:  #self.strip.spectrumViews:       #.orderedSpectrumViews():
+        for spectrumView in self._ordering:  #self._ordering:                             # strip.spectrumViews:       #.orderedSpectrumViews():
 
             if spectrumView.isDeleted:
                 continue
@@ -2349,7 +2378,11 @@ class CcpnGLWidget(QOpenGLWidget):
         # draw the bounding boxes
         GL.glEnable(GL.GL_BLEND)
         if self._preferences.showSpectrumBorder:
-            for spectrumView in self._ordering:  #self.strip.spectrumViews:
+            for spectrumView in self._ordering:  #self._ordering:                             # strip.spectrumViews:
+
+                if spectrumView.isDeleted:
+                    continue
+
                 if spectrumView.isVisible() and spectrumView.spectrum.dimensionCount > 1:
                     self._spectrumValues = spectrumView._getValues()
 
@@ -3259,22 +3292,92 @@ class CcpnGLWidget(QOpenGLWidget):
             if not self._drawDeltaOffset:
                 self._startCoordinate = self.cursorCoordinate
 
-            # generate different axes depending on units - X Axis
-            if self.XAXES[self._xUnits] == GLDefs.AXISUNITSPPM:
-                cursorX = self.cursorCoordinate[0]
-                startX = self._startCoordinate[0]
-                # XMode = '%.3f'
+            # get the list of visible spectra, or the first in the list
+            visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+            thisSpec = visibleSpectra[0] if visibleSpectra else self._ordering[0].spectrum if self._ordering and not self._ordering[0].isDeleted else None
 
-            elif self.XAXES[self._xUnits] == GLDefs.AXISUNITSHZ:
-                if self._ordering:
+            if thisSpec:
 
-                    thisSpec = self._ordering[0].spectrum
+                # generate different axes depending on units - X Axis
+                if self.XAXES[self._xUnits] == GLDefs.AXISUNITSPPM:
+                    cursorX = self.cursorCoordinate[0]
+                    startX = self._startCoordinate[0]
+                    # XMode = '%.3f'
 
-                    if self.is1D:
-                        cursorX = self.cursorCoordinate[0] * thisSpec.spectrometerFrequencies[0]
-                        startX = self._startCoordinate[0] * thisSpec.spectrometerFrequencies[0]
+                elif self.XAXES[self._xUnits] == GLDefs.AXISUNITSHZ:
+                    if self._ordering:
+
+                        # thisSpec = self._ordering[0].spectrum
+
+                        if self.is1D:
+                            cursorX = self.cursorCoordinate[0] * thisSpec.spectrometerFrequencies[0]
+                            startX = self._startCoordinate[0] * thisSpec.spectrometerFrequencies[0]
+
+                        else:
+                            # get the axis ordering from the spectrumDisplay and map to the strip
+                            stripAxisCodes = self.strip.axisCodes
+                            try:
+                                indices = thisSpec.getByAxisCodes('indices', stripAxisCodes)
+                            except Exception as es:
+                                indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
+
+                            cursorX = self.cursorCoordinate[0] * thisSpec.spectrometerFrequencies[indices[0]]
+                            startX = self._startCoordinate[0] * thisSpec.spectrometerFrequencies[indices[0]]
 
                     else:
+                        # error trap all spectra deleted
+                        cursorX = self.cursorCoordinate[0]
+                        startX = self._startCoordinate[0]
+                    # XMode = '%.3f'
+
+                else:
+                    if self._ordering:
+
+                        # visibleSpectra = [specView.spectrum for specView in self._ordering if specView.isVisible()]
+                        # thisSpec = visibleSpectra[0] if visibleSpectra else self._ordering[0].spectrum
+
+                        if self.is1D:
+                            cursorX = thisSpec.mainSpectrumReferences[0].valueToPoint(self.cursorCoordinate[0])
+                            startX = thisSpec.mainSpectrumReferences[0].valueToPoint(self._startCoordinate[0])
+
+                        else:
+                            # get the axis ordering from the spectrumDisplay and map to the strip
+                            stripAxisCodes = self.strip.axisCodes
+                            try:
+                                indices = thisSpec.getByAxisCodes('indices', stripAxisCodes)
+                            except Exception as es:
+                                indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
+
+                            # map to a point
+                            cursorX = thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self.cursorCoordinate[0])
+                            startX = thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self._startCoordinate[0])
+
+                    else:
+                        # error trap all spectra deleted
+                        cursorX = self.cursorCoordinate[0]
+                        startX = self._startCoordinate[0]
+
+                    # if self.modeDecimal[0]:
+                    #     cursorX = int(cursorX)
+                    #     startX = int(startX)
+                    # XMode = '%i'
+
+                # generate different axes depending on units - Y Axis, always use first option for 1d
+                if self.is1D:
+                    cursorY = self.cursorCoordinate[1]
+                    startY = self._startCoordinate[1]
+                    # YMode = '%.6g'
+
+                elif self.YAXES[self._yUnits] == GLDefs.AXISUNITSPPM:
+                    cursorY = self.cursorCoordinate[1]
+                    startY = self._startCoordinate[1]
+                    # YMode = '%.3f'
+
+                elif self.YAXES[self._yUnits] == GLDefs.AXISUNITSHZ:
+                    if self._ordering:
+
+                        # thisSpec = self._ordering[0].spectrum
+
                         # get the axis ordering from the spectrumDisplay and map to the strip
                         stripAxisCodes = self.strip.axisCodes
                         try:
@@ -3282,26 +3385,21 @@ class CcpnGLWidget(QOpenGLWidget):
                         except Exception as es:
                             indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
 
-                        cursorX = self.cursorCoordinate[0] * thisSpec.spectrometerFrequencies[indices[0]]
-                        startX = self._startCoordinate[0] * thisSpec.spectrometerFrequencies[indices[0]]
-
-                else:
-                    # error trap all spectra deleted
-                    cursorX = self.cursorCoordinate[0]
-                    startX = self._startCoordinate[0]
-                # XMode = '%.3f'
-
-            else:
-                if self._ordering:
-
-                    visibleSpectra = [specView.spectrum for specView in self._ordering if specView.isVisible()]
-                    thisSpec = visibleSpectra[0] if visibleSpectra else self._ordering[0].spectrum
-
-                    if self.is1D:
-                        cursorX = thisSpec.mainSpectrumReferences[0].valueToPoint(self.cursorCoordinate[0])
-                        startX = thisSpec.mainSpectrumReferences[0].valueToPoint(self._startCoordinate[0])
+                        cursorY = self.cursorCoordinate[1] * thisSpec.spectrometerFrequencies[indices[1]]
+                        startY = self._startCoordinate[1] * thisSpec.spectrometerFrequencies[indices[1]]
 
                     else:
+                        # error trap all spectra deleted
+                        cursorY = self.cursorCoordinate[1]
+                        startY = self._startCoordinate[1]
+                    # YMode = '%.3f'
+
+                else:
+                    if self._ordering:
+
+                        # visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+                        # thisSpec = visibleSpectra[0] if visibleSpectra else self._ordering[0].spectrum if self._ordering and not self._ordering[0].isDeleted
+
                         # get the axis ordering from the spectrumDisplay and map to the strip
                         stripAxisCodes = self.strip.axisCodes
                         try:
@@ -3310,77 +3408,24 @@ class CcpnGLWidget(QOpenGLWidget):
                             indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
 
                         # map to a point
-                        cursorX = thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self.cursorCoordinate[0])
-                        startX = thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self._startCoordinate[0])
+                        cursorY = thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self.cursorCoordinate[1])
+                        startY = thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self._startCoordinate[1])
 
-                else:
-                    # error trap all spectra deleted
-                    cursorX = self.cursorCoordinate[0]
-                    startX = self._startCoordinate[0]
-
-                # if self.modeDecimal[0]:
-                #     cursorX = int(cursorX)
-                #     startX = int(startX)
-                # XMode = '%i'
-
-            # generate different axes depending on units - Y Axis, always use first option for 1d
-            if self.is1D:
-                cursorY = self.cursorCoordinate[1]
-                startY = self._startCoordinate[1]
-                # YMode = '%.6g'
-
-            elif self.YAXES[self._yUnits] == GLDefs.AXISUNITSPPM:
-                cursorY = self.cursorCoordinate[1]
-                startY = self._startCoordinate[1]
-                # YMode = '%.3f'
-
-            elif self.YAXES[self._yUnits] == GLDefs.AXISUNITSHZ:
-                if self._ordering:
-
-                    thisSpec = self._ordering[0].spectrum
-
-                    # get the axis ordering from the spectrumDisplay and map to the strip
-                    stripAxisCodes = self.strip.axisCodes
-                    try:
-                        indices = thisSpec.getByAxisCodes('indices', stripAxisCodes)
-                    except Exception as es:
-                        indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
-
-                    cursorY = self.cursorCoordinate[1] * thisSpec.spectrometerFrequencies[indices[1]]
-                    startY = self._startCoordinate[1] * thisSpec.spectrometerFrequencies[indices[1]]
-
-                else:
-                    # error trap all spectra deleted
-                    cursorY = self.cursorCoordinate[1]
-                    startY = self._startCoordinate[1]
-                # YMode = '%.3f'
-
-            else:
-                if self._ordering:
-
-                    visibleSpectra = [specView.spectrum for specView in self._ordering if specView.isVisible()]
-                    thisSpec = visibleSpectra[0] if visibleSpectra else self._ordering[0].spectrum
-
-                    # get the axis ordering from the spectrumDisplay and map to the strip
-                    stripAxisCodes = self.strip.axisCodes
-                    try:
-                        indices = thisSpec.getByAxisCodes('indices', stripAxisCodes)
-                    except Exception as es:
-                        indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
-
-                    # map to a point
-                    cursorY = thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self.cursorCoordinate[1])
-                    startY = thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self._startCoordinate[1])
-
-                else:
-                    # error trap all spectra deleted
-                    cursorY = self.cursorCoordinate[1]
-                    startY = self._startCoordinate[1]
+                    else:
+                        # error trap all spectra deleted
+                        cursorY = self.cursorCoordinate[1]
+                        startY = self._startCoordinate[1]
 
                 # if self.modeDecimal[1]:
                 #     cursorY = int(cursorY)
                 #     startY = int(startY)
                 # YMode = '%i'
+
+            else:
+
+                # no visible spectra
+                return
+
 
             # newCoords = self.mouseFormat % (self._axisOrder[0], cursorX,
             #                                 self._axisOrder[1], cursorY)
@@ -3750,7 +3795,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
         positionPixel = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
-        for spectrumView in self.strip.spectrumViews:
+        for spectrumView in self._ordering:                             # strip.spectrumViews:
+            if spectrumView.isDeleted:
+                continue
+
             if self._tracesNeedUpdating(spectrumView):
 
                 phasingFrame = self.spectrumDisplay.phasingFrame
@@ -3803,7 +3851,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
         positionPixel = position  #(self.cursorCoordinate[0], self.cursorCoordinate[1])
 
-        for spectrumView in self.strip.spectrumViews:
+        for spectrumView in self._ordering:                             # strip.spectrumViews:
+
+            if spectrumView.isDeleted:
+                continue
 
             # only add phasing trace for the visible spectra
             if spectrumView.isVisible():
@@ -4016,7 +4067,11 @@ class CcpnGLWidget(QOpenGLWidget):
     def initialiseTraces(self):
         # set up the arrays and dimension for showing the horizontal/vertical traces
         stackCount = 0
-        for spectrumView in self.strip.spectrumViews:
+        for spectrumView in self._ordering:                             # strip.spectrumViews:
+
+            if spectrumView.isDeleted:
+                continue
+
             self._spectrumSettings[spectrumView] = {}
 
             self._spectrumValues = spectrumView._getValues()
@@ -4164,22 +4219,87 @@ class CcpnGLWidget(QOpenGLWidget):
 
         if gridGLList.renderMode == GLRENDERMODE_REBUILD:
 
-            # generate different axes depending on units - X Axis
-            if self.XAXES[self._xUnits] == GLDefs.AXISUNITSPPM:
-                axisLimitL = self.axisL
-                axisLimitR = self.axisR
-                self.XMode = self._floatFormat
+            # get the list of visible spectra, or the first in the list
+            visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+            thisSpec = visibleSpectra[0] if visibleSpectra else self._ordering[0].spectrum if self._ordering and not self._ordering[0].isDeleted else None
 
-            elif self.XAXES[self._xUnits] == GLDefs.AXISUNITSHZ:
-                if self._ordering:
+            if thisSpec:
+                # generate different axes depending on units - X Axis
+                if self.XAXES[self._xUnits] == GLDefs.AXISUNITSPPM:
+                    axisLimitL = self.axisL
+                    axisLimitR = self.axisR
+                    self.XMode = self._floatFormat
 
-                    thisSpec = self._ordering[0].spectrum
+                elif self.XAXES[self._xUnits] == GLDefs.AXISUNITSHZ:
+                    if self._ordering:
 
-                    if self.is1D:
-                        axisLimitL = self.axisL * thisSpec.spectrometerFrequencies[0]
-                        axisLimitR = self.axisR * thisSpec.spectrometerFrequencies[0]
+                        # thisSpec = self._ordering[0].spectrum
+
+                        if self.is1D:
+                            axisLimitL = self.axisL * thisSpec.spectrometerFrequencies[0]
+                            axisLimitR = self.axisR * thisSpec.spectrometerFrequencies[0]
+
+                        else:
+                            # get the axis ordering from the spectrumDisplay and map to the strip
+                            stripAxisCodes = self.strip.axisCodes
+                            try:
+                                indices = thisSpec.getByAxisCodes('indices', stripAxisCodes)
+                            except Exception as es:
+                                indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
+
+                            axisLimitL = self.axisL * thisSpec.spectrometerFrequencies[indices[0]]
+                            axisLimitR = self.axisR * thisSpec.spectrometerFrequencies[indices[0]]
 
                     else:
+                        # error trap all spectra deleted
+                        axisLimitL = self.axisL
+                        axisLimitR = self.axisR
+                    self.XMode = self._floatFormat
+
+                else:
+                    if self._ordering:
+
+                        # visibleSpectra = [specView.spectrum for specView in self._ordering if specView.isVisible()]
+                        # thisSpec = visibleSpectra[0] if visibleSpectra else self._ordering[0].spectrum
+
+                        if self.is1D:
+                            axisLimitL = thisSpec.mainSpectrumReferences[0].valueToPoint(self.axisL)
+                            axisLimitR = thisSpec.mainSpectrumReferences[0].valueToPoint(self.axisR)
+
+                        else:
+                            # get the axis ordering from the spectrumDisplay and map to the strip
+                            stripAxisCodes = self.strip.axisCodes
+                            try:
+                                indices = thisSpec.getByAxisCodes('indices', stripAxisCodes)
+                            except Exception as es:
+                                indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
+
+                            # map to a point
+                            axisLimitL = thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self.axisL)
+                            axisLimitR = thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self.axisR)
+
+                    else:
+                        # error trap all spectra deleted
+                        axisLimitL = self.axisL
+                        axisLimitR = self.axisR
+                    self.XMode = self._intFormat
+
+                # generate different axes depending on units - Y Axis, always use first option for 1d
+                if self.is1D:
+                    axisLimitT = self.axisT
+                    axisLimitB = self.axisB
+                    self.YMode = self._eFormat  # '%.6g'
+
+                elif self.YAXES[self._yUnits] == GLDefs.AXISUNITSPPM:
+                    axisLimitT = self.axisT
+                    axisLimitB = self.axisB
+                    self.YMode = self._floatFormat  # '%.3f'
+
+                elif self.YAXES[self._yUnits] == GLDefs.AXISUNITSHZ:
+                    if self._ordering:
+
+                        # thisSpec = self._ordering[0].spectrum
+
                         # get the axis ordering from the spectrumDisplay and map to the strip
                         stripAxisCodes = self.strip.axisCodes
                         try:
@@ -4187,26 +4307,21 @@ class CcpnGLWidget(QOpenGLWidget):
                         except Exception as es:
                             indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
 
-                        axisLimitL = self.axisL * thisSpec.spectrometerFrequencies[indices[0]]
-                        axisLimitR = self.axisR * thisSpec.spectrometerFrequencies[indices[0]]
-
-                else:
-                    # error trap all spectra deleted
-                    axisLimitL = self.axisL
-                    axisLimitR = self.axisR
-                self.XMode = self._floatFormat
-
-            else:
-                if self._ordering:
-
-                    visibleSpectra = [specView.spectrum for specView in self._ordering if specView.isVisible()]
-                    thisSpec = visibleSpectra[0] if visibleSpectra else self._ordering[0].spectrum
-
-                    if self.is1D:
-                        axisLimitL = thisSpec.mainSpectrumReferences[0].valueToPoint(self.axisL)
-                        axisLimitR = thisSpec.mainSpectrumReferences[0].valueToPoint(self.axisR)
+                        axisLimitT = self.axisT * thisSpec.spectrometerFrequencies[indices[1]]
+                        axisLimitB = self.axisB * thisSpec.spectrometerFrequencies[indices[1]]
 
                     else:
+                        # error trap all spectra deleted
+                        axisLimitT = self.axisT
+                        axisLimitB = self.axisB
+                    self.YMode = self._floatFormat  # '%.3f'
+
+                else:
+                    if self._ordering:
+
+                        # visibleSpectra = [specView.spectrum for specView in self._ordering if specView.isVisible()]
+                        # thisSpec = visibleSpectra[0] if visibleSpectra else self._ordering[0].spectrum
+
                         # get the axis ordering from the spectrumDisplay and map to the strip
                         stripAxisCodes = self.strip.axisCodes
                         try:
@@ -4215,193 +4330,138 @@ class CcpnGLWidget(QOpenGLWidget):
                             indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
 
                         # map to a point
-                        axisLimitL = thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self.axisL)
-                        axisLimitR = thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self.axisR)
+                        axisLimitT = thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self.axisT)
+                        axisLimitB = thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self.axisB)
 
-                else:
-                    # error trap all spectra deleted
-                    axisLimitL = self.axisL
-                    axisLimitR = self.axisR
-                self.XMode = self._intFormat
+                    else:
+                        # error trap all spectra deleted
+                        axisLimitT = self.axisT
+                        axisLimitB = self.axisB
+                    self.YMode = self._intFormat  # '%i'
 
-            # generate different axes depending on units - Y Axis, always use first option for 1d
-            if self.is1D:
-                axisLimitT = self.axisT
-                axisLimitB = self.axisB
-                self.YMode = self._eFormat  # '%.6g'
+                # ul = np.array([min(self.axisL, self.axisR), min(self.axisT, self.axisB)])
+                # br = np.array([max(self.axisL, self.axisR), max(self.axisT, self.axisB)])
 
-            elif self.YAXES[self._yUnits] == GLDefs.AXISUNITSPPM:
-                axisLimitT = self.axisT
-                axisLimitB = self.axisB
-                self.YMode = self._floatFormat  # '%.3f'
+                minX = min(axisLimitL, axisLimitR)
+                maxX = max(axisLimitL, axisLimitR)
+                minY = min(axisLimitT, axisLimitB)
+                maxY = max(axisLimitT, axisLimitB)
+                ul = np.array([minX, minY])
+                br = np.array([maxX, maxY])
 
-            elif self.YAXES[self._yUnits] == GLDefs.AXISUNITSHZ:
-                if self._ordering:
+                gridGLList.renderMode = GLRENDERMODE_DRAW
+                labelsChanged = True
 
-                    thisSpec = self._ordering[0].spectrum
+                gridGLList.clearArrays()
 
-                    # get the axis ordering from the spectrumDisplay and map to the strip
-                    stripAxisCodes = self.strip.axisCodes
-                    try:
-                        indices = thisSpec.getByAxisCodes('indices', stripAxisCodes)
-                    except Exception as es:
-                        indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
+                index = 0
+                for scaleOrder, i in enumerate(scaleGrid):  #  [2,1,0]:   ## Draw three different scales of grid
+                    dist = br - ul
+                    nlTarget = 10. ** i
+                    d = 10. ** np.floor(np.log10(abs(dist / nlTarget)) + 0.5)
 
-                    axisLimitT = self.axisT * thisSpec.spectrometerFrequencies[indices[1]]
-                    axisLimitB = self.axisB * thisSpec.spectrometerFrequencies[indices[1]]
+                    ul1 = np.floor(ul / d) * d
+                    br1 = np.ceil(br / d) * d
+                    dist = br1 - ul1
+                    nl = (dist / d) + 0.5
 
-                else:
-                    # error trap all spectra deleted
-                    axisLimitT = self.axisT
-                    axisLimitB = self.axisB
-                self.YMode = self._floatFormat  # '%.3f'
+                    for ax in axisList:  #   range(0,2):  ## Draw grid for both axes
 
-            else:
-                if self._ordering:
-
-                    visibleSpectra = [specView.spectrum for specView in self._ordering if specView.isVisible()]
-                    thisSpec = visibleSpectra[0] if visibleSpectra else self._ordering[0].spectrum
-
-                    # get the axis ordering from the spectrumDisplay and map to the strip
-                    stripAxisCodes = self.strip.axisCodes
-                    try:
-                        indices = thisSpec.getByAxisCodes('indices', stripAxisCodes)
-                    except Exception as es:
-                        indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
-
-                    # map to a point
-                    axisLimitT = thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self.axisT)
-                    axisLimitB = thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self.axisB)
-
-                else:
-                    # error trap all spectra deleted
-                    axisLimitT = self.axisT
-                    axisLimitB = self.axisB
-                self.YMode = self._intFormat  # '%i'
-
-            # ul = np.array([min(self.axisL, self.axisR), min(self.axisT, self.axisB)])
-            # br = np.array([max(self.axisL, self.axisR), max(self.axisT, self.axisB)])
-
-            minX = min(axisLimitL, axisLimitR)
-            maxX = max(axisLimitL, axisLimitR)
-            minY = min(axisLimitT, axisLimitB)
-            maxY = max(axisLimitT, axisLimitB)
-            ul = np.array([minX, minY])
-            br = np.array([maxX, maxY])
-
-            gridGLList.renderMode = GLRENDERMODE_DRAW
-            labelsChanged = True
-
-            gridGLList.clearArrays()
-
-            index = 0
-            for scaleOrder, i in enumerate(scaleGrid):  #  [2,1,0]:   ## Draw three different scales of grid
-                dist = br - ul
-                nlTarget = 10. ** i
-                d = 10. ** np.floor(np.log10(abs(dist / nlTarget)) + 0.5)
-
-                ul1 = np.floor(ul / d) * d
-                br1 = np.ceil(br / d) * d
-                dist = br1 - ul1
-                nl = (dist / d) + 0.5
-
-                for ax in axisList:  #   range(0,2):  ## Draw grid for both axes
-
-                    # skip grid lines for point grids
-                    if d[0] < 0.1 and ax == 0 and self.XMode == self._intFormat:
-                        continue
-                    if d[1] < 0.1 and ax == 1 and self.YMode == self._intFormat:
-                        continue
-
-                    c = 30.0 + (scaleOrder * 20)
-
-                    bx = (ax + 1) % 2
-                    for x in range(0, int(nl[ax])):
-                        p1 = np.array([0., 0.])
-                        p2 = np.array([0., 0.])
-                        p1[ax] = ul1[ax] + x * d[ax]
-                        p2[ax] = p1[ax]
-                        p1[bx] = ul[bx]
-                        p2[bx] = br[bx]
-                        if p1[ax] < min(ul[ax], br[ax]) or p1[ax] > max(ul[ax], br[ax]):
+                        # skip grid lines for point grids
+                        if d[0] < 0.1 and ax == 0 and self.XMode == self._intFormat:
+                            continue
+                        if d[1] < 0.1 and ax == 1 and self.YMode == self._intFormat:
                             continue
 
-                        if i == 1:  # should be largest scale grid
-                            # p1[0] = self._round_sig(p1[0], sig=4)
-                            # p1[1] = self._round_sig(p1[1], sig=4)
-                            # p2[0] = self._round_sig(p2[0], sig=4)
-                            # p2[1] = self._round_sig(p2[1], sig=4)
-                            d[0] = self._round_sig(d[0], sig=4)
-                            d[1] = self._round_sig(d[1], sig=4)
+                        c = 30.0 + (scaleOrder * 20)
 
-                            # if '%.5f' % p1[0] == '%.5f' % p2[0]:  # easy to round off as strings
-                            #     labelling[str(ax)].append((i, ax, valueToRatio(p1[0], self.axisL, self.axisR),
-                            #                                p1[0], d[0]))
-                            # else:
-                            #     labelling[str(ax)].append((i, ax, valueToRatio(p1[1], self.axisB, self.axisT),
-                            #                                p1[1], d[1]))
+                        bx = (ax + 1) % 2
+                        for x in range(0, int(nl[ax])):
+                            p1 = np.array([0., 0.])
+                            p2 = np.array([0., 0.])
+                            p1[ax] = ul1[ax] + x * d[ax]
+                            p2[ax] = p1[ax]
+                            p1[bx] = ul[bx]
+                            p2[bx] = br[bx]
+                            if p1[ax] < min(ul[ax], br[ax]) or p1[ax] > max(ul[ax], br[ax]):
+                                continue
 
-                            if '%.5f' % p1[0] == '%.5f' % p2[0]:  # check whether a vertical line - x axis
+                            if i == 1:  # should be largest scale grid
+                                # p1[0] = self._round_sig(p1[0], sig=4)
+                                # p1[1] = self._round_sig(p1[1], sig=4)
+                                # p2[0] = self._round_sig(p2[0], sig=4)
+                                # p2[1] = self._round_sig(p2[1], sig=4)
+                                d[0] = self._round_sig(d[0], sig=4)
+                                d[1] = self._round_sig(d[1], sig=4)
 
-                                # xLabel = str(int(p1[0])) if d[0] >=1 else self.XMode % p1[0]
-                                labelling[str(ax)].append((i, ax, valueToRatio(p1[0], axisLimitL, axisLimitR),
-                                                           p1[0], d[0]))
-                            else:
-                                # num = int(p1[1]) if d[1] >=1 else self.XMode % p1[1]
-                                labelling[str(ax)].append((i, ax, valueToRatio(p1[1], axisLimitB, axisLimitT),
-                                                           p1[1], d[1]))
+                                # if '%.5f' % p1[0] == '%.5f' % p2[0]:  # easy to round off as strings
+                                #     labelling[str(ax)].append((i, ax, valueToRatio(p1[0], self.axisL, self.axisR),
+                                #                                p1[0], d[0]))
+                                # else:
+                                #     labelling[str(ax)].append((i, ax, valueToRatio(p1[1], self.axisB, self.axisT),
+                                #                                p1[1], d[1]))
 
-                        # append the new points to the end of nparray
-                        gridGLList.indices = np.append(gridGLList.indices, (index, index + 1))
+                                if '%.5f' % p1[0] == '%.5f' % p2[0]:  # check whether a vertical line - x axis
 
-                        # gridGLList.vertices = np.append(gridGLList.vertices, [p1[0], p1[1], p2[0], p2[1]])
+                                    # xLabel = str(int(p1[0])) if d[0] >=1 else self.XMode % p1[0]
+                                    labelling[str(ax)].append((i, ax, valueToRatio(p1[0], axisLimitL, axisLimitR),
+                                                               p1[0], d[0]))
+                                else:
+                                    # num = int(p1[1]) if d[1] >=1 else self.XMode % p1[1]
+                                    labelling[str(ax)].append((i, ax, valueToRatio(p1[1], axisLimitB, axisLimitT),
+                                                               p1[1], d[1]))
 
-                        # gridGLList.vertices = np.append(gridGLList.vertices, (valueToRatio(p1[0], self.axisL, self.axisR),
-                        #                                                       valueToRatio(p1[1], self.axisB, self.axisT),
-                        #                                                       valueToRatio(p2[0], self.axisL, self.axisR),
-                        #                                                       valueToRatio(p2[1], self.axisB, self.axisT)))
+                            # append the new points to the end of nparray
+                            gridGLList.indices = np.append(gridGLList.indices, (index, index + 1))
 
-                        gridGLList.vertices = np.append(gridGLList.vertices, (valueToRatio(p1[0], axisLimitL, axisLimitR),
-                                                                              valueToRatio(p1[1], axisLimitB, axisLimitT),
-                                                                              valueToRatio(p2[0], axisLimitL, axisLimitR),
-                                                                              valueToRatio(p2[1], axisLimitB, axisLimitT)))
+                            # gridGLList.vertices = np.append(gridGLList.vertices, [p1[0], p1[1], p2[0], p2[1]])
 
-                        alpha = min([1.0, c / transparency])
-                        gridGLList.colors = np.append(gridGLList.colors, (r, g, b, alpha, r, g, b, alpha))
-                        gridGLList.numVertices += 2
-                        index += 2
+                            # gridGLList.vertices = np.append(gridGLList.vertices, (valueToRatio(p1[0], self.axisL, self.axisR),
+                            #                                                       valueToRatio(p1[1], self.axisB, self.axisT),
+                            #                                                       valueToRatio(p2[0], self.axisL, self.axisR),
+                            #                                                       valueToRatio(p2[1], self.axisB, self.axisT)))
 
-            # restrict the labelling to the maximum without overlap based on width
-            # should be dependent on font size though
-            while len(labelling['0']) > (self.w / 60.0):
-                #restrict X axis labelling
-                lStrings = labelling['0']
-                if check(lStrings[0]):
-                    labelling['0'] = lStrings[0::2]  # [ls for ls in lStrings if check(ls)]
-                else:
-                    labelling['0'] = lStrings[1::2]  # [ls for ls in lStrings if check(ls)]
+                            gridGLList.vertices = np.append(gridGLList.vertices, (valueToRatio(p1[0], axisLimitL, axisLimitR),
+                                                                                  valueToRatio(p1[1], axisLimitB, axisLimitT),
+                                                                                  valueToRatio(p2[0], axisLimitL, axisLimitR),
+                                                                                  valueToRatio(p2[1], axisLimitB, axisLimitT)))
 
-            # # clean up strings if in _intFormat
-            # if self.XMode == self._intFormat:
-            #     for ll in labelling['0'][::-1]:
-            #         if round(ll[3], 5) != int(ll[3]):
-            #             # remove the item
-            #             labelling['0'].remove(ll)
+                            alpha = min([1.0, c / transparency])
+                            gridGLList.colors = np.append(gridGLList.colors, (r, g, b, alpha, r, g, b, alpha))
+                            gridGLList.numVertices += 2
+                            index += 2
 
-            while len(labelling['1']) > (self.h / 20.0):
-                #restrict Y axis labelling
-                lStrings = labelling['1']
-                if check(lStrings[0]):
-                    labelling['1'] = lStrings[0::2]  # [ls for ls in lStrings if check(ls)]
-                else:
-                    labelling['1'] = lStrings[1::2]  # [ls for ls in lStrings if check(ls)]
+                # restrict the labelling to the maximum without overlap based on width
+                # should be dependent on font size though
+                while len(labelling['0']) > (self.w / 60.0):
+                    #restrict X axis labelling
+                    lStrings = labelling['0']
+                    if check(lStrings[0]):
+                        labelling['0'] = lStrings[0::2]  # [ls for ls in lStrings if check(ls)]
+                    else:
+                        labelling['0'] = lStrings[1::2]  # [ls for ls in lStrings if check(ls)]
 
-            # # clean up strings if in _intFormat
-            # if self.YMode == self._intFormat:
-            #     for ll in labelling['1'][::-1]:
-            #         if round(ll[3], 5) != int(ll[3]):
-            #             # remove the item
-            #             labelling['1'].remove(ll)
+                # # clean up strings if in _intFormat
+                # if self.XMode == self._intFormat:
+                #     for ll in labelling['0'][::-1]:
+                #         if round(ll[3], 5) != int(ll[3]):
+                #             # remove the item
+                #             labelling['0'].remove(ll)
+
+                while len(labelling['1']) > (self.h / 20.0):
+                    #restrict Y axis labelling
+                    lStrings = labelling['1']
+                    if check(lStrings[0]):
+                        labelling['1'] = lStrings[0::2]  # [ls for ls in lStrings if check(ls)]
+                    else:
+                        labelling['1'] = lStrings[1::2]  # [ls for ls in lStrings if check(ls)]
+
+                # # clean up strings if in _intFormat
+                # if self.YMode == self._intFormat:
+                #     for ll in labelling['1'][::-1]:
+                #         if round(ll[3], 5) != int(ll[3]):
+                #             # remove the item
+                #             labelling['1'].remove(ll)
 
         return labelling, labelsChanged
 
@@ -4443,6 +4503,9 @@ class CcpnGLWidget(QOpenGLWidget):
     def _glAxisUnitsChanged(self, aDict):
         if self.strip.isDeleted:
             return
+
+        # update the list of visible spectra
+        self._updateVisibleSpectrumViews()
 
         if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.spectrumDisplay:
 
@@ -4617,7 +4680,11 @@ class CcpnGLWidget(QOpenGLWidget):
                         self.stripIDString.renderMode = GLRENDERMODE_REBUILD
 
                     if GLNotifier.GLPEAKLISTS in triggers:
-                        for spectrumView in self.strip.spectrumViews:
+                        for spectrumView in self._ordering:                             # strip.spectrumViews:
+
+                            if spectrumView.isDeleted:
+                                continue
+
                             for peakListView in spectrumView.peakListViews:
                                 for peakList in targets:
                                     if peakList == peakListView.peakList:
@@ -4625,7 +4692,11 @@ class CcpnGLWidget(QOpenGLWidget):
                         # self.buildPeakLists()
 
                     if GLNotifier.GLPEAKLISTLABELS in triggers:
-                        for spectrumView in self.strip.spectrumViews:
+                        for spectrumView in self._ordering:                             # strip.spectrumViews:
+
+                            if spectrumView.isDeleted:
+                                continue
+
                             for peakListView in spectrumView.peakListViews:
                                 for peakList in targets:
                                     if peakList == peakListView.peakList:
@@ -4661,7 +4732,11 @@ class CcpnGLWidget(QOpenGLWidget):
 
                     if GLNotifier.GLINTEGRALLISTS in triggers:
 
-                        for spectrumView in self.strip.spectrumViews:
+                        for spectrumView in self._ordering:                             # strip.spectrumViews:
+
+                            if spectrumView.isDeleted:
+                                continue
+
                             for integralListView in spectrumView.integralListViews:
 
                                 if integralListView in self._GLIntegralLists.keys():
@@ -4669,14 +4744,22 @@ class CcpnGLWidget(QOpenGLWidget):
 
                     if GLNotifier.GLINTEGRALLISTLABELS in triggers:
 
-                        for spectrumView in self.strip.spectrumViews:
+                        for spectrumView in self._ordering:                             # strip.spectrumViews:
+
+                            if spectrumView.isDeleted:
+                                continue
+
                             for integralListView in spectrumView.integralListViews:
 
                                 if integralListView in self._GLIntegralLists.keys():
                                     integralListView.buildLabels = True
 
                     if GLNotifier.GLMULTIPLETLISTS in triggers:
-                        for spectrumView in self.strip.spectrumViews:
+                        for spectrumView in self._ordering:                             # strip.spectrumViews:
+
+                            if spectrumView.isDeleted:
+                                continue
+
                             for multipletListView in spectrumView.multipletListViews:
                                 for multipletList in targets:
                                     if multipletList == multipletListView.multipletList:
@@ -4684,7 +4767,11 @@ class CcpnGLWidget(QOpenGLWidget):
                         # self.buildMultipletLists()
 
                     if GLNotifier.GLMULTIPLETLISTLABELS in triggers:
-                        for spectrumView in self.strip.spectrumViews:
+                        for spectrumView in self._ordering:                             # strip.spectrumViews:
+
+                            if spectrumView.isDeleted:
+                                continue
+
                             for multipletListView in spectrumView.multipletListViews:
                                 for multipletList in targets:
                                     if multipletList == multipletListView.multipletList:
@@ -4917,7 +5004,11 @@ class CcpnGLWidget(QOpenGLWidget):
     def _selectPeaksInRegion(self, xPositions, yPositions, zPositions):
         peaks = list(self.current.peaks)
 
-        for spectrumView in self.strip.spectrumViews:
+        for spectrumView in self._ordering:                             # strip.spectrumViews:
+
+            if spectrumView.isDeleted:
+                continue
+
             for peakListView in spectrumView.peakListViews:
                 if not peakListView.isVisible() or not spectrumView.isVisible():
                     continue
@@ -4959,7 +5050,11 @@ class CcpnGLWidget(QOpenGLWidget):
     def _selectMultipletsInRegion(self, xPositions, yPositions, zPositions):
         multiplets = list(self.current.multiplets)
 
-        for spectrumView in self.strip.spectrumViews:
+        for spectrumView in self._ordering:                             # strip.spectrumViews:
+
+            if spectrumView.isDeleted:
+                continue
+
             for multipletListView in spectrumView.multipletListViews:
                 if not multipletListView.isVisible() or not spectrumView.isVisible():
                     continue

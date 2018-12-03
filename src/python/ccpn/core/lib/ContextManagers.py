@@ -782,7 +782,7 @@ def deleteObject():
                                                 topObjectsToCheck=(self._wrappedData.topObject,),
                                                 obj=self, trigger='create', preExecution=False,
                                                 objsToBeUnDeleted=apiObjectsCreated),
-                            redo=BlankedPartial(self._wrappedData.delete,
+                            redo=BlankedPartial(self.delete,
                                                 obj=self, trigger='delete', preExecution=True)
                             )
 

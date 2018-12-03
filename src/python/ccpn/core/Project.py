@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import functools
 import os
 import typing
-from typing import Sequence, Tuple
+from typing import Sequence, Tuple, Union
 import operator
 from collections import OrderedDict
 from time import time
@@ -1396,7 +1396,7 @@ class Project(AbstractWrapperObject):
 
     @logCommand(get='self')
     def newNmrChain(self, shortName: str = None, isConnected: bool = False, label: str = '?',
-                     comment: str = None):
+                    comment: str = None):
         """Create new NmrChain. Setting isConnected=True produces a connected NmrChain.
 
         :param str shortName: shortName for new nmrChain (optional, defaults to '@ijk' or '#ijk',  ijk positive integer
@@ -1416,10 +1416,29 @@ class Project(AbstractWrapperObject):
 
         If shortName is None returns a new NmrChain with name starting with '@'
 
-        :param shortName:
+        :param shortName: string name of required nmrAtom
         :return: an NmrChain instance.
         """
         from ccpn.core.NmrChain import _fetchNmrChain
 
         return _fetchNmrChain(self, shortName=shortName)
 
+    @logCommand(get='self')
+    def produceNmrAtom(self, atomId: str = None, chainCode: str = None,
+                       sequenceCode: Union[int, str] = None,
+                       residueType: str = None, name: str = None):
+        """Get chainCode, sequenceCode, residueType and atomName from dot-separated atomId or Pid
+            or explicit parameters, and find or create an NmrAtom that matches
+            Empty chainCode gets NmrChain:@- ; empty sequenceCode get a new NmrResidue
+
+        :param atomId:
+        :param chainCode:
+        :param sequenceCode:
+        :param residueType:
+        :param name: new or existing nmrAtom, matching parameters
+        :return:
+        """
+        from ccpn.core.NmrAtom import _produceNmrAtom
+
+        return _produceNmrAtom(self, atomId=atomId, chainCode=chainCode,
+                               sequenceCode=sequenceCode, residueType=residueType, name=name)

@@ -190,7 +190,7 @@ class IntegralList(AbstractWrapperObject):
         """
         super()._finaliseAction(action=action)
 
-        if action in ['change']:
+        if action in ['change', 'create']:
             for ilv in self.integralListViews:
                 ilv._finaliseAction(action=action)
 

@@ -207,7 +207,7 @@ class MultipletList(AbstractWrapperObject):
         """
         super()._finaliseAction(action=action)
 
-        if action in ['change']:
+        if action in ['change', 'create']:
             for mlv in self.multipletListViews:
                 mlv._finaliseAction(action=action)
 

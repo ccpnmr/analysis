@@ -352,6 +352,17 @@ class AbstractWrapperObject(NotifierBase):
         for child in node._childClasses:
             self._printClassTree(child, tabs=tabs + 1)
 
+    def _getChildrenByClass(self, klass) -> list:
+        """GWV: Convenience: get the children of type klass of self.
+        klass is string (e.g. 'Peak') or V3 core class
+        returns empty list if klass is not a child of self
+        """
+        klass = klass if isinstance(klass, str) else getattr(klass, 'className')
+        result = self._getChildren(classes=[klass]).get(klass)
+        if result is None:
+            return []
+        return result
+
     def _getChildren(self, classes=['all']) -> OrderedDict:
         """GWV; Return a dict of (className, ChildrenList) pairs
         classes is either 'gui' or 'nonGui' or 'all' or explicit enumeration of classNames
@@ -526,10 +537,12 @@ class AbstractWrapperObject(NotifierBase):
 
     @deleteObject()
     def delete(self):
-        """Delete object, with all contained objects and underlying data."""
+        """Delete object, with all contained objects and underlying data.
+        """
 
         # NBNB clean-up of wrapper structure is done via notifiers.
         # NBNB some child classes must override this function
+        self.deleteAllNotifiers()
         self._wrappedData.delete()
 
     def getByPid(self, pid: str):
@@ -542,7 +555,7 @@ class AbstractWrapperObject(NotifierBase):
             return None
 
         obj = None
-        pid = Pid(pid)
+        pid = Pid.Pid(pid)
         dd = self._project._pid2Obj.get(pid.type)
         if dd is not None:
             obj = dd.get(pid.id)

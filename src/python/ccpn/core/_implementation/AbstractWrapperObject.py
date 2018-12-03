@@ -542,7 +542,7 @@ class AbstractWrapperObject(NotifierBase):
             return None
 
         obj = None
-        pid = Pid(pid)
+        pid = Pid.Pid(pid)
         dd = self._project._pid2Obj.get(pid.type)
         if dd is not None:
             obj = dd.get(pid.id)

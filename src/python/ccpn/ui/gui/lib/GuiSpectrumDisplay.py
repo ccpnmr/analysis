@@ -308,9 +308,12 @@ class GuiSpectrumDisplay(CcpnModule):
         return self._spectrumDisplaySettings.getValues()
 
     def resizeEvent(self, ev):
+        if self.isDeleted:
+            return
+
         # resize the contents of the stripFrame
         self.setColumnStretches(stretchValue=True, widths=False)
-        super(GuiSpectrumDisplay, self).resizeEvent(ev)
+        super().resizeEvent(ev)
 
     def _toolbarChange(self, data):
         trigger = data[Notifier.TRIGGER]

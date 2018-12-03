@@ -78,7 +78,7 @@ try:
     from OpenGL import GL, GLU, GLUT
 except ImportError:
     app = QtWidgets.QApplication(sys.argv)
-    QtWidgets.QMessageBox.critical(None, "OpenGL hellogl",
+    QtWidgets.QMessageBox.critical(None, "OpenGL CCPN",
                                    "PyOpenGL must be installed to run this example.")
     sys.exit(1)
 

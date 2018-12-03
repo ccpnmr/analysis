@@ -450,11 +450,13 @@ class SideBar(QtWidgets.QTreeWidget, Base, NotifierBase):
         NBNB TBD How about refactoring so that we have a shortClassName:Popup dictionary?"""
         dataPid = item.data(0, QtCore.Qt.DisplayRole)
         project = self.project
-        obj = project.getByPid(dataPid)
+
+        # trap creation of new items form sideBar
+        obj = project.getByPid(dataPid) if Pid.Pid.isValid(dataPid) else None
 
         if obj is not None:
             self.raisePopup(obj, item)
-        elif item.data(0, QtCore.Qt.DisplayRole).startswith('<New'):
+        elif dataPid.startswith('<New'):
             self._createNewObject(item)
 
         else:
@@ -1316,7 +1318,7 @@ class SideBar(QtWidgets.QTreeWidget, Base, NotifierBase):
 
         else:
 
-            itemParent = self.project.getByPid(item.parent().text(0))
+            itemParent = self.project.getByPid(item.parent().text(0)) if Pid.Pid.isValid(item.parent().text(0)) else None
 
             funcName = None
             if itemParent is None:

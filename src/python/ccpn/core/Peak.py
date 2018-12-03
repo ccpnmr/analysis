@@ -567,6 +567,14 @@ class Peak(AbstractWrapperObject):
 
         self._wrappedData.integral = integral._wrappedData if integral else None
 
+    def _finaliseAction(self, action: str):
+        """Subclassed to handle associated multiplets
+        """
+        super()._finaliseAction(action=action)
+
+        if action in ['change', 'create', 'delete']:
+            for mt in self.multiplets:
+                mt._finaliseAction(action=action)
 
 #=========================================================================================
 
@@ -604,7 +612,6 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
 
     :return: a new Peak instance
     """
-    #EJB 20181126: minor refactoring
 
     apiPeakList = self._apiPeakList
     apiPeak = apiPeakList.newPeak(height=height, volume=volume,

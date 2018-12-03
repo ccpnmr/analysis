@@ -1857,6 +1857,12 @@ class GuiStrip(Frame):
                                              int(position.y())))
         self.contextMenuPosition = self.current.cursorPosition
 
+    def _updateVisibility(self):
+        """Update visibility list in the OpenGL
+        """
+        self._CcpnGLWidget.updateVisibleSpectrumViews()
+        print('>>>_updateVisibility')
+
     # def peakPickPosition(self, inPosition) -> Tuple[Peak]:
     #     """
     #     Pick peak at position for all spectra currently displayed in strip

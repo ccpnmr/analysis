@@ -76,8 +76,9 @@ from ccpn.core.lib import Pid
 from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple, _getProjection
 from ccpn.core.lib.Cache import cached
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter
 from ccpn.util.Logging import getLogger
+from ccpn.core.lib.ContextManagers import logCommandBlock
 
 from ccpn.util.Common import axisCodeMapping
 from ccpn.util.Logging import getLogger
@@ -1661,12 +1662,15 @@ class Spectrum(AbstractWrapperObject):
                 pass
         return newSpectrum
 
+    # @logCommand(get='self')
+    # @deleteObject()
     @cached.clear(PLANEDATACACHE)  # Check if there was a planedata cache, and if so, clear it
     @cached.clear(SLICEDATACACHE)  # Check if there was a slicedata cache, and if so, clear it
     def delete(self):
         """Delete Spectrum"""
-        self._startCommandEchoBlock('delete')
-        try:
+        with logCommandBlock(get='self') as log:
+            log('delete')
+
             specDisplays = []
             specViews = []
             for sp in self.spectrumViews:
@@ -1677,9 +1681,6 @@ class Spectrum(AbstractWrapperObject):
             self._wrappedData.delete()
             for sd in specViews:
                 sd[0]._removeOrderedSpectrumViewIndex(sd[1])
-
-        finally:
-            self._endCommandEchoBlock()
 
     @property
     def temperature(self):
@@ -1706,14 +1707,19 @@ class Spectrum(AbstractWrapperObject):
 
     def rename(self, value: str):
         """Rename Spectrum, changing its name and Pid"""
-        if value:
-            self._startCommandEchoBlock('rename', value)
-            try:
-                self._wrappedData.name = value
-            finally:
-                self._endCommandEchoBlock()
-        else:
-            raise ValueError("Spectrum name must be set")
+        if not isinstance(value, str):
+            raise TypeError("Spectrum name must be a string")  # ejb
+        elif not value:
+            raise ValueError("Spectrum name must be set")  # ejb
+        elif Pid.altCharacter in value:
+            raise ValueError("Character %s not allowed in Spectrum name" % Pid.altCharacter)
+        previous = self.getByRelativeId(value)
+        if previous not in (None, self):
+            raise ValueError("%s already exists" % previous.longPid)
+
+        with logCommandBlock(get='self') as log:
+            log('rename')
+            self._wrappedData.name = value
 
     def _finaliseAction(self, action: str):
         """Subclassed to handle associated spectrumViews instances

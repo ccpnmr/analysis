@@ -131,9 +131,9 @@ class GLLabelling():
                        if not lv.isDeleted]
         self._visibleListViews = [(lv, specView) for lv, specView in self._listViews
                                   if lv.isVisible()
-                                  and specView.isVisible()
-                                  and lv in self._GLSymbols.keys()]
-
+                                  and specView.isVisible()]
+                                  # and lv in self._GLSymbols.keys()]
+        self._ordering = spectrumViews
 
 class GLpeakListMethods():
     """Class of methods common to 1d and Nd peaks
@@ -312,7 +312,11 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             for objListView in self.listViews(pls):
                 if objListView in self._GLSymbols.keys():
                     for spectrumView in spectrum.spectrumViews:
-                        if spectrumView in self.strip.spectrumViews:
+                        if spectrumView in self._ordering:         # strip.spectrumViews:
+
+                            if spectrumView.isDeleted:
+                                continue
+
                             self._removeSymbol(spectrumView, objListView, obj)
                             self._updateHighlightedSymbols(spectrumView, objListView)
 
@@ -324,7 +328,11 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             for objListView in self.listViews(pls):
                 if objListView in self._GLSymbols.keys():
                     for spectrumView in spectrum.spectrumViews:
-                        if spectrumView in self.strip.spectrumViews:
+                        if spectrumView in self._ordering:         # strip.spectrumViews:
+
+                            if spectrumView.isDeleted:
+                                continue
+
                             self._appendSymbol(spectrumView, objListView, obj)
                             self._updateHighlightedSymbols(spectrumView, objListView)
 
@@ -340,7 +348,11 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             for objListView in self.listViews(pls):
                 if objListView in self._GLSymbols.keys():
                     for spectrumView in spectrum.spectrumViews:
-                        if spectrumView in self.strip.spectrumViews:
+                        if spectrumView in self._ordering:         # strip.spectrumViews:
+
+                            if spectrumView.isDeleted:
+                                continue
+
                             self._removeSymbol(spectrumView, objListView, obj)
                             self._appendSymbol(spectrumView, objListView, obj)
                             self._updateHighlightedSymbols(spectrumView, objListView)
@@ -362,7 +374,11 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             for objListView in self.listViews(pls):
                 if objListView in self._GLLabels.keys():
                     for spectrumView in spectrum.spectrumViews:
-                        if spectrumView in self.strip.spectrumViews:
+                        if spectrumView in self._ordering:         # strip.spectrumViews:
+
+                            if spectrumView.isDeleted:
+                                continue
+
                             drawList = self._GLLabels[objListView]
                             self._appendLabel(spectrumView, objListView, drawList.stringList, obj)
                             self._rescaleLabels(spectrumView, objListView, drawList)
@@ -1119,7 +1135,11 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
     def updateHighlightSymbols(self):
         """Respond to an update highlight notifier and update the highlighted symbols/labels
         """
-        for spectrumView in self.strip.spectrumViews:
+        for spectrumView in self._ordering:         # strip.spectrumViews:
+
+            if spectrumView.isDeleted:
+                continue
+
             # for peakListView in spectrumView.peakListViews:
             for objListView in self.listViews(spectrumView):
 
@@ -1130,7 +1150,11 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
     def updateAllSymbols(self):
         """Respond to update all notifier
         """
-        for spectrumView in self.strip.spectrumViews:
+        for spectrumView in self._ordering:         # strip.spectrumViews:
+
+            if spectrumView.isDeleted:
+                continue
+
             # for peakListView in spectrumView.peakListViews:
             for objListView in self.listViews(spectrumView):
 
@@ -1608,7 +1632,11 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             return
 
         # list through the valid peakListViews attached to the strip - including undeleted
-        for spectrumView in self.strip.spectrumViews:
+        for spectrumView in self._ordering:         # strip.spectrumViews:
+
+            if spectrumView.isDeleted:
+                continue
+
             # for peakListView in spectrumView.peakListViews:
             for objListView in self.listViews(spectrumView):  # spectrumView.peakListViews:
 
@@ -1630,7 +1658,11 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             return
 
         _buildList = []
-        for spectrumView in self.strip.spectrumViews:
+        for spectrumView in self._ordering:         # strip.spectrumViews:
+
+            if spectrumView.isDeleted:
+                continue
+
             # for peakListView in spectrumView.peakListViews:
             for objListView in self.listViews(spectrumView):
 
@@ -1732,6 +1764,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
         # # loop through the attached objListViews to the strip
         # for spectrumView in self._GLParent._ordering:  #self._parent.spectrumViews:
+        #         if spectrumView.isDeleted:
+        #             continue
         #     # for peakListView in spectrumView.peakListViews:
         #     for objListView in self.listViews(spectrumView):
         #         if spectrumView.isVisible() and objListView.isVisible():
@@ -1754,6 +1788,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
         # # loop through the attached peakListViews to the strip
         # for spectrumView in self._GLParent._ordering:  #self._parent.spectrumViews:
+        #         if spectrumView.isDeleted:
+        #             continue
         #     # for peakListView in spectrumView.peakListViews:
         #     for objListView in self.listViews(spectrumView):
         #         if spectrumView.isVisible() and objListView.isVisible():
@@ -2582,7 +2618,9 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
         self.buildSymbols()
 
         # # loop through the attached integralListViews to the strip
-        # for spectrumView in self._GLParent._ordering:  #self.strip.spectrumViews:
+        # for spectrumView in self._GLParent._ordering:  #self._ordering:         # strip.spectrumViews:
+        #         if spectrumView.isDeleted:
+        #             continue
         #     for integralListView in spectrumView.integralListViews:
         #         if spectrumView.isVisible() and integralListView.isVisible():
 

@@ -62,6 +62,9 @@ from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrChain import NmrChain
 from ccpn.ui.gui.lib.Strip import GuiStrip
+from ccpn.ui._implementation.PeakListView import PeakListView
+from ccpn.ui._implementation.IntegralListView import IntegralListView
+from ccpn.ui._implementation.MultipletListView import MultipletListView
 from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySettings
 from ccpn.ui._implementation.SpectrumView import SpectrumView
@@ -243,8 +246,8 @@ class GuiSpectrumDisplay(CcpnModule):
 
         # notifier to respond to items being dropped onto the stripFrame
         self.droppedNotifier = self.setGuiNotifier(self.stripFrame,
-                                           [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
-                                           self._processDroppedItems)
+                                                   [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
+                                                   self._processDroppedItems)
 
         # GWV: This assures that a 'hoverbar' is visible over the strip when dragging
         # the module to another location
@@ -254,15 +257,33 @@ class GuiSpectrumDisplay(CcpnModule):
         self.stripScaleFactor = 1.0
 
         self._toolbarNotifier = self.setNotifier(self.project,
-                                         [Notifier.CHANGE],
-                                         'SpectrumDisplay',
-                                         self._toolbarChange)
+                                                 [Notifier.CHANGE],
+                                                 'SpectrumDisplay',
+                                                 self._toolbarChange)
 
         self._spectrumViewNotifier = self.setNotifier(self.project,
-                                              [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
-                                              SpectrumView.className,
-                                              self._spectrumViewChanged,
-                                              onceOnly=True)
+                                                      [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
+                                                      SpectrumView.className,
+                                                      self._spectrumViewChanged,
+                                                      onceOnly=True)
+
+        self._peakListViewNotifier = self.setNotifier(self.project,
+                                                  [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
+                                                  PeakListView.className,
+                                                  self._listViewChanged,
+                                                  onceOnly=True)
+
+        self._integralListViewNotifier = self.setNotifier(self.project,
+                                                  [Notifier.CREATE, Notifier.DELETE],
+                                                  IntegralListView.className,
+                                                  self._listViewChanged,
+                                                  onceOnly=True)
+
+        self._multipletListViewNotifier = self.setNotifier(self.project,
+                                                  [Notifier.CREATE, Notifier.DELETE],
+                                                  MultipletListView.className,
+                                                  self._listViewChanged,
+                                                  onceOnly=True)
 
     # GWV 20181124:
     # def _unRegisterNotifiers(self):
@@ -274,14 +295,20 @@ class GuiSpectrumDisplay(CcpnModule):
     def _spectrumViewChanged(self, data):
         """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame
         """
+        for strip in self.strips:
+            strip._updateVisibility()
+
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
         GLSignals = GLNotifier(parent=None)
         GLSignals._emitAxisUnitsChanged(source=None, strip=self.strips[0], dataDict={})
 
     def _spectrumViewVisibleChanged(self):
-        """Respond to a visibleChanged in one of the spectrumViews, don't know which though
+        """Respond to a visibleChanged in one of the spectrumViews.
         """
+        for strip in self.strips:
+            strip._updateVisibility()
+
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
         GLSignals = GLNotifier(parent=None)
@@ -302,6 +329,17 @@ class GuiSpectrumDisplay(CcpnModule):
         GLSignals = GLNotifier(parent=None)
         GLSignals._emitAxisUnitsChanged(source=None, strip=self.strips[0], dataDict=dataDict)
 
+    def _listViewChanged(self, data):
+        """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame
+        """
+        for strip in self.strips:
+            strip._updateVisibility()
+
+        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
+        GLSignals = GLNotifier(parent=None)
+        GLSignals.emitPaintEvent()
+
     def getSettings(self):
         """get the settings dict from the settingsWidget
         """
@@ -316,6 +354,8 @@ class GuiSpectrumDisplay(CcpnModule):
         super().resizeEvent(ev)
 
     def _toolbarChange(self, data):
+        """Respond to a change in the spectrum Icon toolbar denoting that clicked or spectrum created/deleted
+        """
         trigger = data[Notifier.TRIGGER]
         if trigger == Notifier.CHANGE:
             # self.spectrumToolBar._toolbarChange(self.strips[0].orderedSpectrumViews())
@@ -323,6 +363,10 @@ class GuiSpectrumDisplay(CcpnModule):
             if data[Notifier.OBJECT] == self:
                 specViews = data[Notifier.OBJECT].spectrumViews
                 self.spectrumToolBar._toolbarChange(self.orderedSpectrumViews(specViews))
+
+                # flag that the listViews need to be updated
+                for strip in self.strips:
+                    strip._updateVisibility()
 
                 # spawn a redraw of the GL windows
                 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier

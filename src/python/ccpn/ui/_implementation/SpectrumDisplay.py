@@ -344,7 +344,7 @@ class SpectrumDisplay(AbstractWrapperObject):
 @newObject(SpectrumDisplay)
 def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 'Y',
                         title: str = None, window: Window = None, comment: str = None,
-                        independentStrips=False, nmrResidue=None, serial=None):
+                        independentStrips=False, nmrResidue=None, serial: int = None):
     """Create new SpectrumDisplay
 
     :param axisCodes:

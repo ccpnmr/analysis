@@ -147,7 +147,7 @@ class SpectrumGroup(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(SpectrumGroup)
-def _newSpectrumGroup(self: Project, name: str, spectra=(), serial=None) -> SpectrumGroup:
+def _newSpectrumGroup(self: Project, name: str, spectra=(), serial: int = None) -> SpectrumGroup:
     """Create new SpectrumGroup
 
     :param name: name for the new SpectrumGroup

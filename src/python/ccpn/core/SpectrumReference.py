@@ -280,7 +280,7 @@ def _newSpectrumReference(self: Spectrum, dimension: int, spectrometerFrequency:
                           isotopeCodes: typing.Sequence[str], axisCode: str = None, measurementType: str = 'Shift',
                           maxAliasedFrequency: float = None, minAliasedFrequency: float = None,
                           foldingMode: str = None, axisUnit: str = None, referencePoint: float = 0.0,
-                          referenceValue: float = 0.0) -> SpectrumReference:
+                          referenceValue: float = 0.0, serial: int = None) -> SpectrumReference:
     """Create new SpectrumReference within Spectrum"""
     dataSource = self._wrappedData
     dataDim = dataSource.findFirstDataDim(dim=dimension)

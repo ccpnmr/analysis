@@ -235,7 +235,7 @@ class Atom(AbstractWrapperObject):
 # Connections to parents:
 #=========================================================================================
 
-def _newAtom(self: Residue, name: str, elementSymbol: str = None) -> 'Atom':
+def _newAtom(self: Residue, name: str, elementSymbol: str = None, serial: int = None) -> 'Atom':
     """Create new Atom within Residue. If elementSymbol is None, it is derived from the name"""
     lastAtom = self.getAtom(name)
     if lastAtom is not None:

@@ -310,7 +310,7 @@ class Sample(AbstractWrapperObject):
 def _newSample(self: Project, name: str = None, pH: float = None, ionicStrength: float = None,
                amount: float = None, amountUnit: str = None, isVirtual: bool = False, isHazardous: bool = None,
                creationDate: datetime = None, batchIdentifier: str = None, plateIdentifier: str = None,
-               rowNumber: int = None, columnNumber: int = None, comment: str = None, serial=None) -> Sample:
+               rowNumber: int = None, columnNumber: int = None, comment: str = None, serial: int = None) -> Sample:
     """Create new Sample.
 
     :param name:

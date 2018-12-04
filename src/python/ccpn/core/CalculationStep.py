@@ -208,10 +208,9 @@ del getter
 def _newCalculationStep(self: DataSet, programName: str = None, programVersion: str = None,
                         scriptName: str = None, script: str = None,
                         inputDataUuid: str = None, outputDataUuid: str = None,
-                        inputDataSet: DataSet = None, outputDataSet: DataSet = None, serial=None) -> CalculationStep:
+                        inputDataSet: DataSet = None, outputDataSet: DataSet = None, serial: int = None) -> CalculationStep:
     """Create new CalculationStep within DataSet.
 
-    :param self:
     :param programName:
     :param programVersion:
     :param scriptName:

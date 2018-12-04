@@ -293,7 +293,7 @@ def _newRestraintList(self: DataSet, restraintType, name: str = None, origin: st
                       tensorMagnitude: float = 0.0, tensorRhombicity: float = 0.0,
                       tensorIsotropicValue: float = 0.0, tensorChainCode: str = None,
                       tensorSequenceCode: str = None, tensorResidueType: str = None,
-                      serial=None, restraintItemLength=None) -> RestraintList:
+                      serial: int = None, restraintItemLength=None) -> RestraintList:
     """Create new RestraintList of type restraintType within DataSet.
 
     :param self:

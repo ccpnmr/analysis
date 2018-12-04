@@ -206,7 +206,7 @@ class Data(AbstractWrapperObject):
 #=========================================================================================
 
 def _newData(self: DataSet, name: str, attachedObjectPid: str = None,
-             attachedObject: AbstractWrapperObject = None) -> Data:
+             attachedObject: AbstractWrapperObject = None, serial: int = None) -> Data:
     """Create new Data within DataSet"""
 
     defaults = {'attachedObjectPid': None}

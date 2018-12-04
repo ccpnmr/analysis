@@ -1835,7 +1835,7 @@ class Spectrum(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(Spectrum)
-def _newSpectrum(self: Project, name: str) -> Spectrum:
+def _newSpectrum(self: Project, name: str, serial: int = None) -> Spectrum:
     """Creation of new Spectrum NOT IMPLEMENTED.
     Use Project.loadData or Project.createDummySpectrum instead"""
 
@@ -1844,7 +1844,7 @@ def _newSpectrum(self: Project, name: str) -> Spectrum:
 
 @newObject(Spectrum)
 def _createDummySpectrum(self: Project, axisCodes: Sequence[str], name=None,
-                         chemicalShiftList=None) -> Spectrum:
+                         chemicalShiftList=None, serial: int = None) -> Spectrum:
     """
     Make dummy spectrum from isotopeCodes list - without data and with default parameters.
 

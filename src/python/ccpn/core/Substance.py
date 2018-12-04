@@ -645,7 +645,7 @@ def _newSubstance(self: Project, name: str = None, labelling: str = None, substa
                   empiricalFormula: str = None, molecularMass: float = None, comment: str = None,
                   synonyms: typing.Sequence[str] = (), atomCount: int = 0, bondCount: int = 0,
                   ringCount: int = 0, hBondDonorCount: int = 0, hBondAcceptorCount: int = 0,
-                  polarSurfaceArea: float = None, logPartitionCoefficient: float = None
+                  polarSurfaceArea: float = None, logPartitionCoefficient: float = None, serial: int = None
                   ) -> Substance:
     """Create new substance WITHOUT storing the sequence internally
     (and hence not suitable for making chains). SubstanceType defaults to 'Molecule'.

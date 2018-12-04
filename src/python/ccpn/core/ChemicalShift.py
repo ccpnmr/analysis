@@ -166,7 +166,7 @@ class ChemicalShift(AbstractWrapperObject):
 @newObject(ChemicalShift)
 def _newChemicalShift(self: ChemicalShiftList, value: float, nmrAtom: NmrAtom,
                       valueError: float = 0.0, figureOfMerit: float = 1.0,
-                      comment: str = None, serial=None) -> ChemicalShift:
+                      comment: str = None, serial: int = None) -> ChemicalShift:
     """Create new ChemicalShift within ChemicalShiftList.
 
     :param self:

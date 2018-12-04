@@ -151,7 +151,7 @@ class Complex(AbstractWrapperObject):
 # Connections to parents:
 #=========================================================================================
 
-def _newComplex(self: Project, name: str, chains=()) -> Complex:
+def _newComplex(self: Project, name: str, chains=(), serial: int = None) -> Complex:
     """Create new Complex"""
 
     if name and Pid.altCharacter in name:

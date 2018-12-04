@@ -124,7 +124,7 @@ import json
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
 import re
-
+# from ccpn.util.decorators import profile
 
 try:
     from OpenGL import GL, GLU, GLUT
@@ -133,6 +133,7 @@ except ImportError:
     QtWidgets.QMessageBox.critical(None, "OpenGL CCPN",
                                    "PyOpenGL must be installed to run this example.")
     sys.exit(1)
+
 
 UNITS_PPM = 'ppm'
 UNITS_HZ = 'Hz'
@@ -2111,6 +2112,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._GLIntegrals.setListViews(self._ordering)
         self._GLMultiplets.setListViews(self._ordering)
 
+    # @profile
     def paintGL(self):
         w = self.w
         h = self.h
@@ -2542,6 +2544,9 @@ class CcpnGLWidget(QOpenGLWidget):
                                                      color=labelColour, GLContext=self,
                                                      obj=None))
 
+                # for lb in self._axisXLabelling:
+                #     lb.defineTextArrayVBO(enableVBO=True)
+
             self._axisYLabelling = []
 
             if self._drawRightAxis:
@@ -2581,6 +2586,9 @@ class CcpnGLWidget(QOpenGLWidget):
                                                      color=labelColour, GLContext=self,
                                                      obj=None))
 
+                # for lb in self._axisYLabelling:
+                #     lb.defineTextArrayVBO(enableVBO=True)
+
     def drawAxisLabels(self):
         # draw axes labelling
 
@@ -2600,7 +2608,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.globalGL._shaderProgramTex.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
                 for lb in self._axisXLabelling:
-                    lb.drawTextArray()
+                    lb.drawTextArrayVBO(enableVBO=True)
 
             if self._drawRightAxis:
                 # put the axis labels into the right bar
@@ -2615,7 +2623,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.globalGL._shaderProgramTex.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
                 for lb in self._axisYLabelling:
-                    lb.drawTextArray()
+                    lb.drawTextArrayVBO(enableVBO=True)
 
     def removeInfiniteLine(self, line):
         if line in self._infiniteLines:
@@ -2921,7 +2929,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # strings are generated when the marksRulers are modified
         for mark in self._marksAxisCodes:
-            mark.drawTextArray()
+            mark.drawTextArrayVBO(enableVBO=True)
 
     def _scaleAxisToRatio(self, values):
         return [(values[0] - self.axisL) / (self.axisR - self.axisL),
@@ -3072,15 +3080,15 @@ class CcpnGLWidget(QOpenGLWidget):
             self._oldStripIDLabel = self.stripIDLabel
 
         # draw the strip ID to the screen
-        self.stripIDString.drawTextArray()
+        self.stripIDString.drawTextArrayVBO(enableVBO=True)
 
         if self.AXISLOCKEDBUTTON:
             if self._axisLocked:
                 # self._lockStringTrue.setStringOffset((self.axisL, self.axisB))
-                self._lockStringTrue.drawTextArray()
+                self._lockStringTrue.drawTextArrayVBO(enableVBO=True)
             else:
                 # self._lockStringFalse.setStringOffset((self.axisL, self.axisB))
-                self._lockStringFalse.drawTextArray()
+                self._lockStringFalse.drawTextArrayVBO(enableVBO=True)
 
     def _rescaleRegions(self):
         self._externalRegions._rescale()
@@ -3458,9 +3466,9 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.underMouse():
             self.buildMouseCoords()
             # draw the mouse coordinates to the screen
-            self.mouseString.drawTextArray()
+            self.mouseString.drawTextArrayVBO(enableVBO=True)
             if self._drawDeltaOffset and self.diffMouseString:
-                self.diffMouseString.drawTextArray()
+                self.diffMouseString.drawTextArrayVBO(enableVBO=True)
 
     def drawSelectionBox(self):
         # should really use the proper VBOs for this

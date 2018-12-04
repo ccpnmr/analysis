@@ -221,7 +221,7 @@ class GLString(GLVertexArray):
                  ox=0.0, oy=0.0,
                  angle=0.0, width=None, height=None, GLContext=None, blendMode=True,
                  clearArrays=False):
-        super(GLString, self).__init__(renderMode=GLRENDERMODE_DRAW, blendMode=blendMode,
+        super().__init__(renderMode=GLRENDERMODE_DRAW, blendMode=blendMode,
                                        GLContext=GLContext, drawMode=GL.GL_TRIANGLES,
                                        dimension=2, clearArrays=clearArrays)
         if text is None:
@@ -323,16 +323,19 @@ class GLString(GLVertexArray):
         self.offsets = np.array((x, y) * self.numVertices, dtype=np.float32)
         self.stringOffset = None        # (ox, oy)
 
+        # create VBOs from the arrays
+        self.defineTextArrayVBO(enableVBO=True)
+
         # total width of text - probably don't need
         # width = penX - glyph.advance[0] / 64.0 + glyph.size[0]
 
     def drawTextArray(self):
-        # TODO:ED need to sort out the speed of this
-        # GL.glActiveTexture(GL.GL_TEXTURE0)
-        # GL.glBindTexture(GL.GL_TEXTURE_2D, self.font.textureId)
-
         self._GLContext.globalGL._shaderProgramTex.setGLUniform1i('texture', self.font.activeTextureNum)
-        super(GLString, self).drawTextArray()
+        super().drawTextArray()
+
+    def drawTextArrayVBO(self, enableVBO=False):
+        self._GLContext.globalGL._shaderProgramTex.setGLUniform1i('texture', self.font.activeTextureNum)
+        super().drawTextArrayVBO(enableVBO=enableVBO)
 
     def setColour(self, col):
         self.colors = np.array(col * self.numVertices, dtype=np.float32)

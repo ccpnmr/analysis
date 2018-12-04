@@ -600,7 +600,7 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
     - assignedNmrAtoms - A tuple of all (e.g.) assignment triplets for a 3D spectrum
     - dimensionNmrAtoms - A tuple of tuples of assignments, one for each dimension
 
-    See the Peak class for details
+    See the Peak class for details.
 
     :param height: height of the peak (related attributes: volume, volumeError, lineWidths)
     :param volume:
@@ -614,9 +614,8 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
     :param pointPosition:
     :param boxWidths:
     :param lineWidths:
-    :param serial:
-
-    :return: a new Peak instance
+    :param serial: optional serial number.
+    :return: a new Peak instance.
     """
 
     apiPeakList = self._apiPeakList

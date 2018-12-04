@@ -34,9 +34,11 @@ from ccpn.core.PseudoDimension import PseudoDimension
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import SpectrumHit as ApiSpectrumHit
 from ccpn.core.lib import Pid
 from ccpn.util import Constants
+from ccpn.util.decorators import logCommand
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.util.Logging import getLogger
 
 
-#
 SpectrumHitPeakList = 'SpectrumHitPeakList'
 
 
@@ -353,48 +355,64 @@ class SpectrumHit(AbstractWrapperObject):
 # Connections to parents:
 #=========================================================================================
 
+@newObject(SpectrumHit)
 def _newSpectrumHit(self: Spectrum, substanceName: str, pointNumber: int = 0,
                     pseudoDimensionNumber: int = 0, pseudoDimension: PseudoDimension = None,
                     figureOfMerit: float = None, meritCode: str = None, normalisedChange: float = None,
                     isConfirmed: bool = None, concentration: float = None, concentrationError: float = None,
                     concentrationUnit: str = None, comment: str = None, serial: int = None):
-    """Create new SpectrumHit within Spectrum"""
+    """Create new SpectrumHit within Spectrum.
 
-    # Default values for 'new' function, as used for echoing to console
-    defaults = collections.OrderedDict(
-            (('pointNumber', 0), ('pseudoDimensionNumber', 0),
-             ('figureOfMerit', None), ('meritCode', None), ('normalisedChange', None),
-             ('isConfirmed', None), ('concentration', None), ('concentrationError', None),
-             ('concentrationUnit', None), ('comment', None)
-             )
-            )
+    See the SpectrumHit class for details.
+
+    :param substanceName:
+    :param pointNumber:
+    :param pseudoDimensionNumber:
+    :param pseudoDimension:
+    :param figureOfMerit:
+    :param meritCode:
+    :param normalisedChange:
+    :param isConfirmed:
+    :param concentration:
+    :param concentrationError:
+    :param concentrationUnit:
+    :param comment:
+    :param serial: optional serial number.
+    :return: a new SpectrumHit instance.
+    """
 
     if concentrationUnit not in Constants.concentrationUnits:
         self._project._logger.warning(
                 "Unsupported value %s for SpectrumHit.concentrationUnit."
                 % concentrationUnit)
 
-    self._startCommandEchoBlock('newSpectrumHit', substanceName, values=locals(), defaults=defaults,
-                                parName='newSpectrumHit')
-    try:
-        if pseudoDimension is not None:
-            if not pseudoDimensionNumber:
-                pseudoDimensionNumber = pseudoDimension.dimension
-            elif pseudoDimensionNumber != pseudoDimension.dimension:
-                raise ValueError("pseudoDimension %s incompatible with pseudoDimensionNumber %s"
-                                 % (pseudoDimensionNumber, pseudoDimension))
+    if pseudoDimension is not None:
+        if not pseudoDimensionNumber:
+            pseudoDimensionNumber = pseudoDimension.dimension
+        elif pseudoDimensionNumber != pseudoDimension.dimension:
+            raise ValueError("pseudoDimension %s incompatible with pseudoDimensionNumber %s"
+                             % (pseudoDimensionNumber, pseudoDimension))
 
-        obj = self._apiDataSource.newSpectrumHit(substanceName=substanceName,
-                                                 sampledDimension=pseudoDimensionNumber,
-                                                 sampledPoint=pointNumber, figureOfMerit=figureOfMerit,
-                                                 meritCode=meritCode, normalisedChange=normalisedChange,
-                                                 isConfirmed=isConfirmed, concentration=concentration,
-                                                 concentrationError=concentrationError,
-                                                 concentrationUnit=concentrationUnit, details=comment)
-    finally:
-        self._endCommandEchoBlock()
+    apiSpectrumHit = self._apiDataSource.newSpectrumHit(substanceName=substanceName,
+                                             sampledDimension=pseudoDimensionNumber,
+                                             sampledPoint=pointNumber, figureOfMerit=figureOfMerit,
+                                             meritCode=meritCode, normalisedChange=normalisedChange,
+                                             isConfirmed=isConfirmed, concentration=concentration,
+                                             concentrationError=concentrationError,
+                                             concentrationUnit=concentrationUnit, details=comment)
 
-    return self._project._data2Obj.get(obj)
+    result = self._project._data2Obj.get(apiSpectrumHit)
+    if result is None:
+        raise RuntimeError('Unable to generate new SpectrumHit item')
+
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
+                                % (result, serial))
+
+    return result
 
 
 Spectrum.newSpectrumHit = _newSpectrumHit

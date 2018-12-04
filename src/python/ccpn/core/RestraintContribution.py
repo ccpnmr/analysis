@@ -337,7 +337,8 @@ def _newRestraintContribution(self: Restraint, targetValue: float = None, error:
                               restraintItems: Sequence = (), serial: int = None) -> RestraintContribution:
     """Create new RestraintContribution within Restraint
 
-    :param self:
+    See the RestraintContribution class for details.
+
     :param targetValue:
     :param error:
     :param weight:
@@ -349,6 +350,7 @@ def _newRestraintContribution(self: Restraint, targetValue: float = None, error:
     :param isDistanceDependent:
     :param combinationId:
     :param restraintItems:
+    :param serial: optional serial number.
     :return: a new RestraintContribution instance.
     """
     func = self._wrappedData.newGenericContribution

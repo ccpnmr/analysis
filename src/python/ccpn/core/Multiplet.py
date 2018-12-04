@@ -451,6 +451,8 @@ def _newMultiplet(self: MultipletList,
                   peaks: ['Peak'] = ()) -> Multiplet:
     """Create a new Multiplet within a multipletList
 
+    See the Multiplet class for details.
+
     :param height:
     :param heightError:
     :param volume:
@@ -466,10 +468,8 @@ def _newMultiplet(self: MultipletList,
     :param slopes:
     :param pointLimits:
     :param peaks:
-
-    :return: new multiplet instance.
+    :return: a new Multiplet instance.
     """
-    #EJB 20181128: refactoring
 
     spectrum = self.spectrum
     peakList = makeIterableList(peaks)

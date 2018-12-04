@@ -211,6 +211,8 @@ def _newCalculationStep(self: DataSet, programName: str = None, programVersion: 
                         inputDataSet: DataSet = None, outputDataSet: DataSet = None, serial: int = None) -> CalculationStep:
     """Create new CalculationStep within DataSet.
 
+    See the CalculationStep class for details.
+
     :param programName:
     :param programVersion:
     :param scriptName:
@@ -219,7 +221,7 @@ def _newCalculationStep(self: DataSet, programName: str = None, programVersion: 
     :param outputDataUuid:
     :param inputDataSet:
     :param outputDataSet:
-    :param serial:
+    :param serial: optional serial number.
     :return: a new CalculationStep instance.
     """
 

@@ -276,12 +276,31 @@ class SpectrumReference(AbstractWrapperObject):
 # Connections to parents:
 #=========================================================================================
 
+@newObject(SpectrumReference)
 def _newSpectrumReference(self: Spectrum, dimension: int, spectrometerFrequency: float,
                           isotopeCodes: typing.Sequence[str], axisCode: str = None, measurementType: str = 'Shift',
                           maxAliasedFrequency: float = None, minAliasedFrequency: float = None,
                           foldingMode: str = None, axisUnit: str = None, referencePoint: float = 0.0,
                           referenceValue: float = 0.0, serial: int = None) -> SpectrumReference:
-    """Create new SpectrumReference within Spectrum"""
+    """Create new SpectrumReference.
+
+    See the SpectrumReference class for details.
+
+    :param dimension:
+    :param spectrometerFrequency:
+    :param isotopeCodes:
+    :param axisCode:
+    :param measurementType:
+    :param maxAliasedFrequency:
+    :param minAliasedFrequency:
+    :param foldingMode:
+    :param axisUnit:
+    :param referencePoint:
+    :param referenceValue:
+    :param serial: optional serial number.
+    :return: a new SpectrumReference instance.
+    """
+
     dataSource = self._wrappedData
     dataDim = dataSource.findFirstDataDim(dim=dimension)
     if dataDim is None:
@@ -293,10 +312,20 @@ def _newSpectrumReference(self: Spectrum, dimension: int, spectrometerFrequency:
                                             unit=axisUnit, minAliasedFreq=minAliasedFrequency,
                                             maxAliasedFreq=maxAliasedFrequency, )
 
-    dataDimRef = dataDim.newDataDimRef(expDimRef=expDimRef, refPoint=referencePoint,
+    apiDataDimRef = dataDim.newDataDimRef(expDimRef=expDimRef, refPoint=referencePoint,
                                        refValue=referenceValue)
+    result = self.project._data2Obj[apiDataDimRef]
+    if result is None:
+        raise RuntimeError('Unable to generate new SpectrumReference item')
 
-    return self.project._data2Obj[dataDimRef]
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
+                                % (result, serial))
+
+    return result
 
 
 # Connections to parents:

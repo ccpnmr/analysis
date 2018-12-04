@@ -249,7 +249,8 @@ def _newMultipletList(self: Spectrum, title: str = None,
                       serial: int = None) -> MultipletList:
     """Create new MultipletList within Spectrum
 
-    :param self:
+    See the MultipletList class for details.
+
     :param title:
     :param symbolColour:
     :param textColour:
@@ -257,7 +258,7 @@ def _newMultipletList(self: Spectrum, title: str = None,
     :param multipletAveraging:
     :param comment:
     :param multiplets:
-    :return: a new MultipletList attached to the Spectrum.
+    :return: a new MultipletList instance.
     """
 
     dd = {'name': title, 'details': comment}

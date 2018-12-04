@@ -36,6 +36,7 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Mark as ApiMark
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject
+from ccpn.util.Logging import getLogger
 
 
 RulerData = collections.namedtuple('RulerData', ['position', 'axisCode', 'unit', 'label'])
@@ -200,12 +201,17 @@ def _newMark(self: Project, colour: str, positions: Sequence[float], axisCodes: 
              style: str = 'simple', units: Sequence[str] = (), labels: Sequence[str] = (), serial: int = None) -> Mark:
     """Create new Mark
 
+    See the Mark class for details.
+
     :param str colour: Mark colour
     :param tuple/list positions: Position in unit (default ppm) of all lines in the mark
     :param tuple/list axisCodes: Axis codes for all lines in the mark
     :param str style: Mark drawing style (dashed line etc.) default: full line ('simple')
     :param tuple/list units: Axis units for all lines in the mark, Default: all ppm
-    :param tuple/list labels: Ruler labels for all lines in the mark. Default: None"""
+    :param tuple/list labels: Ruler labels for all lines in the mark. Default: None
+    :param serial: optional serial number
+    :return: a new Mark instance.
+    """
 
     apiGuiTask = (self._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
                   self._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
@@ -224,6 +230,16 @@ def _newMark(self: Project, colour: str, positions: Sequence[float], axisCodes: 
         apiRuler = apiMark.newRuler(**dd)
 
     result = self._data2Obj.get(apiMark)
+    if result is None:
+        raise RuntimeError('Unable to generate new Multiplet item')
+
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
+                                % (result, serial))
+
     return result
 
 # GWV 20181124: refactored

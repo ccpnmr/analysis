@@ -783,14 +783,16 @@ def _newPeakList(self: Spectrum, title: str = None, comment: str = None,
                  textColour: str = None, serial: int = None) -> PeakList:
     """Create new empty PeakList within Spectrum
 
+    See the PeakList class for details.
+
     :param title:
     :param comment:
     :param isSimulated:
     :param symbolStyle:
     :param symbolColour:
     :param textColour:
-    :param serial:
-    :return: a new PeakList attached to the spectrum.
+    :param serial: optional serial number.
+    :return: a new PeakList instance.
     """
 
     dd = {'name': title, 'details': comment, 'isSimulated': isSimulated}

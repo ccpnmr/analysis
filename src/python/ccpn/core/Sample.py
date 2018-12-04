@@ -300,6 +300,8 @@ def _newSample(self: Project, name: str = None, pH: float = None, ionicStrength:
                rowNumber: int = None, columnNumber: int = None, comment: str = None, serial: int = None) -> Sample:
     """Create new Sample.
 
+    See the Sample class for details.
+
     :param name:
     :param pH:
     :param ionicStrength:
@@ -313,7 +315,7 @@ def _newSample(self: Project, name: str = None, pH: float = None, ionicStrength:
     :param rowNumber:
     :param columnNumber:
     :param comment:
-    :param serial:
+    :param serial: optional serial number.
     :return: a new Sample instance.
     """
 

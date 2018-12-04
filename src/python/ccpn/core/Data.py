@@ -205,11 +205,19 @@ class Data(AbstractWrapperObject):
 # Connections to parents:
 #=========================================================================================
 
+@newObject(DataSet)
 def _newData(self: DataSet, name: str, attachedObjectPid: str = None,
              attachedObject: AbstractWrapperObject = None, serial: int = None) -> Data:
-    """Create new Data within DataSet"""
+    """Create new Data within DataSet.
 
-    defaults = {'attachedObjectPid': None}
+    See the DataSet class for details.
+
+    :param name:
+    :param attachedObjectPid:
+    :param attachedObject:
+    :param serial: optional serial number.
+    :return: a new DataSet instance.
+    """
 
     project = self.project
 
@@ -221,13 +229,19 @@ def _newData(self: DataSet, name: str, attachedObjectPid: str = None,
                     "Either attachedObject or attachedObjectPid must be None - values were %s and %s"
                     % (attachedObject, attachedObjectPid))
 
-    self._startCommandEchoBlock('newData', name, values={'attachedObjectPid': attachedObjectPid},
-                                defaults=defaults, parName='newData')
-    try:
-        obj = self._wrappedData.newData(name=name, attachedObjectPid=attachedObjectPid)
-    finally:
-        self._endCommandEchoBlock()
-    return project._data2Obj.get(obj)
+    apiDataSet = self._wrappedData.newData(name=name, attachedObjectPid=attachedObjectPid)
+    result = project._data2Obj.get(apiDataSet)
+    if result is None:
+        raise RuntimeError('Unable to generate new DataSet item')
+
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
+                                % (result, serial))
+
+    return result
 
 
 DataSet.newData = _newData

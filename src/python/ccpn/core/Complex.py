@@ -151,8 +151,17 @@ class Complex(AbstractWrapperObject):
 # Connections to parents:
 #=========================================================================================
 
+@newObject(Complex)
 def _newComplex(self: Project, name: str, chains=(), serial: int = None) -> Complex:
-    """Create new Complex"""
+    """Create new Complex.
+
+    See the Complex class for details.
+
+    :param name:
+    :param chains:
+    :param serial: optional serial number.
+    :return: a new Complex instance.
+    """
 
     if name and Pid.altCharacter in name:
         raise ValueError("Character %s not allowed in ccpn.Complex.name" % Pid.altCharacter)
@@ -160,23 +169,21 @@ def _newComplex(self: Project, name: str, chains=(), serial: int = None) -> Comp
     if chains:
         getByPid = self._project.getByPid
         chains = [getByPid(x) if isinstance(x, str) else x for x in chains]
-        values = {'chains': tuple(x.pid for x in chains)}
-    else:
-        values = {}
 
-    self._startCommandEchoBlock('newComplex', name, values=values,
-                                parName='newComplex')
-    self._project.blankNotification()
-    try:
-        result = self._data2Obj.get(self._wrappedData.molSystem.newChainGroup(name=name))
-        if chains:
-            result.chains = chains
-    finally:
-        self._endCommandEchoBlock()
-        self._project.unblankNotification()
+    result = self._data2Obj.get(self._wrappedData.molSystem.newChainGroup(name=name))
+    if result is None:
+        raise RuntimeError('Unable to generate new Complex item')
 
-    # DO creation notifications
-    result._finaliseAction('create')
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
+                                         % (result, serial))
+
+    if chains:
+        result.chains = chains
+
     return result
 
 

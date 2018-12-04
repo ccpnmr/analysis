@@ -640,6 +640,7 @@ class Substance(AbstractWrapperObject):
 # Connections to parents:
 #=========================================================================================
 
+@newObject(Substance)
 def _newSubstance(self: Project, name: str = None, labelling: str = None, substanceType: str = 'Molecule',
                   userCode: str = None, smiles: str = None, inChi: str = None, casNumber: str = None,
                   empiricalFormula: str = None, molecularMass: float = None, comment: str = None,
@@ -650,48 +651,53 @@ def _newSubstance(self: Project, name: str = None, labelling: str = None, substa
     """Create new substance WITHOUT storing the sequence internally
     (and hence not suitable for making chains). SubstanceType defaults to 'Molecule'.
 
-    ADVANCED alternatives are 'Cell' and 'Material'"""
+    ADVANCED alternatives are 'Cell' and 'Material'
+
+    See the Substance class for details.
+
+    :param name:
+    :param labelling:
+    :param substanceType:
+    :param userCode:
+    :param smiles:
+    :param inChi:
+    :param casNumber:
+    :param empiricalFormula:
+    :param molecularMass:
+    :param comment:
+    :param synonyms:
+    :param atomCount:
+    :param bondCount:
+    :param ringCount:
+    :param hBondDonorCount:
+    :param hBondAcceptorCount:
+    :param polarSurfaceArea:
+    :param logPartitionCoefficient:
+    :param serial: optional serial number.
+    :return: a new Substance instance.
+    """
 
     if labelling is None:
         apiLabeling = DEFAULT_LABELLING
     else:
         apiLabeling = labelling
 
-    # Default values for 'new' function, as used for echoing to console
-    defaults = OrderedDict(
-            (('labelling', None), ('substanceType', 'Molecule'),
-             ('userCode', None), ('smiles', None), ('inChi', None),
-             ('casNumber', None), ('empiricalFormula', None), ('molecularMass', None),
-             ('comment', None), ('synonyms', ()), ('atomCount', 0),
-             ('bondCount', 0), ('ringCount', 0), ('hBondDonorCount', 0),
-             ('hBondAcceptorCount', 0), ('polarSurfaceArea', None), ('logPartitionCoefficient', None)
-             )
-            )
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-    # for ss in (name, labelling):
-    #   if ss and Pid.altCharacter in ss:
-    #     raise ValueError("Character %s not allowed in ccpn.Substance id: %s.%s" %
-    #                      (Pid.altCharacter, name, labelling))
-    #
     if not isinstance(name, str):
-        raise TypeError("ccpn.Substance name must be a string")  # ejb
+        raise TypeError("ccpn.Substance name must be a string")
     elif not name:
-        raise ValueError("ccpn.Substance name must be set")  # ejb
+        raise ValueError("ccpn.Substance name must be set")
     elif Pid.altCharacter in name:
         raise ValueError("Character %s not allowed in ccpn.Substance id: %s.%s" %
                          (Pid.altCharacter, name, labelling))
 
     if labelling is not None:  # 'None' caught by below as default
         if not isinstance(labelling, str):
-            raise TypeError("ccpn.Substance 'labelling' name must be a string")  # ejb
+            raise TypeError("ccpn.Substance 'labelling' name must be a string")
         elif not labelling:
-            raise ValueError("ccpn.Substance 'labelling' name must be set")  # ejb
+            raise ValueError("ccpn.Substance 'labelling' name must be set")
         elif Pid.altCharacter in labelling:
             raise ValueError("Character %s not allowed in ccpn.Substance labelling, id: %s.%s" %
                              (Pid.altCharacter, name, labelling))
-    #
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
 
     apiNmrProject = self._wrappedData
     apiComponentStore = apiNmrProject.sampleStore.refSampleComponentStore
@@ -707,44 +713,49 @@ def _newSubstance(self: Project, name: str = None, labelling: str = None, substa
         'details': comment
         }
 
-    self._startCommandEchoBlock('newSubstance', name, values=locals(), defaults=defaults,
-                                parName='newSubstance')
-    try:
-        if substanceType == 'Material':
-            if oldSubstance is not None and oldSubstance.className != 'Substance':
-                raise ValueError("Substance name %s clashes with substance of different type: %s"
-                                 % (name, oldSubstance.className))
-            else:
-                apiResult = apiComponentStore.newSubstance(**params)
-        elif substanceType == 'Cell':
-            if oldSubstance is not None and oldSubstance.className != 'Cell':
-                raise ValueError("Substance name %s clashes with substance of different type: %s"
-                                 % (name, oldSubstance.className))
-            else:
-                apiResult = apiComponentStore.newCell(**params)
-        elif substanceType == 'Composite':
-            if oldSubstance is not None and oldSubstance.className != 'Composite':
-                raise ValueError("Substance name %s clashes with substance of different type: %s"
-                                 % (name, oldSubstance.className))
-            else:
-                apiResult = apiComponentStore.newComposite(**params)
-        elif substanceType == 'Molecule':
-            if oldSubstance is not None and oldSubstance.className != 'MolComponent':
-                raise ValueError("Substance name %s clashes with substance of different type: %s"
-                                 % (name, oldSubstance.className))
-            else:
-                apiResult = apiComponentStore.newMolComponent(smiles=smiles, inChi=inChi, casNum=casNumber,
-                                                              empiricalFormula=empiricalFormula, molecularMass=molecularMass, atomCount=atomCount,
-                                                              bondCount=bondCount, ringCount=ringCount, hBondDonorCount=hBondDonorCount,
-                                                              hBondAcceptorCount=hBondAcceptorCount, polarSurfaceArea=polarSurfaceArea,
-                                                              logPartitionCoefficient=logPartitionCoefficient, **params)
+    if substanceType == 'Material':
+        if oldSubstance is not None and oldSubstance.className != 'Substance':
+            raise ValueError("Substance name %s clashes with substance of different type: %s"
+                             % (name, oldSubstance.className))
         else:
-            raise ValueError("Substance type %s not recognised" % substanceType)
-    finally:
-        self._endCommandEchoBlock()
-    #
-    return self._data2Obj[apiResult]
+            apiResult = apiComponentStore.newSubstance(**params)
+    elif substanceType == 'Cell':
+        if oldSubstance is not None and oldSubstance.className != 'Cell':
+            raise ValueError("Substance name %s clashes with substance of different type: %s"
+                             % (name, oldSubstance.className))
+        else:
+            apiResult = apiComponentStore.newCell(**params)
+    elif substanceType == 'Composite':
+        if oldSubstance is not None and oldSubstance.className != 'Composite':
+            raise ValueError("Substance name %s clashes with substance of different type: %s"
+                             % (name, oldSubstance.className))
+        else:
+            apiResult = apiComponentStore.newComposite(**params)
+    elif substanceType == 'Molecule':
+        if oldSubstance is not None and oldSubstance.className != 'MolComponent':
+            raise ValueError("Substance name %s clashes with substance of different type: %s"
+                             % (name, oldSubstance.className))
+        else:
+            apiResult = apiComponentStore.newMolComponent(smiles=smiles, inChi=inChi, casNum=casNumber,
+                                                          empiricalFormula=empiricalFormula, molecularMass=molecularMass, atomCount=atomCount,
+                                                          bondCount=bondCount, ringCount=ringCount, hBondDonorCount=hBondDonorCount,
+                                                          hBondAcceptorCount=hBondAcceptorCount, polarSurfaceArea=polarSurfaceArea,
+                                                          logPartitionCoefficient=logPartitionCoefficient, **params)
+    else:
+        raise ValueError("Substance type %s not recognised" % substanceType)
 
+    result = self._data2Obj[apiResult]
+    if result is None:
+        raise RuntimeError('Unable to generate new Substance item')
+
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
+                                         % (result, serial))
+
+    return result
 
 Project.newSubstance = _newSubstance
 del _newSubstance

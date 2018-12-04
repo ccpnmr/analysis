@@ -219,7 +219,8 @@ def _newDataSet(self: Project, title: str = None, programName: str = None, progr
                 comment: str = None, serial: int = None) -> DataSet:
     """Create new DataSet
 
-    :param self:
+    See the DataSet class for details.
+
     :param title:
     :param programName:
     :param programVersion:
@@ -227,7 +228,7 @@ def _newDataSet(self: Project, title: str = None, programName: str = None, progr
     :param creationDate:
     :param uuid:
     :param comment:
-    :param serial:
+    :param serial: optional serial number.
     :return: a new DataSet instance.
     """
 

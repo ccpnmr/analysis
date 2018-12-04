@@ -406,14 +406,14 @@ def _newNmrChain(self: Project, shortName: str = None, isConnected: bool = False
                  comment: str = None, serial: int = None) -> NmrChain:
     """Create new NmrChain. Setting isConnected=True produces a connected NmrChain.
 
+    See the NmrChain class for details.
+
     :param str shortName: shortName for new nmrChain (optional, defaults to '@ijk' or '#ijk',  ijk positive integer
     :param bool isConnected: (default to False) If true the NmrChain is a connected stretch. This can NOT be changed later
     :param str label: Modifiable NmrChain identifier that does not change with reassignment. Defaults to '@ijk'/'#ijk'
     :param str comment: comment for new nmrChain (optional)
     :return: a new nmrChain instance.
     """
-    # defaults = collections.OrderedDict((('shortName', None), ('isConnected', False),
-    #                                     ('label', '?'), ('comment', None)))
 
     nmrProject = self._apiNmrProject
     serial = None
@@ -441,10 +441,6 @@ def _newNmrChain(self: Project, shortName: str = None, isConnected: bool = False
         shortName = None
 
     dd = {'code': shortName, 'isConnected': isConnected, 'label': label, 'details': comment}
-    # self._startCommandEchoBlock('newNmrChain', values=locals(), defaults=defaults,
-    #                             parName='newNmrChain')
-    # result = None
-    # try:
 
     newApiNmrChain = nmrProject.newNmrChain(**dd)
     result = self._data2Obj.get(newApiNmrChain)
@@ -454,14 +450,9 @@ def _newNmrChain(self: Project, shortName: str = None, isConnected: bool = False
     if serial is not None:
         try:
             result.resetSerial(serial)
-            # modelUtil.resetSerial(newApiNmrChain, serial, 'nmrChains')
         except ValueError:
             self.project._logger.warning("Could not set shortName of %s to %s - keeping default value"
                                          % (result, shortName))
-
-    #     result._finaliseAction('rename')
-    # finally:
-    #     self._endCommandEchoBlock()
 
     return result
 

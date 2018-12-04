@@ -2065,6 +2065,8 @@ class CcpnGLWidget(QOpenGLWidget):
             for pp in range(0, 2 * vertices, 2):
                 self.stripIDString.attribs[pp:pp + 2] = offsets
 
+            self.stripIDString.updateTextArrayVBOAttribs(enableVBO=True)
+
     def _updateHighlightedIntegrals(self, spectrumView, integralListView):
         drawList = self._GLIntegralLists[integralListView]
         drawList._rebuild()
@@ -3092,26 +3094,27 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def _rescaleRegions(self):
         self._externalRegions._rescale()
-        return
 
-        vertices = self._regionList.numVertices
-
-        if vertices:
-            for pp in range(0, 2 * vertices, 8):
-                axisIndex = int(self._regionList.attribs[pp])
-                axis0 = self._regionList.attribs[pp + 1]
-                axis1 = self._regionList.attribs[pp + 3]
-
-                # [x0, y0, x0, y1, x1, y1, x1, y0])
-
-                if axisIndex == 0:
-                    offsets = [axis0, self.axisT + self.pixelY, axis0, self.axisB - self.pixelY,
-                               axis1, self.axisB - self.pixelY, axis1, self.axisT + self.pixelY]
-                else:
-                    offsets = [self.axisL - self.pixelX, axis0, self.axisL - self.pixelX, axis1,
-                               self.axisR + self.pixelX, axis1, self.axisR + self.pixelX, axis0]
-
-                self._regionList.vertices[pp:pp + 8] = offsets
+        # return
+        #
+        # vertices = self._regionList.numVertices
+        #
+        # if vertices:
+        #     for pp in range(0, 2 * vertices, 8):
+        #         axisIndex = int(self._regionList.attribs[pp])
+        #         axis0 = self._regionList.attribs[pp + 1]
+        #         axis1 = self._regionList.attribs[pp + 3]
+        #
+        #         # [x0, y0, x0, y1, x1, y1, x1, y0])
+        #
+        #         if axisIndex == 0:
+        #             offsets = [axis0, self.axisT + self.pixelY, axis0, self.axisB - self.pixelY,
+        #                        axis1, self.axisB - self.pixelY, axis1, self.axisT + self.pixelY]
+        #         else:
+        #             offsets = [self.axisL - self.pixelX, axis0, self.axisL - self.pixelX, axis1,
+        #                        self.axisR + self.pixelX, axis1, self.axisR + self.pixelX, axis0]
+        #
+        #         self._regionList.vertices[pp:pp + 8] = offsets
 
     def _rescaleMarksRulers(self):
         vertices = self._marksList.numVertices
@@ -3144,6 +3147,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
             for pp in range(0, 2 * vertices, 2):
                 mark.attribs[pp:pp + 2] = offsets
+
+            # redefine the mark's VBOs
+            mark.updateTextArrayVBOAttribs(enableVBO=True)
 
     def rescaleMarksRulers(self):
         self._rescaleMarksRulers()

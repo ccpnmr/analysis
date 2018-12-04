@@ -238,7 +238,7 @@ del getter
 def _newSampleComponent(self: Sample, name: str = None, labelling: str = None, role: str = None,  # ejb
                         concentration: float = None, concentrationError: float = None,
                         concentrationUnit: str = None, purity: float = None, comment: str = None,
-                        ) -> SampleComponent:
+                        serial: int = None) -> SampleComponent:
     """Create new SampleComponent within Sample
 
     Automatically creates the corresponding Substance if the name is not already taken

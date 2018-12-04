@@ -181,6 +181,7 @@ class StructureEnsemble(AbstractWrapperObject):
 # Connections to parents:
 #=========================================================================================
 
+@newObject(StructureEnsemble)
 def _newStructureEnsemble(self: Project, serial: int = None, name: str = None, data: EnsembleData = None,
                           comment: str = None) -> StructureEnsemble:
     """Create new StructureEnsemble"""
@@ -188,51 +189,46 @@ def _newStructureEnsemble(self: Project, serial: int = None, name: str = None, d
     defaults = collections.OrderedDict((('serial', None), ('name', None), ('comment', None)))
 
     nmrProject = self._wrappedData
-    self._startCommandEchoBlock('newStructureEnsemble', values=locals(), defaults=defaults,
-                                parName='newStructureEnsemble')
-    undo = self._undo
-    undo.increaseBlocking()
-    self.blankNotification()
-    try:
-        if serial is None:
-            ll = nmrProject.root.structureEnsembles
-            serial = max(x.ensembleId for x in ll) + 1 if ll else 1
-        params = {'molSystem': nmrProject.molSystem, 'ensembleId': serial, 'details': comment}
-        if name:
-            params['name'] = name
-        newApiStructureEnsemble = nmrProject.root.newStructureEnsemble(**params)
-        result = self._data2Obj[newApiStructureEnsemble]
-        if data is None:
-            result.data = EnsembleData()
-        else:
-            logger.warning(
-                    "EnsembleData successfully set on new StructureEnsemble were not echoed - too large")
-            #FIXME:ED - crashes without the following line, is the wrapper not instantiated?
-            # result.data = EnsembleData()    # ejb - no needed
-            result.data = data
-            data._containingObject = result
-            for modelNumber in sorted(data['modelNumber'].unique()):
-                result.newModel(serial=modelNumber, label='Model_%s' % modelNumber)
-    finally:
-        self._endCommandEchoBlock()
-        self.unblankNotification()
-        undo.decreaseBlocking()
 
-    # Set up undo
-    apiObjectsCreated = [newApiStructureEnsemble]
-    apiObjectsCreated.extend(newApiStructureEnsemble.sortedModels())
-    apiObjectsCreated.extend(newApiStructureEnsemble.parameters)
-    undo.newItem(Undo._deleteAllApiObjects, nmrProject.root._unDelete,
-                 undoArgs=(apiObjectsCreated,),
-                 redoArgs=(apiObjectsCreated, (nmrProject, nmrProject.root)))
+    if serial is None:
+        ll = nmrProject.root.structureEnsembles
+        serial = max(x.ensembleId for x in ll) + 1 if ll else 1
+    params = {'molSystem': nmrProject.molSystem, 'ensembleId': serial, 'details': comment}
+    if name:
+        params['name'] = name
 
-    # Do creation notifications
+    newApiStructureEnsemble = nmrProject.root.newStructureEnsemble(**params)
+    result = self._data2Obj[newApiStructureEnsemble]
+    if result is None:
+        raise RuntimeError('Unable to generate new StructureEnsemble item')
+
     if serial is not None:
-        result._finaliseAction('rename')
-    result._finaliseAction('create')
-    for model in result.models:
-        model._finaliseAction('create')
-    #
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
+                                         % (result, serial))
+
+    if data is None:
+        result.data = EnsembleData()
+    else:
+        logger.warning("EnsembleData successfully set on new StructureEnsemble were not echoed - too large")
+
+        # result.data = EnsembleData()    # ejb
+        result.data = data
+        data._containingObject = result
+        for modelNumber in sorted(data['modelNumber'].unique()):
+            result.newModel(serial=modelNumber, label='Model_%s' % modelNumber)
+
+    # TODO:ED CHECK
+    # # Set up undo
+    # apiObjectsCreated = [newApiStructureEnsemble]
+    # apiObjectsCreated.extend(newApiStructureEnsemble.sortedModels())
+    # apiObjectsCreated.extend(newApiStructureEnsemble.parameters)
+    # undo.newItem(Undo._deleteAllApiObjects, nmrProject.root._unDelete,
+    #              undoArgs=(apiObjectsCreated,),
+    #              redoArgs=(apiObjectsCreated, (nmrProject, nmrProject.root)))
+
     return result
 
 

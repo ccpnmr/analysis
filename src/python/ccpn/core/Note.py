@@ -164,7 +164,7 @@ class Note(AbstractWrapperObject):
 # Connections to parents:
 #=========================================================================================
 
-def _newNote(self: Project, name: str = 'Note', text: str = None) -> Note:
+def _newNote(self: Project, name: str = 'Note', text: str = None, serial: int = None) -> Note:
     """Create new Note"""
 
     defaults = collections.OrderedDict((('name', None), ('text', None)))

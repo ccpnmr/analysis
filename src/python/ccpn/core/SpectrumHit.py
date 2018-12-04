@@ -357,7 +357,7 @@ def _newSpectrumHit(self: Spectrum, substanceName: str, pointNumber: int = 0,
                     pseudoDimensionNumber: int = 0, pseudoDimension: PseudoDimension = None,
                     figureOfMerit: float = None, meritCode: str = None, normalisedChange: float = None,
                     isConfirmed: bool = None, concentration: float = None, concentrationError: float = None,
-                    concentrationUnit: str = None, comment: str = None):
+                    concentrationUnit: str = None, comment: str = None, serial: int = None):
     """Create new SpectrumHit within Spectrum"""
 
     # Default values for 'new' function, as used for echoing to console

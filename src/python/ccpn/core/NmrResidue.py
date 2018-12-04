@@ -1224,7 +1224,7 @@ del setter
 
 @newObject(NmrResidue)
 def _newNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None, residueType: str = None,
-                   comment: str = None) -> NmrResidue:
+                   comment: str = None, serial: int = None) -> NmrResidue:
     """Create new NmrResidue within NmrChain.
 
     If NmrChain is connected, append the new NmrResidue to the end of the stretch.

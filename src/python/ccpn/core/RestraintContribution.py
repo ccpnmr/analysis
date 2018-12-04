@@ -334,7 +334,7 @@ def _newRestraintContribution(self: Restraint, targetValue: float = None, error:
                               weight: float = 1.0, upperLimit: float = None, lowerLimit: float = None,
                               additionalUpperLimit: float = None, additionalLowerLimit: float = None,
                               scale: float = 1.0, isDistanceDependent: bool = False, combinationId: int = None,
-                              restraintItems: Sequence = (), serial=None) -> RestraintContribution:
+                              restraintItems: Sequence = (), serial: int = None) -> RestraintContribution:
     """Create new RestraintContribution within Restraint
 
     :param self:

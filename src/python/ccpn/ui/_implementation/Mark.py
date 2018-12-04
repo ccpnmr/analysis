@@ -197,7 +197,7 @@ class Mark(AbstractWrapperObject):
 
 @newObject(Mark)
 def _newMark(self: Project, colour: str, positions: Sequence[float], axisCodes: Sequence,
-             style: str = 'simple', units: Sequence[str] = (), labels: Sequence[str] = ()) -> Mark:
+             style: str = 'simple', units: Sequence[str] = (), labels: Sequence[str] = (), serial: int = None) -> Mark:
     """Create new Mark
 
     :param str colour: Mark colour

@@ -216,7 +216,7 @@ class DataSet(AbstractWrapperObject):
 @newObject(DataSet)
 def _newDataSet(self: Project, title: str = None, programName: str = None, programVersion: str = None,
                 dataPath: str = None, creationDate: datetime.datetime = None, uuid: str = None,
-                comment: str = None, serial=None) -> DataSet:
+                comment: str = None, serial: int = None) -> DataSet:
     """Create new DataSet
 
     :param self:

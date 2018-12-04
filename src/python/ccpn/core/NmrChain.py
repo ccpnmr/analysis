@@ -403,7 +403,7 @@ class NmrChain(AbstractWrapperObject):
 
 @newObject(NmrChain)
 def _newNmrChain(self: Project, shortName: str = None, isConnected: bool = False, label: str = '?',
-                 comment: str = None) -> NmrChain:
+                 comment: str = None, serial: int = None) -> NmrChain:
     """Create new NmrChain. Setting isConnected=True produces a connected NmrChain.
 
     :param str shortName: shortName for new nmrChain (optional, defaults to '@ijk' or '#ijk',  ijk positive integer

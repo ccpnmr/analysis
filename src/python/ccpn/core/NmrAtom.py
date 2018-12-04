@@ -409,7 +409,7 @@ class NmrAtom(AbstractWrapperObject):
 
 @newObject(NmrAtom)
 def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
-                comment: str = None, serial=None) -> NmrAtom:
+                comment: str = None, serial: int = None) -> NmrAtom:
     """Create new NmrAtom within NmrResidue. If name is None, use default name
         (of form e.g. 'H@211', 'N@45', ...)
 

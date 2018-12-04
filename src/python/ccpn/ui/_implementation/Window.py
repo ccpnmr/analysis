@@ -120,7 +120,7 @@ class Window(AbstractWrapperObject):
 # Connections to parents:
 #=========================================================================================
 
-def _newWindow(self: Project, title: str = None, position: tuple = (), size: tuple = ()) -> Window:
+def _newWindow(self: Project, title: str = None, position: tuple = (), size: tuple = (), serial: int = None) -> Window:
     """Create new child Window
 
     :param str title: window  title (optional, defaults to 'W1', 'W2', 'W3', ...

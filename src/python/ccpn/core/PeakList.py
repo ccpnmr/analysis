@@ -45,7 +45,6 @@ from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import fitExistingPeakList
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import pickNewPeaks
 from ccpn.util.decorators import logCommand
-from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter
 from ccpn.util.Logging import getLogger
 
@@ -228,7 +227,27 @@ class PeakList(AbstractWrapperObject):
     def isSimulated(self, value: bool):
         self._wrappedData.isSimulated = value
 
-    # Library functions
+    #=========================================================================================
+    # Implementation functions
+    #=========================================================================================
+
+    @classmethod
+    def _getAllWrappedData(cls, parent: Spectrum) -> list:
+        """get wrappedData (PeakLists) for all PeakList children of parent Spectrum"""
+        return [x for x in parent._wrappedData.sortedPeakLists() if x.dataType == 'Peak']
+
+    def _finaliseAction(self, action: str):
+        """Subclassed to handle associated peakListViews
+        """
+        super()._finaliseAction(action=action)
+
+        if action in ['change', 'create', 'delete']:
+            for plv in self.peakListViews:
+                plv._finaliseAction(action=action)
+
+    #=========================================================================================
+    # CCPN functions
+    #=========================================================================================
 
     ###def pickPeaksNd(self, positions:Sequence[float]=None,
     def pickPeaksNd(self, regionToPick: Sequence[float] = None,
@@ -724,24 +743,6 @@ class PeakList(AbstractWrapperObject):
     #   """Readable string representation"""
     #   return "<%s; #peaks:%d (isSimulated=%s)>" % (self.pid, len(self.peaks), self.isSimulated)
 
-    #=========================================================================================
-    # Implementation functions
-    #=========================================================================================
-
-    @classmethod
-    def _getAllWrappedData(cls, parent: Spectrum) -> list:
-        """get wrappedData (PeakLists) for all PeakList children of parent Spectrum"""
-        return [x for x in parent._wrappedData.sortedPeakLists() if x.dataType == 'Peak']
-
-    def _finaliseAction(self, action: str):
-        """Subclassed to handle associated peakListViews
-        """
-        super()._finaliseAction(action=action)
-
-        if action in ['change', 'create']:
-            for plv in self.peakListViews:
-                plv._finaliseAction(action=action)
-
     #===========================================================================================
     # new'Object' and other methods
     # Call appropriate routines in their respective locations
@@ -773,10 +774,8 @@ class PeakList(AbstractWrapperObject):
 
 
 #=========================================================================================
-# CCPN functions
-#=========================================================================================
-
 # Connections to parents:
+#=========================================================================================
 
 @newObject(PeakList)
 def _newPeakList(self: Spectrum, title: str = None, comment: str = None,
@@ -791,7 +790,6 @@ def _newPeakList(self: Spectrum, title: str = None, comment: str = None,
     :param symbolColour:
     :param textColour:
     :param serial:
-
     :return: a new PeakList attached to the spectrum.
     """
 

@@ -34,6 +34,9 @@ from ccpn.core.RestraintList import RestraintList
 from ccpn.core.Peak import Peak
 from ccpnmodel.ccpncore.api.ccp.nmr import NmrConstraint
 from ccpnmodel.ccpncore.lib import Util as modelUtil
+from ccpn.util.decorators import logCommand
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.util.Logging import getLogger
 
 
 class Restraint(AbstractWrapperObject):
@@ -225,12 +228,27 @@ class Restraint(AbstractWrapperObject):
     def figureOfMerit(self, value: float):
         self._wrappedData.figureOfMerit = value
 
+    #=========================================================================================
     # Implementation functions
+    #=========================================================================================
+
     @classmethod
     def _getAllWrappedData(cls, parent: RestraintList) -> list:
         """get wrappedData - all Constraint children of parent ConstraintList"""
         return parent._wrappedData.sortedConstraints()
 
+    #=========================================================================================
+    # CCPN functions
+    #=========================================================================================
+
+    #===========================================================================================
+    # new'Object' and other methods
+    # Call appropriate routines in their respective locations
+    #===========================================================================================
+
+#=========================================================================================
+# Connections to parents:
+#=========================================================================================
 
 def getter(self: Peak) -> Tuple[Restraint, ...]:
     getDataObj = self._project._data2Obj.get
@@ -256,51 +274,43 @@ Peak.restraints = property(getter, setter, None,
 del getter
 del setter
 
+#=========================================================================================
 
-# Connections to parents:
+@newObject(Restraint)
 def _newRestraint(self: RestraintList, figureOfMerit: float = None, comment: str = None,
                   peaks: Sequence = (), vectorLength: float = None, serial: int = None) -> Restraint:
     """Create new Restraint within RestraintList.
 
     ADVANCED: Note that you just create at least one RestraintContribution afterwards in order to
     have valid data. Use the simpler createSimpleRestraint instead, unless you have specific
-    reasons for needing newRestraint"""
-    # Default values for 'new' function, as used for echoing to console
+    reasons for needing newRestraint
 
-    defaults = collections.OrderedDict(
-            (
-                ('figureOfMerit', None), ('comment', None), ('peaks', ()), ('vectorLength', None),
-                ('serial', None),
-                )
-            )
+    :param figureOfMerit:
+    :param comment:
+    :param peaks:
+    :param vectorLength:
+    :param serial:
+    :return: a new Restraint instance.
+    """
     if peaks:
         getByPid = self._project.getByPid
         peaks = [(getByPid(x) if isinstance(x, str) else x) for x in peaks]
 
-    self._startCommandEchoBlock('newRestraint', values=locals(), defaults=defaults,
-                                parName='newRestraint')
-    self._project.blankNotification()  # delay notifiers till Restraint is fully ready
-    try:
-        dd = {'figureOfMerit': figureOfMerit, 'vectorLength': vectorLength, 'details': comment,
-              'peaks': peaks}
-        obj = self._wrappedData.newGenericConstraint(**dd)
-        result = self._project._data2Obj.get(obj)
-        if serial is not None:
-            try:
-                result.resetSerial(serial)
-                # modelUtil.resetSerial(obj, serial, 'constraints')
-            except ValueError:
-                self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
-                                             % (result, serial))
-    finally:
-        self._project.unblankNotification()
-        self._endCommandEchoBlock()
+    dd = {'figureOfMerit': figureOfMerit, 'vectorLength': vectorLength, 'details': comment,
+          'peaks': peaks}
 
-    # Do creation notifications
+    apiRestraint = self._wrappedData.newGenericConstraint(**dd)
+    result = self._project._data2Obj.get(apiRestraint)
+    if result is None:
+        raise RuntimeError('Unable to generate new Restraint item')
+
     if serial is not None:
-        result._finaliseAction('rename')
-    result._finaliseAction('create')
-    #
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
+                                         % (result, serial))
+
     return result
 
 

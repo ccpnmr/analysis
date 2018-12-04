@@ -39,7 +39,7 @@ from ccpn.core.Spectrum import Spectrum
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import MultipletList as ApiMultipletList
 from typing import Optional, Tuple, Sequence, List
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
 from ccpn.util.Logging import getLogger
 
 
@@ -211,6 +211,10 @@ class MultipletList(AbstractWrapperObject):
             for mlv in self.multipletListViews:
                 mlv._finaliseAction(action=action)
 
+    #=========================================================================================
+    # CCPN functions
+    #=========================================================================================
+
     #===========================================================================================
     # new'Object' and other methods
     # Call appropriate routines in their respective locations
@@ -232,11 +236,10 @@ class MultipletList(AbstractWrapperObject):
 
         return _newMultiplet(self, comment=comment, peaks=peaks, **kwds)
 
-#=========================================================================================
-# CCPN functions
-#=========================================================================================
 
+#=========================================================================================
 # Connections to parents:
+#=========================================================================================
 
 @newObject(MultipletList)
 def _newMultipletList(self: Spectrum, title: str = None,

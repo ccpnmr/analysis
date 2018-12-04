@@ -8,7 +8,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification
@@ -35,182 +35,200 @@ from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import Parameter as ApiParamet
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.DataSet import DataSet
+from ccpn.util.decorators import logCommand
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.util.Logging import getLogger
 
 
 class Data(AbstractWrapperObject):
-  """Object storing links to the data structures (PeakLists, Spectra, StructureEnsembles etc.)
-  connected to a given DataSet, and their associated calculation parameters."""
-  
-  #: Short class name, for PID.
-  shortClassName = 'DA'
-  # Attribute it necessary as subclasses must use superclass className
-  className = 'Data'
+    """Object storing links to the data structures (PeakLists, Spectra, StructureEnsembles etc.)
+    connected to a given DataSet, and their associated calculation parameters."""
 
-  _parentClass = DataSet
+    #: Short class name, for PID.
+    shortClassName = 'DA'
+    # Attribute it necessary as subclasses must use superclass className
+    className = 'Data'
 
-  #: Name of plural link to instances of class
-  _pluralLinkName = 'data'
+    _parentClass = DataSet
 
-  #: List of child classes.
-  _childClasses = []
+    #: Name of plural link to instances of class
+    _pluralLinkName = 'data'
 
-  # Qualified name of matching API class
-  _apiClassQualifiedName = ApiData._metaclass.qualifiedName()
+    #: List of child classes.
+    _childClasses = []
 
-  # CCPN properties
-  @property
-  def _apiData(self) -> ApiData:
-    """ CCPN Data object matching Data"""
-    return self._wrappedData
+    # Qualified name of matching API class
+    _apiClassQualifiedName = ApiData._metaclass.qualifiedName()
 
-  @property
-  def _key(self) -> str:
-    """id string - name"""
-    # return self._wrappedData.name
-    return self._wrappedData.name.translate(Pid.remapSeparators)
+    # CCPN properties
+    @property
+    def _apiData(self) -> ApiData:
+        """ CCPN Data object matching Data"""
+        return self._wrappedData
 
-  @property
-  def name(self) -> str:
-    """name of Data object, used in Pid and to identify the Data object. """
-    return self._wrappedData.name
-    
-  @property
-  def _parent(self) -> DataSet:
-    """DataSet containing Data."""
-    return  self._project._data2Obj[self._wrappedData.nmrConstraintStore]
-  
-  calculationStep = _parent
-  
-  @property
-  def attachedObjectPid(self) -> Optional[str]:
-    """Pid for attached object - used to calculate the attachedObject
+    @property
+    def _key(self) -> str:
+        """id string - name"""
+        # return self._wrappedData.name
+        return self._wrappedData.name.translate(Pid.remapSeparators)
 
-    Remains unchanged also if the object pointed to is renamed or deleted, to
-    preserve, as far as possible, the original data."""
-    return self._wrappedData.attachedObjectPid
+    @property
+    def name(self) -> str:
+        """name of Data object, used in Pid and to identify the Data object. """
+        return self._wrappedData.name
 
-  @attachedObjectPid.setter
-  def attachedObjectPid(self, value:str):
-    self._wrappedData.attachedObjectPid = value
+    @property
+    def _parent(self) -> DataSet:
+        """DataSet containing Data."""
+        return self._project._data2Obj[self._wrappedData.nmrConstraintStore]
 
-  @property
-  def attachedObject(self) -> Optional[AbstractWrapperObject]:
-    """attached object - derived from self.attachedObjectPid.
+    calculationStep = _parent
 
-    If no attached object matching attachedObjectPid can be found
-    (object has been renamed, deleted, or the attachedObjectPid is incorrect)
-    this attribute has the value None."""
-    ss = self._wrappedData.attachedObjectPid
-    if ss:
-      return self.getByPid(ss)
-    else:
-      return None
+    @property
+    def attachedObjectPid(self) -> Optional[str]:
+        """Pid for attached object - used to calculate the attachedObject
 
-  @attachedObject.setter
-  def attachedObject(self, value:str):
-    if value:
-      self._wrappedData.attachedObjectPid = value.pid
-    else:
-      self._wrappedData.attachedObjectPid = None
+        Remains unchanged also if the object pointed to is renamed or deleted, to
+        preserve, as far as possible, the original data."""
+        return self._wrappedData.attachedObjectPid
 
-  @property
-  def parameters(self) -> dict:
-    """Keyword-value dictionary of parameters.
-    NB the value is a copy - modifying it will not modify the actual data.
-    Use the setParameter, deleteParameter, clearParameters, and updateParameters
-    methods to modify the parameters.
+    @attachedObjectPid.setter
+    def attachedObjectPid(self, value: str):
+        self._wrappedData.attachedObjectPid = value
 
-    Dictionary values can be anything that can be exported to JSON,
-    including OrderedDict, numpy.ndarray, ccpn.util.Tensor,
-    or pandas DataFrame, Series, or Panel"""
-    return dict((x.name, x.value) for x in self._wrappedData.parameters)
+    @property
+    def attachedObject(self) -> Optional[AbstractWrapperObject]:
+        """attached object - derived from self.attachedObjectPid.
 
-  def setParameter(self, name:str, value):
-    """Add name:value to parameters, overwriting existing entries"""
-    apiData = self._wrappedData
-    parameter = apiData.findFirstParameter(name=name)
-    if parameter is None:
-      apiData.newParameter(name=name, value=value)
-    else:
-      parameter.value = value
+        If no attached object matching attachedObjectPid can be found
+        (object has been renamed, deleted, or the attachedObjectPid is incorrect)
+        this attribute has the value None."""
+        ss = self._wrappedData.attachedObjectPid
+        if ss:
+            return self.getByPid(ss)
+        else:
+            return None
 
-  def deleteParameter(self, name:str):
-    """Delete parameter named 'name'"""
-    apiData = self._wrappedData
-    parameter = apiData.findFirstParameter(name=name)
-    if parameter is None:
-      raise KeyError("No parameter named %s" % name)
-    else:
-      parameter.delete()
+    @attachedObject.setter
+    def attachedObject(self, value: str):
+        if value:
+            self._wrappedData.attachedObjectPid = value.pid
+        else:
+            self._wrappedData.attachedObjectPid = None
 
-  def clearParameters(self):
-    """Delete all parameters"""
-    for parameter in self._wrappedData.parameters:
-      parameter.delete()
+    @property
+    def parameters(self) -> dict:
+        """Keyword-value dictionary of parameters.
+        NB the value is a copy - modifying it will not modify the actual data.
+        Use the setParameter, deleteParameter, clearParameters, and updateParameters
+        methods to modify the parameters.
 
-  def updateParameters(self, value:dict):
-    """Convenience routine, similar to dict.update().
-    Calls self.setParameter(key, value) for each key,value pair in the input."""
-    for key,val in value.items():
-      self.setParameter(key, val)
+        Dictionary values can be anything that can be exported to JSON,
+        including OrderedDict, numpy.ndarray, ccpn.util.Tensor,
+        or pandas DataFrame, Series, or Panel"""
+        return dict((x.name, x.value) for x in self._wrappedData.parameters)
 
-  def rename(self, value:str):
-    """Rename Data, changing its nmme and Pid"""
-    oldName = self.name
-    undo = self._project._undo
-    self._startCommandEchoBlock('rename', value)
-    if undo is not None:
-      undo.increaseBlocking()
+    def setParameter(self, name: str, value):
+        """Add name:value to parameters, overwriting existing entries"""
+        apiData = self._wrappedData
+        parameter = apiData.findFirstParameter(name=name)
+        if parameter is None:
+            apiData.newParameter(name=name, value=value)
+        else:
+            parameter.value = value
 
-    try:
-      if not value:
-        raise ValueError("Data name must be set")
-      elif Pid.altCharacter in value:
-        raise ValueError("Character %s not allowed in ccpn.Data.name" % Pid.altCharacter)
-      else:
-        coreUtil._resetParentLink(self._wrappedData, 'data', {'name':value})
-        self._finaliseAction('rename')
-        self._finaliseAction('change')
+    def deleteParameter(self, name: str):
+        """Delete parameter named 'name'"""
+        apiData = self._wrappedData
+        parameter = apiData.findFirstParameter(name=name)
+        if parameter is None:
+            raise KeyError("No parameter named %s" % name)
+        else:
+            parameter.delete()
 
-    finally:
-      self._endCommandEchoBlock()
-      if undo is not None:
-        undo.decreaseBlocking()
+    def clearParameters(self):
+        """Delete all parameters"""
+        for parameter in self._wrappedData.parameters:
+            parameter.delete()
 
-    undo.newItem(self.rename, self.rename, undoArgs=(oldName,),redoArgs=(value,))
+    def updateParameters(self, value: dict):
+        """Convenience routine, similar to dict.update().
+        Calls self.setParameter(key, value) for each key,value pair in the input."""
+        for key, val in value.items():
+            self.setParameter(key, val)
+
+    #=========================================================================================
+    # Implementation functions
+    #=========================================================================================
+
+    @classmethod
+    def _getAllWrappedData(cls, parent: DataSet) -> list:
+        """get wrappedData - all Data children of parent NmrConstraintStore"""
+        return parent._wrappedData.sortedData()
+
+    def rename(self, value: str):
+        """Rename Data, changing its nmme and Pid"""
+        oldName = self.name
+        undo = self._project._undo
+        self._startCommandEchoBlock('rename', value)
+        if undo is not None:
+            undo.increaseBlocking()
+
+        try:
+            if not value:
+                raise ValueError("Data name must be set")
+            elif Pid.altCharacter in value:
+                raise ValueError("Character %s not allowed in ccpn.Data.name" % Pid.altCharacter)
+            else:
+                coreUtil._resetParentLink(self._wrappedData, 'data', {'name': value})
+                self._finaliseAction('rename')
+                self._finaliseAction('change')
+
+        finally:
+            self._endCommandEchoBlock()
+            if undo is not None:
+                undo.decreaseBlocking()
+
+        undo.newItem(self.rename, self.rename, undoArgs=(oldName,), redoArgs=(value,))
+
+    #=========================================================================================
+    # CCPN functions
+    #=========================================================================================
+
+    #===========================================================================================
+    # new'Object' and other methods
+    # Call appropriate routines in their respective locations
+    #===========================================================================================
 
 
-
-  @classmethod
-  def _getAllWrappedData(cls, parent:DataSet)-> list:
-    """get wrappedData - all Data children of parent NmrConstraintStore"""
-    return parent._wrappedData.sortedData()
-
+#=========================================================================================
 # Connections to parents:
+#=========================================================================================
 
-def _newData(self:DataSet, name:str, attachedObjectPid:str=None,
-             attachedObject:AbstractWrapperObject=None) -> Data:
-  """Create new Data within DataSet"""
+def _newData(self: DataSet, name: str, attachedObjectPid: str = None,
+             attachedObject: AbstractWrapperObject = None) -> Data:
+    """Create new Data within DataSet"""
 
-  defaults = {'attachedObjectPid':None}
+    defaults = {'attachedObjectPid': None}
 
-  project = self.project
+    project = self.project
 
-  if attachedObject is not None:
-    if attachedObjectPid is None:
-      attachedObjectPid = attachedObject.pid
-    else:
-      raise ValueError(
-        "Either attachedObject or attachedObjectPid must be None - values were %s and %s"
-                      % (attachedObject, attachedObjectPid))
+    if attachedObject is not None:
+        if attachedObjectPid is None:
+            attachedObjectPid = attachedObject.pid
+        else:
+            raise ValueError(
+                    "Either attachedObject or attachedObjectPid must be None - values were %s and %s"
+                    % (attachedObject, attachedObjectPid))
 
-  self._startCommandEchoBlock('newData', name, values={'attachedObjectPid':attachedObjectPid},
-                              defaults=defaults, parName='newData')
-  try:
-    obj = self._wrappedData.newData(name=name, attachedObjectPid=attachedObjectPid)
-  finally:
-    self._endCommandEchoBlock()
-  return project._data2Obj.get(obj)
+    self._startCommandEchoBlock('newData', name, values={'attachedObjectPid': attachedObjectPid},
+                                defaults=defaults, parName='newData')
+    try:
+        obj = self._wrappedData.newData(name=name, attachedObjectPid=attachedObjectPid)
+    finally:
+        self._endCommandEchoBlock()
+    return project._data2Obj.get(obj)
+
 
 DataSet.newData = _newData
 del _newData
@@ -218,13 +236,12 @@ del _newData
 # Notifiers:
 # Data change whenever a parameter is created, deleted, or changed
 Project._apiNotifiers.extend(
-  (
-    ('_notifyRelatedApiObject', {'pathToObject':'data', 'action':'change'},
-     ApiParameter._metaclass.qualifiedName(), ''),
-    ('_notifyRelatedApiObject', {'pathToObject':'data', 'action':'change'},
-     ApiParameter._metaclass.qualifiedName(), '__init__'),
-    ('_notifyRelatedApiObject', {'pathToObject':'data', 'action':'change'},
-     ApiParameter._metaclass.qualifiedName(), 'delete'),
-  )
-)
-
+        (
+            ('_notifyRelatedApiObject', {'pathToObject': 'data', 'action': 'change'},
+             ApiParameter._metaclass.qualifiedName(), ''),
+            ('_notifyRelatedApiObject', {'pathToObject': 'data', 'action': 'change'},
+             ApiParameter._metaclass.qualifiedName(), '__init__'),
+            ('_notifyRelatedApiObject', {'pathToObject': 'data', 'action': 'change'},
+             ApiParameter._metaclass.qualifiedName(), 'delete'),
+            )
+        )

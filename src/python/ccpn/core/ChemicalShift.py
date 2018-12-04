@@ -34,6 +34,9 @@ from ccpn.core.Project import Project
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.NmrAtom import NmrAtom
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
+from ccpn.util.decorators import logCommand
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.util.Logging import getLogger
 
 
 class ChemicalShift(AbstractWrapperObject):
@@ -127,7 +130,10 @@ class ChemicalShift(AbstractWrapperObject):
         """NmrAtom that the shift belongs to"""
         return self._project._data2Obj.get(self._wrappedData.resonance)
 
+    #=========================================================================================
     # Implementation functions
+    #=========================================================================================
+
     @classmethod
     def _getAllWrappedData(cls, parent: ChemicalShiftList) -> list:
         """get wrappedData (ApiShift) for all ChemicalShift children of parent ChemicalShiftList"""
@@ -135,8 +141,18 @@ class ChemicalShift(AbstractWrapperObject):
         return sorted(parent._wrappedData.measurements,
                       key=operator.attrgetter('resonance.serial'))
 
+    #=========================================================================================
+    # CCPN functions
+    #=========================================================================================
 
+    #===========================================================================================
+    # new'Object' and other methods
+    # Call appropriate routines in their respective locations
+    #===========================================================================================
+
+#=========================================================================================
 # Connections to parents:
+#=========================================================================================
 
 # GWV 20181122: Moved to NmrAtom class
 # def getter(self:NmrAtom) -> Tuple[ChemicalShift, ...]:
@@ -147,24 +163,41 @@ class ChemicalShift(AbstractWrapperObject):
 #
 # del getter
 
+@newObject(ChemicalShift)
 def _newChemicalShift(self: ChemicalShiftList, value: float, nmrAtom: NmrAtom,
                       valueError: float = 0.0, figureOfMerit: float = 1.0,
-                      comment: str = None) -> ChemicalShift:
-    """Create new ChemicalShift within ChemicalShiftList."""
+                      comment: str = None, serial=None) -> ChemicalShift:
+    """Create new ChemicalShift within ChemicalShiftList.
+
+    :param self:
+    :param value:
+    :param nmrAtom:
+    :param valueError:
+    :param figureOfMerit:
+    :param comment:
+    :param serial:
+    :return: a new ChemicalShift instance.
+    """
 
     nmrAtom = self.getByPid(nmrAtom) if isinstance(nmrAtom, str) else nmrAtom
     defaults = collections.OrderedDict((('valueError', 0.0), ('figureOfMerit', 1.0),
                                         ('comment', None)))
-    self._startCommandEchoBlock('newChemicalShift', value, nmrAtom, values=locals(),
-                                defaults=defaults, parName='newChemicalShift')
-    try:
-        obj = self._wrappedData.newShift(value=value,
-                                         resonance=nmrAtom._wrappedData, error=valueError,
-                                         figOfMerit=figureOfMerit, details=comment)
-    finally:
-        self._endCommandEchoBlock()
-    return self._project._data2Obj.get(obj)
 
+    apiShift = self._wrappedData.newShift(value=value,
+                                     resonance=nmrAtom._wrappedData, error=valueError,
+                                     figOfMerit=figureOfMerit, details=comment)
+    result = self._project._data2Obj.get(apiShift)
+    if result is None:
+        raise RuntimeError('Unable to generate new ChemicalShift item')
+
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
+                                         % (result, serial))
+
+    return result
 
 ChemicalShiftList.newChemicalShift = _newChemicalShift
 del _newChemicalShift

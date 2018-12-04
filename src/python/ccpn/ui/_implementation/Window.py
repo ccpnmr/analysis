@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification
@@ -33,116 +33,126 @@ from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
+from ccpn.util.decorators import logCommand
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.util.Logging import getLogger
 
 
 class Window(AbstractWrapperObject):
-  """UI window, corresponds to OS window"""
+    """UI window, corresponds to OS window"""
 
-  #: Short class name, for PID.
-  shortClassName = 'GW'
-  # Attribute it necessary as subclasses must use superclass className
-  className = 'Window'
+    #: Short class name, for PID.
+    shortClassName = 'GW'
+    # Attribute it necessary as subclasses must use superclass className
+    className = 'Window'
 
-  _parentClass = Project
+    _parentClass = Project
 
-  #: Name of plural link to instances of class
-  _pluralLinkName = 'windows'
+    #: Name of plural link to instances of class
+    _pluralLinkName = 'windows'
 
-  #: List of child classes.
-  _childClasses = []
+    #: List of child classes.
+    _childClasses = []
 
-  # Qualified name of matching API class
-  _apiClassQualifiedName = ApiWindow._metaclass.qualifiedName()
+    # Qualified name of matching API class
+    _apiClassQualifiedName = ApiWindow._metaclass.qualifiedName()
 
-  # CCPN properties
-  @property
-  def _apiWindow(self) -> ApiWindow:
-    """ CCPN Window matching Window"""
-    return self._wrappedData
+    # CCPN properties
+    @property
+    def _apiWindow(self) -> ApiWindow:
+        """ CCPN Window matching Window"""
+        return self._wrappedData
 
-  @property
-  def _key(self) -> str:
-    """short form of name, corrected to use for id"""
-    return self._wrappedData.title.translate(Pid.remapSeparators)
+    @property
+    def _key(self) -> str:
+        """short form of name, corrected to use for id"""
+        return self._wrappedData.title.translate(Pid.remapSeparators)
 
-  @property
-  def _localCcpnSortKey(self) -> Tuple:
-    """Local sorting key, in context of parent."""
-    return(self._wrappedData.title,)
+    @property
+    def _localCcpnSortKey(self) -> Tuple:
+        """Local sorting key, in context of parent."""
+        return (self._wrappedData.title,)
 
-  @property
-  def title(self) -> str:
-    """Window display title (not used in PID)."""
-    return self._wrappedData.title
+    @property
+    def title(self) -> str:
+        """Window display title (not used in PID)."""
+        return self._wrappedData.title
 
-  @property
-  def _parent(self) -> Project:
-    """Parent (containing) object."""
-    return self._project
+    @property
+    def _parent(self) -> Project:
+        """Parent (containing) object."""
+        return self._project
 
-  @property
-  def position(self) -> tuple:
-    """Window X,Y position in integer pixels"""
-    return self._wrappedData.position
+    @property
+    def position(self) -> tuple:
+        """Window X,Y position in integer pixels"""
+        return self._wrappedData.position
 
-  @position.setter
-  def position(self, value:Sequence):
-    self._wrappedData.position = value
+    @position.setter
+    def position(self, value: Sequence):
+        self._wrappedData.position = value
 
-  @property
-  def size(self) -> tuple:
-    """Window X,Y size in integer pixels"""
-    return self._wrappedData.size
+    @property
+    def size(self) -> tuple:
+        """Window X,Y size in integer pixels"""
+        return self._wrappedData.size
 
-  @size.setter
-  def size(self, value:Sequence):
-    self._wrappedData.size = value
+    @size.setter
+    def size(self, value: Sequence):
+        self._wrappedData.size = value
 
-  # Implementation functions
-  @classmethod
-  def _getAllWrappedData(cls, parent:Project)-> list:
-    """get wrappedData (ccp.gui.windows) for all Window children of parent NmrProject.windowStore"""
-    windowStore = parent._wrappedData.windowStore
+    #=========================================================================================
+    # Implementation functions
+    #=========================================================================================
 
-    if windowStore is None:
-      return []
-    else:
-      return windowStore.sortedWindows()
+    @classmethod
+    def _getAllWrappedData(cls, parent: Project) -> list:
+        """get wrappedData (ccp.gui.windows) for all Window children of parent NmrProject.windowStore"""
+        windowStore = parent._wrappedData.windowStore
 
-# newWindow function
-def _newWindow(self:Project, title:str=None, position:tuple=(), size:tuple=()) -> Window:
-  """Create new child Window
-
-  :param str title: window  title (optional, defaults to 'W1', 'W2', 'W3', ...
-  :param tuple size: x,y size for new window in integer pixels
-  :param tuple position: x,y position for new window in integer pixels"""
-
-  if title and Pid.altCharacter in title:
-    raise ValueError("Character %s not allowed in gui.core.Window.title" % Pid.altCharacter)
-
-  apiWindowStore = self._project._wrappedData.windowStore
+        if windowStore is None:
+            return []
+        else:
+            return windowStore.sortedWindows()
 
 
-  defaults = collections.OrderedDict((('title', None), ('position', ()), ('size', ())))
+#=========================================================================================
+# Connections to parents:
+#=========================================================================================
 
-  self._startCommandEchoBlock('newWindow', values=locals(), defaults=defaults,
-                              parName='newWindow')
-  try:
-    apiGuiTask = (apiWindowStore.root.findFirstGuiTask(nameSpace='user', name='View')
-            or apiWindowStore.root.newGuiTask(nameSpace='user', name='View'))
-    newApiWindow = apiWindowStore.newWindow(title=title, guiTask=apiGuiTask)
-    if position:
-      newApiWindow.position = position
-    if size:
-      newApiWindow.size = size
-  finally:
-    self._endCommandEchoBlock()
+def _newWindow(self: Project, title: str = None, position: tuple = (), size: tuple = ()) -> Window:
+    """Create new child Window
 
-  result =  self._data2Obj.get(newApiWindow)
+    :param str title: window  title (optional, defaults to 'W1', 'W2', 'W3', ...
+    :param tuple size: x,y size for new window in integer pixels
+    :param tuple position: x,y position for new window in integer pixels"""
 
-  return result
+    if title and Pid.altCharacter in title:
+        raise ValueError("Character %s not allowed in gui.core.Window.title" % Pid.altCharacter)
+
+    apiWindowStore = self._project._wrappedData.windowStore
+
+    defaults = collections.OrderedDict((('title', None), ('position', ()), ('size', ())))
+
+    self._startCommandEchoBlock('newWindow', values=locals(), defaults=defaults,
+                                parName='newWindow')
+    try:
+        apiGuiTask = (apiWindowStore.root.findFirstGuiTask(nameSpace='user', name='View')
+                      or apiWindowStore.root.newGuiTask(nameSpace='user', name='View'))
+        newApiWindow = apiWindowStore.newWindow(title=title, guiTask=apiGuiTask)
+        if position:
+            newApiWindow.position = position
+        if size:
+            newApiWindow.size = size
+    finally:
+        self._endCommandEchoBlock()
+
+    result = self._data2Obj.get(newApiWindow)
+
+    return result
+
+
 Project.newWindow = _newWindow
 del _newWindow
 
 # Notifiers: None
-

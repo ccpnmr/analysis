@@ -32,6 +32,9 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
+from ccpn.util.decorators import logCommand
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.util.Logging import getLogger
 
 
 class SpectrumReference(AbstractWrapperObject):
@@ -259,6 +262,19 @@ class SpectrumReference(AbstractWrapperObject):
             for peak in self.spectrum.peaks:
                 peak._finaliseAction('change')
 
+    #=========================================================================================
+    # CCPN functions
+    #=========================================================================================
+
+    #===========================================================================================
+    # new'Object' and other methods
+    # Call appropriate routines in their respective locations
+    #===========================================================================================
+
+
+#=========================================================================================
+# Connections to parents:
+#=========================================================================================
 
 def _newSpectrumReference(self: Spectrum, dimension: int, spectrometerFrequency: float,
                           isotopeCodes: typing.Sequence[str], axisCode: str = None, measurementType: str = 'Shift',

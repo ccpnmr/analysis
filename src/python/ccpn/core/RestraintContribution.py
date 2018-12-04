@@ -35,6 +35,9 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.lib import CcpnSorting
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr import NmrConstraint
+from ccpn.util.decorators import logCommand
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.util.Logging import getLogger
 
 
 class RestraintContribution(AbstractWrapperObject):
@@ -313,42 +316,60 @@ class RestraintContribution(AbstractWrapperObject):
         if action in ['change', 'delete', 'create']:
             self.restraint._finaliseAction(action)
 
+    #=========================================================================================
+    # CCPN functions
+    #=========================================================================================
 
+    #===========================================================================================
+    # new'Object' and other methods
+    # Call appropriate routines in their respective locations
+    #===========================================================================================
+
+#=========================================================================================
 # Connections to parents:
+#=========================================================================================
+
+@newObject(RestraintContribution)
 def _newRestraintContribution(self: Restraint, targetValue: float = None, error: float = None,
                               weight: float = 1.0, upperLimit: float = None, lowerLimit: float = None,
                               additionalUpperLimit: float = None, additionalLowerLimit: float = None,
                               scale: float = 1.0, isDistanceDependent: bool = False, combinationId: int = None,
-                              restraintItems: Sequence = ()) -> RestraintContribution:
-    """Create new RestraintContribution within Restraint"""
+                              restraintItems: Sequence = (), serial=None) -> RestraintContribution:
+    """Create new RestraintContribution within Restraint
 
-    defaults = collections.OrderedDict(
-            (
-                ('targetValue', None), ('error', None), ('weight', 1.0),
-                ('upperLimit', None), ('lowerLimit', None), ('additionalUpperLimit', None),
-                ('additionalLowerLimit', None), ('scale', 1.0), ('isDistanceDependent', False),
-                ('restraintItems', ()),
-                )
-            )
-
+    :param self:
+    :param targetValue:
+    :param error:
+    :param weight:
+    :param upperLimit:
+    :param lowerLimit:
+    :param additionalUpperLimit:
+    :param additionalLowerLimit:
+    :param scale:
+    :param isDistanceDependent:
+    :param combinationId:
+    :param restraintItems:
+    :return: a new RestraintContribution instance.
+    """
     func = self._wrappedData.newGenericContribution
-    self._startCommandEchoBlock('newRestraintContribution', values=locals(), defaults=defaults,
-                                parName='newRestraintContribution')
-    self._project.blankNotification()  # delay notifiers till object is fully ready
-    try:
-        obj = func(targetValue=targetValue, error=error, weight=weight, upperLimit=upperLimit,
-                   lowerLimit=lowerLimit, additionalUpperLimit=additionalUpperLimit,
-                   additionalLowerLimit=additionalLowerLimit, scale=scale,
-                   isDistanceDependent=isDistanceDependent, combinationId=combinationId)
-        result = self._project._data2Obj.get(obj)
-        result.restraintItems = restraintItems
-    finally:
-        self._project.unblankNotification()
-        self._endCommandEchoBlock()
 
-    # Do creation notifications
-    result._finaliseAction('create')
-    #
+    obj = func(targetValue=targetValue, error=error, weight=weight, upperLimit=upperLimit,
+               lowerLimit=lowerLimit, additionalUpperLimit=additionalUpperLimit,
+               additionalLowerLimit=additionalLowerLimit, scale=scale,
+               isDistanceDependent=isDistanceDependent, combinationId=combinationId)
+    result = self._project._data2Obj.get(obj)
+    if result is None:
+        raise RuntimeError('Unable to generate new RestraintContribution item')
+
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
+                                         % (result, serial))
+
+    result.restraintItems = restraintItems
+
     return result
 
 

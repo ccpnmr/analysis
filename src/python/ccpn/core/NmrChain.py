@@ -334,6 +334,10 @@ class NmrChain(AbstractWrapperObject):
         """get wrappedData (Nmr.NmrChains) for all NmrChain children of parent Project"""
         return parent._wrappedData.sortedNmrChains()
 
+    #=========================================================================================
+    # CCPN functions
+    #=========================================================================================
+
     #===========================================================================================
     # new'Object' and other methods
     # Call appropriate routines in their respective locations
@@ -393,10 +397,9 @@ class NmrChain(AbstractWrapperObject):
 # del setter
 
 
-#===========================================================================================
-
-
-# new nmrChain functions
+#=========================================================================================
+# Connections to parents:
+#=========================================================================================
 
 @newObject(NmrChain)
 def _newNmrChain(self: Project, shortName: str = None, isConnected: bool = False, label: str = '?',

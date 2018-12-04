@@ -206,31 +206,35 @@ class PeakCluster(AbstractWrapperObject):
 
 @newObject(PeakCluster)
 def _newPeakCluster(self: Project, peaks: ['Peak'] = None, serial: int = None) -> PeakCluster:
-    """Create new PeakCluster within peakClusterList"""
+    """Create new PeakCluster.
 
-    defaults = collections.OrderedDict(
-            (('peaks', None), ('serial', None),
-             )
-            )
+    See the PeakCluster class for details.
 
-    undo = self._project._undo
-    self._startCommandEchoBlock('newPeakCluster', values=locals(), defaults=defaults,
-                                parName='newPeakCluster')
+    :param peaks:
+    :param serial: optional serial number.
+    :return: a new PeakCluster instance.
+    """
 
-    try:
-        apiParent = self._wrappedData  #
-        if peaks:
-            apiPeakCluster = apiParent.newPeakCluster(clusterType='multiplet',
-                                                      peaks=[p._wrappedData for p in peaks])
-        else:
-            apiPeakCluster = apiParent.newPeakCluster(clusterType='multiplet')
+    apiParent = self._wrappedData
+    if peaks:
+        apiPeakCluster = apiParent.newPeakCluster(clusterType='multiplet',
+                                                  peaks=[p._wrappedData for p in peaks])
+    else:
+        apiPeakCluster = apiParent.newPeakCluster(clusterType='multiplet')
 
-        result = self._project._data2Obj.get(apiPeakCluster)
+    result = self._project._data2Obj.get(apiPeakCluster)
+    if result is None:
+        raise RuntimeError('Unable to generate new PeakCluster item')
 
-    finally:
-        self._endCommandEchoBlock()
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
+                                % (result, serial))
 
     return result
+
 
 
 PeakCluster._parentClass.newPeakCluster = _newPeakCluster

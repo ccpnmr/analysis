@@ -235,20 +235,41 @@ class Atom(AbstractWrapperObject):
 # Connections to parents:
 #=========================================================================================
 
+@newObject(Atom)
 def _newAtom(self: Residue, name: str, elementSymbol: str = None, serial: int = None) -> 'Atom':
-    """Create new Atom within Residue. If elementSymbol is None, it is derived from the name"""
+    """Create new Atom within Residue. If elementSymbol is None, it is derived from the name
+
+    See the Atom class for details.
+
+    :param name:
+    :param elementSymbol:
+    :param serial: optional serial number.
+    :return: a new Atom instance.
+    """
+
     lastAtom = self.getAtom(name)
     if lastAtom is not None:
         raise ValueError("Cannot create %s, atom name %s already in use" % (lastAtom.longPid, name))
     if elementSymbol is None:
         elementSymbol = commonUtil.name2ElementSymbol(name)
+
     apiAtom = self._wrappedData.newAtom(name=name, elementSymbol=elementSymbol)
+    result = self._project._data2Obj[apiAtom]
+    if result is None:
+        raise RuntimeError('Unable to generate new Atom item')
+
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
+                                % (result, serial))
+
     apiAtom.expandNewAtom()
-    #
-    return self._project._data2Obj[apiAtom]
+
+    return result
 
 
-#
 Residue.newAtom = _newAtom
 
 # Connections to parents:

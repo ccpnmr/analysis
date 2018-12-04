@@ -300,29 +300,32 @@ class Model(AbstractWrapperObject):
 # Connections to parents:
 #=========================================================================================
 
+@newObject(Model)
 def _newModel(self: StructureEnsemble, serial: int = None, label: str = None, comment: str = None) -> Model:
-    """Create new Model"""
+    """Create new Model.
 
-    defaults = collections.OrderedDict((('serial', None), ('label', None), ('comment', None)))
+    See the Model class for details.
+
+    :param label:
+    :param comment:
+    :param serial: optional serial number.
+    :return: a new Model instance.
+    """
 
     structureEnsemble = self._wrappedData
 
-    self._startCommandEchoBlock('newModel', values=locals(), defaults=defaults,
-                                parName='newModel')
-    try:
-        newApiModel = structureEnsemble.newModel(name=label, details=comment)
-        result = self._project._data2Obj.get(newApiModel)
+    newApiModel = structureEnsemble.newModel(name=label, details=comment)
+    result = self._project._data2Obj.get(newApiModel)
+    if result is None:
+        raise RuntimeError('Unable to generate new Model item')
 
-        if serial is not None:
-            try:
-                result.resetSerial(serial)
-            except ValueError:
-                logger.warning("Could not reset serial of %s to %s - keeping original value"
-                               % (result, serial))
-            result._finaliseAction('rename')
-    finally:
-        self._endCommandEchoBlock()
-    #
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
+                                         % (result, serial))
+
     return result
 
 

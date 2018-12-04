@@ -169,13 +169,14 @@ def _newChemicalShift(self: ChemicalShiftList, value: float, nmrAtom: NmrAtom,
                       comment: str = None, serial: int = None) -> ChemicalShift:
     """Create new ChemicalShift within ChemicalShiftList.
 
-    :param self:
+    See the ChemicalShift class for details.
+
     :param value:
     :param nmrAtom:
     :param valueError:
     :param figureOfMerit:
     :param comment:
-    :param serial:
+    :param serial: optional serial number.
     :return: a new ChemicalShift instance.
     """
 

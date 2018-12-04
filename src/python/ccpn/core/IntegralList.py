@@ -292,12 +292,13 @@ def _newIntegralList(self: Spectrum, title: str = None, symbolColour: str = None
     """
     Create new IntegralList within Spectrum.
 
-    :param self:
+    See the IntegralList class for details.
+
     :param title:
     :param symbolColour:
     :param textColour:
     :param comment:
-    :param serial:
+    :param serial: optional serial number.
     :return: a new IntegralList attached to the spectrum.
     """
 

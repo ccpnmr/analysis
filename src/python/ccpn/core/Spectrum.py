@@ -1845,8 +1845,9 @@ def _newSpectrum(self: Project, name: str, serial: int = None) -> Spectrum:
 @newObject(Spectrum)
 def _createDummySpectrum(self: Project, axisCodes: Sequence[str], name=None,
                          chemicalShiftList=None, serial: int = None) -> Spectrum:
-    """
-    Make dummy spectrum from isotopeCodes list - without data and with default parameters.
+    """Make dummy Spectrum from isotopeCodes list - without data and with default parameters.
+
+    See the Spectrum class for details.
 
     :param self:
     :param axisCodes:
@@ -1861,9 +1862,6 @@ def _createDummySpectrum(self: Project, axisCodes: Sequence[str], name=None,
     if name:
         if Pid.altCharacter in name:
             raise ValueError("Character %s not allowed in ccpn.Spectrum.name" % Pid.altCharacter)
-        values = {'name': name}
-    else:
-        values = {}
 
     apiSpectrum = self._wrappedData.createDummySpectrum(axisCodes, name=name,
                                                         shiftList=apiShiftList)

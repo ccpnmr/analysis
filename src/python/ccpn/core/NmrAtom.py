@@ -419,6 +419,7 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
     :param name: string name of the new nmrAtom
     :param isotopeCode: isotope code
     :param comment: optional string comment
+    :param serial: optional serial number.
     :return: a new NmrAtom instance.
     """
     nmrProject = self._project._wrappedData

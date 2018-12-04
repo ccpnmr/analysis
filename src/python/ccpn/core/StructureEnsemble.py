@@ -184,9 +184,16 @@ class StructureEnsemble(AbstractWrapperObject):
 @newObject(StructureEnsemble)
 def _newStructureEnsemble(self: Project, serial: int = None, name: str = None, data: EnsembleData = None,
                           comment: str = None) -> StructureEnsemble:
-    """Create new StructureEnsemble"""
+    """Create new StructureEnsemble.
 
-    defaults = collections.OrderedDict((('serial', None), ('name', None), ('comment', None)))
+    See the StructureEnsemble class for details.
+
+    :param name:
+    :param data:
+    :param comment:
+    :param serial: optional serial number.
+    :return: a new StructureEnsemble instance.
+    """
 
     nmrProject = self._wrappedData
 
@@ -220,7 +227,7 @@ def _newStructureEnsemble(self: Project, serial: int = None, name: str = None, d
         for modelNumber in sorted(data['modelNumber'].unique()):
             result.newModel(serial=modelNumber, label='Model_%s' % modelNumber)
 
-    # TODO:ED CHECK
+    # TODO:ED CHECK, but should be okay
     # # Set up undo
     # apiObjectsCreated = [newApiStructureEnsemble]
     # apiObjectsCreated.extend(newApiStructureEnsemble.sortedModels())

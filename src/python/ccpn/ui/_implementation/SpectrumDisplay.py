@@ -347,6 +347,8 @@ def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 
                         independentStrips=False, nmrResidue=None, serial: int = None):
     """Create new SpectrumDisplay
 
+    See the SpectrumDisplay class for details.
+
     :param axisCodes:
     :param stripDirection:
     :param title:
@@ -354,7 +356,7 @@ def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 
     :param comment:
     :param independentStrips:
     :param nmrResidue:
-    :param serial:
+    :param serial: optional serial number.
     :return: a new SpectrumDisplay instance.
     """
 

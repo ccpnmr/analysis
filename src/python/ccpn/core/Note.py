@@ -164,29 +164,41 @@ class Note(AbstractWrapperObject):
 # Connections to parents:
 #=========================================================================================
 
+@newObject(Note)
 def _newNote(self: Project, name: str = 'Note', text: str = None, serial: int = None) -> Note:
-    """Create new Note"""
+    """Create new Note.
 
-    defaults = collections.OrderedDict((('name', None), ('text', None)))
+    See the Note class for details.
+
+    :param name:
+    :param text:
+    :param serial: optional serial number.
+    :return: a new Note instance.
+    """
 
     if not isinstance(name, str):
-        raise TypeError("Note name must be a string")  # ejb catch non-string
+        raise TypeError("Note name must be a string")
     if not name:
-        raise ValueError("Note name must be set")  # ejb catch empty string
+        raise ValueError("Note name must be set")
     if Pid.altCharacter in name:
         raise ValueError("Character %s not allowed in ccpn.Note.name" % Pid.altCharacter)
     if text is not None:
         if not isinstance(text, str):
-            raise TypeError("Note text must be a string")  # ejb catch non-string
-    #
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+            raise TypeError("Note text must be a string")
 
-    self._startCommandEchoBlock('newNote', values=locals(), defaults=defaults,
-                                parName='newNote')
-    try:
-        return self._data2Obj.get(self._wrappedData.newNote(text=text, name=name))
-    finally:
-        self._endCommandEchoBlock()
+    apiNote = self._wrappedData.newNote(text=text, name=name)
+    result = self._data2Obj.get(apiNote)
+    if result is None:
+        raise RuntimeError('Unable to generate new Note item')
+
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
+                                % (result, serial))
+
+    return result
 
 
 # Connections to parents:

@@ -296,7 +296,8 @@ def _newRestraintList(self: DataSet, restraintType, name: str = None, origin: st
                       serial: int = None, restraintItemLength=None) -> RestraintList:
     """Create new RestraintList of type restraintType within DataSet.
 
-    :param self:
+    See the RestraintList class for details.
+
     :param restraintType:
     :param name:
     :param origin:
@@ -309,8 +310,8 @@ def _newRestraintList(self: DataSet, restraintType, name: str = None, origin: st
     :param tensorChainCode:
     :param tensorSequenceCode:
     :param tensorResidueType:
-    :param serial:
     :param restraintItemLength:
+    :param serial: optional serial number.
     :return: a new RestraintList instance.
     """
 

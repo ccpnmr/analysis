@@ -215,12 +215,21 @@ del getter
 del setter
 
 
+@newObject(ChemicalShiftList)
 def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', autoUpdate: bool = True,
                           isSimulated: bool = False, serial: int = None, comment: str = None) -> ChemicalShiftList:
-    """Create new ChemicalShiftList."""
+    """Create new ChemicalShiftList.
 
-    defaults = collections.OrderedDict((('name', None), ('unit', 'ppm'), ('autoUpdate', True),
-                                        ('isSimulated', False), ('serial', None), ('comment', None)))
+    See the ChemicalShiftList class for details.
+
+    :param name:
+    :param unit:
+    :param autoUpdate:
+    :param isSimulated:
+    :param comment:
+    :param serial: optional serial number.
+    :return: a new ChemicalShiftList instance.
+    """
 
     apiNmrProject = self._wrappedData
     if name:
@@ -232,26 +241,22 @@ def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
         while apiNmrProject.findFirstMeasurementList(className='ShiftList', name=name):
             name = commonUtil.incrementName(name)
 
-    self._startCommandEchoBlock('newChemicalShiftList', values=locals(), defaults=defaults,
-                                parName='newChemicalShiftList')
     dd = {'name': name, 'unit': unit, 'autoUpdate': autoUpdate, 'isSimulated': isSimulated,
           'details': comment}
-    result = None
-    try:
-        obj = self._wrappedData.newShiftList(**dd)
-        result = self._data2Obj.get(obj)
-        if serial is not None:
-            try:
-                result.resetSerial(serial)
-                # modelUtil.resetSerial(obj, serial, 'measurementLists')
-            except ValueError:
-                self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
-                                             % (result, serial))
-            result._finaliseAction('rename')
-    finally:
-        self._endCommandEchoBlock()
-    return result
 
+    apiChemicalShiftList = self._wrappedData.newShiftList(**dd)
+    result = self._data2Obj.get(apiChemicalShiftList)
+    if result is None:
+        raise RuntimeError('Unable to generate new ChemicalShiftList item')
+
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
+                                         % (result, serial))
+
+    return result
 
 Project.newChemicalShiftList = _newChemicalShiftList
 del _newChemicalShiftList

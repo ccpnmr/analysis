@@ -355,6 +355,8 @@ def _newIntegral(self: IntegralList,
                  pointLimits: Sequence[Tuple[float, float]] = (), serial: int = None) -> Integral:
     """Create new Integral within IntegralList
 
+    See the Integral class for details.
+
     :param value:
     :param valueError:
     :param bias:
@@ -366,7 +368,7 @@ def _newIntegral(self: IntegralList,
     :param limits:
     :param slopes:
     :param pointLimits:
-    :return new integral instance
+    :return a new Integral instance.
     """
 
     dd = {'volume': value, 'volumeError': valueError, 'offset': offset, 'slopes': slopes,

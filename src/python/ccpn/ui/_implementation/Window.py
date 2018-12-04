@@ -121,33 +121,40 @@ class Window(AbstractWrapperObject):
 #=========================================================================================
 
 def _newWindow(self: Project, title: str = None, position: tuple = (), size: tuple = (), serial: int = None) -> Window:
-    """Create new child Window
+    """Create new child Window.
+
+    See the Window class for details.
 
     :param str title: window  title (optional, defaults to 'W1', 'W2', 'W3', ...
+    :param tuple position: x,y position for new window in integer pixels
     :param tuple size: x,y size for new window in integer pixels
-    :param tuple position: x,y position for new window in integer pixels"""
+    :param serial: optional serial number.
+    :return: a new Window instance.
+    """
 
     if title and Pid.altCharacter in title:
         raise ValueError("Character %s not allowed in gui.core.Window.title" % Pid.altCharacter)
 
     apiWindowStore = self._project._wrappedData.windowStore
 
-    defaults = collections.OrderedDict((('title', None), ('position', ()), ('size', ())))
-
-    self._startCommandEchoBlock('newWindow', values=locals(), defaults=defaults,
-                                parName='newWindow')
-    try:
-        apiGuiTask = (apiWindowStore.root.findFirstGuiTask(nameSpace='user', name='View')
-                      or apiWindowStore.root.newGuiTask(nameSpace='user', name='View'))
-        newApiWindow = apiWindowStore.newWindow(title=title, guiTask=apiGuiTask)
-        if position:
-            newApiWindow.position = position
-        if size:
-            newApiWindow.size = size
-    finally:
-        self._endCommandEchoBlock()
+    apiGuiTask = (apiWindowStore.root.findFirstGuiTask(nameSpace='user', name='View')
+                  or apiWindowStore.root.newGuiTask(nameSpace='user', name='View'))
+    newApiWindow = apiWindowStore.newWindow(title=title, guiTask=apiGuiTask)
+    if position:
+        newApiWindow.position = position
+    if size:
+        newApiWindow.size = size
 
     result = self._data2Obj.get(newApiWindow)
+    if result is None:
+        raise RuntimeError('Unable to generate new Window item')
+
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
+                                % (result, serial))
 
     return result
 

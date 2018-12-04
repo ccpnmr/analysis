@@ -285,11 +285,13 @@ def _newRestraint(self: RestraintList, figureOfMerit: float = None, comment: str
     have valid data. Use the simpler createSimpleRestraint instead, unless you have specific
     reasons for needing newRestraint
 
+    See the Restraint class for details.
+
     :param figureOfMerit:
     :param comment:
     :param peaks:
     :param vectorLength:
-    :param serial:
+    :param serial: optional serial number.
     :return: a new Restraint instance.
     """
     if peaks:

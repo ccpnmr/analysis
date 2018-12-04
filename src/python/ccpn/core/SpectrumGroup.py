@@ -150,8 +150,11 @@ class SpectrumGroup(AbstractWrapperObject):
 def _newSpectrumGroup(self: Project, name: str, spectra=(), serial: int = None) -> SpectrumGroup:
     """Create new SpectrumGroup
 
+    See the SpectrumGroup class for details.
+
     :param name: name for the new SpectrumGroup
     :param spectra: optional list of spectra as objects or pids
+    :param serial: optional serial number
     :return: a new SpectrumGroup instance.
     """
 

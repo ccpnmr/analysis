@@ -1229,6 +1229,8 @@ def _newNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None, 
 
     If NmrChain is connected, append the new NmrResidue to the end of the stretch.
 
+    See the NmrResidue class for details.
+
     :param sequenceCode:
     :param residueType:
     :param comment:
@@ -1236,9 +1238,6 @@ def _newNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None, 
     """
 
     originalSequenceCode = sequenceCode
-
-    defaults = collections.OrderedDict((('sequenceCode', None), ('residueType', None),
-                                        ('comment', None)))
 
     apiNmrChain = self._wrappedData
     nmrProject = apiNmrChain.nmrProject
@@ -1249,12 +1248,6 @@ def _newNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None, 
 
     dd = {'name': residueType, 'details': comment,
           'residueType': residueType, 'directNmrChain': apiNmrChain}
-
-    # self._startCommandEchoBlock('newNmrResidue', values=locals(), defaults=defaults,
-    #                             parName='newNmrResidue')
-    # self._project.blankNotification()  # delay notifiers till NmrResidue is fully ready
-    # result = None
-    # try:
 
     # Convert value to string, and check
     if isinstance(sequenceCode, int):
@@ -1292,6 +1285,9 @@ def _newNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None, 
     dd['sequenceCode'] = sequenceCode
     apiResonanceGroup = nmrProject.newResonanceGroup(**dd)
     result = self._project._data2Obj.get(apiResonanceGroup)
+    if result is None:
+        raise RuntimeError('Unable to generate new NmrResidue item')
+
     if serial is not None:
         try:
             result.resetSerial(serial)
@@ -1308,22 +1304,6 @@ def _newNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None, 
         #tt = MoleculeQuery.fetchStdResNameMap(self._wrappedData.root).get(residueType)
         if tt is not None:
             apiResonanceGroup.molType, apiResonanceGroup.ccpCode = tt
-
-    # except Exception as es:
-    #     getLogger().warning(str(es))
-    # finally:
-    #     self._project.unblankNotification()
-    #     self._endCommandEchoBlock()
-
-    # # Do creation notifications
-    # if result:
-    #     if serial is not None:
-    #         result._finaliseAction('rename')
-    #         # If we have reset serial above this is needed
-    #     result._finaliseAction('create')
-
-    if result is None:
-        raise RuntimeError('Unable to generate new NmrResidue item')
 
     return result
 

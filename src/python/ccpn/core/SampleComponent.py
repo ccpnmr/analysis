@@ -237,13 +237,27 @@ SpectrumHit.sampleComponent = property(getter, None, None,
 del getter
 
 
+@newObject(SampleComponent)
 def _newSampleComponent(self: Sample, name: str = None, labelling: str = None, role: str = None,  # ejb
                         concentration: float = None, concentrationError: float = None,
                         concentrationUnit: str = None, purity: float = None, comment: str = None,
                         serial: int = None) -> SampleComponent:
-    """Create new SampleComponent within Sample
+    """Create new SampleComponent within Sample.
 
-    Automatically creates the corresponding Substance if the name is not already taken
+    Automatically creates the corresponding Substance if the name is not already taken.
+
+    See the SampleComponent class for details.
+
+    :param name:
+    :param labelling:
+    :param role:
+    :param concentration:
+    :param concentrationError:
+    :param concentrationUnit:
+    :param purity:
+    :param comment:
+    :param serial: optional serial number.
+    :return: a new SampleComponent instance.
     """
 
     # Default values for 'new' function, as used for echoing to console
@@ -254,30 +268,22 @@ def _newSampleComponent(self: Sample, name: str = None, labelling: str = None, r
              )
             )
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-    # for ss in (name, labelling):
-    #   if ss and Pid.altCharacter in ss:
-    #     raise ValueError("Character %s not allowed in ccpn.SampleComponent id: %s.%s" %
-    #                      (Pid.altCharacter, name, labelling))
-    #
     if not isinstance(name, str):
-        raise TypeError("ccpn.SampleComponent name must be a string")  # ejb
+        raise TypeError("ccpn.SampleComponent name must be a string")
     elif not name:
-        raise ValueError("ccpn.SampleComponent name must be set")  # ejb
+        raise ValueError("ccpn.SampleComponent name must be set")
     elif Pid.altCharacter in name:
         raise ValueError("Character %s not allowed in ccpn.SampleComponent id: %s.%s" %
                          (Pid.altCharacter, name, labelling))
 
     if labelling is not None:  # 'None' caught by below as default
         if not isinstance(labelling, str):
-            raise TypeError("ccpn.SampleComponent 'labelling' name must be a string")  # ejb
+            raise TypeError("ccpn.SampleComponent 'labelling' name must be a string")
         elif not labelling:
-            raise ValueError("ccpn.SampleComponent 'labelling' name must be set")  # ejb
+            raise ValueError("ccpn.SampleComponent 'labelling' name must be set")
         elif Pid.altCharacter in labelling:
             raise ValueError("Character %s not allowed in ccpn.SampleComponent labelling, id: %s.%s" %
                              (Pid.altCharacter, name, labelling))
-    #
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
 
     if concentrationUnit is not None and concentrationUnit not in Constants.concentrationUnits:
         self._project._logger.warning(
@@ -286,20 +292,27 @@ def _newSampleComponent(self: Sample, name: str = None, labelling: str = None, r
         raise ValueError("SampleComponent.concentrationUnit must be in the list: %s" % Constants.concentrationUnits)  # ejb
 
     apiSample = self._wrappedData
-    self._startCommandEchoBlock('newSampleComponent', name, values=locals(), defaults=defaults,
-                                parName='newSampleComponent')
-    try:
-        substance = self._project.fetchSubstance(name=name, labelling=labelling)
-        # NB - using substance._wrappedData.labelling because we need the API labelling value,
-        # which is different for the default case
-        obj = apiSample.newSampleComponent(name=name, labeling=substance._wrappedData.labeling,
-                                           concentration=concentration,
-                                           concentrationError=concentrationError,
-                                           concentrationUnit=concentrationUnit, details=comment,
-                                           purity=purity)
-    finally:
-        self._endCommandEchoBlock()
-    return self._project._data2Obj.get(obj)
+    substance = self._project.fetchSubstance(name=name, labelling=labelling)
+
+    # NB - using substance._wrappedData.labelling because we need the API labelling value,
+    # which is different for the default case
+    obj = apiSample.newSampleComponent(name=name, labeling=substance._wrappedData.labeling,
+                                       concentration=concentration,
+                                       concentrationError=concentrationError,
+                                       concentrationUnit=concentrationUnit, details=comment,
+                                       purity=purity)
+    result = self._project._data2Obj.get(obj)
+    if result is None:
+        raise RuntimeError('Unable to generate new SampleComponent item')
+
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
+                                % (result, serial))
+
+    return result
 
 
 Sample.newSampleComponent = _newSampleComponent

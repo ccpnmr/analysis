@@ -41,6 +41,7 @@ from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.Sample import Sample
+from ccpn.core.Spectrum import Spectrum
 from ccpn.core.Substance import Substance
 from ccpn.core.Integral import Integral
 from ccpn.core.SpectrumGroup import SpectrumGroup
@@ -53,9 +54,11 @@ from ccpn.ui._implementation.Strip import Strip
 
 SingularOnly = 'singularOnly'
 Remove = 'remove'
+PCAcompontents = 'pcaComponents'
 
 _currentClasses = {
   SpectrumGroup:{SingularOnly:True},
+  Spectrum:{},
   Peak:{},
   Integral:{},
   NmrChain:{},
@@ -77,6 +80,7 @@ _currentExtraFields = {
   'positions':{'docTemplate':"last cursor %s"},
   'cursorPositions':{'singularOnly':True, 'docTemplate':'last cursor %s - (posX,posY) tuple'},
   'axisCodes':{'singularOnly':True, 'docTemplate':'last selected %s'},
+  PCAcompontents:{'docTemplate':'last selected %s, of any obj kind'},
 }
 
 # Fields in current (there is a current.xyz attribute with related functions

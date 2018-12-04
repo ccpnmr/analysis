@@ -344,6 +344,70 @@ class GLVertexArray():
         if self.blendMode:
             GL.glDisable(GL.GL_BLEND)
 
+    def defineTextArrayVBO(self, enableVBO=False):
+        if not (ENABLE_VBOS and enableVBO):
+            return
+
+        # create the VBOs if they don't exist - reusing will just rewrite the buffers
+        if not hasattr(self, 'VBOs'):
+            self.VBOs = GL.glGenBuffers(4)
+
+        sizeVertices = self.vertices.size * self.vertices.itemsize
+        sizeColors = self.colors.size * self.colors.itemsize
+        sizeText = self.texcoords.size * self.texcoords.itemsize
+        sizeAttribs = self.attribs.size * self.attribs.itemsize
+
+        # bind to the buffers
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[0])
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeVertices, self.vertices, GL.GL_STATIC_DRAW)
+
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[1])
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeColors, self.colors, GL.GL_STATIC_DRAW)
+
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[2])
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeText, self.texcoords, GL.GL_STATIC_DRAW)
+
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[3])
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeAttribs, self.attribs, GL.GL_STATIC_DRAW)
+
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
+
+    def drawTextArrayVBO(self, enableVBO=False):
+        if not (ENABLE_VBOS and enableVBO):
+
+            # call the normal drawTextArray routine
+            self.drawTextArray()
+        else:
+
+            if self.blendMode:
+                GL.glEnable(GL.GL_BLEND)
+
+            GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+            GL.glEnableClientState(GL.GL_COLOR_ARRAY)
+            GL.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY)
+
+            GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[0])
+            GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, None)
+            GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[1])
+            GL.glColorPointer(4, GL.GL_FLOAT, 0, None)
+            GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[2])
+            GL.glTexCoordPointer(2, GL.GL_FLOAT, 0, None)
+
+            # this is for passing extra attributes in
+            GL.glEnableVertexAttribArray(1)
+            GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[3])
+            GL.glVertexAttribPointer(1, 2, GL.GL_FLOAT, GL.GL_FALSE, 0, None)
+
+            GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, self.indices)
+
+            GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)
+            GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+            GL.glDisableClientState(GL.GL_COLOR_ARRAY)
+            GL.glDisableVertexAttribArray(1)
+
+            if self.blendMode:
+                GL.glDisable(GL.GL_BLEND)
+
 
 class GLSymbolArray(GLVertexArray):
     def __init__(self, GLContext=None, spectrumView=None, objListView=None):

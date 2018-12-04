@@ -1856,7 +1856,7 @@ class GuiStrip(Frame):
         """Update visibility list in the OpenGL
         """
         self._CcpnGLWidget.updateVisibleSpectrumViews()
-        print('>>>_updateVisibility')
+        # print('>>>_updateVisibility')
 
     # def peakPickPosition(self, inPosition) -> Tuple[Peak]:
     #     """

@@ -1797,7 +1797,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         for objListView, specView in self._visibleListViews:
             if objListView in self._GLLabels.keys():
                 for drawString in self._GLLabels[objListView].stringList:
-                    drawString.drawTextArray()
+                    drawString.drawTextArrayVBO(enableVBO=True)
                     # drawString.defineTextArray()
 
 

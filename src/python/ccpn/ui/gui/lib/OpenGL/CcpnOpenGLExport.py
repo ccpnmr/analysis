@@ -769,7 +769,7 @@ class GLExporter():
         """
         colourGroups = OrderedDict()
         for drawString in self._parent._marksAxisCodes:
-            # drawString.drawTextArray()
+            # drawString.drawTextArrayVBO(enableVBO=True)
 
             col = drawString.colors[0]
             if not isinstance(col, Iterable):

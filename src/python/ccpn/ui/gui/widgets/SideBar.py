@@ -134,7 +134,6 @@ NEW_ITEM_DICT = {
     'Complexes': 'newComplex',
     }
 
-
 def _openItemObject(mainWindow, objs, **args):
     """
     Abstract routine to activate a module to display objs

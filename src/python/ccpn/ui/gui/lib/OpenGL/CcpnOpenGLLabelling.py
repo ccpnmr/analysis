@@ -1331,7 +1331,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 try:
                     drawList.vertices[index:index + 8] = drawList.attribs[index:index + 8] + offsets
                 except:
-                    pass
+                    raise RuntimeError('Error _rescaleSymbols')
 
             pass
 
@@ -1394,6 +1394,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         if symbolType == 0:  # a cross
             for drawStr in drawList.stringList:
                 drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
+                drawStr.updateTextArrayVBOAttribs(enableVBO=True)
 
         elif symbolType == 1:
             for drawStr in drawList.stringList:
@@ -1404,6 +1405,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 else:
                     drawStr.setStringOffset((GLDefs.STRINGSCALE * r * np.sign(self._GLParent.pixelX),
                                              GLDefs.STRINGSCALE * w * np.sign(self._GLParent.pixelY)))
+                drawStr.updateTextArrayVBOAttribs(enableVBO=True)
 
             # pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
             # spectrumFrequency = spectrumView.spectrum.spectrometerFrequencies
@@ -1428,6 +1430,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 else:
                     drawStr.setStringOffset((GLDefs.STRINGSCALE * r * np.sign(self._GLParent.pixelX),
                                              GLDefs.STRINGSCALE * w * np.sign(self._GLParent.pixelY)))
+                drawStr.updateTextArrayVBOAttribs(enableVBO=True)
 
             # pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
             # spectrumFrequency = spectrumView.spectrum.spectrometerFrequencies
@@ -2232,7 +2235,7 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
 
             for drawStr in drawList.stringList:
                 drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
-
+                drawStr.updateTextArrayVBOAttribs(enableVBO=True)
 
 class GLmultipletListMethods():
     """Class of methods common to 1d and Nd multiplets
@@ -2659,6 +2662,8 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
 
                 for pp in range(0, 2 * vertices, 2):
                     drawStr.attribs[pp:pp + 2] = offsets
+
+                drawStr.updateTextArrayVBOAttribs(enableVBO=True)
 
     def rescaleIntegralLists(self):
         for il in self._GLSymbols.values():

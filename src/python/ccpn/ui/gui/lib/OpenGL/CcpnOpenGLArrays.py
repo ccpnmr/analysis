@@ -372,6 +372,49 @@ class GLVertexArray():
 
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
 
+    def updateTextArrayVBO(self, enableVBO=False):
+        if not (ENABLE_VBOS and enableVBO):
+            return
+
+        # check the VBOs, if they don't exist raise error
+        if not hasattr(self, 'VBOs'):
+            raise RuntimeError('OpenGL Error: cannot update textArray: %s' % self)
+
+        sizeVertices = self.vertices.size * self.vertices.itemsize
+        sizeColors = self.colors.size * self.colors.itemsize
+        sizeText = self.texcoords.size * self.texcoords.itemsize
+        sizeAttribs = self.attribs.size * self.attribs.itemsize
+
+        # bind to the buffers
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[0])
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeVertices, self.vertices, GL.GL_STATIC_DRAW)
+
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[1])
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeColors, self.colors, GL.GL_STATIC_DRAW)
+
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[2])
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeText, self.texcoords, GL.GL_STATIC_DRAW)
+
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[3])
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeAttribs, self.attribs, GL.GL_STATIC_DRAW)
+
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
+
+    def updateTextArrayVBOAttribs(self, enableVBO=False):
+        if not (ENABLE_VBOS and enableVBO):
+            return
+
+        # check the VBOs, if they don't exist raise error
+        if not hasattr(self, 'VBOs'):
+            raise RuntimeError('OpenGL Error: cannot update attribs: %s' % self)
+
+        sizeAttribs = self.attribs.size * self.attribs.itemsize
+
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[3])
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeAttribs, self.attribs, GL.GL_STATIC_DRAW)
+
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
+
     def drawTextArrayVBO(self, enableVBO=False):
         if not (ENABLE_VBOS and enableVBO):
 

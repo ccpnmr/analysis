@@ -31,6 +31,9 @@ import collections
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import CalculationStep as ApiCalculationStep
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.DataSet import DataSet
+from ccpn.util.decorators import logCommand
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.util.Logging import getLogger
 
 
 class CalculationStep(AbstractWrapperObject):
@@ -158,13 +161,27 @@ class CalculationStep(AbstractWrapperObject):
     def outputDataSet(self, value: str):
         self._wrappedData.outputDataUuid = value if value is None else value.uuid
 
+    #=========================================================================================
+    # Implementation functions
+    #=========================================================================================
+
     @classmethod
     def _getAllWrappedData(cls, parent: DataSet) -> list:
         """get wrappedData - all ConstraintList children of parent NmrConstraintStore"""
         return parent._wrappedData.sortedCalculationSteps()
 
+    #=========================================================================================
+    # CCPN functions
+    #=========================================================================================
 
+    #===========================================================================================
+    # new'Object' and other methods
+    # Call appropriate routines in their respective locations
+    #===========================================================================================
+
+#=========================================================================================
 # Connections to parents:
+#=========================================================================================
 
 def getter(self: DataSet) -> List[CalculationStep]:
     uuid = self.uuid
@@ -187,18 +204,25 @@ DataSet.inputCalculationSteps = property(getter, None, None,
 del getter
 
 
+@newObject(CalculationStep)
 def _newCalculationStep(self: DataSet, programName: str = None, programVersion: str = None,
                         scriptName: str = None, script: str = None,
                         inputDataUuid: str = None, outputDataUuid: str = None,
-                        inputDataSet: DataSet = None, outputDataSet: DataSet = None, ) -> CalculationStep:
-    """Create new CalculationStep within DataSet"""
+                        inputDataSet: DataSet = None, outputDataSet: DataSet = None, serial=None) -> CalculationStep:
+    """Create new CalculationStep within DataSet.
 
-    # Default values for 'new' function, as used for echoing to console
-    defaults = collections.OrderedDict(
-            (('programName', None), ('programVersion', None), ('scriptName', None), ('script', None),
-             ('inputDataUuid', None), ('outputDataUuid', None)
-             )
-            )
+    :param self:
+    :param programName:
+    :param programVersion:
+    :param scriptName:
+    :param script:
+    :param inputDataUuid:
+    :param outputDataUuid:
+    :param inputDataSet:
+    :param outputDataSet:
+    :param serial:
+    :return: a new CalculationStep instance.
+    """
 
     project = self.project
     programName = programName or project.programName
@@ -217,17 +241,22 @@ def _newCalculationStep(self: DataSet, programName: str = None, programVersion: 
             raise ValueError("Either outputDataSet or inputDataUuid must be None - values were %s and %s"
                              % (outputDataSet, outputDataUuid))
 
-    self._startCommandEchoBlock('newCalculationStep', values=locals(), defaults=defaults,
-                                parName='newCalculationStep')
-    try:
-        obj = self._wrappedData.newCalculationStep(programName=programName, programVersion=programVersion,
-                                                   scriptName=scriptName, script=script,
-                                                   inputDataUuid=inputDataUuid,
-                                                   outputDataUuid=outputDataUuid)
-    finally:
-        self._endCommandEchoBlock()
-    return project._data2Obj.get(obj)
+    obj = self._wrappedData.newCalculationStep(programName=programName, programVersion=programVersion,
+                                               scriptName=scriptName, script=script,
+                                               inputDataUuid=inputDataUuid,
+                                               outputDataUuid=outputDataUuid)
+    result = project._data2Obj.get(obj)
+    if result is None:
+        raise RuntimeError('Unable to generate new PeakList item')
 
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
+                                         % (result, serial))
+
+    return result
 
 DataSet.newCalculationStep = _newCalculationStep
 del _newCalculationStep

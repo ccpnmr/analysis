@@ -36,7 +36,7 @@ from typing import Optional, Tuple, Sequence, List
 import numpy as np
 from scipy.integrate import trapz
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
 from ccpn.util.Logging import getLogger
 
 
@@ -310,12 +310,13 @@ class Integral(AbstractWrapperObject):
                 return (baseline, x[xRegion], y[xRegion])
 
     #=========================================================================================
-    # Connections to parents:
+    # CCPN functions
     #=========================================================================================
 
     @property
     def peak(self):
-        """The peak attached to the integral"""
+        """The peak attached to the integral.
+        """
         return self._project._data2Obj[self._wrappedData.peak] if self._wrappedData.peak else None
 
     @peak.setter
@@ -335,8 +336,15 @@ class Integral(AbstractWrapperObject):
 
         self._wrappedData.peak = peak._wrappedData if peak else None
 
-#=========================================================================================
+    #===========================================================================================
+    # new'Object' and other methods
+    # Call appropriate routines in their respective locations
+    #===========================================================================================
 
+
+#=========================================================================================
+# Connections to parents:
+#=========================================================================================
 
 @newObject(Integral)
 def _newIntegral(self: IntegralList,
@@ -347,7 +355,6 @@ def _newIntegral(self: IntegralList,
                  pointLimits: Sequence[Tuple[float, float]] = (), serial: int = None) -> Integral:
     """Create new Integral within IntegralList
 
-    :param self:
     :param value:
     :param valueError:
     :param bias:
@@ -359,10 +366,8 @@ def _newIntegral(self: IntegralList,
     :param limits:
     :param slopes:
     :param pointLimits:
-
     :return new integral instance
     """
-    #EJB 20181128: minor refactoring
 
     dd = {'volume': value, 'volumeError': valueError, 'offset': offset, 'slopes': slopes,
           'figOfMerit': figureOfMerit, 'constraintWeight': constraintWeight,

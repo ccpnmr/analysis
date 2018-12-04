@@ -76,10 +76,8 @@ from ccpn.core.lib import Pid
 from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple, _getProjection
 from ccpn.core.lib.Cache import cached
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
 from ccpn.util.Logging import getLogger
-from ccpn.core.lib.ContextManagers import logCommandBlock
-
 from ccpn.util.Common import axisCodeMapping
 from ccpn.util.Logging import getLogger
 
@@ -1662,8 +1660,13 @@ class Spectrum(AbstractWrapperObject):
                 pass
         return newSpectrum
 
-    # @logCommand(get='self')
+    # # @logCommand(get='self')
     # @deleteObject()
+    # def _delete(self):
+    #     """Delete the spectrum.
+    #     """
+    #     self._wrappedData.delete()
+
     @cached.clear(PLANEDATACACHE)  # Check if there was a planedata cache, and if so, clear it
     @cached.clear(SLICEDATACACHE)  # Check if there was a slicedata cache, and if so, clear it
     def delete(self):
@@ -1671,6 +1674,7 @@ class Spectrum(AbstractWrapperObject):
         with logCommandBlock(get='self') as log:
             log('delete')
 
+            # handle spectrumView ordering - this should be moved to spectrumView or spectrumDisplay via notifier
             specDisplays = []
             specViews = []
             for sp in self.spectrumViews:
@@ -1678,7 +1682,18 @@ class Spectrum(AbstractWrapperObject):
                     specDisplays.append(sp._parent.spectrumDisplay)
                     specViews.append((sp._parent, sp._parent.spectrumViews.index(sp)))
 
+            # TODO:ED need to delete all peakLists and integralLists first, treat as single undo
+            # need to be a pre/post event for delete OR coreNotifier for peakListView on peakList
+            for peakList in self.peakLists:
+                peakList.delete()
+            for integralList in self.integralLists:
+                integralList.delete()
+            for multipletList in self.multipletLists:
+                multipletList.delete()
+
             self._wrappedData.delete()
+            # self._delete()
+
             for sd in specViews:
                 sd[0]._removeOrderedSpectrumViewIndex(sd[1])
 
@@ -1729,6 +1744,10 @@ class Spectrum(AbstractWrapperObject):
         if action in ['change']:
             for specView in self.spectrumViews:
                 specView._finaliseAction(action=action)
+
+    #=========================================================================================
+    # CCPN functions
+    #=========================================================================================
 
     #===========================================================================================
     # new'Object' and other methods
@@ -1812,7 +1831,7 @@ class Spectrum(AbstractWrapperObject):
 
 
 #=========================================================================================
-# CCPN functions
+# Connections to parents:
 #=========================================================================================
 
 @newObject(Spectrum)

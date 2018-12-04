@@ -50,10 +50,9 @@ from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 from ccpnmodel.ccpncore.lib.Io import Pdb as pdbIo
 from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
-
-from ccpn.util.Logging import getLogger
-
 from ccpn.util.decorators import logCommand
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.util.Logging import getLogger
 
 
 # TODO These should be merged with the sams constants in CcpnNefIo

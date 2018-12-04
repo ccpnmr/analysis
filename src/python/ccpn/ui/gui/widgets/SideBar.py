@@ -662,13 +662,13 @@ class SideBar(QtWidgets.QTreeWidget, Base, NotifierBase):
                 for obj in objs:
                     if obj:
                         if isinstance(obj, Spectrum):
-                            # need to delete all peakLists and integralLists first, treat as single undo
-                            for peakList in obj.peakLists:
-                                peakList.delete()
-                            for integralList in obj.integralLists:
-                                integralList.delete()
-                            for multipletList in obj.multipletLists:
-                                multipletList.delete()
+                            # # need to delete all peakLists and integralLists first, treat as single undo
+                            # for peakList in obj.peakLists:
+                            #     peakList.delete()
+                            # for integralList in obj.integralLists:
+                            #     integralList.delete()
+                            # for multipletList in obj.multipletLists:
+                            #     multipletList.delete()
                             obj.delete()
                         else:
                             # just delete the object

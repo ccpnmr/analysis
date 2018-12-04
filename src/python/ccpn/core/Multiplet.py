@@ -45,7 +45,7 @@ from ccpn.util.Common import makeIterableList
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 from functools import partial
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
 from ccpn.util.Logging import getLogger
 
 
@@ -353,6 +353,10 @@ class Multiplet(AbstractWrapperObject):
         """get wrappedData (Multiplets) for all Multiplet children of parent MultipletList"""
         return parent._wrappedData.sortedMultiplets()
 
+    #=========================================================================================
+    # CCPN functions
+    #=========================================================================================
+
     def addPeaks(self, peaks: ['Peak'] = None):
         """
         Add a peak or list of peaks to the Multiplet
@@ -426,9 +430,14 @@ class Multiplet(AbstractWrapperObject):
         if trigger in ['change']:
             self._finaliseAction(trigger)
 
+    #===========================================================================================
+    # new'Object' and other methods
+    # Call appropriate routines in their respective locations
+    #===========================================================================================
+
 
 #=========================================================================================
-# CCPN functions
+# Connections to parents
 #=========================================================================================
 
 @newObject(Multiplet)

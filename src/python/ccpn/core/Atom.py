@@ -34,6 +34,9 @@ from ccpn.core.Project import Project
 from ccpn.core.Residue import Residue
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Atom as ApiAtom
+from ccpn.util.decorators import logCommand
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.util.Logging import getLogger
 
 
 class Atom(AbstractWrapperObject):
@@ -218,6 +221,19 @@ class Atom(AbstractWrapperObject):
         """get wrappedData (MolSystem.Atoms) for all Atom children of parent Residue"""
         return parent._wrappedData.sortedAtoms()
 
+    #=========================================================================================
+    # CCPN functions
+    #=========================================================================================
+
+    #===========================================================================================
+    # new'Object' and other methods
+    # Call appropriate routines in their respective locations
+    #===========================================================================================
+
+
+#=========================================================================================
+# Connections to parents:
+#=========================================================================================
 
 def _newAtom(self: Residue, name: str, elementSymbol: str = None) -> 'Atom':
     """Create new Atom within Residue. If elementSymbol is None, it is derived from the name"""

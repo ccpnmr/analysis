@@ -38,8 +38,10 @@ from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
-from ccpn.util.Logging import getLogger
 from ccpn.core.lib.OrderedSpectrumViews import SPECTRUMVIEWINDEX, OrderedSpectrumViews
+from ccpn.util.decorators import logCommand
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.util.Logging import getLogger
 
 logger = getLogger()
 
@@ -218,29 +220,6 @@ class SpectrumDisplay(AbstractWrapperObject):
         for key, val in value.items():
             self.setParameter(key, val)
 
-    # Implementation functions
-    @classmethod
-    def _getAllWrappedData(cls, parent: Project) -> list:
-        """get wrappedData (ccp.gui.Module) for all SpectrumDisplay children of Project"""
-
-        apiGuiTask = (parent._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
-                      parent._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
-        return [x for x in apiGuiTask.sortedModules() if isinstance(x, ApiBoundDisplay)]
-
-    # CCPN functions
-    def resetAxisOrder(self):
-        """Reset display to original axis order"""
-
-        self._startCommandEchoBlock('resetAxisOrder')
-        try:
-            self._wrappedData.resetAxisOrder()
-        finally:
-            self._endCommandEchoBlock()
-
-    def findAxis(self, axisCode):
-        """Find axis """
-        return self._project._data2Obj.get(self._wrappedData.findAxis(axisCode))
-
     # #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # # ejb - orderedSpectrumViews, orderedSpectra
     # # store the current orderedSpectrumViews in the internal data store
@@ -304,7 +283,19 @@ class SpectrumDisplay(AbstractWrapperObject):
         finally:
             self._endCommandEchoBlock()
 
+    # CCPN functions
+    def resetAxisOrder(self):
+        """Reset display to original axis order"""
 
+        self._startCommandEchoBlock('resetAxisOrder')
+        try:
+            self._wrappedData.resetAxisOrder()
+        finally:
+            self._endCommandEchoBlock()
+
+    def findAxis(self, axisCode):
+        """Find axis """
+        return self._project._data2Obj.get(self._wrappedData.findAxis(axisCode))
 
     # def appendSpectrumView(self, spectrumView):
     #   """
@@ -324,14 +315,48 @@ class SpectrumDisplay(AbstractWrapperObject):
     #     self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
     #   self._orderedSpectrumViews.removeSpectrumView(spectrumView)
 
+    #=========================================================================================
+    # Implementation functions
+    #=========================================================================================
 
-# newSpectrumDisplay functions
+    @classmethod
+    def _getAllWrappedData(cls, parent: Project) -> list:
+        """get wrappedData (ccp.gui.Module) for all SpectrumDisplay children of Project"""
+
+        apiGuiTask = (parent._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
+                      parent._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
+        return [x for x in apiGuiTask.sortedModules() if isinstance(x, ApiBoundDisplay)]
+
+
+    #=========================================================================================
+    # CCPN functions
+    #=========================================================================================
+
+    #===========================================================================================
+    # new'Object' and other methods
+    # Call appropriate routines in their respective locations
+    #===========================================================================================
+
+#=========================================================================================
+# Connections to parents:
+#=========================================================================================
+
+@newObject(SpectrumDisplay)
 def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 'Y',
                         title: str = None, window: Window = None, comment: str = None,
-                        independentStrips=False, nmrResidue=None):
-    defaults = collections.OrderedDict((('stripDirection', 'Y'), ('title', None),
-                                        ('window', None), ('comment', None),
-                                        ('independentStrips', False), ('nmrResidue', None)))
+                        independentStrips=False, nmrResidue=None, serial=None):
+    """Create new SpectrumDisplay
+
+    :param axisCodes:
+    :param stripDirection:
+    :param title:
+    :param window:
+    :param comment:
+    :param independentStrips:
+    :param nmrResidue:
+    :param serial:
+    :return: a new SpectrumDisplay instance.
+    """
 
     window = self.getByPid(window) if isinstance(window, str) else window
     nmrResidue = self.getByPid(nmrResidue) if isinstance(nmrResidue, str) else nmrResidue
@@ -348,6 +373,7 @@ def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 
             stripDirection=stripDirection, window=window,
             details=comment, resonanceGroup=nmrResidue and nmrResidue._wrappedData
     )
+
     # Add name, setting and insuring uniqueness if necessary
     if title is None:
         if 'intensity' in axisCodes:
@@ -360,46 +386,49 @@ def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 
         title = commonUtil.incrementName(title)
     displayPars['name'] = title
 
-    self._startCommandEchoBlock('newSpectrumDisplay', axisCodes, values=locals(), defaults=defaults,
-                                parName='newSpectrumDisplay')
-    try:
-        # Create SpectrumDisplay
-        if independentStrips:
-            # Create FreeStripDisplay
-            apiSpectrumDisplay = apiTask.newFreeDisplay(**displayPars)
+    if independentStrips:
+        # Create FreeStripDisplay
+        apiSpectrumDisplay = apiTask.newFreeDisplay(**displayPars)
+    else:
+        # Create Boundstrip/Nostrip display and first strip
+        displayPars['axisCodes'] = displayPars['axisOrder'] = axisCodes
+        apiSpectrumDisplay = apiTask.newBoundDisplay(**displayPars)
+
+    # Create axes
+    for ii, code in enumerate(axisCodes):
+        # if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y' or
+        #    not stripDirection):
+        # Reactivate this code if we reintroduce non-strip displays (stripDirection == None)
+        if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y'):
+            stripSerial = 0
         else:
-            # Create Boundstrip/Nostrip display and first strip
-            displayPars['axisCodes'] = displayPars['axisOrder'] = axisCodes
-            apiSpectrumDisplay = apiTask.newBoundDisplay(**displayPars)
+            stripSerial = 1
 
-        # Create axes
-        for ii, code in enumerate(axisCodes):
-            # if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y' or
-            #    not stripDirection):
-            # Reactivate this code if we reintroduce non-strip displays (stripDirection == None)
-            if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y'):
-                stripSerial = 0
-            else:
-                stripSerial = 1
-
-            if code[0].isupper():
-                apiSpectrumDisplay.newFrequencyAxis(code=code, stripSerial=stripSerial)
-            elif code == 'intensity':
-                apiSpectrumDisplay.newIntensityAxis(code=code, stripSerial=stripSerial)
-            elif code.startswith('fid'):
-                apiSpectrumDisplay.newFidAxis(code=code, stripSerial=stripSerial)
-            else:
-                apiSpectrumDisplay.newSampledAxis(code=code, stripSerial=stripSerial)
-
-        # Create first strip
-        if independentStrips:
-            apiStrip = apiSpectrumDisplay.newFreeStrip(axisCodes=axisCodes, axisOrder=axisCodes)
+        if code[0].isupper():
+            apiSpectrumDisplay.newFrequencyAxis(code=code, stripSerial=stripSerial)
+        elif code == 'intensity':
+            apiSpectrumDisplay.newIntensityAxis(code=code, stripSerial=stripSerial)
+        elif code.startswith('fid'):
+            apiSpectrumDisplay.newFidAxis(code=code, stripSerial=stripSerial)
         else:
-            apiStrip = apiSpectrumDisplay.newBoundStrip()
-        #
-        result = self._project._data2Obj.get(apiSpectrumDisplay)
-    finally:
-        self._endCommandEchoBlock()
+            apiSpectrumDisplay.newSampledAxis(code=code, stripSerial=stripSerial)
+
+    # Create first strip
+    if independentStrips:
+        apiStrip = apiSpectrumDisplay.newFreeStrip(axisCodes=axisCodes, axisOrder=axisCodes)
+    else:
+        apiStrip = apiSpectrumDisplay.newBoundStrip()
+
+    result = self._project._data2Obj.get(apiSpectrumDisplay)
+    if result is None:
+        raise RuntimeError('Unable to generate new SpectrumDisplay item')
+
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
+                                         % (result, serial))
 
     return result
 

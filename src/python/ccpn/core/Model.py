@@ -31,6 +31,8 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.util.StructureData import EnsembleData
 from ccpnmodel.ccpncore.api.ccp.molecule.MolStructure import Model as ApiModel
+from ccpn.util.decorators import logCommand
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
 from ccpn.util.Logging import getLogger
 
 
@@ -284,6 +286,19 @@ class Model(AbstractWrapperObject):
             self.clearData()
         super()._finaliseAction(action)
 
+    #=========================================================================================
+    # CCPN functions
+    #=========================================================================================
+
+    #===========================================================================================
+    # new'Object' and other methods
+    # Call appropriate routines in their respective locations
+    #===========================================================================================
+
+
+#=========================================================================================
+# Connections to parents:
+#=========================================================================================
 
 def _newModel(self: StructureEnsemble, serial: int = None, label: str = None, comment: str = None) -> Model:
     """Create new Model"""

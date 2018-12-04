@@ -38,9 +38,8 @@ from ccpn.core.PeakList import PeakList
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 #from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr import Peak as LibPeak
-
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
 from ccpn.util.Logging import getLogger
 
 
@@ -375,34 +374,6 @@ class Peak(AbstractWrapperObject):
         return tuple([self._project._data2Obj[mt] for mt in self._wrappedData.sortedMultiplets()
                       if mt in self._project._data2Obj])
 
-    def _linkPeaks(self, peaks):
-        """
-        NB: this is needed for screening spectrumHits and peakHits. You might see peakCluster instead.
-        Saves the peaks in _ccpnInternalData as pids
-        """
-        pids = [str(peak.pid) for peak in peaks if peak != self and isinstance(peak, Peak)]
-        if isinstance(self._ccpnInternalData, dict):
-
-            # a single write is required to the api to notify that a change has occurred,
-            # this will prompt for a save of the v2 data
-            tempCcpn = self._ccpnInternalData.copy()
-            tempCcpn[self._linkedPeaksName] = pids
-            self._ccpnInternalData = tempCcpn
-        else:
-            raise ValueError("Peak.linkPeaks: CCPN internal must be a dictionary")
-
-    @property
-    def _linkedPeaks(self):
-        """
-        NB: this is needed for screening spectrumHits and peakHits. You might see peakCluster instead.
-        It returns a list of peaks belonging to other peakLists or spectra which are required to be linked to this particular peak.
-        This functionality is not implemented in the model. Saves the Peak pids in _ccpnInternalData.
-        :return: a list of peaks
-        """
-        pids = self._ccpnInternalData.get(self._linkedPeaksName) or []
-        peaks = [self.project.getByPid(pid) for pid in pids if pid is not None]
-        return peaks
-
     def addAssignment(self, value: Sequence[Union[str, 'NmrAtom']]):
         """Add a peak assignment - a list of one NmrAtom or Pid for each dimension"""
 
@@ -453,7 +424,27 @@ class Peak(AbstractWrapperObject):
         dimensionNmrAtoms[index] = value
         self.dimensionNmrAtoms = dimensionNmrAtoms
 
-    # Utility functions
+    #=========================================================================================
+    # Implementation functions
+    #=========================================================================================
+
+    @classmethod
+    def _getAllWrappedData(cls, parent: PeakList) -> Tuple[Nmr.Peak, ...]:
+        """Get wrappedData (Peaks) for all Peak children of parent PeakList."""
+        return parent._wrappedData.sortedPeaks()
+
+    def _finaliseAction(self, action: str):
+        """Subclassed to handle associated multiplets
+        """
+        super()._finaliseAction(action=action)
+
+        if action in ['change', 'create', 'delete']:
+            for mt in self.multiplets:
+                mt._finaliseAction(action=action)
+
+    #=========================================================================================
+    # CCPN functions
+    #=========================================================================================
 
     def isPartlyAssigned(self):
         """Whether peak is partly assigned."""
@@ -535,15 +526,6 @@ class Peak(AbstractWrapperObject):
         """Set the position, height and lineWidth of the Peak."""
         LibPeak.fitPositionHeightLineWidths(self._apiPeak)
 
-    #=========================================================================================
-    # Implementation functions
-    #=========================================================================================
-
-    @classmethod
-    def _getAllWrappedData(cls, parent: PeakList) -> Tuple[Nmr.Peak, ...]:
-        """Get wrappedData (Peaks) for all Peak children of parent PeakList."""
-        return parent._wrappedData.sortedPeaks()
-
     @property
     def integral(self):
         """Return the integral attached to the peak."""
@@ -567,19 +549,43 @@ class Peak(AbstractWrapperObject):
 
         self._wrappedData.integral = integral._wrappedData if integral else None
 
-    def _finaliseAction(self, action: str):
-        """Subclassed to handle associated multiplets
+    def _linkPeaks(self, peaks):
         """
-        super()._finaliseAction(action=action)
+        NB: this is needed for screening spectrumHits and peakHits. You might see peakCluster instead.
+        Saves the peaks in _ccpnInternalData as pids
+        """
+        pids = [str(peak.pid) for peak in peaks if peak != self and isinstance(peak, Peak)]
+        if isinstance(self._ccpnInternalData, dict):
 
-        if action in ['change', 'create', 'delete']:
-            for mt in self.multiplets:
-                mt._finaliseAction(action=action)
+            # a single write is required to the api to notify that a change has occurred,
+            # this will prompt for a save of the v2 data
+            tempCcpn = self._ccpnInternalData.copy()
+            tempCcpn[self._linkedPeaksName] = pids
+            self._ccpnInternalData = tempCcpn
+        else:
+            raise ValueError("Peak.linkPeaks: CCPN internal must be a dictionary")
+
+    @property
+    def _linkedPeaks(self):
+        """
+        NB: this is needed for screening spectrumHits and peakHits. You might see peakCluster instead.
+        It returns a list of peaks belonging to other peakLists or spectra which are required to be linked to this particular peak.
+        This functionality is not implemented in the model. Saves the Peak pids in _ccpnInternalData.
+        :return: a list of peaks
+        """
+        pids = self._ccpnInternalData.get(self._linkedPeaksName) or []
+        peaks = [self.project.getByPid(pid) for pid in pids if pid is not None]
+        return peaks
+
+    #===========================================================================================
+    # new'Object' and other methods
+    # Call appropriate routines in their respective locations
+    #===========================================================================================
+
 
 #=========================================================================================
-
-
-# new Peak functions
+# Connections to parents:
+#=========================================================================================
 
 @newObject(Peak)
 def _newPeak(self: PeakList, height: float = None, volume: float = None,

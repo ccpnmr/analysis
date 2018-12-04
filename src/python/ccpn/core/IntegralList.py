@@ -36,9 +36,8 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import IntegralList as ApiIntegralList
 import numpy as np
 from scipy.integrate import trapz
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
 from ccpn.util.Logging import getLogger
-
 from ccpn.core.lib.SpectrumLib import _oldEstimateNoiseLevel1D
 
 
@@ -194,29 +193,8 @@ class IntegralList(AbstractWrapperObject):
             for ilv in self.integralListViews:
                 ilv._finaliseAction(action=action)
 
-    #===========================================================================================
-    # new'Object' and other methods
-    # Call appropriate routines in their respective locations
-    #===========================================================================================
-
-    @logCommand(get='self')
-    def newIntegral(self, value: List[float] = None, comment: str = None, **kwds):
-        """Create a new integral within an IntegralList.
-
-        See the Integral class for details.
-
-        Optional keyword arguments can be passed in; see Integral._newIntegral for details.
-
-        :param value: (min, max) values in ppm for the integral
-        :param comment: optional comment string
-        :return: a new Integral instance
-        """
-        from ccpn.core.Integral import _newIntegral  # imported here to avoid circular imports
-
-        return _newIntegral(self, value=value, comment=comment, **kwds)
-
     #=========================================================================================
-    # Library functions
+    # CCPN functions
     #=========================================================================================
 
     def automaticIntegral1D(self, minimalLineWidth=0.01, deltaFactor=1.5, findPeak=False, noiseThreshold=None) -> List['Integral']:
@@ -282,13 +260,31 @@ class IntegralList(AbstractWrapperObject):
 
         return integrals
 
+    #===========================================================================================
+    # new'Object' and other methods
+    # Call appropriate routines in their respective locations
+    #===========================================================================================
+
+    @logCommand(get='self')
+    def newIntegral(self, value: List[float] = None, comment: str = None, **kwds):
+        """Create a new integral within an IntegralList.
+
+        See the Integral class for details.
+
+        Optional keyword arguments can be passed in; see Integral._newIntegral for details.
+
+        :param value: (min, max) values in ppm for the integral
+        :param comment: optional comment string
+        :return: a new Integral instance
+        """
+        from ccpn.core.Integral import _newIntegral  # imported here to avoid circular imports
+
+        return _newIntegral(self, value=value, comment=comment, **kwds)
+
 
 #=========================================================================================
-# CCPN functions
-#=========================================================================================
-
-
 # Connections to parents:
+#=========================================================================================
 
 @newObject(IntegralList)
 def _newIntegralList(self: Spectrum, title: str = None, symbolColour: str = None,

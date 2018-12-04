@@ -37,9 +37,8 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGro
 from ccpnmodel.ccpncore.lib.Constants import defaultNmrChainCode
 from ccpn.core import _importOrder
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
 from ccpn.util.Logging import getLogger
-from ccpn.core.lib.ContextManagers import logCommandBlock
 
 
 # Value used for sorting with no offset - puts no_offset just before offset +0
@@ -1110,6 +1109,10 @@ class NmrResidue(AbstractWrapperObject):
         """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""
         return parent._wrappedData.sortedResonanceGroups()
 
+    #=========================================================================================
+    # CCPN functions
+    #=========================================================================================
+
     #===========================================================================================
     # new'Object' and other methods
     # Call appropriate routines in their respective locations
@@ -1143,6 +1146,9 @@ class NmrResidue(AbstractWrapperObject):
         return _fetchNmrAtom(name=name)
 
 #=========================================================================================
+# Connections to parents:
+#=========================================================================================
+
 # GWV 20181122: Moved to Residue class
 # def getter(self:Residue) -> typing.Optional[NmrResidue]:
 #   try:
@@ -1198,7 +1204,6 @@ class NmrResidue(AbstractWrapperObject):
 #                                   "AllNmrResidues corresponding to Residue - E.g. (for MR:A.87)"
 #                                   " NmrResidues NR:A.87, NR:A.87+0, NR:A.88-1, NR:A.82+5, etc.")
 
-
 def getter(self: NmrChain) -> typing.Tuple[NmrResidue]:
     result = list(self._project._data2Obj.get(x) for x in self._wrappedData.mainResonanceGroups)
     if not self.isConnected:
@@ -1216,11 +1221,6 @@ NmrChain.mainNmrResidues = property(getter, setter, None, """NmrResidues belongi
 del getter
 del setter
 
-
-#=========================================================================================
-
-
-# new nmrResidue functions
 
 @newObject(NmrResidue)
 def _newNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None, residueType: str = None,

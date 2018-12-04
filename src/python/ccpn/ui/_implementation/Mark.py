@@ -181,10 +181,19 @@ class Mark(AbstractWrapperObject):
             return '<%s:%s %s>' % (self.shortClassName, self.serial, pstring[1:-1])
 
 
+    #=========================================================================================
+    # CCPN functions
+    #=========================================================================================
+
+    #===========================================================================================
+    # new'Object' and other methods
+    # Call appropriate routines in their respective locations
+    #===========================================================================================
+
+
 #=========================================================================================
-
-
-# newMark functions
+# Connections to parents:
+#=========================================================================================
 
 @newObject(Mark)
 def _newMark(self: Project, colour: str, positions: Sequence[float], axisCodes: Sequence,

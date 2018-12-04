@@ -369,9 +369,18 @@ class NmrAtom(AbstractWrapperObject):
             for cs in self.chemicalShifts:
                 cs._finaliseAction(action=action)
 
+    #=========================================================================================
+    # CCPN functions
+    #=========================================================================================
+
+    #===========================================================================================
+    # new'Object' and other methods
+    # Call appropriate routines in their respective locations
+    #===========================================================================================
 
 #=========================================================================================
-
+# Connections to parents:
+#=========================================================================================
 
 #GWV 20181122: moved to Atom class
 # def getter(self: Atom) -> Optional[NmrAtom]:
@@ -474,6 +483,8 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
         except ValueError:
             getLogger().warning("Could not reset serial of %s to %s - keeping original value"
                                 % (result, serial))
+
+    return result
 
 
 def _fetchNmrAtom(self: NmrResidue, name: str):

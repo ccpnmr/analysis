@@ -124,6 +124,8 @@ import json
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
 import re
+
+
 # from ccpn.util.decorators import profile
 
 try:
@@ -133,7 +135,6 @@ except ImportError:
     QtWidgets.QMessageBox.critical(None, "OpenGL CCPN",
                                    "PyOpenGL must be installed to run this example.")
     sys.exit(1)
-
 
 UNITS_PPM = 'ppm'
 UNITS_HZ = 'Hz'
@@ -563,7 +564,7 @@ class CcpnGLWidget(QOpenGLWidget):
         stackCount = 0
         self.resetRangeLimits(allLimits=False)
 
-        for spectrumView in self._ordering:                             # _ordering:                             # strip.spectrumViews:  #.orderedSpectrumViews():
+        for spectrumView in self._ordering:  # _ordering:                             # strip.spectrumViews:  #.orderedSpectrumViews():
             # self._spectrumSettings[spectrumView] = {}
 
             if spectrumView.isDeleted:
@@ -580,7 +581,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.strip.project._undo.decreaseBlocking()
 
     def _maximiseRegions(self):
-        for spectrumView in self._ordering:                             # strip.spectrumViews:  #.orderedSpectrumViews():
+        for spectrumView in self._ordering:  # strip.spectrumViews:  #.orderedSpectrumViews():
             if spectrumView.isDeleted:
                 self._spectrumSettings[spectrumView] = {}
                 continue
@@ -797,7 +798,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # def between(val, l, r):
         #   return (l-val)*(r-val) <= 0
 
-        if self.strip and not self._ordering:                             # strip.spectrumViews:
+        if self.strip and not self._ordering:  # strip.spectrumViews:
             event.accept()
             return
 
@@ -1345,10 +1346,10 @@ class CcpnGLWidget(QOpenGLWidget):
         reset the axes to the limits of the spectra in this view
         """
         # set a default empty axisRange
-        axisLimits = [-1.0, 1.0, -1.0, 1.0]
+        axisLimits = []
 
         # iterate over spectrumViews
-        for spectrumView in self._ordering:                             # strip.spectrumViews:
+        for spectrumView in self._ordering:  # strip.spectrumViews:
             if spectrumView.isDeleted:
                 continue
 
@@ -1363,6 +1364,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 axisLimits[2] = max(axisLimits[2], self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MAXYALIAS])
                 axisLimits[3] = min(axisLimits[3], self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MINYALIAS])
 
+        if axisLimits:
             if xAxis:
                 if self.INVERTXAXIS:
                     self.axisL, self.axisR = axisLimits[0:2]
@@ -1905,7 +1907,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def mouseMoveEvent(self, event):
         if self.strip.isDeleted:
             return
-        if not self._ordering:                             # strip.spectrumViews:
+        if not self._ordering:  # strip.spectrumViews:
             return
 
         if abs(self.axisL - self.axisR) < 1.0e-6 or abs(self.axisT - self.axisB) < 1.0e-6:
@@ -2116,10 +2118,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
     # @profile
     def paintGL(self):
-        w = self.w
-        h = self.h
-
-        GL.glClear(GL.GL_COLOR_BUFFER_BIT)
 
         if self._blankDisplay:
             return
@@ -2140,6 +2138,9 @@ class CcpnGLWidget(QOpenGLWidget):
         # self._GLIntegrals.setListViews(self._ordering)
         # self._GLMultiplets.setListViews(self._ordering)
 
+        w = self.w
+        h = self.h
+        GL.glClear(GL.GL_COLOR_BUFFER_BIT)
         currentShader = self.globalGL._shaderProgram1.makeCurrent()
 
         # start with the grid mapped to (0..1, 0..1) to remove zoom errors here
@@ -2153,10 +2154,11 @@ class CcpnGLWidget(QOpenGLWidget):
         currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
                                         self.axisT, -1.0, 1.0)
         currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+        currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
 
         # draw the spectra, need to reset the viewport
         self.viewports.setViewport(self._currentView)
-        self.drawSpectra(currentShader)
+        self.drawSpectra()
 
         if not self._stackingMode:
             self._GLPeaks.drawSymbols(self._spectrumSettings)
@@ -2210,10 +2212,10 @@ class CcpnGLWidget(QOpenGLWidget):
             self.drawMouseCoords()
 
         # make the overlay/axis solid
-        self.globalGL._shaderProgramTex.setBlendEnabled(0)
+        currentShader.setBlendEnabled(0)
         self.drawOverlayText()
         self.drawAxisLabels()
-        self.globalGL._shaderProgramTex.setBlendEnabled(1)
+        currentShader.setBlendEnabled(1)
 
         self.disableTexture()
 
@@ -2271,7 +2273,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
 
     def buildAllContours(self):
-        for spectrumView in self._ordering:                             # strip.spectrumViews:
+        for spectrumView in self._ordering:  # strip.spectrumViews:
             if not spectrumView.isDeleted:
                 spectrumView.buildContours = True
 
@@ -2281,7 +2283,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # self._spectrumSettings = {}
         rebuildFlag = False
-        for spectrumView in self._ordering:                             # strip.spectrumViews:
+        for spectrumView in self._ordering:  # strip.spectrumViews:
             if spectrumView.isDeleted:
                 continue
 
@@ -2322,9 +2324,11 @@ class CcpnGLWidget(QOpenGLWidget):
         if rebuildFlag:
             self.rebuildTraces()
 
-    def drawSpectra(self, currentShader):
+    def drawSpectra(self):
         if self.strip.isDeleted:
             return
+
+        currentShader = self.globalGL._shaderProgram1
 
         self.buildSpectra()
 
@@ -2448,35 +2452,30 @@ class CcpnGLWidget(QOpenGLWidget):
                             g=self.foreground[1],
                             b=self.foreground[2], transparency=32.0)
 
-        # for gr in self.gridList:
-        #     gr.defineIndexVBO(enableVBO=True)
+        # buffer the lists to VBOs
+        for gr in self.gridList:
+            gr.defineIndexVBO(enableVBO=True)
 
     def drawGrid(self):
         # set to the mainView and draw the grid
-
         self.buildGrid()
+
         GL.glEnable(GL.GL_BLEND)
 
         if self.strip.gridVisible:
             self.viewports.setViewport(self._currentView)
-            # self.axisLabelling, self.labelsChanged = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[1,0], r=1.0, g=1.0, b=1.0, transparency=300.0)
-            self.gridList[0].drawIndexArray()
-            # self.gridList[0].drawIndexVBO(enableVBO=True)
+            self.gridList[0].drawIndexVBO(enableVBO=True)
 
         if self._axesVisible:
             if self._drawRightAxis:
                 # draw the grid marks for the right axis
                 self.viewports.setViewport(self._currentRightAxisView)
-                # self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=32.0)
-                self.gridList[1].drawIndexArray()
-                # self.gridList[1].drawIndexVBO(enableVBO=True)
+                self.gridList[1].drawIndexVBO(enableVBO=True)
 
             if self._drawBottomAxis:
                 # draw the grid marks for the bottom axis
                 self.viewports.setViewport(self._currentBottomAxisView)
-                # self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=32.0)
-                self.gridList[2].drawIndexArray()
-                # self.gridList[2].drawIndexVBO(enableVBO=True)
+                self.gridList[2].drawIndexVBO(enableVBO=True)
 
     def _floatFormat(self, f=0.0, prec=3):
         """return a float string, remove trailing zeros after decimal
@@ -3440,7 +3439,6 @@ class CcpnGLWidget(QOpenGLWidget):
                 # no visible spectra
                 return
 
-
             # newCoords = self.mouseFormat % (self._axisOrder[0], cursorX,
             #                                 self._axisOrder[1], cursorY)
             newCoords = ' %s: %s\n %s: %s' % (self._axisOrder[0], self.XMode(cursorX),
@@ -3809,7 +3807,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         positionPixel = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
-        for spectrumView in self._ordering:                             # strip.spectrumViews:
+        for spectrumView in self._ordering:  # strip.spectrumViews:
             if spectrumView.isDeleted:
                 continue
 
@@ -3865,7 +3863,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         positionPixel = position  #(self.cursorCoordinate[0], self.cursorCoordinate[1])
 
-        for spectrumView in self._ordering:                             # strip.spectrumViews:
+        for spectrumView in self._ordering:  # strip.spectrumViews:
 
             if spectrumView.isDeleted:
                 continue
@@ -4081,7 +4079,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def initialiseTraces(self):
         # set up the arrays and dimension for showing the horizontal/vertical traces
         stackCount = 0
-        for spectrumView in self._ordering:                             # strip.spectrumViews:
+        for spectrumView in self._ordering:  # strip.spectrumViews:
 
             if spectrumView.isDeleted:
                 continue
@@ -4368,6 +4366,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 gridGLList.clearArrays()
 
+                vertexList = ()
+                indexList = ()
+                colorList = ()
+
                 index = 0
                 for scaleOrder, i in enumerate(scaleGrid):  #  [2,1,0]:   ## Draw three different scales of grid
                     dist = br - ul
@@ -4426,7 +4428,8 @@ class CcpnGLWidget(QOpenGLWidget):
                                                                p1[1], d[1]))
 
                             # append the new points to the end of nparray
-                            gridGLList.indices = np.append(gridGLList.indices, (index, index + 1))
+                            # gridGLList.indices = np.append(gridGLList.indices, (index, index + 1))
+                            indexList += (index, index + 1)
 
                             # gridGLList.vertices = np.append(gridGLList.vertices, [p1[0], p1[1], p2[0], p2[1]])
 
@@ -4435,15 +4438,26 @@ class CcpnGLWidget(QOpenGLWidget):
                             #                                                       valueToRatio(p2[0], self.axisL, self.axisR),
                             #                                                       valueToRatio(p2[1], self.axisB, self.axisT)))
 
-                            gridGLList.vertices = np.append(gridGLList.vertices, (valueToRatio(p1[0], axisLimitL, axisLimitR),
-                                                                                  valueToRatio(p1[1], axisLimitB, axisLimitT),
-                                                                                  valueToRatio(p2[0], axisLimitL, axisLimitR),
-                                                                                  valueToRatio(p2[1], axisLimitB, axisLimitT)))
+                            # gridGLList.vertices = np.append(gridGLList.vertices, (valueToRatio(p1[0], axisLimitL, axisLimitR),
+                            #                                                       valueToRatio(p1[1], axisLimitB, axisLimitT),
+                            #                                                       valueToRatio(p2[0], axisLimitL, axisLimitR),
+                            #                                                       valueToRatio(p2[1], axisLimitB, axisLimitT)))
+                            vertexList += (valueToRatio(p1[0], axisLimitL, axisLimitR),
+                                           valueToRatio(p1[1], axisLimitB, axisLimitT),
+                                           valueToRatio(p2[0], axisLimitL, axisLimitR),
+                                           valueToRatio(p2[1], axisLimitB, axisLimitT))
 
                             alpha = min([1.0, c / transparency])
-                            gridGLList.colors = np.append(gridGLList.colors, (r, g, b, alpha, r, g, b, alpha))
+                            # gridGLList.colors = np.append(gridGLList.colors, (r, g, b, alpha, r, g, b, alpha))
+                            colorList += (r, g, b, alpha, r, g, b, alpha)
+
                             gridGLList.numVertices += 2
                             index += 2
+
+                # copy the arrays the the GLstore
+                gridGLList.vertices = np.array(vertexList, dtype=np.float32)
+                gridGLList.indices = np.array(indexList, dtype=np.uint32)
+                gridGLList.colors = np.array(colorList, dtype=np.float32)
 
                 # restrict the labelling to the maximum without overlap based on width
                 # should be dependent on font size though
@@ -4694,7 +4708,7 @@ class CcpnGLWidget(QOpenGLWidget):
                         self.stripIDString.renderMode = GLRENDERMODE_REBUILD
 
                     if GLNotifier.GLPEAKLISTS in triggers:
-                        for spectrumView in self._ordering:                             # strip.spectrumViews:
+                        for spectrumView in self._ordering:  # strip.spectrumViews:
 
                             if spectrumView.isDeleted:
                                 continue
@@ -4706,7 +4720,7 @@ class CcpnGLWidget(QOpenGLWidget):
                         # self.buildPeakLists()
 
                     if GLNotifier.GLPEAKLISTLABELS in triggers:
-                        for spectrumView in self._ordering:                             # strip.spectrumViews:
+                        for spectrumView in self._ordering:  # strip.spectrumViews:
 
                             if spectrumView.isDeleted:
                                 continue
@@ -4746,7 +4760,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
                     if GLNotifier.GLINTEGRALLISTS in triggers:
 
-                        for spectrumView in self._ordering:                             # strip.spectrumViews:
+                        for spectrumView in self._ordering:  # strip.spectrumViews:
 
                             if spectrumView.isDeleted:
                                 continue
@@ -4758,7 +4772,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
                     if GLNotifier.GLINTEGRALLISTLABELS in triggers:
 
-                        for spectrumView in self._ordering:                             # strip.spectrumViews:
+                        for spectrumView in self._ordering:  # strip.spectrumViews:
 
                             if spectrumView.isDeleted:
                                 continue
@@ -4769,7 +4783,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                     integralListView.buildLabels = True
 
                     if GLNotifier.GLMULTIPLETLISTS in triggers:
-                        for spectrumView in self._ordering:                             # strip.spectrumViews:
+                        for spectrumView in self._ordering:  # strip.spectrumViews:
 
                             if spectrumView.isDeleted:
                                 continue
@@ -4781,7 +4795,7 @@ class CcpnGLWidget(QOpenGLWidget):
                         # self.buildMultipletLists()
 
                     if GLNotifier.GLMULTIPLETLISTLABELS in triggers:
-                        for spectrumView in self._ordering:                             # strip.spectrumViews:
+                        for spectrumView in self._ordering:  # strip.spectrumViews:
 
                             if spectrumView.isDeleted:
                                 continue
@@ -5018,7 +5032,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def _selectPeaksInRegion(self, xPositions, yPositions, zPositions):
         peaks = list(self.current.peaks)
 
-        for spectrumView in self._ordering:                             # strip.spectrumViews:
+        for spectrumView in self._ordering:  # strip.spectrumViews:
 
             if spectrumView.isDeleted:
                 continue
@@ -5064,7 +5078,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def _selectMultipletsInRegion(self, xPositions, yPositions, zPositions):
         multiplets = list(self.current.multiplets)
 
-        for spectrumView in self._ordering:                             # strip.spectrumViews:
+        for spectrumView in self._ordering:  # strip.spectrumViews:
 
             if spectrumView.isDeleted:
                 continue

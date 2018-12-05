@@ -102,7 +102,7 @@ class GLVertexArray():
             GL.glDeleteBuffers(len(self.VBOs), self.VBOs)
 
     def clearArrays(self):
-        # set everything to 32 bit for openGL VBOs, indices are ints, everything else is float
+        # set everything to 32 bit for openGL VBOs, indices are uint32s, everything else is float32
         self.indices = np.array([], dtype=np.uint32)
         self.vertices = np.array([], dtype=np.float32)
         self.colors = np.array([], dtype=np.float32)

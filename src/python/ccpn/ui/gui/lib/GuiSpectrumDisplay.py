@@ -896,7 +896,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
             else:
                 for ss in self.strips:
-                    ss.plotWidget.plotItem.axes['right']['item'].show()
+                    # ss.plotWidget.plotItem.axes['right']['item'].show()
                     try:
                         ss._CcpnGLWidget.setRightAxisVisible(axisVisible=True)
                     except Exception as es:

@@ -2448,6 +2448,9 @@ class CcpnGLWidget(QOpenGLWidget):
                             g=self.foreground[1],
                             b=self.foreground[2], transparency=32.0)
 
+        # for gr in self.gridList:
+        #     gr.defineIndexVBO(enableVBO=True)
+
     def drawGrid(self):
         # set to the mainView and draw the grid
 
@@ -2458,6 +2461,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self.viewports.setViewport(self._currentView)
             # self.axisLabelling, self.labelsChanged = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[1,0], r=1.0, g=1.0, b=1.0, transparency=300.0)
             self.gridList[0].drawIndexArray()
+            # self.gridList[0].drawIndexVBO(enableVBO=True)
 
         if self._axesVisible:
             if self._drawRightAxis:
@@ -2465,12 +2469,14 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.viewports.setViewport(self._currentRightAxisView)
                 # self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=32.0)
                 self.gridList[1].drawIndexArray()
+                # self.gridList[1].drawIndexVBO(enableVBO=True)
 
             if self._drawBottomAxis:
                 # draw the grid marks for the bottom axis
                 self.viewports.setViewport(self._currentBottomAxisView)
                 # self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=32.0)
                 self.gridList[2].drawIndexArray()
+                # self.gridList[2].drawIndexVBO(enableVBO=True)
 
     def _floatFormat(self, f=0.0, prec=3):
         """return a float string, remove trailing zeros after decimal
@@ -2546,9 +2552,6 @@ class CcpnGLWidget(QOpenGLWidget):
                                                      color=labelColour, GLContext=self,
                                                      obj=None))
 
-                # for lb in self._axisXLabelling:
-                #     lb.defineTextArrayVBO(enableVBO=True)
-
             self._axisYLabelling = []
 
             if self._drawRightAxis:
@@ -2587,9 +2590,6 @@ class CcpnGLWidget(QOpenGLWidget):
                                                      y=1.0 * self.deltaY,
                                                      color=labelColour, GLContext=self,
                                                      obj=None))
-
-                # for lb in self._axisYLabelling:
-                #     lb.defineTextArrayVBO(enableVBO=True)
 
     def drawAxisLabels(self):
         # draw axes labelling

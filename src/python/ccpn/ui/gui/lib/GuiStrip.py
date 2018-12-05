@@ -38,7 +38,7 @@ from ccpn.core.lib.Notifiers import Notifier, NotifierBase
 from ccpn.ui.gui.guiSettings import getColours, GUISTRIP_PIVOT
 from ccpn.ui.gui.guiSettings import textFontSmall
 from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.PlotWidget import PlotWidget
+# from ccpn.ui.gui.widgets.PlotWidget import PlotWidget
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import FloatLineEdit
 from ccpn.ui.gui.widgets.Widget import Widget

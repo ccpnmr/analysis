@@ -652,7 +652,7 @@ class Substance(AbstractWrapperObject):
         """
         from ccpn.core.Chain import _createChainFromSubstance
 
-        return _createChainFromSubstance(shortName=shortName, role=role, comment=comment, **kwds)
+        return _createChainFromSubstance(self, shortName=shortName, role=role, comment=comment, **kwds)
 
 #=========================================================================================
 # Connections to parents:

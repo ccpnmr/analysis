@@ -104,7 +104,7 @@ from ccpn.ui.gui.lib.mouseEvents import \
 
 try:
     # used to test whether all the arrays are defined correctly - conflicts with pyqt window manager resize
-    # os.environ.update({'PYOPENGL_ERROR_ON_COPY': 'true'})
+    os.environ.update({'PYOPENGL_ERROR_ON_COPY': 'false'})
 
     from OpenGL import GL, GLU, GLUT
 except ImportError:
@@ -2952,14 +2952,14 @@ class CcpnGLWidget(QOpenGLWidget):
             self.buildMarks = False
 
         self.buildMarksRulers()
-        self._marksList.drawIndexVBO(enableVBO=True)
+        self._marksList.drawIndexVBO(enableVBO=False)
 
     def drawRegions(self):
         if self.strip.isDeleted:
             return
 
         self.buildRegions()
-        self._externalRegions.drawIndexVBO(enableVBO=True)
+        self._externalRegions.drawIndexVBO(enableVBO=False)
 
     def drawMarksAxisCodes(self):
         if self.strip.isDeleted:

@@ -514,8 +514,8 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
                 "Display of sampled dimension spectra is not implemented yet")
         # # NBNB TBD FIXME
 
-    with logCommandBlock(prefix='newSpectrumDisplay=') as log:
-        log('createSpectrumDisplay')
+    with logCommandBlock(prefix='newSpectrumDisplay=', get='window') as log:
+        log('createSpectrumDisplay', spectrum=repr(spectrum.pid))
 
         display = project.newSpectrumDisplay(axisCodes=displayAxisCodes, stripDirection=stripDirection,
                                              independentStrips=independentStrips,

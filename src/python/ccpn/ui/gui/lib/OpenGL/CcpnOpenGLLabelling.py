@@ -1295,6 +1295,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
                 index += np2 + 5
 
+        drawList.updateTextArrayVBOColour(enableVBO=True)
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Rescaling
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1550,7 +1552,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             #                     objListView=objListView,
             #                     drawList=self._GLLabels[objListView])
 
-            drawList.defineIndexVBO(enableVBO=False)
+            drawList.defineIndexVBO(enableVBO=True)
 
         elif drawList.renderMode == GLRENDERMODE_REBUILD:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
@@ -1626,7 +1628,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 # times.append('_sym:' + str((time.time() - times[0])))
                 # times.append('_t:' + str(tcount))
 
-            drawList.defineIndexVBO(enableVBO=False)
+            drawList.defineIndexVBO(enableVBO=True)
 
             # times.append('_def:' + str(time.time() - times[0]))
             # print(', '.join([str(t) for t in times]))
@@ -1868,6 +1870,8 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
 
                 index += numPoints
 
+            drawList.updateTextArrayVBOColour(enableVBO=True)
+
     def _insertSymbolItem(self, strip, obj, listCol, indexList, r, w,
                           spectrumFrequency, symbolType, drawList, spectrumView,
                           buildIndex):
@@ -1939,7 +1943,7 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
             #                     objListView=objListView,
             #                     drawList=self._GLLabels[objListView])
 
-            drawList.defineIndexVBO(enableVBO=False)
+            drawList.defineIndexVBO(enableVBO=True)
 
         elif drawList.renderMode == GLRENDERMODE_REBUILD:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
@@ -1991,7 +1995,7 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
                                            spectrumFrequency, 0, drawList,
                                            spectrumView, buildIndex)
 
-            drawList.defineIndexVBO(enableVBO=False)
+            drawList.defineIndexVBO(enableVBO=True)
 
     def _rescaleSymbols(self, spectrumView, objListView):
         """rescale symbols when the screen dimensions change
@@ -2605,6 +2609,7 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
     def _updateHighlightedSymbols(self, spectrumView, integralListView):
         drawList = self._GLSymbols[integralListView]
         drawList._rebuild()
+        drawList.updateTextArrayVBOColour(enableVBO=True)
 
     def objIsInPlane(self, strip, integral) -> bool:
         """is integral in currently displayed planes for strip?"""
@@ -2630,7 +2635,7 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
 
         for integralListView, specView in self._visibleListViews:
             if integralListView in self._GLSymbols.keys():
-                self._GLSymbols[integralListView].drawIndexArray()
+                self._GLSymbols[integralListView].drawIndexVBO(enableVBO=True)
 
                 # draw the integralAreas if they exist
                 for integralArea in self._GLSymbols[integralListView]._regions:
@@ -2693,9 +2698,13 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
                 drawList.addIntegral(integral, integralListView, colour=None,
                                      brush=(*listCol, CCPNGLWIDGET_INTEGRALSHADE))
 
+            drawList.defineIndexVBO(enableVBO=True)
+
         elif drawList.renderMode == GLRENDERMODE_RESCALE:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
             drawList._rebuildIntegralAreas()
+
+            drawList.defineIndexVBO(enableVBO=True)
 
     def _deleteSymbol(self, integral):
         for ils in self._GLSymbols.values():

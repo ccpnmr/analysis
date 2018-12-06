@@ -391,6 +391,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._ordering = []
         self._visibleSpectrumViewsChange = False
 
+        self._glClientIndex = 0
         self.glReady = True
 
     def close(self):
@@ -1383,6 +1384,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # initialise a common to all OpenGL windows
         self.globalGL = GLGlobalData(parent=self, strip=self.strip)
+        self._glClientIndex = self.globalGL.getNextClientIndex()
 
         # initialise the arrays for the grid and axes
         self.gridList = []
@@ -2179,11 +2181,14 @@ class CcpnGLWidget(QOpenGLWidget):
         self.enableTexture()
 
         if not self._stackingMode:
+            self.enableTextClientState()
+
             self._GLPeaks.drawLabels(self._spectrumSettings)
             self._GLMultiplets.drawLabels(self._spectrumSettings)
             self._GLIntegrals.drawLabels(self._spectrumSettings)
-
             self.drawMarksAxisCodes()
+
+            self.disableTextClientState()
 
         currentShader = self.globalGL._shaderProgram1.makeCurrent()
 
@@ -2204,7 +2209,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.drawCursors()
 
         currentShader = self.globalGL._shaderProgramTex.makeCurrent()
-
+        self.enableTextClientState()
         self._setViewPortFontScale()
 
         if self.strip.crosshairVisible:
@@ -2216,6 +2221,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.drawAxisLabels()
         currentShader.setBlendEnabled(1)
 
+        self.disableTextClientState()
         self.disableTexture()
 
         # use the current viewport matrix to display the last bit of the axes
@@ -2322,6 +2328,18 @@ class CcpnGLWidget(QOpenGLWidget):
         # rebuild the traces as the spectrum/plane may have changed
         if rebuildFlag:
             self.rebuildTraces()
+
+    def enableTextClientState(self):
+        GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+        GL.glEnableClientState(GL.GL_COLOR_ARRAY)
+        GL.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY)
+        GL.glEnableVertexAttribArray(self._glClientIndex)
+
+    def disableTextClientState(self):
+        GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)
+        GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+        GL.glDisableClientState(GL.GL_COLOR_ARRAY)
+        GL.glDisableVertexAttribArray(self._glClientIndex)
 
     def drawSpectra(self):
         if self.strip.isDeleted:

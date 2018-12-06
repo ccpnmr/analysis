@@ -54,6 +54,11 @@ class GLGlobalData(QtWidgets.QWidget):
         self.loadFonts()
 
         self.initialiseShaders()
+        self._glClientIndex = 0
+
+    def getNextClientIndex(self):
+        self._glClientIndex += 1
+        return 1        #self._glClientIndex
 
     def loadFonts(self):
         for fontFile in FONTLIST:

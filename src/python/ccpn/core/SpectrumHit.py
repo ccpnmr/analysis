@@ -345,11 +345,11 @@ class SpectrumHit(AbstractWrapperObject):
     def _removeReference(self, referenceSpectrum):
         pass
 
-
     #===========================================================================================
     # new'Object' and other methods
     # Call appropriate routines in their respective locations
     #===========================================================================================
+
 
 #=========================================================================================
 # Connections to parents:
@@ -415,8 +415,9 @@ def _newSpectrumHit(self: Spectrum, substanceName: str, pointNumber: int = 0,
     return result
 
 
-Spectrum.newSpectrumHit = _newSpectrumHit
-del _newSpectrumHit
+#EJB 20181203: moved to Spectrum
+# Spectrum.newSpectrumHit = _newSpectrumHit
+# del _newSpectrumHit
 
 
 def getter(self: PseudoDimension) -> typing.List[SpectrumHit]:

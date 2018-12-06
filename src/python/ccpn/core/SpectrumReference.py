@@ -328,10 +328,9 @@ def _newSpectrumReference(self: Spectrum, dimension: int, spectrometerFrequency:
     return result
 
 
-# Connections to parents:
-
-Spectrum.newSpectrumReference = _newSpectrumReference
-del _newSpectrumReference
+#EJB 20181205: moved to Spectrum
+# Spectrum.newSpectrumReference = _newSpectrumReference
+# del _newSpectrumReference
 
 
 def getter(self: Spectrum) -> typing.List[typing.Optional[SpectrumReference]]:

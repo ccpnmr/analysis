@@ -435,8 +435,9 @@ def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 
     return result
 
 
-Project.newSpectrumDisplay = _newSpectrumDisplay
-del _newSpectrumDisplay
+#EJB 20181205: moved to Project
+# Project.newSpectrumDisplay = _newSpectrumDisplay
+# del _newSpectrumDisplay
 
 
 def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes: Sequence[str] = (),
@@ -457,20 +458,17 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
 
     inputValues = locals()
 
-    defaults = collections.OrderedDict((('displayAxisCodes', ()), ('axisOrder', ()), ('title', None),
-                                        ('positions', ()), ('widths', ()), ('units', ()),
-                                        ('stripDirection', 'Y'), ('is1D', False),
-                                        ('independentStrips', False)))
+    # defaults = collections.OrderedDict((('displayAxisCodes', ()), ('axisOrder', ()), ('title', None),
+    #                                     ('positions', ()), ('widths', ()), ('units', ()),
+    #                                     ('stripDirection', 'Y'), ('is1D', False),
+    #                                     ('independentStrips', False)))
 
     if title and Pid.altCharacter in title:
         raise ValueError("Character %s not allowed in gui.core.SpectrumDisplay.name" % Pid.altCharacter)
 
     spectrum = window.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
-
     dataSource = spectrum._wrappedData
-
     project = window._project
-
     spectrumAxisCodes = spectrum.axisCodes
 
     mapIndices = ()
@@ -516,9 +514,9 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
                 "Display of sampled dimension spectra is not implemented yet")
         # # NBNB TBD FIXME
 
-    window._startCommandEchoBlock('createSpectrumDisplay', spectrum, values=inputValues,
-                                  defaults=defaults, parName='newSpectrumDisplay')
-    try:
+    with logCommandBlock(prefix='newSpectrumDisplay=', get='self') as log:
+        log('createSpectrumDisplay')
+
         display = project.newSpectrumDisplay(axisCodes=displayAxisCodes, stripDirection=stripDirection,
                                              independentStrips=independentStrips,
                                              title=title)
@@ -563,8 +561,6 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
                 apiAxis.unit = unit
                 apiAxis.position = position
                 apiAxis.width = width
-    finally:
-        window._endCommandEchoBlock()
 
     # Make spectrumView. NB We need notifiers on for these
     stripSerial = 1 if independentStrips else 0
@@ -580,8 +576,9 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
     return display
 
 
-Window.createSpectrumDisplay = _createSpectrumDisplay
-del _createSpectrumDisplay
+#EJB 20181206: moved to _implementation.Window
+# Window.createSpectrumDisplay = _createSpectrumDisplay
+# del _createSpectrumDisplay
 
 
 # Window.spectrumDisplays property

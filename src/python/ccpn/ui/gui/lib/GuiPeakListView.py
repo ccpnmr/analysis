@@ -372,35 +372,35 @@ class GuiPeakListView(QtWidgets.QGraphicsItem):
     def _deletedStripPeakListView(self):
         return
 
-        if isinstance(self.peakList, IntegralList):
-            return
-
-        spectrumView = self.spectrumView
-        strip = spectrumView.strip
-        spectrumDisplay = strip.spectrumDisplay
-
-        try:
-            peakItemDict = spectrumDisplay.activePeakItemDict[self]
-            peakItems = set(spectrumDisplay.inactivePeakItemDict[self])
-            for apiPeak in peakItemDict:
-                # NBNB TBD FIXME change to get rid of API peaks here
-                peakItem = peakItemDict[apiPeak]
-                peakItems.add(peakItem)
-
-            # TODO:ED should really remove all references at some point
-            # if strip.plotWidget:
-            #   scene = strip.plotWidget.scene()
-            #   for peakItem in peakItems:
-            #     scene.removeItem(peakItem.annotation)
-            #     if spectrumDisplay.is1D:
-            #       scene.removeItem(peakItem.symbol)
-            #     scene.removeItem(peakItem)
-            #   self.scene.removeItem(self)
-
-            del spectrumDisplay.activePeakItemDict[self]
-            del spectrumDisplay.inactivePeakItemDict[self]
-        except Exception as es:
-            getLogger().warning('Error: peakList does not exist in spectrum')
+        # if isinstance(self.peakList, IntegralList):
+        #     return
+        #
+        # spectrumView = self.spectrumView
+        # strip = spectrumView.strip
+        # spectrumDisplay = strip.spectrumDisplay
+        #
+        # try:
+        #     peakItemDict = spectrumDisplay.activePeakItemDict[self]
+        #     peakItems = set(spectrumDisplay.inactivePeakItemDict[self])
+        #     for apiPeak in peakItemDict:
+        #         # NBNB TBD FIXME change to get rid of API peaks here
+        #         peakItem = peakItemDict[apiPeak]
+        #         peakItems.add(peakItem)
+        #
+        #     # TODO:ED should really remove all references at some point
+        #     # if strip.plotWidget:
+        #     #   scene = strip.plotWidget.scene()
+        #     #   for peakItem in peakItems:
+        #     #     scene.removeItem(peakItem.annotation)
+        #     #     if spectrumDisplay.is1D:
+        #     #       scene.removeItem(peakItem.symbol)
+        #     #     scene.removeItem(peakItem)
+        #     #   self.scene.removeItem(self)
+        #
+        #     del spectrumDisplay.activePeakItemDict[self]
+        #     del spectrumDisplay.inactivePeakItemDict[self]
+        # except Exception as es:
+        #     getLogger().warning('Error: peakList does not exist in spectrum')
 
     def _changedPeakListView(self):
 

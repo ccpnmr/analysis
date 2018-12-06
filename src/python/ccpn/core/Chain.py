@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification
@@ -41,361 +41,350 @@ from ccpnmodel.ccpncore.api.ccp.molecule import Molecule
 from ccpnmodel.ccpncore.api.ccp.lims import Sample
 from ccpn.core.lib import Pid
 from typing import Tuple, Optional, Union, Sequence
-
+from ccpn.util.decorators import logCommand
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.util.Logging import getLogger
 
 
 class Chain(AbstractWrapperObject):
-  """A molecular Chain, containing one or more Residues."""
-  
-  #: Short class name, for PID.
-  shortClassName = 'MC'
-  # Attribute it necessary as subclasses must use superclass className
-  className = 'Chain'
+    """A molecular Chain, containing one or more Residues."""
 
-  _parentClass = Project
+    #: Short class name, for PID.
+    shortClassName = 'MC'
+    # Attribute it necessary as subclasses must use superclass className
+    className = 'Chain'
 
-  #: Name of plural link to instances of class
-  _pluralLinkName = 'chains'
-  
-  #: List of child classes.
-  _childClasses = []
+    _parentClass = Project
 
-  # Qualified name of matching API class
-  _apiClassQualifiedName = ApiChain._metaclass.qualifiedName()
-  
+    #: Name of plural link to instances of class
+    _pluralLinkName = 'chains'
 
-  # CCPN properties  
-  @property
-  def _apiChain(self) -> ApiChain:
-    """ CCPN chain matching Chain"""
-    return self._wrappedData
-    
-  @property
-  def _key(self) -> str:
-    """short form of name, corrected to use for id"""
-    return self._wrappedData.code.translate(Pid.remapSeparators)
+    #: List of child classes.
+    _childClasses = []
 
-  @property
-  def shortName(self) -> str:
-    """short form of name"""
-    return self._wrappedData.code
-    
-  @property
-  def compoundName(self) -> str:
-    """Short name of chemical compound (e.g. 'Lysozyme') making up Chain"""
-    return self._wrappedData.molecule.name
+    # Qualified name of matching API class
+    _apiClassQualifiedName = ApiChain._metaclass.qualifiedName()
 
-  # GWV: more logical attribute!
-  name = compoundName
-    
-  @property
-  def _parent(self) -> Project:
-    """Parent (containing) object."""
-    return self._project
-  
-  @property
-  def role(self) -> str:
-    """The role of the chain in a molecular complex or sample - free text. Could be 'free',
-    ''bound', 'open', 'closed', 'minor form B', ..."""
-    return self._wrappedData.role
-    
-  @role.setter
-  def role(self, value:str):
-    self._wrappedData.role = value
+    # CCPN properties
+    @property
+    def _apiChain(self) -> ApiChain:
+        """ CCPN chain matching Chain"""
+        return self._wrappedData
 
-  @property
-  def isCyclic(self) -> bool:
-    """True if this is a cyclic polymer."""
-    return self._wrappedData.molecule.isStdCyclic
-  
-  @property
-  def comment(self) -> str:
-    """Free-form text comment."""
-    return self._wrappedData.details
-    
-  @comment.setter
-  def comment(self, value:str):
-    self._wrappedData.details = value
+    @property
+    def _key(self) -> str:
+        """short form of name, corrected to use for id"""
+        return self._wrappedData.code.translate(Pid.remapSeparators)
 
-  @property
-  def substances(self) -> Tuple[Substance, ...]:
-    """Substances matching to Chain (based on chain.compoundName)"""
-    compoundName = self.compoundName
-    return tuple(x for x in self.project.substances if x.name == compoundName)
+    @property
+    def shortName(self) -> str:
+        """short form of name"""
+        return self._wrappedData.code
 
-  @property
-  def sampleComponents(self) -> Tuple[SampleComponent, ...]:
-    """SampleComponents matching to Chain (based on chain.compoundName)"""
-    compoundName = self.compoundName
-    return tuple(x for x in self.project.sampleComponents if x.name == compoundName)
+    @property
+    def compoundName(self) -> str:
+        """Short name of chemical compound (e.g. 'Lysozyme') making up Chain"""
+        return self._wrappedData.molecule.name
 
-  @property
-  def nmrChain(self) ->typing.Optional['NmrChain']:
-    "NmrChain to which Chain is assigned"
-    try:
-      return self._project.getNmrChain(self._id)
-    except:
-      return None
+    # GWV: more logical attribute!
+    name = compoundName
 
-  # GWV 20181122: removed setters between Chain/NmrChain, Residue/NmrResidue, Atom/NmrAtom
-  # @property.setter
-  # def nmrChain(self, value: 'NmrChain'):
-  #   if value is None:
-  #     raise ValueError("nmrChain cannot be set to None")
-  #   else:
-  #     value.chain = self
+    @property
+    def _parent(self) -> Project:
+        """Parent (containing) object."""
+        return self._project
 
-  # CCPN functions
-  def clone(self, shortName:str=None):
-    """Make copy of chain."""
+    @property
+    def role(self) -> str:
+        """The role of the chain in a molecular complex or sample - free text. Could be 'free',
+        ''bound', 'open', 'closed', 'minor form B', ..."""
+        return self._wrappedData.role
 
-    apiChain = self._wrappedData
-    apiMolSystem = apiChain.molSystem
-    dataObj = self._project._data2Obj
+    @role.setter
+    def role(self, value: str):
+        self._wrappedData.role = value
 
+    @property
+    def isCyclic(self) -> bool:
+        """True if this is a cyclic polymer."""
+        return self._wrappedData.molecule.isStdCyclic
 
-    if shortName is None:
-      shortName = apiMolSystem.nextChainCode()
+    @property
+    def comment(self) -> str:
+        """Free-form text comment."""
+        return self._wrappedData.details
 
-    if apiMolSystem.findFirstChain(code=shortName) is not None:
-      raise ValueError("Project already has one Chain with shortName %s" % shortName)
+    @comment.setter
+    def comment(self, value: str):
+        self._wrappedData.details = value
 
-    topObjectParameters = {'code':shortName,
-                           'pdbOneLetterCode':shortName[0]}
-    self._startCommandEchoBlock('clone', shortName, parName='newChain')
-    # # Blanking notification ruins sidebar handling of new chain
-    # self._project.blankNotification()
-    try:
-      newApiChain = copySubTree(apiChain, apiMolSystem, maySkipCrosslinks=True,
-                                topObjectParameters=topObjectParameters)
-      result = self._project._data2Obj.get(newApiChain)
+    @property
+    def substances(self) -> Tuple[Substance, ...]:
+        """Substances matching to Chain (based on chain.compoundName)"""
+        compoundName = self.compoundName
+        return tuple(x for x in self.project.substances if x.name == compoundName)
 
-      # Add intra-chain generic bonds
-      for apiGenericBond in apiMolSystem.genericBonds:
-        ll = []
-        for aa in apiGenericBond.atoms:
-          if aa.residue.chain is apiChain:
-            ll.append(dataObj[aa])
-        if len(ll) == 2:
-          relativeIds = list(x._id.split(Pid.IDSEP, 1)[1] for x in ll)
-          newAtoms = list(result.getAtom(x) for x in relativeIds)
-          newAtoms[0].addInterAtomBond(newAtoms[1])
+    @property
+    def sampleComponents(self) -> Tuple[SampleComponent, ...]:
+        """SampleComponents matching to Chain (based on chain.compoundName)"""
+        compoundName = self.compoundName
+        return tuple(x for x in self.project.sampleComponents if x.name == compoundName)
 
-    finally:
-      # self._project.unblankNotification()
-      self._endCommandEchoBlock()
-    #
-    return result
-                                  
+    @property
+    def nmrChain(self) -> typing.Optional['NmrChain']:
+        "NmrChain to which Chain is assigned"
+        try:
+            return self._project.getNmrChain(self._id)
+        except:
+            return None
 
-  def _lock(self):
-    """Finalize chain so that it can no longer be modified, and add missing data."""
-    self._startCommandEchoBlock('_lock')
-    try:
-      self._wrappedData.molecule.isFinalised = True
-    finally:
-      self._endCommandEchoBlock()
+    # GWV 20181122: removed setters between Chain/NmrChain, Residue/NmrResidue, Atom/NmrAtom
+    # @property.setter
+    # def nmrChain(self, value: 'NmrChain'):
+    #   if value is None:
+    #     raise ValueError("nmrChain cannot be set to None")
+    #   else:
+    #     value.chain = self
 
+    # CCPN functions
+    def clone(self, shortName: str = None):
+        """Make copy of chain."""
 
-  # Implementation functions
+        apiChain = self._wrappedData
+        apiMolSystem = apiChain.molSystem
+        dataObj = self._project._data2Obj
 
-  def rename(self, value:str):
-    """Rename Chain, changing its shortName and Pid."""
-    # from ccpn.util.Common import contains_whitespace
-    #
-    # if not isinstance(value, str):
-    #   raise TypeError("Chain name must be a string")  # ejb catch non-string
-    # if not value:
-    #   raise ValueError("Chain name must be set")  # ejb catch empty string
-    # if Pid.altCharacter in value:
-    #   raise ValueError("Character %s not allowed in ccpn.Chain.name" % Pid.altCharacter)
-    # if contains_whitespace(value):
-    #   raise ValueError("whitespace not allowed in ccpn.Chain.name")
+        if shortName is None:
+            shortName = apiMolSystem.nextChainCode()
 
-    _validateName('Chain name', value=value, includeWhitespace=True)
+        if apiMolSystem.findFirstChain(code=shortName) is not None:
+            raise ValueError("Project already has one Chain with shortName %s" % shortName)
 
-    previous = self._project.getChain(value.translate(Pid.remapSeparators))
-    if previous not in (None, self):
-      raise ValueError("%s already exists" % previous.longPid)
+        topObjectParameters = {'code': shortName,
+                               'pdbOneLetterCode': shortName[0]}
+        self._startCommandEchoBlock('clone', shortName, parName='newChain')
+        # # Blanking notification ruins sidebar handling of new chain
+        # self._project.blankNotification()
+        try:
+            newApiChain = copySubTree(apiChain, apiMolSystem, maySkipCrosslinks=True,
+                                      topObjectParameters=topObjectParameters)
+            result = self._project._data2Obj.get(newApiChain)
 
-    # if value:
-    #   previous = self._project.getChain(value.translate(Pid.remapSeparators))
-    #   if previous not in (None, self):
-    #     raise ValueError("%s already exists" % previous.longPid)
-    # else:
-    #   raise ValueError("Chain name must be set")
+            # Add intra-chain generic bonds
+            for apiGenericBond in apiMolSystem.genericBonds:
+                ll = []
+                for aa in apiGenericBond.atoms:
+                    if aa.residue.chain is apiChain:
+                        ll.append(dataObj[aa])
+                if len(ll) == 2:
+                    relativeIds = list(x._id.split(Pid.IDSEP, 1)[1] for x in ll)
+                    newAtoms = list(result.getAtom(x) for x in relativeIds)
+                    newAtoms[0].addInterAtomBond(newAtoms[1])
 
-    self._startCommandEchoBlock('rename', value)
-    try:
-      self._apiChain.renameChain(value)
-      self._finaliseAction('rename')
-      self._finaliseAction('change')
-    finally:
-      self._endCommandEchoBlock()
+        finally:
+            # self._project.unblankNotification()
+            self._endCommandEchoBlock()
+        #
+        return result
 
-  def renumberResidues(self, offset:int, start:int=None,
-                                  stop:int=None):
-    """Renumber residues in range start-stop (inclusive) by adding offset
+    def _lock(self):
+        """Finalize chain so that it can no longer be modified, and add missing data."""
+        self._startCommandEchoBlock('_lock')
+        try:
+            self._wrappedData.molecule.isFinalised = True
+        finally:
+            self._endCommandEchoBlock()
 
-    The residue number is the integer starting part of the sequenceCode,
-    e.g. residue '12B' is renumbered to '13B' (offset=1)
+    # Implementation functions
 
-    if start (stop) is None, there is no lower (upper) limit
+    def rename(self, value: str):
+        """Rename Chain, changing its shortName and Pid."""
+        # from ccpn.util.Common import contains_whitespace
+        #
+        # if not isinstance(value, str):
+        #   raise TypeError("Chain name must be a string")  # ejb catch non-string
+        # if not value:
+        #   raise ValueError("Chain name must be set")  # ejb catch empty string
+        # if Pid.altCharacter in value:
+        #   raise ValueError("Character %s not allowed in ccpn.Chain.name" % Pid.altCharacter)
+        # if contains_whitespace(value):
+        #   raise ValueError("whitespace not allowed in ccpn.Chain.name")
 
-    NB Will rename residues one by one, and stop on error."""
+        _validateName('Chain name', value=value, includeWhitespace=True)
 
-    # Must be here to avoid circular imports
-    from ccpn.core.lib import MoleculeLib
+        previous = self._project.getChain(value.translate(Pid.remapSeparators))
+        if previous not in (None, self):
+            raise ValueError("%s already exists" % previous.longPid)
 
-    residues = self.residues
-    if offset > 0:
-      residues.reverse()
+        # if value:
+        #   previous = self._project.getChain(value.translate(Pid.remapSeparators))
+        #   if previous not in (None, self):
+        #     raise ValueError("%s already exists" % previous.longPid)
+        # else:
+        #   raise ValueError("Chain name must be set")
 
-    changedResidues = []
-    self._startCommandEchoBlock('renumberResidues', offset,
-                                values={'start':start, 'stop':stop})
-    try:
-      for residue in residues:
-        sequenceCode = residue.sequenceCode
-        code, ss, unused = commonUtil.parseSequenceCode(sequenceCode)
-        # assert unused is None
-        if code is not None:
-          if ((start is None or code >= start)
-              and (stop is None or code <= stop)):
-            newSequenceCode = MoleculeLib._incrementedSequenceCode(residue.sequenceCode, offset)
-            residue.rename(newSequenceCode)
-            changedResidues.append(residue)
+        self._startCommandEchoBlock('rename', value)
+        try:
+            self._apiChain.renameChain(value)
+            self._finaliseAction('rename')
+            self._finaliseAction('change')
+        finally:
+            self._endCommandEchoBlock()
 
-    finally:
-      self._endCommandEchoBlock()
-      for residue in changedResidues:
-        residue._finaliseAction('rename')
-        residue._finaliseAction('change')
+    def renumberResidues(self, offset: int, start: int = None,
+                         stop: int = None):
+        """Renumber residues in range start-stop (inclusive) by adding offset
 
-    if start is not None and stop is not None:
-      if len(changedResidues) != stop +1 - start:
-        self._project._logger.warning("Only %s residues found in range %s tos %s"
-                                      % (len(changedResidues), start, stop))
+        The residue number is the integer starting part of the sequenceCode,
+        e.g. residue '12B' is renumbered to '13B' (offset=1)
 
-  @property
-  def sequence(self):
-    """
-    :return: the full sequence as a single string of one letter codes
-    """
-    sequence = ''
-    for residue in self.residues:
-      if residue is not None:
-        c = residue.shortName
-        if c:
-          sequence+=c
-    return sequence
+        if start (stop) is None, there is no lower (upper) limit
 
-  @property
-  def hasAssignedAtoms(self) -> bool:
-    """
-    :return: True if any of its atoms have an assignment
-    """
-    return any([a.isAssigned for a in self.atoms])
+        NB Will rename residues one by one, and stop on error."""
 
-  def _toNmrChain(self):
-    ''' Makes an Nmr Chain from the chain '''
-    try:
-      nmrChain = self.project.newNmrChain(isConnected=True)
-      for residue in self.residues:
-        nmrResidue = nmrChain.newNmrResidue(sequenceCode= residue.sequenceCode, residueType = residue.residueType)
-        atomNames = [atom.name for atom in residue.atoms]
-        for atomName in atomNames:
-          if atomName:
-            nmrResidue.newNmrAtom(atomName)
-    except Exception as e:
-      self.project._logger.warning("Error in creating an NmrChain from Chain: %s"
-                                    % e)
-  #=========================================================================================
-  # Implementation functions
-  #=========================================================================================
+        # Must be here to avoid circular imports
+        from ccpn.core.lib import MoleculeLib
 
-  @classmethod
-  def _getAllWrappedData(cls, parent:Project)-> list:
-    """get wrappedData (MolSystem.Chains) for all Chain children of parent NmrProject.molSystem"""
-    molSystem =  parent._wrappedData.molSystem
-    if molSystem is None:
-      return []
-    else:
-      return molSystem.sortedChains()
+        residues = self.residues
+        if offset > 0:
+            residues.reverse()
+
+        changedResidues = []
+        self._startCommandEchoBlock('renumberResidues', offset,
+                                    values={'start': start, 'stop': stop})
+        try:
+            for residue in residues:
+                sequenceCode = residue.sequenceCode
+                code, ss, unused = commonUtil.parseSequenceCode(sequenceCode)
+                # assert unused is None
+                if code is not None:
+                    if ((start is None or code >= start)
+                            and (stop is None or code <= stop)):
+                        newSequenceCode = MoleculeLib._incrementedSequenceCode(residue.sequenceCode, offset)
+                        residue.rename(newSequenceCode)
+                        changedResidues.append(residue)
+
+        finally:
+            self._endCommandEchoBlock()
+            for residue in changedResidues:
+                residue._finaliseAction('rename')
+                residue._finaliseAction('change')
+
+        if start is not None and stop is not None:
+            if len(changedResidues) != stop + 1 - start:
+                self._project._logger.warning("Only %s residues found in range %s tos %s"
+                                              % (len(changedResidues), start, stop))
+
+    @property
+    def sequence(self):
+        """
+        :return: the full sequence as a single string of one letter codes
+        """
+        sequence = ''
+        for residue in self.residues:
+            if residue is not None:
+                c = residue.shortName
+                if c:
+                    sequence += c
+        return sequence
+
+    @property
+    def hasAssignedAtoms(self) -> bool:
+        """
+        :return: True if any of its atoms have an assignment
+        """
+        return any([a.isAssigned for a in self.atoms])
+
+    def _toNmrChain(self):
+        ''' Makes an Nmr Chain from the chain '''
+        try:
+            nmrChain = self.project.newNmrChain(isConnected=True)
+            for residue in self.residues:
+                nmrResidue = nmrChain.newNmrResidue(sequenceCode=residue.sequenceCode, residueType=residue.residueType)
+                atomNames = [atom.name for atom in residue.atoms]
+                for atomName in atomNames:
+                    if atomName:
+                        nmrResidue.newNmrAtom(atomName)
+        except Exception as e:
+            self.project._logger.warning("Error in creating an NmrChain from Chain: %s"
+                                         % e)
+
+    #=========================================================================================
+    # Implementation functions
+    #=========================================================================================
+
+    @classmethod
+    def _getAllWrappedData(cls, parent: Project) -> list:
+        """get wrappedData (MolSystem.Chains) for all Chain children of parent NmrProject.molSystem"""
+        molSystem = parent._wrappedData.molSystem
+        if molSystem is None:
+            return []
+        else:
+            return molSystem.sortedChains()
+
 
 #=========================================================================================
 
-def _validateName(attrib:str, value:str, includeWhitespace:bool=False):
-  from ccpn.util.Common import contains_whitespace
+def _validateName(attrib: str, value: str, includeWhitespace: bool = False):
+    from ccpn.util.Common import contains_whitespace
 
-  if not isinstance(value, str):
-    raise TypeError("%s must be a string" % attrib)  # ejb catch non-string
-  if not value:
-    raise ValueError("%s must be set" % attrib)  # ejb catch empty string
-  if Pid.altCharacter in value:
-    raise ValueError("Character %s not allowed in %s" % (Pid.altCharacter, attrib))
-  if includeWhitespace and contains_whitespace(value):
-    raise ValueError("whitespace not allowed in %s" % attrib)
+    if not isinstance(value, str):
+        raise TypeError("%s must be a string" % attrib)  # ejb catch non-string
+    if not value:
+        raise ValueError("%s must be set" % attrib)  # ejb catch empty string
+    if Pid.altCharacter in value:
+        raise ValueError("Character %s not allowed in %s" % (Pid.altCharacter, attrib))
+    if includeWhitespace and contains_whitespace(value):
+        raise ValueError("whitespace not allowed in %s" % attrib)
 
-  # will only get here if all the tests pass
-  return True
+    # will only get here if all the tests pass
+    return True
 
-def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:str=None,
-                 startNumber:int=1, molType:str=None, isCyclic:bool=False,
-                 shortName:str=None, role:str=None, comment:str=None) -> Chain:
-  """Create new chain from sequence of residue codes, using default variants.
 
-  Automatically creates the corresponding polymer Substance if the compoundName is not already taken
+@newObject(Chain)
+def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundName: str = None,
+                 startNumber: int = 1, molType: str = None, isCyclic: bool = False,
+                 shortName: str = None, role: str = None, comment: str = None,
+                 serial: int = None) -> Chain:
+    """Create new chain from sequence of residue codes, using default variants.
 
-  :param Sequence sequence: string of one-letter codes or sequence of residue types
+    Automatically creates the corresponding polymer Substance if the compoundName is not already taken
 
-  :param str compoundName: name of new Substance (e.g. 'Lysozyme') Defaults to 'Molecule_n
+    See the Chain class for details.
 
-  :param str molType: molType ('protein','DNA', 'RNA'). Needed only if sequence is a string.
+    :param Sequence sequence: string of one-letter codes or sequence of residue types
+    :param str compoundName: name of new Substance (e.g. 'Lysozyme') Defaults to 'Molecule_n
+    :param str molType: molType ('protein','DNA', 'RNA'). Needed only if sequence is a string.
+    :param int startNumber: number of first residue in sequence
+    :param str shortName: shortName for new chain (optional)
+    :param str role: role for new chain (optional)
+    :param str comment: comment for new chain (optional)
+    :param serial: optional serial number.
+    :return: a new Chain instance.
+    """
 
-  :param int startNumber: number of first residue in sequence
+    apiMolSystem = self._wrappedData.molSystem
+    if not shortName:
+        shortName = apiMolSystem.nextChainCode()
+    else:
+        _validateName('shortName', value=shortName, includeWhitespace=False)  # ejb - test the name
 
-  :param str shortName: shortName for new chain (optional)
+    previous = self._project.getChain(shortName.translate(Pid.remapSeparators))
+    if previous is not None:
+        raise ValueError("%s already exists" % previous.longPid)
 
-  :param str role: role for new chain (optional)
+    apiRefComponentStore = self._apiNmrProject.sampleStore.refSampleComponentStore
+    if compoundName is None:
+        name = self._uniqueSubstanceName()
+    elif apiRefComponentStore.findFirstComponent(name=compoundName) is None:
+        _validateName('compoundName', value=compoundName, includeWhitespace=False)  # ejb - test the name
 
-  :param str comment: comment for new chain (optional)
+        name = compoundName
+    else:
+        raise ValueError(
+                "Substance named %s already exists. Try Substance.createChain function instead?"
+                % compoundName)
 
-  """
-
-  defaults = collections.OrderedDict(
-    (('compoundName', None), ('startNumber', 1), ('molType', None), ('isCyclic', False),
-     ('shortName', None), ('role', None), ('comment', None)
-    )
-  )
-
-  apiMolSystem = self._wrappedData.molSystem
-  if not shortName:
-    shortName = apiMolSystem.nextChainCode()
-  else:
-    _validateName('shortName', value=shortName, includeWhitespace=False)   # ejb - test the name
-
-  previous = self._project.getChain(shortName.translate(Pid.remapSeparators))
-  if previous is not None:
-    raise ValueError("%s already exists" % previous.longPid)
-
-  apiRefComponentStore = self._apiNmrProject.sampleStore.refSampleComponentStore
-  if compoundName is None:
-    name = self._uniqueSubstanceName()
-  elif apiRefComponentStore.findFirstComponent(name=compoundName) is None:
-    _validateName('compoundName', value=compoundName, includeWhitespace=False)   # ejb - test the name
-
-    name = compoundName
-  else:
-    raise ValueError(
-      "Substance named %s already exists. Try Substance.createChain function instead?"
-      % compoundName)
-
-  self._startCommandEchoBlock('createChain', sequence, values=locals(), defaults=defaults,
-                              parName='newChain')
-  # # Blanking notification ruins sidebar handling of new chain
-  # self._project.blankNotification()
-  try:
     substance = self.createPolymerSubstance(sequence=sequence, name=name,
                                             startNumber=startNumber, molType=molType,
                                             isCyclic=isCyclic, comment=comment)
@@ -404,83 +393,106 @@ def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:s
     apiMolecule.isFinalised = True
     newApiChain = apiMolSystem.newChain(molecule=apiMolecule, code=shortName, role=role,
                                         details=comment)
-  finally:
-    # self._project.unblankNotification()
-    self._endCommandEchoBlock()
 
-  result = self._project._data2Obj[newApiChain]
-  for residue in result.residues:
-    # Necessary as CCPN V2 default protonation states do not match tne NEF / V3 standard
-    residue.resetVariantToDefault()
-  #
-  return result
-Project.createChain = _createChain
-del _createChain
+    result = self._project._data2Obj[newApiChain]
+    if result is None:
+        raise RuntimeError('Unable to generate new Chain item')
+
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
+                                % (result, serial))
+
+    for residue in result.residues:
+        # Necessary as CCPN V2 default protonation states do not match tne NEF / V3 standard
+        residue.resetVariantToDefault()
+
+    return result
 
 
-def _createChainFromSubstance(self:Substance, shortName:str=None, role:str=None,
-                             comment:str=None) -> Chain:
-  """Create new Chain that matches Substance"""
+#EJB 20181206; moved to Project
+# Project.createChain = _createChain
+# del _createChain
 
-  defaults = collections.OrderedDict((('shortName', None), ('role', None), ('comment', None)))
 
-  if self.substanceType != 'Molecule':
-    raise ValueError("Only Molecule Substances can be used to create chains")
+@newObject(Chain)
+def _createChainFromSubstance(self: Substance, shortName: str = None, role: str = None,
+                              comment: str = None, serial: int = None) -> Chain:
+    """Create new Chain that matches Substance
 
-  apiMolecule = self._apiSubstance.molecule
-  if apiMolecule is None:
-    raise ValueError("API MolComponent must have attached ApiMolecule in order to create chains")
+    :param shortName:
+    :param role:
+    :param comment: optional comment string
+    :param serial: optional serial number.
+    :return: a new Chain instance.
+    """
 
-  apiMolSystem = self._project._apiNmrProject.molSystem
-  if shortName is None:
-    shortName = apiMolSystem.nextChainCode()
+    if self.substanceType != 'Molecule':
+        raise ValueError("Only Molecule Substances can be used to create chains")
 
-  previous = self._project.getChain(shortName.translate(Pid.remapSeparators))
-  if previous is not None:
-    raise ValueError("%s already exists" % previous.longPid)
+    apiMolecule = self._apiSubstance.molecule
+    if apiMolecule is None:
+        raise ValueError("API MolComponent must have attached ApiMolecule in order to create chains")
 
-  self._startCommandEchoBlock('createChain', values=locals(), defaults=defaults,
-                              parName='newChain')
-  # # Blanking notification ruins sidebar handling of new chain
-  # self._project.blankNotification()
-  try:
+    apiMolSystem = self._project._apiNmrProject.molSystem
+    if shortName is None:
+        shortName = apiMolSystem.nextChainCode()
+
+    previous = self._project.getChain(shortName.translate(Pid.remapSeparators))
+    if previous is not None:
+        raise ValueError("%s already exists" % previous.longPid)
+
     newApiChain = apiMolSystem.newChain(molecule=apiMolecule, code=shortName, role=role,
-                                         details=comment)
-  finally:
-    # self._project.unblankNotification()
-    self._endCommandEchoBlock()
+                                        details=comment)
 
-  result = self._project._data2Obj[newApiChain]
-  for residue in result.residues:
-    # Necessary as CCPN V2 default protonation states do not match the NEF / V3 standard
-    residue.resetVariantToDefault()
-  #
-  return result
-#
-Substance.createChain = _createChainFromSubstance
-del _createChainFromSubstance
+    result = self._project._data2Obj[newApiChain]
+    if result is None:
+        raise RuntimeError('Unable to generate new Chain item')
+
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
+                                % (result, serial))
+
+    for residue in result.residues:
+        # Necessary as CCPN V2 default protonation states do not match the NEF / V3 standard
+        residue.resetVariantToDefault()
+
+    return result
 
 
-def getter(self:Substance) -> Tuple[Chain, ...]:
+#EJB 20181206: moved to Substance
+# Substance.createChain = _createChainFromSubstance
+# del _createChainFromSubstance
 
-  name = self.name
-  return tuple(x for x in self._project.chains if x.compoundName == name)
+
+def getter(self: Substance) -> Tuple[Chain, ...]:
+    name = self.name
+    return tuple(x for x in self._project.chains if x.compoundName == name)
+
 
 Substance.chains = property(getter, None, None,
-  "ccpn.Chains that correspond to ccpn.Substance (if defined)"
-)
+                            "ccpn.Chains that correspond to ccpn.Substance (if defined)"
+                            )
 
-def getter(self:SampleComponent) -> Tuple[Chain, ...]:
-  name = self.name
-  return tuple(x for x in self._project.chains if x.compoundName == name)
+
+def getter(self: SampleComponent) -> Tuple[Chain, ...]:
+    name = self.name
+    return tuple(x for x in self._project.chains if x.compoundName == name)
+
+
 SampleComponent.chains = property(getter, None, None,
-  "ccpn.Chains that correspond to ccpn.SampleComponent (if defined)"
-)
+                                  "ccpn.Chains that correspond to ccpn.SampleComponent (if defined)"
+                                  )
 
 del getter
 
 # Clean-up
-    
+
 Chain.clone.__annotations__['return'] = Chain
 
 # Connections to parents:
@@ -491,15 +503,15 @@ Chain.clone.__annotations__['return'] = Chain
 # Crosslinks: substance
 className = Molecule.Molecule._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_modifiedLink', {'classNames':('Chain','Substance')}, className, 'create'),
-    ('_modifiedLink', {'classNames':('Chain','Substance')}, className, 'delete'),
-  )
-)
+        (('_modifiedLink', {'classNames': ('Chain', 'Substance')}, className, 'create'),
+         ('_modifiedLink', {'classNames': ('Chain', 'Substance')}, className, 'delete'),
+         )
+        )
 # Crosslinks: sampleComponent
 className = Sample.SampleComponent._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_modifiedLink', {'classNames':('Chain','SampleComponent')}, className, 'addChainCode'),
-    ('_modifiedLink', {'classNames':('Chain','SampleComponent')}, className, 'removeChainCode'),
-    ('_modifiedLink', {'classNames':('Chain','SampleComponent')}, className, 'setChainCodes'),
-  )
-)
+        (('_modifiedLink', {'classNames': ('Chain', 'SampleComponent')}, className, 'addChainCode'),
+         ('_modifiedLink', {'classNames': ('Chain', 'SampleComponent')}, className, 'removeChainCode'),
+         ('_modifiedLink', {'classNames': ('Chain', 'SampleComponent')}, className, 'setChainCodes'),
+         )
+        )

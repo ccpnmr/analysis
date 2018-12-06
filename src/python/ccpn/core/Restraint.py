@@ -246,6 +246,40 @@ class Restraint(AbstractWrapperObject):
     # Call appropriate routines in their respective locations
     #===========================================================================================
 
+    @logCommand(get='self')
+    def newRestraintContribution(self, targetValue: float = None, error: float = None,
+                                  weight: float = 1.0, upperLimit: float = None, lowerLimit: float = None,
+                                  additionalUpperLimit: float = None, additionalLowerLimit: float = None,
+                                  scale: float = 1.0, isDistanceDependent: bool = False, combinationId: int = None,
+                                  restraintItems: Sequence = (), **kwds):
+        """Create new RestraintContribution within Restraint
+
+        See the RestraintContribution class for details.
+
+        Optional keyword arguments can be passed in; see RestraintContribution._newRestraintContribution for details.
+
+        :param targetValue:
+        :param error:
+        :param weight:
+        :param upperLimit:
+        :param lowerLimit:
+        :param additionalUpperLimit:
+        :param additionalLowerLimit:
+        :param scale:
+        :param isDistanceDependent:
+        :param combinationId:
+        :param restraintItems:
+        :param serial: optional serial number.
+        :return: a new RestraintContribution instance.
+        """
+        from ccpn.core.RestraintContribution import _newRestraintContribution
+
+        return _newRestraintContribution(self, targetValue=targetValue, error=error,
+                                  weight=weight, upperLimit=upperLimit, lowerLimit=lowerLimit,
+                                  additionalUpperLimit=additionalUpperLimit, additionalLowerLimit=additionalLowerLimit,
+                                  scale=scale, isDistanceDependent=isDistanceDependent, combinationId=combinationId,
+                                  restraintItems=restraintItems, **kwds)
+
 #=========================================================================================
 # Connections to parents:
 #=========================================================================================
@@ -316,7 +350,7 @@ def _newRestraint(self: RestraintList, figureOfMerit: float = None, comment: str
     return result
 
 
-def createSimpleRestraint(self: RestraintList, comment: str = None, figureOfMerit: float = None,
+def _createSimpleRestraint(self: RestraintList, comment: str = None, figureOfMerit: float = None,
                           peaks: Sequence[Peak] = (), targetValue: float = None, error: float = None,
                           weight: float = 1.0, upperLimit: float = None, lowerLimit: float = None,
                           additionalUpperLimit: float = None, additionalLowerLimit: float = None,
@@ -326,7 +360,25 @@ def createSimpleRestraint(self: RestraintList, comment: str = None, figureOfMeri
     well as the Restraint proper.
 
     This function should be used routinely, unless there is a need to create more complex
-    Restraints."""
+    Restraints.
+
+    See the Restraint class for details.
+
+    :param comment:
+    :param figureOfMerit:
+    :param peaks:
+    :param targetValue:
+    :param error:
+    :param weight:
+    :param upperLimit:
+    :param lowerLimit:
+    :param additionalUpperLimit:
+    :param additionalLowerLimit:
+    :param scale:
+    :param vectorLength:
+    :param restraintItems:
+    :return: a new Restraint instance.
+    """
 
     defaults = collections.OrderedDict(
             (
@@ -341,25 +393,21 @@ def createSimpleRestraint(self: RestraintList, comment: str = None, figureOfMeri
         peaks = [(getByPid(x) if isinstance(x, str) else x) for x in peaks]
         values['peaks'] = tuple(x.pid for x in peaks)
 
-    self._startCommandEchoBlock('createSimpleRestraint', values=values, defaults=defaults,
-                                parName='newRestraint')
-    try:
-        restraint = self.newRestraint(comment=comment, peaks=peaks, figureOfMerit=figureOfMerit,
-                                      vectorLength=vectorLength, )
-        restraint.newRestraintContribution(targetValue=targetValue, error=error, weight=weight,
-                                           upperLimit=upperLimit, lowerLimit=lowerLimit,
-                                           additionalUpperLimit=additionalUpperLimit,
-                                           additionalLowerLimit=additionalLowerLimit, scale=scale,
-                                           restraintItems=restraintItems)
-    finally:
-        self._endCommandEchoBlock()
-    #
+    restraint = self.newRestraint(comment=comment, peaks=peaks, figureOfMerit=figureOfMerit,
+                                  vectorLength=vectorLength, )
+    restraint.newRestraintContribution(targetValue=targetValue, error=error, weight=weight,
+                                       upperLimit=upperLimit, lowerLimit=lowerLimit,
+                                       additionalUpperLimit=additionalUpperLimit,
+                                       additionalLowerLimit=additionalLowerLimit, scale=scale,
+                                       restraintItems=restraintItems)
+
     return restraint
 
 
-RestraintList.newRestraint = _newRestraint
-del _newRestraint
-RestraintList.createSimpleRestraint = createSimpleRestraint
+#EJB 20181205: moved to RestraintList
+# RestraintList.newRestraint = _newRestraint
+# del _newRestraint
+# RestraintList.createSimpleRestraint = _createSimpleRestraint
 
 # Notifiers:
 for clazz in NmrConstraint.ConstraintPeakContrib._metaclass.getNonAbstractSubtypes():

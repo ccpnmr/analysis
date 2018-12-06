@@ -181,8 +181,6 @@ def _newChemicalShift(self: ChemicalShiftList, value: float, nmrAtom: NmrAtom,
     """
 
     nmrAtom = self.getByPid(nmrAtom) if isinstance(nmrAtom, str) else nmrAtom
-    defaults = collections.OrderedDict((('valueError', 0.0), ('figureOfMerit', 1.0),
-                                        ('comment', None)))
 
     apiShift = self._wrappedData.newShift(value=value,
                                      resonance=nmrAtom._wrappedData, error=valueError,
@@ -200,8 +198,10 @@ def _newChemicalShift(self: ChemicalShiftList, value: float, nmrAtom: NmrAtom,
 
     return result
 
-ChemicalShiftList.newChemicalShift = _newChemicalShift
-del _newChemicalShift
+
+#EJB 20181203: moved to ChemicalShiftList
+# ChemicalShiftList.newChemicalShift = _newChemicalShift
+# del _newChemicalShift
 
 # Notifiers:
 # GWV 20181122: refactored as explicit call in NmrAtom._finalise

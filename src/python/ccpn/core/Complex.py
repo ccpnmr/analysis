@@ -187,9 +187,9 @@ def _newComplex(self: Project, name: str, chains=(), serial: int = None) -> Comp
     return result
 
 
-# Connections to parents:
-Project.newComplex = _newComplex
-del _newComplex
+#EJB 20181205 moved to Project
+# Project.newComplex = _newComplex
+# del _newComplex
 
 
 # reverse link Chain.complexes

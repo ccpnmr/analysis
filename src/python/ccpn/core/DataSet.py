@@ -209,6 +209,91 @@ class DataSet(AbstractWrapperObject):
     # Call appropriate routines in their respective locations
     #===========================================================================================
 
+    @logCommand(get='self')
+    def newRestraintList(self, restraintType, name: str = None, origin: str = None,
+                          comment: str = None, unit: str = None, potentialType: str = 'unknown',
+                          tensorMagnitude: float = 0.0, tensorRhombicity: float = 0.0,
+                          tensorIsotropicValue: float = 0.0, tensorChainCode: str = None,
+                          tensorSequenceCode: str = None, tensorResidueType: str = None,
+                          restraintItemLength=None, **kwds):
+        """Create new RestraintList of type restraintType within DataSet.
+
+        See the RestraintList class for details.
+
+        Optional keyword arguments can be passed in; see RestraintList._newRestraintList for details.
+
+        :param restraintType:
+        :param name:
+        :param origin:
+        :param comment:
+        :param unit:
+        :param potentialType:
+        :param tensorMagnitude:
+        :param tensorRhombicity:
+        :param tensorIsotropicValue:
+        :param tensorChainCode:
+        :param tensorSequenceCode:
+        :param tensorResidueType:
+        :param restraintItemLength:
+        :return: a new RestraintList instance.
+        """
+        from ccpn.core.RestraintList import _newRestraintList
+
+        return _newRestraintList(self, restraintType, name=name, origin=origin,
+                          comment=comment, unit=unit, potentialType=potentialType,
+                          tensorMagnitude=tensorMagnitude, tensorRhombicity=tensorRhombicity,
+                          tensorIsotropicValue=tensorIsotropicValue, tensorChainCode=tensorChainCode,
+                          tensorSequenceCode=tensorSequenceCode, tensorResidueType=tensorResidueType,
+                          restraintItemLength=restraintItemLength, **kwds)
+
+    @logCommand(get='self')
+    def _newCalculationStep(self, programName: str = None, programVersion: str = None,
+                            scriptName: str = None, script: str = None,
+                            inputDataUuid: str = None, outputDataUuid: str = None,
+                            inputDataSet = None, outputDataSet = None, **kwds):
+        """Create new CalculationStep within DataSet.
+
+        See the CalculationStep class for details.
+
+        Optional keyword arguments can be passed in; see CalculationStep._newCalculationStep for details.
+
+        :param programName:
+        :param programVersion:
+        :param scriptName:
+        :param script:
+        :param inputDataUuid:
+        :param outputDataUuid:
+        :param inputDataSet:
+        :param outputDataSet:
+        :return: a new CalculationStep instance.
+        """
+        from ccpn.core.CalculationStep import _newCalculationStep
+
+        return _newCalculationStep(self, programName=programName, programVersion=programVersion,
+                                   scriptName=scriptName, script=script,
+                                   inputDataUuid=inputDataUuid, outputDataUuid=outputDataUuid,
+                                   inputDataSet=inputDataSet, outputDataSet=outputDataSet,
+                                   **kwds)
+
+    @logCommand(get='self')
+    def _newData(self, name: str, attachedObjectPid: str = None,
+                 attachedObject: AbstractWrapperObject = None, **kwds):
+        """Create new Data within DataSet.
+
+        See the Data class for details.
+
+        Optional keyword arguments can be passed in; see Data._newData for details.
+
+        :param name:
+        :param attachedObjectPid:
+        :param attachedObject:
+        :return: a new DataSet instance.
+        """
+        from ccpn.core.Data import _newData
+
+        return _newData(self, name=name, attachedObjectPid=attachedObjectPid,
+                        attachedObject=attachedObject, **kwds)
+
 #=========================================================================================
 # Connections to parents:
 #=========================================================================================
@@ -255,6 +340,7 @@ def _newDataSet(self: Project, title: str = None, programName: str = None, progr
     return result
 
 
-Project.newDataSet = _newDataSet
-del _newDataSet
+#EJB 20181206: moved to Project
+# Project.newDataSet = _newDataSet
+# del _newDataSet
 

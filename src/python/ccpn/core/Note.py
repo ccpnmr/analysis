@@ -170,8 +170,8 @@ def _newNote(self: Project, name: str = 'Note', text: str = None, serial: int = 
 
     See the Note class for details.
 
-    :param name:
-    :param text:
+    :param name: name for the note.
+    :param text: contents of the note.
     :param serial: optional serial number.
     :return: a new Note instance.
     """
@@ -201,9 +201,9 @@ def _newNote(self: Project, name: str = 'Note', text: str = None, serial: int = 
     return result
 
 
-# Connections to parents:
-Project.newNote = _newNote
-del _newNote
+#EJB 20181205: moved to Project
+# Project.newNote = _newNote
+# del _newNote
 
 # Notifiers:
 Project._apiNotifiers.append(('_finaliseApiRename', {},

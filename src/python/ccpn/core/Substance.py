@@ -636,6 +636,24 @@ class Substance(AbstractWrapperObject):
     # Call appropriate routines in their respective locations
     #===========================================================================================
 
+    @logCommand(get='self')
+    def createChain(self, shortName: str = None, role: str = None,
+                                  comment: str = None, **kwds):
+        """Create new Chain that matches Substance
+
+        See the Chain class for details.
+
+        Optional keyword arguments can be passed in; see Chain._createChainFromSubstance for details.
+
+        :param shortName:
+        :param role:
+        :param comment: optional comment string
+        :return: a new Chain instance.
+        """
+        from ccpn.core.Chain import _createChainFromSubstance
+
+        return _createChainFromSubstance(shortName=shortName, role=role, comment=comment, **kwds)
+
 #=========================================================================================
 # Connections to parents:
 #=========================================================================================
@@ -757,86 +775,80 @@ def _newSubstance(self: Project, name: str = None, labelling: str = None, substa
 
     return result
 
-Project.newSubstance = _newSubstance
-del _newSubstance
+
+#EJB 20181206: moved to Project
+# Project.newSubstance = _newSubstance
+# del _newSubstance
 
 
-def _fetchNefSubstance(self: Project, sequence: typing.Sequence[dict], name: str = None):
-    """Fetch Substance that matches sequence of NEF rows and/or name"""
+@newObject(Substance)
+def _fetchNefSubstance(self: Project, sequence: typing.Sequence[dict], name: str = None, serial: int = None):
+    """Fetch Substance that matches sequence of NEF rows and/or name
 
-    defaults = {'name': None}
+    :param self:
+    :param sequence:
+    :param name:
+    :return: a new Nef Substance instance.
+    """
 
     # TODO add sequence matching and name matching to avoid unnecessary duplicates
     apiNmrProject = self._wrappedData
 
-    self._startCommandEchoBlock('fetchNefSubstance', values=locals(), defaults=defaults,
-                                parName='newSubstance')
-    self._project.blankNotification()
-    try:
+    name = name or 'Molecule_1'
+    while apiNmrProject.root.findFirstMolecule(name=name) is not None:
+        name = commonUtil.incrementName(name)
 
-        name = name or 'Molecule_1'
-        while apiNmrProject.root.findFirstMolecule(name=name) is not None:
-            name = commonUtil.incrementName(name)
+    apiMolecule = MoleculeModify.createMoleculeFromNef(apiNmrProject.root, name, sequence)
 
-        apiMolecule = MoleculeModify.createMoleculeFromNef(apiNmrProject.root, name, sequence)
+    result = self._data2Obj[
+        apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(apiMolecule)
+    ]
+    if result is None:
+        raise RuntimeError('Unable to generate new Nef Substance item')
 
-        result = self._data2Obj[
-            apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(apiMolecule)
-        ]
-    finally:
-        self._endCommandEchoBlock()
-        self._project.unblankNotification()
-    #
-    result._finaliseAction('create')
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
+                                % (result, serial))
     return result
 
 
-Project.fetchNefSubstance = _fetchNefSubstance
-del _fetchNefSubstance
+#EJB 20181206: moved to Project
+# Project.fetchNefSubstance = _fetchNefSubstance
+# del _fetchNefSubstance
 
 
+@newObject(Substance)
 def _createPolymerSubstance(self: Project, sequence: typing.Sequence[str], name: str,
                             labelling: str = None, userCode: str = None, smiles: str = None,
                             synonyms: typing.Sequence[str] = (), comment: str = None,
-                            startNumber: int = 1, molType: str = None, isCyclic: bool = False) -> Substance:
+                            startNumber: int = 1, molType: str = None, isCyclic: bool = False,
+                            serial: int = None) -> Substance:
     """Make new Substance from sequence of residue codes, using default linking and variants
 
     NB: For more complex substances, you must use advanced, API-level commands.
 
+    See the Substance class for details.
+
     :param Sequence sequence: string of one-letter codes or sequence of residueNames
-
     :param str name: name of new substance
-
     :param str labelling: labelling for new substance. Optional - None means 'natural abundance'
-
     :param str userCode: user code for new substance (optional)
-
     :param str smiles: smiles string for new substance (optional)
-
     :param Sequence[str] synonyms: synonyms for Substance name
-
     :param str comment: comment for new substance (optional)
-
     :param int startNumber: number of first residue in sequence
-
     :param str molType: molType ('protein','DNA', 'RNA'). Required only if sequence is a string.
-
     :param bool isCyclic: Should substance created be cyclic?
-
+    :return: a new Substance instance.
     """
 
     if labelling is None:
         apiLabeling = DEFAULT_LABELLING
     else:
         apiLabeling = labelling
-
-    defaults = OrderedDict(
-            (
-                ('labelling', None), ('userCode', None), ('smiles', None),
-                ('synonyms', ()), ('comment', None), ('startNumber', 1), ('molType', None),
-                ('isCyclic', False)
-                )
-            )
 
     apiNmrProject = self._wrappedData
 
@@ -850,7 +862,6 @@ def _createPolymerSubstance(self: Project, sequence: typing.Sequence[str], name:
     elif apiNmrProject.root.findFirstMolecule(name=name) is not None:
         raise ValueError("Molecule name %s is already in use for API Molecule")
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
     if labelling is not None:
         if not isinstance(labelling, str):
             raise TypeError("ccpn.Substance 'labelling' name must be a string")
@@ -859,65 +870,67 @@ def _createPolymerSubstance(self: Project, sequence: typing.Sequence[str], name:
         elif Pid.altCharacter in labelling:
             raise ValueError("Character %s not allowed in ccpn.Substance labelling, id: %s.%s" %
                              (Pid.altCharacter, name, labelling))
-    #
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
 
-    self._startCommandEchoBlock('createPolymerSubstance', sequence, name,
-                                values=locals(), defaults=defaults,
-                                parName='newPolymerSubstance')
-    self._project.blankNotification()
-    try:
-        apiMolecule = MoleculeModify.createMolecule(apiNmrProject.root, sequence, molType=molType,
-                                                    name=name, startNumber=startNumber,
-                                                    isCyclic=isCyclic)
-        apiMolecule.commonNames = synonyms
-        apiMolecule.smiles = smiles
-        apiMolecule.details = comment
+    apiMolecule = MoleculeModify.createMolecule(apiNmrProject.root, sequence, molType=molType,
+                                                name=name, startNumber=startNumber,
+                                                isCyclic=isCyclic)
+    apiMolecule.commonNames = synonyms
+    apiMolecule.smiles = smiles
+    apiMolecule.details = comment
 
-        result = self._data2Obj[apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(
-                apiMolecule, labeling=apiLabeling)]
-        result.userCode = userCode
-    finally:
-        self._endCommandEchoBlock()
-        self._project.unblankNotification()
+    result = self._data2Obj[apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(
+            apiMolecule, labeling=apiLabeling)]
+    if result is None:
+        raise RuntimeError('Unable to generate new PolymerSubstance item')
 
-    # DO creation notifications
-    result._finaliseAction('create')
-    #
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
+                                % (result, serial))
+
+    result.userCode = userCode
+
     return result
 
 
-Project.createPolymerSubstance = _createPolymerSubstance
-del _createPolymerSubstance
+#EJB 20181206: moved to Project
+# Project.createPolymerSubstance = _createPolymerSubstance
+# del _createPolymerSubstance
 
 
 def _fetchSubstance(self: Project, name: str, labelling: str = None) -> Substance:
-    """get or create Substance with given name and labelling."""
+    """Get or create Substance with given name and labelling.
+
+    :param self:
+    :param name:
+    :param labelling:
+    :return: new or existing Substance instance.
+    """
 
     if labelling is None:
         apiLabeling = DEFAULT_LABELLING
     else:
         apiLabeling = labelling
 
-    values = {'labelling': labelling}
-
     apiRefComponentStore = self._apiNmrProject.sampleStore.refSampleComponentStore
     apiResult = apiRefComponentStore.findFirstComponent(name=name, labeling=apiLabeling)
 
-    self._startCommandEchoBlock('fetchSubstance', name, values=values, parName='newSubstance')
-    try:
+    with logCommandBlock(prefix='substance=', get='self') as log:
+        log('fetchSubstance')
+
         if apiResult:
             result = self._data2Obj[apiResult]
         else:
             result = self.newSubstance(name=name, labelling=labelling)
-    finally:
-        self._endCommandEchoBlock()
+
     return result
 
 
-#
-Project.fetchSubstance = _fetchSubstance
-del _fetchSubstance
+#EJB 20181206: moved to Project
+# Project.fetchSubstance = _fetchSubstance
+# del _fetchSubstance
 
 
 def getter(self: SampleComponent) -> typing.Optional[Substance]:

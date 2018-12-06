@@ -315,8 +315,9 @@ def _newSampleComponent(self: Sample, name: str = None, labelling: str = None, r
     return result
 
 
-Sample.newSampleComponent = _newSampleComponent
-del _newSampleComponent
+#EJB 20181204: moved to Sample
+# Sample.newSampleComponent = _newSampleComponent
+# del _newSampleComponent
 
 # Notifiers - to notify SampleComponent - SpectrumHit link:
 className = Nmr.Experiment._metaclass.qualifiedName()

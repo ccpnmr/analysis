@@ -302,6 +302,26 @@ class Sample(AbstractWrapperObject):
     # Call appropriate routines in their respective locations
     #===========================================================================================
 
+    @logCommand(get='self')
+    def newSampleComponent(self, name: str = None, labelling: str = None,
+                           comment: str = None, **kwds):
+        """Create new SampleComponent within Sample.
+
+        Automatically creates the corresponding Substance if the name is not already taken.
+
+        See the SampleComponent class for details.
+
+        Optional keyword arguments can be passed in; see SampleComponent._newSampleComponent for details.
+
+        :param name:
+        :param labelling:
+        :param comment: optional comment string
+        :return: a new SampleComponent instance.
+        """
+        from ccpn.core.SampleComponent import _newSampleComponent
+
+        return _newSampleComponent(self, name=name, labelling=labelling, comment=comment, **kwds)
+
 #=========================================================================================
 # Connections to parents:
 #=========================================================================================
@@ -412,9 +432,9 @@ PseudoDimension.orderedSamples = property(getter, setter, None,
 del getter
 del setter
 
-# Connections to parents:
-Project.newSample = _newSample
-del _newSample
+#EJB 20181205: moved to Project
+# Project.newSample = _newSample
+# del _newSample
 
 # Notifiers - added to trigger crosslink changes
 className = Nmr.Experiment._metaclass.qualifiedName()

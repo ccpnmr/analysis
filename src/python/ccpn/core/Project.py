@@ -31,6 +31,7 @@ from typing import Sequence, Tuple, Union
 import operator
 from collections import OrderedDict
 from time import time
+from datetime import datetime
 
 from ccpn.util.Common import _traverse, _getChildren
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -1441,3 +1442,343 @@ class Project(AbstractWrapperObject):
 
         return _produceNmrAtom(self, atomId=atomId, chainCode=chainCode,
                                sequenceCode=sequenceCode, residueType=residueType, name=name)
+
+    @logCommand(get='self')
+    def newNote(self, name: str = 'Note', text: str = None, **kwds):
+        """Create new Note.
+
+        See the Note class for details.
+
+        Optional keyword arguments can be passed in; see Note._newNote for details.
+
+        :param name: name for the note.
+        :param text: contents of the note.
+        :return: a new Note instance.
+        """
+        from ccpn.core.Note import _newNote
+
+        return _newNote(self, name=name, text=text, **kwds)
+
+    @logCommand(get='self')
+    def newWindow(self, title: str = None, position: tuple = (), size: tuple = (), **kwds):
+        """Create new child Window.
+
+        See the Window class for details.
+
+        Optional keyword arguments can be passed in; see Window._newWindow for details.
+
+        :param str title: window  title (optional, defaults to 'W1', 'W2', 'W3', ...
+        :param tuple position: x,y position for new window in integer pixels.
+        :param tuple size: x,y size for new window in integer pixels.
+        :return: a new Window instance.
+        """
+        from ccpn.ui._implementation.Window import _newWindow
+
+        return _newWindow(self, title=title, position=position, size=size, **kwds)
+
+    @logCommand(get='self')
+    def newStructureEnsemble(self, name: str = None, data=None,
+                             comment: str = None, **kwds):
+        """Create new StructureEnsemble.
+
+        See the StructureEnsemble class for details.
+
+        Optional keyword arguments can be passed in; see StructureEnsemble._newStructureEnsemble for details.
+
+        :param name: new name for the StructureEnsemble.
+        :param data: Pandas dataframe.
+        :param comment: optional comment string
+        :return: a new StructureEnsemble instance.
+        """
+        from ccpn.core.StructureEnsemble import _newStructureEnsemble
+
+        return _newStructureEnsemble(self, name=name, data=data, comment=comment, **kwds)
+
+    @logCommand(get='self')
+    def newPeakCluster(self, peaks: ['Peak'] = None, **kwds):
+        """Create new PeakCluster.
+
+        See the PeakCluster class for details.
+
+        Optional keyword arguments can be passed in; see PeakCluster._newPeakCluster for details.
+
+        :param peaks: optional list of peaks as objects or pids.
+        :return: a new PeakCluster instance.
+        """
+        from ccpn.core.PeakCluster import _newPeakCluster
+
+        return _newPeakCluster(self, peaks=peaks, **kwds)
+
+    @logCommand(get='self')
+    def newSample(self, name: str = None, pH: float = None, ionicStrength: float = None,
+                  amount: float = None, amountUnit: str = None, isVirtual: bool = False, isHazardous: bool = None,
+                  creationDate: datetime = None, batchIdentifier: str = None, plateIdentifier: str = None,
+                  rowNumber: int = None, columnNumber: int = None, comment: str = None, **kwds):
+        """Create new Sample.
+
+        See the Sample class for details.
+
+        Optional keyword arguments can be passed in; see Sample._newSample for details.
+
+        :param name:
+        :param pH:
+        :param ionicStrength:
+        :param amount:
+        :param amountUnit:
+        :param isVirtual:
+        :param isHazardous:
+        :param creationDate:
+        :param batchIdentifier:
+        :param plateIdentifier:
+        :param rowNumber:
+        :param columnNumber:
+        :param comment:
+        :param serial: optional serial number.
+        :return: a new Sample instance.
+        """
+        from ccpn.core.Sample import _newSample
+
+        return _newSample(self, name=name, pH=pH, ionicStrength=ionicStrength,
+                          amount=amount, amountUnit=amountUnit, isVirtual=isVirtual, isHazardous=isHazardous,
+                          creationDate=creationDate, batchIdentifier=batchIdentifier, plateIdentifier=plateIdentifier,
+                          rowNumber=rowNumber, columnNumber=columnNumber, comment=comment, **kwds)
+
+    @logCommand(get='self')
+    def newDataSet(self, title: str = None, programName: str = None, programVersion: str = None,
+                   dataPath: str = None, creationDate: datetime = None, uuid: str = None,
+                   comment: str = None, **kwds):
+        """Create new DataSet
+
+        See the DataSet class for details.
+
+        Optional keyword arguments can be passed in; see DataSet._newDataSet for details.
+
+        :param title:
+        :param programName:
+        :param programVersion:
+        :param dataPath:
+        :param creationDate:
+        :param uuid:
+        :param comment:
+        :return: a new DataSet instance.
+        """
+        from ccpn.core.DataSet import _newDataSet
+
+        return _newDataSet(self, title=title, programName=programName, programVersion=programVersion,
+                           dataPath=dataPath, creationDate=creationDate, uuid=uuid, comment=comment, **kwds)
+
+    @logCommand(get='self')
+    def newSpectrumDisplay(self, axisCodes: (str,), stripDirection: str = 'Y',
+                           title: str = None, window=None, comment: str = None,
+                           independentStrips=False, nmrResidue=None, **kwds):
+        """Create new SpectrumDisplay
+
+        See the SpectrumDisplay class for details.
+
+        Optional keyword arguments can be passed in; see SpectrumDisplay._newSpectrumDisplay for details.
+
+        :param axisCodes:
+        :param stripDirection:
+        :param title:
+        :param window:
+        :param comment:
+        :param independentStrips:
+        :param nmrResidue:
+        :param serial: optional serial number.
+        :return: a new SpectrumDisplay instance.
+        """
+        from ccpn.ui._implementation.SpectrumDisplay import _newSpectrumDisplay
+
+        return _newSpectrumDisplay(self, axisCodes=axisCodes, stripDirection=stripDirection,
+                                   title=title, window=window, independentStrips=independentStrips,
+                                   comment=comment, **kwds)
+
+    @logCommand(get='self')
+    def newSpectrumGroup(self, name: str, spectra=(), **kwds):
+        """Create new SpectrumGroup
+
+        See the SpectrumGroup class for details.
+
+        Optional keyword arguments can be passed in; see SpectrumGroup._newSpectrumGroup for details.
+
+        :param name: name for the new SpectrumGroup
+        :param spectra: optional list of spectra as objects or pids
+        :return: a new SpectrumGroup instance.
+        """
+        from ccpn.core.SpectrumGroup import _newSpectrumGroup
+
+        return _newSpectrumGroup(self, name=name, spectra=spectra, **kwds)
+
+    @logCommand(get='self')
+    def createChain(self, sequence: Union[str, Sequence[str]], compoundName: str = None,
+                    startNumber: int = 1, molType: str = None, isCyclic: bool = False,
+                    shortName: str = None, role: str = None, comment: str = None, **kwds):
+        """Create new chain from sequence of residue codes, using default variants.
+
+        Automatically creates the corresponding polymer Substance if the compoundName is not already taken
+
+        See the Chain class for details.
+
+        Optional keyword arguments can be passed in; see Chain._createChain for details.
+
+        :param Sequence sequence: string of one-letter codes or sequence of residue types
+        :param str compoundName: name of new Substance (e.g. 'Lysozyme') Defaults to 'Molecule_n
+        :param str molType: molType ('protein','DNA', 'RNA'). Needed only if sequence is a string.
+        :param int startNumber: number of first residue in sequence
+        :param str shortName: shortName for new chain (optional)
+        :param str role: role for new chain (optional)
+        :param str comment: comment for new chain (optional)
+        :return: a new Chain instance.
+        """
+        from ccpn.core.Chain import _createChain
+
+        return _createChain(self, sequence=sequence, compoundName=compoundName,
+                            startNumber=startNumber, molType=molType, isCyclic=isCyclic,
+                            shortName=shortName, role=role, comment=comment, **kwds)
+
+    @logCommand(get='self')
+    def newSubstance(self, name: str = None, labelling: str = None, substanceType: str = 'Molecule',
+                     userCode: str = None, smiles: str = None, inChi: str = None, casNumber: str = None,
+                     empiricalFormula: str = None, molecularMass: float = None, comment: str = None,
+                     synonyms: typing.Sequence[str] = (), atomCount: int = 0, bondCount: int = 0,
+                     ringCount: int = 0, hBondDonorCount: int = 0, hBondAcceptorCount: int = 0,
+                     polarSurfaceArea: float = None, logPartitionCoefficient: float = None, **kwds):
+        """Create new substance WITHOUT storing the sequence internally
+        (and hence not suitable for making chains). SubstanceType defaults to 'Molecule'.
+
+        ADVANCED alternatives are 'Cell' and 'Material'
+
+        See the Substance class for details.
+
+        Optional keyword arguments can be passed in; see Substance._newSubstance for details.
+
+        :param name:
+        :param labelling:
+        :param substanceType:
+        :param userCode:
+        :param smiles:
+        :param inChi:
+        :param casNumber:
+        :param empiricalFormula:
+        :param molecularMass:
+        :param comment:
+        :param synonyms:
+        :param atomCount:
+        :param bondCount:
+        :param ringCount:
+        :param hBondDonorCount:
+        :param hBondAcceptorCount:
+        :param polarSurfaceArea:
+        :param logPartitionCoefficient:
+        :return: a new Substance instance.
+        """
+        from ccpn.core.Substance import _newSubstance
+
+        return _newSubstance(self, name=name, labelling=labelling, substanceType=substanceType,
+                             userCode=userCode, smiles=smiles, inChi=inChi, casNumber=casNumber,
+                             empiricalFormula=empiricalFormula, molecularMass=molecularMass, comment=comment,
+                             synonyms=synonyms, atomCount=atomCount, bondCount=bondCount,
+                             ringCount=ringCount, hBondDonorCount=hBondDonorCount, hBondAcceptorCount=hBondAcceptorCount,
+                             polarSurfaceArea=polarSurfaceArea, logPartitionCoefficient=logPartitionCoefficient, **kwds)
+
+    @logCommand(get='self')
+    def fetchNefSubstance(self, sequence: typing.Sequence[dict], name: str = None, **kwds):
+        """Fetch Substance that matches sequence of NEF rows and/or name
+
+        See the Substance class for details.
+
+        Optional keyword arguments can be passed in; see Substance._fetchNefSubstance for details.
+
+        :param self:
+        :param sequence:
+        :param name:
+        :return: a new Nef Substance instance.
+        """
+        from ccpn.core.Substance import _fetchNefSubstance
+
+        return _fetchNefSubstance(self, sequence=sequence, name=name, **kwds)
+
+    @logCommand(get='self')
+    def createPolymerSubstance(self, sequence: typing.Sequence[str], name: str,
+                               labelling: str = None, userCode: str = None, smiles: str = None,
+                               synonyms: typing.Sequence[str] = (), comment: str = None,
+                               startNumber: int = 1, molType: str = None, isCyclic: bool = False,
+                               **kwds):
+        """Make new Substance from sequence of residue codes, using default linking and variants
+
+        NB: For more complex substances, you must use advanced, API-level commands.
+
+        See the Substance class for details.
+
+        Optional keyword arguments can be passed in; see Substance._fetchNefSubstance for details.
+
+        :param Sequence sequence: string of one-letter codes or sequence of residueNames
+        :param str name: name of new substance
+        :param str labelling: labelling for new substance. Optional - None means 'natural abundance'
+        :param str userCode: user code for new substance (optional)
+        :param str smiles: smiles string for new substance (optional)
+        :param Sequence[str] synonyms: synonyms for Substance name
+        :param str comment: comment for new substance (optional)
+        :param int startNumber: number of first residue in sequence
+        :param str molType: molType ('protein','DNA', 'RNA'). Required only if sequence is a string.
+        :param bool isCyclic: Should substance created be cyclic?
+        :return: a new Substance instance.
+        """
+        from ccpn.core.Substance import _createPolymerSubstance
+
+        return _createPolymerSubstance(self, sequence=sequence, name=name,
+                                       labelling=labelling, userCode=userCode, smiles=smiles,
+                                       synonyms=synonyms, comment=comment,
+                                       startNumber=startNumber, molType=molType, isCyclic=isCyclic,
+                                       **kwds)
+
+    @logCommand(get='self')
+    def fetchSubstance(self, name: str, labelling: str = None):
+        """Get or create Substance with given name and labelling.
+
+        See the Substance class for details.
+
+        :param self:
+        :param name:
+        :param labelling:
+        :return: new or existing Substance instance.
+        """
+        from ccpn.core.Substance import _fetchSubstance
+
+        return _fetchSubstance(name=name, labelling=labelling)
+
+    @logCommand(get='self')
+    def newComplex(self, name: str, chains=(), **kwds):
+        """Create new Complex.
+
+        See the Complex class for details.
+
+        Optional keyword arguments can be passed in; see Complex._newComplex for details.
+
+        :param name:
+        :param chains:
+        :return: a new Complex instance.
+        """
+        from ccpn.core.Complex import _newComplex
+
+        return _newComplex(self, name=name, chains=chains, **kwds)
+
+    @logCommand(get='self')
+    def newChemicalShiftList(self, name: str = None, unit: str = 'ppm', autoUpdate: bool = True,
+                              isSimulated: bool = False, comment: str = None, **kwds):
+        """Create new ChemicalShiftList.
+
+        See the ChemicalShiftList class for details.
+
+        :param name:
+        :param unit:
+        :param autoUpdate:
+        :param isSimulated:
+        :param comment:
+        :param serial: optional serial number.
+        :return: a new ChemicalShiftList instance.
+        """
+        from ccpn.core.ChemicalShiftList import _newChemicalShiftList
+
+        return _newChemicalShiftList(self, name=name, unit=unit, autoUpdate=autoUpdate,
+                                     isSimulated=isSimulated, comment=comment, **kwds)

@@ -329,9 +329,9 @@ def _newModel(self: StructureEnsemble, serial: int = None, label: str = None, co
     return result
 
 
-# Connections to parents:
-StructureEnsemble.newModel = _newModel
-del _newModel
+#EJB 20181204: moved to StructureEnsemble
+# StructureEnsemble.newModel = _newModel
+# del _newModel
 
 #EJB 20181122: moved to _finaliseAction
 # Notifiers:

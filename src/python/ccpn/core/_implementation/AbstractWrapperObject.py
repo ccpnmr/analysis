@@ -331,8 +331,8 @@ class AbstractWrapperObject(NotifierBase):
             return (self._key,)
 
     def _newInstance(self, *kwds):
-        """Intialiate a new instance, including the wrappedData
-        Shoudl be subclassed
+        """Instantiate a new instance, including the wrappedData
+        Should be subclassed
         """
         pass
 

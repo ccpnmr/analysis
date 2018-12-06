@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import operator
 import collections
+from typing import Sequence
 
 from ccpn.core.lib import Pid
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -283,6 +284,70 @@ class RestraintList(AbstractWrapperObject):
     # Call appropriate routines in their respective locations
     #===========================================================================================
 
+    @logCommand(get='self')
+    def newRestraint(self, figureOfMerit: float = None, comment: str = None,
+                      peaks: Sequence = (), vectorLength: float = None, **kwds):
+        """Create new Restraint within RestraintList.
+
+        ADVANCED: Note that you just create at least one RestraintContribution afterwards in order to
+        have valid data. Use the simpler createSimpleRestraint instead, unless you have specific
+        reasons for needing newRestraint
+
+        See the Restraint class for details.
+
+        Optional keyword arguments can be passed in; see Restraint._newRestraint for details.
+
+        :param figureOfMerit:
+        :param comment:
+        :param peaks:
+        :param vectorLength:
+        :return: a new Restraint instance.
+        """
+        from ccpn.core.Restraint import _newRestraint
+
+        return _newRestraint(self, figureOfMerit=figureOfMerit, peaks=peaks, vectorLength=vectorLength,
+                             comment=comment, **kwds)
+
+    @logCommand(get='self')
+    def createSimpleRestraint(self, comment: str = None, figureOfMerit: float = None,
+                               peaks: Sequence = (), targetValue: float = None, error: float = None,
+                               weight: float = 1.0, upperLimit: float = None, lowerLimit: float = None,
+                               additionalUpperLimit: float = None, additionalLowerLimit: float = None,
+                               scale=1.0, vectorLength=None, restraintItems: Sequence = (), **kwds):
+        """Create a Restraint with a single RestraintContribution within the RestraintList.
+        The function takes all the information needed and creates the RestraintContribution as
+        well as the Restraint proper.
+
+        This function should be used routinely, unless there is a need to create more complex
+        Restraints.
+
+        See the Restraint class for details.
+
+        Optional keyword arguments can be passed in; see Restraint._createSimpleRestraint for details.
+
+        :param comment:
+        :param figureOfMerit:
+        :param peaks:
+        :param targetValue:
+        :param error:
+        :param weight:
+        :param upperLimit:
+        :param lowerLimit:
+        :param additionalUpperLimit:
+        :param additionalLowerLimit:
+        :param scale:
+        :param vectorLength:
+        :param restraintItems:
+        :return: a new simple Restraint instance.
+        """
+        from ccpn.core.Restraint import _createSimpleRestraint
+
+        return _createSimpleRestraint(self, comment=comment, figureOfMerit=figureOfMerit,
+                               peaks=peaks, targetValue=targetValue, error=error,
+                               weight=weight, upperLimit=upperLimit, lowerLimit=lowerLimit,
+                               additionalUpperLimit=additionalUpperLimit, additionalLowerLimit=additionalLowerLimit,
+                               scale=scale, vectorLength=vectorLength, restraintItems=restraintItems, **kwds)
+
 #=========================================================================================
 # Connections to parents:
 #=========================================================================================
@@ -352,8 +417,9 @@ def _newRestraintList(self: DataSet, restraintType, name: str = None, origin: st
     return result
 
 
-DataSet.newRestraintList = _newRestraintList
-del _newRestraintList
+#EJB 20181206: moved to DataSet
+# DataSet.newRestraintList = _newRestraintList
+# del _newRestraintList
 
 # Notifiers:
 for clazz in ApiAbstractConstraintList._metaclass.getNonAbstractSubtypes():

@@ -259,7 +259,9 @@ def _newCalculationStep(self: DataSet, programName: str = None, programVersion: 
 
     return result
 
-DataSet.newCalculationStep = _newCalculationStep
-del _newCalculationStep
+
+#EJB 20181204: moved to DataSet
+# DataSet.newCalculationStep = _newCalculationStep
+# del _newCalculationStep
 
 # Notifiers:

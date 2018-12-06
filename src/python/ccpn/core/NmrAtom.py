@@ -496,7 +496,7 @@ def _fetchNmrAtom(self: NmrResidue, name: str):
     """
     # resonanceGroup = self._wrappedData
 
-    with logCommandBlock(prefix='newmrAtom=', get='self') as log:
+    with logCommandBlock(prefix='nmrAtom=', get='self') as log:
         log('fetchNmrAtom')
 
         result = (self.getNmrAtom(name.translate(Pid.remapSeparators)) or
@@ -515,8 +515,8 @@ def _produceNmrAtom(self: Project, atomId: str = None, chainCode: str = None,
     or explicit parameters, and find or create an NmrAtom that matches
     Empty chainCode gets NmrChain:@- ; empty sequenceCode get a new NmrResidue"""
 
-    with logCommandBlock(prefix='newmrAtom=', get='self') as log:
-        log('_produceNmrAtom')
+    with logCommandBlock(prefix='nmrAtom=', get='self') as log:
+        log('produceNmrAtom')
 
         # Get ID parts to use
         if sequenceCode is not None:
@@ -550,7 +550,7 @@ def _produceNmrAtom(self: Project, atomId: str = None, chainCode: str = None,
     return result
 
 
-# Connections to parents:
+#EJB 20181203: moved to NmrResidue
 # NmrResidue.newNmrAtom = _newNmrAtom
 # del _newNmrAtom
 # NmrResidue.fetchNmrAtom = _fetchNmrAtom

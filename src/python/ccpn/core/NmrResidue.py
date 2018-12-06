@@ -1120,7 +1120,7 @@ class NmrResidue(AbstractWrapperObject):
 
     @logCommand(get='self')
     def newNmrAtom(self, name: str = None, isotopeCode: str = None,
-                    comment: str = None, **kwds):
+                   comment: str = None, **kwds):
         """Create new NmrAtom within NmrResidue. If name is None, use default name
             (of form e.g. 'H@211', 'N@45', ...)
 
@@ -1144,6 +1144,7 @@ class NmrResidue(AbstractWrapperObject):
         from ccpn.core.NmrAtom import _fetchNmrAtom  # imported here to avoid circular imports
 
         return _fetchNmrAtom(name=name)
+
 
 #=========================================================================================
 # Connections to parents:
@@ -1327,7 +1328,7 @@ def _fetchNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None
     #                             parName='newNmrResidue')
     # try:
 
-    with logCommandBlock(get='self') as log:
+    with logCommandBlock(prefix='nmrResidue=', get='self') as log:
         log('fetchNmrResidue')
 
         if sequenceCode is None:

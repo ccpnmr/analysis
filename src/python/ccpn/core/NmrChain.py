@@ -465,10 +465,7 @@ def _fetchNmrChain(self: Project, shortName: str = None) -> NmrChain:
     :param shortName:
     :return: nmrChain instance.
     """
-    # self._startCommandEchoBlock('fetchNmrChain', shortName, parName='newNmrChain')
-    # try:
-
-    with logCommandBlock(prefix='newNmrChain', get='self') as log:
+    with logCommandBlock(prefix='newNmrChain=', get='self') as log:
         log('fetchNmrChain')
 
         if not shortName:
@@ -479,9 +476,6 @@ def _fetchNmrChain(self: Project, shortName: str = None) -> NmrChain:
                 result = self.newNmrChain(shortName=shortName)
             else:
                 result = self._data2Obj.get(apiNmrChain)
-
-    # finally:
-    #     self._endCommandEchoBlock()
 
     return result
 

@@ -337,9 +337,8 @@ class GLString(GLVertexArray):
         self._GLContext.globalGL._shaderProgramTex.setGLUniform1i('texture', self.font.activeTextureNum)
         super().drawTextArrayVBO(enableVBO=enableVBO)
 
-    def setColour(self, col):
+    def setStringColour(self, col):
         self.colors = np.array(col * self.numVertices, dtype=np.float32)
 
     def setStringOffset(self, attrib):
         self.attribs = self.offsets + np.array(attrib * self.numVertices, dtype=np.float32)
-        # self.stringOffset = attrib

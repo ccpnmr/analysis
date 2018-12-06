@@ -68,14 +68,16 @@ __date__ = "$Date$"
 
 import sys
 import math
+import json
+import re
 import time
+import numpy as np
 # from threading import Thread
 # from queue import Queue
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QPoint, QSize, Qt, pyqtSlot
 from PyQt5.QtWidgets import QApplication, QOpenGLWidget
 from ccpn.util.Logging import getLogger
-import numpy as np
 from pyqtgraph import functions as fn
 from ccpn.core.PeakList import PeakList
 # from ccpn.core.IntegralList import IntegralList
@@ -120,13 +122,10 @@ from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE
 from ccpn.ui.gui.guiSettings import textFont, getColours, STRIPHEADER_BACKGROUND, \
     STRIPHEADER_FOREGROUND, GUINMRRESIDUE
 
-import json
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
-import re
-
-
-# from ccpn.util.decorators import profile
+from ccpn.core.lib.ContextManagers import undoBlockManager
+from ccpn.util.decorators import profile
 
 try:
     from OpenGL import GL, GLU, GLUT
@@ -5169,15 +5168,9 @@ class CcpnGLWidget(QOpenGLWidget):
             for peak in peaks:
                 peak.startPosition = peak.position
 
-            self.project._startCommandEchoBlock('movePeaks')
-            try:
+            with undoBlockManager():
                 for peak in peaks:
                     self._movePeak(peak, deltaPosition)
-            except Exception as es:
-                pass
-
-            finally:
-                self.project._endCommandEchoBlock()
 
             self.current.peaks = peaks
 

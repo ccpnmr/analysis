@@ -66,6 +66,7 @@ __date__ = "$Date$"
 # Start of code
 #=========================================================================================
 
+import os
 import sys
 import math
 import json
@@ -100,6 +101,18 @@ from ccpn.ui.gui.lib.mouseEvents import \
     leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, controlShiftRightMouse, \
     middleMouse, shiftMiddleMouse, rightMouse, shiftRightMouse, controlRightMouse, PICK
 # from ccpn.core.lib.Notifiers import Notifier
+
+try:
+    # used to test whether all the arrays are defined correctly - conflicts with pyqt window manager resize
+    # os.environ.update({'PYOPENGL_ERROR_ON_COPY': 'true'})
+
+    from OpenGL import GL, GLU, GLUT
+except ImportError:
+    app = QtWidgets.QApplication(sys.argv)
+    QtWidgets.QMessageBox.critical(None, "OpenGL CCPN",
+                                   "PyOpenGL must be installed to run this example.")
+    sys.exit(1)
+
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLGlobalData
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString
@@ -126,14 +139,6 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
 from ccpn.core.lib.ContextManagers import undoBlockManager
 from ccpn.util.decorators import profile
-
-try:
-    from OpenGL import GL, GLU, GLUT
-except ImportError:
-    app = QtWidgets.QApplication(sys.argv)
-    QtWidgets.QMessageBox.critical(None, "OpenGL CCPN",
-                                   "PyOpenGL must be installed to run this example.")
-    sys.exit(1)
 
 UNITS_PPM = 'ppm'
 UNITS_HZ = 'Hz'
@@ -374,7 +379,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self._useTexture = np.zeros((1,), dtype=np.int)
         self._axisScale = np.zeros((4,), dtype=np.float32)
-        self._background = np.zeros((4,), dtype=np.float32)
+        self.background = np.zeros((4,), dtype=np.float32)
         self._parameterList = np.zeros((4,), dtype=np.int32)
         self._view = np.zeros((4,), dtype=np.float32)
         self.cursorCoordinate = np.zeros((4,), dtype=np.float32)
@@ -2408,36 +2413,45 @@ class CcpnGLWidget(QOpenGLWidget):
                 if spectrumView.isDeleted:
                     continue
 
-                if spectrumView.isVisible() and spectrumView.spectrum.dimensionCount > 1:
-                    self._spectrumValues = spectrumView._getValues()
+                if spectrumView.isVisible() and spectrumView.spectrum.dimensionCount > 1 and spectrumView in self._spectrumSettings.keys():
+                    specSettings = self._spectrumSettings[spectrumView]
 
-                    spectrumReferences = spectrumView.spectrum.spectrumReferences
+                    fx0 = specSettings[GLDefs.SPECTRUM_MAXXALIAS]
+                    fx1 = specSettings[GLDefs.SPECTRUM_MINXALIAS]
+                    fy0 = specSettings[GLDefs.SPECTRUM_MAXYALIAS]
+                    fy1 = specSettings[GLDefs.SPECTRUM_MINYALIAS]
 
-                    # get the bounding box of the spectra
-                    fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
+                    # fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
+                    #
+                    # self._spectrumValues = spectrumView._getValues()
+                    #
+                    # spectrumReferences = spectrumView.spectrum.spectrumReferences
+                    #
+                    # # get the bounding box of the spectra
+                    # fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
+                    #
+                    # # totalPointCountX = spectrumView.spectrum.totalPointCounts[0]
+                    # # fx0, fx1 = spectrumReferences[0].pointToValue(1), spectrumReferences[0].pointToValue(totalPointCountX)
+                    # # fx0, fx1 = max(fx0, fx1), min(fx0, fx1)
+                    #
+                    # # if spectrumView.spectrum.dimensionCount > 1:
+                    # fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
+                    #
+                    # # totalPointCountY = spectrumView.spectrum.totalPointCounts[1]
+                    # # fy0, fy1 = spectrumReferences[1].pointToValue(1), spectrumReferences[1].pointToValue(totalPointCountY)
+                    # # fy0, fy1 = max(fy0, fy1), min(fy0, fy1)
 
-                    # totalPointCountX = spectrumView.spectrum.totalPointCounts[0]
-                    # fx0, fx1 = spectrumReferences[0].pointToValue(1), spectrumReferences[0].pointToValue(totalPointCountX)
-                    # fx0, fx1 = max(fx0, fx1), min(fx0, fx1)
+                    GL.glColor4f(*spectrumView.posColour[0:3], 0.5)
 
-                    if spectrumView.spectrum.dimensionCount > 1:
-                        fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[
-                            1].minAliasedFrequency
-
-                        # totalPointCountY = spectrumView.spectrum.totalPointCounts[1]
-                        # fy0, fy1 = spectrumReferences[1].pointToValue(1), spectrumReferences[1].pointToValue(totalPointCountY)
-                        # fy0, fy1 = max(fy0, fy1), min(fy0, fy1)
-
-                        GL.glColor4f(*spectrumView.posColour[0:3], 0.5)
-                    else:
-                        fy0, fy1 = np.max(spectrumView.spectrum.intensities), np.min(spectrumView.spectrum.intensities)
-
-                        colour = spectrumView.sliceColour
-                        colR = int(colour.strip('# ')[0:2], 16) / 255.0
-                        colG = int(colour.strip('# ')[2:4], 16) / 255.0
-                        colB = int(colour.strip('# ')[4:6], 16) / 255.0
-
-                        GL.glColor4f(colR, colG, colB, 0.5)
+                    # else:
+                    #     fy0, fy1 = np.max(spectrumView.spectrum.intensities), np.min(spectrumView.spectrum.intensities)
+                    #
+                    #     colour = spectrumView.sliceColour
+                    #     colR = int(colour.strip('# ')[0:2], 16) / 255.0
+                    #     colG = int(colour.strip('# ')[2:4], 16) / 255.0
+                    #     colB = int(colour.strip('# ')[4:6], 16) / 255.0
+                    #
+                    #     GL.glColor4f(colR, colG, colB, 0.5)
 
                     GL.glBegin(GL.GL_LINE_LOOP)
                     GL.glVertex2d(fx0, fy0)
@@ -2789,65 +2803,69 @@ class CcpnGLWidget(QOpenGLWidget):
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
             drawList._rebuild()
 
+            drawList.defineIndexVBO(enableVBO=True)
+
         elif drawList.renderMode == GLRENDERMODE_RESCALE:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
             drawList._resize()
 
+            drawList.defineIndexVBO(enableVBO=True)
+
         return
 
-        drawList = self._regionList
-
-        if drawList.renderMode == GLRENDERMODE_REBUILD:
-            drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
-            drawList.refreshMode = GLREFRESHMODE_REBUILD
-            drawList.clearArrays()
-
-            # build the marks VBO
-            index = 0
-            for region in self._regions:
-
-                if not region.visible:
-                    continue
-
-                for ps, psCode in enumerate(self.axisOrder[0:2]):
-                    if self._preferences.matchAxisCode == 0:  # default - match atom type
-
-                        if region.axisCode[0] == psCode[0]:
-                            axisIndex = ps
-                    elif self._preferences.matchAxisCode == 1:  # match full code
-                        if region.axisCode == psCode:
-                            axisIndex = ps
-
-                # NOTE:ED check axis units - assume 'ppm' for the minute
-                if axisIndex == 0:
-                    # vertical ruler
-                    pos0 = x0 = region.values[0]
-                    pos1 = x1 = region.values[1]
-                    y0 = self.axisT
-                    y1 = self.axisB
-                else:
-                    # horizontal ruler
-                    pos0 = y0 = region.values[0]
-                    pos1 = y1 = region.values[1]
-                    x0 = self.axisL
-                    x1 = self.axisR
-
-                colour = region.brush
-                drawList.indices = np.append(drawList.indices, (index, index + 1, index + 2, index + 3,
-                                                                index, index + 1, index, index + 1,
-                                                                index + 1, index + 2, index + 1, index + 2,
-                                                                index + 2, index + 3, index + 2, index + 3,
-                                                                index, index + 3, index, index + 3))
-                drawList.vertices = np.append(drawList.vertices, (x0, y0, x0, y1, x1, y1, x1, y0))
-                drawList.colors = np.append(drawList.colors, colour * 4)
-                drawList.attribs = np.append(drawList.attribs,
-                                             (axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1))
-
-                index += 4
-                drawList.numVertices += 4
-
-        elif drawList.renderMode == GLRENDERMODE_RESCALE:
-            drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
+        # drawList = self._regionList
+        #
+        # if drawList.renderMode == GLRENDERMODE_REBUILD:
+        #     drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
+        #     drawList.refreshMode = GLREFRESHMODE_REBUILD
+        #     drawList.clearArrays()
+        #
+        #     # build the marks VBO
+        #     index = 0
+        #     for region in self._regions:
+        #
+        #         if not region.visible:
+        #             continue
+        #
+        #         for ps, psCode in enumerate(self.axisOrder[0:2]):
+        #             if self._preferences.matchAxisCode == 0:  # default - match atom type
+        #
+        #                 if region.axisCode[0] == psCode[0]:
+        #                     axisIndex = ps
+        #             elif self._preferences.matchAxisCode == 1:  # match full code
+        #                 if region.axisCode == psCode:
+        #                     axisIndex = ps
+        #
+        #         # NOTE:ED check axis units - assume 'ppm' for the minute
+        #         if axisIndex == 0:
+        #             # vertical ruler
+        #             pos0 = x0 = region.values[0]
+        #             pos1 = x1 = region.values[1]
+        #             y0 = self.axisT
+        #             y1 = self.axisB
+        #         else:
+        #             # horizontal ruler
+        #             pos0 = y0 = region.values[0]
+        #             pos1 = y1 = region.values[1]
+        #             x0 = self.axisL
+        #             x1 = self.axisR
+        #
+        #         colour = region.brush
+        #         drawList.indices = np.append(drawList.indices, (index, index + 1, index + 2, index + 3,
+        #                                                         index, index + 1, index, index + 1,
+        #                                                         index + 1, index + 2, index + 1, index + 2,
+        #                                                         index + 2, index + 3, index + 2, index + 3,
+        #                                                         index, index + 3, index, index + 3))
+        #         drawList.vertices = np.append(drawList.vertices, (x0, y0, x0, y1, x1, y1, x1, y0))
+        #         drawList.colors = np.append(drawList.colors, colour * 4)
+        #         drawList.attribs = np.append(drawList.attribs,
+        #                                      (axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1))
+        #
+        #         index += 4
+        #         drawList.numVertices += 4
+        #
+        # elif drawList.renderMode == GLRENDERMODE_RESCALE:
+        #     drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
 
     def buildMarksRulers(self):
         drawList = self._marksList
@@ -2920,6 +2938,8 @@ class CcpnGLWidget(QOpenGLWidget):
                         index += 2
                         drawList.numVertices += 2
 
+            drawList.defineIndexVBO(enableVBO=True)
+
         elif drawList.renderMode == GLRENDERMODE_RESCALE:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
 
@@ -2932,14 +2952,14 @@ class CcpnGLWidget(QOpenGLWidget):
             self.buildMarks = False
 
         self.buildMarksRulers()
-        self._marksList.drawIndexArray()
+        self._marksList.drawIndexVBO(enableVBO=True)
 
     def drawRegions(self):
         if self.strip.isDeleted:
             return
 
         self.buildRegions()
-        self._externalRegions.drawIndexArray()
+        self._externalRegions.drawIndexVBO(enableVBO=True)
 
     def drawMarksAxisCodes(self):
         if self.strip.isDeleted:

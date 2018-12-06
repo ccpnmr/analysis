@@ -39,6 +39,7 @@ from ccpn.ui.gui.popups.ShortcutsPopup import UserShortcuts
 from ccpn.ui.gui.widgets.MessageDialog import progressManager
 from ccpn.ui.gui.lib.mouseEvents import MouseModes, setCurrentMouseMode, getCurrentMouseMode
 from ccpn.util.decorators import logCommand
+from ccpn.core.lib.ContextManagers import logCommandBlock
 
 
 #TODO:WAYNE: incorporate most functionality in GuiMainWindow. See also MainMenu
@@ -231,22 +232,26 @@ class GuiWindow():
             peak.lineWidths = lineWidths
 
     def add1DIntegral(self, peak=None):
-        """Peak: take self.currentPeak as default
+        """Peak: take self.application.currentPeak as default
         """
-        strip = self.current.strip
+        strip = self.application.current.strip
+        peak = self.project.getByPid(peak) if isinstance(peak, str) else peak
 
         if strip is not None:
-            currentIntegrals = list(self.current.integrals)
-
             if strip.spectrumDisplay.is1D:
-                cursorPosition = self.current.cursorPosition
+                cursorPosition = self.application.current.cursorPosition
                 if cursorPosition is not None:
                     limits = [cursorPosition[0], cursorPosition[0] + 0.005]
 
                     validViews = [sv for sv in strip.spectrumViews if sv.isVisible()]
 
-                    strip._startCommandEchoBlock('addIntegral1D', limits)
-                    try:
+                    with logCommandBlock(get='self') as log:
+                        if peak:
+                            log('add1DIntegral', peak=repr(peak.pid))
+                        else:
+                            log('add1DIntegral')
+
+                        currentIntegrals = list(self.current.integrals)
                         for spectrumView in validViews:
 
                             if not spectrumView.spectrum.integralLists:
@@ -264,19 +269,16 @@ class GuiWindow():
                                         il.setVisible(True)
 
                             for integralList in validIntegralLists:
-                                integral = integralList.newIntegral(limits=[limits, ])
-
+                                integral = integralList.newIntegral(value=None, limits=[limits, ])
                                 currentIntegrals.append(integral)
 
                                 if peak:
                                     integral.peak = peak
                                 else:
-                                    if len(self.current.peaks) == 1:
-                                        if self.current.peak.peakList.spectrum == integral.integralList.spectrum:
-                                            integral.peak = self.current.peak
-                    finally:
+                                    if len(self.application.current.peaks) == 1:
+                                        if self.application.current.peak.peakList.spectrum == integral.integralList.spectrum:
+                                            integral.peak = self.application.current.peak
                         self.current.integrals = currentIntegrals
-                        strip._endCommandEchoBlock()
 
             else:
                 getLogger().warning('Current strip is not 1D')
@@ -313,8 +315,9 @@ class GuiWindow():
         """add current peaks to a new multiplet"""
         strip = self.application.current.strip
 
-        strip._startCommandEchoBlock('addMultiplet')
-        try:
+        with logCommandBlock(get='self') as log:
+            log('addMultiplet')
+
             if strip and strip.spectrumDisplay:
                 spectra = [spectrumView.spectrum for spectrumView in
                            strip.spectrumDisplay.spectrumViews if spectrumView.isVisible()]
@@ -323,11 +326,10 @@ class GuiWindow():
                         multipletList = spectrum.newMultipletList()
                     else:
                         multipletList = spectrum.multipletLists[-1]
-                    peaks = [peak for peakList in spectrum.peakLists for peak in peakList.peaks if peak in self.current.peaks]
+                    peaks = [peak for peakList in spectrum.peakLists for peak in peakList.peaks if
+                             peak in self.application.current.peaks]
                     multiplet = multipletList.newMultiplet(peaks=peaks)
                     self.application.current.multiplet = multiplet
-        finally:
-            strip._endCommandEchoBlock()
 
     def traceScaleScale(self, window: 'GuiWindow', scale: float):
         """

@@ -326,6 +326,13 @@ class GLExternalRegion(GLVertexArray):
         self.fillMode = GL.GL_FILL
         super().drawIndexArray()
 
+    def drawIndexVBO(self, enableVBO=False):
+        # draw twice top cover the outline
+        self.fillMode = GL.GL_LINE
+        super().drawIndexVBO(enableVBO=False)
+        self.fillMode = GL.GL_FILL
+        super().drawIndexVBO(enableVBO=False)
+
     def _clearRegions(self):
         self._regions = []
 

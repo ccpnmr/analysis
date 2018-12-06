@@ -444,7 +444,19 @@ class GLVertexArray():
 
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
 
-    def drawTextArrayVBO(self, enableVBO=False):
+    # def enableTextClientState(self):
+    #     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+    #     GL.glEnableClientState(GL.GL_COLOR_ARRAY)
+    #     GL.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY)
+    #     GL.glEnableVertexAttribArray(self._GLContext._glClientIndex)
+    #
+    # def disableTextClientState(self):
+    #     GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)
+    #     GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+    #     GL.glDisableClientState(GL.GL_COLOR_ARRAY)
+    #     GL.glDisableVertexAttribArray(self._GLContext._glClientIndex)
+
+    def drawTextArrayVBO(self, enableVBO=False, enableClientState=False, disableClientState=False):
         if not (ENABLE_VBOS and enableVBO):
 
             # call the normal drawTextArray routine
@@ -454,9 +466,11 @@ class GLVertexArray():
             if self.blendMode:
                 GL.glEnable(GL.GL_BLEND)
 
-            GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
-            GL.glEnableClientState(GL.GL_COLOR_ARRAY)
-            GL.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY)
+            if enableClientState:
+                GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+                GL.glEnableClientState(GL.GL_COLOR_ARRAY)
+                GL.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY)
+                GL.glEnableVertexAttribArray(self._GLContext._glClientIndex)
 
             GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[0])
             GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, None)
@@ -465,9 +479,8 @@ class GLVertexArray():
             GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[2])
             GL.glTexCoordPointer(2, GL.GL_FLOAT, 0, None)
 
-            GL.glEnableVertexAttribArray(1)
             GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[3])
-            GL.glVertexAttribPointer(1, 2, GL.GL_FLOAT, GL.GL_FALSE, 0, None)
+            GL.glVertexAttribPointer(self._GLContext._glClientIndex, 2, GL.GL_FLOAT, GL.GL_FALSE, 0, None)
 
             GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self.VBOs[4])
             GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, None)
@@ -475,10 +488,11 @@ class GLVertexArray():
             GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
             GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
 
-            GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)
-            GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
-            GL.glDisableClientState(GL.GL_COLOR_ARRAY)
-            GL.glDisableVertexAttribArray(1)
+            if disableClientState:
+                GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)
+                GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+                GL.glDisableClientState(GL.GL_COLOR_ARRAY)
+                GL.glDisableVertexAttribArray(self._GLContext._glClientIndex)
 
             if self.blendMode:
                 GL.glDisable(GL.GL_BLEND)

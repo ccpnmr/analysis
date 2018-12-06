@@ -1143,7 +1143,7 @@ class NmrResidue(AbstractWrapperObject):
         """
         from ccpn.core.NmrAtom import _fetchNmrAtom  # imported here to avoid circular imports
 
-        return _fetchNmrAtom(name=name)
+        return _fetchNmrAtom(self, name=name)
 
 
 #=========================================================================================

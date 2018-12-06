@@ -1745,7 +1745,7 @@ class Project(AbstractWrapperObject):
         """
         from ccpn.core.Substance import _fetchSubstance
 
-        return _fetchSubstance(name=name, labelling=labelling)
+        return _fetchSubstance(self, name=name, labelling=labelling)
 
     @logCommand(get='self')
     def newComplex(self, name: str, chains=(), **kwds):

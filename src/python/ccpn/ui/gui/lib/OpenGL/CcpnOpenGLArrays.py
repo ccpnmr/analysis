@@ -429,6 +429,21 @@ class GLVertexArray():
 
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
 
+    def updateTextArrayVBOColour(self, enableVBO=False):
+        if not (ENABLE_VBOS and enableVBO):
+            return
+
+        # check the VBOs, if they don't exist raise error
+        if not hasattr(self, 'VBOs'):
+            raise RuntimeError('OpenGL Error: cannot update attribs: %s' % self)
+
+        sizeColors = self.colors.size * self.colors.itemsize
+
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[1])
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeColors, self.colors, GL.GL_STATIC_DRAW)
+
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
+
     def drawTextArrayVBO(self, enableVBO=False):
         if not (ENABLE_VBOS and enableVBO):
 
@@ -450,7 +465,6 @@ class GLVertexArray():
             GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[2])
             GL.glTexCoordPointer(2, GL.GL_FLOAT, 0, None)
 
-            # this is for passing extra attributes in
             GL.glEnableVertexAttribArray(1)
             GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[3])
             GL.glVertexAttribPointer(1, 2, GL.GL_FLOAT, GL.GL_FALSE, 0, None)

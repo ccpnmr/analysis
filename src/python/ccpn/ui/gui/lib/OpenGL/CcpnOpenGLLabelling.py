@@ -1128,9 +1128,10 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 if _isInPlane or _isInFlankingPlane:
 
                     if self._isSelected(obj):
-                        drawStr.setColour((*self._GLParent.highlightColour[:3], fade))
+                        drawStr.setStringColour((*self._GLParent.highlightColour[:3], fade))
                     else:
-                        drawStr.setColour((*listCol, fade))
+                        drawStr.setStringColour((*listCol, fade))
+                    drawStr.updateTextArrayVBOColour(enableVBO=True)
 
     def updateHighlightSymbols(self):
         """Respond to an update highlight notifier and update the highlighted symbols/labels

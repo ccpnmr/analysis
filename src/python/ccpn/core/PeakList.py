@@ -818,7 +818,7 @@ def _newPeakList(self: Spectrum, title: str = None, comment: str = None,
 
     return result
 
-# EJB 20181127: moved to spectrum
+#EJB 20181127: moved to Spectrum
 # Spectrum.newPeakList = _newPeakList
 # del _newPeakList
 

@@ -182,6 +182,28 @@ class ChemicalShiftList(AbstractWrapperObject):
     # Call appropriate routines in their respective locations
     #===========================================================================================
 
+    @logCommand(get='self')
+    def _newChemicalShift(self, value: float, nmrAtom,
+                          valueError: float = 0.0, figureOfMerit: float = 1.0,
+                          comment: str = None, **kwds):
+        """Create new ChemicalShift within ChemicalShiftList.
+
+        See the ChemicalShift class for details.
+
+        Optional keyword arguments can be passed in; see Peak._newPeak for details.
+
+        :param value:
+        :param nmrAtom: nmrAtom as object or pid
+        :param valueError:
+        :param figureOfMerit:
+        :param comment: optional comment string
+        :return: a new ChemicalShift instance.
+        """
+        from ccpn.core.ChemicalShift import _newChemicalShift
+
+        return _newChemicalShift(self, value, nmrAtom, valueError=valueError,
+                                 figureOfMerit=figureOfMerit, comment=comment, **kwds)
+
 
 #=========================================================================================
 # Connections to parents:
@@ -258,8 +280,10 @@ def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
 
     return result
 
-Project.newChemicalShiftList = _newChemicalShiftList
-del _newChemicalShiftList
+
+#EJB 20181205: moved to Project
+# Project.newChemicalShiftList = _newChemicalShiftList
+# del _newChemicalShiftList
 
 # Notifiers
 className = Nmr.ShiftList._metaclass.qualifiedName()

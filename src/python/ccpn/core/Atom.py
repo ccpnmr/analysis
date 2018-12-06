@@ -270,6 +270,7 @@ def _newAtom(self: Residue, name: str, elementSymbol: str = None, serial: int = 
     return result
 
 
-Residue.newAtom = _newAtom
+#EJB 20181204: moved to Residue
+# Residue.newAtom = _newAtom
 
 # Connections to parents:

@@ -210,7 +210,7 @@ def _newPeakCluster(self: Project, peaks: ['Peak'] = None, serial: int = None) -
 
     See the PeakCluster class for details.
 
-    :param peaks:
+    :param peaks: optional list of peaks as objects or pids.
     :param serial: optional serial number.
     :return: a new PeakCluster instance.
     """
@@ -236,6 +236,6 @@ def _newPeakCluster(self: Project, peaks: ['Peak'] = None, serial: int = None) -
     return result
 
 
-
-PeakCluster._parentClass.newPeakCluster = _newPeakCluster
-del _newPeakCluster
+#EJB 20181205: moved to Project
+# PeakCluster._parentClass.newPeakCluster = _newPeakCluster
+# del _newPeakCluster

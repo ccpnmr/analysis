@@ -154,13 +154,11 @@ class StructureEnsemble(AbstractWrapperObject):
         NB, the serial remains immutable."""
 
         if not isinstance(value, str):
-            raise TypeError("StructureEnsemble name must be a string")  # ejb catch non-string
+            raise TypeError("StructureEnsemble name must be a string")
         if not value:
-            raise ValueError("StructureEnsemble name must be set")  # ejb catch empty string
+            raise ValueError("StructureEnsemble name must be set")
         if Pid.altCharacter in value:
             raise ValueError("Character %s not allowed in ccpn.StructureEnsemble.name" % Pid.altCharacter)
-        #
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
 
         self._startCommandEchoBlock('rename', value)
         try:
@@ -176,6 +174,22 @@ class StructureEnsemble(AbstractWrapperObject):
     # new'Object' and other methods
     # Call appropriate routines in their respective locations
     #===========================================================================================
+
+    @logCommand(get='self')
+    def newModel(self, label: str = None, comment: str = None, **kwds):
+        """Create new Model.
+
+        See the Model class for details.
+
+        Optional keyword arguments can be passed in; see Model._newModel for details.
+
+        :param label: new name for the model.
+        :param comment: optional comment string.
+        :return: a new Model instance.
+        """
+        from ccpn.core.Model import _newModel
+
+        return _newModel(self, label=label, comment=comment, **kwds)
 
 #=========================================================================================
 # Connections to parents:
@@ -239,8 +253,8 @@ def _newStructureEnsemble(self: Project, serial: int = None, name: str = None, d
     return result
 
 
-# Connections to parents:
-Project.newStructureEnsemble = _newStructureEnsemble
-del _newStructureEnsemble
+#EJB 20181204: moved to Project
+# Project.newStructureEnsemble = _newStructureEnsemble
+# del _newStructureEnsemble
 
 # Notifiers:

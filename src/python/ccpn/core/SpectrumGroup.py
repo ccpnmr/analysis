@@ -182,9 +182,9 @@ def _newSpectrumGroup(self: Project, name: str, spectra=(), serial: int = None) 
     return result
 
 
-# Connections to parents:
-Project.newSpectrumGroup = _newSpectrumGroup
-del _newSpectrumGroup
+#EJB 2181206: moved to Project
+# Project.newSpectrumGroup = _newSpectrumGroup
+# del _newSpectrumGroup
 
 
 # reverse link Spectrum.spectrumGroups

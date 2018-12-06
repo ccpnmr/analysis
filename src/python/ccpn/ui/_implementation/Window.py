@@ -10,7 +10,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                  "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -20,12 +19,13 @@ __version__ = "$Revision: 3.0.b3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
+
 import collections
 from typing import Sequence, Tuple
 
@@ -115,19 +115,42 @@ class Window(AbstractWrapperObject):
         else:
             return windowStore.sortedWindows()
 
+    @logCommand(get='self')
+    def createSpectrumDisplay(self, spectrum, displayAxisCodes: Sequence[str] = (),
+                              axisOrder: Sequence[str] = (), title: str = None, positions: Sequence[float] = (),
+                              widths: Sequence[float] = (), units: Sequence[str] = (),
+                              stripDirection: str = 'Y', is1D: bool = False,
+                              independentStrips: bool = False, **kwds):
+        """
+        :param \*str, displayAxisCodes: display axis codes to use in display order - default to spectrum axisCodes in heuristic order
+        :param \*str axisOrder: spectrum axis codes in display order - default to spectrum axisCodes in heuristic order
+        :param \*float positions: axis positions in order - default to heuristic
+        :param \*float widths: axis widths in order - default to heuristic
+        :param \*str units: axis units in display order - default to heuristic
+        :param str stripDirection: if 'X' or 'Y' set strip axis
+        :param bool is1D: If True, or spectrum passed in is 1D, do 1D display
+        :param bool independentStrips: if True do freeStrip display.
+        """
+        from ccpn.ui._implementation.SpectrumDisplay import _createSpectrumDisplay
+
+        return _createSpectrumDisplay(self, spectrum, displayAxisCodes=displayAxisCodes, axisOrder=axisOrder,
+                                      title=title, positions=positions, widths=widths, units=units,
+                                      stripDirection=stripDirection, is1D=is1D, independentStrips=independentStrips, **kwds)
+
 
 #=========================================================================================
 # Connections to parents:
 #=========================================================================================
 
+@newObject(Window)
 def _newWindow(self: Project, title: str = None, position: tuple = (), size: tuple = (), serial: int = None) -> Window:
     """Create new child Window.
 
     See the Window class for details.
 
     :param str title: window  title (optional, defaults to 'W1', 'W2', 'W3', ...
-    :param tuple position: x,y position for new window in integer pixels
-    :param tuple size: x,y size for new window in integer pixels
+    :param tuple position: x,y position for new window in integer pixels.
+    :param tuple size: x,y size for new window in integer pixels.
     :param serial: optional serial number.
     :return: a new Window instance.
     """
@@ -158,8 +181,8 @@ def _newWindow(self: Project, title: str = None, position: tuple = (), size: tup
 
     return result
 
-
-Project.newWindow = _newWindow
-del _newWindow
+#EJB 20181205: moved to Project
+# Project.newWindow = _newWindow
+# del _newWindow
 
 # Notifiers: None

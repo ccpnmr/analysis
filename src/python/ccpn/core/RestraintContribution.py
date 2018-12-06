@@ -375,8 +375,9 @@ def _newRestraintContribution(self: Restraint, targetValue: float = None, error:
     return result
 
 
-Restraint.newRestraintContribution = _newRestraintContribution
-del _newRestraintContribution
+#EJB 20181206: moved to Restraint
+# Restraint.newRestraintContribution = _newRestraintContribution
+# del _newRestraintContribution
 
 # Notifiers:
 # Change RestraintContribution when Api RestraintItems are created or deleted

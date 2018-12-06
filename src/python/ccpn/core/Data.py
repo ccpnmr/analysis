@@ -210,7 +210,7 @@ def _newData(self: DataSet, name: str, attachedObjectPid: str = None,
              attachedObject: AbstractWrapperObject = None, serial: int = None) -> Data:
     """Create new Data within DataSet.
 
-    See the DataSet class for details.
+    See the Data class for details.
 
     :param name:
     :param attachedObjectPid:
@@ -244,8 +244,9 @@ def _newData(self: DataSet, name: str, attachedObjectPid: str = None,
     return result
 
 
-DataSet.newData = _newData
-del _newData
+#EJB 20181204: moved to DataSet
+# DataSet.newData = _newData
+# del _newData
 
 # Notifiers:
 # Data change whenever a parameter is created, deleted, or changed

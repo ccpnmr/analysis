@@ -136,18 +136,17 @@ class SpectrumDisplay(AbstractWrapperObject):
         tt = self.axisCodes
         return bool(tt and tt[1] == 'intensity')
 
-    @property
-    def window(self) -> Window:
-        """Gui window showing SpectrumDisplay"""
-        # TODO: RASMUS window clashes with a Qt attribute.
-        # This should be renamed, but that also requires refactoring
-        # possibly with a model change that modifies the Task/Window/Module relationship
-        return self._project._data2Obj.get(self._wrappedData.window)
-
-    @window.setter
-    def window(self, value: Window):
-        value = self.getByPid(value) if isinstance(value, str) else value
-        self._wrappedData.window = value and value._wrappedData
+    # @property
+    # def window(self) -> Window:
+    #     """Gui window showing SpectrumDisplay"""
+    #     # This should be renamed, but that also requires refactoring
+    #     # possibly with a model change that modifies the Task/Window/Module relationship
+    #     return self._project._data2Obj.get(self._wrappedData.window)
+    #
+    # @window.setter
+    # def window(self, value: Window):
+    #     value = self.getByPid(value) if isinstance(value, str) else value
+    #     self._wrappedData.window = value and value._wrappedData
 
     @property
     def nmrResidue(self) -> NmrResidue:

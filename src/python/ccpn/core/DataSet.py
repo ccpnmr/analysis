@@ -35,6 +35,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import NmrConstraintStore as A
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import FixedResonance as ApiFixedResonance
 from ccpn.util.Common import name2IsotopeCode
 from ccpn.core.lib import Pid
+from ccpn.util import Common as commonUtil
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
 from ccpn.util.Logging import getLogger
@@ -70,7 +71,9 @@ class DataSet(AbstractWrapperObject):
     @property
     def _key(self) -> str:
         """id string - serial number converted to string"""
-        return str(self._wrappedData.serial)
+        #return str(self._wrappedData.serial)
+        #return str(self.title)+'_'+str(self.serial)
+        return self.title.translate(Pid.remapSeparators)  # Title should not be unique
 
     @property
     def serial(self) -> int:
@@ -84,12 +87,25 @@ class DataSet(AbstractWrapperObject):
 
     @property
     def title(self) -> str:
-        """Title of DataSet (not used in PID)."""
+        """Title of DataSet.
+        """
+        # Reading V2 project resulted in name being None; create one on the fly
+        if self._wrappedData.name is None:
+            nextNumber = len(self._project.dataSets)
+            title = '%s_%s' % (self._defaultName(self), nextNumber) if nextNumber > 0 else self._defaultName(self)
+            while self._project._wrappedData.findFirstNmrConstraintStore(name=title) is not None:
+                title = commonUtil.incrementName(title)
+            self._wrappedData.__dict__['name'] = title  # The only way to access this
+
         return self._wrappedData.name
 
     @title.setter
     def title(self, value: str):
-        self._wrappedData.name = value
+        # self._wrappedData.name = value
+        self.rename(value)
+
+    # fix for now
+    name = title
 
     @property
     def programName(self) -> str:
@@ -199,6 +215,21 @@ class DataSet(AbstractWrapperObject):
         """get wrappedData for all NmrConstraintStores linked to NmrProject"""
         return parent._wrappedData.sortedNmrConstraintStores()
 
+    def rename(self, value: str):
+        """Rename DataSet, changing its name and Pid.
+        NB, the serial remains immutable."""
+
+        if not isinstance(value, str):
+            raise TypeError("DataSet name must be a string")
+        if not value:
+            raise ValueError("DataSet name must be set")
+        if Pid.altCharacter in value:
+            raise ValueError("Character %s not allowed in DataSet name" % Pid.altCharacter)
+        previous = self.getByRelativeId(value)
+        if previous not in (None, self):
+            raise ValueError("%s already exists" % previous.longPid)
+
+        self._wrappedData.name = value
 
     #=========================================================================================
     # CCPN functions
@@ -318,6 +349,27 @@ def _newDataSet(self: Project, title: str = None, programName: str = None, progr
     """
 
     nmrProject = self._wrappedData
+
+    if not title:
+        # Make default name
+        # nextNumber = len(nmrProject.sortedNmrConstraintStores())
+        # GWV: use V3 attributes whenever possible
+        nextNumber = len(self.dataSets)
+        title = '%s_%s' % (self._defaultName(DataSet), nextNumber) if nextNumber > 0 else self._defaultName(DataSet)
+    titles = [d.title for d in self.dataSets]
+    while title in titles:
+        title = commonUtil.incrementName(title)
+
+    if not isinstance(title, str):
+        raise TypeError("DataSet name must be a string")  # ejb catch non-string
+    if Pid.altCharacter in title:
+        raise ValueError("Character %s not allowed in DataSet name" % Pid.altCharacter)
+
+    if programName is not None and not isinstance(programName, str):
+        raise TypeError("programName must be a string")
+    if programVersion is not None and not isinstance(programVersion, str):
+        raise TypeError("programName must be a string")
+
     apiNmrConstraintStore = nmrProject.root.newNmrConstraintStore(nmrProject=nmrProject,
                                                                      name=title,
                                                                      programName=programName,

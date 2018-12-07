@@ -28,7 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import typing
-
+from functools import partial
 from ccpnmodel.ccpncore.lib import Util as coreUtil
 from ccpn.core.Project import Project
 from ccpn.core.Chain import Chain
@@ -37,7 +37,7 @@ from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Chain as ApiChain
 from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import ChainGroup as ApiChainGroup
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock, undoStackBlocking
 from ccpn.util.Logging import getLogger
 
 
@@ -115,28 +115,24 @@ class Complex(AbstractWrapperObject):
     def rename(self, value: str):
         """Rename Complex, changing its name and Pid"""
         oldName = self.name
-        self._startCommandEchoBlock('rename', value)
-        undo = self._project._undo
-        if undo is not None:
-            undo.increaseBlocking()
+        if not value:
+            raise ValueError("Complex name must be set")
+        elif Pid.altCharacter in value:
+            raise ValueError("Character %s not allowed in ccpn.Complex.name" % Pid.altCharacter)
+        previous = self.getByRelativeId(value)
+        if previous not in (None, self):
+            raise ValueError("%s already exists" % previous.longPid)
 
-        try:
-            if not value:
-                raise ValueError("Complex name must be set")
-            elif Pid.altCharacter in value:
-                raise ValueError("Character %s not allowed in ccpn.Complex.name" % Pid.altCharacter)
-            else:
+        with logCommandBlock(get='self') as log:
+            log('rename')
+            with undoStackBlocking() as addUndoItem:
                 self._wrappedData.__dict__['name'] = value
                 # coreUtil._resetParentLink(self._wrappedData, 'chainGroups', {'name':value})
                 self._finaliseAction('rename')
                 self._finaliseAction('change')
 
-        finally:
-            if undo is not None:
-                undo.decreaseBlocking()
-            self._endCommandEchoBlock()
-
-        undo.newItem(self.rename, self.rename, undoArgs=(oldName,), redoArgs=(value,))
+                addUndoItem(undo=partial(self.rename, oldName),
+                            redo=partial(self.rename, value))
 
     #=========================================================================================
     # CCPN functions
@@ -146,6 +142,7 @@ class Complex(AbstractWrapperObject):
     # new'Object' and other methods
     # Call appropriate routines in their respective locations
     #===========================================================================================
+
 
 #=========================================================================================
 # Connections to parents:

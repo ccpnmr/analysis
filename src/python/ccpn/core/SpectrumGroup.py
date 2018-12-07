@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from typing import Tuple
-
+from functools import partial
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -36,7 +36,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import SpectrumGroup as ApiSpectrumGroup
 from ccpnmodel.ccpncore.lib import Util as coreUtil
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock, undoStackBlocking
 from ccpn.util.Logging import getLogger
 
 
@@ -53,6 +53,9 @@ class SpectrumGroup(AbstractWrapperObject):
 
     #: Name of plural link to instances of class
     _pluralLinkName = 'spectrumGroups'
+
+    # the attribute name used by current
+    _currentAttributeName = 'spectrumGroup'
 
     #: List of child classes.
     _childClasses = []
@@ -110,28 +113,24 @@ class SpectrumGroup(AbstractWrapperObject):
     def rename(self, value: str):
         """Rename SpectrumGroup, changing its name and Pid"""
         oldName = self.name
-        self._startCommandEchoBlock('rename', value)
-        undo = self._project._undo
-        if undo is not None:
-            undo.increaseBlocking()
+        if not value:
+            raise ValueError("SpectrumGroup name must be set")
+        elif Pid.altCharacter in value:
+            raise ValueError("Character %s not allowed in ccpn.SpectrumGroup.name" % Pid.altCharacter)
+        previous = self.getByRelativeId(value)
+        if previous not in (None, self):
+            raise ValueError("%s already exists" % previous.longPid)
 
-        try:
-            if not value:
-                raise ValueError("SpectrumGroup name must be set")
-            elif Pid.altCharacter in value:
-                raise ValueError("Character %s not allowed in ccpn.SpectrumGroup.name" % Pid.altCharacter)
-            else:
+        with logCommandBlock(get='self') as log:
+            log('rename')
+            with undoStackBlocking() as addUndoItem:
                 self._wrappedData.__dict__['name'] = value
                 # coreUtil._resetParentLink(self._wrappedData, 'spectrumGroups', {'name':value})
                 self._finaliseAction('rename')
                 self._finaliseAction('change')
 
-        finally:
-            if undo is not None:
-                undo.decreaseBlocking()
-            self._endCommandEchoBlock()
-
-        undo.newItem(self.rename, self.rename, undoArgs=(oldName,), redoArgs=(value,))
+                addUndoItem(undo=partial(self.rename, oldName),
+                            redo=partial(self.rename, value))
 
     #=========================================================================================
     # CCPN functions
@@ -141,6 +140,7 @@ class SpectrumGroup(AbstractWrapperObject):
     # new'Object' and other methods
     # Call appropriate routines in their respective locations
     #===========================================================================================
+
 
 #=========================================================================================
 # Connections to parents:

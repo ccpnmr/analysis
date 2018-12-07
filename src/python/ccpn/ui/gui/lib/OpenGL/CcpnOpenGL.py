@@ -379,7 +379,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self._useTexture = np.zeros((1,), dtype=np.int)
         self._axisScale = np.zeros((4,), dtype=np.float32)
-        self.background = np.zeros((4,), dtype=np.float32)
+        self._background = np.zeros((4,), dtype=np.float32)
         self._parameterList = np.zeros((4,), dtype=np.int32)
         self._view = np.zeros((4,), dtype=np.float32)
         self.cursorCoordinate = np.zeros((4,), dtype=np.float32)

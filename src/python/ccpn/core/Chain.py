@@ -42,7 +42,7 @@ from ccpnmodel.ccpncore.api.ccp.lims import Sample
 from ccpn.core.lib import Pid
 from typing import Tuple, Optional, Union, Sequence
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock, undoBlockManager
 from ccpn.util.Logging import getLogger
 
 
@@ -58,6 +58,9 @@ class Chain(AbstractWrapperObject):
 
     #: Name of plural link to instances of class
     _pluralLinkName = 'chains'
+
+    # the attribute name used by current
+    _currentAttributeName = 'chains'
 
     #: List of child classes.
     _childClasses = []
@@ -162,10 +165,10 @@ class Chain(AbstractWrapperObject):
 
         topObjectParameters = {'code': shortName,
                                'pdbOneLetterCode': shortName[0]}
-        self._startCommandEchoBlock('clone', shortName, parName='newChain')
-        # # Blanking notification ruins sidebar handling of new chain
-        # self._project.blankNotification()
-        try:
+
+        with logCommandBlock(prefix='newChain=', get='self') as log:
+            log('clone')
+
             newApiChain = copySubTree(apiChain, apiMolSystem, maySkipCrosslinks=True,
                                       topObjectParameters=topObjectParameters)
             result = self._project._data2Obj.get(newApiChain)
@@ -181,55 +184,26 @@ class Chain(AbstractWrapperObject):
                     newAtoms = list(result.getAtom(x) for x in relativeIds)
                     newAtoms[0].addInterAtomBond(newAtoms[1])
 
-        finally:
-            # self._project.unblankNotification()
-            self._endCommandEchoBlock()
-        #
         return result
 
     def _lock(self):
-        """Finalize chain so that it can no longer be modified, and add missing data."""
-        self._startCommandEchoBlock('_lock')
-        try:
+        """Finalise chain so that it can no longer be modified, and add missing data."""
+        with undoBlockManager():
             self._wrappedData.molecule.isFinalised = True
-        finally:
-            self._endCommandEchoBlock()
 
     # Implementation functions
 
     def rename(self, value: str):
         """Rename Chain, changing its shortName and Pid."""
-        # from ccpn.util.Common import contains_whitespace
-        #
-        # if not isinstance(value, str):
-        #   raise TypeError("Chain name must be a string")  # ejb catch non-string
-        # if not value:
-        #   raise ValueError("Chain name must be set")  # ejb catch empty string
-        # if Pid.altCharacter in value:
-        #   raise ValueError("Character %s not allowed in ccpn.Chain.name" % Pid.altCharacter)
-        # if contains_whitespace(value):
-        #   raise ValueError("whitespace not allowed in ccpn.Chain.name")
-
         _validateName('Chain name', value=value, includeWhitespace=True)
 
-        previous = self._project.getChain(value.translate(Pid.remapSeparators))
+        previous = self.getByRelativeId(value)
         if previous not in (None, self):
             raise ValueError("%s already exists" % previous.longPid)
 
-        # if value:
-        #   previous = self._project.getChain(value.translate(Pid.remapSeparators))
-        #   if previous not in (None, self):
-        #     raise ValueError("%s already exists" % previous.longPid)
-        # else:
-        #   raise ValueError("Chain name must be set")
-
-        self._startCommandEchoBlock('rename', value)
-        try:
+        with logCommandBlock(get='self') as log:
+            log('rename')
             self._apiChain.renameChain(value)
-            self._finaliseAction('rename')
-            self._finaliseAction('change')
-        finally:
-            self._endCommandEchoBlock()
 
     def renumberResidues(self, offset: int, start: int = None,
                          stop: int = None):
@@ -250,9 +224,10 @@ class Chain(AbstractWrapperObject):
             residues.reverse()
 
         changedResidues = []
-        self._startCommandEchoBlock('renumberResidues', offset,
-                                    values={'start': start, 'stop': stop})
-        try:
+
+        with logCommandBlock(get='self') as log:
+            log('renumberResidues')
+
             for residue in residues:
                 sequenceCode = residue.sequenceCode
                 code, ss, unused = commonUtil.parseSequenceCode(sequenceCode)
@@ -264,16 +239,12 @@ class Chain(AbstractWrapperObject):
                         residue.rename(newSequenceCode)
                         changedResidues.append(residue)
 
-        finally:
-            self._endCommandEchoBlock()
             for residue in changedResidues:
                 residue._finaliseAction('rename')
-                residue._finaliseAction('change')
 
         if start is not None and stop is not None:
             if len(changedResidues) != stop + 1 - start:
-                self._project._logger.warning("Only %s residues found in range %s tos %s"
-                                              % (len(changedResidues), start, stop))
+                getLogger().warning("Only %s residues found in range %s tos %s" % (len(changedResidues), start, stop))
 
     @property
     def sequence(self):

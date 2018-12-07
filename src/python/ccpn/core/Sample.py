@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-10 11:42:40 +0000 (Mon, April 10, 2017) $"
 import collections
 from datetime import datetime
 from typing import Sequence, Tuple, Optional
-
+from functools import partial
 from ccpn.core.Project import Project
 from ccpn.core.PseudoDimension import PseudoDimension
 from ccpn.core.Spectrum import Spectrum
@@ -40,7 +40,7 @@ from ccpnmodel.ccpncore.api.ccp.lims.Sample import Sample as ApiSample
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.lib import Util as coreUtil
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock, undoStackBlocking
 from ccpn.util.Logging import getLogger
 
 
@@ -57,6 +57,9 @@ class Sample(AbstractWrapperObject):
 
     #: Name of plural link to instances of class
     _pluralLinkName = 'samples'
+
+    # the attribute name used by current
+    _currentAttributeName = 'samples'
 
     #: List of child classes.
     _childClasses = []
@@ -79,6 +82,11 @@ class Sample(AbstractWrapperObject):
     def name(self) -> str:
         """actual sample name"""
         return self._wrappedData.name
+
+    @name.setter
+    def name(self, value: str):
+        """set sample name"""
+        self.rename(value)
 
     @property
     def serial(self) -> int:
@@ -260,38 +268,25 @@ class Sample(AbstractWrapperObject):
     def rename(self, value: str):
         """Rename Sample, changing its name and Pid."""
         oldName = self.name
-        self._startCommandEchoBlock('rename', value)
-        undo = self._project._undo
-        if undo is not None:
-            undo.increaseBlocking()
+        if not isinstance(value, str):
+            raise TypeError("Sample name must be a string")  # ejb
+        elif not value:
+            raise ValueError("Sample name must be set")  # ejb
+        elif Pid.altCharacter in value:
+            raise ValueError("Character %s not allowed in ccpn.Sample.name" % Pid.altCharacter)
+        previous = self.getByRelativeId(value)
+        if previous not in (None, self):
+            raise ValueError("%s already exists" % previous.longPid)
 
-        try:
-            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-            # if not value:
-            #   raise ValueError("Sample name must be set")
-            # elif Pid.altCharacter in value:
-            #   raise ValueError("Character %s not allowed in ccpn.Sample.name" % Pid.altCharacter)
-            #
-            if not isinstance(value, str):
-                raise TypeError("Sample name must be a string")  # ejb
-            elif not value:
-                raise ValueError("Sample name must be set")  # ejb
-            elif Pid.altCharacter in value:
-                raise ValueError("Character %s not allowed in ccpn.Sample.name" % Pid.altCharacter)
-            #
-            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-
-            else:
+        with logCommandBlock(get='self') as log:
+            log('rename')
+            with undoStackBlocking() as addUndoItem:
                 self._wrappedData.__dict__['name'] = value
                 self._finaliseAction('rename')
                 self._finaliseAction('change')
 
-        finally:
-            if undo is not None:
-                undo.decreaseBlocking()
-            self._endCommandEchoBlock()
-
-        undo.newItem(self.rename, self.rename, undoArgs=(oldName,), redoArgs=(value,))
+                addUndoItem(undo=partial(self.rename, oldName),
+                            redo=partial(self.rename, value))
 
     #=========================================================================================
     # CCPN functions
@@ -321,6 +316,7 @@ class Sample(AbstractWrapperObject):
         from ccpn.core.SampleComponent import _newSampleComponent
 
         return _newSampleComponent(self, name=name, labelling=labelling, comment=comment, **kwds)
+
 
 #=========================================================================================
 # Connections to parents:
@@ -352,28 +348,30 @@ def _newSample(self: Project, name: str = None, pH: float = None, ionicStrength:
     :return: a new Sample instance.
     """
 
+    nmrProject = self._wrappedData
+    apiSampleStore = nmrProject.sampleStore
+
+    if not name:
+        # Make default name
+        nextNumber = len(self.samples)
+        sampleName = self._defaultName(Sample)
+        name = '%s_%s' % (sampleName, nextNumber) if nextNumber > 0 else sampleName
+    names = [d.name for d in self.samples]
+    while name in names:
+        name = commonUtil.incrementName(name)
+
+    if not isinstance(name, str):
+        raise TypeError("Sample name must be a string")
+    elif not name:
+        raise ValueError("Sample name must be set")
+    elif Pid.altCharacter in name:
+        raise ValueError("Character %s not allowed in ccpn.Sample.name" % Pid.altCharacter)
+
     if amountUnit is not None and amountUnit not in Constants.amountUnits:
         self._project._logger.warning(
                 "Unsupported value %s for Sample.amountUnit."
                 % amountUnit)
-        raise ValueError("Sample.amountUnit must be in the list: %s" % Constants.amountUnits)  # ejb
-
-    nmrProject = self._wrappedData
-    apiSampleStore = nmrProject.sampleStore
-
-    if name is None:
-        # Make default name
-        nextNumber = len(apiSampleStore.samples) + 1
-        name = 'Sample_%s' % nextNumber
-        while apiSampleStore.findFirstSample(name=name) is not None:
-            name = commonUtil.incrementName(name)
-
-    if not isinstance(name, str):
-        raise TypeError("Sample name must be a string")  # ejb
-    elif not name:
-        raise ValueError("Sample name must be set")  # ejb
-    elif Pid.altCharacter in name:
-        raise ValueError("Character %s not allowed in ccpn.Sample.name" % Pid.altCharacter)
+        raise ValueError("Sample.amountUnit must be in the list: %s" % Constants.amountUnits)
 
     newApiSample = apiSampleStore.newSample(name=name, ph=pH, ionicStrength=ionicStrength,
                                             amount=amount, amountUnit=amountUnit,

@@ -232,41 +232,23 @@ class Model(AbstractWrapperObject):
         self._wrappedData.details = value
 
     def clearData(self):
-        """
-        Remove all data for model by successively calling the deleteRow method
+        """Remove all data for model by successively calling the deleteRow method
         """
         data = self.structureEnsemble.data
         if data is not None:
-            # data.drop(modelNumber=data._modelsSelector(self.serial))      # ejb - old - already seems to be empty
 
-            # need iterrecords to check the modeNumber against the list and delete each individually
-
-            # containingObject = self._containingObject
             containingObject = data._containingObject  # supresses the creation of intermediate
-            if containingObject is not None:  # wayPoints - this becomes a single undo event
-                # undo and echoing
-                containingObject._startCommandEchoBlock('clearData')
 
-            # Found = True
-            # while Found:
-            #   Found = False                             # set to False for the next iteration
-            #   self.itRec = data.records()
-            #   for rNum, rec in enumerate(self.itRec):
-            #     if int(rec['modelNumber']) == self.serial:
-            #       data.deleteRow(rNum+1)          # should also be able to undo this
-            #       Found = True
-            #       break                                 # break out for the next repeat
+            from ccpn.core.lib.ContextManagers import logCommandManager
 
-            try:
+            with logCommandManager(get='self') as log:
+                log('clearData')
+
                 if 'modelNumber' in data.columns:
                     # If there are no modelNumbers, we must be in the process of deleting
                     # the modelNumbers column, or some similar shenanigans.
                     # Anyway, you do not clear the data if there are none to clear. OK.
-                    data.deleteSelectedRows(modelNumbers=self.serial)
-
-            finally:
-                if containingObject is not None:
-                    containingObject._endCommandEchoBlock()
+                    data.deleteSelectedRows(modelNumbers=int(self.serial))
 
         else:
             logger.debug('StructureEnsemble %s contains no data for %s'.format(self.structureEnsemble.pid, self.pid))

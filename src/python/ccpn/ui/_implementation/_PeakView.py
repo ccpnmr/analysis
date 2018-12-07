@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification
@@ -37,67 +37,70 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import PeakView as ApiPeakView
 
 
 class PeakView(AbstractWrapperObject):
-  """Peak View for 1D or nD PeakList. Currently NOT used."""
-  
-  #: Short class name, for PID.
-  shortClassName = 'GP'
-  # Attribute it necessary as subclasses must use superclass className
-  className = 'PeakView'
+    """Peak View for 1D or nD PeakList. Currently NOT used."""
 
-  _parentClass = PeakListView
+    #: Short class name, for PID.
+    shortClassName = 'GP'
+    # Attribute it necessary as subclasses must use superclass className
+    className = 'PeakView'
 
-  #: Name of plural link to instances of class
-  _pluralLinkName = 'peakViews'
-  
-  #: List of child classes.
-  _childClasses = []
-  
+    _parentClass = PeakListView
 
-  # CCPN properties  
-  @property
-  def _apiPeakView(self) -> ApiPeakView:
-    """ CCPN PeakView matching PeakView"""
-    return self._wrappedData
-    
-  @property
-  def _parent(self) -> PeakListView:
-    """PeakListView containing PeakView."""
-    return self._project._data2Obj.get(self._wrappedData.peakListView)
+    #: Name of plural link to instances of class
+    _pluralLinkName = 'peakViews'
 
-  spectrumView= _parent
+    #: List of child classes.
+    _childClasses = []
 
-  @property
-  def _key(self) -> str:
-    """id string - """
-    return str(self._wrappedData.peak.serial)
+    # CCPN properties
+    @property
+    def _apiPeakView(self) -> ApiPeakView:
+        """ CCPN PeakView matching PeakView"""
+        return self._wrappedData
 
-  @property
-  def _localCcpnSortKey(self) -> typing.Tuple:
-    """Local sorting key, in context of parent."""
-    return(self._wrappedData.peak.serial,)
+    @property
+    def _parent(self) -> PeakListView:
+        """PeakListView containing PeakView."""
+        return self._project._data2Obj.get(self._wrappedData.peakListView)
 
-  @property
-  def textOffset(self) -> tuple:
-    """Peak X,Y text annotation offset"""
-    return self._wrappedData.textOffset
+    spectrumView = _parent
 
-  @textOffset.setter
-  def textOffset(self, value:tuple):
-    self._wrappedData.textOffset = value
+    @property
+    def _key(self) -> str:
+        """id string - """
+        return str(self._wrappedData.peak.serial)
 
-  @property
-  def peak(self) -> Peak:
-    """Peak that PeakView refers to"""
-    return self._project._data2Obj.get(self._wrappedData.peak)
+    @property
+    def _localCcpnSortKey(self) -> typing.Tuple:
+        """Local sorting key, in context of parent."""
+        return (self._wrappedData.peak.serial,)
 
-  # Implementation functions
-  @classmethod
-  def _getAllWrappedData(cls, parent:PeakListView)-> list:
-    """get wrappedData (ccpnmr.gui.Task.PeakView) in serial number order"""
-    return parent._wrappedData.sortedPeakViews()
+    @property
+    def textOffset(self) -> tuple:
+        """Peak X,Y text annotation offset"""
+        return self._wrappedData.textOffset
 
-  #CCPN functions
+    @textOffset.setter
+    def textOffset(self, value: tuple):
+        self._wrappedData.textOffset = value
 
+    @property
+    def peak(self) -> Peak:
+        """Peak that PeakView refers to"""
+        return self._project._data2Obj.get(self._wrappedData.peak)
+
+    #=========================================================================================
+    # Implementation functions
+    #=========================================================================================
+
+    @classmethod
+    def _getAllWrappedData(cls, parent: PeakListView) -> list:
+        """get wrappedData (ccpnmr.gui.Task.PeakView) in serial number order"""
+        return parent._wrappedData.sortedPeakViews()
+
+    #=========================================================================================
+    # CCPN functions
+    #=========================================================================================
 
 # newPeakView functions: None
 

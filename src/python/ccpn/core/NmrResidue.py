@@ -84,6 +84,9 @@ class NmrResidue(AbstractWrapperObject):
     #: Name of plural link to instances of class
     _pluralLinkName = 'nmrResidues'
 
+    # the attribute name used by current
+    _currentAttributeName = 'nmrResidues'
+
     #: List of child classes.
     _childClasses = []
 

@@ -1402,7 +1402,33 @@ class Spectrum(AbstractWrapperObject):
         return newValues
 
     def getRegionData(self, **axisDict):
-        """Return the region of the spectrum data defined by the axis limits
+        """Return the region of the spectrum data defined by the axis limits.
+
+        Axis limits are passed in as a dict containing the axiscodes and the required limits.
+        Each limit is defined as a key, value pair: (str, tuple),
+        with the tuple supplied as (min,max) axis limits in ppm.
+
+        For axisCodes that are not included, the limits will by taken from the aliasingLimits of the spectrum.
+
+        Illegal axisCodes will raise an error.
+
+        Example dict:
+
+        ::
+
+            {'Hn': (7.0, 9.0),
+             'Nh': (110, 130)
+             }
+
+        Example calling function:
+
+        ::
+
+            regionData = spectrum.getRegionData(limitsDict)
+            regionData = spectrum.getRegionData(Hn=(7.0, 9.0), Nh=(110, 130))
+
+        :param axisDict: dict of axis limits
+        :return: numpy data array
         """
         startPoint = []
         endPoint = []

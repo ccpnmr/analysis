@@ -126,7 +126,7 @@ class AbstractWrapperObject(NotifierBase):
     # Function to generate custom subclass instances -= overridden in some subclasses
     _factoryFunction = None
 
-    # Default values for paraeters to 'new' function. Overridden in subclasses
+    # Default values for parameters to 'new' function. Overridden in subclasses
     _defaultInitValues = None
 
     # Implementation methods
@@ -217,9 +217,9 @@ class AbstractWrapperObject(NotifierBase):
 
     __hash__ = object.__hash__
 
-    #--------------------------------------------------------------------------------------------
-    # CCPN properties
-    #--------------------------------------------------------------------------------------------
+    #=========================================================================================
+    # CCPN Properties
+    #=========================================================================================
 
     @property
     def className(self) -> str:
@@ -263,6 +263,11 @@ class AbstractWrapperObject(NotifierBase):
         return (not hasattr(self, '_wrappedData') or self._wrappedData is None
                 or not hasattr(self._project, '_data2Obj') or self._wrappedData.isDeleted)
 
+    # default name to use for objects with a name/title
+    # @property
+    def _defaultName(self, cls):
+        return cls.className.lower()
+
     @property
     def _ccpnInternalData(self) -> dict:
         """Dictionary containing arbitrary type data for internal use.
@@ -287,7 +292,9 @@ class AbstractWrapperObject(NotifierBase):
             raise ValueError("_ccpnInternalData must be a dictionary, was %s" % value)
         self._wrappedData.ccpnInternalData = value
 
+    #=========================================================================================
     # CCPN abstract properties
+    #=========================================================================================
 
     @property
     def _key(self) -> str:
@@ -336,9 +343,9 @@ class AbstractWrapperObject(NotifierBase):
         """
         pass
 
-    #--------------------------------------------------------------------------------------------
+    #=========================================================================================
     # Abstract /Api methods
-    #--------------------------------------------------------------------------------------------
+    #=========================================================================================
 
     def _printClassTree(self, node=None, tabs=0):
         """Simple Class-tree printing method
@@ -533,7 +540,9 @@ class AbstractWrapperObject(NotifierBase):
     # def newMolecule( self, *args, **kwds):
     # and then doing Project.newMolecule = newMolecule
 
+    #=========================================================================================
     # CCPN functions
+    #=========================================================================================
 
     @deleteObject()
     def delete(self):
@@ -555,6 +564,11 @@ class AbstractWrapperObject(NotifierBase):
             return None
 
         obj = None
+
+        # return if the pid does not conform to a pid definition
+        if not Pid.Pid.isValid(pid):
+            return None
+
         pid = Pid.Pid(pid)
         dd = self._project._pid2Obj.get(pid.type)
         if dd is not None:
@@ -579,7 +593,12 @@ class AbstractWrapperObject(NotifierBase):
         # #
         # return None
 
+    #=========================================================================================
     # CCPN Implementation methods
+    #=========================================================================================
+
+    def getByRelativeId(self, newName: str):
+        return self._getDescendant(self.project, newName)
 
     @classmethod
     def _linkWrapperClasses(cls, ancestors: list = None, Project: 'Project' = None):

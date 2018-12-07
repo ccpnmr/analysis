@@ -248,7 +248,7 @@ def _newCalculationStep(self: DataSet, programName: str = None, programVersion: 
                                                outputDataUuid=outputDataUuid)
     result = project._data2Obj.get(obj)
     if result is None:
-        raise RuntimeError('Unable to generate new PeakList item')
+        raise RuntimeError('Unable to generate new CalculationStep item')
 
     if serial is not None:
         try:

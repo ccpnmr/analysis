@@ -36,8 +36,9 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.Project import Project
 from ccpn.core.DataSet import DataSet
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock, undoStackBlocking
 from ccpn.util.Logging import getLogger
+from functools import partial
 
 
 class Data(AbstractWrapperObject):
@@ -167,29 +168,26 @@ class Data(AbstractWrapperObject):
         return parent._wrappedData.sortedData()
 
     def rename(self, value: str):
-        """Rename Data, changing its nmme and Pid"""
+        """Rename Data, changing its name and Pid"""
         oldName = self.name
-        undo = self._project._undo
-        self._startCommandEchoBlock('rename', value)
-        if undo is not None:
-            undo.increaseBlocking()
 
-        try:
-            if not value:
-                raise ValueError("Data name must be set")
-            elif Pid.altCharacter in value:
-                raise ValueError("Character %s not allowed in ccpn.Data.name" % Pid.altCharacter)
-            else:
+        if not value:
+            raise ValueError("Data name must be set")
+        elif Pid.altCharacter in value:
+            raise ValueError("Character %s not allowed in ccpn.Data.name" % Pid.altCharacter)
+        previous = self.getByRelativeId(value)
+        if previous not in (None, self):
+            raise ValueError("%s already exists" % previous.longPid)
+
+        with logCommandBlock(get='self') as log:
+            log('rename')
+            with undoStackBlocking() as addUndoItem:
                 coreUtil._resetParentLink(self._wrappedData, 'data', {'name': value})
                 self._finaliseAction('rename')
                 self._finaliseAction('change')
 
-        finally:
-            self._endCommandEchoBlock()
-            if undo is not None:
-                undo.decreaseBlocking()
-
-        undo.newItem(self.rename, self.rename, undoArgs=(oldName,), redoArgs=(value,))
+                addUndoItem(undo=partial(self.rename, oldName),
+                            redo=partial(self.rename, value))
 
     #=========================================================================================
     # CCPN functions
@@ -205,7 +203,7 @@ class Data(AbstractWrapperObject):
 # Connections to parents:
 #=========================================================================================
 
-@newObject(DataSet)
+@newObject(Data)
 def _newData(self: DataSet, name: str, attachedObjectPid: str = None,
              attachedObject: AbstractWrapperObject = None, serial: int = None) -> Data:
     """Create new Data within DataSet.
@@ -232,7 +230,7 @@ def _newData(self: DataSet, name: str, attachedObjectPid: str = None,
     apiDataSet = self._wrappedData.newData(name=name, attachedObjectPid=attachedObjectPid)
     result = project._data2Obj.get(apiDataSet)
     if result is None:
-        raise RuntimeError('Unable to generate new DataSet item')
+        raise RuntimeError('Unable to generate new Data item')
 
     if serial is not None:
         try:

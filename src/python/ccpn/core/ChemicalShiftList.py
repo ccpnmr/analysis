@@ -60,6 +60,9 @@ class ChemicalShiftList(AbstractWrapperObject):
     #: Name of plural link to instances of class
     _pluralLinkName = 'chemicalShiftLists'
 
+    # the attribute name used by current
+    _currentAttributeName = 'chemicalShiftLists'
+
     #: List of child classes.
     _childClasses = []
 
@@ -99,6 +102,11 @@ class ChemicalShiftList(AbstractWrapperObject):
     def name(self) -> str:
         """name of ChemicalShiftList. """
         return self._wrappedData.name
+
+    @name.setter
+    def name(self, value:str):
+        """set name of ChemicalShiftList."""
+        self.rename(value)
 
     @property
     def unit(self) -> str:
@@ -159,19 +167,19 @@ class ChemicalShiftList(AbstractWrapperObject):
 
     def rename(self, value: str):
         """Rename ChemicalShiftList, changing its name and Pid."""
-        if value:
-            previous = self._project.getChemicalShiftList(value.translate(Pid.remapSeparators))
-            if previous not in (None, self):
-                raise ValueError("%s already exists" % previous.longPid)
+        if not isinstance(value, str):
+            raise TypeError("ChemicalShiftList name must be a string")  # ejb catch non-string
+        if not value:
+            raise ValueError("ChemicalShiftList name must be set")  # ejb catch empty string
+        if Pid.altCharacter in value:
+            raise ValueError("Character %s not allowed in ChemicalShiftList name" % Pid.altCharacter)
+        previous = self.getByRelativeId(value)
+        if previous not in (None, self):
+            raise ValueError("%s already exists" % previous.longPid)
 
-            self._startCommandEchoBlock('rename', value)
-            try:
-                self._wrappedData.name = value
-            finally:
-                self._endCommandEchoBlock()
-
-        else:
-            raise ValueError("ChemicalShiftList name must be set")
+        with logCommandBlock(get='self') as log:
+            log('rename')
+            self._wrappedData.name = value
 
     #=========================================================================================
     # CCPN functions
@@ -253,15 +261,19 @@ def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
     :return: a new ChemicalShiftList instance.
     """
 
-    apiNmrProject = self._wrappedData
-    if name:
-        previous = self.getChemicalShiftList(name.translate(Pid.remapSeparators))
-        if previous is not None:
-            raise ValueError("%s already exists" % previous.longPid)
-    else:
-        name = 'Shift_2'
-        while apiNmrProject.findFirstMeasurementList(className='ShiftList', name=name):
-            name = commonUtil.incrementName(name)
+    if not name:
+        # Make default name
+        nextNumber = len(self.chemicalShiftLists)
+        chemName = self._defaultName(ChemicalShiftList)
+        name = '%s_%s' % (chemName, nextNumber) if nextNumber > 0 else chemName
+    names = [d.name for d in self.chemicalShiftLists]
+    while name in names:
+        name = commonUtil.incrementName(name)
+
+    if not isinstance(name, str):
+        raise TypeError("ChemicalShiftList name must be a string")  # ejb catch non-string
+    if Pid.altCharacter in name:
+        raise ValueError("Character %s not allowed in ChemicalShiftList name" % Pid.altCharacter)
 
     dd = {'name': name, 'unit': unit, 'autoUpdate': autoUpdate, 'isSimulated': isSimulated,
           'details': comment}

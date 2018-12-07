@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -35,142 +35,146 @@ from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripAxis as ApiStripAxis
 
+
 # from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
 
 
 class Axis(AbstractWrapperObject):
-  """Display Axis for 1D or nD spectrum"""
+    """Display Axis for 1D or nD spectrum"""
 
-  #: Short class name, for PID.
-  shortClassName = 'GA'
-  # Attribute it necessary as subclasses must use superclass className
-  className = 'Axis'
+    #: Short class name, for PID.
+    shortClassName = 'GA'
+    # Attribute it necessary as subclasses must use superclass className
+    className = 'Axis'
 
-  _parentClass = Strip
+    _parentClass = Strip
 
-  #: Name of plural link to instances of class
-  _pluralLinkName = 'axes'
-  
-  #: List of child classes.
-  _childClasses = []
+    #: Name of plural link to instances of class
+    _pluralLinkName = 'axes'
 
-  # Qualified name of matching API class
-  _apiClassQualifiedName = ApiStripAxis._metaclass.qualifiedName()
-  
+    #: List of child classes.
+    _childClasses = []
 
-  # CCPN properties  
-  @property
-  def _apiStripAxis(self) -> ApiStripAxis:
-    """ CCPN Axis matching Axis"""
-    return self._wrappedData
-    
-  @property
-  def _key(self) -> str:
-    """local id, equal to Axis code"""
-    return self._wrappedData.axis.code.translate(Pid.remapSeparators)
+    # Qualified name of matching API class
+    _apiClassQualifiedName = ApiStripAxis._metaclass.qualifiedName()
 
-  code = _key
+    # CCPN properties
+    @property
+    def _apiStripAxis(self) -> ApiStripAxis:
+        """ CCPN Axis matching Axis"""
+        return self._wrappedData
 
-    
-  @property
-  def _parent(self) -> Strip:
-    """Strip containing axis."""
-    return self._project._data2Obj.get(self._wrappedData.strip)
+    @property
+    def _key(self) -> str:
+        """local id, equal to Axis code"""
+        return self._wrappedData.axis.code.translate(Pid.remapSeparators)
 
-  strip = _parent
+    code = _key
 
-  @property
-  def position(self) -> float:
-    """Centre point position for displayed region, in current unit."""
-    return self._wrappedData.axis.position
+    @property
+    def _parent(self) -> Strip:
+        """Strip containing axis."""
+        return self._project._data2Obj.get(self._wrappedData.strip)
 
-  @position.setter
-  def position(self, value):
-    self._wrappedData.axis.position = value
+    strip = _parent
 
-  @property
-  def width(self) -> float:
-    """Width for displayed region, in current unit."""
-    return self._wrappedData.axis.width
+    @property
+    def position(self) -> float:
+        """Centre point position for displayed region, in current unit."""
+        return self._wrappedData.axis.position
 
-  @width.setter
-  def width(self, value):
-    self._wrappedData.axis.width = value
+    @position.setter
+    def position(self, value):
+        self._wrappedData.axis.position = value
 
-  @property
-  def region(self) -> tuple:
-    """Display region - position +/- width/2.."""
-    position = self._wrappedData.axis.position
-    halfwidth = self._wrappedData.axis.width / 2.
-    return (position - halfwidth, position + halfwidth)
+    @property
+    def width(self) -> float:
+        """Width for displayed region, in current unit."""
+        return self._wrappedData.axis.width
 
-  @region.setter
-  def region(self, value):
-    self._wrappedData.axis.position = (value[0] + value[1]) / 2.
-    self._wrappedData.axis.width = abs(value[1] - value[0])
+    @width.setter
+    def width(self, value):
+        self._wrappedData.axis.width = value
 
-  @property
-  def unit(self) -> str:
-    """Display unit for axis"""
-    return self._wrappedData.axis.unit
+    @property
+    def region(self) -> tuple:
+        """Display region - position +/- width/2.."""
+        position = self._wrappedData.axis.position
+        halfwidth = self._wrappedData.axis.width / 2.
+        return (position - halfwidth, position + halfwidth)
 
-  # NBNB TBD This should be settable, but changing it requires changing the position
-  # values. For now we leave it unsettable.
+    @region.setter
+    def region(self, value):
+        self._wrappedData.axis.position = (value[0] + value[1]) / 2.
+        self._wrappedData.axis.width = abs(value[1] - value[0])
 
-  # NBNB TBD the 'regions' attribute may not be needed. leave it out
+    @property
+    def unit(self) -> str:
+        """Display unit for axis"""
+        return self._wrappedData.axis.unit
 
-  @property
-  def nmrAtoms(self) -> Tuple[NmrAtom]:
-    """nmrAtoms connected to axis"""
-    ff = self._project._data2Obj.get
-    return tuple(sorted(ff(x) for x in self._wrappedData.axis.resonances))
+    # NBNB TBD This should be settable, but changing it requires changing the position
+    # values. For now we leave it unsettable.
 
-  @nmrAtoms.setter
-  def nmrAtoms(self, value):
-    value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
-    self._wrappedData.axis.resonances = tuple(x._wrappedData for x in value)
+    # NBNB TBD the 'regions' attribute may not be needed. leave it out
 
-  @property
-  def strip(self) -> Optional[Strip]:
-    """Strip that Axis belongs to"""
-    if self._wrappedData:
-      return self._project._data2Obj.get(self._wrappedData.strip)
-    else:
-      return None
+    @property
+    def nmrAtoms(self) -> Tuple[NmrAtom]:
+        """nmrAtoms connected to axis"""
+        ff = self._project._data2Obj.get
+        return tuple(sorted(ff(x) for x in self._wrappedData.axis.resonances))
 
-  # Implementation functions
-  @classmethod
-  def _getAllWrappedData(cls, parent:Strip)-> list:
-    """get wrappedData (ccpnmr.gui.Task.Axis) in serial number order"""
-    apiStrip = parent._wrappedData
-    dd = {x.axis.code:x for x in apiStrip.stripAxes}
-    return [dd[x] for x in apiStrip.axisCodes]
+    @nmrAtoms.setter
+    def nmrAtoms(self, value):
+        value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
+        self._wrappedData.axis.resonances = tuple(x._wrappedData for x in value)
 
-  def delete(self):
-    """Overrides normal delete"""
-    raise  ValueError("Axes cannot be deleted independently")
+    # @property
+    # def strip(self) -> Optional[Strip]:
+    #     """Strip that Axis belongs to"""
+    #     if self._wrappedData:
+    #         return self._project._data2Obj.get(self._wrappedData.strip)
+    #     else:
+    #         return None
 
+    #=========================================================================================
+    # Implementation functions
+    #=========================================================================================
+
+    @classmethod
+    def _getAllWrappedData(cls, parent: Strip) -> list:
+        """get wrappedData (ccpnmr.gui.Task.Axis) in serial number order"""
+        apiStrip = parent._wrappedData
+        dd = {x.axis.code: x for x in apiStrip.stripAxes}
+        return [dd[x] for x in apiStrip.axisCodes]
+
+    def delete(self):
+        """Overrides normal delete"""
+        raise ValueError("Axes cannot be deleted independently")
+
+
+#=========================================================================================
+# Connections to parents:
+#=========================================================================================
 
 # We should NOT have any newAxis functions
 
-# Strip.orderedAxes property
-def getter(self) -> Tuple[Axis, ...]:
-  apiStrip = self._wrappedData
-  ff = self._project._data2Obj.get
-  return tuple(ff(apiStrip.findFirstStripAxis(axis=x)) for x in apiStrip.orderedAxes)
-def setter(self, value:Sequence):
-  value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
-  #self._wrappedData.orderedAxes = tuple(x._wrappedData.axis for x in value)
-  self._wrappedData.axisOrder = tuple(x.code for x in value)
-Strip.orderedAxes = property(getter, setter, None,
-                             "Axes in display order (X, Y, Z1, Z2, ...) ")
-del getter
-del setter
+# # Strip.orderedAxes property
+# def getter(self) -> Tuple[Axis, ...]:
+#   apiStrip = self._wrappedData
+#   ff = self._project._data2Obj.get
+#   return tuple(ff(apiStrip.findFirstStripAxis(axis=x)) for x in apiStrip.orderedAxes)
+# def setter(self, value:Sequence):
+#   value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
+#   #self._wrappedData.orderedAxes = tuple(x._wrappedData.axis for x in value)
+#   self._wrappedData.axisOrder = tuple(x.code for x in value)
+# Strip.orderedAxes = property(getter, setter, None,
+#                              "Axes in display order (X, Y, Z1, Z2, ...) ")
+# del getter
+# del setter
 
 # Notifiers:
 Project._apiNotifiers.append(
-  ('_notifyRelatedApiObject', {'pathToObject':'stripAxes', 'action':'change'},
-   ApiAxis._metaclass.qualifiedName(), '')
-)
-
-
+        ('_notifyRelatedApiObject', {'pathToObject': 'stripAxes', 'action': 'change'},
+         ApiAxis._metaclass.qualifiedName(), '')
+        )

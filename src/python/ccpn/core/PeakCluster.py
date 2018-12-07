@@ -137,29 +137,24 @@ class PeakCluster(AbstractWrapperObject):
 
         :param peaks - single peak or list of peaks:
         """
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-        # throw more understandable errors for the python console
-        # spectrum = self._parent.spectrum
-        pks = makeIterableList(peaks)
+        peakList = makeIterableList(peaks)
+        pks = []
+        for peak in peakList:
+            pks.append(self.project.getByPid(peak.pid) if isinstance(peak, str) else peak)
+
         for pp in pks:
             if not isinstance(pp, Peak):
                 raise TypeError('%s is not of type Peak' % pp)
-        #   if pp not in spectrum.peaks:
-        #     raise ValueError('%s does not belong to spectrum: %s' % (pp.pid, spectrum.pid))
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
 
-        defaults = collections.OrderedDict(
-                (('peaks', None),
-                 )
-                )
-        undo = self._project._undo
-        self._startCommandEchoBlock('addPeaks', values=locals(), defaults=defaults,
-                                    parName='addPeaks')
-        try:
+        with logCommandBlock(get='self') as log:
+            if pks:
+                peakStr = '[' + ','.join(["'%s'" % peak.pid for peak in pks]) + ']'
+                log('addPeaks', peaks=peakStr)
+            else:
+                log('addPeaks')
+
             for pk in pks:
                 self._wrappedData.addPeak(pk._wrappedData)
-        finally:
-            self._endCommandEchoBlock()
 
     def removePeaks(self, peaks: ['Peak'] = None):
         """
@@ -168,36 +163,31 @@ class PeakCluster(AbstractWrapperObject):
 
         :param peaks - single peak or list of peaks:
         """
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-        # throw more understandable errors for the python console
-        # spectrum = self._parent.spectrum
-        pks = makeIterableList(peaks)
+        peakList = makeIterableList(peaks)
+        pks = []
+        for peak in peakList:
+            pks.append(self.project.getByPid(peak.pid) if isinstance(peak, str) else peak)
+
         for pp in pks:
             if not isinstance(pp, Peak):
                 raise TypeError('%s is not of type Peak' % pp)
             if pp not in self.peaks:
                 raise ValueError('%s does not belong to multiplet: %s' % (pp.pid, self.pid))
-            # if pp not in spectrum.peaks:
-            #   raise ValueError('%s does not belong to spectrum: %s' % (pp.pid, spectrum.pid))
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
 
-        defaults = collections.OrderedDict(
-                (('peaks', None),
-                 )
-                )
-        undo = self._project._undo
-        self._startCommandEchoBlock('removePeaks', values=locals(), defaults=defaults,
-                                    parName='removePeaks')
-        try:
-            for pk in pks:
-                self._wrappedData.removePeak(pk._wrappedData)
-        finally:
-            self._endCommandEchoBlock()
+        with logCommandBlock(get='self') as log:
+            if pks:
+                peakStr = '[' + ','.join(["'%s'" % peak.pid for peak in pks]) + ']'
+                log('removePeaks', peaks=peakStr)
+            else:
+                log('removePeaks')
 
-    #===========================================================================================
-    # new'Object' and other methods
-    # Call appropriate routines in their respective locations
-    #===========================================================================================
+                for pk in pks:
+                    self._wrappedData.removePeak(pk._wrappedData)
+
+#===========================================================================================
+# new'Object' and other methods
+# Call appropriate routines in their respective locations
+#===========================================================================================
 
 
 #=========================================================================================
@@ -234,7 +224,6 @@ def _newPeakCluster(self: Project, peaks: ['Peak'] = None, serial: int = None) -
                                 % (result, serial))
 
     return result
-
 
 #EJB 20181205: moved to Project
 # PeakCluster._parentClass.newPeakCluster = _newPeakCluster

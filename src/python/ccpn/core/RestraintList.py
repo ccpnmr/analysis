@@ -268,12 +268,9 @@ class RestraintList(AbstractWrapperObject):
         elif Pid.altCharacter in value:
             raise ValueError("Character %s not allowed in ccpn.RestraintList.name:" % Pid.altCharacter)
 
-        else:
-            self._startCommandEchoBlock('rename', value)
-            try:
-                self._wrappedData.name = value
-            finally:
-                self._endCommandEchoBlock()
+        with logCommandBlock(get='self') as log:
+            log('rename')
+            self._wrappedData.name = value
 
     #=========================================================================================
     # CCPN functions

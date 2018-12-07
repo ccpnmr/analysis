@@ -53,6 +53,7 @@ from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
 from ccpn.util.OrderedSet import OrderedSet
+from ccpn.core.lib.ContextManagers import logCommandBlock, undoStackBlocking, undoBlockManager
 
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
 
@@ -156,8 +157,7 @@ class SpectrumPropertiesPopup(CcpnDialog):
 
         GLSignals = GLNotifier(parent=self)
 
-        self.project._startCommandEchoBlock('_applyChanges', quiet=True)
-        try:
+        with undoBlockManager():
             spectrumList = []
             for t in tabs:
                 if t is not None:
@@ -165,7 +165,8 @@ class SpectrumPropertiesPopup(CcpnDialog):
                     if changes:
                         spectrumList.append(t.spectrum)
 
-            _undo._newItem(undoPartial=partial(_updateGl, self, spectrumList))
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(undo=partial(_updateGl, self, spectrumList))
 
             for t in tabs:
                 if t is not None:
@@ -173,7 +174,8 @@ class SpectrumPropertiesPopup(CcpnDialog):
                     if changes:
                         self._applyAllChanges(changes)
 
-            _undo._newItem(redoPartial=partial(_updateGl, self, spectrumList))
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(redo=partial(_updateGl, self, spectrumList))
 
             for spec in spectrumList:
                 for specViews in spec.spectrumViews:
@@ -183,10 +185,6 @@ class SpectrumPropertiesPopup(CcpnDialog):
             GLSignals.emitPaintEvent()
 
             applyAccept = True
-        except Exception as es:
-            showWarning(str(self.windowTitle()), str(es))
-        finally:
-            self.project._endCommandEchoBlock()
 
         if applyAccept is False:
             # should only undo if something new has been added to the undo deque
@@ -1216,8 +1214,7 @@ class SpectrumDisplayPropertiesPopupNd(CcpnDialog):
 
         GLSignals = GLNotifier(parent=self)
 
-        self.project._startCommandEchoBlock('_applyChanges', quiet=True)
-        try:
+        with undoBlockManager():
             spectrumList = []
             for t in tabs:
                 if t is not None:
@@ -1225,7 +1222,8 @@ class SpectrumDisplayPropertiesPopupNd(CcpnDialog):
                     if changes:
                         spectrumList.append(t.spectrum)
 
-            _undo._newItem(undoPartial=partial(_updateGl, self, spectrumList))
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(undo=partial(_updateGl, self, spectrumList))
 
             for t in tabs:
                 if t is not None:
@@ -1233,7 +1231,8 @@ class SpectrumDisplayPropertiesPopupNd(CcpnDialog):
                     if changes:
                         self._applyAllChanges(changes)
 
-            _undo._newItem(redoPartial=partial(_updateGl, self, spectrumList))
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(redo=partial(_updateGl, self, spectrumList))
 
             for spec in spectrumList:
                 for specViews in spec.spectrumViews:
@@ -1243,10 +1242,6 @@ class SpectrumDisplayPropertiesPopupNd(CcpnDialog):
             GLSignals.emitPaintEvent()
 
             applyAccept = True
-        except Exception as es:
-            showWarning(str(self.windowTitle()), str(es))
-        finally:
-            self.project._endCommandEchoBlock()
 
         if applyAccept is False:
             # should only undo if something new has been added to the undo deque
@@ -1353,8 +1348,7 @@ class SpectrumDisplayPropertiesPopup1d(CcpnDialog):
 
         GLSignals = GLNotifier(parent=self)
 
-        self.project._startCommandEchoBlock('_applyChanges', quiet=True)
-        try:
+        with undoBlockManager():
             spectrumList = []
             for t in tabs:
                 if t is not None:
@@ -1362,7 +1356,8 @@ class SpectrumDisplayPropertiesPopup1d(CcpnDialog):
                     if changes:
                         spectrumList.append(t.spectrum)
 
-            _undo._newItem(undoPartial=partial(_updateGl, self, spectrumList))
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(undo=partial(_updateGl, self, spectrumList))
 
             for t in tabs:
                 if t is not None:
@@ -1370,12 +1365,8 @@ class SpectrumDisplayPropertiesPopup1d(CcpnDialog):
                     if changes:
                         self._applyAllChanges(changes)
 
-            _undo._newItem(redoPartial=partial(_updateGl, self, spectrumList))
-
-            # for specNum, thisSpec in enumerate(self.orderedSpectra):
-            #   for specViews in thisSpec.spectrumViews:
-            #
-            #     specViews.buildContours = True
+            with undoStackBlocking() as addUndoItem:
+                undoItem(redo=partial(_updateGl, self, spectrumList))
 
             for spec in spectrumList:
                 for specViews in spec.spectrumViews:
@@ -1385,10 +1376,6 @@ class SpectrumDisplayPropertiesPopup1d(CcpnDialog):
             GLSignals.emitPaintEvent()
 
             applyAccept = True
-        except Exception as es:
-            showWarning(str(self.windowTitle()), str(es))
-        finally:
-            self.project._endCommandEchoBlock()
 
         if applyAccept is False:
             # should only undo if something new has been added to the undo deque

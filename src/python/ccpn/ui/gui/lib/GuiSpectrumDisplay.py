@@ -38,7 +38,6 @@ from ccpn.core.Sample import Sample
 
 #from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
-from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 #import typing
 
 from ccpn.ui.gui.widgets.Frame import Frame  #, ScrollableFrame
@@ -68,6 +67,8 @@ from ccpn.ui._implementation.MultipletListView import MultipletListView
 from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySettings
 from ccpn.ui._implementation.SpectrumView import SpectrumView
+from ccpn.core.lib.ContextManagers import logCommandBlock, undoBlockManager
+from ccpn.util.Common import makeIterableList
 
 
 AXIS_WIDTH = 30
@@ -425,7 +426,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     showWarning('Forbidden drop', 'A Single spectrum cannot be dropped onto grouped displays.')
                     return success
 
-                with suspendSideBarNotifications(self.project):
+                with undoBlockManager():
                     self.displaySpectrum(obj)
 
                 if strip in self.strips:
@@ -441,15 +442,15 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 success = True
             elif obj is not None and isinstance(obj, PeakList):
-                with suspendSideBarNotifications(self.project):
+                with undoBlockManager():
                     self._handlePeakList(obj)
                 success = True
             elif obj is not None and isinstance(obj, SpectrumGroup):
-                with suspendSideBarNotifications(self.project):
+                with undoBlockManager():
                     self._handleSpectrumGroup(obj)
                 success = True
             elif obj is not None and isinstance(obj, Sample):
-                with suspendSideBarNotifications(self.project):
+                with undoBlockManager():
                     self._handleSample(obj)
                 success = True
             elif obj is not None and isinstance(obj, NmrAtom):
@@ -468,18 +469,12 @@ class GuiSpectrumDisplay(CcpnModule):
                 showWarning('Dropped item "%s"' % obj.pid, 'Wrong kind; drop Spectrum, SpectrumGroup, PeakList,'
                                                            ' NmrChain, NmrResidue, NmrAtom or Strip')
         if nmrChains:
-            # with suspendSideBarNotifications(self.project):
-
             with undoBlock():
                 self._handleNmrChains(nmrChains)
         if nmrResidues:
-            # with suspendSideBarNotifications(self.project):
-
             with undoBlock():
                 self._handleNmrResidues(nmrResidues)
         if nmrAtoms:
-            # with suspendSideBarNotifications(self.project):
-
             with undoBlock():
                 self._handleNmrAtoms(nmrAtoms)
 
@@ -793,12 +788,9 @@ class GuiSpectrumDisplay(CcpnModule):
             self.delete()
 
     def _unDelete(self, strip):
-        _undo = self.project._undo
-        self._startCommandEchoBlock('removeStrip')
-        try:
+        with undoBlockManager():
             strip._unDelete()
-        finally:
-            self._endCommandEchoBlock()
+
             self.showAxes()
 
     def _removeIndexStrip(self, value):
@@ -821,34 +813,16 @@ class GuiSpectrumDisplay(CcpnModule):
                         % (self.pid,))
             return
 
-        _undo = self.project._undo
-        self._startCommandEchoBlock('removeStrip')
+        with logCommandBlock(get='self') as log:
+            log('deleteStrip', strip=repr(strip.pid))
 
-        # if _undo is not None:
-        #   _undo.increaseBlocking()
-
-        try:
-            # strip._unregisterStrip()
             self.current.strip = None
             self.setColumnStretches(stretchValue=False)  # set to 0 so they disappear
-            # this removes it too early
-            # strip.setParent(None)           # need to remove the rogue widget from the widgetArea
             strip.deleteStrip()
             self.setColumnStretches(stretchValue=True)  # set to 0 so they disappear
 
-            # update the 'orderedSpectra' list
-            # TODO:ED update the orderedSpectra list
-            # self.removeSpectrumView(None)
-
-        finally:
-            self._endCommandEchoBlock()
-
-        # if _undo is not None:
-        #   _undo.decreaseBlocking()
-        #
-        #   # TODO:ED this may not be the correct strip to Redo:remove
-        #   _undo.newItem(self.addStrip, self._removeIndexStrip, redoArgs=(-1,))
-
+        if self.strips:
+            self.current.strip = self.strips[-1]
         self.showAxes()
 
     def removeCurrentStrip(self):
@@ -1319,9 +1293,9 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         spectrum = self.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
 
-        self._startCommandEchoBlock('displaySpectrum', spectrum, values=locals(),
-                                    defaults={'axisOrder': ()})
-        try:
+        with logCommandBlock(get='self') as log:
+            log('displaySpectrum', spectrum=repr(spectrum.pid))
+
             newSpectrum = self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
             if newSpectrum:
                 newInd = self.spectrumViews.index(newSpectrum)
@@ -1352,11 +1326,6 @@ class GuiSpectrumDisplay(CcpnModule):
                 #   for spInDSet in dSet:
                 #     strip.appendSpectrumView(spInDSet)
 
-        except Exception as es:
-            getLogger().warning('Error appending newSpectrum: %s' % spectrum)
-        finally:
-            self._endCommandEchoBlock()
-
     def _removeSpectrum(self, spectrum):
         try:
             # self._orderedSpectra.remove(spectrum)
@@ -1373,6 +1342,16 @@ class GuiSpectrumDisplay(CcpnModule):
         the list of nmrResidues passing in
         Can only choose either peaks or nmrResidues, peaks chosen will override any selected nmrResidues
         """
+        pkList = makeIterableList(peaks)
+        pks = []
+        for peak in pkList:
+            pks.append(self.project.getByPid(peak.pid) if isinstance(peak, str) else peak)
+
+        resList = makeIterableList(nmrResidues)
+        nmrs = []
+        for nmrRes in resList:
+            nmrs.append(self.project.getByPid(nmrRes.pid) if isinstance(nmrRes, str) else nmrRes)
+
 
         # need to clean up the use of GLNotifier - possibly into AbstractWrapperObject
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
@@ -1383,31 +1362,32 @@ class GuiSpectrumDisplay(CcpnModule):
             GLSignals = GLNotifier(parent=self)
             GLSignals.emitPaintEvent()
 
-        if peaks or nmrResidues:
+        if pks or nmrs:
 
             GLSignals = GLNotifier(parent=self)
             _undo = self.project._undo
 
             project = self.project
-            project._startCommandEchoBlock('makeStripPlot', peaks, nmrResidues,
-                                           autoClearMarks, sequentialStrips,
-                                           markPositions, widths)
-            try:
+            with logCommandBlock(get='self') as log:
+                peakStr = '[' + ','.join(["'%s'" % peak.pid for peak in pks]) + ']'
+                nmrResidueStr = '[' + ','.join(["'%s'" % nmrRes.pid for nmrRes in nmrs]) + ']'
+                log('addPeaks', peaks=peakStr, nmrResidues=nmrResidueStr)
+
                 # _undo._newItem(undoPartial=partial(_updateGl, self, []))
 
                 if autoClearMarks:
                     self.mainWindow.clearMarks()
 
                 # Make sure there are enough strips to display nmrAtomPairs
-                stripCount = len(peaks) if peaks else len(nmrResidues)
+                stripCount = len(pks) if pks else len(nmrs)
                 while len(self.strips) < stripCount:
                     self.addStrip()
                 for strip in self.strips[stripCount:]:
                     self.removeStrip(strip)
 
                 # build the strips
-                if peaks:
-                    for ii, pk in enumerate(peaks):
+                if pks:
+                    for ii, pk in enumerate(pks):
                         strip = self.strips[ii]
 
                         newWidths = [0.2] * len(self.axisCodes)
@@ -1420,8 +1400,8 @@ class GuiSpectrumDisplay(CcpnModule):
 
                         navigateToPositionInStrip(strip, pk.position, pk.axisCodes, widths=newWidths)
 
-                elif nmrResidues:
-                    for ii, nmr in enumerate(nmrResidues):
+                elif nmrs:
+                    for ii, nmr in enumerate(nmrs):
                         strip = self.strips[ii]
 
                         newWidths = ['default'] * len(strip.axisCodes)
@@ -1439,11 +1419,6 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 # repaint - not sure whether needed here
                 GLSignals.emitPaintEvent()
-
-            except Exception as es:
-                showWarning(str(self.windowTitle()), str(es))
-            finally:
-                self.project._endCommandEchoBlock()
 
 
 #=========================================================================================

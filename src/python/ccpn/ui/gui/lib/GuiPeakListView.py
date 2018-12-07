@@ -35,6 +35,7 @@ from ccpn.core.Peak import Peak
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.util.Logging import getLogger
 from ccpn.core.IntegralList import IntegralList
+from ccpn.core.lib.ContextManagers import undoBlockManager
 
 
 # from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import AbstractPeakDimContrib as ApiAbstractPeakDimContrib
@@ -578,11 +579,10 @@ class Peak1dAnnotation(QtWidgets.QGraphicsSimpleTextItem):
             # self.setText(text)
 
             project = peakItem.peak.project
-            project._startCommandEchoBlock('setupPeakAnnotationItem', peakItem, quiet=True)
             undo = project._undo
-            if undo is not None:
-                undo.increaseBlocking()
-            try:
+
+            with undoBlockManager():
+
                 # TODO:ED can't remember why I did this
                 if clearLabel:
                     self.setText(text)
@@ -591,11 +591,6 @@ class Peak1dAnnotation(QtWidgets.QGraphicsSimpleTextItem):
 
                 # undo.newItem(self.setupPeakAnnotationItem, self.setupPeakAnnotationItem, undoArgs=(peakItem,),
                 #              redoArgs=(peakItem, clearLabel))
-
-            finally:
-                if undo is not None:
-                    undo.decreaseBlocking()
-                project._endCommandEchoBlock()
 
             # TODO:ED check why this is updating in wrong correct place
             undo.newItem(self.setupPeakAnnotationItem, self.setupPeakAnnotationItem, undoArgs=(peakItem,),
@@ -1210,11 +1205,9 @@ class PeakNdAnnotation(QtWidgets.QGraphicsSimpleTextItem):
             # self.setText(text)
 
             project = peakItem.peak.project
-            project._startCommandEchoBlock('setupPeakAnnotationItem', peakItem, quiet=True)
             undo = project._undo
-            if undo is not None:
-                undo.increaseBlocking()
-            try:
+
+            with undoBlockManager():
                 # TODO:ED can't remember why I did this
                 if clearLabel:
                     self.setText(text)
@@ -1223,11 +1216,6 @@ class PeakNdAnnotation(QtWidgets.QGraphicsSimpleTextItem):
 
                 # undo.newItem(self.setupPeakAnnotationItem, self.setupPeakAnnotationItem, undoArgs=(peakItem,),
                 #              redoArgs=(peakItem, clearLabel))
-
-            finally:
-                if undo is not None:
-                    undo.decreaseBlocking()
-                project._endCommandEchoBlock()
 
             # TODO:ED check why this is updating in wrong correct place
             undo.newItem(self.setupPeakAnnotationItem, self.setupPeakAnnotationItem, undoArgs=(peakItem,),

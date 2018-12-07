@@ -63,8 +63,9 @@ class TempAreaWindow(GuiWindow, MainWindow):
         self.application = mainWindow.application
         self.project = mainWindow.application.project
         self.current = mainWindow.application.current
-        self._startCommandEchoBlock = self.project._startCommandEchoBlock
-        self._endCommandEchoBlock = self.project._endCommandEchoBlock
+        # self._startCommandEchoBlock = self.project._startCommandEchoBlock
+        # self._endCommandEchoBlock = self.project._endCommandEchoBlock
+
         self._setShortcuts()
         self.setMouseMode(SELECT)
 

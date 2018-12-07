@@ -134,10 +134,10 @@ NEW_ITEM_DICT = {
     'Complexes': 'newComplex',
     }
 
-def _openItemObject(mainWindow, objs, **args):
+def _openItemObject(mainWindow, objs, **kwds):
     """
     Abstract routine to activate a module to display objs
-    Builds on OpenObjAction dict, genererated below, which defines the handling for the various
+    Builds on OpenObjAction dict, generated below, which defines the handling for the various
     obj classes
     """
     spectrumDisplay = None
@@ -154,7 +154,7 @@ def _openItemObject(mainWindow, objs, **args):
                     else:
 
                         # process objects to open
-                        returnObj = OpenObjAction[obj.__class__](mainWindow, obj, **args)
+                        returnObj = OpenObjAction[obj.__class__](mainWindow, obj, **kwds)
 
                         # if the first spectrum then set the spectrumDisplay
                         if isinstance(obj, Spectrum):

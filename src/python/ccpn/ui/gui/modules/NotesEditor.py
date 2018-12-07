@@ -39,6 +39,7 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+from ccpn.core.lib.ContextManagers import undoBlockManager
 
 
 logger = getLogger()
@@ -214,12 +215,9 @@ class NotesEditorModule(CcpnModule):
             name = self.lineEdit1.text()
             text = self.textBox.toPlainText()
 
-            self.note._startCommandEchoBlock('_applyNote')
-            try:
+            with undoBlockManager():
                 self.note.rename(name)
                 self.note.text = text
-            finally:
-                self.note._endCommandEchoBlock()
 
             self.noWidget.select(self.note.pid)
         self._setNotifiers()

@@ -50,10 +50,10 @@ from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 from ccpnmodel.ccpncore.lib.Io import Pdb as pdbIo
-from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
+# from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
-    logCommandBlock, undoStackBlocking, notificationBlanking, undoBlock, deleteBlockManager
+    logCommandBlock, undoStackBlocking, notificationBlanking, undoBlock, deleteBlockManager, undoBlockManager
 from ccpn.util.Logging import getLogger
 
 
@@ -1072,7 +1072,8 @@ class Project(AbstractWrapperObject):
             elif funcname == '_loadSpectrum':
                 # NBNB TBD #TODO:RASMUS:FIXME check if loadSpectrum should start with underscore
                 # (NB referred to elsewhere
-                with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
+                # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
+                with undoBlockManager():
                     thisSpec = self.loadSpectrum(usePath, subType)
                 return thisSpec
 
@@ -1212,7 +1213,8 @@ class Project(AbstractWrapperObject):
             # readCsv(self, path=path)
 
         elif subType == ioFormats.EXCEL:
-            with suspendSideBarNotifications(self, 'ExcelReader', quiet=False):
+            # with suspendSideBarNotifications(self, 'ExcelReader', quiet=False):
+            with undoBlockManager():
                 ExcelReader(project=self, excelPath=path)
 
     def _uniqueSubstanceName(self, name: str = None, defaultName: str = 'Molecule') -> str:

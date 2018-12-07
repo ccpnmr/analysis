@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -32,49 +32,46 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
+from ccpn.core.lib.ContextManagers import undoBlockManager
 
 
 class SetupNmrResiduesPopup(CcpnDialog):
-  def __init__(self, parent=None, mainWindow=None,
-               title='Setup nmrResidues', **kwds):
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
+    def __init__(self, parent=None, mainWindow=None,
+                 title='Setup nmrResidues', **kwds):
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
-    self._parent = parent
-    self.mainWindow = mainWindow
-    self.project = self.mainWindow.project
+        self._parent = parent
+        self.mainWindow = mainWindow
+        self.project = self.mainWindow.project
 
-    label1a = Label(self, text="Source PeakList ", grid=(0, 0))
-    self.peakListPulldown = PulldownList(self, grid=(0, 1))
-    self.peakListPulldown.setData([peakList.pid for peakList in self.project.peakLists if len(peakList.peaks)>0])
-    label1a = Label(self, text="NmrChain ", grid=(0, 2))
-    self.nmrChainPulldown = PulldownList(self, grid=(0, 3))
-    self.nmrChainPulldown.setData([nmrChain.pid for nmrChain in self.project.nmrChains])
-    self.assignmentCheckBox = CheckBox(self,text= "Keep existing assignments", checked=True, grid=(1,0))
+        label1a = Label(self, text="Source PeakList ", grid=(0, 0))
+        self.peakListPulldown = PulldownList(self, grid=(0, 1))
+        self.peakListPulldown.setData([peakList.pid for peakList in self.project.peakLists if len(peakList.peaks) > 0])
+        label1a = Label(self, text="NmrChain ", grid=(0, 2))
+        self.nmrChainPulldown = PulldownList(self, grid=(0, 3))
+        self.nmrChainPulldown.setData([nmrChain.pid for nmrChain in self.project.nmrChains])
+        self.assignmentCheckBox = CheckBox(self, text="Keep existing assignments", checked=True, grid=(1, 0))
 
-    # self.assignmentCheckBox.setEnabled(False) #This option is broken.
-    self.buttonBox = ButtonList(self, grid=(1, 3), texts=['Cancel', 'Ok'],
-                                callbacks=[self.reject, self._setupNmrResidues])
+        # self.assignmentCheckBox.setEnabled(False) #This option is broken.
+        self.buttonBox = ButtonList(self, grid=(1, 3), texts=['Cancel', 'Ok'],
+                                    callbacks=[self.reject, self._setupNmrResidues])
 
+    def _setupNmrResidues(self):
+        with undoBlockManager():
+            peakList = self.project.getByPid(self.peakListPulldown.currentText())
+            nmrChain = self.project.getByPid(self.nmrChainPulldown.currentText())
+            keepAssignments = self.assignmentCheckBox.isChecked()  #This option is broken.
 
-  def _setupNmrResidues(self):
-    self.project._startCommandEchoBlock('_setupNmrResidues')
-    try:
-      peakList = self.project.getByPid(self.peakListPulldown.currentText())
-      nmrChain = self.project.getByPid(self.nmrChainPulldown.currentText())
-      keepAssignments = self.assignmentCheckBox.isChecked() #This option is broken.
+            # go through all the peaks in the peakList
+            for peak in peakList.peaks:
 
-      # go through all the peaks in the peakList
-      for peak in peakList.peaks:
+                # only process those that are empty OR those not empty when checkbox cleared
+                if not keepAssignments or all(not dimensionNmrAtoms for dimensionNmrAtoms in peak.dimensionNmrAtoms):
 
-        # only process those that are empty OR those not empty when checkbox cleared
-        if not keepAssignments or all(not dimensionNmrAtoms for dimensionNmrAtoms in peak.dimensionNmrAtoms):
+                    nmrResidue = nmrChain.newNmrResidue()
+                    for i, axisCode in enumerate(peak.axisCodes):
+                        nmrAtom = nmrResidue.fetchNmrAtom(name=str(axisCode))
+                        peak.assignDimension(axisCode=axisCode, value=[nmrAtom])
 
-          nmrResidue = nmrChain.newNmrResidue()
-          for i, axisCode in enumerate(peak.axisCodes):
-              nmrAtom = nmrResidue.fetchNmrAtom(name=str(axisCode))
-              peak.assignDimension(axisCode=axisCode, value=[nmrAtom])
-
-    finally:
-      self.accept()
-      self.project._endCommandEchoBlock()
+        self.accept()

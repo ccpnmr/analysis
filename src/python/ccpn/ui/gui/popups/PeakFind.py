@@ -38,6 +38,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
 from ccpn.ui.gui.widgets.MessageDialog import showWarning, showInfo
+from ccpn.core.lib.ContextManagers import undoBlockManager
 
 
 class PeakFindPopup(CcpnDialog):
@@ -107,8 +108,7 @@ class PeakFindPopup(CcpnDialog):
         self._updateContents()
 
     def _pickPeaks(self):
-        self.project._startCommandEchoBlock('_pickPeaks')
-        try:
+        with undoBlockManager():
             peakList = self.peakList
             positions = [[x.value(), y.value()] for x, y in zip(self.minPositionBoxes, self.maxPositionBoxes)]
 
@@ -126,9 +126,7 @@ class PeakFindPopup(CcpnDialog):
             # for strip in self.project.strips:
             #     strip.showPeaks(peakList)
 
-        finally:
-            self.accept()
-            self.project._endCommandEchoBlock()
+        self.accept()
 
     def _updateContents(self):
 

@@ -450,8 +450,6 @@ class GuiWindow():
         :param chemicalShifts: A list or tuple of ChemicalShifts at whose values the marks should be made
         """
         project = self.application.project
-        # project._startCommandEchoBlock('markPositions', project, axisCodes, chemicalShifts)
-        # try:
 
         # colourDict = guiSettings.MARK_LINE_COLOUR_DICT  # maps atomName --> colour
         for ii, axisCode in enumerate(axisCodes):
@@ -478,18 +476,15 @@ class GuiWindow():
                 if found:
                     continue
 
-                project._startCommandEchoBlock('markPositions', project, [axisCode], [chemicalShift])
-                try:
+                with logCommandBlock(get='self') as log:
+                    log('markPositions')
                     # GWV 20181030: changed from atomName to id
                     if colour:
                         project.newMark(colour, [chemicalShift.value], [axisCode], labels=[atomId])
                     else:
                         # just use gray rather than checking colourScheme
-                        # project.newMark(colourDict[guiSettings.DEFAULT], [chemicalShift.value], [axisCode])
-                        project.newMark(self.application.preferences.general.defaultMarksColour, [chemicalShift.value], [atomId])
-
-                finally:
-                    project._endCommandEchoBlock()
+                        defaultColour = self.application.preferences.general.defaultMarksColour
+                        project.newMark(defaultColour, [chemicalShift.value], [atomId])
 
     def toggleGridAll(self):
         """

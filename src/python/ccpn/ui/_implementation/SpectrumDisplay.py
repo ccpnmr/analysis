@@ -40,7 +40,7 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
 from ccpn.core.lib.OrderedSpectrumViews import SPECTRUMVIEWINDEX, OrderedSpectrumViews
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock, undoBlockManager
 from ccpn.util.Logging import getLogger
 
 logger = getLogger()
@@ -249,14 +249,12 @@ class SpectrumDisplay(AbstractWrapperObject):
         """
         defaults = collections.OrderedDict((('spectrumIndex', None),))
 
-        self._startCommandEchoBlock('setOrderedSpectrumViewsIndex', values=locals(), defaults=defaults)
-        try:
+        with logCommandBlock(get='self') as log:
+            log('setOrderedSpectrumViewsIndex')
+
             if not self._orderedSpectrumViews:
                 self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
             self._orderedSpectrumViews.setOrderedSpectrumViewsIndex(spectrumIndex=spectrumIndex)
-
-        finally:
-            self._endCommandEchoBlock()
 
     def _removeOrderedSpectrumViewIndex(self, index):
         # self.removeOrderedSpectrumView(index)
@@ -266,8 +264,9 @@ class SpectrumDisplay(AbstractWrapperObject):
         defaults = collections.OrderedDict((('ind', None),))
 
         index = ind #.spectrumViews.index(spectrumView)
-        self._startCommandEchoBlock('removeOrderedSpectrumView', values=locals(), defaults=defaults)
-        try:
+        with logCommandBlock(get='self') as log:
+            log('removeOrderedSpectrumView')
+
             if not self._orderedSpectrumViews:
                 self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
             oldIndex = list(self.getOrderedSpectrumViewsIndex())
@@ -279,18 +278,14 @@ class SpectrumDisplay(AbstractWrapperObject):
                     oldIndex[ii] -= 1
             self._orderedSpectrumViews.setOrderedSpectrumViewsIndex(spectrumIndex=oldIndex)
 
-        finally:
-            self._endCommandEchoBlock()
-
     # CCPN functions
     def resetAxisOrder(self):
         """Reset display to original axis order"""
 
-        self._startCommandEchoBlock('resetAxisOrder')
-        try:
+        with logCommandBlock(get='self') as log:
+            log('resetAxisOrder')
+
             self._wrappedData.resetAxisOrder()
-        finally:
-            self._endCommandEchoBlock()
 
     def findAxis(self, axisCode):
         """Find axis """
@@ -513,9 +508,7 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
                 "Display of sampled dimension spectra is not implemented yet")
         # # NBNB TBD FIXME
 
-    with logCommandBlock(prefix='newSpectrumDisplay=', get='window') as log:
-        log('createSpectrumDisplay', spectrum=repr(spectrum.pid))
-
+    with undoBlockManager():
         display = project.newSpectrumDisplay(axisCodes=displayAxisCodes, stripDirection=stripDirection,
                                              independentStrips=independentStrips,
                                              title=title)

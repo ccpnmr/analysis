@@ -65,7 +65,6 @@ from ccpn.ui.gui.widgets.ToolButton import ToolButton
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import moduleLabelFont
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 from ccpn.ui.gui.widgets.SideBar import SideBar
 from ccpn.ui.gui.widgets.PythonEditor import QCodeEditor
 
@@ -77,6 +76,7 @@ from ccpn.ui.gui.widgets.PulldownListsForObjects import _PulldownABC
 
 from ccpn.core.lib.Notifiers import Notifier, NotifierBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+from ccpn.core.lib.ContextManagers import undoBlockManager
 
 CommonWidgets = {
     CheckBox.__name__: (CheckBox.get, CheckBox.setChecked),
@@ -800,7 +800,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                 pids = data[DropBase.PIDS]
                 objs = [self.mainWindow.project.getByPid(pid) for pid in pids]
 
-                with suspendSideBarNotifications(self.mainWindow.project):
+                with undoBlockManager():
                     _openItemObject(self.mainWindow, objs, position=self.dropArea, relativeTo=self)
 
                 event.accept()

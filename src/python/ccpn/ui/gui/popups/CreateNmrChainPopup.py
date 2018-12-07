@@ -45,6 +45,7 @@ from ccpn.core.Chain import Chain
 from ccpn.core.Substance import Substance
 from ccpn.core.Complex import Complex
 from ccpn.util.Logging import getLogger
+from ccpn.core.lib.ContextManagers import logCommandBlock
 
 
 CHAIN = Chain.className
@@ -171,14 +172,17 @@ class CreateNmrChainPopup(CcpnDialog):
         self.buttonBox.setButtonEnabled(Create, value)
 
     def _cloneFromChain(self, name):
-        newNmrChain = self._createEmptyNmrChain(name)
-        if newNmrChain:
-            try:
-                self.project._startCommandEchoBlock('_createNmrChain')
+        with logCommandBlock(get='self') as log:
+            log('_cloneFromChain')
+
+            newNmrChain = self._createEmptyNmrChain(name)
+            if newNmrChain:
+
                 if len(self._chain.residues) > 0:
                     self.project.blankNotification()  # For speed issue: Blank the notifications until the penultimate residue
                     for residue in self._chain.residues[:-1]:
-                        nmrResidue = newNmrChain.newNmrResidue(sequenceCode=residue.sequenceCode, residueType=residue.residueType)
+                        nmrResidue = newNmrChain.newNmrResidue(sequenceCode=residue.sequenceCode,
+                                                               residueType=residue.residueType)
                         for atom in residue.atoms:
                             nmrResidue.fetchNmrAtom(atom.name)
                     self.project.unblankNotification()
@@ -188,15 +192,16 @@ class CreateNmrChainPopup(CcpnDialog):
                     # lastNmrResidue.residue = lastResidue
                     for atom in lastResidue.atoms:
                         lastNmrResidue.fetchNmrAtom(atom.name)
-            finally:
-                self.project._endCommandEchoBlock()
+
             return newNmrChain
 
     def _cloneFromNmrChain(self, name):
-        newNmrChain = self._createEmptyNmrChain(name)
-        if newNmrChain:
-            try:
-                self.project._startCommandEchoBlock('_createNmrChain')
+        with logCommandBlock(get='self') as log:
+            log('_cloneFromNmrChain')
+
+            newNmrChain = self._createEmptyNmrChain(name)
+            if newNmrChain:
+
                 if len(self._nmrChain.nmrResidues) > 0:
                     self.project.blankNotification()  # For speed issue: Blank the notifications until the penultimate residue
                     for nmrResidue in self._nmrChain.nmrResidues[:-1]:
@@ -217,30 +222,24 @@ class CreateNmrChainPopup(CcpnDialog):
                     # lastNmrResidue.residue = lastResidue
                     for nmrAtom in lastNmrResidue.nmrAtoms:
                         lastTargetNmrResidue.fetchNmrAtom(nmrAtom.name)
-            finally:
-                self.project._endCommandEchoBlock()
+
             return newNmrChain
 
     def _cloneFromSubstance(self, name):
-        '''Create a new nmr chain from a substance which has a SMILES set.'''
-        newNmrChain = self._createEmptyNmrChain(name)
-        if newNmrChain:
-            try:
-                self.project._startCommandEchoBlock('_createNmrChain')
-                # self.project.blankNotification()  # For speed issue
+        """Create a new nmr chain from a substance which has a SMILES set."""
+        with logCommandBlock(get='self') as log:
+            log('_cloneFromSubstance')
+
+            newNmrChain = self._createEmptyNmrChain(name)
+            if newNmrChain:
 
                 from ccpn.ui.gui.widgets.CompoundView import CompoundView, Variant, importSmiles
-
                 nmrResidue = newNmrChain.newNmrResidue(name)
                 if self._substance.smiles:
                     compound = importSmiles(self._substance.smiles, compoundName=name)
                     for atom in compound.atoms:
                         nmrAtom = nmrResidue.fetchNmrAtom(atom.name)
 
-                # self.project.unblankNotification()
-
-            finally:
-                self.project._endCommandEchoBlock()
             return newNmrChain
 
     # def _disableSubstanceWithoutSMILES(self):

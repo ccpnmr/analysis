@@ -26,35 +26,38 @@ __date__ = "$Date$"
 from contextlib import contextmanager
 
 
-@contextmanager
-def suspendSideBarNotifications(project, funcName='suspendSideBarNotifications', *args, quiet=True):
-  """
-  Context manager to wrap the function with a command block and suspend notifications
-  to the sideBar until commandBlock has finished
-  """
-  try:
-    project._startCommandEchoBlock(funcName, *args, quiet=quiet)
-    yield
-
-  finally:
-    project._endCommandEchoBlock()
-
-
-def _suspendSideBarNotifications(project):
-  """
-  decorator to wrap the function with a command block and suspend notifications
-  to the sideBar until commandBlock has finished
-  """
-  def funcWrapper(fn):
-    def returnfunc(*args):      # the same arguments as fn
-      # propagate args to the function
-      try:
-        project._startCommandEchoBlock(fn.__name__, quiet=True)
-        fn_ret = fn(*args)                                    # call 'fn' here - don't forget the brackets
-
-      finally:
-        project._endCommandEchoBlock()
-
-      return fn_ret
-    return returnfunc             # and return the outer function
-  return funcWrapper
+# @contextmanager
+# def suspendSideBarNotifications(project, funcName='suspendSideBarNotifications', *args, quiet=True):
+#     """
+#     Context manager to wrap the function with a command block and suspend notifications
+#     to the sideBar until commandBlock has finished
+#     """
+#     try:
+#         project._startCommandEchoBlock(funcName, *args, quiet=quiet)
+#         yield
+#
+#     finally:
+#         project._endCommandEchoBlock()
+#
+#
+# def _suspendSideBarNotifications(project):
+#     """
+#     decorator to wrap the function with a command block and suspend notifications
+#     to the sideBar until commandBlock has finished
+#     """
+#
+#     def funcWrapper(fn):
+#         def returnfunc(*args):  # the same arguments as fn
+#             # propagate args to the function
+#             try:
+#                 project._startCommandEchoBlock(fn.__name__, quiet=True)
+#                 fn_ret = fn(*args)  # call 'fn' here - don't forget the brackets
+#
+#             finally:
+#                 project._endCommandEchoBlock()
+#
+#             return fn_ret
+#
+#         return returnfunc  # and return the outer function
+#
+#     return funcWrapper

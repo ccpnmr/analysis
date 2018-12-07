@@ -245,12 +245,12 @@ def _newStructureEnsemble(self: Project, serial: int = None, name: str = None, d
     if result is None:
         raise RuntimeError('Unable to generate new StructureEnsemble item')
 
-    if serial is not None:
-        try:
-            result.resetSerial(serial)
-        except ValueError:
-            self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
-                                         % (result, serial))
+    # if serial is not None:
+    #     try:
+    #         result.resetSerial(serial)
+    #     except ValueError:
+    #         self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
+    #                                      % (result, serial))
 
     if data is None:
         result.data = EnsembleData()

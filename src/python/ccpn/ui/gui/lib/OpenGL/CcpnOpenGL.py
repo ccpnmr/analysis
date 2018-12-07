@@ -104,7 +104,7 @@ from ccpn.ui.gui.lib.mouseEvents import \
 
 try:
     # used to test whether all the arrays are defined correctly - conflicts with pyqt window manager resize
-    os.environ.update({'PYOPENGL_ERROR_ON_COPY': 'false'})
+    # os.environ.update({'PYOPENGL_ERROR_ON_COPY': 'false'})
 
     from OpenGL import GL, GLU, GLUT
 except ImportError:
@@ -2124,6 +2124,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
     # @profile
     def paintGL(self):
+        w = self.w
+        h = self.h
+        GL.glClear(GL.GL_COLOR_BUFFER_BIT)
+        currentShader = self.globalGL._shaderProgram1.makeCurrent()
 
         if self._blankDisplay:
             return
@@ -2143,11 +2147,6 @@ class CcpnGLWidget(QOpenGLWidget):
         # self._GLPeaks.setListViews(self._ordering)
         # self._GLIntegrals.setListViews(self._ordering)
         # self._GLMultiplets.setListViews(self._ordering)
-
-        w = self.w
-        h = self.h
-        GL.glClear(GL.GL_COLOR_BUFFER_BIT)
-        currentShader = self.globalGL._shaderProgram1.makeCurrent()
 
         # start with the grid mapped to (0..1, 0..1) to remove zoom errors here
         currentShader.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0.0, 1.0, -1.0, 1.0)

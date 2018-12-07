@@ -362,34 +362,33 @@ class EditSampleComponentPopup(CcpnDialog):
         applyAccept = False
         oldUndo = self.project._undo.numItems()
 
-        self.project._startCommandEchoBlock('_applyChanges', quiet=True)
-        try:
-            if self.newSampleComponentToCreate:
-                self.sampleComponent = self.sample.newSampleComponent(
-                        name=str(self.nameComponentLineEdit.text()),
-                        labelling=str(self.labellingPulldownList.currentText()),
-                        role=str(self.typePulldownList.get()),
-                        concentration=float(self.concentrationLineEdit.text()),
-                        concentrationUnit=str(self.concentrationUnitPulldownList.get()),
-                        comment=str(self.commentLineEdit.text()))
-            else:
-                for property, value in self._getCallBacksDict().items():
-                    # if value or type(value) is str and value is not 'None':
-                    property(value)
+        from ccpn.core.lib.ContextManagers import undoBlockManager
 
-            self.nameComponentLineEdit.setReadOnly(True)
-            self.labellingPulldownList.setEnabled(False)
+        with undoBlockManager():
+            try:
+                if self.newSampleComponentToCreate:
+                    self.sampleComponent = self.sample.newSampleComponent(
+                            name=str(self.nameComponentLineEdit.text()),
+                            labelling=str(self.labellingPulldownList.currentText()),
+                            role=str(self.typePulldownList.get()),
+                            concentration=float(self.concentrationLineEdit.text()),
+                            concentrationUnit=str(self.concentrationUnitPulldownList.get()),
+                            comment=str(self.commentLineEdit.text()))
+                else:
+                    for property, value in self._getCallBacksDict().items():
+                        # if value or type(value) is str and value is not 'None':
+                        property(value)
 
-            applyAccept = True
-        except Exception as es:
-            if 'pre-existing object' in str(es):
-                #TODO:ED this catches api trying to duplicate object
+                self.nameComponentLineEdit.setReadOnly(True)
+                self.labellingPulldownList.setEnabled(False)
+
                 applyAccept = True
-            else:
-                showWarning(str(self.windowTitle()), str(es))
-
-        finally:
-            self.project._endCommandEchoBlock()
+            except Exception as es:
+                if 'pre-existing object' in str(es):
+                    # this catches api trying to duplicate object
+                    applyAccept = True
+                else:
+                    showWarning(str(self.windowTitle()), str(es))
 
         if applyAccept is False:
             # should only undo if something new has been added to the undo deque

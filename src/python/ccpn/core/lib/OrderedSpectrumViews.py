@@ -32,7 +32,8 @@ __date__ = "$Date$"
 #=========================================================================================
 
 from typing import Tuple, Optional, List
-
+from functools import partial
+from ccpn.core.lib.ContextManagers import logCommandBlock, undoStackBlocking
 
 SPECTRUMVIEWINDEX = '_spectrumViewIndex'
 
@@ -139,24 +140,30 @@ class OrderedSpectrumViews(object):
         Set the ordering of the spectrumViews attached to the strip/spectrumDisplay
         :param spectrumIndex - tuple of ints:
         """
-        # self._parent._startCommandEchoBlock("project.getByPid('%s').setOrderedSpectrumViewIndex(spectrumIndex=%s)" % \
-        #                                          (self._parent.pid, spectrumIndex))
-        self._parent._startCommandEchoBlock('setOrderedSpectrumViewIndex', spectrumIndex)
+        with logCommandBlock(get='self') as log:
+            log('setOrderedSpectrumViewsIndex')
+            with undoStackBlocking() as addUndoItem:
 
-        _undo = self.project._undo
-        if _undo is not None:
-            _undo.increaseBlocking()
-        try:
-            _oldSpectrumViews = self._spectrumViewIndex
-            self._setOrderedSpectrumViews(spectrumIndex=spectrumIndex)
+                _oldSpectrumViews = self._spectrumViewIndex
+                self._setOrderedSpectrumViews(spectrumIndex=spectrumIndex)
 
-        finally:
-            self._parent._endCommandEchoBlock()
-        if _undo is not None:
-            _undo.decreaseBlocking()
+                addUndoItem(undo=partial(self._undoOrderedSpectrumViews, _oldSpectrumViews),
+                            redo=partial(self._setOrderedSpectrumViews, spectrumIndex))
 
-            _undo.newItem(self._undoOrderedSpectrumViews, self._setOrderedSpectrumViews,
-                          undoArgs=(_oldSpectrumViews,), redoArgs=(spectrumIndex,))
+        # _undo = self.project._undo
+            # if _undo is not None:
+            #     _undo.increaseBlocking()
+            # try:
+            #     _oldSpectrumViews = self._spectrumViewIndex
+            #     self._setOrderedSpectrumViews(spectrumIndex=spectrumIndex)
+            #
+            # finally:
+            #     self._parent._endCommandEchoBlock()
+            # if _undo is not None:
+            #     _undo.decreaseBlocking()
+            #
+            #     _undo.newItem(self._undoOrderedSpectrumViews, self._setOrderedSpectrumViews,
+            #                   undoArgs=(_oldSpectrumViews,), redoArgs=(spectrumIndex,))
 
         # notify that the order has been changed - parent is SpectrumDisplay
         # self._parent._finaliseAction(action='change')

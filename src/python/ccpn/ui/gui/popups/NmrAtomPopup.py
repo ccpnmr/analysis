@@ -12,6 +12,7 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
 from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import PROTEIN_ATOM_NAMES
 from ccpn.util.Common import isotopeCode2Nucleus
 from ccpn.util.Logging import getLogger
+from ccpn.core.lib.ContextManagers import undoBlockManager
 
 
 ###from ccpn.framework.Framework import createFramework  # see note below
@@ -87,10 +88,9 @@ class NmrAtomPopup(CcpnDialog):
           repopulate the popup widgets
         """
         applyAccept = False
-        oldUndo = self.project._undo.numItems()
+        oldUndoItems = self.project._undo.numItems()
 
-        self.project._startCommandEchoBlock('_applyChanges', quiet=True)
-        try:
+        with undoBlockManager():
             if self.nmrAtom.name != self.nmrAtomNamePulldown.currentText():
                 self.nmrAtom.rename(self.nmrAtomNamePulldown.currentText())
 
@@ -107,22 +107,17 @@ class NmrAtomPopup(CcpnDialog):
                                           sequenceCode=nmrResidue.sequenceCode,
                                           residueType=nmrResidue.residueType,
                                           mergeToExisting=self.mergeBox.isChecked())
-                    # self.nmrResidue._finaliseAction('change')
 
                 self.nmrAtomLabel.setText("NmrAtom: %s" % self.nmrAtom.id)
 
             applyAccept = True
-        except Exception as es:
-            showWarning(str(self.windowTitle()), str(es))
-        finally:
-            self.project._endCommandEchoBlock()
 
         if applyAccept is False:
             # should only undo if something new has been added to the undo deque
             # may cause a problem as some things may be set with the same values
             # and still be added to the change list, so only undo if length has changed
             errorName = str(self.__class__.__name__)
-            if oldUndo != self.project._undo.numItems():
+            if oldUndoItems != self.project._undo.numItems():
                 self.project._undo.undo()
                 getLogger().debug('>>>Undo.%s._applychanges' % errorName)
             else:

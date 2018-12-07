@@ -70,6 +70,7 @@ from collections import OrderedDict
 from ccpn.util.Logging import getLogger
 from types import SimpleNamespace
 from contextlib import contextmanager
+from ccpn.core.lib.ContextManagers import undoBlockManager
 
 # BG_COLOR = QtGui.QColor('#E0E0E0')
 # TODO:ED add some documentation here
@@ -856,16 +857,12 @@ QuickTable::item::selected {
 
                 if hasattr(selected[0], 'project'):
                     thisProject = selected[0].project
-                    thisProject._startCommandEchoBlock('application.table.deleteFromTable', [sI.pid for sI in selected])
 
-                    # bug hunt
-                    #self._silenceCallback = True
-                    for obj in selected:
-                        if hasattr(obj, 'pid'):
-                            # print ('>>> deleting', obj)
-                            obj.delete()
-                    #self._silenceCallback = False
-                    thisProject._endCommandEchoBlock()
+                    with undoBlockManager():
+                        # echo [sI.pid for sI in selected])
+                        for obj in selected:
+                            if hasattr(obj, 'pid'):
+                                obj.delete()
 
                 else:
 

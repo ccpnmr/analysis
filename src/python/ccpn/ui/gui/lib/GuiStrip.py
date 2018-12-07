@@ -59,6 +59,7 @@ from ccpn.util import Common as commonUtil
 from typing import Tuple, List, Any
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO
+from ccpn.core.lib.ContextManagers import logCommandBlock, undoStackBlocking
 
 
 STRIPLABEL_ISPLUS = 'stripLabel_isPlus'
@@ -196,7 +197,7 @@ class GuiStrip(Frame):
 
         # Strip needs access to plotWidget's items and info #TODO: get rid of this
         # self.plotItem = self.plotWidget.plotItem
-        self.viewStripMenu = None         # = self.plotItem.vb
+        self.viewStripMenu = None  # = self.plotItem.vb
 
         self._showCrossHair()
         # callbacks
@@ -256,9 +257,9 @@ class GuiStrip(Frame):
         self.setNotifier(self.project, [Notifier.RENAME], 'NmrResidue', self._updateStripLabel)
 
         # For now, all dropEvents are not strip specific, use spectrumDisplay's handling
-        self.setGuiNotifier(self,[GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
+        self.setGuiNotifier(self, [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
                             self.spectrumDisplay._processDroppedItems)
-        self.setGuiNotifier(self,[GuiNotifier.DRAGMOVEEVENT], [DropBase.URLS, DropBase.PIDS],
+        self.setGuiNotifier(self, [GuiNotifier.DRAGMOVEEVENT], [DropBase.URLS, DropBase.PIDS],
                             self.spectrumDisplay._processDragEnterEvent)
 
         # set peakLabelling to the default from preferences or strip to the left
@@ -1162,7 +1163,7 @@ class GuiStrip(Frame):
 
         except Exception as es:
             getLogger().warning('Error setting mark at current cursor position')
-            raise(es)
+            raise (es)
 
     # # TODO: remove apiRuler (when notifier at bottom of module gets rid of it)
     # def _initRulers(self):
@@ -1552,23 +1553,20 @@ class GuiStrip(Frame):
                                 % (newIndex, stripCount))
             newIndex = stripCount - 1
 
-        _undo = self.project._undo
-        self._startCommandEchoBlock('moveTo', newIndex)
-        try:
-            # management of API objects
+        with logCommandBlock(get='self') as log:
+            log('moveTo')
 
-            if _undo is not None:
-                _undo._newItem(undoPartial=partial(self.spectrumDisplay.showAxes))
+            with undoStackBlocking() as addUndoItem:
+                # needs to be first as it uses currentOrdering
+                addUndoItem(undo=partial(self.spectrumDisplay.showAxes))
 
             self._wrappedData.moveTo(newIndex)
 
-            if _undo is not None:
-                _undo.newItem(self._resetStripLayout, self._resetStripLayout,
-                              undoArgs=(newIndex, currentIndex), redoArgs=(currentIndex, newIndex))
-                _undo._newItem(redoPartial=partial(self.spectrumDisplay.showAxes))
-
-        finally:
-            self._endCommandEchoBlock()
+            # add undo item to reorder the strips in the layout
+            with undoStackBlocking() as undoItem:
+                addUndoItem(undo=partial(self._resetStripLayout, newIndex, currentIndex),
+                            redo=partial(self._resetStripLayout, currentIndex, newIndex))
+                addUndoItem(redo=partial(self.spectrumDisplay.showAxes))
 
         # reorder the strips in the layout
         self._resetStripLayout(currentIndex, newIndex)
@@ -1854,7 +1852,7 @@ class GuiStrip(Frame):
 
         position = event.screenPos()
         self.viewStripMenu.popup(QtCore.QPoint(int(position.x()),
-                                             int(position.y())))
+                                               int(position.y())))
         self.contextMenuPosition = self.current.cursorPosition
 
     def _updateVisibility(self):

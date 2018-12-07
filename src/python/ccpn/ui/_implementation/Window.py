@@ -119,8 +119,7 @@ class Window(AbstractWrapperObject):
     def createSpectrumDisplay(self, spectrum, displayAxisCodes: Sequence[str] = (),
                               axisOrder: Sequence[str] = (), title: str = None, positions: Sequence[float] = (),
                               widths: Sequence[float] = (), units: Sequence[str] = (),
-                              stripDirection: str = 'Y', is1D: bool = False,
-                              independentStrips: bool = False, **kwds):
+                              stripDirection: str = 'Y', is1D: bool = False, **kwds):
         """
         :param \*str, displayAxisCodes: display axis codes to use in display order - default to spectrum axisCodes in heuristic order
         :param \*str axisOrder: spectrum axis codes in display order - default to spectrum axisCodes in heuristic order
@@ -135,7 +134,7 @@ class Window(AbstractWrapperObject):
 
         return _createSpectrumDisplay(self, spectrum, displayAxisCodes=displayAxisCodes, axisOrder=axisOrder,
                                       title=title, positions=positions, widths=widths, units=units,
-                                      stripDirection=stripDirection, is1D=is1D, independentStrips=independentStrips, **kwds)
+                                      stripDirection=stripDirection, is1D=is1D, **kwds)
 
 
 #=========================================================================================

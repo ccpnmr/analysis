@@ -38,7 +38,7 @@ from ccpn.util.Logging import getLogger
 from collections import OrderedDict
 from ccpn.core.lib.OrderedSpectrumViews import OrderedSpectrumViews
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import undoBlock, logCommandBlock, undoStackBlocking
+from ccpn.core.lib.ContextManagers import undoBlock, logCommandBlock, undoStackBlocking, notificationBlanking
 
 
 # SV_TITLE = '_Strip'
@@ -300,211 +300,6 @@ class Strip(AbstractWrapperObject):
         """
         raise RuntimeError('Please use spectrumDisplay.deleteStrip()')
 
-    # def _getWidgetFromLayout(self):
-    #     ccpnStrip = self._wrappedData
-    #     n = len(ccpnStrip.spectrumDisplay.strips)
-    #     if n > 1:
-    #         index = ccpnStrip.index
-    #         spectrumDisplay = self.spectrumDisplay
-    #         layout = spectrumDisplay.stripFrame.layout()
-    #
-    #         if layout:
-    #             lRows = layout.rowCount()
-    #             currentStripItem = None
-    #
-    #             for r in range(layout.rowCount()):
-    #                 items = []
-    #                 if spectrumDisplay.stripDirection == 'Y':
-    #                     currentStripItem = layout.itemAtPosition(r, index)
-    #                 elif spectrumDisplay.stripDirection == 'X':
-    #                     currentStripItem = layout.itemAtPosition(index, 0)
-    #
-    #             return currentStripItem
-    #     else:
-    #         raise ValueError("The last strip in a display cannot be deleted")
-
-    # def _removeFromLayout(self):
-    #
-    #     ccpnStrip = self._wrappedData
-    #     # n = len(ccpnStrip.spectrumDisplay.orderedStrips)
-    #     index = ccpnStrip.index
-    #     spectrumDisplay = self.spectrumDisplay
-    #     layout = spectrumDisplay.stripFrame.layout()
-    #     n = layout.count()
-    #
-    #     if n > 1 and layout:
-    #         _undo = self.project._undo
-    #         if _undo is not None:
-    #             _undo.increaseBlocking()
-    #
-    #         currentStripItem = self
-    #         currentRow = 0
-    #         currentIndex = index
-    #         currentParent = self.parent()
-    #         currentStripDirection = spectrumDisplay.stripDirection
-    #         currentWrapped = ccpnStrip
-    #
-    #         self._widgets = []
-    #         while layout.count():  # clear the layout and store
-    #             self._widgets.append(layout.takeAt(0).widget())
-    #         self._widgets.remove(self)
-    #         # print ('>>> removeFromLayout', self, ' >>> ', self._widgets)
-    #
-    #         if spectrumDisplay.stripDirection == 'Y':
-    #             for m, widgStrip in enumerate(self._widgets):  # build layout again
-    #                 layout.addWidget(widgStrip, 0, m)
-    #                 layout.setColumnStretch(m, 1)
-    #                 layout.setColumnStretch(m + 1, 0)
-    #         elif spectrumDisplay.stripDirection == 'X':
-    #             for m, widgStrip in enumerate(self._widgets):  # build layout again
-    #                 layout.addWidget(widgStrip, m, 0)
-    #             layout.setColumnStretch(0, 1)
-    #
-    #         # move to widget store
-    #         self.mainWindow._UndoWidgetStorage.layout().addWidget(self)
-    #
-    #         self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
-    #
-    #         # # TODO:ED HACK HACK HACK HACK - put ccpnStrip back into strips - not sure if needed here
-    #         # if self not in ccpnStrip.spectrumDisplay.orderedStrips:
-    #         #   # childrenDict = ccpnStrip.spectrumDisplay.__dict__.get('strips')
-    #         #   # childrenDict[n] = ccpnStrip
-    #         #   for order, cStrip in enumerate(self._widgets):
-    #         #     cStrip._wrappedData.__dict__['index'] = order
-    #         #     # ccpnStrip.__dict__['index'] = currentIndex-1
-    #
-    #         # store the old information
-    #         _stripDeleteDict = {'currentRow': currentRow,
-    #                             'currentIndex': currentIndex,
-    #                             'currentStripDirection': currentStripDirection,
-    #                             'currentStripItem': currentStripItem,
-    #                             'currentParent': currentParent,
-    #                             'currentWrapped': currentWrapped}
-    #         ccpnStrip.__dict__['_stripDeleteDict'] = _stripDeleteDict
-    #
-    #         _undo = self.project._undo
-    #         if _undo is not None:
-    #             _undo.decreaseBlocking()
-    #         self.spectrumDisplay.showAxes()
-    #
-    #     else:
-    #         raise ValueError("The last strip in a display cannot be deleted")
-    #
-    # def _restoreToLayout(self):
-    #     ccpnStrip = self._wrappedData
-    #     # n = len(ccpnStrip.spectrumDisplay.orderedStrips)
-    #
-    #     index = ccpnStrip.index
-    #     spectrumDisplay = self.spectrumDisplay
-    #     layout = spectrumDisplay.stripFrame.layout()
-    #     n = layout.count()
-    #
-    #     if layout:
-    #         _undo = self.project._undo
-    #         if _undo is not None:
-    #             _undo.increaseBlocking()
-    #
-    #         _stripDeleteDict = ccpnStrip.__dict__['_stripDeleteDict']
-    #         currentStripItem = _stripDeleteDict['currentStripItem']
-    #         currentStripDirection = _stripDeleteDict['currentStripDirection']
-    #         currentRow = _stripDeleteDict['currentRow']
-    #         currentIndex = _stripDeleteDict['currentIndex']
-    #         currentParent = _stripDeleteDict['currentParent']
-    #         currentWrapped = _stripDeleteDict['currentWrapped']
-    #
-    #         self.mainWindow._UndoWidgetStorage.layout().removeWidget(self)
-    #         # self.setParent(currentParent)
-    #         self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
-    #
-    #         self._widgets = []
-    #         while layout.count():  # clear the layout and store
-    #             self._widgets.append(layout.takeAt(0).widget())
-    #         self._widgets.insert(currentIndex, self)
-    #         # print ('>>> restoreToLayout', self, ' >>> ', self._widgets)
-    #
-    #         if spectrumDisplay.stripDirection == 'Y':
-    #             for m, widgStrip in enumerate(self._widgets):  # build layout again
-    #                 layout.addWidget(widgStrip, 0, m)
-    #                 layout.setColumnStretch(m, 1)
-    #         elif spectrumDisplay.stripDirection == 'X':
-    #             for m, widgStrip in enumerate(self._widgets):  # build layout again
-    #                 layout.addWidget(widgStrip, m, 0)
-    #             layout.setColumnStretch(0, 1)
-    #
-    #         count = ccpnStrip.spectrumDisplay.__dict__
-    #         field = ccpnStrip.spectrumDisplay._fieldNames
-    #         strippy = ccpnStrip.spectrumDisplay.getOrderedStrips()
-    #         # ccpnStrip.spectrumDisplay.newBoundStrip = [appWidg._wrappedData for appWidg in self._widgets]
-    #
-    #         # TODO:ED HACK HACK HACK HACK - put ccpnStrip back into strips
-    #         if self not in ccpnStrip.spectrumDisplay.orderedStrips:
-    #             # childrenDict = ccpnStrip.spectrumDisplay.__dict__.get('strips')
-    #             # childrenDict[n] = ccpnStrip
-    #             for order, cStrip in enumerate(self._widgets):
-    #                 cStrip._wrappedData.__dict__['index'] = order  # this is the api creation of orderedStrips
-    #                 # ccpnStrip.__dict__['index'] = currentIndex-1
-    #
-    #         _undo = self.project._undo
-    #         if _undo is not None:
-    #             _undo.decreaseBlocking()
-    #
-    #         self.spectrumDisplay.showAxes()
-    #
-    # #TODO:RASMUS: most of this below belongs in the Gui class or even the GuiSpectrumDisplay class (like adding, removing strips)
-    # #TODO:ED: confer with rasmus and me to refactor while writing tests
-    # def delete(self):
-    #     """Overrides normal delete"""
-    #     # currentStripItem = self._getWidgetFromLayout()
-    #     # self.setParent(None)
-    #
-    #     ccpnStrip = self._wrappedData
-    #     n = len(ccpnStrip.spectrumDisplay.strips)
-    #     if n > 1:
-    #         spectrumDisplay = self.spectrumDisplay
-    #         layout = spectrumDisplay.stripFrame.layout()
-    #
-    #         if layout:  # should always be the case but play safe
-    #
-    #             self._removeFromLayout()  # adds nothing to the undo stack, so add it below
-    #
-    #             _undo = self.project._undo
-    #             if _undo is not None:
-    #                 _undo.newItem(self._restoreToLayout, self._removeFromLayout)
-    #             self._unDeleteCall, self._unDeleteArgs = self._recoverApiObject(ccpnStrip)
-    #             ccpnStrip.delete()
-    #
-    #         self.current.strip = spectrumDisplay.strips[-1]
-    #     else:
-    #         raise ValueError("The last strip in a display cannot be deleted")
-    #
-    # def _unDelete(self):
-    #     """Overrides normal delete"""
-    #     # currentStripItem = self._getWidgetFromLayout()
-    #     # self.setParent(None)
-    #
-    #     # TODO:ED check this cheeky code :)
-    #     self._unDeleteCall(*self._unDeleteArgs)  # recover the deleted apiStrip
-    #
-    #     ccpnStrip = self._wrappedData
-    #
-    #     n = len(ccpnStrip.spectrumDisplay.strips)
-    #     if n > 1:
-    #         spectrumDisplay = self.spectrumDisplay
-    #         layout = spectrumDisplay.stripFrame.layout()
-    #
-    #         if layout:  # should always be the case but play safe
-    #
-    #             self._restoreToLayout()  # adds nothing to the undo stack, so add it below
-    #
-    #             _undo = self.project._undo
-    #             if _undo is not None:
-    #                 _undo.newItem(self._removeFromLayout, self._restoreToLayout)
-    #
-    #         self.current.strip = spectrumDisplay.strips[-1]
-    #
-    #     else:
-    #         raise ValueError("The last strip in a display cannot be deleted")
-
     def _removeOrderedSpectrumViewIndex(self, index):
         self.spectrumDisplay.removeOrderedSpectrumView(index)
 
@@ -609,17 +404,15 @@ class Strip(AbstractWrapperObject):
         else:
             stripSerial = 0
 
-        self._startCommandEchoBlock('displaySpectrum', spectrum, values=locals(),
-                                    defaults={'axisOrder': ()})
-        try:
+        with logCommandBlock(get='self') as log:
+            log('displaySpectrum', spectrum=repr(spectrum.pid))
+
             # Make spectrumView
             obj = apiStrip.spectrumDisplay.newSpectrumView(spectrumName=dataSource.name,
                                                            stripSerial=stripSerial, dataSource=dataSource,
                                                            dimensionOrdering=dimensionOrdering)
-        finally:
-            self._endCommandEchoBlock()
         result = self._project._data2Obj[apiStrip.findFirstStripSpectrumView(spectrumView=obj)]
-        #
+
         return result
 
     def peakIsInPlane(self, peak: Peak) -> bool:
@@ -684,41 +477,8 @@ class Strip(AbstractWrapperObject):
                 zWidth = orderedAxes[ii].width
                 if zRegion[0] - zWidth < zPosition < zRegion[0] or zRegion[1] < zPosition < zRegion[1] + zWidth:
                     return True
-        #
+
         return False
-
-    def peakPickPosition_OLDplotWidget(self, position: List[float]) -> Tuple[Peak]:
-        """Pick peak at position for all spectra currently displayed in strip"""
-
-        result = []
-
-        self._startCommandEchoBlock('peakPickPosition_OLD', position)
-        self._project.blankNotification()
-        try:
-            for spectrumView in self.spectrumViews:
-                if not spectrumView.peakListViews:  # this can happen if no peakLists, so create one
-                    self._project.unblankNotification()  # need this otherwise SideBar does not get updated
-                    spectrumView.spectrum.newPeakList()
-                    self._project.blankNotification()
-                peakListView = spectrumView.peakListViews[0]
-                # TODO: is there some way of specifying which peakListView
-                if not peakListView.isVisible():
-                    continue
-                peakList = peakListView.peakList
-
-                peak = peakList.newPeak(position=position)
-                # note, the height below is not derived from any fitting
-                # but is a weighted average of the values at the neighbouring grid points
-                peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
-                result.append(peak)
-        finally:
-            self._endCommandEchoBlock()
-            self._project.unblankNotification()
-
-        for peak in result:
-            peak._finaliseAction('create')
-        #
-        return tuple(result)
 
     @logCommand(get='self')
     def peakPickPosition(self, inPosition) -> Tuple[Peak]:
@@ -778,78 +538,6 @@ class Strip(AbstractWrapperObject):
 
         return tuple(result), tuple(peakLists)
 
-    def peakPickRegion_OLD(self, selectedRegion: List[List[float]]) -> Tuple[Peak]:
-        """Peak pick all spectra currently displayed in strip in selectedRegion """
-
-        result = []
-
-        project = self.project
-        minDropfactor = self.application.preferences.general.peakDropFactor
-
-        self._startCommandEchoBlock('peakPickRegion_OLD', selectedRegion)
-        self._project.blankNotification()
-        try:
-
-            for spectrumView in self.spectrumViews:
-                if not spectrumView.isVisible():
-                    continue
-                if not spectrumView.peakListViews:  # this can happen if no peakLists, so create one
-                    self._project.unblankNotification()  # need this otherwise SideBar does not get updated
-                    spectrumView.spectrum.newPeakList()
-                    self._project.blankNotification()
-                peakListView = spectrumView.peakListViews[0]
-                # TODO: is there some way of specifying which peakListView
-                if not peakListView.isVisible():
-                    continue
-                peakList = peakListView.peakList
-
-                if spectrumView.spectrum.dimensionCount > 1:
-                    sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]
-                    spectrumAxisCodes = spectrumView.spectrum.axisCodes
-                    stripAxisCodes = self.axisCodes
-                    sortedSpectrumRegion = [0] * spectrumView.spectrum.dimensionCount
-
-                    remapIndices = commonUtil._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
-                    for n, axisCode in enumerate(spectrumAxisCodes):
-                        # idx = stripAxisCodes.index(axisCode)
-                        idx = remapIndices[n]
-                        sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
-                    newPeaks = peakList.pickPeaksNd(sortedSpectrumRegion,
-                                                    doPos=spectrumView.displayPositiveContours,
-                                                    doNeg=spectrumView.displayNegativeContours,
-                                                    fitMethod='gaussian', minDropfactor=minDropfactor)
-                else:
-                    # 1D's
-                    # NBNB This is a change - valuea are now rounded to three decimal places. RHF April 2017
-                    newPeaks = peakList.pickPeaks1d(selectedRegion[0], sorted(selectedRegion[1]))
-                    # y0 = startPosition.y()
-                    # y1 = endPosition.y()
-                    # y0, y1 = min(y0, y1), max(y0, y1)
-                    # newPeaks = peakList.pickPeaks1d([startPosition.x(), endPosition.x()], [y0, y1])
-
-                result.extend(newPeaks)
-
-                # # Add the new peaks to selection
-                # for peak in newPeaks:
-                #   # peak.isSelected = True
-                #   self.current.addPeak(peak)
-
-                # for window in project.windows:
-                #   for spectrumDisplay in window.spectrumDisplays:
-                #     for strip in spectrumDisplay.strips:
-                #       spectra = [spectrumView.spectrum for spectrumView in strip.spectrumViews]
-                #       if peakList.spectrum in spectra:
-                #               strip.showPeaks(peakList)
-
-        finally:
-            self._endCommandEchoBlock()
-            self._project.unblankNotification()
-
-        for peak in result:
-            peak._finaliseAction('create')
-        #
-        return tuple(result)
-
     def peakPickRegion(self, selectedRegion: List[List[float]]) -> Tuple[Peak]:
         """Peak pick all spectra currently displayed in strip in selectedRegion """
 
@@ -858,78 +546,74 @@ class Strip(AbstractWrapperObject):
         project = self.project
         minDropfactor = self.application.preferences.general.peakDropFactor
 
-        self._startCommandEchoBlock('peakPickRegion', selectedRegion)
-        self._project.blankNotification()
-        try:
+        with logCommandBlock(get='self') as log:
+            log('peakPickRegion')
+            with notificationBlanking():
 
-            for spectrumView in self.spectrumViews:
+                for spectrumView in self.spectrumViews:
 
-                numPeakLists = [pp for pp in spectrumView.peakListViews if isinstance(pp.peakList, PeakList)]
-                if not numPeakLists:  # this can happen if no peakLists, so create one
-                    self._project.unblankNotification()  # need this otherwise SideBar does not get updated
-                    spectrumView.spectrum.newPeakList()
-                    self._project.blankNotification()
+                    numPeakLists = [pp for pp in spectrumView.peakListViews if isinstance(pp.peakList, PeakList)]
+                    if not numPeakLists:  # this can happen if no peakLists, so create one
+                        self._project.unblankNotification()  # need this otherwise SideBar does not get updated
+                        spectrumView.spectrum.newPeakList()
+                        self._project.blankNotification()
 
-                validPeakListViews = [pp for pp in spectrumView.peakListViews if isinstance(pp.peakList, PeakList)
-                                      and pp.isVisible()
-                                      and spectrumView.isVisible()]
-                # if numPeakLists:
-                for thisPeakListView in validPeakListViews:
-                    # find the first visible peakList
-                    peakList = thisPeakListView.peakList
+                    validPeakListViews = [pp for pp in spectrumView.peakListViews if isinstance(pp.peakList, PeakList)
+                                          and pp.isVisible()
+                                          and spectrumView.isVisible()]
+                    # if numPeakLists:
+                    for thisPeakListView in validPeakListViews:
+                        # find the first visible peakList
+                        peakList = thisPeakListView.peakList
 
-                    # peakList = spectrumView.spectrum.peakLists[0]
+                        # peakList = spectrumView.spectrum.peakLists[0]
 
-                    if spectrumView.spectrum.dimensionCount > 1:
-                        sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]
-                        spectrumAxisCodes = spectrumView.spectrum.axisCodes
-                        stripAxisCodes = self.axisCodes
-                        sortedSpectrumRegion = [0] * spectrumView.spectrum.dimensionCount
+                        if spectrumView.spectrum.dimensionCount > 1:
+                            sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]
+                            spectrumAxisCodes = spectrumView.spectrum.axisCodes
+                            stripAxisCodes = self.axisCodes
+                            sortedSpectrumRegion = [0] * spectrumView.spectrum.dimensionCount
 
-                        remapIndices = commonUtil._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
-                        if remapIndices:
-                            for n, axisCode in enumerate(spectrumAxisCodes):
-                                # idx = stripAxisCodes.index(axisCode)
-                                idx = remapIndices[n]
-                                sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
+                            remapIndices = commonUtil._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
+                            if remapIndices:
+                                for n, axisCode in enumerate(spectrumAxisCodes):
+                                    # idx = stripAxisCodes.index(axisCode)
+                                    idx = remapIndices[n]
+                                    sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
+                            else:
+                                sortedSpectrumRegion = sortedSelectedRegion
+
+                            newPeaks = peakList.pickPeaksNd(sortedSpectrumRegion,
+                                                            doPos=spectrumView.displayPositiveContours,
+                                                            doNeg=spectrumView.displayNegativeContours,
+                                                            fitMethod='gaussian', minDropfactor=minDropfactor)
                         else:
-                            sortedSpectrumRegion = sortedSelectedRegion
+                            # 1D's
+                            # NBNB This is a change - valuea are now rounded to three decimal places. RHF April 2017
+                            newPeaks = peakList.pickPeaks1d(selectedRegion[0], sorted(selectedRegion[1]), size=minDropfactor * 100)
+                            # y0 = startPosition.y()
+                            # y1 = endPosition.y()
+                            # y0, y1 = min(y0, y1), max(y0, y1)
+                            # newPeaks = peakList.pickPeaks1d([startPosition.x(), endPosition.x()], [y0, y1])
 
-                        newPeaks = peakList.pickPeaksNd(sortedSpectrumRegion,
-                                                        doPos=spectrumView.displayPositiveContours,
-                                                        doNeg=spectrumView.displayNegativeContours,
-                                                        fitMethod='gaussian', minDropfactor=minDropfactor)
-                    else:
-                        # 1D's
-                        # NBNB This is a change - valuea are now rounded to three decimal places. RHF April 2017
-                        newPeaks = peakList.pickPeaks1d(selectedRegion[0], sorted(selectedRegion[1]), size=minDropfactor * 100)
-                        # y0 = startPosition.y()
-                        # y1 = endPosition.y()
-                        # y0, y1 = min(y0, y1), max(y0, y1)
-                        # newPeaks = peakList.pickPeaks1d([startPosition.x(), endPosition.x()], [y0, y1])
+                        result.extend(newPeaks)
+                        # break
 
-                    result.extend(newPeaks)
-                    # break
+                    # # Add the new peaks to selection
+                    # for peak in newPeaks:
+                    #   # peak.isSelected = True
+                    #   self.current.addPeak(peak)
 
-                # # Add the new peaks to selection
-                # for peak in newPeaks:
-                #   # peak.isSelected = True
-                #   self.current.addPeak(peak)
-
-                # for window in project.windows:
-                #   for spectrumDisplay in window.spectrumDisplays:
-                #     for strip in spectrumDisplay.strips:
-                #       spectra = [spectrumView.spectrum for spectrumView in strip.spectrumViews]
-                #       if peakList.spectrum in spectra:
-                #               strip.showPeaks(peakList)
-
-        finally:
-            self._endCommandEchoBlock()
-            self._project.unblankNotification()
+                    # for window in project.windows:
+                    #   for spectrumDisplay in window.spectrumDisplays:
+                    #     for strip in spectrumDisplay.strips:
+                    #       spectra = [spectrumView.spectrum for spectrumView in strip.spectrumViews]
+                    #       if peakList.spectrum in spectra:
+                    #               strip.showPeaks(peakList)
 
         for peak in result:
             peak._finaliseAction('create')
-        #
+
         return tuple(result)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1141,9 +825,9 @@ def _copyStrip(self: SpectrumDisplay, strip: Strip, newIndex=None) -> Strip:
                     % (newIndex, stripCount))
         newIndex = None
 
-    self._startCommandEchoBlock('copyStrip', strip, values=locals(), defaults={'newIndex': None},
-                                parName='newStrip')
-    try:
+    with logCommandBlock(prefix='newStrip=', get='self') as log:
+        log('copyStrip', strip=repr(strip.pid))
+
         if strip.spectrumDisplay is self:
             # Within same display. Not that useful, but harmless
             newStrip = strip.clone()
@@ -1166,9 +850,7 @@ def _copyStrip(self: SpectrumDisplay, strip: Strip, newIndex=None) -> Strip:
                         # Override if there is a mapping and axis is not shared for all strips
                         axis.position = positions[ind]
                         axis.widths = widths[ind]
-    finally:
-        self._endCommandEchoBlock()
-    #
+
     return newStrip
 
 

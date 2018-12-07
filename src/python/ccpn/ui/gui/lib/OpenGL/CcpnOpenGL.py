@@ -1214,12 +1214,9 @@ class CcpnGLWidget(QOpenGLWidget):
         if type(event) == QtGui.QKeyEvent:
             if event.key() in moveDict:
 
-                self.project._startCommandEchoBlock('_movePeakFromKeys')
-                try:
+                with undoBlockManager():
                     for peak in self.current.peaks:
                         self._movePeak(peak, moveDict.get(event.key()))
-                finally:
-                    self.project._endCommandEchoBlock()
 
     def _singleKeyAction(self, event):
         """

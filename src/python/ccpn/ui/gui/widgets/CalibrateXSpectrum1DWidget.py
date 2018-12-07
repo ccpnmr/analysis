@@ -37,7 +37,7 @@ from ccpn.core.lib.SpectrumLib import _calibrateX1D
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-
+from ccpn.core.lib.ContextManagers import undoBlockManager
 
 OP = 'Calibrate X - Original Position: '
 NP = 'New Position: '
@@ -183,25 +183,24 @@ class CalibrateX1DWidgets(Frame):
 
     def _apply(self):
         applyAccept = False
-        self.project._startCommandEchoBlock('_applyChanges', quiet=True)
-        _undo = self.project._undo
-        oldUndo = _undo.numItems()
-        fromPos = self.originalPosition
-        toPos = self.newPosition
-        try:
-            self._calibrateSpectra(fromPos, toPos)
 
-            # add an undo item to the stack
-            if _undo is not None:
-                _undo.newItem(self._calibrateSpectra, self._calibrateSpectra,
-                              undoArgs=(toPos, fromPos),
-                              redoArgs=(fromPos, toPos))
+        with undoBlockManager():
+            _undo = self.project._undo
+            oldUndo = _undo.numItems()
+            fromPos = self.originalPosition
+            toPos = self.newPosition
+            try:
+                self._calibrateSpectra(fromPos, toPos)
 
-            applyAccept = True
-        except Exception as es:
-            showWarning(str(self.windowTitle()), str(es))
-        finally:
-            self.project._endCommandEchoBlock()
+                # add an undo item to the stack
+                if _undo is not None:
+                    _undo.newItem(self._calibrateSpectra, self._calibrateSpectra,
+                                  undoArgs=(toPos, fromPos),
+                                  redoArgs=(fromPos, toPos))
+
+                applyAccept = True
+            except Exception as es:
+                showWarning(str(self.windowTitle()), str(es))
 
         if applyAccept is False:
             # should only undo if something new has been added to the undo deque

@@ -36,6 +36,7 @@ from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.util.Logging import getLogger
+from ccpn.core.lib.ContextManagers import undoBlockManager
 
 
 class SpectrumGroupEditor(CcpnDialog):
@@ -370,29 +371,27 @@ class SpectrumGroupEditor(CcpnDialog):
         applyAccept = False
         oldUndo = self.project._undo.numItems()
 
-        self.project._startCommandEchoBlock('_applyChanges', quiet=True)
-        try:
-            if self.addNewSpectrumGroup:
-                self._applyToNewSG(leftWidgetSpectra)
+        with undoBlockManager():
+            try:
+                if self.addNewSpectrumGroup:
+                    self._applyToNewSG(leftWidgetSpectra)
 
-            if self.editorMode:
-                if self.leftPullDownSelection.text != 'Select an Option':
-                    self.spectrumGroup = self.project.getByPid('SG:' + self.leftPullDownSelection.getText())
+                if self.editorMode:
+                    if self.leftPullDownSelection.text != 'Select an Option':
+                        self.spectrumGroup = self.project.getByPid('SG:' + self.leftPullDownSelection.getText())
 
-            if self.spectrumGroup:
-                self._applyToCurrentSG(leftWidgetSpectra)
+                if self.spectrumGroup:
+                    self._applyToCurrentSG(leftWidgetSpectra)
 
-            if self.rightPullDownSelection.getText() == ' ' or self.rightPullDownSelection.getText() == 'Available Spectra':
-                # return # don't do changes to spectra
-                pass
-            else:
-                self._updateRightSGspectra(rightWidgetSpectra)
+                if self.rightPullDownSelection.getText() == ' ' or self.rightPullDownSelection.getText() == 'Available Spectra':
+                    # return # don't do changes to spectra
+                    pass
+                else:
+                    self._updateRightSGspectra(rightWidgetSpectra)
 
-            applyAccept = True
-        except Exception as es:
-            showWarning(str(self.windowTitle()), str(es))
-        finally:
-            self.project._endCommandEchoBlock()
+                applyAccept = True
+            except Exception as es:
+                showWarning(str(self.windowTitle()), str(es))
 
         if applyAccept is False:
             # should only undo if something new has been added to the undo deque

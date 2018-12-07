@@ -88,20 +88,23 @@ class DeleteItemsPopup(CcpnDialog):
         undo = self.project._undo
         oldUndo = undo.numItems()
 
-        self.project._startCommandEchoBlock('_applyChanges', quiet=True)
-        try:
-            for delItem in self.deleteList:
-                if delItem[2].isChecked():
-                    self.project.deleteObjects(*delItem[1])
+        from ccpn.core.lib.ContextManagers import undoBlockManager, undoStackBlocking
+        from functools import partial
 
-            # add item here to redraw items
-            undo.newItem(self._refreshGLItems, self._refreshGLItems)
+        with undoBlockManager():
+            try:
+                for delItem in self.deleteList:
+                    if delItem[2].isChecked():
+                        self.project.deleteObjects(*delItem[1])
 
-            applyAccept = True
-        except Exception as es:
-            showWarning(str(self.windowTitle()), str(es))
-        finally:
-            self.project._endCommandEchoBlock()
+                # add item here to redraw items
+                with undoStackBlocking() as addUndoItem:
+                    addUndoItem(undo=partial(self._refreshGLItems),
+                                redo=partial(self._refreshGLItems))
+
+                applyAccept = True
+            except Exception as es:
+                showWarning(str(self.windowTitle()), str(es))
 
         # redraw the items
         self._refreshGLItems()

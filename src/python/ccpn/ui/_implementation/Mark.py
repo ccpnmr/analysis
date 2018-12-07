@@ -231,7 +231,7 @@ def _newMark(self: Project, colour: str, positions: Sequence[float], axisCodes: 
 
     result = self._data2Obj.get(apiMark)
     if result is None:
-        raise RuntimeError('Unable to generate new Multiplet item')
+        raise RuntimeError('Unable to generate new Mark item')
 
     if serial is not None:
         try:

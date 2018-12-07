@@ -115,6 +115,11 @@ class NmrAtom(AbstractWrapperObject):
         """Atom name string (e.g. 'HA')"""
         return self._wrappedData.name
 
+    @name.setter
+    def name(self, value: str):
+        """set Atom name"""
+        self.rename(value)
+
     @property
     def serial(self) -> int:
         """NmrAtom serial number - set at creation and unchangeable"""
@@ -213,8 +218,6 @@ class NmrAtom(AbstractWrapperObject):
 
     def deassign(self):
         """Reset NmrAtom back to its originalName, cutting all assignment links"""
-        from ccpn.core.lib.ContextManagers import logCommandBlock
-
         with logCommandBlock(get='self') as log:
             log('deassign')
             self._wrappedData.name = None
@@ -257,8 +260,9 @@ class NmrAtom(AbstractWrapperObject):
         apiResonance = self._apiResonance
         apiResonanceGroup = apiResonance.resonanceGroup
 
-        self._startCommandEchoBlock('assignTo', values=locals(), defaults=defaults)
-        try:
+        with logCommandBlock(get='self') as log:
+            log('assignTo')
+
             if sequenceCode is not None:
                 sequenceCode = str(sequenceCode) or None
 
@@ -338,9 +342,7 @@ class NmrAtom(AbstractWrapperObject):
             #
             if undo is not None and clearUndo:
                 undo.clear()
-        finally:
-            self._endCommandEchoBlock()
-        #
+
         return result
 
     @property

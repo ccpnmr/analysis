@@ -52,7 +52,8 @@ from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 from ccpnmodel.ccpncore.lib.Io import Pdb as pdbIo
 from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
+    logCommandBlock, undoStackBlocking, notificationBlanking, undoBlock, deleteBlockManager
 from ccpn.util.Logging import getLogger
 
 
@@ -306,15 +307,10 @@ class Project(AbstractWrapperObject):
         objs = [getByPid(x) if isinstance(x, str) else x for x in objs]
 
         apiObjs = [x._wrappedData for x in objs]
-        self._startDeleteCommandBlock(*apiObjs)
-        try:
+        with deleteBlockManager():
             for obj in objs:
                 if obj and not obj.isDeleted:
-                    # If statement in case deleting one obj triggers the deletion of another
                     obj.delete()
-
-        finally:
-            self._endDeleteCommandBlock(*apiObjs)
 
     # def renameObject(self, objectOrPid:typing.Union[str,AbstractWrapperObject], newName:str):
     #   """Rename object indicated by objectOrPid to name newName
@@ -436,11 +432,14 @@ class Project(AbstractWrapperObject):
         #
         return result
 
-    #
+
+  #===========================================================================================
     #  Notifiers system
     #
 
     # Old, API-level functions:
+  #
+  #===========================================================================================
 
     @classmethod
     def _setupApiNotifier(cls, func, apiClassOrName, apiFuncName, parameterDict=None):
@@ -519,7 +518,12 @@ class Project(AbstractWrapperObject):
             tt = self._activeNotifiers.pop()
             Notifiers.unregisterNotify(*tt)
 
+  #===========================================================================================
+  #  Notifiers system
+  #
     # New notifier system (Free for use in application code):
+  #
+  #===========================================================================================
 
     def registerNotifier(self, className: str, target: str, func: typing.Callable[..., None],
                          parameterDict: dict = {}, onceOnly: bool = False) -> typing.Callable[..., None]:
@@ -708,23 +712,7 @@ class Project(AbstractWrapperObject):
             undo.newWaypoint()  # DO NOT CHANGE THIS
             undo.increaseWaypointBlocking()
 
-            # TODO:ED check this!
             # self.suspendNotification()
-
-        # GWV 20181123: chnged to logCOmmand decoraor in calling routine's
-        # if not self._appBase._echoBlocking:
-        #
-        #     getDataObj = self._data2Obj.get
-        #     ll = [getDataObj(x) for x in allWrappedData]
-        #     ss = ', '.join(repr(x.pid) for x in ll if x is not None)
-        #     if not ss:
-        #         raise ValueError("No object for deletion recognised among API objects: %s"
-        #                          % allWrappedData)
-        #     command = "project.deleteObjects(%s)" % ss
-        #     # echo command strings
-        #     self._appBase.ui.echoCommands((command,))
-        #
-        # self._appBase._echoBlocking += 1
 
     def _endDeleteCommandBlock(self, *dummyWrappedData):
         """End block for delete command echoing
@@ -733,7 +721,7 @@ class Project(AbstractWrapperObject):
         """
         undo = self._undo
         if undo is not None:
-            # TODO:ED check this!
+
             # self.resumeNotification()
             undo.decreaseWaypointBlocking()
 
@@ -901,35 +889,15 @@ class Project(AbstractWrapperObject):
         :param pidList: a list of pids
         """
         from ccpn.core.lib import CcpnNefIo
-        from collections import OrderedDict
 
-        defaults = OrderedDict((('path', None),
-                                ('overwriteExisting', None),
-                                ('skipPrefixes', None),
-                                ('expandSelection', None),
-                                ('pidList', None)))
-
-        self._startCommandEchoBlock('exportNef', values=locals(), defaults=defaults)
-        undo = self._undo
-        if undo is not None:
-            undo.increaseBlocking()
-        self.blankNotification()
-
-        try:
-            t0 = time()
-            CcpnNefIo.exportNef(self, path,
-                                overwriteExisting=overwriteExisting,
-                                skipPrefixes=skipPrefixes,
-                                expandSelection=expandSelection,
-                                pidList=pidList)
-            t2 = time()
-            getLogger().info('Exported NEF file, time = %.2fs' % (t2 - t0))
-
-        finally:
-            self._endCommandEchoBlock()
-            self.unblankNotification()
-            if undo is not None:
-                undo.decreaseBlocking()
+        with logCommandBlock(get='self') as log:
+            log('exportNef')
+            with notificationBlanking():
+                CcpnNefIo.exportNef(self, path,
+                                    overwriteExisting=overwriteExisting,
+                                    skipPrefixes=skipPrefixes,
+                                    expandSelection=expandSelection,
+                                    pidList=pidList)
 
     def _convertToDataBlock(self, skipPrefixes: typing.Sequence = (),
                             expandSelection: bool = True,
@@ -953,31 +921,14 @@ class Project(AbstractWrapperObject):
         """
         from ccpn.core.lib import CcpnNefIo
 
-        defaults = OrderedDict((('skipPrefixes', None),
-                                ('expandSelection', None),
-                                ('pidList', None)))
-
-        self._startCommandEchoBlock('exportNef', values=locals(), defaults=defaults)
-        undo = self._undo
-        if undo is not None:
-            undo.increaseBlocking()
-        self.blankNotification()
-
-        dataBlock = None
-        newPath = None
-        try:
-            t0 = time()
-            dataBlock = CcpnNefIo.convertToDataBlock(self, skipPrefixes=skipPrefixes,
-                                                     expandSelection=expandSelection,
-                                                     pidList=pidList)
-            t2 = time()
-            getLogger().info('File to dataBlock, time = %.2fs' % (t2 - t0))
-
-        finally:
-            self._endCommandEchoBlock()
-            self.unblankNotification()
-            if undo is not None:
-                undo.decreaseBlocking()
+        with undoStackBlocking():
+            with notificationBlanking():
+                t0 = time()
+                dataBlock = CcpnNefIo.convertToDataBlock(self, skipPrefixes=skipPrefixes,
+                                                         expandSelection=expandSelection,
+                                                         pidList=pidList)
+                t2 = time()
+                getLogger().info('File to dataBlock, time = %.2fs' % (t2 - t0))
 
         return dataBlock
 
@@ -986,27 +937,12 @@ class Project(AbstractWrapperObject):
         # Export the modified dataBlock to file
         from ccpn.core.lib import CcpnNefIo
 
-        defaults = OrderedDict((('dataBlock', None),
-                                ('path', None),
-                                ('overwriteExisting', None)))
-
-        self._startCommandEchoBlock('writeDataBlockToFile', values=locals(), defaults=defaults)
-        undo = self._undo
-        if undo is not None:
-            undo.increaseBlocking()
-        self.blankNotification()
-
-        try:
-            t0 = time()
-            CcpnNefIo.writeDataBlock(dataBlock, path=path, overwriteExisting=overwriteExisting)
-            t2 = time()
-            getLogger().info('Exporting dataBlock to file, time = %.2fs' % (t2 - t0))
-
-        finally:
-            self._endCommandEchoBlock()
-            self.unblankNotification()
-            if undo is not None:
-                undo.decreaseBlocking()
+        with undoStackBlocking():
+            with notificationBlanking():
+                t0 = time()
+                CcpnNefIo.writeDataBlock(dataBlock, path=path, overwriteExisting=overwriteExisting)
+                t2 = time()
+                getLogger().info('Exporting dataBlock to file, time = %.2fs' % (t2 - t0))
 
     def recurseAnalyseUrl(self, filePath, includeUndefined=False):
         """Recurse through the given path to find valid data that can be loaded
@@ -1322,6 +1258,23 @@ class Project(AbstractWrapperObject):
         #
         return result
 
+    def getObjectsById(self, className: str,
+                       id: str) -> typing.List[AbstractWrapperObject]:
+        """get objects from class name / shortName and the start of the ID.
+
+        The function does NOT interrogate the API level, which makes it faster in a
+        number fo cases, e.g. for NmrResidues"""
+
+        dd = self._pid2Obj.get(className)
+        if dd:
+            # NB the _pid2Obj entry is set in the object init.
+            # The relevant dictionary may therefore be missing if no object has yet been created
+            result = [tt[1] for tt in dd.items() if tt[0] == id]
+        else:
+            result = None
+        #
+        return result
+
     #===========================================================================================
     # new'Object' and other methods
     # Call appropriate routines in their respective locations
@@ -1444,7 +1397,7 @@ class Project(AbstractWrapperObject):
                                sequenceCode=sequenceCode, residueType=residueType, name=name)
 
     @logCommand(get='self')
-    def newNote(self, name: str = 'Note', text: str = None, **kwds):
+    def newNote(self, name: str = None, text: str = None, **kwds):
         """Create new Note.
 
         See the Note class for details.
@@ -1765,7 +1718,7 @@ class Project(AbstractWrapperObject):
 
     @logCommand(get='self')
     def newChemicalShiftList(self, name: str = None, unit: str = 'ppm', autoUpdate: bool = True,
-                              isSimulated: bool = False, comment: str = None, **kwds):
+                             isSimulated: bool = False, comment: str = None, **kwds):
         """Create new ChemicalShiftList.
 
         See the ChemicalShiftList class for details.

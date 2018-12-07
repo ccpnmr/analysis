@@ -45,7 +45,8 @@ from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import fitExistingPeakList
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import pickNewPeaks
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter
+from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, logCommandBlock, notificationBlanking
+
 from ccpn.util.Logging import getLogger
 
 
@@ -314,20 +315,13 @@ class PeakList(AbstractWrapperObject):
             posLevel = spectrum.positiveContourBase if doPos else None
             negLevel = spectrum.negativeContourBase if doNeg else None
 
-            undo = self._project._undo
-            self._startCommandEchoBlock('pickPeaksNd', values=locals(), defaults=defaults)
-            self._project.blankNotification()
-            # undo.increaseBlocking()
-            try:
-                apiPeaks = pickNewPeaks(self._apiPeakList, startPoint=startPoints, endPoint=endPoints,
-                                        posLevel=posLevel, negLevel=negLevel, fitMethod=fitMethod,
-                                        excludedRegions=excludedRegions, excludedDiagonalDims=excludedDiagonalDims,
-                                        excludedDiagonalTransform=excludedDiagonalTransform, minDropfactor=minDropfactor)
-
-            finally:
-                self._endCommandEchoBlock()
-                self._project.unblankNotification()
-                # undo.decreaseBlocking()
+            with logCommandBlock(get='self') as log:
+                log('pickPeaksNd')
+                with notificationBlanking():
+                    apiPeaks = pickNewPeaks(self._apiPeakList, startPoint=startPoints, endPoint=endPoints,
+                                            posLevel=posLevel, negLevel=negLevel, fitMethod=fitMethod,
+                                            excludedRegions=excludedRegions, excludedDiagonalDims=excludedDiagonalDims,
+                                            excludedDiagonalTransform=excludedDiagonalTransform, minDropfactor=minDropfactor)
 
         data2ObjDict = self._project._data2Obj
         result = [data2ObjDict[apiPeak] for apiPeak in apiPeaks]
@@ -381,11 +375,10 @@ class PeakList(AbstractWrapperObject):
         """
         Pick 1D peaks form data in  self.spectrum
         """
-        defaults = collections.OrderedDict((('size', 9), ('mode', 'wrap'), ('excludeRegions', None), ('positiveNoiseThreshold', None)))
-
-        self._startCommandEchoBlock('pickPeaks1dFiltered', values=locals(), defaults=defaults)
         ll = []
-        try:
+        with logCommandBlock(get='self') as log:
+            log('pickPeaks1dFiltered')
+
             if excludeRegions is None:
                 excludeRegions = [[-20.1, -19.1]]
             excludeRegions = [sorted(pair, reverse=True) for pair in excludeRegions]
@@ -434,8 +427,6 @@ class PeakList(AbstractWrapperObject):
                 height = newArray2[1][position]
                 peaks.append(self.newPeak(height=float(height), position=peakPosition))
 
-        finally:
-            self._endCommandEchoBlock()
         return peaks
 
     def _noiseLineWidth(self):
@@ -596,8 +587,9 @@ class PeakList(AbstractWrapperObject):
         import numpy as np
         import time
 
-        self._startCommandEchoBlock('automatic1dPeakPicking', values=locals())
-        try:
+        with logCommandBlock(get='self') as log:
+            log('peakFinder1D')
+
             spectrum = self.spectrum
             integralList = self.spectrum.newIntegralList()
 
@@ -632,8 +624,7 @@ class PeakList(AbstractWrapperObject):
             #   for i in minValues:
             #     if i[1] < -delta:
             #       peaks.append(self.newPeak(position=[i[0]], height=i[1]))
-        finally:
-            self._endCommandEchoBlock()
+
         # return peaks
 
     def copyTo(self, targetSpectrum: Spectrum, **kwargs) -> 'PeakList':
@@ -665,7 +656,7 @@ class PeakList(AbstractWrapperObject):
         #
         return newPeakList
 
-    def subtractPeakLists(self, peakList2: 'PeakList') -> 'PeakList':
+    def subtractPeakLists(self, peakListIn: 'PeakList') -> 'PeakList':
         """
         Subtracts peaks in peakList2 from peaks in peakList1, based on position,
         and puts those in a new peakList3.  Assumes a common spectrum for now.
@@ -680,10 +671,11 @@ class PeakList(AbstractWrapperObject):
                 else:
                     return peak
 
-        self._startCommandEchoBlock('subtractPeakLists', values={'peakList2': peakList2},
-                                    parName='newPeakList')
+        peakList2 = [self.project.getByPid(peak) if isinstance(peak, str) else peak for peak in peakListIn]
 
-        try:
+        with logCommandBlock(prefix='newPeakList=', get='self') as log:
+            peakStr = '[' + ','.join(["'%s'" % peak.pid for peak in peakList2]) + ']'
+            log('subtractPeakLists', peaks=peakStr)
 
             spectrum = self.spectrum
 
@@ -701,10 +693,6 @@ class PeakList(AbstractWrapperObject):
                     peakList3.newPeak(height=peak1.height, volume=peak1.volume, figureOfMerit=peak1.figureOfMerit,
                                       annotation=peak1.annotation, position=peak1.position,
                                       pointPosition=peak1.pointPosition)
-
-
-        finally:
-            self._endCommandEchoBlock()
 
         return peakList3
 

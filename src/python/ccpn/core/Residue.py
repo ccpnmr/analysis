@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import typing
-
+from functools import partial
 from ccpn.util import Common as commonUtil
 from ccpn.core.Project import Project
 from ccpn.core.Chain import Chain
@@ -33,7 +33,7 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Residue as ApiResidue
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock, undoStackBlocking, notificationBlanking
 from ccpn.util.Logging import getLogger
 
 
@@ -51,6 +51,9 @@ class Residue(AbstractWrapperObject):
 
     #: Name of plural link to instances of class
     _pluralLinkName = 'residues'
+
+    # the attribute name used by current
+    _currentAttributeName = 'residues'
 
     #: List of child classes.
     _childClasses = []
@@ -284,11 +287,9 @@ class Residue(AbstractWrapperObject):
             raise TypeError('Cannot delete residue that has assigned nmrResidues')
 
         if self._wrappedData in chainFragment.residues:
+            with logCommandBlock(get='self') as log:
+                log('delete')
 
-            self._startCommandEchoBlock('delete')
-            undo = self._project._undo
-
-            try:
                 oldResidues = list(chainFragment.residues)
                 newResidues = list(chainFragment.residues)
                 delRes = newResidues.pop(newResidues.index(apiResidue))
@@ -298,13 +299,9 @@ class Residue(AbstractWrapperObject):
                 chainFragment.__dict__['residues'] = tuple(newResidues)
 
                 # add new undo item to set the residues in the chainFragment
-                if undo is not None:
-                    undo.newItem(self._setFragmentResidues, self._setFragmentResidues,
-                                 undoArgs=(chainFragment, oldResidues),
-                                 redoArgs=(chainFragment, newResidues))
-
-            finally:
-                self._endCommandEchoBlock()
+                with undoStackBlocking() as addUndoItem:
+                    addUndoItem(undo=partial(self._setFragmentResidues, chainFragment, oldResidues),
+                                redo=partial(self._setFragmentResidues, chainFragment, newResidues))
 
     @property
     def nextResidue(self) -> 'Residue':
@@ -412,33 +409,32 @@ class Residue(AbstractWrapperObject):
         """
         apiResidue = self._wrappedData
 
-        self._startCommandEchoBlock('rename', sequenceCode)
-        self._project.blankNotification()
-        try:
-            if sequenceCode is None:
-                seqCode = apiResidue.seqId
-                seqInsertCode = ' '
+        with logCommandBlock(get='self') as log:
+            log('rename', sequenceCode)
 
-            else:
-                # Parse values from sequenceCode
-                code, ss, offset = commonUtil.parseSequenceCode(sequenceCode)
-                if code is None or offset is not None:
-                    raise ValueError("Illegal value for Residue.sequenceCode: %s" % sequenceCode)
-                seqCode = code
-                seqInsertCode = ss or ' '
+            with notificationBlanking():
+                if sequenceCode is None:
+                    seqCode = apiResidue.seqId
+                    seqInsertCode = ' '
 
-            previous = apiResidue.chain.findFirstResidue(seqCode=seqCode, seqInsertCode=seqInsertCode)
-            if (previous not in (None, apiResidue)):
-                raise ValueError("New sequenceCode %s clashes with existing Residue %s"
-                                 % (sequenceCode, self._project._data2Obj.get(previous)))
+                else:
+                    # Parse values from sequenceCode
+                    code, ss, offset = commonUtil.parseSequenceCode(sequenceCode)
+                    if code is None or offset is not None:
+                        raise ValueError("Illegal value for Residue.sequenceCode: %s" % sequenceCode)
+                    seqCode = code
+                    seqInsertCode = ss or ' '
 
-            apiResidue.seqCode = seqCode
-            apiResidue.seqInsertCode = seqInsertCode
-        finally:
-            self._endCommandEchoBlock()
-            self._project.unblankNotification()
-        self._finaliseAction('rename')
-        self._finaliseAction('change')
+                previous = apiResidue.chain.findFirstResidue(seqCode=seqCode, seqInsertCode=seqInsertCode)
+                if (previous not in (None, apiResidue)):
+                    raise ValueError("New sequenceCode %s clashes with existing Residue %s"
+                                     % (sequenceCode, self._project._data2Obj.get(previous)))
+
+                apiResidue.seqCode = seqCode
+                apiResidue.seqInsertCode = seqInsertCode
+
+            self._finaliseAction('rename')
+            # self._finaliseAction('change')
 
     #===========================================================================================
     # new'Object' and other methods
@@ -460,6 +456,7 @@ class Residue(AbstractWrapperObject):
         from ccpn.core.Atom import _newAtom
 
         return _newAtom(self, name=name, elementSymbol=elementSymbol, **kwds)
+
 
 #=========================================================================================
 # Connections to parents:

@@ -25,8 +25,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from typing import Sequence, Tuple, List, Optional
-from PyQt5 import QtGui, QtWidgets, Qt, QtCore
+from typing import Sequence, Tuple, List
+from functools import partial
 from ccpn.util import Common as commonUtil
 from ccpn.core.Peak import Peak
 from ccpn.core.Spectrum import Spectrum
@@ -38,7 +38,8 @@ from ccpn.util.Logging import getLogger
 from collections import OrderedDict
 from ccpn.core.lib.OrderedSpectrumViews import OrderedSpectrumViews
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import undoBlock
+from ccpn.core.lib.ContextManagers import undoBlock, logCommandBlock, undoStackBlocking
+
 
 # SV_TITLE = '_Strip'
 
@@ -55,6 +56,9 @@ class Strip(AbstractWrapperObject):
 
     #: Name of plural link to instances of class
     _pluralLinkName = 'strips'
+
+    # the attribute name used by current
+    _currentAttributeName = 'strip'
 
     #: List of child classes.
     _childClasses = []
@@ -102,6 +106,20 @@ class Strip(AbstractWrapperObject):
     @axisOrder.setter
     def axisOrder(self, value: Sequence):
         self._wrappedData.axisOrder = value
+
+    #GWV: moved here from _implementation/Axis.py
+    @property
+    def orderedAxes(self) -> Tuple:
+        "Axes in display order (X, Y, Z1, Z2, ...) "
+        apiStrip = self._wrappedData
+        ff = self._project._data2Obj.get
+        return tuple(ff(apiStrip.findFirstStripAxis(axis=x)) for x in apiStrip.orderedAxes)
+
+    @orderedAxes.setter
+    def orderedAxes(self, value: Sequence):
+        value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
+        #self._wrappedData.orderedAxes = tuple(x._wrappedData.axis for x in value)
+        self._wrappedData.axisOrder = tuple(x.code for x in value)
 
     @property
     def positions(self) -> Tuple[float, ...]:
@@ -492,23 +510,16 @@ class Strip(AbstractWrapperObject):
 
     #CCPN functions
     def clone(self):
-        """create new strip that duplicates this one, appending it at the end"""
-        self._startCommandEchoBlock('cloneStrip')
+        """create new strip that duplicates this one, appending it at the end
+        """
+        with logCommandBlock(prefix='newStrip=', get='self') as log:
+            log('clone')
 
-        _undo = self.project._undo
-        if _undo is not None:
-            _undo.increaseBlocking()
+            with undoStackBlocking() as addUndoItem:
+                newStrip = self._project._data2Obj.get(self._wrappedData.clone())
 
-        try:
-            newStrip = self._project._data2Obj.get(self._wrappedData.clone())
-        finally:
-            self._endCommandEchoBlock()
-
-        if _undo is not None:
-            _undo.decreaseBlocking()
-            # _undo.newItem(newStrip.delete, newStrip._unDelete)
-            _undo.newItem(self.spectrumDisplay.removeStrip, self.spectrumDisplay._unDelete,
-                          undoArgs=(newStrip,), redoArgs=(newStrip,))
+                addUndoItem(undo=partial(self.spectrumDisplay.removeStrip, newStrip),
+                            redo=partial(self.spectrumDisplay._unDelete, newStrip))
 
         return newStrip
 
@@ -532,88 +543,11 @@ class Strip(AbstractWrapperObject):
         # move the strip
         self._wrappedData.moveTo(newIndex)
 
-    # def moveTo(self, newIndex: int):
-    #     """Move strip to index newIndex in orderedStrips"""
-    #
-    #     currentIndex = self._wrappedData.index
-    #     if currentIndex == newIndex:
-    #         return
-    #
-    #     stripCount = self.spectrumDisplay.stripCount
-    #
-    #     if newIndex >= stripCount:
-    #         # Put strip at the right, which means newIndex should be stripCount - 1
-    #         if newIndex > stripCount:
-    #             # warning
-    #             self._project._logger.warning(
-    #                     "Attempt to copy strip to position %s in display with only %s strips"
-    #                     % (newIndex, stripCount))
-    #         newIndex = stripCount - 1
-    #
-    #     self._startCommandEchoBlock('moveTo', newIndex)
-    #     try:
-    #         # management of API objects
-    #         self._wrappedData.moveTo(newIndex)
-    #     finally:
-    #         self._endCommandEchoBlock()
-    #
-    #     # NB - no echo blocking below, as none of the layout stuff is modeled (?)
-    #
-    #     # NBNB TODO - should the stuff below not be moved to the corresponding GUI class?
-    #     # Is there always a layout, regardless of application?
-    #
-    #     # management of Qt layout
-    #     # TBD: need to soup up below with extra loop when have tiles
-    #     spectrumDisplay = self.spectrumDisplay
-    #     layout = spectrumDisplay.stripFrame.layout()
-    #     if not layout:  # should always exist but play safe:
-    #         return
-    #
-    #     for r in range(layout.rowCount()):
-    #         items = []
-    #         if spectrumDisplay.stripDirection == 'Y':
-    #             if currentIndex < newIndex:
-    #                 for n in range(currentIndex, newIndex + 1):
-    #                     item = layout.itemAtPosition(r, n)
-    #                     items.append(item)
-    #                     layout.removeItem(item)
-    #                 items = items[1:] + [items[0]]
-    #                 for m, item in enumerate(items):
-    #                     layout.addItem(item, r, m + currentIndex, )
-    #             else:
-    #                 for n in range(newIndex, currentIndex + 1):
-    #                     item = layout.itemAtPosition(r, n)
-    #                     items.append(item)
-    #                     layout.removeItem(item)
-    #                 items = [items[-1]] + items[:-1]
-    #                 for m, item in enumerate(items):
-    #                     layout.addItem(item, r, m + newIndex, )
-    #
-    #         elif spectrumDisplay.stripDirection == 'X':
-    #             if currentIndex < newIndex:
-    #                 for n in range(currentIndex, newIndex + 1):
-    #                     item = layout.itemAtPosition(n, 0)
-    #                     items.append(item)
-    #                     layout.removeItem(item)
-    #                 items = items[1:] + [items[0]]
-    #                 for m, item in enumerate(items):
-    #                     layout.addItem(item, m + currentIndex, 0)
-    #             else:
-    #                 for n in range(newIndex, currentIndex + 1):
-    #                     item = layout.itemAtPosition(n, 0)
-    #                     items.append(item)
-    #                     layout.removeItem(item)
-    #                 items = [items[-1]] + items[:-1]
-    #                 for m, item in enumerate(items):
-    #                     layout.addItem(item, m + newIndex, 0)
-
     def resetAxisOrder(self):
         """Reset display to original axis order"""
-        self._startCommandEchoBlock('resetAxisOrder')
-        try:
+        with logCommandBlock(get='self') as log:
+            log('resetAxisOrder')
             self._wrappedData.resetAxisOrder()
-        finally:
-            self._endCommandEchoBlock()
 
     def findAxis(self, axisCode):
         """Find axis"""
@@ -833,10 +767,10 @@ class Strip(AbstractWrapperObject):
                     # else:
                     peak = peakList.newPeak(ppmPositions=position)
 
-                        # peak.position = position
-                        # # note, the height below is not derived from any fitting
-                        # # but is a weighted average of the values at the neighbouring grid points
-                        # peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
+                    # peak.position = position
+                    # # note, the height below is not derived from any fitting
+                    # # but is a weighted average of the values at the neighbouring grid points
+                    # peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
                     result.append(peak)
                     peakLists.append(peakList)
 
@@ -1102,6 +1036,11 @@ class Strip(AbstractWrapperObject):
     def _recoverApiObject(strip):
         """recover the deleted api object by using the auto-generated code from the Model
         CCPN Internal
+
+
+        This is the new deleteObject decorator!
+
+
         """
         self = strip._wrappedData
         dataDict = self.__dict__

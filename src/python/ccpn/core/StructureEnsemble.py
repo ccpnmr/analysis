@@ -35,6 +35,7 @@ from ccpnmodel.ccpncore.api.ccp.molecule.MolStructure import StructureEnsemble a
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
 from ccpn.util.Logging import getLogger
+from ccpn.util import Common as commonUtil
 
 
 logger = getLogger()
@@ -68,7 +69,9 @@ class StructureEnsemble(AbstractWrapperObject):
     @property
     def _key(self) -> str:
         """id string - ID number converted to string"""
-        return str(self._wrappedData.ensembleId)
+        # return str(self._wrappedData.ensembleId)
+        # return str(self.name) + '_' + str(self.serial)
+        return self._wrappedData.name.translate(Pid.remapSeparators)
 
     @property
     def serial(self) -> int:
@@ -84,6 +87,11 @@ class StructureEnsemble(AbstractWrapperObject):
     def name(self) -> str:
         """Name of StructureEnsemble, part of identifier"""
         return self._wrappedData.name
+
+    @name.setter
+    def name(self, value: str):
+        """set name of ChemicalShiftList."""
+        self.rename(value)
 
     @property
     def data(self) -> EnsembleData:
@@ -150,7 +158,6 @@ class StructureEnsemble(AbstractWrapperObject):
 
     def rename(self, value: str):
         """Rename StructureEnsemble, changing its name and Pid.
-
         NB, the serial remains immutable."""
 
         if not isinstance(value, str):
@@ -158,13 +165,14 @@ class StructureEnsemble(AbstractWrapperObject):
         if not value:
             raise ValueError("StructureEnsemble name must be set")
         if Pid.altCharacter in value:
-            raise ValueError("Character %s not allowed in ccpn.StructureEnsemble.name" % Pid.altCharacter)
+            raise ValueError("Character %s not allowed in StructureEnsemble name" % Pid.altCharacter)
+        previous = self.getByRelativeId(value)
+        if previous not in (None, self):
+            raise ValueError("%s already exists" % previous.longPid)
 
-        self._startCommandEchoBlock('rename', value)
-        try:
+        with logCommandBlock(get='self') as log:
+            log('rename', value)
             self._wrappedData.name = value
-        finally:
-            self._endCommandEchoBlock()
 
     #=========================================================================================
     # CCPN functions
@@ -211,6 +219,20 @@ def _newStructureEnsemble(self: Project, serial: int = None, name: str = None, d
 
     nmrProject = self._wrappedData
 
+    if not name:
+        # Make default name
+        nextNumber = len(self.structureEnsembles)
+        strName = self._defaultName(StructureEnsemble)
+        name = '%s_%s' % (strName, nextNumber) if nextNumber > 0 else strName
+    names = [d.name for d in self.structureEnsembles]
+    while name in names:
+        name = commonUtil.incrementName(name)
+
+    if not isinstance(name, str):
+        raise TypeError("StructureEnsemble name must be a string")
+    if Pid.altCharacter in name:
+        raise ValueError("Character %s not allowed in StructureEnsemble name" % Pid.altCharacter)
+
     if serial is None:
         ll = nmrProject.root.structureEnsembles
         serial = max(x.ensembleId for x in ll) + 1 if ll else 1
@@ -235,20 +257,13 @@ def _newStructureEnsemble(self: Project, serial: int = None, name: str = None, d
     else:
         logger.warning("EnsembleData successfully set on new StructureEnsemble were not echoed - too large")
 
-        # result.data = EnsembleData()    # ejb
         result.data = data
         data._containingObject = result
         for modelNumber in sorted(data['modelNumber'].unique()):
             result.newModel(serial=modelNumber, label='Model_%s' % modelNumber)
 
-    # TODO:ED CHECK, but should be okay
-    # # Set up undo
-    # apiObjectsCreated = [newApiStructureEnsemble]
-    # apiObjectsCreated.extend(newApiStructureEnsemble.sortedModels())
-    # apiObjectsCreated.extend(newApiStructureEnsemble.parameters)
-    # undo.newItem(Undo._deleteAllApiObjects, nmrProject.root._unDelete,
-    #              undoArgs=(apiObjectsCreated,),
-    #              redoArgs=(apiObjectsCreated, (nmrProject, nmrProject.root)))
+        # for model in result.models:           ?
+        #     model._finaliseAction('create')
 
     return result
 

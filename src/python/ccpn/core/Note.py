@@ -35,6 +35,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Note as ApiNote
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
 from ccpn.util.Logging import getLogger
+from ccpn.util import Common as commonUtil
 
 
 class Note(AbstractWrapperObject):
@@ -65,8 +66,10 @@ class Note(AbstractWrapperObject):
     @property
     def _key(self) -> str:
         """Residue local ID"""
-        return Pid.IDSEP.join((str(self._wrappedData.serial),
-                               self._wrappedData.name.translate(Pid.remapSeparators)))
+        # return Pid.IDSEP.join((str(self._wrappedData.serial),
+        #                        self._wrappedData.name.translate(Pid.remapSeparators), 'HELP'))
+        # return str(self.name)+'_'+str(self.serial)
+        return self._wrappedData.name.translate(Pid.remapSeparators)
 
     @property
     def serial(self) -> int:
@@ -77,6 +80,11 @@ class Note(AbstractWrapperObject):
     def name(self) -> str:
         """Name of note, part of identifier"""
         return self._wrappedData.name
+
+    @name.setter
+    def name(self, value: str):
+        """set Name of note, part of identifier"""
+        self.rename(value)
 
     @property
     def _parent(self) -> Project:
@@ -90,15 +98,10 @@ class Note(AbstractWrapperObject):
 
     @text.setter
     def text(self, value: str):
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-        # self._wrappedData.text = value
-        #
         if value is not None:
             if not isinstance(value, str):
-                raise TypeError("Note text must be a string")  # ejb catch non-string
+                raise TypeError("Note text must be a string")
         self._wrappedData.text = value
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
 
     @property
     def created(self) -> typing.Optional[str]:
@@ -136,19 +139,18 @@ class Note(AbstractWrapperObject):
         NB, the serial remains immutable."""
 
         if not isinstance(value, str):
-            raise TypeError("Note name must be a string")  # ejb catch non-string
+            raise TypeError("Note name must be a string")
         if not value:
-            raise ValueError("Note name must be set")  # ejb catch empty string
+            raise ValueError("Note name must be set")
         if Pid.altCharacter in value:
-            raise ValueError("Character %s not allowed in ccpn.Note.name" % Pid.altCharacter)
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+            raise ValueError("Character %s not allowed in Note name" % Pid.altCharacter)
+        previous = self.getByRelativeId(value)
+        if previous not in (None, self):
+            raise ValueError("%s already exists" % previous.longPid)
 
-        self._startCommandEchoBlock('rename', value)
-        try:
+        with logCommandBlock(get='self') as log:
+            log('rename')
             self._wrappedData.name = value
-        finally:
-            self._endCommandEchoBlock()
 
     #=========================================================================================
     # CCPN functions
@@ -165,7 +167,7 @@ class Note(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(Note)
-def _newNote(self: Project, name: str = 'Note', text: str = None, serial: int = None) -> Note:
+def _newNote(self: Project, name: str = None, text: str = None, serial: int = None) -> Note:
     """Create new Note.
 
     See the Note class for details.
@@ -175,6 +177,15 @@ def _newNote(self: Project, name: str = 'Note', text: str = None, serial: int = 
     :param serial: optional serial number.
     :return: a new Note instance.
     """
+
+    if not name:
+        # Make default name
+        nextNumber = len(self.notes)
+        noteName = self._defaultName(Note)
+        name = '%s_%s' % (noteName, nextNumber) if nextNumber > 0 else noteName
+    names = [d.name for d in self.notes]
+    while name in names:
+        name = commonUtil.incrementName(name)
 
     if not isinstance(name, str):
         raise TypeError("Note name must be a string")

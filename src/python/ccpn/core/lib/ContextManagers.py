@@ -23,21 +23,11 @@ __date__ = "$Date$"
 # Start of code
 #=========================================================================================
 
-from contextlib import contextmanager
-import functools
-import itertools
-import operator
-import typing
 import decorator
+from contextlib import contextmanager
+from collections import Iterable
 from functools import partial
-from collections import OrderedDict
-from ccpn.core import _importOrder
-# from ccpn.core.lib import CcpnSorting
 from ccpn.core.lib import Util as coreUtil
-from ccpn.util import Common as commonUtil
-from ccpn.core.lib import Pid
-from ccpnmodel.ccpncore.api.memops import Implementation as ApiImplementation
-from ccpn.util.Logging import getLogger
 from ccpn.framework.Application import getApplication
 
 
@@ -691,9 +681,16 @@ class _ObjectStore(object):
         if not hasattr(self.current, self.attributeName):
             raise RuntimeError('Current object does not have attribute "%s"' % self.attributeName)
         self.currentObjects = None
+        self.singularOnly = False
 
     def _storeCurrentSelectedObject(self):
-        self.currentObjects = list(getattr(self.current, self.attributeName))
+        items = getattr(self.current, self.attributeName)
+        if isinstance(items, Iterable):
+            self.currentObjects = tuple(items)
+            self.singularOnly = False
+        else:
+            self.currentObjects = items
+            self.singularOnly = True
 
     def _restoreCurrentSelectedObject(self):
         self.current.increaseBlanking()

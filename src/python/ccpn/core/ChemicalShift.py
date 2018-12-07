@@ -58,6 +58,9 @@ class ChemicalShift(AbstractWrapperObject):
     #: Name of plural link to instances of class
     _pluralLinkName = 'chemicalShifts'
 
+    # the attribute name used by current
+    _currentAttributeName = 'chemicalShifts'
+
     #: List of child classes.
     _childClasses = []
 

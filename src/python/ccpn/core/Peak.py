@@ -62,6 +62,9 @@ class Peak(AbstractWrapperObject):
     #: Name of plural link to instances of class
     _pluralLinkName = 'peaks'
 
+    # the attribute name used by current
+    _currentAttributeName = 'peaks'
+
     #: List of child classes.
     _childClasses = []
 
@@ -70,9 +73,6 @@ class Peak(AbstractWrapperObject):
 
     # _linkedPeak = None
     _linkedPeaksName = 'linkedPeaks'
-
-    # the attribute name used by current
-    _currentAttributeName = 'peaks'
 
     # CCPN properties
     @property

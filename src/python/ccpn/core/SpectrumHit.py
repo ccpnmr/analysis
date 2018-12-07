@@ -80,6 +80,9 @@ class SpectrumHit(AbstractWrapperObject):
     #: Name of plural link to instances of class
     _pluralLinkName = 'spectrumHits'
 
+    # the attribute name used by current
+    _currentAttributeName = 'spectrumHit'
+
     #: List of child classes.
     _childClasses = []
 

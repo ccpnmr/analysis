@@ -59,6 +59,9 @@ class Integral(AbstractWrapperObject):
     #: Name of plural link to instances of class
     _pluralLinkName = 'integrals'
 
+    # the attribute name used by current
+    _currentAttributeName = 'integrals'
+
     #: List of child classes.
     _childClasses = []
 
@@ -68,9 +71,6 @@ class Integral(AbstractWrapperObject):
     _baseline = None
     _linkedPeakNotifier = None
     _linkedPeaks = set()
-
-    # the attribute name used by current
-    _currentAttributeName = 'integrals'
 
     # CCPN properties
     @property
@@ -328,6 +328,8 @@ class Integral(AbstractWrapperObject):
         :param peak: single peak
         """
         spectrum = self._parent.spectrum
+        peak = self.project.getByPid(peak) if isinstance(peak, str) else peak
+
         if peak:
             if not isinstance(peak, Peak):
                 raise TypeError('%s is not of type Peak' % peak)
@@ -383,7 +385,7 @@ def _newIntegral(self: IntegralList,
     apiIntegral = apiParent.newIntegral(**dd)
     result = self._project._data2Obj.get(apiIntegral)
     if result is None:
-        raise RuntimeError('Unable to generate new IntegralList item')
+        raise RuntimeError('Unable to generate new Integral item')
 
     if serial is not None:
         try:

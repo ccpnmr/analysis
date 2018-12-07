@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import collections
 import typing
 import operator
-
+from functools import partial
 from ccpn.util import Common as commonUtil
 from ccpn.core.lib import MoleculeLib
 from ccpn.core.Chain import Chain
@@ -39,7 +39,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrChain as ApiNmrChain
 from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.lib import Constants
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, logCommandBlock, undoStackBlocking
 
 
 class NmrChain(AbstractWrapperObject):
@@ -67,6 +67,9 @@ class NmrChain(AbstractWrapperObject):
 
     #: Name of plural link to instances of class
     _pluralLinkName = 'nmrChains'
+
+    # the attribute name used by current
+    _currentAttributeName = 'nmrChains'
 
     #: List of child classes.
     _childClasses = []
@@ -165,21 +168,19 @@ class NmrChain(AbstractWrapperObject):
             raise ValueError("NmrChain:%s cannot be renamed" % Constants.defaultNmrChainCode)
         elif Pid.altCharacter in value:
             raise ValueError("Character %s not allowed in ccpn.NmrChain.shortName" % Pid.altCharacter)
-        else:
-            # NB names that clash with existing NmrChains cause ValueError at the API level.
-            self._startCommandEchoBlock('rename', value)
-            try:
-                wrappedData.code = value
-            finally:
-                self._endCommandEchoBlock()
+        previous = self.getByRelativeId(value)
+        if previous not in (None, self):
+            raise ValueError("%s already exists" % previous.longPid)
+
+        with logCommandBlock(get='self') as log:
+            log('rename')
+            wrappedData.code = value
 
     def deassign(self):
         """Reset NmrChain back to its originalName, cutting all assignment links"""
-        self._startCommandEchoBlock('deassign')
-        try:
+        with logCommandBlock(get='self') as log:
+            log('deassign')
             self._wrappedData.code = None
-        finally:
-            self._endCommandEchoBlock()
 
     def assignSingleResidue(self, thisNmrResidue: typing.Union['NmrResidue'], firstResidue: typing.Union[Residue, str]):
         """Assign a single unconnected residue from the default '@-' chain"""
@@ -203,11 +204,9 @@ class NmrChain(AbstractWrapperObject):
                              % (thisNmrResidue.id, firstResidue.id))
 
         # If we get here we are OK - assign residues and delete NmrChain
-        self._startCommandEchoBlock('assignSingleResidue', firstResidue)
-        try:
+        with logCommandBlock(get='self') as log:
+            log('assignSingleResidue', thisNmrResidue=repr(firstResidue.pid))
             thisNmrResidue._wrappedData.assignedResidue = firstResidue._wrappedData
-        finally:
-            self._endCommandEchoBlock()
 
     def assignConnectedResidues(self, firstResidue: typing.Union[Residue, str]):
         """Assign all NmrResidues in connected NmrChain sequentially,
@@ -248,19 +247,13 @@ class NmrChain(AbstractWrapperObject):
             else:
                 residues.append(next)
 
-        # If we get here we are OK - assign residues and delete NmrChain
-        self._startCommandEchoBlock('assignConnectedResidues', firstResidue)
-        try:
+        with logCommandBlock(get='self') as log:
+            log('assignConnectedResidues', firstResidue=repr(firstResidue.pid))
 
-            # TODO:ED could check if the nmrChain exists and create if not
             tempChain = self.project.fetchNmrChain(firstResidue.chain.shortName)
             for ii, res in enumerate(residues):
                 apiStretch[ii].assignedResidue = res._wrappedData
             apiNmrChain.delete()
-
-
-        finally:
-            self._endCommandEchoBlock()
 
     def reverse(self, _force=False):
         """Reverse order of NmrResidues within NmrChain
@@ -268,20 +261,16 @@ class NmrChain(AbstractWrapperObject):
         Illegal for assigned NmrChains, and only relevant for connected NmrChains.
         Serves mainly as building block to make disconnections easier to undo"""
 
-        # print ('>>>reverse')
         if self.chain is not None:  # and _force is False:
             raise ValueError("NmrChain is assigned (to %s) and cannot be reversed"
                              % self.chain.longPid)
 
-        # _undo
-        undo = self._wrappedData.root._undo
-        self._startCommandEchoBlock('reverse')
-        try:
-            self._wrappedData.__dict__['mainResonanceGroups'].reverse()
-            if undo is not None:
-                undo.newItem(self.reverse, self.reverse)
-        finally:
-            self._endCommandEchoBlock()
+        with logCommandBlock(get='self') as log:
+            log('reverse')
+            with undoStackBlocking() as addUndoItem:
+                self._wrappedData.__dict__['mainResonanceGroups'].reverse()
+
+                addUndoItem(undo=partial(self.reverse), redo=partial(self.reverse))
 
     def renumberNmrResidues(self, offset: int, start: int = None, stop: int = None):
         """Renumber nmrResidues in range start-stop (inclusive) by adding offset
@@ -299,9 +288,9 @@ class NmrChain(AbstractWrapperObject):
             nmrResidues.reverse()
 
         changedNmrResidues = []
-        self._startCommandEchoBlock('renumberNmrResidues', offset,
-                                    values={'start': start, 'stop': stop})
-        try:
+        with logCommandBlock(get='self') as log:
+            log('renumberNmrResidues')
+
             for nmrResidue in nmrResidues:
                 sequenceCode = nmrResidue.sequenceCode
                 code, ss, offs = commonUtil.parseSequenceCode(sequenceCode)
@@ -314,8 +303,6 @@ class NmrChain(AbstractWrapperObject):
                         nmrResidue.rename('%s.%s' % (newSequenceCode, nmrResidue.residueType or ''))
                         changedNmrResidues.append(nmrResidue)
 
-        finally:
-            self._endCommandEchoBlock()
             for nmrResidue in changedNmrResidues:
                 nmrResidue._finaliseAction('rename')
                 nmrResidue._finaliseAction('change')

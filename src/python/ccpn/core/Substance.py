@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from collections import OrderedDict
 # from typing import Tuple, Optional, Sequence, Dict
 import typing
-
+from functools import partial
 from ccpn.util import Common as commonUtil
 from ccpn.core.Project import Project
 from ccpn.core.Sample import Sample
@@ -77,6 +77,9 @@ class Substance(AbstractWrapperObject):
 
     #: Name of plural link to instances of class
     _pluralLinkName = 'substances'
+
+    # the attribute name used by current
+    _currentAttributeName = 'substances'
 
     #: List of child classes.
     _childClasses = []
@@ -582,50 +585,43 @@ class Substance(AbstractWrapperObject):
             raise TypeError("ccpn.Substance.labelling must be a string")
         elif not labelling:
             # raise ValueError("ccpn.Substance.labelling must be set")
-
-            #TODO:ED testing
             apiLabeling = DEFAULT_LABELLING
 
         elif Pid.altCharacter in labelling:
             raise ValueError("Character %s not allowed in ccpn.Substance.labelling" % Pid.altCharacter)
 
-        self._startCommandEchoBlock('rename', name, labelling)
-        undo = self._project._undo
-        if undo is not None:
-            undo.increaseBlocking()
+        from ccpn.core.lib.ContextManagers import logCommandBlock, undoStackBlocking
 
-        try:
-            renamedObjects = [self]
-            for sampleComponent in self.sampleComponents:
-                for spectrumHit in sampleComponent.spectrumHits:
-                    coreUtil._resetParentLink(spectrumHit._wrappedData, 'spectrumHits',
-                                              OrderedDict((('substanceName', name),
-                                                           ('sampledDimension', spectrumHit.pseudoDimensionNumber),
-                                                           ('sampledPoint', spectrumHit.pointNumber)))
+        with logCommandBlock(get='self') as log:
+            log('rename')
+            with undoStackBlocking() as addUndoItem:
+
+                renamedObjects = [self]
+                for sampleComponent in self.sampleComponents:
+                    for spectrumHit in sampleComponent.spectrumHits:
+                        coreUtil._resetParentLink(spectrumHit._wrappedData, 'spectrumHits',
+                                                  OrderedDict((('substanceName', name),
+                                                               ('sampledDimension', spectrumHit.pseudoDimensionNumber),
+                                                               ('sampledPoint', spectrumHit.pointNumber)))
+                                                  )
+                        renamedObjects.append(spectrumHit)
+
+                    # NB this must be done AFTER the spectrumHit loop to avoid breaking links
+                    coreUtil._resetParentLink(sampleComponent._wrappedData, 'sampleComponents',
+                                              OrderedDict((('name', name), ('labeling', apiLabeling)))
                                               )
-                    renamedObjects.append(spectrumHit)
+                    renamedObjects.append(sampleComponent)
 
-                # NB this must be done AFTER the spectrumHit loop to avoid breaking links
-                coreUtil._resetParentLink(sampleComponent._wrappedData, 'sampleComponents',
+                # NB this must be done AFTER the sampleComponent loop to avoid breaking links
+                coreUtil._resetParentLink(self._wrappedData, 'components',
                                           OrderedDict((('name', name), ('labeling', apiLabeling)))
                                           )
-                renamedObjects.append(sampleComponent)
+                for obj in renamedObjects:
+                    obj._finaliseAction('rename')
+                    obj._finaliseAction('change')
 
-            # NB this must be done AFTER the sampleComponent loop to avoid breaking links
-            coreUtil._resetParentLink(self._wrappedData, 'components',
-                                      OrderedDict((('name', name), ('labeling', apiLabeling)))
-                                      )
-            for obj in renamedObjects:
-                obj._finaliseAction('rename')
-                obj._finaliseAction('change')
-
-        finally:
-            if undo is not None:
-                undo.decreaseBlocking()
-            self._endCommandEchoBlock()
-
-        undo.newItem(self.rename, self.rename, undoArgs=(oldName, oldLabelling),
-                     redoArgs=(name, labelling,))
+                addUndoItem(undo=partial(self.rename, oldName, oldLabelling),
+                             redo=partial(self.rename, name, labelling))
 
     #=========================================================================================
     # CCPN functions

@@ -376,8 +376,6 @@ class Multiplet(AbstractWrapperObject):
             if pp not in spectrum.peaks:
                 raise ValueError('%s does not belong to spectrum: %s' % (pp.pid, spectrum.pid))
 
-        from ccpn.core.lib.ContextManagers import logCommandBlock
-
         with logCommandBlock(get='self') as log:
             if pks:
                 peakStr = '[' + ','.join(["'%s'" % peak.pid for peak in pks]) + ']'
@@ -408,8 +406,6 @@ class Multiplet(AbstractWrapperObject):
                 raise ValueError('%s does not belong to multiplet: %s' % (pp.pid, self.pid))
             if pp not in spectrum.peaks:
                 raise ValueError('%s does not belong to spectrum: %s' % (pp.pid, spectrum.pid))
-
-        from ccpn.core.lib.ContextManagers import logCommandBlock
 
         with logCommandBlock(get='self') as log:
             if pks:

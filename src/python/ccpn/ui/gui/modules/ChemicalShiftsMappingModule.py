@@ -63,6 +63,11 @@ from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
 import random
+from ccpn.ui.gui.widgets.ConcentrationsWidget import ConcentrationWidget
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.popups.Dialog import CcpnDialog
+from ccpn.util.Constants import concentrationUnits
+
 
 
 def chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues, belowThresholdResidues,
@@ -98,6 +103,8 @@ def chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues,
 
   return filePath
 
+DefaultConcentration = 0.0
+DefaultConcentrationUnit = concentrationUnits[0]
 DefaultThreshould = 0.1
 PymolScriptName = 'chemicalShiftMapping_Pymol_Template.py'
 
@@ -510,6 +517,11 @@ class ChemicalShiftsMapping(CcpnModule):
     self._checkSpectraWithPeakListsOnly()
     self.__addCheckBoxesAttr(self.spectraSelectionWidget.allSpectraCheckBoxes)
     self.__addCheckBoxesAttr(self.spectraSelectionWidget.allSG_CheckBoxes)
+
+    i += 1
+    self.concentrationLabel = Label(self.scrollAreaWidgetContents, text='Concentrations', grid=(i, 0), vAlign='t')
+    self.concentrationButton = Button(self.scrollAreaWidgetContents, text='Setup...', callback=self._setupConcentrationsPopup,
+                                      grid=(i, 1))
 
     # self.spectraSelectionWidget.setMaximumHeight(150)
     i += 1
@@ -1051,6 +1063,77 @@ class ChemicalShiftsMapping(CcpnModule):
                    self._mouseDoubleClickEvent(event)
                else:
                  getLogger().warning('Impossible to navigate to peak position. Set a current strip first')
+
+
+  def _setupConcentrationsPopup(self):
+    popup = CcpnDialog(windowTitle='Setup Concentrations', setLayout=True)
+
+    spectra = self.spectraSelectionWidget.getSelections()
+    names = [sp.name for sp in spectra]
+    w = ConcentrationWidget(popup, names=names, grid=(0,0))
+    vs, u = self._getConcentrationsFromSpectra(spectra)
+    w.setValues(vs)
+    w.setUnit(u)
+    buttons = ButtonList(popup, texts=['Cancel', 'Apply', 'Ok'],
+                         callbacks=[popup.reject, partial(self._applyConcentrations,w),
+                                                                            partial(self._closeConcentrationsPopup,popup,w)],
+                         grid=(1,0))
+    popup.show()
+    popup.raise_()
+
+  def _applyConcentrations(self, w):
+    spectra = self.spectraSelectionWidget.getSelections()
+    vs, u = w.getValues() , w.getUnit()
+    self._addConcentrationsFromSpectra(spectra, vs, u)
+
+  def _closeConcentrationsPopup(self,popup, w):
+    self._applyConcentrations(w)
+    popup.accept()
+
+  def  _getConcentrationsFromSpectra(self, spectra):
+
+    vs = []
+    # us = []
+    u = DefaultConcentrationUnit
+    for spectrum in spectra:
+
+      if spectrum.sample:
+        sampleComponent = spectrum.sample._fetchSampleComponent(name=spectrum.name)
+        v = sampleComponent.concentration or DefaultConcentration
+        u = sampleComponent.concentrationUnit
+      else:
+        v = DefaultConcentration
+        u = DefaultConcentrationUnit
+
+      vs.append(v)
+      # us.append(u)
+      # this is unfortunate. We can select only one unit for all
+
+    return vs, u
+
+
+
+  def _addConcentrationsFromSpectra(self, spectra, concentrationValues, concentrationUnit):
+    """
+    
+    :return: 
+    """""
+
+    # add concentrations
+
+    for spectrum, value in zip(spectra, concentrationValues):
+      if not spectrum.sample:
+        sample = self.project.newSample(name=spectrum.name)
+        sample.spectra = [spectrum]
+        newSampleComponent = sample.newSampleComponent(name=spectrum.name)
+        newSampleComponent.concentration = value
+        newSampleComponent.concentrationUnit = concentrationUnit
+
+      else:
+        sample = spectrum.sample
+        newSampleComponent = sample._fetchSampleComponent(name=spectrum.name)
+        newSampleComponent.concentration = value
+        newSampleComponent.concentrationUnit = concentrationUnit
 
 
   def close(self):

@@ -136,7 +136,7 @@ class SampleComponent(AbstractWrapperObject):
 
   @property
   def concentrationUnit(self) -> str:
-    """Unit of SampleComponent.concentration, one of: 'Molar', 'g/L', 'L/L', 'mol/mol', 'g/g' """
+    """Unit of SampleComponent.concentration, one of: 'Molar', 'g/L', 'L/L', 'mol/mol', 'g/g' , 'eq' """
 
     result =  self._wrappedData.concentrationUnit
     # if result is not None and result not in Constants.concentrationUnits:
@@ -207,6 +207,9 @@ class SampleComponent(AbstractWrapperObject):
   def _getAllWrappedData(cls, parent: Sample)-> list:
     """get wrappedData (SampleComponent) for all SampleComponent children of parent Sample"""
     return parent._wrappedData.sortedSampleComponents()
+
+
+
 
 
 def getter(self:SpectrumHit) -> SampleComponent:

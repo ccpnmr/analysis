@@ -232,6 +232,19 @@ class Sample(AbstractWrapperObject):
     ff = self._project._data2Obj.get
     return tuple(sorted(ff(x) for x in self._apiSample.sampledDataDims))
 
+  def _fetchSampleComponent(self, name: str):
+    """Fetch SampleComponent with name=name, creating it if necessary"""
+
+    # self._startCommandEchoBlock('fetchSampleComponent', name, parName='newSampleComponent')
+    ff = self._project._data2Obj.get
+    # try:
+    result = (ff(self._wrappedData.findFirstSampleComponent(name=name)) or
+                self.newSampleComponent(name=name))
+    # finally:
+    #   self._endCommandEchoBlock()
+
+    return result
+
   # Implementation functions
   def rename(self, value:str):
     """Rename Sample, changing its name and Pid."""

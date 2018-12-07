@@ -559,6 +559,8 @@ def get1DdataInRange(x,y, xRange):
     :return: x,y within the xRange (minXrange,maxXrange)
 
     """
+    if xRange is None:
+      return x,y
     point1, point2 = np.max(xRange), np.min(xRange)
     x_filtered = np.where((x <= point1) & (x >= point2))
     y_filtered = y[x_filtered]

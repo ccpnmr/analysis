@@ -1009,8 +1009,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # spawn rebuild event for the grid
         if self.gridList:
-            self.gridList[0].renderMode = GLRENDERMODE_REBUILD
-            self.gridList[2].renderMode = GLRENDERMODE_REBUILD
+            for gr in self.gridList:
+                gr.renderMode = GLRENDERMODE_REBUILD
+            # self.gridList[0].renderMode = GLRENDERMODE_REBUILD
+            # self.gridList[2].renderMode = GLRENDERMODE_REBUILD
 
         # ratios have changed so rescale the peak/multiplet symbols
         self._GLPeaks.rescale()
@@ -1036,8 +1038,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # spawn rebuild event for the grid
         if self.gridList:
-            self.gridList[0].renderMode = GLRENDERMODE_REBUILD
-            self.gridList[1].renderMode = GLRENDERMODE_REBUILD
+            for gr in self.gridList:
+                gr.renderMode = GLRENDERMODE_REBUILD
+            # self.gridList[0].renderMode = GLRENDERMODE_REBUILD
+            # self.gridList[1].renderMode = GLRENDERMODE_REBUILD
 
         # ratios have changed so rescale the peak/multiplet symbols
         self._GLPeaks.rescale()
@@ -2938,6 +2942,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
         elif drawList.renderMode == GLRENDERMODE_RESCALE:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
+
+            drawList.defineIndexVBO(enableVBO=True)
 
     def drawMarksRulers(self):
         if self.strip.isDeleted:

@@ -404,6 +404,9 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
     def _appendLabel(self, spectrumView, objListView, stringList, obj):
         """Append a new label to the end of the list
         """
+        if obj.isDeleted:
+            return
+
         if not obj.position:
             return
 
@@ -1646,6 +1649,9 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             # for peakListView in spectrumView.peakListViews:
             for objListView in self.listViews(spectrumView):  # spectrumView.peakListViews:
 
+                if objListView.isDeleted:
+                    continue
+
                 if objListView in self._GLSymbols.keys():
                     if self._GLSymbols[objListView].renderMode == GLRENDERMODE_RESCALE:
                         self._buildSymbols(spectrumView, objListView)
@@ -1671,6 +1677,9 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
             # for peakListView in spectrumView.peakListViews:
             for objListView in self.listViews(spectrumView):
+
+                if objListView.isDeleted:
+                    continue
 
                 if objListView in self._GLLabels.keys():
                     if self._GLLabels[objListView].renderMode == GLRENDERMODE_RESCALE:
@@ -1777,7 +1786,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         #         if spectrumView.isVisible() and objListView.isVisible():
 
         for objListView, specView in self._visibleListViews:
-            if objListView in self._GLSymbols.keys():
+            if not objListView.isDeleted and objListView in self._GLSymbols.keys():
                 # self._GLSymbols[objListView].drawIndexArray()
                 self._GLSymbols[objListView].drawIndexVBO(enableVBO=False)
 
@@ -1801,7 +1810,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         #         if spectrumView.isVisible() and objListView.isVisible():
 
         for objListView, specView in self._visibleListViews:
-            if objListView in self._GLLabels.keys():
+            if not objListView.isDeleted and objListView in self._GLLabels.keys():
                 for drawString in self._GLLabels[objListView].stringList:
                     drawString.drawTextArrayVBO(enableVBO=True)
                     # drawString.defineTextArray()
@@ -2634,7 +2643,7 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
         #         if spectrumView.isVisible() and integralListView.isVisible():
 
         for integralListView, specView in self._visibleListViews:
-            if integralListView in self._GLSymbols.keys():
+            if not integralListView.isDeleted and integralListView in self._GLSymbols.keys():
                 self._GLSymbols[integralListView].drawIndexVBO(enableVBO=True)
 
                 # draw the integralAreas if they exist

@@ -1203,6 +1203,10 @@ class Project(AbstractWrapperObject):
                     # spectrum.sliceColour = autoCorrectHexColour(spectrum.sliceColour,
                     #                                                       getColours()[CCPNGLWIDGET_HEXBACKGROUND])
 
+            # if there are no peakLists then create a new one - taken from Spectrum _spectrumMakeFirstPeakList notifier
+            if not spectrum.peakLists:
+                spectrum.newPeakList()
+
             return [spectrum]
 
     def _loadLookupFile(self, path: str, subType: str, ):

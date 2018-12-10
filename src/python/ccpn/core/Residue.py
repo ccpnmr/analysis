@@ -243,7 +243,7 @@ class Residue(AbstractWrapperObject):
         else:
             result = self._project._data2Obj.get(
                     apiResidue.chain.findFirstResidue(seqId=molResidue.serial))
-        #
+
         return result
 
     @property
@@ -257,7 +257,7 @@ class Residue(AbstractWrapperObject):
         else:
             result = self._project._data2Obj.get(
                     apiResidue.chain.findFirstResidue(seqId=molResidue.serial))
-        #
+
         return result
 
     def resetVariantToDefault(self):
@@ -303,27 +303,28 @@ class Residue(AbstractWrapperObject):
                     addUndoItem(undo=partial(self._setFragmentResidues, chainFragment, oldResidues),
                                 redo=partial(self._setFragmentResidues, chainFragment, newResidues))
 
-    @property
-    def nextResidue(self) -> 'Residue':
-        "Next sequentially connected Residue"
-        apiResidue = self._wrappedData
-        nextApiMolResidue = apiResidue.molResidue.nextMolResidue
-        if nextApiMolResidue is None:
-            return None
-        else:
-            return self._project._data2Obj.get(
-                    apiResidue.chain.findFirstResidue(seqId=nextApiMolResidue.serial))
-
-    @property
-    def previousResidue(self) -> 'Residue':
-        "Previous sequentially connected Residue"
-        apiResidue = self._wrappedData
-        previousApiMolResidue = apiResidue.molResidue.previousMolResidue
-        if previousApiMolResidue is None:
-            return None
-        else:
-            return self._project._data2Obj.get(
-                    apiResidue.chain.findFirstResidue(seqId=previousApiMolResidue.serial))
+    #EJB 20181210: defined twice
+    # @property
+    # def nextResidue(self) -> 'Residue':
+    #     "Next sequentially connected Residue"
+    #     apiResidue = self._wrappedData
+    #     nextApiMolResidue = apiResidue.molResidue.nextMolResidue
+    #     if nextApiMolResidue is None:
+    #         return None
+    #     else:
+    #         return self._project._data2Obj.get(
+    #                 apiResidue.chain.findFirstResidue(seqId=nextApiMolResidue.serial))
+    #
+    # @property
+    # def previousResidue(self) -> 'Residue':
+    #     "Previous sequentially connected Residue"
+    #     apiResidue = self._wrappedData
+    #     previousApiMolResidue = apiResidue.molResidue.previousMolResidue
+    #     if previousApiMolResidue is None:
+    #         return None
+    #     else:
+    #         return self._project._data2Obj.get(
+    #                 apiResidue.chain.findFirstResidue(seqId=previousApiMolResidue.serial))
 
     @property
     def nmrResidue(self) -> typing.Optional['NmrResidue']:

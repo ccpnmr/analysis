@@ -242,9 +242,13 @@ class PeakList(AbstractWrapperObject):
         """
         super()._finaliseAction(action=action)
 
-        if action in ['change', 'create', 'delete']:
-            for plv in self.peakListViews:
-                plv._finaliseAction(action=action)
+        # this is a can-of-worms for undelete at the minute
+        try:
+            if action in ['change', 'create', 'delete']:
+                for plv in self.peakListViews:
+                    plv._finaliseAction(action=action)
+        except Exception as es:
+            pass
 
     #=========================================================================================
     # CCPN functions

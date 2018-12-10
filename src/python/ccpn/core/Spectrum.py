@@ -1693,35 +1693,45 @@ class Spectrum(AbstractWrapperObject):
     #     """
     #     self._wrappedData.delete()
 
+    @deleteObject()
     @cached.clear(PLANEDATACACHE)  # Check if there was a planedata cache, and if so, clear it
     @cached.clear(SLICEDATACACHE)  # Check if there was a slicedata cache, and if so, clear it
     def delete(self):
         """Delete Spectrum"""
-        with logCommandBlock(get='self') as log:
-            log('delete')
+        # with logCommandBlock(get='self') as log:
+        #     log('delete')
 
             # handle spectrumView ordering - this should be moved to spectrumView or spectrumDisplay via notifier
-            specDisplays = []
-            specViews = []
-            for sp in self.spectrumViews:
-                if sp._parent.spectrumDisplay not in specDisplays:
-                    specDisplays.append(sp._parent.spectrumDisplay)
-                    specViews.append((sp._parent, sp._parent.spectrumViews.index(sp)))
+        specDisplays = []
+        specViews = []
+        for sp in self.spectrumViews:
+            if sp._parent.spectrumDisplay not in specDisplays:
+                specDisplays.append(sp._parent.spectrumDisplay)
+                specViews.append((sp._parent, sp._parent.spectrumViews.index(sp)))
 
-            # TODO:ED need to delete all peakLists and integralLists first, treat as single undo
-            # need to be a pre/post event for delete OR coreNotifier for peakListView on peakList
-            for peakList in self.peakLists:
-                peakList.delete()
-            for integralList in self.integralLists:
-                integralList.delete()
-            for multipletList in self.multipletLists:
-                multipletList.delete()
+        # TODO:ED need to delete all peakLists and integralLists first, treat as single undo
+        # need to be a pre/post event for delete OR coreNotifier for peakListView on peakList
+        listsToDelete = tuple(self.peakLists)
+        listsToDelete += tuple(self.integralLists)
+        listsToDelete += tuple(self.multipletLists)
 
-            self._wrappedData.delete()
-            # self._delete()
+        # delete the connected lists, should undo in the correct order
+        for obj in listsToDelete:
+            obj.delete()
 
-            for sd in specViews:
-                sd[0]._removeOrderedSpectrumViewIndex(sd[1])
+        # for peakList in self.peakLists:
+        #     peakList.delete()
+        # for integralList in self.integralLists:
+        #     integralList.delete()
+        # for multipletList in self.multipletLists:
+        #     multipletList.delete()
+
+        self._wrappedData.delete()
+        # self._delete()
+
+
+        for sd in specViews:
+            sd[0]._removeOrderedSpectrumViewIndex(sd[1])
 
     @property
     def temperature(self):
@@ -1961,17 +1971,22 @@ def _createDummySpectrum(self: Project, axisCodes: Sequence[str], name=None,
     if result is None:
         raise RuntimeError('Unable to generate new Spectrum item')
 
+    # newly created spectra require a peaklist
+    if not result.peakLists:
+        result.newPeakList()
+
     return result
 
-# EJB 20181130: not sure what do with this
-def _spectrumMakeFirstPeakList(project: Project, dataSource: Nmr.DataSource):
-    """Add PeakList if none is present - also IntegralList for 1D. For notifiers."""
-    if not dataSource.findFirstPeakList(dataType='Peak'):
-        dataSource.newPeakList()
-
-
-Project._setupApiNotifier(_spectrumMakeFirstPeakList, Nmr.DataSource, 'postInit')
-del _spectrumMakeFirstPeakList
+# EJB 20181130: not sure what do with this...
+# EJB 20181210: Moved to Project.loadSpectrum, and _createDummySpectrum
+# def _spectrumMakeFirstPeakList(project: Project, dataSource: Nmr.DataSource):
+#     """Add PeakList if none is present - also IntegralList for 1D. For notifiers."""
+#     if not dataSource.findFirstPeakList(dataType='Peak'):
+#         dataSource.newPeakList()
+#
+#
+# Project._setupApiNotifier(_spectrumMakeFirstPeakList, Nmr.DataSource, 'postInit')
+# del _spectrumMakeFirstPeakList
 
 # Connections to parents:
 

@@ -33,6 +33,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import random
 import os
 import numpy as np
+import pyqtgraph as pg
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTable
 from ccpn.ui.gui.widgets.BarGraph import BarGraph
@@ -54,6 +55,8 @@ from ccpn.core.lib.Notifiers import Notifier
 from ccpn.util.Colour import spectrumColours, hexToRgb
 from ccpn.core.lib.peakUtils import getNmrResidueDeltas, MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME, DefaultAtomWeights, H, N, OTHER, C
 from ccpn.core.lib import CcpnSorting
+from ccpn.ui.gui.guiSettings import autoCorrectHexColour, getColours, CCPNGLWIDGET_HEXBACKGROUND,\
+  GUISTRIP_PIVOT, DIVIDER, CCPNGLWIDGET_SELECTAREA, CCPNGLWIDGET_HIGHLIGHT
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.Project import Project
 from ccpn.util.Logging import getLogger
@@ -67,6 +70,7 @@ from ccpn.ui.gui.widgets.ConcentrationsWidget import ConcentrationWidget
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.util.Constants import concentrationUnits
+import  pandas as pd
 
 
 
@@ -107,9 +111,15 @@ DefaultConcentration = 0.0
 DefaultConcentrationUnit = concentrationUnits[0]
 DefaultThreshould = 0.1
 PymolScriptName = 'chemicalShiftMapping_Pymol_Template.py'
+BackgroundColour = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
 
 MORE, LESS = 'More', 'Fewer'
 PreferredNmrAtoms = ['H', 'HA', 'HB', 'C', 'CA', 'CB', 'N', 'NE', 'ND']
+
+
+def _getRandomColours(numberOfColors):
+  import random
+  return  ["#" + ''.join([random.choice('0123456789ABCDEF') for j in range(6)]) for i in range(numberOfColors)]
 
 
 class CustomNmrResidueTable(NmrResidueTable):
@@ -249,10 +259,10 @@ class ChemicalShiftsMapping(CcpnModule):
     self.updateIcon = Icon('icons/update')
 
     self._setWidgets()
-    self._setSettingsWidgets()
     if self.mainWindow:
+      self._setSettingsWidgets()
       self._selectCurrentNmrResiduesNotifier = Notifier(self.current , [Notifier.CURRENT] , targetName='nmrResidues'
-                                                       , callback=self._selectCurrentNmrResiduesNotifierCallback)
+                                                        , callback=self._selectCurrentNmrResiduesNotifierCallback)
       self._peakDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'Peak', self._peakDeletedCallBack)
 
       # self._peakChangedNotifier = Notifier(self.project, [Notifier.CHANGE], 'Peak',
@@ -312,10 +322,15 @@ class ChemicalShiftsMapping(CcpnModule):
       self.barGraphWidget.xLine.setPos(DefaultThreshould)
       self.barGraphWidget.xLine.sigPositionChangeFinished.connect(self._threshouldLineMoved)
       self.barGraphWidget.customViewBox.mouseClickEvent = self._viewboxMouseClickEvent
-      self.nmrResidueTable = CustomNmrResidueTable(parent=self.mainWidget, mainWindow=self.mainWindow,
+
+      self.tableFrame = Frame(self.mainWidget, setLayout=True, grid=(0, 0))
+      self.nmrResidueTable = CustomNmrResidueTable(parent=self.tableFrame , mainWindow=self.mainWindow,
                                                    actionCallback= self._customActionCallBack, checkBoxCallback=self._checkBoxCallback,
                                                    setLayout=True, grid = (0, 0))
       self.nmrResidueTable.chemicalShiftsMappingModule = self
+
+      self.kdPlotFrame = Frame(self.nmrResidueTable._parent, setLayout=True, grid = (3, 6))
+      self._setKdPlot(layoutParent=self.kdPlotFrame)
 
       self.showOnViewerButton = Button(self.nmrResidueTable._widget, tipText='Show on Molecular Viewer',
                                        icon=self.showStructureIcon,
@@ -331,11 +346,29 @@ class ChemicalShiftsMapping(CcpnModule):
       self.nmrResidueTable.displayTableForNmrChain = self._displayTableForNmrChain
       self.barGraphWidget.customViewBox.selectAboveThreshold = self._selectNmrResiduesAboveThreshold
 
-      self.splitter.addWidget(self.nmrResidueTable)
+      self.splitter.addWidget(self.tableFrame)
       self.splitter.addWidget(self.barGraphWidget)
       self.mainWidget.getLayout().addWidget(self.splitter)
       self.splitter.setStretchFactor(0, 1)
       self.mainWidget.setContentsMargins(5, 5, 5, 5)  # l,t,r,b
+
+  def _setKdPlot(self, layoutParent):
+    ###  Plot setup
+    self._kdPlotView = pg.GraphicsLayoutWidget()
+    self._kdPlotView.setBackground(BackgroundColour)
+    self.kdPlot = self._kdPlotView.addPlot()
+    self.kdPlot.addLegend(offset=[1, 10])
+    self._kdPlotViewbox = self.kdPlot.vb
+    self.kdPlot.setLabel('bottom', 'Concentrations')
+    self.kdPlot.setLabel('left', 'Deltas')
+    self.kdPlot.setMenuEnabled(False)
+    layoutParent.getLayout().addWidget(self._kdPlotView)
+
+
+  def _clearLegendKd(self):
+    while self.kdPlot.legend.layout.count() > 0:
+      self.kdPlot.legend.layout.removeAt(0)
+    self.kdPlot.legend.items = []
 
 
   def _checkSpectraWithPeakListsOnly(self):
@@ -988,9 +1021,48 @@ class ChemicalShiftsMapping(CcpnModule):
     except Exception as e:
       getLogger().warning('Pymol not started. Check executable.', e)
 
+  def getKdPlotDataFrame(self, nmrResidues):
+
+    selectedAtomNames = [cb.text() for cb in self.nmrAtomsCheckBoxes if cb.isChecked()]
+    mode = self.modeButtons.getSelectedText()
+    if not mode in MODES:
+      return
+    weights = {}
+    for atomWSB in self.atomWeightSpinBoxes:
+      weights.update({atomWSB.objectName(): atomWSB.value()})
+
+
+    values = []
+    for nmrResidue in nmrResidues:
+      if self._isInt(nmrResidue.sequenceCode):
+        spectra = self.spectraSelectionWidget.getSelections()
+        if len(spectra)>1:
+          deltas = []
+          concentrationsValues = []
+          zeroSpectrum, otherSpectra = spectra[0], spectra[1:]
+          for i, spectrum in enumerate(otherSpectra):
+            if nmrResidue._includeInDeltaShift:
+              delta = getNmrResidueDeltas(nmrResidue, selectedAtomNames, mode=mode, spectra=[zeroSpectrum, spectrum],
+                                          atomWeights=weights)
+              deltas.append(delta)
+
+              concentrations, units =  self._getConcentrationsFromSpectra([spectrum])
+              if len(concentrations)>0:
+                concentration = concentrations[0]
+                if concentration is None:
+                  concentration = i
+                concentrationsValues.append(concentration)
+
+          df = pd.DataFrame([deltas], index=[nmrResidue], columns=concentrationsValues)
+          df = df.replace(np.nan, 0)
+          values.append(df)
+    if len(values)>0:
+      return pd.concat(values)
+
 
 
   def _selectCurrentNmrResiduesNotifierCallback(self, data):
+    # TODO replace colour
     for bar in self.barGraphWidget.barGraphs:
       for label in bar.labels:
         if label.data(int(label.text())) is not None:
@@ -1006,11 +1078,29 @@ class ChemicalShiftsMapping(CcpnModule):
               label.setVisible(True)
               label.setSelected(True)
 
+
             else:
               label.setSelected(False)
               label.setBrush(QtGui.QColor(bar.brush))
               if label.isBelowThreshold and not self.barGraphWidget.customViewBox.allLabelsShown:
                 label.setVisible(False)
+    self.kdPlot.clear()
+    self._clearLegendKd()
+    colours = _getRandomColours(len(self.current.nmrResidues))
+    for nmrR, colour in zip(self.current.nmrResidues, colours):
+      nmrR._colour = colour
+    # brush = pg.functions.mkBrush(hexToRgb(colour), width=1)
+    # for nmrResidue, colour in zip(self.current.nmrResidues,colours):
+    plotData = self.getKdPlotDataFrame(self.current.nmrResidues)
+    plotData =  plotData.replace(np.nan, 0)
+    if plotData is not None:
+      for obj, row, in plotData.iterrows():
+        ys = list(row.values)
+        xs = list(plotData.columns)
+        pen = pg.functions.mkPen(hexToRgb(obj._colour), width=1)
+        brush = pg.functions.mkBrush(hexToRgb(obj._colour), width=1)
+        self.kdPlot.plot(xs,ys, symbol='o', pen=pen, symbolBrush=brush, name=obj.pid)
+
 
 
   def _mouseClickEvent(self, event):
@@ -1099,10 +1189,10 @@ class ChemicalShiftsMapping(CcpnModule):
 
       if spectrum.sample:
         sampleComponent = spectrum.sample._fetchSampleComponent(name=spectrum.name)
-        v = sampleComponent.concentration or DefaultConcentration
+        v = sampleComponent.concentration
         u = sampleComponent.concentrationUnit
       else:
-        v = DefaultConcentration
+        v = None
         u = DefaultConcentrationUnit
 
       vs.append(v)
@@ -1158,3 +1248,26 @@ class ChemicalShiftsMapping(CcpnModule):
 
     super(ChemicalShiftsMapping, self)._closeModule()
 
+
+if __name__ == '__main__':
+  from PyQt5 import QtGui, QtWidgets
+  from ccpn.ui.gui.widgets.Application import TestApplication
+  from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
+
+
+  app = TestApplication()
+  win = QtWidgets.QMainWindow()
+
+  moduleArea = CcpnModuleArea(mainWindow=None)
+  module = ChemicalShiftsMapping(mainWindow=None, name='My Module')
+  moduleArea.addModule(module)
+
+
+  win.setCentralWidget(moduleArea)
+  win.resize(1000, 500)
+  win.setWindowTitle('Testing %s' % module.moduleName)
+  win.show()
+
+
+  app.start()
+  win.close()

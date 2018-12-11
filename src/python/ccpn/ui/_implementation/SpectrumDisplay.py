@@ -309,6 +309,12 @@ class SpectrumDisplay(AbstractWrapperObject):
     #     self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
     #   self._orderedSpectrumViews.removeSpectrumView(spectrumView)
 
+    @property
+    def orderedStrips(self):
+        """Return the ccpn.Strips in displayed order"""
+        ff = self._project._data2Obj.get
+        return tuple(ff(x) for x in self._wrappedData.orderedStrips)
+
     #=========================================================================================
     # Implementation functions
     #=========================================================================================

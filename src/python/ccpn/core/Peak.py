@@ -180,6 +180,22 @@ class Peak(AbstractWrapperObject):
             peakDim.value = value[ii]
             peakDim.realValue = None
 
+    ppmPositions = position
+
+    # @property
+    # def ppmPositions(self) -> Tuple[float, ...]:
+    #     """Peak position in ppm (or other relevant unit) in dimension order."""
+    #     return tuple(x.value for x in self._wrappedData.sortedPeakDims())
+    #
+    # @ppmPositions.setter
+    # @logCommand(get='self', isProperty=True)
+    # @ccpNmrV3CoreSetter()
+    # def ppmPositions(self, value: Sequence):
+    #     # call api changes
+    #     for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+    #         peakDim.value = value[ii]
+    #         peakDim.realValue = None
+
     @property
     def positionError(self) -> Tuple[Optional[float], ...]:
         """Peak position error in ppm (or other relevant unit)."""
@@ -459,7 +475,7 @@ class Peak(AbstractWrapperObject):
 
         singleValueTags = ['height', 'volume', 'heightError', 'volumeError', 'figureOfMerit',
                            'annotation', 'comment', 'serial']
-        dimensionValueTags = ['position', 'positionError', 'boxWidths', 'lineWidths', ]
+        dimensionValueTags = ['ppmPositions', 'positionError', 'boxWidths', 'lineWidths', ]
 
         peakList = self._parent
         dimensionCount = peakList.spectrum.dimensionCount

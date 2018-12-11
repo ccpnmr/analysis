@@ -1558,18 +1558,20 @@ class GuiStrip(Frame):
 
             with undoStackBlocking() as addUndoItem:
                 # needs to be first as it uses currentOrdering
-                addUndoItem(undo=partial(self.spectrumDisplay.showAxes))
+                addUndoItem(undo=partial(self._resetStripLayout, newIndex, currentIndex))
+                            # redo=partial(self._resetStripLayout, currentIndex, newIndex))
+                # addUndoItem(undo=partial(self.spectrumDisplay.showAxes))
 
             self._wrappedData.moveTo(newIndex)
+            # reorder the strips in the layout
+            self._resetStripLayout(currentIndex, newIndex)
 
             # add undo item to reorder the strips in the layout
-            with undoStackBlocking() as undoItem:
-                addUndoItem(undo=partial(self._resetStripLayout, newIndex, currentIndex),
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(#undo=partial(self._resetStripLayout, newIndex, currentIndex),
                             redo=partial(self._resetStripLayout, currentIndex, newIndex))
-                addUndoItem(redo=partial(self.spectrumDisplay.showAxes))
+                # addUndoItem(redo=partial(self.spectrumDisplay.showAxes))
 
-        # reorder the strips in the layout
-        self._resetStripLayout(currentIndex, newIndex)
 
         # # rebuild the axes for each strip
         # self.spectrumDisplay.showAxes()
@@ -1614,7 +1616,33 @@ class GuiStrip(Frame):
         # # rebuild the axes for each strip
         # self.spectrumDisplay.showAxes()
 
-    def deleteStrip(self):
+
+    class _StripStore(object):
+        "A class to temporarily store the strip widget"
+
+        def __init__(self, obj):
+            self.stripWidget = None
+
+        def _storeStripDelete(self):
+            """store the api delete info
+            CCPN Internal
+            """
+            self._unDeleteCall, self._unDeleteArgs = self._recoverApiObject(self)
+
+        def _storeStripUnDelete(self):
+            """retrieve the api deleted object
+            CCPN Internal
+            """
+            self._unDeleteCall(*self._unDeleteArgs)
+
+        def _storeStripWidget(self):
+            pass
+
+        def _restoreStripWidget(self):
+            pass
+
+
+    def _deleteStrip(self):
         """Overrides normal delete"""
         # currentStripItem = self._getWidgetFromLayout()
         # self.setParent(None)
@@ -1628,32 +1656,56 @@ class GuiStrip(Frame):
 
             if layout:  # should always be the case but play safe
 
-                self._removeFromLayout()  # adds nothing to the undo stack, so add it below
+                # stripStore = self._StripStore(self)
+                # stripStore._storeStripWidget()
+                # with undoStackBlocking() as addUndoItem:
+                #     addUndoItem(undo=stripStore._restoreStripWidget,
+                #                 redo=stripStore._storeStripWidget)
+                #
+                # # delete the strip - notifiers still need to fire here
+                # self._delete()
 
+
+                # current actions
+                self._removeFromLayout()  # adds nothing to the undo stack, so add it below
                 _undo = self.project._undo
                 if _undo is not None:
                     _undo.newItem(self._restoreToLayout, self._removeFromLayout)
-
-                # save the deleted api object
                 self._storeStripDelete()
-                # self._unDeleteCall, self._unDeleteArgs = self._recoverApiObject(self)
-
-                # # reorder the strips ordering class
-                # strips = spectrumDisplay.strips
-                # # order = list(spectrumDisplay._stripOrdering.getOrder())
-                # order = list(spectrumDisplay.stripOrder)
-                # ind = strips.index(self)
-                # val = order.pop(ind)
-                # order = [o if o < val else (o - 1) for o in order]
-
-                # delete the strip
                 self._delete()
-                # ccpnStrip.delete()
 
-                # spectrumDisplay._stripOrdering.setOrder(tuple(order))
-                # spectrumDisplay.stripOrder = order
+                pass
+                # with undoStackBlocking() as addUndoItem:
+                #     addUndoItem(redo=partial(self._removeFromLayout()))
 
-            self.current.strip = spectrumDisplay.strips[-1]
+
+                # _undo = self.project._undo
+                # if _undo is not None:
+                #     _undo.newItem(self._restoreToLayout, self._removeFromLayout)
+                #
+
+
+
+                # # save the deleted api object
+                # self._storeStripDelete()
+                # # self._unDeleteCall, self._unDeleteArgs = self._recoverApiObject(self)
+                #
+                # # # reorder the strips ordering class
+                # # strips = spectrumDisplay.strips
+                # # # order = list(spectrumDisplay._stripOrdering.getOrder())
+                # # order = list(spectrumDisplay.stripOrder)
+                # # ind = strips.index(self)
+                # # val = order.pop(ind)
+                # # order = [o if o < val else (o - 1) for o in order]
+                #
+                # # delete the strip
+                # self._delete()
+                # # ccpnStrip.delete()
+                #
+                # # spectrumDisplay._stripOrdering.setOrder(tuple(order))
+                # # spectrumDisplay.stripOrder = order
+
+            # self.current.strip = spectrumDisplay.strips[-1]
         else:
             raise ValueError("The last strip in a display cannot be deleted")
 

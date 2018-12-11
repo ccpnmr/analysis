@@ -344,7 +344,7 @@ def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None
         while len(display.strips) < stripCount:
             display.addStrip()
         for strip in display.strips[stripCount:]:
-            display.removeStrip(strip)
+            display.deleteStrip(strip)
         strips = display.strips
 
         # widths = ['default'] * len(display.strips)
@@ -366,7 +366,7 @@ def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None
         # not showing sequential strips
         # widths = ['default'] * len(display.strips)
         for strip in display.strips[stripIndex + 1:]:
-            display.removeStrip(strip)
+            display.deleteStrip(strip)
         navigateToNmrAtomsInStrip(display.strips[stripIndex], nmrResidue.nmrAtoms,
                                   widths=widths, markPositions=markPositions, setNmrResidueLabel=True)
         strips.append(display.strips[stripIndex])

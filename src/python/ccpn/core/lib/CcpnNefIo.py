@@ -3569,7 +3569,7 @@ class CcpnNefReader:
 
                 # make new peak  multipleAttributes
                 # parameters['position'] = row._get('position')[:dimensionCount]
-                parameters['position'] = tuple(row.get(x) for x in multipleAttributes['position'])
+                parameters['ppmPositions'] = tuple(row.get(x) for x in multipleAttributes['position'])
                 parameters['positionError'] = tuple(row.get(x) for x in multipleAttributes['positionError'])
                 # parameters['positionError'] = row._get('position_uncertainty')[:dimensionCount]
                 peak = peakList.newPeak(**parameters)

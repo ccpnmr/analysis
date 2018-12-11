@@ -119,7 +119,7 @@ def _parseDataFrame(ccpnDataFrame, spectrum, nmrChain):
                                                             ccpnDataFrame.iloc[:,3], ccpnDataFrame.iloc[:,4],
                                                             ccpnDataFrame.iloc[:,5]):
 
-    peak = newPeakList.newPeak(position=(float(pos2), float(pos1)))
+    peak = newPeakList.newPeak(ppmPositions=(float(pos2), float(pos1)))
 
     if resNumber in foundResNumber[:i]:  # in case of duplicated Residues Eg sideChain W2023N-H H and W2023NE1-HE1, don't need to create a new nmrResidue, just add the atoms to the previous one.
       nmrResidue = lastNmrResidue

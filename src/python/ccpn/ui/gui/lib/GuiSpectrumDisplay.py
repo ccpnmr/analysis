@@ -28,7 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # import importlib, os
 
 from PyQt5 import QtWidgets, QtCore
-
+from functools import partial
 from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
@@ -67,7 +67,8 @@ from ccpn.ui._implementation.MultipletListView import MultipletListView
 from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySettings
 from ccpn.ui._implementation.SpectrumView import SpectrumView
-from ccpn.core.lib.ContextManagers import logCommandBlock, undoBlockManager
+from ccpn.core.lib.ContextManagers import logCommandBlock, undoBlockManager, \
+    newObject, deleteObject, undoStackBlocking, notificationBlanking
 from ccpn.util.Common import makeIterableList
 
 
@@ -269,22 +270,22 @@ class GuiSpectrumDisplay(CcpnModule):
                                                       onceOnly=True)
 
         self._peakListViewNotifier = self.setNotifier(self.project,
-                                                  [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
-                                                  PeakListView.className,
-                                                  self._listViewChanged,
-                                                  onceOnly=True)
+                                                      [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
+                                                      PeakListView.className,
+                                                      self._listViewChanged,
+                                                      onceOnly=True)
 
         self._integralListViewNotifier = self.setNotifier(self.project,
-                                                  [Notifier.CREATE, Notifier.DELETE],
-                                                  IntegralListView.className,
-                                                  self._listViewChanged,
-                                                  onceOnly=True)
+                                                          [Notifier.CREATE, Notifier.DELETE],
+                                                          IntegralListView.className,
+                                                          self._listViewChanged,
+                                                          onceOnly=True)
 
         self._multipletListViewNotifier = self.setNotifier(self.project,
-                                                  [Notifier.CREATE, Notifier.DELETE],
-                                                  MultipletListView.className,
-                                                  self._listViewChanged,
-                                                  onceOnly=True)
+                                                           [Notifier.CREATE, Notifier.DELETE],
+                                                           MultipletListView.className,
+                                                           self._listViewChanged,
+                                                           onceOnly=True)
 
     # GWV 20181124:
     # def _unRegisterNotifiers(self):
@@ -788,28 +789,125 @@ class GuiSpectrumDisplay(CcpnModule):
             self.delete()
 
     def _unDelete(self, strip):
+        """unDelete the strip
+        """
         with undoBlockManager():
             strip._unDelete()
 
             self.showAxes()
 
     def _removeIndexStrip(self, value):
-        self.removeStrip(self.strips[value])
+        self.deleteStrip(self.strips[value])
 
-    def removeStrip(self, strip):
-        "Remove strip if it belongs to self"
 
+    class _StripStore(object):
+        "A class to temporarily store the strip widget"
+
+        def __init__(self, spectrumDisplay):
+            self.spectrumDisplay = None
+            self.strip = None
+            self.stripWidget = None
+
+        def _storeStripDelete(self):
+            """store the api delete info
+            CCPN Internal
+            """
+            self._unDeleteCall, self._unDeleteArgs = self._recoverApiObject(self)
+
+        def _storeStripUnDelete(self):
+            """retrieve the api deleted object
+            CCPN Internal
+            """
+            self._unDeleteCall(*self._unDeleteArgs)
+
+        def _storeUnDelete(self):
+            pass
+
+        def _restoreStripWidget(self):
+            pass
+
+
+    def _removeStripFromLayout(self, spectrumDisplay, strip):
+        """Remove the current strip from the layout
+        CCPN Internal
+        """
+        layout = spectrumDisplay.stripFrame.layout()
+
+        if layout and layout.count() > 1:
+            spectrumDisplay.stripFrame.blockSignals(True)
+            spectrumDisplay.stripFrame.setUpdatesEnabled(False)
+
+            # clear the layout and rebuild
+            _widgets = []
+            while layout.count():
+                _widgets.append(layout.takeAt(0).widget())
+            _widgets.remove(strip)
+
+            if spectrumDisplay.stripDirection == 'Y':
+                for m, widgStrip in enumerate(_widgets):  # build layout again
+                    layout.addWidget(widgStrip, 0, m)
+                    layout.setColumnStretch(m, 1)
+                    layout.setColumnStretch(m + 1, 0)
+            elif spectrumDisplay.stripDirection == 'X':
+                for m, widgStrip in enumerate(_widgets):  # build layout again
+                    layout.addWidget(widgStrip, m, 0)
+                layout.setColumnStretch(0, 1)
+
+            spectrumDisplay.stripFrame.setUpdatesEnabled(True)
+            spectrumDisplay.stripFrame.blockSignals(False)
+        else:
+            raise RuntimeError('Error, stripFrame layout in invalid state')
+
+    def _restoreStripToLayout(self, spectrumDisplay, strip, currentIndex):
+        """Restore the current strip to the layout
+        CCPN Internal
+        """
+        layout = spectrumDisplay.stripFrame.layout()
+
+        if layout:
+            spectrumDisplay.stripFrame.setUpdatesEnabled(False)
+            spectrumDisplay.stripFrame.blockSignals(True)
+
+            # clear the layout and rebuild
+            _widgets = []
+            while layout.count():
+                _widgets.append(layout.takeAt(0).widget())
+            _widgets.insert(currentIndex, strip)
+
+            if spectrumDisplay.stripDirection == 'Y':
+                for m, widgStrip in enumerate(_widgets):  # build layout again
+                    layout.addWidget(widgStrip, 0, m)
+                    layout.setColumnStretch(m, 1)
+            elif spectrumDisplay.stripDirection == 'X':
+                for m, widgStrip in enumerate(_widgets):  # build layout again
+                    layout.addWidget(widgStrip, m, 0)
+                layout.setColumnStretch(0, 1)
+
+            # put ccpnStrip back into strips using the api
+            # if self not in ccpnStrip.spectrumDisplay.strips:
+            if self not in spectrumDisplay.strips:
+                for order, cStrip in enumerate(_widgets):
+                    cStrip._setStripIndex(order)
+
+            spectrumDisplay.stripFrame.blockSignals(False)
+            spectrumDisplay.stripFrame.setUpdatesEnabled(True)
+        else:
+            raise RuntimeError('Error, stripFrame layout in invalid state')
+
+    def deleteStrip(self, strip):
+        """Delete a strip from the spectrumDisplay
+        """
         if strip is None:
-            showWarning('Remove strip', 'Invalid strip')
+            showWarning('Delete strip', 'Invalid strip')
             return
 
         if strip not in self.strips:
-            showWarning('Remove strip', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
+            showWarning('Delete strip', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
                         % (strip.pid, self.pid))
             return
 
         if len(self.orderedStrips) == 1:
-            showWarning('Remove strip', 'Last strip of SpectrumDisplay "%s" cannot be removed' \
+            showWarning('Delete strip', 'Last strip of SpectrumDisplay "%s" cannot be removed' \
                         % (self.pid,))
             return
 
@@ -817,13 +915,42 @@ class GuiSpectrumDisplay(CcpnModule):
             log('deleteStrip', strip=repr(strip.pid))
 
             self.current.strip = None
-            self.setColumnStretches(stretchValue=False)  # set to 0 so they disappear
-            strip.deleteStrip()
-            self.setColumnStretches(stretchValue=True)  # set to 0 so they disappear
+
+            # generate temporary store object
+            # getLayout
+            # remove stripWidget from layout
+            # get apiObject list
+
+            with undoStackBlocking() as addUndoItem:
+                # retrieve list of created items from the api
+                # strangely, this modifies _wrappedData.orderedStrips
+                apiObjectsCreated = strip._getApiObjectTree()
+
+                addUndoItem(undo=self._redrawAxes)
+
+                index = strip.stripIndex()
+                addUndoItem(undo=partial(self._restoreStripToLayout, self, strip, index),
+                            redo=partial(self._removeStripFromLayout, self, strip))
+                self._removeStripFromLayout(self, strip)
+
+                addUndoItem(undo=partial(strip._wrappedData.root._unDelete,
+                                         apiObjectsCreated, (strip._wrappedData.topObject,)),
+                            redo=partial(strip._delete)
+                            )
+
+                strip._delete()
+
+                addUndoItem(redo=self._redrawAxes)
+
+            # do axis redrawing (as below)
+            self._redrawAxes()
 
         if self.strips:
             self.current.strip = self.strips[-1]
+
+    def _redrawAxes(self):
         self.showAxes()
+        self.setColumnStretches(stretchValue=True)
 
     def removeCurrentStrip(self):
         "Remove current.strip if it belongs to self"
@@ -831,7 +958,7 @@ class GuiSpectrumDisplay(CcpnModule):
         if self.current.strip is None:
             showWarning('Remove current strip', 'Select first in SpectrumDisplay by clicking')
             return
-        self.removeStrip(self.current.strip)
+        self.deleteStrip(self.current.strip)
 
         if self.strips:
             self.current.strip = self.strips[-1]
@@ -953,72 +1080,62 @@ class GuiSpectrumDisplay(CcpnModule):
     #   getLogger().debug('OpenGL widget not instantiated')
 
     def addStrip(self) -> 'GuiStripNd':
-        """
-        Creates a new strip by cloning strip with index (default the last) in the display.
+        """Creates a new strip by cloning strip with index (default the last) in the display.
         """
         if self.phasingFrame.isVisible():
             showWarning(str(self.windowTitle()), 'Please disable Phasing Console before adding strips')
             return
 
-        stripIndex = -1  # ejb - just here for the minute
-        newStrip = self.strips[stripIndex].clone()
+        with logCommandBlock(get='self') as log:
+            log('addStrip')
 
-        # newStrip.copyOrderedSpectrumViews(self.strips[stripIndex-1])
+            stripIndex = -1
+            newStrip = self.strips[stripIndex].clone()
 
-        self.showAxes()
+            # newStrip.copyOrderedSpectrumViews(self.strips[stripIndex-1])
 
-        # do setColumnStretches here or in Gui.py (422)
-        self.setColumnStretches(True)
+            self.showAxes()
+            self.setColumnStretches(True)
+            self.current.strip = newStrip
 
-        mainWindow = self.mainWindow
-        mainWindow.pythonConsole.writeConsoleCommand("strip.clone()", strip=newStrip)
-        getLogger().info("spectrumDisplay = ui.getByGid(%r); spectrumDisplay.addStrip(%d)" \
-                         % (self.pid, stripIndex))
-
-        self.current.strip = newStrip
-
-        # ED: copy traceScale from the previous strips and enable phasing Console
-        self._copyPreviousStripValues(self.strips[0], newStrip)
+            # ED: copy traceScale from the previous strips and enable phasing Console
+            self._copyPreviousStripValues(self.strips[0], newStrip)
 
         return newStrip
 
     def _addObjStrip(self, strip=None) -> 'GuiStripNd':
-        """
-        Creates a new strip by cloning strip with index (default the last) in the display.
+        """Creates a new strip by cloning strip with index (default the last) in the display.
         """
         if self.phasingFrame.isVisible():
             showWarning(str(self.windowTitle()), 'Please disable Phasing Console before adding strips')
             return
 
-        stripIndex = self.strips.index(strip)
-        newStrip = strip.clone()
+        if strip not in self.strips:
+            showWarning(str(self.windowTitle()), '%s not in spectrumDisplay.strips' % str(strip))
+            return
 
-        self.showAxes()
+        with logCommandBlock(get='self') as log:
+            log('addStrip')
 
-        # do setColumnStretches here or in Gui.py (422)
-        self.setColumnStretches(True)
+            newStrip = strip.clone()
 
-        mainWindow = self.mainWindow
-        mainWindow.pythonConsole.writeConsoleCommand("strip.clone()", strip=newStrip)
-        getLogger().info("spectrumDisplay = ui.getByGid(%r); spectrumDisplay.addStrip(%d)" \
-                         % (self.pid, stripIndex))
+            self.showAxes()
+            self.setColumnStretches(True)
+            self.current.strip = newStrip
 
-        self.current.strip = newStrip
-
-        # ED: copy traceScale from the previous strips and enable phasing Console
-        self._copyPreviousStripValues(self.strips[0], newStrip)
+            # ED: copy traceScale from the previous strips and enable phasing Console
+            self._copyPreviousStripValues(self.strips[0], newStrip)
 
         return newStrip
 
     def setColumnStretches(self, stretchValue=False, scaleFactor=1.0, widths=True):
-        # crude routine to set the stretch of all columns upto the last widget to stretchValue
+        """Set the column widths of the strips so that the last strip accommodates the axis bar
+        if necessary."""
         widgets = self.stripFrame.children()
 
         if widgets:
             thisLayout = self.stripFrame.layout()
-            thisLayoutWidth = self.width()  # self.stripFrame.width()
-            # thisLayout = self.layout
-            # thisLayoutWidth = self.width()-2
+            thisLayoutWidth = self.width()
 
             if not thisLayout.itemAt(0):
                 return
@@ -1026,15 +1143,14 @@ class GuiSpectrumDisplay(CcpnModule):
             AXIS_WIDTH = 1
             AXIS_PADDING = 5
             if self.strips:
-                # add 5% to account for any small borders
-                firstStripWidth = thisLayoutWidth / (len(self.strips))  # * 1.025)
+                firstStripWidth = thisLayoutWidth / (len(self.strips))
                 AXIS_WIDTH = self.orderedStrips[0]._CcpnGLWidget.AXIS_MARGINRIGHT
             else:
                 firstStripWidth = thisLayout.itemAt(0).widget().width()
 
             if not self.lastAxisOnly:
                 maxCol = 0
-                for wid in self.orderedStrips:  #widgets[1:]:
+                for wid in self.orderedStrips:
                     index = thisLayout.indexOf(wid)
                     if index >= 0:
                         row, column, cols, rows = thisLayout.getItemPosition(index)
@@ -1049,7 +1165,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
             else:
                 maxCol = 0
-                for wid in self.orderedStrips:  #widgets[1:]:
+                for wid in self.orderedStrips:
                     index = thisLayout.indexOf(wid)
                     if index >= 0:
                         row, column, cols, rows = thisLayout.getItemPosition(index)
@@ -1093,27 +1209,27 @@ class GuiSpectrumDisplay(CcpnModule):
                 # fix the width of the stripFrame
                 self.stripFrame.setMinimumWidth(self.stripFrame.minimumSizeHint().width())
 
-            # printWidths = [thisLayout.itemAt(col).widget().width() for col in list(range(maxCol+1))]
-            # printWidths = [ss.width() for ss in self.orderedStrips]
-            # print('>>>', self, self.width(), thisLayoutWidth, firstStripWidth, leftWidth, printWidths)
-
     def _maximiseRegions(self):
-        """Zooms Y axis of current strip to show entire region"""
+        """Zooms Y axis of current strip to show entire region.
+        """
         for strip in self.strips:
             strip._maximiseRegions()
 
     def resetYZooms(self):
-        """Zooms Y axis of current strip to show entire region"""
+        """Zooms Y axis of current strip to show entire region.
+        """
         for strip in self.strips:
             strip.resetYZoom()
 
     def resetXZooms(self):
-        """Zooms X axis of current strip to show entire region"""
+        """Zooms X axis of current strip to show entire region.
+        """
         for strip in self.strips:
             strip.resetXZoom()
 
     def _restoreZoom(self):
-        """Restores last saved zoom of current strip."""
+        """Restores last saved zoom of current strip.
+        """
         try:
             if not self.strips:
                 showWarning('Restore Zoom', 'SpectrumDisplay "%s" does not contain any strips' \
@@ -1352,7 +1468,6 @@ class GuiSpectrumDisplay(CcpnModule):
         for nmrRes in resList:
             nmrs.append(self.project.getByPid(nmrRes.pid) if isinstance(nmrRes, str) else nmrRes)
 
-
         # need to clean up the use of GLNotifier - possibly into AbstractWrapperObject
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
         from functools import partial
@@ -1383,7 +1498,7 @@ class GuiSpectrumDisplay(CcpnModule):
                 while len(self.strips) < stripCount:
                     self.addStrip()
                 for strip in self.strips[stripCount:]:
-                    self.removeStrip(strip)
+                    self.deleteStrip(strip)
 
                 # build the strips
                 if pks:

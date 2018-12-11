@@ -1657,12 +1657,12 @@ class Spectrum(AbstractWrapperObject):
                 pass
         return newSpectrum
 
-    # # @logCommand(get='self')
+    # @logCommand(get='self')
     # @deleteObject()
-    # def _delete(self):
-    #     """Delete the spectrum.
-    #     """
-    #     self._wrappedData.delete()
+    def _delete(self):
+        """Delete the spectrum wrapped data.
+        """
+        self._wrappedData.delete()
 
     # @deleteObject()
     @cached.clear(PLANEDATACACHE)  # Check if there was a planedata cache, and if so, clear it
@@ -1672,7 +1672,7 @@ class Spectrum(AbstractWrapperObject):
         with logCommandBlock(get='self') as log:
             log('delete')
 
-            # handle spectrumView ordering - this should be moved to spectrumView or spectrumDisplay via notifier
+            # handle spectrumView ordering - this should be moved to spectrumView or spectrumDisplay via notifier?
             specDisplays = []
             specViews = []
             for sp in self.spectrumViews:
@@ -1690,16 +1690,7 @@ class Spectrum(AbstractWrapperObject):
             for obj in listsToDelete:
                 obj.delete()
 
-            # for peakList in self.peakLists:
-            #     peakList.delete()
-            # for integralList in self.integralLists:
-            #     integralList.delete()
-            # for multipletList in self.multipletLists:
-            #     multipletList.delete()
-
-            self._wrappedData.delete()
-            # self._delete()
-
+            self._delete()
 
             for sd in specViews:
                 sd[0]._removeOrderedSpectrumViewIndex(sd[1])

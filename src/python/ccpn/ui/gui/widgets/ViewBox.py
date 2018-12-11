@@ -283,7 +283,7 @@ class ViewBox(pg.ViewBox):
             #   if not peakListView.isVisible():
             #     continue
             #   peakList = peakListView.peakList
-            #   peak = peakList.newPeak(position=position)
+            #   peak = peakList.newPeak(ppmPositions=position)
             #   # note, the height below is not derived from any fitting
             #   # but is a weighted average of the values at the neighbouring grid points
             #   peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)

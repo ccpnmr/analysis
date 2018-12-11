@@ -293,7 +293,7 @@ class NotificationTest(WrapperTesting):
 
     spectrum = project.createDummySpectrum(axisCodes=('Fn', 'Nf'), name='HF-hsqc')
     peakList = spectrum.peakLists[0]
-    peak1 = peakList.newPeak(position=(1.0,2.0))
+    peak1 = peakList.newPeak(ppmPositions=(1.0,2.0))
     self.assertEqual(ll, ['newSpectrum', 'newSpectrum2', 'newPeakList', 'newPeak'])
     self.assertEqual(peak1.pid, 'PK:HF-hsqc.1.1')
     spectrum.rename('HF-copy')

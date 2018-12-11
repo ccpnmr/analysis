@@ -62,7 +62,7 @@ class PeakTest2(WrapperTesting):
 
   singleValueTags = ['height', 'volume', 'heightError', 'volumeError', 'figureOfMerit',
                      'annotation', 'comment']
-  dimensionValueTags = ['position', 'positionError', 'boxWidths', 'lineWidths', 'assignedNmrAtoms']
+  dimensionValueTags = ['ppmPositions', 'positionError', 'boxWidths', 'lineWidths', 'assignedNmrAtoms']
 
   # NBNB TODO We still need a case where axisCodes are not in the same order (e.g. HNC<->HCN)
 

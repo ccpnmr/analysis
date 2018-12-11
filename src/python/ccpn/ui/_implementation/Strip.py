@@ -38,7 +38,8 @@ from ccpn.util.Logging import getLogger
 from collections import OrderedDict
 from ccpn.core.lib.OrderedSpectrumViews import OrderedSpectrumViews
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import undoBlock, logCommandBlock, undoStackBlocking, notificationBlanking
+from ccpn.core.lib.ContextManagers import undoBlock, logCommandBlock, undoStackBlocking, notificationBlanking, \
+    newObject, deleteObject
 
 
 # SV_TITLE = '_Strip'
@@ -234,16 +235,20 @@ class Strip(AbstractWrapperObject):
     #   # TODO:ED handle deletion - may not need anything here
     #   pass
 
+    #=========================================================================================
     # Implementation functions
+    #=========================================================================================
+
     @classmethod
     def _getAllWrappedData(cls, parent: SpectrumDisplay) -> list:
-        """get wrappedData (ccpnmr.gui.Task.Strip) in serial number order"""
+        """Get wrappedData (ccpnmr.gui.Task.Strip) in serial number order"""
         return parent._wrappedData.sortedStrips()
 
+    # @deleteObject() - doesn't work here
     def _delete(self):
-        """delete the wrappedData
+        """delete the wrappedData.
+        CCPN Internal
         """
-        # print("_implentation.stip>>> _delete")
         self._wrappedData.delete()
 
     def _storeStripDeleteDict(self, currentIndex):
@@ -303,7 +308,10 @@ class Strip(AbstractWrapperObject):
     def _removeOrderedSpectrumViewIndex(self, index):
         self.spectrumDisplay.removeOrderedSpectrumView(index)
 
-    #CCPN functions
+    #=========================================================================================
+    # CCPN functions
+    #=========================================================================================
+
     def clone(self):
         """create new strip that duplicates this one, appending it at the end
         """
@@ -313,10 +321,21 @@ class Strip(AbstractWrapperObject):
             with undoStackBlocking() as addUndoItem:
                 newStrip = self._project._data2Obj.get(self._wrappedData.clone())
 
-                addUndoItem(undo=partial(self.spectrumDisplay.removeStrip, newStrip),
+                addUndoItem(undo=partial(self.spectrumDisplay.deleteStrip, newStrip),
                             redo=partial(self.spectrumDisplay._unDelete, newStrip))
 
         return newStrip
+
+    # @newObject(Strip)
+    # def clone(self):
+    #     """create new strip that duplicates this one, appending it at the end
+    #     """
+    #     apiStrip = self._wrappedData.clone()
+    #     result = self._project._data2Obj.get(apiStrip)
+    #     if result is None:
+    #         raise RuntimeError('Unable to generate new Strip item')
+    #
+    #     return result
 
     def moveStrip(self, newIndex):
         """Move strip to index newIndex in orderedStrips
@@ -858,22 +877,22 @@ SpectrumDisplay.copyStrip = _copyStrip
 del _copyStrip
 
 
-#TODO:RASMUS: if this is a SpectrumDisplay thing, it should not be here
-# SpectrumDisplay.orderedStrips property
-def getter(self) -> Tuple[Strip, ...]:
-    ff = self._project._data2Obj.get
-    return tuple(ff(x) for x in self._wrappedData.orderedStrips)
-
-
-def setter(self, value: Sequence):
-    value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
-    self._wrappedData.orderedStrips = tuple(x._wrappedData for x in value)
-
-
-SpectrumDisplay.orderedStrips = property(getter, setter, None,
-                                         "ccpn.Strips in displayed order ")
-del getter
-del setter
+# #TODO:RASMUS: if this is a SpectrumDisplay thing, it should not be here
+# # SpectrumDisplay.orderedStrips property
+# def getter(self) -> Tuple[Strip, ...]:
+#     ff = self._project._data2Obj.get
+#     return tuple(ff(x) for x in self._wrappedData.orderedStrips)
+#
+#
+# def setter(self, value: Sequence):
+#     value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
+#     self._wrappedData.orderedStrips = tuple(x._wrappedData for x in value)
+#
+#
+# SpectrumDisplay.orderedStrips = property(getter, setter, None,
+#                                          "ccpn.Strips in displayed order ")
+# del getter
+# del setter
 
 # SHOULD NOT BE HERE like this
 # Drag-n-drop functions:

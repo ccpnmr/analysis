@@ -367,7 +367,7 @@ class PeakList(AbstractWrapperObject):
                 peakPosition = [float(selectedData[0][position])]
                 height = selectedData[1][position]
                 if intensityRange is None or intensityRange[0] <= height <= intensityRange[1]:
-                    peaks.append(self.newPeak(height=float(height), position=peakPosition))
+                    peaks.append(self.newPeak(height=float(height), ppmPositions=peakPosition))
 
         finally:
             self._project.resumeNotification()
@@ -429,7 +429,7 @@ class PeakList(AbstractWrapperObject):
             for position in indices:
                 peakPosition = [float(newArray2[0][position])]
                 height = newArray2[1][position]
-                peaks.append(self.newPeak(height=float(height), position=peakPosition))
+                peaks.append(self.newPeak(height=float(height), ppmPositions=peakPosition))
 
         return peaks
 
@@ -540,7 +540,7 @@ class PeakList(AbstractWrapperObject):
     #           lw = abs(limits[0] - limits[1])
     #           region = numpy.where((x <= limits[0]) & (x >= limits[1]))
     #           integral = trapz(y[region])
-    #           peak = self.newPeak(height=peakHeigh, position=peakPos, volume=float(integral),
+    #           peak = self.newPeak(height=peakHeigh, ppmPositions=peakPos, volume=float(integral),
     #                               lineWidths=[lw,])
     #           newIntegral = integralList.newIntegral(limits=[[min(limits), max(limits)]])
     #           newIntegral.peak = peak
@@ -568,11 +568,11 @@ class PeakList(AbstractWrapperObject):
     #         peak = d['peak']
     #
     #         peakPos = peak.get('positions')
-    #         peakHeigh = float(peak.get('height'))
+    #         peakHeight = float(peak.get('height'))
     #         newLw = abs(newMax - newMin)
     #         region = numpy.where((x <= newMax) & (x >= newMin))
     #         integral = trapz(region)
-    #         peak = self.newPeak(height=peakHeigh, position=peakPos, volume=float(integral),
+    #         peak = self.newPeak(height=peakHeight, ppmPositions=peakPos, volume=float(integral),
     #                             )
     #         newIntegral = integralList.newIntegral(limits=[[newMin,newMax]])
     #         newIntegral.peak = peak
@@ -605,7 +605,7 @@ class PeakList(AbstractWrapperObject):
 
             maxValues, minValues = peakdet(y=filteredY, x=filteredX, delta=noiseThreshold / deltaFactor)
             for position, height in maxValues:
-                peak = self.newPeak(position=[position], height=height)
+                peak = self.newPeak(ppmPositions=[position], height=height)
 
             # const = round(len(y) * 0.0039, 1)
             # correlatedSignal1 = signal.correlate(y, np.ones(int(const)), mode='same') / const
@@ -618,7 +618,7 @@ class PeakList(AbstractWrapperObject):
             #     if height > delta: # ensure are only the positive peaks
             #       if max(limits) > position > min(limits):  # peak  position is between limits
             #         lw = max(limits) - min(limits)
-            #         peak = self.newPeak(position=[position], height=height, lineWidths = [lw])
+            #         peak = self.newPeak(ppmPositions=[position], height=height, lineWidths = [lw])
             #         newIntegral = integralList.newIntegral(limits=[[min(limits), max(limits)]])
             #         newIntegral.peak = peak
             #         peak.volume = newIntegral.value
@@ -627,7 +627,7 @@ class PeakList(AbstractWrapperObject):
             # if negativePeaks:
             #   for i in minValues:
             #     if i[1] < -delta:
-            #       peaks.append(self.newPeak(position=[i[0]], height=i[1]))
+            #       peaks.append(self.newPeak(ppmPositions=[i[0]], height=i[1]))
 
         # return peaks
 
@@ -695,7 +695,7 @@ class PeakList(AbstractWrapperObject):
                 values1 = [peak1.position[dim] for dim in range(len(peak1.position))]
                 if not _havePeakNearPosition(values1, tolerances, peaks2):
                     peakList3.newPeak(height=peak1.height, volume=peak1.volume, figureOfMerit=peak1.figureOfMerit,
-                                      annotation=peak1.annotation, position=peak1.position,
+                                      annotation=peak1.annotation, ppmPositions=peak1.position,
                                       pointPosition=peak1.pointPosition)
 
         return peakList3

@@ -237,14 +237,14 @@ class IntegralList(AbstractWrapperObject):
                             for p, h in zip(positions, heights):
                                 numerator.append(p * h)
                                 centerOfMass = sum(numerator) / sum(heights)
-                                newPeak = peakList.newPeak(position=[centerOfMass, ], height=max(heights))
+                                newPeak = peakList.newPeak(ppmPositions=[centerOfMass, ], height=max(heights))
                                 newIntegral.peak = newPeak
                                 newPeak.volume = newIntegral.value
                                 newPeak.lineWidths = (lineWidth,)
 
                         else:
                             for position, height in maxValues:
-                                newPeak = peakList.newPeak(position=[float(x[position]), ], height=height)
+                                newPeak = peakList.newPeak(ppmPositions=[float(x[position]), ], height=height)
                                 newIntegral.peak = newPeak
                                 newPeak.volume = newIntegral.value
                                 newPeak.lineWidths = (lineWidth,)

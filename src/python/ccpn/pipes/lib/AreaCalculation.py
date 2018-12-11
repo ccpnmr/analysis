@@ -170,7 +170,7 @@ def _addAreaValuesToPeaks(spectrum, peakList, noiseThreshold=None, minimalLineWi
                     peak.lineWidths = (lineWidth,)
                     peak.volume = float(integral)
 
-                # peak = newPeakList.newPeak(height= height, position = (centerOfMass,),volume= float(integral),lineWidths= (lineWidth,))
+                # peak = newPeakList.newPeak(height= height, ppmPositions = (centerOfMass,),volume= float(integral),lineWidths= (lineWidth,))
                 # peaks.append(peak)
                 # integral = integralList.newIntegral(value=float(integral), limits=[[min(i), max(i)],])
                 # integrals.append(integral)

@@ -944,6 +944,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 addUndoItem(redo=self._redrawAxes)
 
+                #EJB check handling of current.strip - can't remain on deleted strip
             # do axis redrawing (as below)
             self._redrawAxes()
 

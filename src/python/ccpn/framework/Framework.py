@@ -1342,6 +1342,7 @@ class Framework:
                 self.nefReader.importNewProject(self.project, dataBlock)
             except Exception as es:
                 getLogger().warning('Error loading Nef file: %s' % str(es))
+                # raise es
             # finally:
 
         self.project._wrappedData.shiftAveraging = True

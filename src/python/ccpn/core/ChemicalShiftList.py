@@ -187,27 +187,37 @@ PeakList.chemicalShiftList = property(getter, setter, None,
 del getter
 del setter
 
-def _newChemicalShiftList(self:Project, name:str=None, unit:str='ppm', autoUpdate:bool=True,
+def _newChemicalShiftList(self:Project, name:str='default', unit:str='ppm', autoUpdate:bool=True,
                           isSimulated:bool=False, serial:int=None, comment:str=None) -> ChemicalShiftList:
   """Create new ChemicalShiftList."""
 
   defaults = collections.OrderedDict((('name', None), ('unit', 'ppm'), ('autoUpdate', True),
                                       ('isSimulated', False), ('serial', None), ('comment', None)))
 
-  apiNmrProject = self._wrappedData
-  if name:
-    previous = self.getChemicalShiftList(name.translate(Pid.remapSeparators))
-    if previous is not None:
-      raise ValueError("%s already exists" % previous.longPid)
-  else:
-    name = 'Shift_2'
-    while apiNmrProject.findFirstMeasurementList(className='ShiftList', name=name):
-      name = commonUtil.incrementName(name)
+  # apiNmrProject = self._wrappedData
+
+  # if name:
+  #   previous = self.getChemicalShiftList(name.translate(Pid.remapSeparators))
+  #   if previous is not None:
+  #     raise ValueError("%s already exists" % previous.longPid)
+  # else:
+  #   name = 'Shift_2'
+  #   while apiNmrProject.findFirstMeasurementList(className='ShiftList', name=name):
+  #     name = commonUtil.incrementName(name)
+
+  # GWV 20181210: deal with already existing names by incrementing
+  name = name.translate(Pid.remapSeparators)
+  # find a name that is unique
+  found = (self.getChemicalShiftList(name) is not None)
+  while found:
+    name = commonUtil.incrementName(name)
+    found = (self.getChemicalShiftList(name) is not None)
 
   self._startCommandEchoBlock('newChemicalShiftList', values=locals(), defaults=defaults,
                               parName='newChemicalShiftList')
   dd = {'name':name, 'unit':unit, 'autoUpdate':autoUpdate, 'isSimulated':isSimulated,
         'details':comment}
+
   result = None
   try:
     obj = self._wrappedData.newShiftList(**dd)

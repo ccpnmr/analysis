@@ -248,7 +248,7 @@ class PeakList(AbstractWrapperObject):
                 for plv in self.peakListViews:
                     plv._finaliseAction(action=action)
         except Exception as es:
-            pass
+            raise RuntimeError('Error _finalising peakListViews: %s' % str(es))
 
     #=========================================================================================
     # CCPN functions

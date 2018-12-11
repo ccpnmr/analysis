@@ -244,7 +244,7 @@ class PeakList(AbstractWrapperObject):
 
         # this is a can-of-worms for undelete at the minute
         try:
-            if action in ['change', 'create', 'delete']:
+            if action in ['change']:
                 for plv in self.peakListViews:
                     plv._finaliseAction(action=action)
         except Exception as es:

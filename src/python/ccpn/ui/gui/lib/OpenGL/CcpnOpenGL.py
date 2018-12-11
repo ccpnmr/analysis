@@ -2119,6 +2119,10 @@ class CcpnGLWidget(QOpenGLWidget):
         """Update the list of visible spectrumViews when change occurs
         """
         self._ordering = self.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
+        for specView in tuple(self._spectrumSettings.keys()):
+            if specView not in self._ordering:
+                del self._spectrumSettings[specView]
+
         self._GLPeaks.setListViews(self._ordering)
         self._GLIntegrals.setListViews(self._ordering)
         self._GLMultiplets.setListViews(self._ordering)
@@ -2367,6 +2371,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 if spectrumView.spectrum.dimensionCount > 1:
                     if spectrumView in self._spectrumSettings.keys():
                         # set correct transform when drawing this contour
+
                         currentShader.setGLUniformMatrix4fv('mvMatrix',
                                                             1, GL.GL_FALSE,
                                                             self._spectrumSettings[spectrumView][

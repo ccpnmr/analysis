@@ -113,7 +113,7 @@ class Gui(Ui):
 
         from ccpn.ui.gui.lib import GuiSpectrumDisplay
 
-        project.registerNotifier('Peak', 'delete', GuiSpectrumDisplay._deletedPeak)
+        # project.registerNotifier('Peak', 'delete', GuiSpectrumDisplay._deletedPeak)
         project.registerNotifier('Spectrum', 'change', GuiSpectrumDisplay._spectrumHasChanged)
 
         from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView

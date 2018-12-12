@@ -71,6 +71,7 @@ from ccpn.core.lib.ContextManagers import logCommandBlock, undoBlockManager, \
     newObject, deleteObject, undoStackBlocking, \
     notificationBlanking, _storeDeleteObjectCurrent, BlankedPartial
 from ccpn.util.Common import makeIterableList
+from ccpn.core.lib import Undo
 
 
 AXIS_WIDTH = 30
@@ -189,7 +190,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
         # GWV: Not sure what the widget argument is for
         # LM: is the spectrumDisplay, used in the widget to set actions/callbacks to the buttons
-        spectrumRow = 0
+        spectrumRow = 1
         toolBarRow = 0
         stripRow = 2
         phasingRow = 3
@@ -206,7 +207,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
         # Utilities Toolbar; filled in Nd/1d classes
         self.spectrumUtilToolBar = ToolBar(parent=self.qtParent, iconSizes=(24, 24),
-                                           grid=(toolBarRow, 6), gridSpan=(1, 1),
+                                           grid=(toolBarRow, 0), gridSpan=(1, 1),
                                            hPolicy='minimal', hAlign='left')
         self.spectrumUtilToolBar.setFixedHeight(self.spectrumToolBar.height())
         if self.application.preferences.general.showToolbar:
@@ -789,13 +790,13 @@ class GuiSpectrumDisplay(CcpnModule):
             super()._closeModule()
             self.delete()
 
-    def _unDelete(self, strip):
-        """unDelete the strip
-        """
-        with undoBlockManager():
-            strip._unDelete()
-
-            self.showAxes()
+    # def _unDelete(self, strip):
+    #     """unDelete the strip
+    #     """
+    #     with undoBlockManager():
+    #         strip._unDelete()
+    #
+    #         self.showAxes()
 
     def _removeIndexStrip(self, value):
         self.deleteStrip(self.strips[value])
@@ -1050,23 +1051,13 @@ class GuiSpectrumDisplay(CcpnModule):
         self.stripFrame.show()
 
     def _copyPreviousStripValues(self, fromStrip, toStrip):
-        # try:
+        """Copy the trace settings to another strip in the spectrumDisplay.
+        """
         traceScale = fromStrip.spectrumViews[0].traceScale
         toStrip.setTraceScale(traceScale)
 
-        # hTrace = fromStrip._CcpnGLWidget._updateHTrace
-        # vTrace = fromStrip._CcpnGLWidget._updateVTrace
-        # toStrip._CcpnGLWidget._updateHTrace = hTrace
-        # toStrip._CcpnGLWidget._updateVTrace = vTrace
-        # toStrip.hTraceAction.setChecked(hTrace)
-        # toStrip.vTraceAction.setChecked(vTrace)
-
         if self.phasingFrame.isVisible():
             toStrip.turnOnPhasing()
-
-    # except Exception as es:
-    #   getLogger().warning('>>> ERROR turning on phasing - %s' % str(es))
-    #   getLogger().debug('OpenGL widget not instantiated')
 
     def addStrip(self, strip=None) -> 'GuiStripNd':
         """Creates a new strip by cloning strip with index (default the last) in the display.
@@ -1077,29 +1068,6 @@ class GuiSpectrumDisplay(CcpnModule):
         if self.phasingFrame.isVisible():
             showWarning(str(self.windowTitle()), 'Please disable Phasing Console before adding strips')
             return
-
-        # with logCommandBlock(get='self') as log:
-        #     log('addStrip')
-        #
-        #     # stripIndex = -1
-        #     newStrip = self.strips[index]._clone()
-        #
-        #     # newStrip.copyOrderedSpectrumViews(self.strips[stripIndex-1])
-        #
-        #     self.showAxes()
-        #     self.setColumnStretches(True)
-        #     self.current.strip = newStrip
-        #
-        #     # ED: copy traceScale from the previous strips and enable phasing Console
-        #     self._copyPreviousStripValues(self.strips[0], newStrip)
-        #
-        # # return newStrip
-
-        # this is what the strip did
-        #     addUndoItem(undo=partial(self.spectrumDisplay.deleteStrip, newStrip),
-        #                 redo=partial(self.spectrumDisplay._unDelete, newStrip))
-
-        from ccpn.core.lib import Undo
 
         with logCommandBlock(get='self') as log:
             log('addStrip')
@@ -1137,43 +1105,6 @@ class GuiSpectrumDisplay(CcpnModule):
             self._redrawAxes(index)
 
         return result
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # def _addObjStrip(self, strip=None) -> 'GuiStripNd':
-    #     """Creates a new strip by cloning strip with index (default the last) in the display.
-    #     """
-    #     if self.phasingFrame.isVisible():
-    #         showWarning(str(self.windowTitle()), 'Please disable Phasing Console before adding strips')
-    #         return
-    #
-    #     if strip not in self.strips:
-    #         showWarning(str(self.windowTitle()), '%s not in spectrumDisplay.strips' % str(strip))
-    #         return
-    #
-    #     with logCommandBlock(get='self') as log:
-    #         log('addStrip')
-    #
-    #         newStrip = strip.clone()
-    #
-    #         self.showAxes()
-    #         self.setColumnStretches(True)
-    #         self.current.strip = newStrip
-    #
-    #         # ED: copy traceScale from the previous strips and enable phasing Console
-    #         self._copyPreviousStripValues(self.strips[0], newStrip)
-    #
-    #     return newStrip
 
     def setColumnStretches(self, stretchValue=False, scaleFactor=1.0, widths=True):
         """Set the column widths of the strips so that the last strip accommodates the axis bar
@@ -1221,22 +1152,6 @@ class GuiSpectrumDisplay(CcpnModule):
                 # set the correct widths for the strips
                 leftWidth = scaleFactor * (thisLayoutWidth - AXIS_WIDTH - (maxCol * AXIS_PADDING)) / (maxCol + 1)
                 endWidth = leftWidth + AXIS_WIDTH
-
-                # # set the widths and column stretches
-                # for col in range(0, maxCol):
-                #   if widths:
-                #     thisLayout.itemAt(col).widget().setMinimumWidth(leftWidth)
-                #
-                #   print('>>>', col, leftWidth, thisLayout.itemAt(col).widget())
-                #   # self.orderedStrips[col].setMinimumWidth(leftWidth)
-                #   thisLayout.setColumnStretch(col, leftWidth if stretchValue else 0)
-                #
-                # if widths and thisLayout.itemAt(maxCol):
-                #   thisLayout.itemAt(maxCol).widget().setMinimumWidth(endWidth)
-                #   # self.orderedStrips[maxCol].setMinimumWidth(leftWidth)
-                #
-                # print('>>>', maxCol, thisLayout.itemAt(maxCol).widget())
-                # thisLayout.setColumnStretch(maxCol, endWidth if stretchValue else 0)
 
                 # set the widths and column stretches
                 for wid in self.orderedStrips:
@@ -1290,18 +1205,6 @@ class GuiSpectrumDisplay(CcpnModule):
 
             strip._restoreZoom()
 
-            # else:
-            #     self.current.strip._restoreZoom()
-
-            # if not self.current.strip:
-            #     showWarning('Restore Zoom', 'No strip selected')
-            #     return
-            # if self.current.strip not in self.strips:
-            #     showWarning('Restore Zoom', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
-            #                 % (self.current.strip.pid, self.pid))
-            #     return
-            # else:
-            #     self.current.strip._restoreZoom()
         except Exception as ex:
             getLogger().warning('Error restoring zoom')
 
@@ -1320,15 +1223,6 @@ class GuiSpectrumDisplay(CcpnModule):
 
             strip._storeZoom()
 
-            # if not self.current.strip:
-            #     showWarning('Store Zoom', 'No strip selected')
-            #     return
-            # if self.current.strip not in self.strips:
-            #     showWarning('Store Zoom', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
-            #                 % (self.current.strip.pid, self.pid))
-            #     return
-            # else:
-            #     self.current.strip._storeZoom()
         except:
             getLogger().warning('Error storing zoom')
 
@@ -1347,15 +1241,6 @@ class GuiSpectrumDisplay(CcpnModule):
 
             strip._zoomIn()
 
-            # if not self.current.strip:
-            #     showWarning('Zoom In', 'No strip selected')
-            #     return
-            # if self.current.strip not in self.strips:
-            #     showWarning('Zoom In', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
-            #                 % (self.current.strip.pid, self.pid))
-            #     return
-            # else:
-            #     self.current.strip._zoomIn()
         except:
             getLogger().warning('Error zooming in')
 
@@ -1374,43 +1259,28 @@ class GuiSpectrumDisplay(CcpnModule):
 
             strip._zoomOut()
 
-            # if not self.current.strip:
-            #     showWarning('Zoom Out', 'No strip selected')
-            #     return
-            # if self.current.strip not in self.strips:
-            #     showWarning('Zoom Out', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
-            #                 % (self.current.strip.pid, self.pid))
-            #     return
-            # else:
-            #     self.current.strip._zoomOut()
         except:
             getLogger().warning('Error zooming out')
 
     def toggleCrossHair(self):
-        """Toggles whether cross hair is displayed in all strips of spectrum display."""
-        # toggle crosshairs for strips in this spectrumDisplay
+        """Toggles whether cross hair is displayed in all strips of spectrum display.
+        """
         for strip in self.strips:
             strip._toggleCrossHair()
 
     def toggleGrid(self):
-        """Toggles whether grid is displayed in all strips of spectrum display."""
-        # toggle grid for strips in this spectrumDisplay
+        """Toggles whether grid is displayed in all strips of spectrum display.
+        """
         for strip in self.strips:
             strip.toggleGrid()
 
     def _cyclePeakLabelling(self):
-        """toggles peak labelling of current strip."""
+        """Toggles peak labelling of current strip.
+        """
         try:
             if not self.current.strip:
                 showWarning('Cycle Peak Labelling', 'No strip selected')
                 return
-
-            # if self.current.strip not in self.strips:
-            #   showWarning('Cycle Peak Labelling', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
-            #               % (self.current.strip.pid, self.pid))
-            #   return
-            # else:
-            #   self.current.strip.cyclePeakLabelling()
 
             for strip in self.strips:
                 strip.cyclePeakLabelling()
@@ -1419,37 +1289,31 @@ class GuiSpectrumDisplay(CcpnModule):
             getLogger().warning('Error cycling peak labelling')
 
     def _cyclePeakSymbols(self):
-        """toggles peak labelling of current strip."""
+        """toggles peak labelling of current strip.
+        """
         try:
             if not self.current.strip:
                 showWarning('Cycle Peak Symbols', 'No strip selected')
                 return
-
-            # if self.current.strip not in self.strips:
-            #   showWarning('Cycle Peak ymbols', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
-            #               % (self.current.strip.pid, self.pid))
-            #   return
-            # else:
-            #   self.current.strip.cyclePeakLabelling()
 
             for strip in self.strips:
                 strip.cyclePeakSymbols()
         except:
             getLogger().warning('Error cycling peak symbols')
 
-    def _deletedPeak(self, peak):
-        apiPeak = peak._wrappedData
-        # NBNB TBD FIXME rewrite this to not use API peaks
-        # ALSO move this machinery from subclasses to this class.
-        for peakListView in self.activePeakItemDict:
-            peakItemDict = self.activePeakItemDict[peakListView]
-            peakItem = peakItemDict.get(apiPeak)
-            if peakItem:
-                # peakListView.spectrumView.strip.plotWidget.scene().removeItem(peakItem)
-                del peakItemDict[apiPeak]
-                inactivePeakItems = self.inactivePeakItemDict.get(peakListView)
-                if inactivePeakItems:
-                    inactivePeakItems.add(peakItem)
+    # def _deletedPeak(self, peak):
+    #     apiPeak = peak._wrappedData
+    #     # NBNB TBD FIXME rewrite this to not use API peaks
+    #     # ALSO move this machinery from subclasses to this class.
+    #     for peakListView in self.activePeakItemDict:
+    #         peakItemDict = self.activePeakItemDict[peakListView]
+    #         peakItem = peakItemDict.get(apiPeak)
+    #         if peakItem:
+    #             # peakListView.spectrumView.strip.plotWidget.scene().removeItem(peakItem)
+    #             del peakItemDict[apiPeak]
+    #             inactivePeakItems = self.inactivePeakItemDict.get(peakListView)
+    #             if inactivePeakItems:
+    #                 inactivePeakItems.add(peakItem)
 
     def displaySpectrum(self, spectrum, axisOrder: (str,) = ()):
         """Display additional spectrum, with spectrum axes ordered according ton axisOrder
@@ -1585,14 +1449,13 @@ class GuiSpectrumDisplay(CcpnModule):
 
 #=========================================================================================
 
-
-def _deletedPeak(peak: Peak):
-    """Function for notifiers.
-    #CCPNINTERNAL
-    """
-
-    for spectrumView in peak.peakList.spectrum.spectrumViews:
-        spectrumView.strip.spectrumDisplay._deletedPeak(peak)
+# def _deletedPeak(peak: Peak):
+#     """Function for notifiers.
+#     #CCPNINTERNAL
+#     """
+#
+#     for spectrumView in peak.peakList.spectrum.spectrumViews:
+#         spectrumView.strip.spectrumDisplay._deletedPeak(peak)
 
 
 def _spectrumHasChanged(spectrum: Spectrum):

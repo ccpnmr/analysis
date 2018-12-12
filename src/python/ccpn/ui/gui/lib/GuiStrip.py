@@ -1709,35 +1709,35 @@ class GuiStrip(Frame):
         else:
             raise ValueError("The last strip in a display cannot be deleted")
 
-    def _unDelete(self):
-        """Overrides normal delete"""
-        # currentStripItem = self._getWidgetFromLayout()
-        # self.setParent(None)
-
-        # recover the deleted apiStrip
-        self._storeStripUnDelete()
-        # self._unDeleteCall(*self._unDeleteArgs)
-
-        # ccpnStrip = self._wrappedData
-        # n = len(ccpnStrip.spectrumDisplay.strips)
-        n = self.spectrumDisplay.stripCount
-
-        if n > 1:
-            spectrumDisplay = self.spectrumDisplay
-            layout = spectrumDisplay.stripFrame.layout()
-
-            if layout:  # should always be the case but play safe
-
-                self._restoreToLayout()  # adds nothing to the undo stack, so add it below
-
-                _undo = self.project._undo
-                if _undo is not None:
-                    _undo.newItem(self._removeFromLayout, self._restoreToLayout)
-
-            self.current.strip = spectrumDisplay.strips[-1]
-
-        else:
-            raise ValueError("The last strip in a display cannot be deleted")
+    # def _unDelete(self):
+    #     """Overrides normal delete"""
+    #     # currentStripItem = self._getWidgetFromLayout()
+    #     # self.setParent(None)
+    #
+    #     # recover the deleted apiStrip
+    #     self._storeStripUnDelete()
+    #     # self._unDeleteCall(*self._unDeleteArgs)
+    #
+    #     # ccpnStrip = self._wrappedData
+    #     # n = len(ccpnStrip.spectrumDisplay.strips)
+    #     n = self.spectrumDisplay.stripCount
+    #
+    #     if n > 1:
+    #         spectrumDisplay = self.spectrumDisplay
+    #         layout = spectrumDisplay.stripFrame.layout()
+    #
+    #         if layout:  # should always be the case but play safe
+    #
+    #             self._restoreToLayout()  # adds nothing to the undo stack, so add it below
+    #
+    #             _undo = self.project._undo
+    #             if _undo is not None:
+    #                 _undo.newItem(self._removeFromLayout, self._restoreToLayout)
+    #
+    #         self.current.strip = spectrumDisplay.strips[-1]
+    #
+    #     else:
+    #         raise ValueError("The last strip in a display cannot be deleted")
 
     def _resetStripLayout(self, currentIndex, newIndex):
         # management of Qt layout

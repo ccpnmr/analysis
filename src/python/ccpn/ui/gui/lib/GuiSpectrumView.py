@@ -190,6 +190,10 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
         """Change action icon colour and other changes when spectrumView changes
 
         NB SpectrumView change notifiers are triggered when either DataSource or ApiSpectrumView change"""
+
+        if self.isDeleted:
+            return
+
         spectrumDisplay = self.strip.spectrumDisplay
         apiDataSource = self.spectrum._wrappedData
 

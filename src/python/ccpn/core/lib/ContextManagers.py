@@ -698,6 +698,27 @@ class _ObjectStore(object):
         self.current.decreaseBlanking()
 
 
+def _storeNewObjectCurrent(result, thisAddUndoItem):
+    if hasattr(result, CURRENT_ATTRIBUTE_NAME):
+        storeObj = _ObjectStore(result)
+        thisAddUndoItem(undo=storeObj._storeCurrentSelectedObject,
+                        redo=storeObj._restoreCurrentSelectedObject,
+                        )
+
+
+def _storeDeleteObjectCurrent(self, thisAddUndoItem):
+    if hasattr(self, CURRENT_ATTRIBUTE_NAME):
+        storeObj = _ObjectStore(self)
+
+        # store the current state - check because item already removed from current?
+        storeObj._storeCurrentSelectedObject()
+
+        # add it to the stack
+        thisAddUndoItem(undo=storeObj._restoreCurrentSelectedObject,
+                        redo=storeObj._storeCurrentSelectedObject
+                        )
+
+
 def newObject(klass):
     """A decorator wrap a newObject method's of the various classes in an undo block and calls
     result._finalise('create')
@@ -729,11 +750,12 @@ def newObject(klass):
                                                 objsToBeUnDeleted=apiObjectsCreated)
                             )
 
-                if hasattr(result, CURRENT_ATTRIBUTE_NAME):
-                    storeObj = _ObjectStore(result)
-                    addUndoItem(undo=storeObj._storeCurrentSelectedObject,
-                                redo=storeObj._restoreCurrentSelectedObject,
-                                )
+                _storeNewObjectCurrent(result, addUndoItem)
+                # if hasattr(result, CURRENT_ATTRIBUTE_NAME):
+                #     storeObj = _ObjectStore(result)
+                #     addUndoItem(undo=storeObj._storeCurrentSelectedObject,
+                #                 redo=storeObj._restoreCurrentSelectedObject,
+                #                 )
 
         result._finaliseAction('create')
         return result
@@ -762,16 +784,17 @@ def deleteObject():
         with notificationBlanking(application=application):
             with undoStackBlocking(application=application) as addUndoItem:
 
-                if hasattr(self, CURRENT_ATTRIBUTE_NAME):
-                    storeObj = _ObjectStore(self)
-
-                    # store the current state - check because item already removed from current?
-                    storeObj._storeCurrentSelectedObject()
-
-                    # add it to the stack
-                    addUndoItem(undo=storeObj._restoreCurrentSelectedObject,
-                                redo=storeObj._storeCurrentSelectedObject
-                                )
+                _storeDeleteObjectCurrent(self, addUndoItem)
+                # if hasattr(self, CURRENT_ATTRIBUTE_NAME):
+                #     storeObj = _ObjectStore(self)
+                #
+                #     # store the current state - check because item already removed from current?
+                #     storeObj._storeCurrentSelectedObject()
+                #
+                #     # add it to the stack
+                #     addUndoItem(undo=storeObj._restoreCurrentSelectedObject,
+                #                 redo=storeObj._storeCurrentSelectedObject
+                #                 )
 
                 # retrieve list of created items from the api
                 apiObjectsCreated = self._getApiObjectTree()

@@ -1106,6 +1106,8 @@ class GuiSpectrumDisplay(CcpnModule):
 
             with undoStackBlocking() as addUndoItem:
 
+                addUndoItem(undo=self._redrawAxes)
+
                 with notificationBlanking():
                     result = self.strips[index]._clone()
                     if not isinstance(result, GuiStrip):
@@ -1129,6 +1131,7 @@ class GuiSpectrumDisplay(CcpnModule):
                 # add layout handling to the undo stack
                 addUndoItem(undo=partial(self._removeStripFromLayout, self, result),
                             redo=partial(self._restoreStripToLayout, self, result, index))
+                addUndoItem(redo=partial(self._redrawAxes, index))
 
 
             # do axis redrawing

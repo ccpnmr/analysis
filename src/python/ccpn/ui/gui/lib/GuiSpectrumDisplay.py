@@ -899,9 +899,9 @@ class GuiSpectrumDisplay(CcpnModule):
                 apiObjectsCreated = strip._getApiObjectTree()
 
                 index = strip.stripIndex()
-                addUndoItem(undo=partial(self._redrawAxes, index))
 
                 # add layout handling to the undo stack
+                addUndoItem(undo=partial(self._redrawAxes, index))
                 addUndoItem(undo=partial(self._restoreStripToLayout, self, strip, index),
                             redo=partial(self._removeStripFromLayout, self, strip))
                 self._removeStripFromLayout(self, strip)

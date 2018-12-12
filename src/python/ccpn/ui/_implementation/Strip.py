@@ -244,7 +244,7 @@ class Strip(AbstractWrapperObject):
         """Get wrappedData (ccpnmr.gui.Task.Strip) in serial number order"""
         return parent._wrappedData.sortedStrips()
 
-    # @deleteObject() - doesn't work here
+    # @deleteObject()         # - doesn't work here
     def _delete(self):
         """delete the wrappedData.
         CCPN Internal
@@ -315,16 +315,27 @@ class Strip(AbstractWrapperObject):
     def clone(self):
         """create new strip that duplicates this one, appending it at the end
         """
-        with logCommandBlock(prefix='newStrip=', get='self') as log:
-            log('clone')
+        # with logCommandBlock(prefix='newStrip=', get='self') as log:
+        #     log('clone')
 
-            with undoStackBlocking() as addUndoItem:
-                newStrip = self._project._data2Obj.get(self._wrappedData.clone())
+        result = _newStrip(self)
+        # with undoStackBlocking() as addUndoItem:
+        #     newStrip = self._project._data2Obj.get(self._wrappedData.clone())
+        #
+        #     addUndoItem(undo=partial(self.spectrumDisplay.deleteStrip, newStrip),
+        #                 redo=partial(self.spectrumDisplay._unDelete, newStrip))
 
-                addUndoItem(undo=partial(self.spectrumDisplay.deleteStrip, newStrip),
-                            redo=partial(self.spectrumDisplay._unDelete, newStrip))
+        return result
 
-        return newStrip
+    def _clone(self):
+        """create new strip that duplicates this one, appending it at the end
+        """
+        apiStrip = self._wrappedData.clone()
+        result = self._project._data2Obj.get(apiStrip)
+        if result is None:
+            raise RuntimeError('Unable to generate new Strip item')
+
+        return result
 
     # @newObject(Strip)
     # def clone(self):
@@ -337,6 +348,7 @@ class Strip(AbstractWrapperObject):
     #
     #     return result
 
+    @logCommand(get='self')
     def moveStrip(self, newIndex):
         """Move strip to index newIndex in orderedStrips
         """
@@ -826,6 +838,19 @@ class Strip(AbstractWrapperObject):
         # _undo.newItem(root._unDelete, self.delete, undoArgs=(objsToBeDeleted, topObjectsToCheck))
         return (root._unDelete, (objsToBeDeleted, topObjectsToCheck))
 
+
+
+@newObject(Strip)
+def _newStrip(self):
+    """create new strip that duplicates this one, appending it at the end
+    Does not handle any gui updating.
+    """
+    apiStrip = self._wrappedData.clone()
+    result = self._project._data2Obj.get(apiStrip)
+    if result is None:
+        raise RuntimeError('Unable to generate new Strip item')
+
+    return result
 
 # newStrip functions
 # We should NOT have any newStrip function, except possibly for FreeStrips

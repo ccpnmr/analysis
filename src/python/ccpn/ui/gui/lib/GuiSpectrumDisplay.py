@@ -68,7 +68,8 @@ from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySettings
 from ccpn.ui._implementation.SpectrumView import SpectrumView
 from ccpn.core.lib.ContextManagers import logCommandBlock, undoBlockManager, \
-    newObject, deleteObject, undoStackBlocking, notificationBlanking
+    newObject, deleteObject, undoStackBlocking, \
+    notificationBlanking, _storeDeleteObjectCurrent, BlankedPartial
 from ccpn.util.Common import makeIterableList
 
 
@@ -799,34 +800,6 @@ class GuiSpectrumDisplay(CcpnModule):
     def _removeIndexStrip(self, value):
         self.deleteStrip(self.strips[value])
 
-
-    class _StripStore(object):
-        "A class to temporarily store the strip widget"
-
-        def __init__(self, spectrumDisplay):
-            self.spectrumDisplay = None
-            self.strip = None
-            self.stripWidget = None
-
-        def _storeStripDelete(self):
-            """store the api delete info
-            CCPN Internal
-            """
-            self._unDeleteCall, self._unDeleteArgs = self._recoverApiObject(self)
-
-        def _storeStripUnDelete(self):
-            """retrieve the api deleted object
-            CCPN Internal
-            """
-            self._unDeleteCall(*self._unDeleteArgs)
-
-        def _storeUnDelete(self):
-            pass
-
-        def _restoreStripWidget(self):
-            pass
-
-
     def _removeStripFromLayout(self, spectrumDisplay, strip):
         """Remove the current strip from the layout
         CCPN Internal
@@ -842,8 +815,8 @@ class GuiSpectrumDisplay(CcpnModule):
             while layout.count():
                 _widgets.append(layout.takeAt(0).widget())
             _widgets.remove(strip)
-            strip.setParent(None)       # set widget parent to None to hide,
-                                        # was previously handled by addWidget to tempStore
+            strip.setParent(None)  # set widget parent to None to hide,
+            # was previously handled by addWidget to tempStore
 
             if spectrumDisplay.stripDirection == 'Y':
                 for m, widgStrip in enumerate(_widgets):  # build layout again
@@ -898,7 +871,11 @@ class GuiSpectrumDisplay(CcpnModule):
 
     def deleteStrip(self, strip):
         """Delete a strip from the spectrumDisplay
+
+        :param strip: strip to delete as object or pid
         """
+        strip = self.getByPid(strip) if isinstance(strip, str) else strip
+
         if strip is None:
             showWarning('Delete strip', 'Invalid strip')
             return
@@ -916,55 +893,64 @@ class GuiSpectrumDisplay(CcpnModule):
         with logCommandBlock(get='self') as log:
             log('deleteStrip', strip=repr(strip.pid))
 
-            self.current.strip = None
-
-            # generate temporary store object
-            # getLayout
-            # remove stripWidget from layout
-            # get apiObject list
-
             with undoStackBlocking() as addUndoItem:
                 # retrieve list of created items from the api
                 # strangely, this modifies _wrappedData.orderedStrips
                 apiObjectsCreated = strip._getApiObjectTree()
 
-                addUndoItem(undo=self._redrawAxes)
-
                 index = strip.stripIndex()
+                addUndoItem(undo=partial(self._redrawAxes, index))
+
+                # add layout handling to the undo stack
                 addUndoItem(undo=partial(self._restoreStripToLayout, self, strip, index),
                             redo=partial(self._removeStripFromLayout, self, strip))
                 self._removeStripFromLayout(self, strip)
 
-                addUndoItem(undo=partial(strip._wrappedData.root._unDelete,
-                                         apiObjectsCreated, (strip._wrappedData.topObject,)),
-                            redo=partial(strip._delete)
+                # # add object delete/undelete to the undo stack
+                # addUndoItem(undo=partial(strip._wrappedData.root._unDelete,
+                #                          apiObjectsCreated, (strip._wrappedData.topObject,)),
+                #             redo=partial(strip._delete)
+                #             )
+                #
+                # # delete the strip
+                # strip._delete()
+
+                # add object delete/undelete to the undo stack
+                addUndoItem(undo=BlankedPartial(strip._wrappedData.root._unDelete,
+                                                topObjectsToCheck=(strip._wrappedData.topObject,),
+                                                obj=strip, trigger='create', preExecution=False,
+                                                objsToBeUnDeleted=apiObjectsCreated),
+                            redo=BlankedPartial(strip._delete,
+                                                obj=strip, trigger='delete', preExecution=True)
                             )
 
-                strip._delete()
+                # delete the strip
+                strip._finaliseAction('delete')
+                with notificationBlanking():
+                    strip._delete()
 
                 addUndoItem(redo=self._redrawAxes)
 
-                #EJB check handling of current.strip - can't remain on deleted strip
-            # do axis redrawing (as below)
+            # do axis redrawing
             self._redrawAxes()
 
-        if self.strips:
-            self.current.strip = self.strips[-1]
-
-    def _redrawAxes(self):
+    def _redrawAxes(self, index=-1):
+        """Redraw the axes for the stripFrame, and set the new current strip,
+        will default to the last strip if not selected.
+        """
         self.showAxes()
         self.setColumnStretches(stretchValue=True)
+        if self.strips:
+            self.current.strip = self.strips[index]
 
     def removeCurrentStrip(self):
-        "Remove current.strip if it belongs to self"
-
+        """Remove current.strip if it belongs to self.
+        """
         if self.current.strip is None:
             showWarning('Remove current strip', 'Select first in SpectrumDisplay by clicking')
             return
-        self.deleteStrip(self.current.strip)
 
-        if self.strips:
-            self.current.strip = self.strips[-1]
+        self.deleteStrip(self.current.strip)
 
     # def duplicateStrip(self):
     #   """
@@ -1082,29 +1068,85 @@ class GuiSpectrumDisplay(CcpnModule):
     #   getLogger().warning('>>> ERROR turning on phasing - %s' % str(es))
     #   getLogger().debug('OpenGL widget not instantiated')
 
-    def addStrip(self) -> 'GuiStripNd':
+    def addStrip(self, strip=None) -> 'GuiStripNd':
         """Creates a new strip by cloning strip with index (default the last) in the display.
         """
+        strip = self.getByPid(strip) if isinstance(strip, str) else strip
+        index = strip.stripIndex() if strip else -1
+
         if self.phasingFrame.isVisible():
             showWarning(str(self.windowTitle()), 'Please disable Phasing Console before adding strips')
             return
 
+        # with logCommandBlock(get='self') as log:
+        #     log('addStrip')
+        #
+        #     # stripIndex = -1
+        #     newStrip = self.strips[index]._clone()
+        #
+        #     # newStrip.copyOrderedSpectrumViews(self.strips[stripIndex-1])
+        #
+        #     self.showAxes()
+        #     self.setColumnStretches(True)
+        #     self.current.strip = newStrip
+        #
+        #     # ED: copy traceScale from the previous strips and enable phasing Console
+        #     self._copyPreviousStripValues(self.strips[0], newStrip)
+        #
+        # # return newStrip
+
+        # this is what the strip did
+        #     addUndoItem(undo=partial(self.spectrumDisplay.deleteStrip, newStrip),
+        #                 redo=partial(self.spectrumDisplay._unDelete, newStrip))
+
+        from ccpn.core.lib import Undo
+
         with logCommandBlock(get='self') as log:
             log('addStrip')
 
-            stripIndex = -1
-            newStrip = self.strips[stripIndex].clone()
+            with undoStackBlocking() as addUndoItem:
 
-            # newStrip.copyOrderedSpectrumViews(self.strips[stripIndex-1])
+                with notificationBlanking():
+                    result = self.strips[index]._clone()
+                    if not isinstance(result, GuiStrip):
+                        raise RuntimeError('Expected an object of class %s, obtained %s' % (GuiStrip, result.__class__))
+                result._finaliseAction('create')
 
-            self.showAxes()
-            self.setColumnStretches(True)
-            self.current.strip = newStrip
+                # retrieve list of created items from the api
+                # strangely, this modifies _wrappedData.orderedStrips
+                apiObjectsCreated = result._getApiObjectTree()
+                addUndoItem(undo=BlankedPartial(Undo._deleteAllApiObjects,
+                                                obj=result, trigger='delete', preExecution=True,
+                                                objsToBeDeleted=apiObjectsCreated),
+                            redo=BlankedPartial(result._wrappedData.root._unDelete,
+                                                topObjectsToCheck=(result._wrappedData.topObject,),
+                                                obj=result, trigger='create', preExecution=False,
+                                                objsToBeUnDeleted=apiObjectsCreated)
+                            )
 
-            # ED: copy traceScale from the previous strips and enable phasing Console
-            self._copyPreviousStripValues(self.strips[0], newStrip)
+                index = result.stripIndex()
 
-        return newStrip
+                # add layout handling to the undo stack
+                addUndoItem(undo=partial(self._removeStripFromLayout, self, result),
+                            redo=partial(self._restoreStripToLayout, self, result, index))
+
+
+            # do axis redrawing
+            self._redrawAxes(index)
+
+        return result
+
+
+
+
+
+
+
+
+
+
+
+
 
     def _addObjStrip(self, strip=None) -> 'GuiStripNd':
         """Creates a new strip by cloning strip with index (default the last) in the display.

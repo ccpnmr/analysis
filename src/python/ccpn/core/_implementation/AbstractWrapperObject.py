@@ -714,6 +714,18 @@ class AbstractWrapperObject(NotifierBase):
         return result
 
     @classmethod
+    def _getParentClasses(cls) -> list:
+        """Return a list of parent classes, staring with the root (i.e. Project)
+        """
+        result = []
+        klass = cls
+        while klass._parentClass is not None:
+            result.append(klass._parentClass)
+            klass = klass._parentClass
+        result.reverse()
+        return result
+
+    @classmethod
     def _getDescendant(cls, self, relativeId: str):
         """Get descendant of class cls with relative key relativeId
          Implementation function, used to generate getCls functions

@@ -72,7 +72,8 @@ def makeStripPlotFromSingles(spectrumDisplay: GuiSpectrumDisplay, nmrAtoms: List
     # Make sure there are enough strips to display nmrAtomPairs
     if numberOfStrips < len(nmrAtoms):
         for ii in range(numberOfStrips, len(nmrAtoms)):
-            spectrumDisplay.strips[-1].clone()
+            # spectrumDisplay.strips[-1].clone()
+            spectrumDisplay.addStrip()
 
     # print(spectrumDisplay, nmrAtomPairs, len(nmrAtomPairs), len(spectrumDisplay.strips))
     # loop through strips and navigate to appropriate position in strip

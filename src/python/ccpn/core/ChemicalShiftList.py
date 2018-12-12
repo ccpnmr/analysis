@@ -191,7 +191,7 @@ class ChemicalShiftList(AbstractWrapperObject):
     #===========================================================================================
 
     @logCommand(get='self')
-    def _newChemicalShift(self, value: float, nmrAtom,
+    def newChemicalShift(self, value: float, nmrAtom,
                           valueError: float = 0.0, figureOfMerit: float = 1.0,
                           comment: str = None, **kwds):
         """Create new ChemicalShift within ChemicalShiftList.

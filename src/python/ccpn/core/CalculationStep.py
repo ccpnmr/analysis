@@ -204,6 +204,9 @@ DataSet.inputCalculationSteps = property(getter, None, None,
 del getter
 
 
+#=========================================================================================
+
+
 @newObject(CalculationStep)
 def _newCalculationStep(self: DataSet, programName: str = None, programVersion: str = None,
                         scriptName: str = None, script: str = None,

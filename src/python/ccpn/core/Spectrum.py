@@ -1858,10 +1858,10 @@ class Spectrum(AbstractWrapperObject):
 
     @logCommand(get='self')
     def newSpectrumHit(self, substanceName: str, pointNumber: int = 0,
-                        pseudoDimensionNumber: int = 0, pseudoDimension = None,
-                        figureOfMerit: float = None, meritCode: str = None, normalisedChange: float = None,
-                        isConfirmed: bool = None, concentration: float = None, concentrationError: float = None,
-                        concentrationUnit: str = None, comment: str = None, **kwds):
+                       pseudoDimensionNumber: int = 0, pseudoDimension=None,
+                       figureOfMerit: float = None, meritCode: str = None, normalisedChange: float = None,
+                       isConfirmed: bool = None, concentration: float = None, concentrationError: float = None,
+                       concentrationUnit: str = None, comment: str = None, **kwds):
         """Create new SpectrumHit within Spectrum.
 
         See the SpectrumHit class for details.
@@ -1885,17 +1885,17 @@ class Spectrum(AbstractWrapperObject):
         from ccpn.core.SpectrumHit import _newSpectrumHit
 
         return _newSpectrumHit(self, substanceName=substanceName, pointNumber=pointNumber,
-                        pseudoDimensionNumber=pseudoDimensionNumber, pseudoDimension=pseudoDimension,
-                        figureOfMerit=figureOfMerit, meritCode=meritCode, normalisedChange=normalisedChange,
-                        isConfirmed=isConfirmed, concentration=concentration, concentrationError=concentrationError,
-                        concentrationUnit=concentrationUnit, comment=comment, **kwds)
+                               pseudoDimensionNumber=pseudoDimensionNumber, pseudoDimension=pseudoDimension,
+                               figureOfMerit=figureOfMerit, meritCode=meritCode, normalisedChange=normalisedChange,
+                               isConfirmed=isConfirmed, concentration=concentration, concentrationError=concentrationError,
+                               concentrationUnit=concentrationUnit, comment=comment, **kwds)
 
     @logCommand(get='self')
-    def _newSpectrumReference(self, dimension: int, spectrometerFrequency: float,
-                              isotopeCodes: Sequence[str], axisCode: str = None, measurementType: str = 'Shift',
-                              maxAliasedFrequency: float = None, minAliasedFrequency: float = None,
-                              foldingMode: str = None, axisUnit: str = None, referencePoint: float = 0.0,
-                              referenceValue: float = 0.0, **kwds):
+    def newSpectrumReference(self, dimension: int, spectrometerFrequency: float,
+                             isotopeCodes: Sequence[str], axisCode: str = None, measurementType: str = 'Shift',
+                             maxAliasedFrequency: float = None, minAliasedFrequency: float = None,
+                             foldingMode: str = None, axisUnit: str = None, referencePoint: float = 0.0,
+                             referenceValue: float = 0.0, **kwds):
         """Create new SpectrumReference.
 
         See the SpectrumReference class for details.
@@ -1922,6 +1922,7 @@ class Spectrum(AbstractWrapperObject):
                                      maxAliasedFrequency=maxAliasedFrequency, minAliasedFrequency=minAliasedFrequency,
                                      foldingMode=foldingMode, axisUnit=axisUnit, referencePoint=referencePoint,
                                      referenceValue=referenceValue, **kwds)
+
 
 #=========================================================================================
 # Connections to parents:
@@ -1967,6 +1968,7 @@ def _createDummySpectrum(self: Project, axisCodes: Sequence[str], name=None,
         result.newPeakList()
 
     return result
+
 
 # EJB 20181130: not sure what do with this...
 # EJB 20181210: Moved to Project.loadSpectrum, and _createDummySpectrum

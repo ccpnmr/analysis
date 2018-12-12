@@ -242,11 +242,11 @@ class DataSet(AbstractWrapperObject):
 
     @logCommand(get='self')
     def newRestraintList(self, restraintType, name: str = None, origin: str = None,
-                          comment: str = None, unit: str = None, potentialType: str = 'unknown',
-                          tensorMagnitude: float = 0.0, tensorRhombicity: float = 0.0,
-                          tensorIsotropicValue: float = 0.0, tensorChainCode: str = None,
-                          tensorSequenceCode: str = None, tensorResidueType: str = None,
-                          restraintItemLength=None, **kwds):
+                         comment: str = None, unit: str = None, potentialType: str = 'unknown',
+                         tensorMagnitude: float = 0.0, tensorRhombicity: float = 0.0,
+                         tensorIsotropicValue: float = 0.0, tensorChainCode: str = None,
+                         tensorSequenceCode: str = None, tensorResidueType: str = None,
+                         restraintItemLength=None, **kwds):
         """Create new RestraintList of type restraintType within DataSet.
 
         See the RestraintList class for details.
@@ -271,17 +271,17 @@ class DataSet(AbstractWrapperObject):
         from ccpn.core.RestraintList import _newRestraintList
 
         return _newRestraintList(self, restraintType, name=name, origin=origin,
-                          comment=comment, unit=unit, potentialType=potentialType,
-                          tensorMagnitude=tensorMagnitude, tensorRhombicity=tensorRhombicity,
-                          tensorIsotropicValue=tensorIsotropicValue, tensorChainCode=tensorChainCode,
-                          tensorSequenceCode=tensorSequenceCode, tensorResidueType=tensorResidueType,
-                          restraintItemLength=restraintItemLength, **kwds)
+                                 comment=comment, unit=unit, potentialType=potentialType,
+                                 tensorMagnitude=tensorMagnitude, tensorRhombicity=tensorRhombicity,
+                                 tensorIsotropicValue=tensorIsotropicValue, tensorChainCode=tensorChainCode,
+                                 tensorSequenceCode=tensorSequenceCode, tensorResidueType=tensorResidueType,
+                                 restraintItemLength=restraintItemLength, **kwds)
 
     @logCommand(get='self')
-    def _newCalculationStep(self, programName: str = None, programVersion: str = None,
-                            scriptName: str = None, script: str = None,
-                            inputDataUuid: str = None, outputDataUuid: str = None,
-                            inputDataSet = None, outputDataSet = None, **kwds):
+    def newCalculationStep(self, programName: str = None, programVersion: str = None,
+                           scriptName: str = None, script: str = None,
+                           inputDataUuid: str = None, outputDataUuid: str = None,
+                           inputDataSet=None, outputDataSet=None, **kwds):
         """Create new CalculationStep within DataSet.
 
         See the CalculationStep class for details.
@@ -307,8 +307,8 @@ class DataSet(AbstractWrapperObject):
                                    **kwds)
 
     @logCommand(get='self')
-    def _newData(self, name: str, attachedObjectPid: str = None,
-                 attachedObject: AbstractWrapperObject = None, **kwds):
+    def newData(self, name: str, attachedObjectPid: str = None,
+                attachedObject: AbstractWrapperObject = None, **kwds):
         """Create new Data within DataSet.
 
         See the Data class for details.
@@ -324,6 +324,7 @@ class DataSet(AbstractWrapperObject):
 
         return _newData(self, name=name, attachedObjectPid=attachedObjectPid,
                         attachedObject=attachedObject, **kwds)
+
 
 #=========================================================================================
 # Connections to parents:
@@ -371,13 +372,13 @@ def _newDataSet(self: Project, title: str = None, programName: str = None, progr
         raise TypeError("programName must be a string")
 
     apiNmrConstraintStore = nmrProject.root.newNmrConstraintStore(nmrProject=nmrProject,
-                                                                     name=title,
-                                                                     programName=programName,
-                                                                     programVersion=programVersion,
-                                                                     dataPath=dataPath,
-                                                                     creationDate=creationDate,
-                                                                     uuid=uuid,
-                                                                     details=comment)
+                                                                  name=title,
+                                                                  programName=programName,
+                                                                  programVersion=programVersion,
+                                                                  dataPath=dataPath,
+                                                                  creationDate=creationDate,
+                                                                  uuid=uuid,
+                                                                  details=comment)
     result = self._data2Obj.get(apiNmrConstraintStore)
     if result is None:
         raise RuntimeError('Unable to generate new DataSet item')
@@ -391,8 +392,6 @@ def _newDataSet(self: Project, title: str = None, programName: str = None, progr
 
     return result
 
-
 #EJB 20181206: moved to Project
 # Project.newDataSet = _newDataSet
 # del _newDataSet
-

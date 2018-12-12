@@ -1133,7 +1133,6 @@ class GuiSpectrumDisplay(CcpnModule):
                             redo=partial(self._restoreStripToLayout, self, result, index))
                 addUndoItem(redo=partial(self._redrawAxes, index))
 
-
             # do axis redrawing
             self._redrawAxes(index)
 
@@ -1151,30 +1150,30 @@ class GuiSpectrumDisplay(CcpnModule):
 
 
 
-    def _addObjStrip(self, strip=None) -> 'GuiStripNd':
-        """Creates a new strip by cloning strip with index (default the last) in the display.
-        """
-        if self.phasingFrame.isVisible():
-            showWarning(str(self.windowTitle()), 'Please disable Phasing Console before adding strips')
-            return
-
-        if strip not in self.strips:
-            showWarning(str(self.windowTitle()), '%s not in spectrumDisplay.strips' % str(strip))
-            return
-
-        with logCommandBlock(get='self') as log:
-            log('addStrip')
-
-            newStrip = strip.clone()
-
-            self.showAxes()
-            self.setColumnStretches(True)
-            self.current.strip = newStrip
-
-            # ED: copy traceScale from the previous strips and enable phasing Console
-            self._copyPreviousStripValues(self.strips[0], newStrip)
-
-        return newStrip
+    # def _addObjStrip(self, strip=None) -> 'GuiStripNd':
+    #     """Creates a new strip by cloning strip with index (default the last) in the display.
+    #     """
+    #     if self.phasingFrame.isVisible():
+    #         showWarning(str(self.windowTitle()), 'Please disable Phasing Console before adding strips')
+    #         return
+    #
+    #     if strip not in self.strips:
+    #         showWarning(str(self.windowTitle()), '%s not in spectrumDisplay.strips' % str(strip))
+    #         return
+    #
+    #     with logCommandBlock(get='self') as log:
+    #         log('addStrip')
+    #
+    #         newStrip = strip.clone()
+    #
+    #         self.showAxes()
+    #         self.setColumnStretches(True)
+    #         self.current.strip = newStrip
+    #
+    #         # ED: copy traceScale from the previous strips and enable phasing Console
+    #         self._copyPreviousStripValues(self.strips[0], newStrip)
+    #
+    #     return newStrip
 
     def setColumnStretches(self, stretchValue=False, scaleFactor=1.0, widths=True):
         """Set the column widths of the strips so that the last strip accommodates the axis bar

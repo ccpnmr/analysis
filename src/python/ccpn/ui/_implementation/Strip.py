@@ -312,20 +312,23 @@ class Strip(AbstractWrapperObject):
     # CCPN functions
     #=========================================================================================
 
-    def clone(self):
-        """create new strip that duplicates this one, appending it at the end
-        """
-        # with logCommandBlock(prefix='newStrip=', get='self') as log:
-        #     log('clone')
-
-        result = _newStrip(self)
-        # with undoStackBlocking() as addUndoItem:
-        #     newStrip = self._project._data2Obj.get(self._wrappedData.clone())
-        #
-        #     addUndoItem(undo=partial(self.spectrumDisplay.deleteStrip, newStrip),
-        #                 redo=partial(self.spectrumDisplay._unDelete, newStrip))
-
-        return result
+    # def clone(self):
+    #     """create new strip that duplicates this one, appending it at the end
+    #     """
+    #
+    #     #EJB 20181212: I think this is already deprecated in the refactored branch
+    #
+    #     # with logCommandBlock(prefix='newStrip=', get='self') as log:
+    #     #     log('clone')
+    #
+    #     result = _newStrip(self)
+    #     # with undoStackBlocking() as addUndoItem:
+    #     #     newStrip = self._project._data2Obj.get(self._wrappedData.clone())
+    #     #
+    #     #     addUndoItem(undo=partial(self.spectrumDisplay.deleteStrip, newStrip),
+    #     #                 redo=partial(self.spectrumDisplay._unDelete, newStrip))
+    #
+    #     return result
 
     def _clone(self):
         """create new strip that duplicates this one, appending it at the end
@@ -874,7 +877,11 @@ def _copyStrip(self: SpectrumDisplay, strip: Strip, newIndex=None) -> Strip:
 
         if strip.spectrumDisplay is self:
             # Within same display. Not that useful, but harmless
-            newStrip = strip.clone()
+            # newStrip = strip.clone()
+
+            # clone the last strip
+            newStrip = strip.spectrumDisplay.addStrip(strip)
+
             if newIndex is not None:
                 newStrip.moveTo(newIndex)
 
@@ -885,7 +892,11 @@ def _copyStrip(self: SpectrumDisplay, strip: Strip, newIndex=None) -> Strip:
             else:
                 positions = strip.positions
                 widths = strip.widths
-                newStrip = self.orderedStrips[0].clone()
+                # newStrip = self.orderedStrips[0].clone()
+
+                # clone the first strip
+                newStrip = strip.spectrumDisplay.addStrip(self.orderedStrips[0])
+
                 if newIndex is not None:
                     newStrip.moveTo(newIndex)
                 for ii, axis in enumerate(newStrip.orderedAxes):

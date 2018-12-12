@@ -251,26 +251,6 @@ class Strip(AbstractWrapperObject):
         """
         self._wrappedData.delete()
 
-    def _storeStripDeleteDict(self, currentIndex):
-        """Store the current strip index in the wrappedData
-        CCPN Internal
-        """
-        _stripDeleteDict = {'currentIndex': currentIndex}
-        # ccpnStrip = self._wrappedData
-        # ccpnStrip.__dict__['_stripDeleteDict'] = _stripDeleteDict
-
-        self._ccpnInternalData['_stripDeleteDict'] = _stripDeleteDict
-
-    def _getStripDeleteDict(self):
-        """retrieve the old strip index from the wrappedData
-        CCPN Internal
-        """
-        # ccpnStrip = self._wrappedData
-        # _stripDeleteDict = ccpnStrip.__dict__['_stripDeleteDict']
-
-        _stripDeleteDict = self._ccpnInternalData['_stripDeleteDict']
-        return _stripDeleteDict['currentIndex']
-
     def _setStripIndex(self, index):
         """Set the index of the current strip in the wrapped data
         CCPN Internal
@@ -287,18 +267,6 @@ class Strip(AbstractWrapperObject):
         # spectrumDisplay = self.spectrumDisplay
         # index = spectrumDisplay.strips.index(self)
         return index
-
-    def _storeStripDelete(self):
-        """store the api delete info
-        CCPN Internal
-        """
-        self._unDeleteCall, self._unDeleteArgs = self._recoverApiObject(self)
-
-    def _storeStripUnDelete(self):
-        """retrieve the api deleted object
-        CCPN Internal
-        """
-        self._unDeleteCall(*self._unDeleteArgs)
 
     def delete(self):
         """trap this delete
@@ -383,8 +351,7 @@ class Strip(AbstractWrapperObject):
         return self._project._data2Obj.get(self._wrappedData.findAxis(axisCode))
 
     def displaySpectrum(self, spectrum: Spectrum, axisOrder: Sequence = ()):
-        """
-        Display additional spectrum on strip, with spectrum axes ordered according to axisOrder
+        """Display additional spectrum on strip, with spectrum axes ordered according to axisOrder
         """
         getLogger().debug('Strip.displaySpectrum>>> %s' % spectrum)
 
@@ -450,8 +417,8 @@ class Strip(AbstractWrapperObject):
         return result
 
     def peakIsInPlane(self, peak: Peak) -> bool:
-        """is peak in currently displayed planes for strip?"""
-
+        """Is peak in currently displayed planes for strip?
+        """
         spectrumView = self.findSpectrumView(peak.peakList.spectrum)
         if spectrumView is None:
             return False
@@ -468,7 +435,7 @@ class Strip(AbstractWrapperObject):
                 zRegion = orderedAxes[ii].region
                 if zPosition < zRegion[0] - zPlaneSize or zPosition > zRegion[1] + zPlaneSize:
                     return False
-        #
+
         return True
 
         # apiSpectrumView = self._wrappedData.findFirstSpectrumView(
@@ -493,8 +460,8 @@ class Strip(AbstractWrapperObject):
         # return True
 
     def peakIsInFlankingPlane(self, peak: Peak) -> bool:
-        """is peak in planes flanking currently displayed planes for strip?"""
-
+        """Is peak in planes flanking currently displayed planes for strip?
+        """
         spectrumView = self.findSpectrumView(peak.peakList.spectrum)
         if spectrumView is None:
             return False
@@ -516,8 +483,7 @@ class Strip(AbstractWrapperObject):
 
     @logCommand(get='self')
     def peakPickPosition(self, inPosition) -> Tuple[Peak]:
-        """
-        Pick peak at position for all spectra currently displayed in strip
+        """Pick peak at position for all spectra currently displayed in strip.
         """
         _preferences = self.application.preferences.general
 
@@ -553,18 +519,8 @@ class Strip(AbstractWrapperObject):
                         else:
                             position = inPosition
 
-                    # if spectrumView.spectrum.dimensionCount == 1:
-                    #     # if len(position) > 1:
-                    #     peak = peakList.newPeak(ppmPositions=(position[0],))        #, height=position[1])
-                    #         # peak.position = (position[0],)
-                    #         # peak.height = position[1]
-                    # else:
                     peak = peakList.newPeak(ppmPositions=position)
 
-                    # peak.position = position
-                    # # note, the height below is not derived from any fitting
-                    # # but is a weighted average of the values at the neighbouring grid points
-                    # peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
                     result.append(peak)
                     peakLists.append(peakList)
 
@@ -573,8 +529,8 @@ class Strip(AbstractWrapperObject):
         return tuple(result), tuple(peakLists)
 
     def peakPickRegion(self, selectedRegion: List[List[float]]) -> Tuple[Peak]:
-        """Peak pick all spectra currently displayed in strip in selectedRegion """
-
+        """Peak pick all spectra currently displayed in strip in selectedRegion.
+        """
         result = []
 
         project = self.project
@@ -625,227 +581,18 @@ class Strip(AbstractWrapperObject):
                             # 1D's
                             # NBNB This is a change - valuea are now rounded to three decimal places. RHF April 2017
                             newPeaks = peakList.pickPeaks1d(selectedRegion[0], sorted(selectedRegion[1]), size=minDropfactor * 100)
-                            # y0 = startPosition.y()
-                            # y1 = endPosition.y()
-                            # y0, y1 = min(y0, y1), max(y0, y1)
-                            # newPeaks = peakList.pickPeaks1d([startPosition.x(), endPosition.x()], [y0, y1])
 
                         result.extend(newPeaks)
-                        # break
-
-                    # # Add the new peaks to selection
-                    # for peak in newPeaks:
-                    #   # peak.isSelected = True
-                    #   self.current.addPeak(peak)
-
-                    # for window in project.windows:
-                    #   for spectrumDisplay in window.spectrumDisplays:
-                    #     for strip in spectrumDisplay.strips:
-                    #       spectra = [spectrumView.spectrum for spectrumView in strip.spectrumViews]
-                    #       if peakList.spectrum in spectra:
-                    #               strip.showPeaks(peakList)
 
         for peak in result:
             peak._finaliseAction('create')
 
         return tuple(result)
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # ejb - orderedSpectrumViews, orderedSpectra
-    # store the current orderedSpectrumViews in the internal data store
-    # so it is hidden from external users
-    # def orderedSpectrumViews(self, spectrumList, includeDeleted=False) -> Optional[Tuple]:
-    #   """
-    #   The spectrumViews attached to the strip (ordered)
-    #   :return tuple of SpectrumViews:
-    #   """
-    #   return self.spectrumDisplay.orderedSpectrumViews(spectrumList)
-
-    # def setOrderedSpectrumViews(self, spectrumViews: Tuple):
-    #   """
-    #   Set the ordering of the spectrumViews attached to the strip/spectrumDisplay
-    #   :param spectrumViews - tuple of SpectrumView objects:
-    #   """
-    #   if not self._orderedSpectrumViews:
-    #     self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
-    #   self._orderedSpectrumViews.setOrderedSpectrumViews(spectrumViews)
-    #
-    # def _indexOrderedSpectrumViews(self, newIndex: Tuple[int]):
-    #   """
-    #   Set the new indexing of the spectrumViews attached to the strip/spectrumDisplay
-    #   :param newIndex - tuple of int:
-    #   """
-    #   if not self._orderedSpectrumViews:
-    #     self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
-    #
-    #   specViews = self._orderedSpectrumViews.orderedSpectrumViews()
-    #   if len(set(newIndex)) != len(newIndex):
-    #     raise ValueError('List contains duplicates')
-    #   notDeletedViews = [spec for spec in specViews if not spec.isDeleted]
-    #   if len(newIndex) != len(notDeletedViews):
-    #     raise ValueError('List is not the correct length')
-    #
-    #   newSpecViews = [specViews[ii] for ii in newIndex]
-    #   self._orderedSpectrumViews.setOrderedSpectrumViews(newSpecViews)
-    #
-    # def appendSpectrumView(self, spectrumView):
-    #   """
-    #   Append a SpectrumView to the end of the ordered spectrumviews
-    #   :param spectrumView - new SpectrumView:
-    #   """
-    #   if not self._orderedSpectrumViews:
-    #     self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
-    #   self._orderedSpectrumViews.appendSpectrumView(spectrumView)
-    #
-    # def removeSpectrumView(self, spectrumView):
-    #   """
-    #   Remove a SpectrumView from the ordered spectrumviews
-    #   :param spectrumView - SpectrumView to be removed:
-    #   """
-    #   if not self._orderedSpectrumViews:
-    #     self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
-    #   self._orderedSpectrumViews.removeSpectrumView(spectrumView)
-    #
-    # def copyOrderedSpectrumViews(self, fromStrip):
-    #   """
-    #   Copy the strip order from an adjacent strip
-    #   :param fromStrip - source strip
-    #   """
-    #   if not self._orderedSpectrumViews:
-    #     self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
-    #   self._orderedSpectrumViews.copyOrderedSpectrumViews(fromStrip)
-
-    # def orderedSpectra(self) -> Optional[Tuple[Spectrum, ...]]:
-    #   """
-    #   The spectra attached to the strip (ordered)
-    #   :return tuple of spectra:
-    #   """
-    #   return self.spectrumDisplay.orderedSpectra()
-    #
-    # def orderedSpectrumViews(self, includeDeleted=False) -> Optional[Tuple]:
-    #   """
-    #   The spectrumViews attached to the strip (ordered)
-    #   :return tuple of SpectrumViews:
-    #   """
-    #   return self.spectrumDisplay.orderedSpectrumViews()
-    #
-    # def setOrderedSpectrumViews(self, spectrumViews: Tuple):
-    #   """
-    #   Set the ordering of the spectrumViews attached to the strip/spectrumDisplay
-    #   :param spectrumViews - tuple of SpectrumView objects:
-    #   """
-    #   self.spectrumDisplay.setOrderedSpectrumViews(spectrumViews)
-    #
-    # def appendSpectrumView(self, spectrumView):
-    #   """
-    #   Append a SpectrumView to the end of the ordered spectrumviews
-    #   :param spectrumView - new SpectrumView:
-    #   """
-    #   self.spectrumDisplay.appendSpectrumView(spectrumView)
-    #
-    # def removeSpectrumView(self, spectrumView):
-    #   """
-    #   Remove a SpectrumView from the ordered spectrumviews
-    #   :param spectrumView - SpectrumView to be removed:
-    #   """
-    #   self.spectrumDisplay.removeSpectrumView(spectrumView)
-
-    @staticmethod
-    def _recoverApiObject(strip):
-        """recover the deleted api object by using the auto-generated code from the Model
-        CCPN Internal
-
-
-        This is the new deleteObject decorator!
-
-
-        """
-        self = strip._wrappedData
-        dataDict = self.__dict__
-        topObject = dataDict.get('topObject')
-        notInConstructor = not (dataDict.get('inConstructor'))
-
-        root = dataDict.get('topObject').__dict__.get('memopsRoot')
-        notOverride = not (root.__dict__.get('override'))
-        notIsReading = not (topObject.__dict__.get('isReading'))
-        notOverride = (notOverride and notIsReading)
-
-        # objects to be deleted
-        # This implementation could be greatly improve, but meanwhile this should work
-        from ccpn.util.OrderedSet import OrderedSet
-        from ccpnmodel.ccpncore.memops.ApiError import ApiError
-
-        objsToBeDeleted = OrderedSet()
-        # objects still to be checked for cascading delete (each object to be deleted gets checked)
-        objsToBeChecked = list()
-        # counter keyed on (obj, roleName) for how many objects at other end of link are to be deleted
-        linkCounter = {}
-
-        # topObjects to check if modifiable
-        topObjectsToCheck = set()
-        objsToBeChecked = list()
-        # counter keyed on (obj, roleName) for how many objects at other end of link are to be deleted
-        linkCounter = {}
-
-        # topObjects to check if modifiable
-        topObjectsToCheck = set()
-
-        objsToBeChecked.append(self)
-        while len(objsToBeChecked) > 0:
-            obj = objsToBeChecked.pop()
-            obj._checkDelete(objsToBeDeleted, objsToBeChecked, linkCounter, topObjectsToCheck)
-
-        if (notInConstructor):
-            for topObjectToCheck in topObjectsToCheck:
-                if (not (topObjectToCheck.__dict__.get('isModifiable'))):
-                    raise ApiError("""%s.delete:
-           Storage not modifiable""" % self.qualifiedName
-                                   + ": %s" % (topObjectToCheck,)
-                                   )
-
-        if (dataDict.get('isDeleted')):
-            raise ApiError("""%s.delete:
-       called on deleted object""" % self.qualifiedName
-                           )
-
-        # if ((notInConstructor and notOverride)):
-        #
-        #   for notify in self.__class__._notifies.get('startDeleteBlock', ()):
-        #     notify(self)
-        #
-        #   for obj in reversed(objsToBeDeleted):
-        #     for notify in obj.__class__._notifies.get('preDelete', ()):
-        #       notify(obj)
-        #
-        # for obj in reversed(objsToBeDeleted):
-        #   obj._singleDelete(objsToBeDeleted)
-
-        # doNotifies
-
-        # if ((notInConstructor and notOverride)):
-        #
-        #   for obj in reversed(objsToBeDeleted):
-        #     for notify in obj.__class__._notifies.get('delete', ()):
-        #       notify(obj)
-        #
-        #   for notify in self.__class__._notifies.get('endDeleteBlock', ()):
-        #     notify(self)
-        #
-
-        # if ((not (dataDict.get('inConstructor')) and notIsReading)):
-        #   # register Undo functions
-        #
-        #   _undo = root._undo
-        #   if _undo is not None:
-
-        # _undo.newItem(root._unDelete, self.delete, undoArgs=(objsToBeDeleted, topObjectsToCheck))
-        return (root._unDelete, (objsToBeDeleted, topObjectsToCheck))
-
-
 
 @newObject(Strip)
 def _newStrip(self):
-    """create new strip that duplicates this one, appending it at the end
+    """Create new strip that duplicates this one, appending it at the end
     Does not handle any gui updating.
     """
     apiStrip = self._wrappedData.clone()
@@ -858,8 +605,8 @@ def _newStrip(self):
 # newStrip functions
 # We should NOT have any newStrip function, except possibly for FreeStrips
 def _copyStrip(self: SpectrumDisplay, strip: Strip, newIndex=None) -> Strip:
-    """Make copy of strip in self, at position newIndex - or rightmost"""
-
+    """Make copy of strip in self, at position newIndex - or rightmost.
+    """
     strip = self.getByPid(strip) if isinstance(strip, str) else strip
 
     stripCount = self.stripCount

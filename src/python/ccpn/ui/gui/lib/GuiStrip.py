@@ -30,33 +30,18 @@ import typing
 import pyqtgraph as pg
 from PyQt5 import QtWidgets, QtCore, QtGui
 
-from ccpn.core.Peak import Peak
-from ccpn.core.PeakList import PeakList
 from ccpn.core.Project import Project
 from ccpn.core.lib.Notifiers import Notifier, NotifierBase
 
 from ccpn.ui.gui.guiSettings import getColours, GUISTRIP_PIVOT
-from ccpn.ui.gui.guiSettings import textFontSmall
-from ccpn.ui.gui.widgets.Button import Button
-# from ccpn.ui.gui.widgets.PlotWidget import PlotWidget
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.LineEdit import FloatLineEdit
-from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel, StripHeader
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets import MessageDialog
-
-from ccpn.ui.gui import guiSettings
-
-from ccpn.util import Ticks
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME
-from ccpn.util import Common as commonUtil
-from typing import Tuple, List, Any
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO
 from ccpn.core.lib.ContextManagers import logCommandBlock, undoStackBlocking
@@ -95,31 +80,12 @@ class GuiStrip(Frame):
                          acceptDrops=True  #, hPolicy='expanding', vPolicy='expanding' ##'minimal'
                          )
 
-        # it appears to be required to explicitly set these, otherwise
-        # the Widget will not fill all available space
-        ###self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        # The strip is responsive on restore to the contentMargins set here
-        # self.setContentsMargins(5, 0, 5, 0)
-        # self.setContentsMargins(10, 10, 10, 10)
         self.setMinimumWidth(50)
         self.setMinimumHeight(150)
-        # self.layout().setSizeConstraint(QtWidgets.QLayout.SetNoConstraint)
 
         self.layout().setSpacing(0)
-
         self.header = StripHeader(parent=self, mainWindow=self.mainWindow,
                                   grid=(0, 0), gridSpan=(1, 2), setLayout=True, spacing=(0, 0))
-
-        # self.plotWidget = PlotWidget(self, useOpenGL=useOpenGL)
-        # self.plotWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
-
-        #showDoubleCrosshair = self.application.preferences.general.doubleCrossHair)
-        # GWV: plotWidget appears not to be responsive to contentsMargins
-        # self.plotWidget.setContentsMargins(10, 30, 10, 30)
-        # self.getLayout().addWidget(self.plotWidget, 1, 0)
-        # self.layout().setHorizontalSpacing(0)
-        # self.layout().setVerticalSpacing(0)
-        # self.plotWidget.showGrid(x=True, y=True, alpha=None)
 
         self._useCcpnGL = True
         # TODO: ED comment out the block below to return to normal
@@ -140,80 +106,22 @@ class GuiStrip(Frame):
             self._CcpnGLWidget.setStripID('.'.join(self.id.split('.')))
             self._CcpnGLWidget.gridVisible = self.application.preferences.general.showGrid
 
-        # self.plotWidgetOverlay = pg.PlotWidget(self, useOpenGL=useOpenGL)  #    make a copy
-        # self.plotWidgetOverlay.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        # self.plotWidgetOverlay.resize(200, 200)
-        # self.plotWidgetOverlay.setWindowFlags(QtCore.Qt.FramelessWindowHint)
-        # self.plotWidgetOverlay.setAttribute(QtCore.Qt.WA_TranslucentBackground, True)
-        # self.plotWidgetOverlay.showGrid(x=True, y=True, alpha=None)
-
         # Widgets for toolbar; items will be added by GuiStripNd (eg. the Z/A-plane boxes)
         # and GuiStrip1d; will be hidden for 2D's by GuiSpectrumView
         self._stripToolBarWidget = Widget(parent=self, setLayout=True,
                                           hPolicy='expanding',
                                           grid=(2, 0), spacing=(5, 5))
 
-        # Widgets for _stripIdLabel and _stripLabel
-        # self._labelWidget = Frame(parent=self, setLayout=True,
-        #                            hPolicy='expanding', vAlign='center',
-        # grid=(0, 0), spacing=(0,0))
-        # self._labelWidget.layout().setHorizontalSpacing(0)
-        # self._labelWidget.layout().setVerticalSpacing(0)
-        # self._labelWidget.setFixedHeight(32)
-
-        # display and pid
-        #TODO:GEERTEN correct once pid has been reviewed
-        # self._stripIdLabel = Label(parent=self._labelWidget,
-        #                            text='.'.join(self.id.split('.')), margins=[0,0,0,0], spacing=(0,0),
-        #                            grid=(0,0), gridSpan=(1,1), hAlign='left', vAlign='top', hPolicy='minimum')
-        # self._stripIdLabel.setFont(textFontSmall)
-        # TODO:ED check - have moved the label to the top-left corner
-        # self.plotWidget.stripIDLabel.setText('.'.join(self.id.split('.')))
-
-        # Displays a draggable label for the strip
-        #TODO:GEERTEN reinsert a notifier for update in case this displays a nmrResidue
-        # self._stripLabel = _StripLabel(parent=self._labelWidget,
-        #                                text='', spacing=(0,0),
-        #                                grid=(0,1), hAlign='c')    #, hAlign='left', vAlign='top', hPolicy='minimum')
-        #
-        # self._stripLabel.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-        # self._stripLabel.setFont(textFontSmall)
-        #
-        # self._stripResidueId = _StripLabel(parent=self._labelWidget,
-        #                                text='', spacing=(0,0),
-        #                                grid=(0,0), hAlign='l')
-        # self._stripResidueId.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-        # self._stripResidueId.setFont(textFontSmall)
-        # self._stripResidueId.hide()
-        #
-        # self._stripResidueDir = _StripLabel(parent=self._labelWidget,
-        #                                text='', spacing=(0,0),
-        #                                grid=(0,2), hAlign='r')
-        # self._stripResidueDir.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-        # self._stripResidueDir.setFont(textFontSmall)
-        # self._stripResidueDir.hide()
-
-        # self._labelWidget.layout().setAlignment(QtCore.Qt.AlignTop)
-
-        # Strip needs access to plotWidget's items and info #TODO: get rid of this
-        # self.plotItem = self.plotWidget.plotItem
         self.viewStripMenu = None  # = self.plotItem.vb
-
         self._showCrossHair()
-        # callbacks
-        ###self.plotWidget.scene().sigMouseMoved.connect(self._mouseMoved)
-        # self.plotWidget.scene().sigMouseMoved.connect(self._showMousePosition)  # update mouse cursors
         self.storedZooms = []
-
         self.beingUpdated = False
-        # self.xPreviousRegion, self.yPreviousRegion = self.viewRange()
 
         # need to keep track of mouse position because Qt shortcuts don't provide
         # the widget or the position of where the cursor is
         self.axisPositionDict = {}  # axisCode --> position
 
         self._contextMenuMode = DefaultMenu
-
         self._contextMenus = {DefaultMenu: None,
                               PeakMenu: None,
                               PhasingMenu: None,
@@ -223,19 +131,7 @@ class GuiStrip(Frame):
 
         self.navigateToPeakMenu = None  #set from context menu and in CcpnOpenGL rightClick
         self.navigateToCursorMenu = None  #set from context menu and in CcpnOpenGL rightClick
-        # self._initRulers()
         self._isPhasingOn = False
-        # self.hPhasingPivot = pg.InfiniteLine(angle=90, movable=True)
-        # self.hPhasingPivot.setVisible(False)
-        # self.plotWidget.addItem(self.hPhasingPivot)
-        # self.hPhasingPivot.sigPositionChanged.connect(lambda phasingPivot: self._movedPivot())
-        # self.haveSetHPhasingPivot = False
-
-        # self.vPhasingPivot = pg.InfiniteLine(angle=0, movable=True)
-        # self.vPhasingPivot.setVisible(False)
-        # self.plotWidget.addItem(self.vPhasingPivot)
-        # self.vPhasingPivot.sigPositionChanged.connect(lambda phasingPivot: self._movedPivot())
-        # self.haveSetVPhasingPivot = False
 
         # GWV 20181127: moved to GuiMainWindow
         # notifier for highlighting the strip
@@ -275,11 +171,6 @@ class GuiStrip(Frame):
 
             try:
                 self._CcpnGLWidget._axisLocked = spectrumDisplay.strips[0]._CcpnGLWidget._axisLocked
-                # self._CcpnGLWidget._updateHTrace = spectrumDisplay.strips[0]._CcpnGLWidget._updateHTrace
-                # self._CcpnGLWidget._updateVTrace = spectrumDisplay.strips[0]._CcpnGLWidget._updateVTrace
-                # self.hTraceAction.setChecked(self._CcpnGLWidget._updateHTrace)
-                # self.vTraceAction.setChecked(self._CcpnGLWidget._updateVTrace)
-
             except Exception as es:
                 getLogger().debugGL('OpenGL widget not instantiated')
 
@@ -295,8 +186,6 @@ class GuiStrip(Frame):
             self.crosshairVisible = self.application.preferences.general.showCrosshair
             self.showSpectraOnPhasing = self.application.preferences.general.showSpectraOnPhasing
 
-        # self.plotWidget.grid.setVisible(self.application.preferences.general.showGrid)
-
         self._storedPhasingData = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
 
         try:
@@ -308,69 +197,30 @@ class GuiStrip(Frame):
         except Exception as es:
             getLogger().debugGL('OpenGL widget not instantiated')
 
-        # self._stripToolBarWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Preferred)
-        # self._labelWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
-        # self._stripLabel.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
-
-        # self.show()
-
-    # def mouseMoveEvent(self, a0: QtGui.QMouseEvent):
-    #     print('>>>mouseMove')
-
     def viewRange(self):
         return self._CcpnGLWidget.viewRange()
 
     @property
     def gridIsVisible(self):
-        "True if grid is visible"
-
+        """True if grid is visible.
+        """
         try:
             return self._CcpnGLWidget.gridVisible
         except Exception as es:
             getLogger().debugGL('OpenGL widget not instantiated')
 
-        # return self.plotWidget.grid.isVisible()
-
     @property
     def crossHairIsVisible(self):
-        "True if crosshair is visible"
-
+        """True if crosshair is visible.
+        """
         try:
             return self._CcpnGLWidget.crossHairVisible
         except Exception as es:
             getLogger().debugGL('OpenGL widget not instantiated')
 
-        # return self.plotWidget.crossHair1.isVisible()
-
-    # @property
-    # def mouseMode(self):
-    #   """Get the mouseMode from the mainWindow"""
-    #   return self.application.ui.mainWindow.mouseMode
-
     @property
     def pythonConsole(self):
         return self.mainWindow.pythonConsole
-
-    # def getStripLabel(self):
-    #   """Return the stripLabel widget"""
-    #   return self._stripLabel
-    #
-    # def setStripLabelText(self, text: str):
-    #   """set the text of the _stripLabel"""
-    #   if text is not None:
-    #     self._stripLabel.setText(text)
-    #
-    # def getStripLabelText(self) -> str:
-    #   """return the text of the _stripLabel"""
-    #   return self._stripLabel.text()
-    #
-    # def showStripLabel(self, doShow: bool=True):
-    #   """show / hide the _stripLabel"""
-    #   self._stripLabel.setVisible(doShow)
-    #
-    # def hideStripLabel(self):
-    #   "Hide the _stripLabel; convienience"
-    #   self._stripLabel.setVisible(False)
 
     def _openCopySelectedPeaks(self):
         from ccpn.ui.gui.popups.CopyPeaksPopup import CopyPeaks
@@ -382,91 +232,24 @@ class GuiStrip(Frame):
         popup.raise_()
 
     def _updateStripLabel(self, callbackDict):
-        "Update the striplabel if it represented a NmrResidue that has changed its id"
-        # text = self.getStripLabelText()
-
+        """Update the striplabel if it represented a NmrResidue that has changed its id.
+        """
         text = self.header.getLabelText(position='c')
         if callbackDict['oldPid'] == text:
             self.header.setLabelText(position='c', text=callbackDict['object'].pid)
 
-            # self.setStripLabelText(callbackDict['object'].pid)
-
-        # try:
-        #   self._CcpnGLWidget.setStripID(callbackDict['object'].pid)
-        # except Exception as es:
-        #   getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
-
-    # def setStripLabelisPlus(self, isPlus: bool):
-    #   """set the isPlus attribute of the _stripResidueId"""
-    #   self._stripLabel._isPlus = isPlus
-    #
-    # def getStripResidueId(self):
-    #   """Return the stripResidueId widget"""
-    #   return self._stripResidueId
-    #
-    # def setStripResidueIdText(self, text: str):
-    #   """set the text of the _stripResidueId"""
-    #   if text is not None:
-    #     self._stripResidueId.setText(text)
-    #
-    # def getStripResidueIdText(self) -> str:
-    #   """return the text of the _stripResidueId"""
-    #   return self._stripResidueId.text()
-    #
-    # def showStripResidueId(self, doShow: bool=True):
-    #   """show / hide the _stripResidueId"""
-    #   self._stripResidueId.setVisible(doShow)
-    #   if doShow:
-    #     self._labelWidget.setFixedHeight(32)
-    #   else:
-    #     self._labelWidget.setFixedHeight(32)
-    #
-    # def hideStripResidueId(self):
-    #   "Hide the _stripResidueId; convienience"
-    #   self._stripResidueId.setVisible(False)
-    #   self._labelWidget.setFixedHeight(32)
-    #
-    # def getStripResidueDir(self):
-    #   """Return the stripResidueDir widget"""
-    #   return self._stripResidueDir
-    #
-    # def setStripResidueDirText(self, text: str):
-    #   """set the text of the _stripResidueDir"""
-    #   if text is not None:
-    #     self._stripResidueDir.setText(text)
-    #
-    # def getStripResidueDirText(self) -> str:
-    #   """return the text of the _stripResidueDir"""
-    #   return self._stripResidueDir.text()
-    #
-    # def showStripResidueDir(self, doShow: bool=True):
-    #   """show / hide the _stripResidueDir"""
-    #   self._stripResidueDir.setVisible(doShow)
-    #   if doShow:
-    #     self._labelWidget.setFixedHeight(32)
-    #   else:
-    #     self._labelWidget.setFixedHeight(32)
-    #
-    # def hideStripResidueDir(self):
-    #   "Hide the _stripResidueDir; convienience"
-    #   self._stripResidueDir.setVisible(False)
-    #   self._labelWidget.setFixedHeight(32)
-
     def createMark(self):
-        """
-        Sets the marks at current position
+        """Sets the marks at current position
         """
         self.spectrumDisplay.mainWindow.createMark()
 
     def clearMarks(self):
-        """
-        Sets the marks at current position
+        """Sets the marks at current position
         """
         self.spectrumDisplay.mainWindow.clearMarks()
 
     def estimateNoise(self):
-        """
-        Estimate noise in the current region
+        """Estimate noise in the current region
         """
         from ccpn.ui.gui.popups.EstimateNoisePopup import EstimateNoisePopup
 
@@ -518,7 +301,8 @@ class GuiStrip(Frame):
         pass
 
     def _addItemsToNavigateToPeakMenu(self):
-        ''' Adds item to navigate to peak position from context menu'''
+        """Adds item to navigate to peak position from context menu.
+        """
         # TODO, merge the two menu (cursor and peak) in one single menu to avoid code duplication. Issues: when tried, only one menu at the time worked!
         from functools import partial
         from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
@@ -546,9 +330,10 @@ class GuiStrip(Frame):
                         self.navigateToPeakMenu.setEnabled(False)
 
     def _addItemsToNavigateToCursorPosMenu(self):
-        ''' Copied from old viewbox. This function apparently take the current cursorPosition
-         and uses to pan a selected display from the list of spectrumViews or the current cursor position
-        TODO needs clear documentation'''
+        """Copied from old viewbox. This function apparently take the current cursorPosition
+         and uses to pan a selected display from the list of spectrumViews or the current cursor position.
+        """
+        # TODO needs clear documentation
         from functools import partial
         from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
 
@@ -573,7 +358,7 @@ class GuiStrip(Frame):
                     self.navigateCursorMenu.setEnabled(False)
 
     def _updateDisplayedIntegrals(self, data):
-        """Callback when integrals have changed
+        """Callback when integrals have changed.
         """
         self._CcpnGLWidget._processIntegralNotifier(data)
 
@@ -606,79 +391,11 @@ class GuiStrip(Frame):
     #     except Exception as es:
     #         getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
 
-    # def _printToFile(self, printer):
-    #     # CCPN INTERNAL - called in printToFile method of GuiMainWindow
-    #
-    #     for spectrumView in self.spectrumViews:
-    #         spectrumView._printToFile(printer)
-    #
-    #     # print box
-    #
-    #     # print ticks and grid line
-    #     viewRegion = self.plotWidget.viewRange()
-    #     v1, v0 = viewRegion[0]  # TBD: relies on axes being backwards
-    #     w1, w0 = viewRegion[1]  # TBD: relies on axes being backwards, which is not true in 1D
-    #     xMajorTicks, xMinorTicks, xMajorFormat = Ticks.findTicks((v0, v1))
-    #     yMajorTicks, yMinorTicks, yMajorFormat = Ticks.findTicks((w0, w1))
-    #
-    #     xScale = (printer.x1 - printer.x0) / (v1 - v0)
-    #     xOffset = printer.x0 - xScale * v0
-    #     yScale = (printer.y1 - printer.y0) / (w1 - w0)
-    #     yOffset = printer.y0 - yScale * w0
-    #     xMajorText = [xMajorFormat % tick for tick in xMajorTicks]
-    #     xMajorTicks = [tick * xScale + xOffset for tick in xMajorTicks]
-    #     xMinorTicks = [tick * xScale + xOffset for tick in xMinorTicks]
-    #     yMajorText = [xMajorFormat % tick for tick in yMajorTicks]
-    #     yMajorTicks = [tick * yScale + yOffset for tick in yMajorTicks]
-    #     yMinorTicks = [tick * yScale + yOffset for tick in yMinorTicks]
-    #
-    #     xTickHeight = yTickHeight = max(printer.y1 - printer.y0, printer.x1 - printer.x0) * 0.01
-    #
-    #     for tick in xMinorTicks:
-    #         printer.writeLine(tick, printer.y0, tick, printer.y0 + 0.5 * xTickHeight)
-    #
-    #     fontsize = 10
-    #     for n, tick in enumerate(xMajorTicks):
-    #         if self.plotWidget.grid.isVisible():
-    #             printer.writeLine(tick, printer.y0, tick, printer.y1, colour='#888888')
-    #         printer.writeLine(tick, printer.y0, tick, printer.y0 + xTickHeight)
-    #         text = xMajorText[n]
-    #         printer.writeText(text, tick - 0.5 * len(text) * fontsize * 0.7, printer.y0 + xTickHeight + 1.5 * fontsize)
-    #
-    #     # output backwards for y
-    #     for tick in yMinorTicks:
-    #         printer.writeLine(printer.x0, printer.y1 - tick, printer.x0 + 0.5 * yTickHeight, printer.y1 - tick)
-    #
-    #     for n, tick in enumerate(yMajorTicks):
-    #         if self.plotWidget.grid.isVisible():
-    #             printer.writeLine(printer.x0, printer.y1 - tick, printer.x1, printer.y1 - tick, colour='#888888')
-    #         printer.writeLine(printer.x0, printer.y1 - tick, printer.x0 + yTickHeight, printer.y1 - tick)
-    #         text = yMajorText[n]
-    #         printer.writeText(text, printer.x0 + yTickHeight + 0.5 * fontsize * 0.7, printer.y1 - tick + 0.5 * fontsize)
-
     def _newPhasingTrace(self):
-
         try:
             self._CcpnGLWidget.newTrace()
         except Exception as es:
             getLogger().debugGL('OpenGL widget not instantiated')
-
-        return
-
-        for spectrumView in self.spectrumViews:
-            spectrumView._newPhasingTrace()
-
-    """
-    def newHPhasingTrace(self):
-      
-      for spectrumView in self.spectrumViews:
-        spectrumView.newHPhasingTrace(self.mousePosition[1])
-        
-    def newVPhasingTrace(self):
-      
-      for spectrumView in self.spectrumViews:
-        spectrumView.newVPhasingTrace(self.mousePosition[0])
-    """
 
     def _setPhasingPivot(self):
 
@@ -701,24 +418,13 @@ class GuiStrip(Frame):
         self._updatePivot()
 
     def removePhasingTraces(self):
-
         try:
             self._CcpnGLWidget.clearStaticTraces()
         except:
             getLogger().debugGL('OpenGL widget not instantiated')
 
-        #     return
-        #     for spectrumView in self.spectrumViews:
-        #         spectrumView.removePhasingTraces()
-        #
-        # """
-        # def togglePhasingPivot(self):
-        #
-        #   self.hPhasingPivot.setPos(self.mousePosition[0])
-        #   self.hPhasingPivot.setVisible(not self.hPhasingPivot.isVisible())
-        # """
-
-    def _updatePivot(self):  # this is called if pivot entry at bottom of display is updated and then "return" key used
+    def _updatePivot(self):
+        # this is called if pivot entry at bottom of display is updated and then "return" key used
 
         # update the static traces from the phasing console
         # redraw should update the display
@@ -726,29 +432,6 @@ class GuiStrip(Frame):
             self._CcpnGLWidget.rescaleStaticTraces()
         except:
             getLogger().debugGL('OpenGL widget not instantiated')
-
-        # return
-        #
-        # phasingFrame = self.spectrumDisplay.phasingFrame
-        # position = phasingFrame.pivotEntry.get()
-        # direction = phasingFrame.getDirection()
-        # if direction == 0:
-        #     self.hPhasingPivot.setPos(position)
-        # else:
-        #     self.vPhasingPivot.setPos(position)
-        # self._updatePhasing()
-
-    # def _movedPivot(self):  # this is called if pivot on screen is dragged
-    #
-    #     phasingFrame = self.spectrumDisplay.phasingFrame
-    #     direction = phasingFrame.getDirection()
-    #     if direction == 0:
-    #         position = self.hPhasingPivot.getXPos()
-    #     else:
-    #         position = self.vPhasingPivot.getYPos()
-    #
-    #     phasingFrame.pivotEntry.set(position)
-    #     self._updatePhasing()
 
     def setTraceScale(self, traceScale):
         for spectrumView in self.spectrumViews:
@@ -822,7 +505,6 @@ class GuiStrip(Frame):
         if self._newConsoleDirection == 0:
             self.pivotLine.orientation = ('v')
 
-            # TODO:ED don't need as menu will change
             # self.hTraceAction.setChecked(True)
             # self.vTraceAction.setChecked(False)
             if not self.spectrumDisplay.is1D:
@@ -899,22 +581,8 @@ class GuiStrip(Frame):
         phasingFrame = self.spectrumDisplay.phasingFrame
         direction = phasingFrame.getDirection()
 
-        # phasingFrame.setDirection(1-direction)
-        # self.spectrumDisplay._storedPhasingData[1-direction] = [phasingFrame.slider0.value(),
-        #                                                         phasingFrame.slider1.value(),
-        #                                                         phasingFrame.pivotEntry.get()]
-
         if not phasingFrame.isVisible():
             return
-
-        # if direction == 0:
-        #     self.hPhasingPivot.setVisible(True)
-        #     self.vPhasingPivot.setVisible(False)
-        #     # self.pivotLine.orientation = ('v')
-        # else:
-        #     self.hPhasingPivot.setVisible(False)
-        #     self.vPhasingPivot.setVisible(True)
-        #     # self.pivotLine.orientation = ('h')
 
         if direction == 0:
             self.pivotLine.orientation = ('v')
@@ -946,9 +614,6 @@ class GuiStrip(Frame):
         #     spectrumView._changedPhasingDirection()
 
     def _updatePhasing(self):
-
-        # update the static traces from the phasing console
-        # redraw should update the display
         try:
             if self.spectrumDisplay.phasingFrame.isVisible():
                 colour = getColours()[GUISTRIP_PIVOT]
@@ -957,89 +622,9 @@ class GuiStrip(Frame):
         except:
             getLogger().debugGL('OpenGL widget not instantiated', spectrumDisplay=self.spectrumDisplay, strip=self)
 
-        # return
-        #
-        # # TODO:GEERTEN: Fix  (not yet picked-up!; why? - ED: old code, return statement above)
-        # colour = getColours()[GUISTRIP_PIVOT]
-        # self.hPhasingPivot.setPen({'color': colour})
-        # self.vPhasingPivot.setPen({'color': colour})
-        # for spectrumView in self.spectrumViews:
-        #     spectrumView.setPivotColour(colour)
-        #     spectrumView._updatePhasing()
-
-    # def _updateXRegion(self, viewBox):
-    #     # this is called when the viewBox is changed on the screen via the mouse
-    #     # this code is complicated because need to keep viewBox region and axis region in sync
-    #     # and there can be different viewBoxes with the same axis
-    #
-    #     if not self._finaliseDone: return
-    #
-    #     assert viewBox is self.viewBox, 'viewBox = %s, self.viewBox = %s' % (viewBox, self.viewBox)
-    #
-    #     self._updateX()
-    #     self._updatePhasing()
-    #
-    # def _updateYRegion(self, viewBox):
-    #     # this is called when the viewBox is changed on the screen via the mouse
-    #     # this code is complicated because need to keep viewBox region and axis region in sync
-    #     # and there can be different viewBoxes with the same axis
-    #
-    #     if not self._finaliseDone: return
-    #
-    #     assert viewBox is self.viewBox, 'viewBox = %s, self.viewBox = %s' % (viewBox, self.viewBox)
-    #
-    #     self._updateY()
-    #     self._updatePhasing()
-
-    # def _updateX(self):
-    #
-    #     def _widthsChangedEnough(r1, r2, tol=1e-5):
-    #         r1 = sorted(r1)
-    #         r2 = sorted(r2)
-    #         minDiff = abs(r1[0] - r2[0])
-    #         maxDiff = abs(r1[1] - r2[1])
-    #         return (minDiff > tol) or (maxDiff > tol)
-    #
-    #     if not self._finaliseDone: return
-    #
-    #     # this only wants to get the scaling of the modified strip and not the actual values
-    #
-    #     xRange = list(self.viewBox.viewRange()[0])
-    #     for strip in self.spectrumDisplay.strips:
-    #         if strip is not self:
-    #             stripXRange = list(strip.viewBox.viewRange()[0])
-    #             if _widthsChangedEnough(stripXRange, xRange):
-    #                 # TODO:ED check whether the strip has a range set yet
-    #                 diff = (xRange[1] - xRange[0]) / 2.0
-    #                 mid = (stripXRange[1] + stripXRange[0]) / 2.0
-    #                 xRange = (mid - diff, mid + diff)
-    #
-    #                 strip.viewBox.setXRange(*xRange, padding=0)
-
-    # def _updateY(self):
-    #
-    #     def _widthsChangedEnough(r1, r2, tol=1e-5):
-    #         r1 = sorted(r1)
-    #         r2 = sorted(r2)
-    #         minDiff = abs(r1[0] - r2[0])
-    #         maxDiff = abs(r1[1] - r2[1])
-    #         return (minDiff > tol) or (maxDiff > tol)
-    #
-    #     if not self._finaliseDone: return
-    #
-    #     yRange = list(self.viewBox.viewRange()[1])
-    #     for strip in self.spectrumDisplay.strips:
-    #         if strip is not self:
-    #             stripYRange = list(strip.viewBox.viewRange()[1])
-    #             if _widthsChangedEnough(stripYRange, yRange):
-    #                 strip.viewBox.setYRange(*yRange, padding=0)
-
     def _toggleCrossHair(self):
-        " Toggles whether crosshair is visible"
-        # self.plotWidget.crossHair1.toggle()
-        # if self.spectrumViews and self.spectrumViews[0].spectrum.showDoubleCrosshair:
-        #     self.plotWidget.crossHair2.toggle()
-
+        """Toggles whether crosshair is visible.
+        """
         try:
             self.crosshairVisible = not self.crosshairVisible
             self._CcpnGLWidget.crossHairVisible = self.crosshairVisible
@@ -1047,11 +632,8 @@ class GuiStrip(Frame):
             getLogger().debugGL('OpenGL widget not instantiated')
 
     def _showCrossHair(self):
-        "Displays crosshair in strip"
-        # self.plotWidget.crossHair1.show()
-        # if self.spectrumViews and self.spectrumViews[0].spectrum.showDoubleCrosshair:
-        #   self.plotWidget.crossHair2.show()
-
+        """Displays crosshair in strip.
+        """
         try:
             self.crosshairVisible = True
             self._CcpnGLWidget.crossHairVisible = True
@@ -1059,11 +641,8 @@ class GuiStrip(Frame):
             getLogger().debugGL('OpenGL widget not instantiated')
 
     def _hideCrossHair(self):
-        "Hides crosshair in strip."
-        # self.plotWidget.crossHair1.hide()
-        # if self.spectrumViews and self.spectrumViews[0].spectrum.showDoubleCrosshair:
-        #   self.plotWidget.crossHair2.hide()
-
+        """Hides crosshair in strip.
+        """
         try:
             self.crosshairVisible = False
             self._CcpnGLWidget.crossHairVisible = False
@@ -1071,7 +650,8 @@ class GuiStrip(Frame):
             getLogger().debugGL('OpenGL widget not instantiated')
 
     def _toggleShowSpectraOnPhasing(self):
-        " Toggles whether spectraOnPhasing is visible"
+        """Toggles whether spectraOnPhasing is visible.
+        """
         try:
             self.showSpectraOnPhasing = not self.showSpectraOnPhasing
             self._CcpnGLWidget.showSpectraOnPhasing = self.showSpectraOnPhasing
@@ -1079,7 +659,8 @@ class GuiStrip(Frame):
             getLogger().debugGL('OpenGL widget not instantiated')
 
     def _showSpectraOnPhasing(self):
-        "Displays spectraOnPhasing in strip"
+        """Displays spectraOnPhasing in strip.
+        """
         try:
             self.showSpectraOnPhasing = True
             self._CcpnGLWidget.showSpectraOnPhasing = True
@@ -1087,7 +668,8 @@ class GuiStrip(Frame):
             getLogger().debugGL('OpenGL widget not instantiated')
 
     def _hideSpectraOnPhasing(self):
-        "Hides spectraOnPhasing in strip."
+        """Hides spectraOnPhasing in strip.
+        """
         try:
             self.showSpectraOnPhasing = False
             self._CcpnGLWidget.showSpectraOnPhasing = False
@@ -1095,9 +677,8 @@ class GuiStrip(Frame):
             getLogger().debugGL('OpenGL widget not instantiated')
 
     def toggleGrid(self):
-        "Toggles whether grid is visible in the strip."
-        # self.plotWidget.toggleGrid()
-
+        """Toggles whether grid is visible in the strip.
+        """
         try:
             self.gridVisible = not self.gridVisible
             self._CcpnGLWidget.gridVisible = self.gridVisible
@@ -1105,7 +686,7 @@ class GuiStrip(Frame):
             getLogger().debugGL('OpenGL widget not instantiated')
 
     def cyclePeakLabelling(self):
-        """Toggles whether peak labelling is minimal is visible in the strip
+        """Toggles whether peak labelling is minimal is visible in the strip.
         """
         self.peakLabelling += 1
         if self.peakLabelling > 2:
@@ -1125,7 +706,7 @@ class GuiStrip(Frame):
             GLSignals.emitPaintEvent()
 
     def cyclePeakSymbols(self):
-        """Cycle through peak symbol types
+        """Cycle through peak symbol types.
         """
         self.symbolType += 1
         if self.symbolType > 2:
@@ -1149,8 +730,9 @@ class GuiStrip(Frame):
             GLSignals.emitPaintEvent()
 
     def _crosshairCode(self, axisCode):
-        # determines what axisCodes are compatible as far as drawing crosshair is concerned
-        # TBD: the naive approach below should be improved
+        """Determines what axisCodes are compatible as far as drawing crosshair is concerned
+        TBD: the naive approach below should be improved
+        """
         return axisCode  #if axisCode[0].isupper() else axisCode
 
     def _createMarkAtCursorPosition(self):
@@ -1174,8 +756,7 @@ class GuiStrip(Frame):
     #             self.plotWidget._addRulerLine(apiRuler)
 
     def _showMousePosition(self, pos: QtCore.QPointF):
-        """
-        Displays mouse position for both axes by axis code.
+        """Displays mouse position for both axes by axis code.
         """
         if self.isDeleted:
             return
@@ -1190,32 +771,13 @@ class GuiStrip(Frame):
         except:
             format = "%s: %.3f  %s: %.4g"
 
-        # self._cursorLabel.setText(format %
-        #   (self.axisOrder[0], position.x(), self.axisOrder[1], position.y())
-        # )
-
-        # self.plotWidget.mouseLabel.setText(format %
-        #                                    (self.axisOrder[0], position.x(), self.axisOrder[1], position.y())
-        #                                    )
-        # self.plotWidget.mouseLabel.setPos(position.x(), position.y())
-        # self.plotWidget.mouseLabel.show()
-
     def zoom(self, xRegion: typing.Tuple[float, float], yRegion: typing.Tuple[float, float]):
-        """Zooms strip to the specified region
+        """Zooms strip to the specified region.
         """
         try:
             self._CcpnGLWidget.zoom(xRegion, yRegion)
         except:
             getLogger().debugGL('OpenGL widget not instantiated')
-
-    # def zoomToRegion(self, xRegion: typing.Tuple[float, float], yRegion: typing.Tuple[float, float]):
-    #     """
-    #     Zooms strip to the specified region
-    #     """
-    #     if not self._finaliseDone: return
-    #     padding = self.application.preferences.general.stripRegionPadding
-    #     self.viewBox.setXRange(*xRegion, padding=padding)
-    #     self.viewBox.setYRange(*yRegion, padding=padding)
 
     def zoomX(self, x1: float, x2: float):
         """
@@ -1225,8 +787,7 @@ class GuiStrip(Frame):
         self.viewBox.setXRange(x1, x2, padding=padding)
 
     def zoomY(self, y1: float, y2: float):
-        """
-        Zooms y axis of strip to the specified region
+        """Zooms y axis of strip to the specified region
         """
         padding = self.application.preferences.general.stripRegionPadding
         self.viewBox.setYRange(y1, y2, padding=padding)
@@ -1306,41 +867,20 @@ class GuiStrip(Frame):
     #                          )
 
     def _storeZoom(self):
+        """Adds current region to the zoom stack for the strip.
         """
-        Adds current region to the zoom stack for the strip.
-        """
-        # self.storedZooms.append(self.viewBox.viewRange())
-
         try:
             self._CcpnGLWidget.storeZoom()
         except:
             getLogger().debugGL('OpenGL widget not instantiated')
 
     def _restoreZoom(self):
+        """Restores last saved region to the zoom stack for the strip.
         """
-        Restores last saved region to the zoom stack for the strip.
-        """
-        # if not self._finaliseDone: return
-
-        # if len(self.storedZooms) != 0:
-        #     restoredZoom = self.storedZooms.pop()
-        #     padding = self.application.preferences.general.stripRegionPadding
-        #     self.plotWidget.setXRange(restoredZoom[0][0], restoredZoom[0][1], padding=padding)
-        #     self.plotWidget.setYRange(restoredZoom[1][0], restoredZoom[1][1], padding=padding)
-        # else:
-        #     self.resetZoom()
-
         try:
             self._CcpnGLWidget.restoreZoom()
         except:
             getLogger().debugGL('OpenGL widget not instantiated')
-
-    # def resetZoom(self):
-    #   """
-    #   Zooms both axis of strip to the specified region
-    #   """
-    #   padding = self.application.preferences.general.stripRegionPadding
-    #   self.viewBox.autoRange(padding=padding)
 
     def _setZoomPopup(self):
         from ccpn.ui.gui.popups.ZoomPopup import ZoomPopup
@@ -1357,77 +897,20 @@ class GuiStrip(Frame):
             getLogger().debugGL('OpenGL widget not instantiated')
 
     def _zoomIn(self):
+        """Zoom in to the strip.
         """
-        zoom in to the strip.
-        """
-        # if not self._finaliseDone: return
-
-        # zoomPercent = -self.application.preferences.general.zoomPercent / 100.0
-        # padding = self.application.preferences.general.stripRegionPadding
-        # currentRange = self.viewBox.viewRange()
-        # l = currentRange[0][0]
-        # r = currentRange[0][1]
-        # b = currentRange[1][0]
-        # t = currentRange[1][1]
-        # dx = (r - l) / 2.0
-        # dy = (t - b) / 2.0
-        # nl = l - zoomPercent * dx
-        # nr = r + zoomPercent * dx
-        # nt = t + zoomPercent * dy
-        # nb = b - zoomPercent * dy
-        # self.plotWidget.setXRange(nl, nr, padding=padding)
-        # self.plotWidget.setYRange(nb, nt, padding=padding)
-
         try:
             self._CcpnGLWidget.zoomIn()
         except:
             getLogger().debugGL('OpenGL widget not instantiated')
 
     def _zoomOut(self):
+        """Zoom out of the strip.
         """
-        zoom out of the strip.
-        """
-        # if not self._finaliseDone: return
-
-        # zoomPercent = +self.application.preferences.general.zoomPercent / 100.0
-        # padding = self.application.preferences.general.stripRegionPadding
-        # currentRange = self.viewBox.viewRange()
-        # l = currentRange[0][0]
-        # r = currentRange[0][1]
-        # b = currentRange[1][0]
-        # t = currentRange[1][1]
-        # dx = (r - l) / 2.0
-        # dy = (t - b) / 2.0
-        # nl = l - zoomPercent * dx
-        # nr = r + zoomPercent * dx
-        # nt = t + zoomPercent * dy
-        # nb = b - zoomPercent * dy
-        # self.plotWidget.setXRange(nl, nr, padding=padding)
-        # self.plotWidget.setYRange(nb, nt, padding=padding)
-
         try:
             self._CcpnGLWidget.zoomOut()
         except:
             getLogger().debugGL('OpenGL widget not instantiated')
-
-    # def showPeaks(self, peakList: PeakList, peaks: typing.List[Peak] = None):
-    #     ###from ccpn.ui.gui.modules.spectrumItems.GuiPeakListView import GuiPeakListView
-    #     # NBNB TBD 1) we should not always display all peak lists together
-    #     # NBNB TBD 2) This should not be called for each strip
-    #
-    #     # Redundant but still removing
-    #
-    #     return
-
-    # if not peaks:
-    #     peaks = peakList.peaks
-    #
-    # peakListView = self._findPeakListView(peakList)
-    # if not peakListView:
-    #     return
-    #
-    # peaks = [peak for peak in peaks if self.peakIsInPlane(peak) or self.peakIsInFlankingPlane(peak)]
-    # self.spectrumDisplay.showPeaks(peakListView, peaks)
 
     def _resetRemoveStripAction(self):
         """Update interface when a strip is created or deleted.
@@ -1495,8 +978,7 @@ class GuiStrip(Frame):
                 self._showAllSpectrumViews(True)
 
     def report(self):
-        """
-        Generate a drawing object that can be added to reports
+        """Generate a drawing object that can be added to reports
         :return reportlab drawing object:
         """
         if self._CcpnGLWidget:
@@ -1507,7 +989,7 @@ class GuiStrip(Frame):
                 return glReport.report()
 
     def axisRegionChanged(self, axis):
-        """Notifier function: Update strips etc. for when axis position or width changes
+        """Notifier function: Update strips etc. for when axis position or width changes.
         """
         # axis = data[Notifier.OBJECT]
         strip = self  #axis.strip
@@ -1531,7 +1013,7 @@ class GuiStrip(Frame):
         strip.beingUpdated = False
 
     def moveTo(self, newIndex: int):
-        """Move strip to index newIndex in orderedStrips
+        """Move strip to index newIndex in orderedStrips.
         """
         currentIndex = self._wrappedData.index
         if currentIndex == newIndex:
@@ -1554,8 +1036,6 @@ class GuiStrip(Frame):
             with undoStackBlocking() as addUndoItem:
                 # needs to be first as it uses currentOrdering
                 addUndoItem(undo=partial(self._resetStripLayout, newIndex, currentIndex))
-                            # redo=partial(self._resetStripLayout, currentIndex, newIndex))
-                # addUndoItem(undo=partial(self.spectrumDisplay.showAxes))
 
             self._wrappedData.moveTo(newIndex)
             # reorder the strips in the layout
@@ -1563,176 +1043,7 @@ class GuiStrip(Frame):
 
             # add undo item to reorder the strips in the layout
             with undoStackBlocking() as addUndoItem:
-                addUndoItem(#undo=partial(self._resetStripLayout, newIndex, currentIndex),
-                            redo=partial(self._resetStripLayout, currentIndex, newIndex))
-                # addUndoItem(redo=partial(self.spectrumDisplay.showAxes))
-
-
-        # # rebuild the axes for each strip
-        # self.spectrumDisplay.showAxes()
-
-        return
-
-        # from ccpn.core.lib.ContextManagers import logCommandManager, blockUndoItems
-        # from functools import partial
-        #
-        # with logCommandManager(get='self') as log:
-        #     log('moveTo')
-        #
-        #     with blockUndoItems() as addUndoItem:
-        #         # needs to be first as it uses currentOrdering
-        #         addUndoItem(undo=partial(self.spectrumDisplay.showAxes))
-        #
-        #     self.moveStrip(newIndex)
-        #
-        #     # reorder the strips ordering class
-        #     strips = self.spectrumDisplay.strips
-        #     order = list(self.spectrumDisplay._stripOrdering.getOrder())
-        #     ind = strips.index(self)
-        #     val = order.pop(ind)
-        #     order.insert(newIndex, val)
-        #     self.spectrumDisplay._stripOrdering.setOrder(tuple(order))
-        #
-        #     # add undo item to reorder the strips in the layout
-        #     with blockUndoItems() as addUndoItem:
-        #         addUndoItem(undo=partial(self._resetStripLayout, newIndex, currentIndex),
-        #                  redo=partial(self._resetStripLayout, currentIndex, newIndex))
-        #         addUndoItem(redo=partial(self.spectrumDisplay.showAxes))
-        #
-        #     if _undo is not None:
-        #         _undo.decreaseBlocking()
-        #         # _undo.newItem(newStrip.delete, newStrip._unDelete)
-        #         _undo.newItem(self.spectrumDisplay.removeStrip, self.spectrumDisplay._unDelete,
-        #                       undoArgs=(newStrip,), redoArgs=(newStrip,))
-        #
-        # # reorder the strips in the layout
-        # self._resetStripLayout(currentIndex, newIndex)
-        #
-        # # rebuild the axes for each strip
-        # self.spectrumDisplay.showAxes()
-
-
-    class _StripStore(object):
-        "A class to temporarily store the strip widget"
-
-        def __init__(self, obj):
-            self.stripWidget = None
-
-        def _storeStripDelete(self):
-            """store the api delete info
-            CCPN Internal
-            """
-            self._unDeleteCall, self._unDeleteArgs = self._recoverApiObject(self)
-
-        def _storeStripUnDelete(self):
-            """retrieve the api deleted object
-            CCPN Internal
-            """
-            self._unDeleteCall(*self._unDeleteArgs)
-
-        def _storeStripWidget(self):
-            pass
-
-        def _restoreStripWidget(self):
-            pass
-
-
-    def _deleteStrip(self):
-        """Overrides normal delete"""
-        # currentStripItem = self._getWidgetFromLayout()
-        # self.setParent(None)
-
-        # ccpnStrip = self._wrappedData
-        # n = len(ccpnStrip.spectrumDisplay.strips)
-        n = self.spectrumDisplay.stripCount
-        if n > 1:
-            spectrumDisplay = self.spectrumDisplay
-            layout = spectrumDisplay.stripFrame.layout()
-
-            if layout:  # should always be the case but play safe
-
-                # stripStore = self._StripStore(self)
-                # stripStore._storeStripWidget()
-                # with undoStackBlocking() as addUndoItem:
-                #     addUndoItem(undo=stripStore._restoreStripWidget,
-                #                 redo=stripStore._storeStripWidget)
-                #
-                # # delete the strip - notifiers still need to fire here
-                # self._delete()
-
-
-                # current actions
-                self._removeFromLayout()  # adds nothing to the undo stack, so add it below
-                _undo = self.project._undo
-                if _undo is not None:
-                    _undo.newItem(self._restoreToLayout, self._removeFromLayout)
-                self._storeStripDelete()
-                self._delete()
-
-                pass
-                # with undoStackBlocking() as addUndoItem:
-                #     addUndoItem(redo=partial(self._removeFromLayout()))
-
-
-                # _undo = self.project._undo
-                # if _undo is not None:
-                #     _undo.newItem(self._restoreToLayout, self._removeFromLayout)
-                #
-
-
-
-                # # save the deleted api object
-                # self._storeStripDelete()
-                # # self._unDeleteCall, self._unDeleteArgs = self._recoverApiObject(self)
-                #
-                # # # reorder the strips ordering class
-                # # strips = spectrumDisplay.strips
-                # # # order = list(spectrumDisplay._stripOrdering.getOrder())
-                # # order = list(spectrumDisplay.stripOrder)
-                # # ind = strips.index(self)
-                # # val = order.pop(ind)
-                # # order = [o if o < val else (o - 1) for o in order]
-                #
-                # # delete the strip
-                # self._delete()
-                # # ccpnStrip.delete()
-                #
-                # # spectrumDisplay._stripOrdering.setOrder(tuple(order))
-                # # spectrumDisplay.stripOrder = order
-
-            # self.current.strip = spectrumDisplay.strips[-1]
-        else:
-            raise ValueError("The last strip in a display cannot be deleted")
-
-    # def _unDelete(self):
-    #     """Overrides normal delete"""
-    #     # currentStripItem = self._getWidgetFromLayout()
-    #     # self.setParent(None)
-    #
-    #     # recover the deleted apiStrip
-    #     self._storeStripUnDelete()
-    #     # self._unDeleteCall(*self._unDeleteArgs)
-    #
-    #     # ccpnStrip = self._wrappedData
-    #     # n = len(ccpnStrip.spectrumDisplay.strips)
-    #     n = self.spectrumDisplay.stripCount
-    #
-    #     if n > 1:
-    #         spectrumDisplay = self.spectrumDisplay
-    #         layout = spectrumDisplay.stripFrame.layout()
-    #
-    #         if layout:  # should always be the case but play safe
-    #
-    #             self._restoreToLayout()  # adds nothing to the undo stack, so add it below
-    #
-    #             _undo = self.project._undo
-    #             if _undo is not None:
-    #                 _undo.newItem(self._removeFromLayout, self._restoreToLayout)
-    #
-    #         self.current.strip = spectrumDisplay.strips[-1]
-    #
-    #     else:
-    #         raise ValueError("The last strip in a display cannot be deleted")
+                addUndoItem(redo=partial(self._resetStripLayout, currentIndex, newIndex))
 
     def _resetStripLayout(self, currentIndex, newIndex):
         # management of Qt layout
@@ -1783,56 +1094,6 @@ class GuiStrip(Frame):
         # rebuild the axes for each strip
         self.spectrumDisplay.showAxes(stretchValue=True, widths=False)
 
-    def _removeFromLayout(self):
-        """Remove the current strip from the layout and store in the temporary area for undoing
-        (contained in mainWindow)
-        CCPN Internal
-        """
-        spectrumDisplay = self.spectrumDisplay
-        index = self.stripIndex()
-
-        layout = spectrumDisplay.stripFrame.layout()
-        n = layout.count()
-
-        if n > 1 and layout:
-            _undo = self.project._undo
-            if _undo is not None:
-                _undo.increaseBlocking()
-
-            currentIndex = index
-
-            # clear the layout and rebuild
-            self._widgets = []
-            while layout.count():
-                self._widgets.append(layout.takeAt(0).widget())
-            self._widgets.remove(self)
-
-            if spectrumDisplay.stripDirection == 'Y':
-                for m, widgStrip in enumerate(self._widgets):  # build layout again
-                    layout.addWidget(widgStrip, 0, m)
-                    layout.setColumnStretch(m, 1)
-                    layout.setColumnStretch(m + 1, 0)
-            elif spectrumDisplay.stripDirection == 'X':
-                for m, widgStrip in enumerate(self._widgets):  # build layout again
-                    layout.addWidget(widgStrip, m, 0)
-                layout.setColumnStretch(0, 1)
-
-            # move to widget store
-            self.mainWindow._UndoWidgetStorage.layout().addWidget(self)
-            # self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
-
-            _undo = self.project._undo
-            if _undo is not None:
-                _undo.decreaseBlocking()
-
-            # store the old information
-            self._storeStripDeleteDict(currentIndex)
-
-            # rebuild the axes for each strip
-            self.spectrumDisplay.showAxes()
-
-        else:
-            raise ValueError("The last strip in a display cannot be deleted")
 
     def navigateToPosition(self, positions: typing.List[float],
                            axisCodes: typing.List[str] = None,
@@ -1848,49 +1109,6 @@ class GuiStrip(Frame):
         else:
             MessageDialog.showMessage('No Peak', 'Select a peak first')
 
-    def _restoreToLayout(self):
-        """Restore the current strip to the layout from the temporary undo area
-        (currently contained in mainWindow)
-        CCPN Internal
-        """
-        # ccpnStrip = self._wrappedData
-        spectrumDisplay = self.spectrumDisplay
-        layout = spectrumDisplay.stripFrame.layout()
-
-        if layout:
-            from ccpn.core.lib.ContextManagers import undoBlock
-
-            with undoBlock():
-                # retrieve the old index from storageDict
-                currentIndex = self._getStripDeleteDict()
-
-                self.mainWindow._UndoWidgetStorage.layout().removeWidget(self)
-                # self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
-
-                # clear the layout and rebuild
-                self._widgets = []
-                while layout.count():
-                    self._widgets.append(layout.takeAt(0).widget())
-                self._widgets.insert(currentIndex, self)
-
-                if spectrumDisplay.stripDirection == 'Y':
-                    for m, widgStrip in enumerate(self._widgets):  # build layout again
-                        layout.addWidget(widgStrip, 0, m)
-                        layout.setColumnStretch(m, 1)
-                elif spectrumDisplay.stripDirection == 'X':
-                    for m, widgStrip in enumerate(self._widgets):  # build layout again
-                        layout.addWidget(widgStrip, m, 0)
-                    layout.setColumnStretch(0, 1)
-
-                # put ccpnStrip back into strips using the api
-                # if self not in ccpnStrip.spectrumDisplay.strips:
-                if self not in self.spectrumDisplay.strips:
-                    for order, cStrip in enumerate(self._widgets):
-                        # cStrip._wrappedData.__dict__['index'] = order  # this is the api creation of orderedStrips
-                        cStrip._setStripIndex(order)
-
-            # rebuild the axes for each strip
-            self.spectrumDisplay.showAxes()
 
     def _raiseContextMenu(self, event: QtGui.QMouseEvent):
         """
@@ -1906,188 +1124,11 @@ class GuiStrip(Frame):
         """Update visibility list in the OpenGL
         """
         self._CcpnGLWidget.updateVisibleSpectrumViews()
-        # print('>>>_updateVisibility')
-
-    # def peakPickPosition(self, inPosition) -> Tuple[Peak]:
-    #     """
-    #     Pick peak at position for all spectra currently displayed in strip
-    #     """
-    #     _preferences = self.application.preferences.general
-    #
-    #     result = []
-    #     peakLists = []
-    #
-    #     self._startCommandEchoBlock('peakPickPosition', inPosition)  #Dict)
-    #     self._project.blankNotification()
-    #     try:
-    #         for spectrumView in self.spectrumViews:
-    #
-    #             # check whether there any peakLists attached to the spectrumView - could be peakLists or integralLists
-    #             numPeakLists = [pp for pp in spectrumView.peakListViews if isinstance(pp.peakList, PeakList)]
-    #             if not numPeakLists:  # this can happen if no peakLists, so create one
-    #                 # if not spectrumView.peakListViews:    # this can happen if no peakLists, so create one
-    #                 self._project.unblankNotification()  # need this otherwise SideBar does not get updated
-    #                 spectrumView.spectrum.newPeakList()
-    #                 self._project.blankNotification()
-    #
-    #             validPeakListViews = [pp for pp in spectrumView.peakListViews if isinstance(pp.peakList, PeakList)
-    #                                   and pp.isVisible()
-    #                                   and spectrumView.isVisible()]
-    #             for thisPeakListView in validPeakListViews:
-    #                 # find the first visible peakList
-    #                 peakList = thisPeakListView.peakList
-    #
-    #                 # for peakListView in spectrumView.peakListViews:
-    #                 # find the first visible peakList
-    #                 # if not peakListView.isVisible() or not spectrumView.isVisible():
-    #                 #   continue
-    #
-    #                 # peakList = peakListView.peakList
-    #
-    #                 # if isinstance(peakList, PeakList):
-    #                 peak = peakList.newPeak()
-    #
-    #                 # change dict to position
-    #                 # position = [0.0] * len(peak.axisCodes)
-    #                 # for n, axis in enumerate(peak.axisCodes):
-    #                 #   if _preferences.matchAxisCode == 0:  # default - match atom type
-    #                 #     for ax in positionDict.keys():
-    #                 #       if ax and axis and ax[0] == axis[0]:
-    #                 #         position[n] = positionDict[ax]
-    #                 #         break
-    #                 #
-    #                 #   elif _preferences.matchAxisCode == 1:  # match full code
-    #                 #     if axis in positionDict.keys():
-    #                 #       position[n] = positionDict[axis]
-    #
-    #                 position = inPosition
-    #                 if spectrumView.spectrum.dimensionCount > 1:
-    #                     # sortedSelectedRegion =[list(sorted(x)) for x in selectedRegion]
-    #                     spectrumAxisCodes = spectrumView.spectrum.axisCodes
-    #                     stripAxisCodes = self.axisCodes
-    #                     position = [0] * spectrumView.spectrum.dimensionCount
-    #
-    #                     remapIndices = commonUtil._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
-    #                     if remapIndices:
-    #                         for n, axisCode in enumerate(spectrumAxisCodes):
-    #                             # idx = stripAxisCodes.index(axisCode)
-    #
-    #                             idx = remapIndices[n]
-    #                             # sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
-    #                             position[n] = inPosition[idx]
-    #                     else:
-    #                         position = inPosition
-    #
-    #                 if peak.peakList.spectrum.dimensionCount == 1:
-    #                     if len(position) > 1:
-    #                         peak.position = (position[0],)
-    #                         peak.height = position[1]
-    #                 else:
-    #                     peak.position = position
-    #                     # note, the height below is not derived from any fitting
-    #                     # but is a weighted average of the values at the neighbouring grid points
-    #                     peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
-    #                 result.append(peak)
-    #                 peakLists.append(peakList)
-    #
-    #     except Exception as es:
-    #         pass
-    #
-    #     finally:
-    #         self._endCommandEchoBlock()
-    #         self._project.unblankNotification()
-    #
-    #     for peak in result:
-    #         peak._finaliseAction('create')
-    #
-    #     return tuple(result), tuple(peakLists)
-
-    # def peakPickRegion(self, selectedRegion: List[List[float]]) -> Tuple[Peak]:
-    #     """Peak pick all spectra currently displayed in strip in selectedRegion """
-    #
-    #     result = []
-    #
-    #     project = self.project
-    #     minDropfactor = self.application.preferences.general.peakDropFactor
-    #
-    #     self._startCommandEchoBlock('peakPickRegion', selectedRegion)
-    #     self._project.blankNotification()
-    #     try:
-    #
-    #         for spectrumView in self.spectrumViews:
-    #
-    #             numPeakLists = [pp for pp in spectrumView.peakListViews if isinstance(pp.peakList, PeakList)]
-    #             if not numPeakLists:  # this can happen if no peakLists, so create one
-    #                 self._project.unblankNotification()  # need this otherwise SideBar does not get updated
-    #                 spectrumView.spectrum.newPeakList()
-    #                 self._project.blankNotification()
-    #
-    #             validPeakListViews = [pp for pp in spectrumView.peakListViews if isinstance(pp.peakList, PeakList)
-    #                                   and pp.isVisible()
-    #                                   and spectrumView.isVisible()]
-    #             # if numPeakLists:
-    #             for thisPeakListView in validPeakListViews:
-    #                 # find the first visible peakList
-    #                 peakList = thisPeakListView.peakList
-    #
-    #                 # peakList = spectrumView.spectrum.peakLists[0]
-    #
-    #                 if spectrumView.spectrum.dimensionCount > 1:
-    #                     sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]
-    #                     spectrumAxisCodes = spectrumView.spectrum.axisCodes
-    #                     stripAxisCodes = self.axisCodes
-    #                     sortedSpectrumRegion = [0] * spectrumView.spectrum.dimensionCount
-    #
-    #                     remapIndices = commonUtil._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
-    #                     if remapIndices:
-    #                         for n, axisCode in enumerate(spectrumAxisCodes):
-    #                             # idx = stripAxisCodes.index(axisCode)
-    #                             idx = remapIndices[n]
-    #                             sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
-    #                     else:
-    #                         sortedSpectrumRegion = sortedSelectedRegion
-    #
-    #                     newPeaks = peakList.pickPeaksNd(sortedSpectrumRegion,
-    #                                                     doPos=spectrumView.displayPositiveContours,
-    #                                                     doNeg=spectrumView.displayNegativeContours,
-    #                                                     fitMethod='gaussian', minDropfactor=minDropfactor)
-    #                 else:
-    #                     # 1D's
-    #                     # NBNB This is a change - valuea are now rounded to three decimal places. RHF April 2017
-    #                     newPeaks = peakList.pickPeaks1d(selectedRegion[0], sorted(selectedRegion[1]), size=minDropfactor * 100)
-    #                     # y0 = startPosition.y()
-    #                     # y1 = endPosition.y()
-    #                     # y0, y1 = min(y0, y1), max(y0, y1)
-    #                     # newPeaks = peakList.pickPeaks1d([startPosition.x(), endPosition.x()], [y0, y1])
-    #
-    #                 result.extend(newPeaks)
-    #                 # break
-    #
-    #             # # Add the new peaks to selection
-    #             # for peak in newPeaks:
-    #             #   # peak.isSelected = True
-    #             #   self.current.addPeak(peak)
-    #
-    #             # for window in project.windows:
-    #             #   for spectrumDisplay in window.spectrumDisplays:
-    #             #     for strip in spectrumDisplay.strips:
-    #             #       spectra = [spectrumView.spectrum for spectrumView in strip.spectrumViews]
-    #             #       if peakList.spectrum in spectra:
-    #             #               strip.showPeaks(peakList)
-    #
-    #     finally:
-    #         self._endCommandEchoBlock()
-    #         self._project.unblankNotification()
-    #
-    #     for peak in result:
-    #         peak._finaliseAction('create')
-    #     #
-    #     return tuple(result)
 
 
 # Notifiers:
 def _updateDisplayedMarks(data):
-    """Callback when marks have changed - Create, Change, Delete; defined above
+    """Callback when marks have changed - Create, Change, Delete; defined above.
     """
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
@@ -2096,7 +1137,7 @@ def _updateDisplayedMarks(data):
 
 
 def _updateSelectedPeaks(data):
-    """Callback when peaks have changed
+    """Callback when peaks have changed.
     """
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
@@ -2105,7 +1146,7 @@ def _updateSelectedPeaks(data):
 
 
 def _updateSelectedIntegrals(data):
-    """Callback when integrals have changed
+    """Callback when integrals have changed.
     """
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
@@ -2114,7 +1155,7 @@ def _updateSelectedIntegrals(data):
 
 
 def _updateSelectedMultiplets(data):
-    """Callback when multiplets have changed
+    """Callback when multiplets have changed.
     """
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
@@ -2123,8 +1164,8 @@ def _updateSelectedMultiplets(data):
 
 
 def _axisRegionChanged(cDict):
-    """Notifier function: Update strips etc. for when axis position or width changes"""
-
+    """Notifier function: Update strips etc. for when axis position or width changes.
+    """
     axis = cDict[Notifier.OBJECT]
     strip = axis.strip
 
@@ -2147,16 +1188,6 @@ def _axisRegionChanged(cDict):
                 padding = strip.application.preferences.general.stripRegionPadding
                 strip.viewBox.setYRange(*region, padding=padding)
             else:
-                # One of the Z axes
-                # strip._updateTraces()
-                # for spectrumView in strip.spectrumViews:
-                #     spectrumView.update()
-                #     if spectrumView.isVisible():
-                #         for peakListView in spectrumView.peakListViews:
-                #             if peakListView.isVisible():
-                #                 peakList = peakListView.peakList
-                #                 peaks = [peak for peak in peakList.peaks if strip.peakIsInPlane(peak) or strip.peakIsInFlankingPlane(peak)]
-                #                 strip.spectrumDisplay.showPeaks(peakListView, peaks)
 
                 if len(strip.axisOrder) > 2:
                     n = index - 2
@@ -2166,21 +1197,8 @@ def _axisRegionChanged(cDict):
                         planeLabel.setValue(position)
                         strip.planeToolbar.planeCounts[n].setValue(width / planeSize)
 
-            # if index >= 2:
-            #     spectrumDisplay = strip.spectrumDisplay
-            #     if hasattr(spectrumDisplay, 'activePeakItemDict'):  # ND display
-            #         activePeakItemDict = spectrumDisplay.activePeakItemDict
-            #         for spectrumView in strip.spectrumViews:
-            #             for peakListView in spectrumView.peakListViews:
-            #                 peakItemDict = activePeakItemDict.get(peakListView, {})
-            #                 for peakItem in peakItemDict.values():
-            #                     peakItem._stripRegionUpdated()
-
         finally:
             strip.beingUpdated = False
-
-    # if index == 1:  # ASSUMES that only do H phasing
-    #     strip._updatePhasing()
 
 
 # NB The following two notifiers could be replaced by wrapper notifiers on
@@ -2206,21 +1224,9 @@ def _axisRegionChanged(cDict):
 # NB This notifier must be implemented as an API postInit notifier,
 # As it relies on Axs that are not yet created when 'created' notifiers are executed
 def _setupGuiStrip(project: Project, apiStrip):
-    """Set up graphical parameters for completed strips - for notifiers"""
+    """Set up graphical parameters for completed strips - for notifiers.
+    """
     strip = project._data2Obj[apiStrip]
-
-    # orderedAxes = strip.orderedAxes
-    # padding = strip.application.preferences.general.stripRegionPadding
-    #
-    # strip.viewBox.setXRange(*orderedAxes[0].region, padding=padding)
-    # strip.viewBox.setYRange(*orderedAxes[1].region, padding=padding)
-    # strip.plotWidget._initTextItems()
-    # strip.viewBox.sigStateChanged.connect(strip.plotWidget._moveAxisCodeLabels)
-    #
-    # # signal for communicating zoom across strips
-    # strip.viewBox.sigXRangeChanged.connect(strip._updateXRegion)
-    # strip.viewBox.sigYRangeChanged.connect(strip._updateYRegion)
-
     try:
         strip._CcpnGLWidget.initialiseAxes(strip=strip)
         # strip._CcpnGLWidget._resetAxisRange()

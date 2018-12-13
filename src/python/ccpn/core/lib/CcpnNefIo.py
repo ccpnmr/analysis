@@ -3952,7 +3952,8 @@ class CcpnNefReader:
             parameters['residueType'] = row.get('residue_name')
             # NB chainCode None is not possible here (for ccpn data)
             chainCode = row['chain_code']
-            nmrChain = nmrChains[chainCode]
+            # nmrChain = nmrChains[chainCode]
+            nmrChain = project.fetchNmrChain(chainCode)
             nmrResidue = nmrChain.newNmrResidue(**parameters)
             nmrResidue.resetSerial(row['serial'])
             # NB former call was BROKEN!
@@ -4015,7 +4016,11 @@ class CcpnNefReader:
         loop = saveFrame[loopName]
         for row in loop.data:
             pid, data = row.values()
-            project.getByPid(pid)._ccpnInternalData = jsonIo.loads(data)
+            obj = project.getByPid(pid)
+            if obj is None:
+                getLogger().warning('Loading NEF additional data: unable to find object "%s"' % pid)
+            else:
+                obj._ccpnInternalData = jsonIo.loads(data)
 
     #
     importers['ccpn_additional_data'] = load_ccpn_additional_data

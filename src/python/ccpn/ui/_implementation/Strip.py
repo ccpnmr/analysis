@@ -241,20 +241,23 @@ class Strip(AbstractWrapperObject):
 
     @classmethod
     def _getAllWrappedData(cls, parent: SpectrumDisplay) -> list:
-        """Get wrappedData (ccpnmr.gui.Task.Strip) in serial number order"""
+        """Get wrappedData (ccpnmr.gui.Task.Strip) in serial number order.
+        """
         return parent._wrappedData.sortedStrips()
 
     def _finaliseAction(self, action: str):
+        """Spawn _finaliseAction notifiers for spectrumView tree attached to this strip.
+        """
         super()._finaliseAction(action)
 
-        if action in ['create']:
+        if action in ['create', 'delete']:
             for sv in self.spectrumViews:
                 sv._finaliseAction(action)
 
                 for plv in sv.peakListViews:
                     plv._finaliseAction(action)
                 for ilv in sv.integralListViews:
-                    plv._finaliseAction(action)
+                    ilv._finaliseAction(action)
                 for mlv in sv.multipletListViews:
                     mlv._finaliseAction(action)
 
@@ -266,14 +269,14 @@ class Strip(AbstractWrapperObject):
         self._wrappedData.delete()
 
     def _setStripIndex(self, index):
-        """Set the index of the current strip in the wrapped data
+        """Set the index of the current strip in the wrapped data.
         CCPN Internal
         """
         ccpnStrip = self._wrappedData
         ccpnStrip.__dict__['index'] = index  # this is the api creation of orderedStrips
 
     def stripIndex(self):
-        """return the index of the current strip in the spectrumDisplay
+        """Return the index of the current strip in the spectrumDisplay.
         """
         # original api indexing
         ccpnStrip = self._wrappedData
@@ -602,6 +605,7 @@ class Strip(AbstractWrapperObject):
             peak._finaliseAction('create')
 
         return tuple(result)
+
 
 
 @newObject(Strip)

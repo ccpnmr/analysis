@@ -402,6 +402,13 @@ class SpectrumToolBar(ToolBar):
 
         return super(SpectrumToolBar, self).eventFilter(obj, event)  # do the rest
 
+    def _toolbarAddSpectrum(self, data):
+        """Respond to a new spectrum being added to the spectrumDisplay; add new toolbar Icon
+        """
+        trigger = data[Notifier.TRIGGER]
+        spectrum = data[Notifier.OBJECT]
+        self._addSpectrumViewToolButtons(spectrum.spectrumViews)
+
     def _addSpectrumViewToolButtons(self, spectrumView):
 
         spectrumDisplay = spectrumView.strip.spectrumDisplay

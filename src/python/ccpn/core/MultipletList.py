@@ -203,13 +203,17 @@ class MultipletList(AbstractWrapperObject):
         return parent._wrappedData.sortedMultipletLists()
 
     def _finaliseAction(self, action: str):
-        """Subclassed to handle associated peakListViews
+        """Subclassed to notify changes to associated peakListViews
         """
         super()._finaliseAction(action=action)
 
-        if action in ['change', 'create']:
-            for mlv in self.multipletListViews:
-                mlv._finaliseAction(action=action)
+        # this is a can-of-worms for undelete at the minute
+        try:
+            if action in ['change']:
+                for mlv in self.multipletListViews:
+                    mlv._finaliseAction(action=action)
+        except Exception as es:
+            raise RuntimeError('Error _finalising multipletListViews: %s' % str(es))
 
     #=========================================================================================
     # CCPN functions

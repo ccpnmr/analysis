@@ -3511,7 +3511,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                 obj=None)
 
     def drawMouseCoords(self):
-        if self.underMouse():
+        if self.underMouse() and self.mouseString:
             self.buildMouseCoords()
             # draw the mouse coordinates to the screen
             self.mouseString.drawTextArrayVBO(enableVBO=True)

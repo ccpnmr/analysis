@@ -87,12 +87,13 @@ class SpectrumView(AbstractWrapperObject):
         """Delete SpectrumView for all strips.
         """
         with undoBlock():
-            self._finaliseAction('delete')
-            with notificationBlanking():
-                index = self._parent.spectrumViews.index(self)
-                parent = self._parent
-                self._wrappedData.spectrumView.delete()
-                parent._removeOrderedSpectrumViewIndex(index)
+            # self._finaliseAction('delete')
+            # with notificationBlanking():
+
+            index = self._parent.spectrumViews.index(self)
+            parent = self._parent
+            self._wrappedData.spectrumView.delete()
+            parent._removeOrderedSpectrumViewIndex(index)
 
     #EJB 20181122: why????
     # @property

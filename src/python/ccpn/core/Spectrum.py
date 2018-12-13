@@ -1686,14 +1686,12 @@ class Spectrum(AbstractWrapperObject):
                 pass
         return newSpectrum
 
-    # @logCommand(get='self')
-    # @deleteObject()
+    @deleteObject()
     def _delete(self):
         """Delete the spectrum wrapped data.
         """
         self._wrappedData.delete()
 
-    # @deleteObject()
     @cached.clear(PLANEDATACACHE)  # Check if there was a planedata cache, and if so, clear it
     @cached.clear(SLICEDATACACHE)  # Check if there was a slicedata cache, and if so, clear it
     def delete(self):
@@ -1709,8 +1707,6 @@ class Spectrum(AbstractWrapperObject):
                     specDisplays.append(sp._parent.spectrumDisplay)
                     specViews.append((sp._parent, sp._parent.spectrumViews.index(sp)))
 
-            # TODO:ED need to delete all peakLists and integralLists first, treat as single undo
-            # need to be a pre/post event for delete OR coreNotifier for peakListView on peakList
             listsToDelete = tuple(self.peakLists)
             listsToDelete += tuple(self.integralLists)
             listsToDelete += tuple(self.multipletLists)
@@ -1719,6 +1715,7 @@ class Spectrum(AbstractWrapperObject):
             for obj in listsToDelete:
                 obj.delete()
 
+            # delete the _wrappedData
             self._delete()
 
             for sd in specViews:

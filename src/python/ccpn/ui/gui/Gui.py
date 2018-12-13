@@ -145,26 +145,26 @@ class Gui(Ui):
         #                          GuiMultipletListView.GuiMultipletListView._changedMultipletListView)
 
         # TODO:ED need to unregister these notifiers on close
-        self._updateNotifier1 = Notifier(project,
-                                         triggers=[Notifier.RENAME],
-                                         targetName='NmrAtom',
-                                         callback=GuiPeakListView._updateAssignmentsNmrAtom)
+        # self._updateNotifier1 = Notifier(project,
+        #                                  triggers=[Notifier.RENAME],
+        #                                  targetName='NmrAtom',
+        #                                  callback=GuiPeakListView._updateAssignmentsNmrAtom)
         # self._updateNotifier2 = Notifier(project,
         #                                 triggers=[Notifier.CREATE],
         #                                 targetName='NmrAtom',
         #                                 callback=GuiPeakListView._editAssignmentsNmrAtom)
 
-        project.registerNotifier('Peak', 'change', _coreClassMap['Peak']._refreshPeakPosition, onceOnly=True)
+        # project.registerNotifier('Peak', 'change', _coreClassMap['Peak']._refreshPeakPosition, onceOnly=True)
 
         # API notifiers - see functions for comments on why this is done this way
-        project._registerApiNotifier(GuiPeakListView._upDateAssignmentsPeakDimContrib,
-                                     'ccp.nmr.Nmr.AbstractPeakDimContrib', 'postInit')
+        # project._registerApiNotifier(GuiPeakListView._upDateAssignmentsPeakDimContrib,
+        #                              'ccp.nmr.Nmr.AbstractPeakDimContrib', 'postInit')
         # project._registerApiNotifier(GuiPeakListView._deleteAssignmentsNmrAtomDelete,
         #                             'ccp.nmr.Nmr.AbstractPeakDimContrib', 'preDelete')
 
         # ejb - new notifier to catch the deletion of an nmrAtom and update peak labels
-        project._registerApiNotifier(GuiPeakListView._deleteAssignmentsNmrAtomDelete,
-                                     'ccp.nmr.Nmr.AbstractPeakDimContrib', 'delete')
+        # project._registerApiNotifier(GuiPeakListView._deleteAssignmentsNmrAtomDelete,
+        #                              'ccp.nmr.Nmr.AbstractPeakDimContrib', 'delete')
 
         from ccpn.ui.gui.modules import SpectrumDisplayNd
 

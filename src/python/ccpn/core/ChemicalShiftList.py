@@ -244,6 +244,8 @@ PeakList.chemicalShiftList = property(getter, setter, None,
 del getter
 del setter
 
+#=========================================================================================
+
 @newObject(ChemicalShiftList)
 def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', autoUpdate: bool = True,
                           isSimulated: bool = False, serial: int = None, comment: str = None) -> ChemicalShiftList:

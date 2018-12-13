@@ -905,7 +905,12 @@ class GuiSpectrumDisplay(CcpnModule):
                 addUndoItem(undo=partial(self._redrawAxes, index))
                 addUndoItem(undo=partial(self._restoreStripToLayout, self, strip, index),
                             redo=partial(self._removeStripFromLayout, self, strip))
+                # add notifier handling for the strip
+                addUndoItem(undo=partial(strip.setBlankingAllNotifiers, False),
+                            redo=partial(strip.setBlankingAllNotifiers, True))
+
                 self._removeStripFromLayout(self, strip)
+                strip.setBlankingAllNotifiers(True)
 
                 # # add object delete/undelete to the undo stack
                 # addUndoItem(undo=partial(strip._wrappedData.root._unDelete,
@@ -1095,6 +1100,10 @@ class GuiSpectrumDisplay(CcpnModule):
                             )
 
                 index = result.stripIndex()
+
+                # add notifier handling to the stack
+                addUndoItem(undo=partial(result.setBlankingAllNotifiers, True),
+                            redo=partial(result.setBlankingAllNotifiers, False))
 
                 # add layout handling to the undo stack
                 addUndoItem(undo=partial(self._removeStripFromLayout, self, result),

@@ -577,7 +577,7 @@ class Peak(AbstractWrapperObject):
 def _newPeak(self: PeakList, height: float = None, volume: float = None,
              heightError: float = None, volumeError: float = None,
              figureOfMerit: float = 1.0, annotation: str = None, comment: str = None,
-             ppmPositions: Sequence[float] = (), positionError: Sequence[float] = (),
+             ppmPositions: Sequence[float] = (), position: Sequence[float] = None, positionError: Sequence[float] = (),
              pointPosition: Sequence[float] = (), boxWidths: Sequence[float] = (),
              lineWidths: Sequence[float] = (), serial: int = None) -> Peak:
     """Create a new Peak within a peakList
@@ -596,6 +596,7 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
     :param annotation:
     :param comment: optional comment string
     :param ppmPositions: peak position in ppm for each dimension (related attributes: positionError, pointPosition)
+    :param position: OLD: peak position in ppm for each dimension (related attributes: positionError, pointPosition)
     :param positionError:
     :param pointPosition:
     :param boxWidths:
@@ -605,6 +606,9 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
     :return: a new Peak instance
     """
     #EJB 20181126: minor refactoring
+
+    if position is not None:
+        ppmPositions = position  # Backward compatibility
 
     apiPeakList = self._apiPeakList
     apiPeak = apiPeakList.newPeak(height=height, volume=volume,

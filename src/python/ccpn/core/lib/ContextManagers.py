@@ -82,14 +82,14 @@ def echoCommand(obj, funcName, *params, values=None, defaults=None,
 
     if not project.application._echoBlocking:
         project.application.ui.echoCommands(commands)
-    getLogger().debug('_enterEchoCommand: command=%s' % commands[0])
+    getLogger().debug2('_enterEchoCommand: command=%s' % commands[0])
 
     try:
         # transfer control to the calling function
         yield
 
     finally:
-        getLogger().debug('_exitEchoCommand')
+        getLogger().debug2('_exitEchoCommand')
 
 
 @contextmanager

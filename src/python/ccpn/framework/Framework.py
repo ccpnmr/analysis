@@ -309,6 +309,15 @@ class Framework:
         self.submitMacroPopup = None
         self.updatePopup = None
 
+    @property
+    def _isInDebugMode(self) -> bool:
+        """Return True if either of the debug flags has been set
+        CCPNINTERNAL: used throughout to check
+        """
+        if self.level == Logging.DEBUG1 or self.level == Logging.DEBUG2 or self.level == Logging.DEBUG3:
+            return True
+        return False
+
     def _testShortcuts0(self):
         print('>>> Testing shortcuts0')
 
@@ -799,7 +808,7 @@ class Framework:
                 self.ui.echoCommands(commands)
 
         self._increaseNotificationBlocking()
-        getLogger().debug('command=%s, echoBlocking=%s, undo.blocking=%s'
+        getLogger().debug2('command=%s, echoBlocking=%s, undo.blocking=%s'
                           % (command, self._echoBlocking, undo.blocking))
 
     #TODO:TJ: Why is this a private method; it is and should be used all over the code?
@@ -808,7 +817,7 @@ class Framework:
 
         MUST be paired with _startCommandBlock call - use try ... finally to ensure both are called"""
 
-        getLogger().debug('echoBlocking=%s' % self._echoBlocking)
+        getLogger().debug2('echoBlocking=%s' % self._echoBlocking)
         undo = self.project._undo
 
         # if self._echoBlocking > 0:
@@ -1319,7 +1328,10 @@ class Framework:
         #   return project
 
         else:
-            sys.stderr.write('==> Could not recognise "%s" as a project\n' % path)
+            sys.stderr.write('==> Could not recognise "%s" as a project; loading into default project\n' % path)
+            self.project = self.newProject()
+            self.loadData(paths=[path])
+            return self.project
 
     def _loadNefFile(self, path: str, makeNewProject=True) -> Project:
         """Load Project from NEF file at path, and do necessary setup"""
@@ -1337,13 +1349,15 @@ class Framework:
         # self.project._undo.increaseBlocking()
         self.project._wrappedData.shiftAveraging = False
 
-        with undoBlock():
-            try:
-                self.nefReader.importNewProject(self.project, dataBlock)
-            except Exception as es:
-                getLogger().warning('Error loading Nef file: %s' % str(es))
-                # raise es
-            # finally:
+        with suspendSideBarNotifications(project=self.project):
+            with undoBlock():
+                try:
+                    self.nefReader.importNewProject(self.project, dataBlock)
+                except Exception as es:
+                    getLogger().warning('Error loading Nef file: %s' % str(es))
+                    if self._isInDebugMode:
+                        raise es
+                # finally:
 
         self.project._wrappedData.shiftAveraging = True
         # self._echoBlocking -= 1
@@ -1546,6 +1560,8 @@ class Framework:
                     self._loadNefFile(path=path, makeNewProject=False)
             except Exception as es:
                 getLogger().warning('Error Importing Nef File: %s' % str(es))
+                if self._isInDebugMode:
+                    raise es
 
     def _exportNEF(self):
         """

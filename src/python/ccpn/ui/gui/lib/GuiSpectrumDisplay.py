@@ -260,9 +260,9 @@ class GuiSpectrumDisplay(CcpnModule):
         self._phasingTraceScale = 1.0e-7
         self.stripScaleFactor = 1.0
 
-        # self._stripNotifier = self.setNotifier(self.project,
-        #                                        [Notifier.CREATE, Notifier.DELETE],
-        #                                        'Strip',
+        # self._spectrumNotifier = self.setNotifier(self.project,
+        #                                        [Notifier.CREATE],
+        #                                        'Spectrum',
         #                                        self._spectrumViewChanged)
 
         self._toolbarNotifier = self.setNotifier(self.project,
@@ -361,6 +361,15 @@ class GuiSpectrumDisplay(CcpnModule):
         # resize the contents of the stripFrame
         self.setColumnStretches(stretchValue=True, widths=False)
         super().resizeEvent(ev)
+
+    def _toolbarAddSpectrum(self, data):
+        """Respond to a new spectrum being added to the spectrumDisplay; add new toolbar Icon
+        """
+        print('>>>_toolbarAddSpectrum')
+
+        trigger = data[Notifier.TRIGGER]
+        spectrum = data[Notifier.OBJECT]
+        # self.spectrumToolBar._addSpectrumViewToolButtons(spectrum.spectrumViews[0])
 
     def _toolbarChange(self, data):
         """Respond to a change in the spectrum Icon toolbar denoting that clicked or spectrum created/deleted

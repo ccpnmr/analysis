@@ -66,6 +66,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import numpy as np
 import operator
 from typing import Sequence, Tuple, Optional
+from functools import partial
 from ccpn.util import Common as commonUtil
 from ccpn.util import Constants
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -76,7 +77,8 @@ from ccpn.core.lib import Pid
 from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple, _getProjection
 from ccpn.core.lib.Cache import cached
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
+    logCommandBlock, undoStackBlocking
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import axisCodeMapping
 from ccpnmodel.ccpncore.lib.Io import Formats
@@ -1686,11 +1688,24 @@ class Spectrum(AbstractWrapperObject):
             for obj in listsToDelete:
                 obj.delete()
 
+            with undoStackBlocking() as addUndoItem:
+                # notify spectrumViews of delete
+                addUndoItem(undo=partial(self._finaliseSpectrumViews, 'create'),
+                            redo=partial(self._finaliseSpectrumViews, 'delete'))
+
             # delete the _wrappedData
             self._delete()
 
+            # with undoStackBlocking() as addUndoItem:
+            #     # notify spectrumViews of delete
+            #     addUndoItem(redo=self._finaliseSpectrumViews, '')
+
             for sd in specViews:
                 sd[0]._removeOrderedSpectrumViewIndex(sd[1])
+
+    def _finaliseSpectrumViews(self, action):
+        for sv in self.spectrumViews:
+            sv._finaliseAction(action)
 
     @property
     def temperature(self):

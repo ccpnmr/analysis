@@ -189,9 +189,15 @@ class PeakListView(AbstractWrapperObject):
 
 # newPeakListView functions: None
 
+from ccpn.util.Common import makeIterableList
+
 # PeakList.peakListViews property
 def getter(peakList: PeakList) -> typing.Tuple[PeakListView, ...]:
     data2ObjDict = peakList._project._data2Obj
+
+    # splvs = [x for x in peakList._wrappedData.sortedPeakListViews()]
+    # ssplvs = [y.sortedStripPeakListViews() for y in splvs if not y.isDeleted]
+    # plvs = tuple(data2ObjDict[y] for y in makeIterableList(ssplvs))
 
     return tuple(data2ObjDict[y]
                  for x in peakList._wrappedData.sortedPeakListViews()
@@ -224,7 +230,7 @@ Project._apiNotifiers.append(
          ApiStripPeakListView._metaclass.qualifiedName(), '')
         )
 
-#EJB 20181122: moved to PeakList
+#EJB 20181122: moved to PeakList _finaliseAction
 # Notify PeakListView change when PeakList changes
 # PeakList._setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
 #                             {'pathToObject': 'peakListViews', 'action': 'change'})

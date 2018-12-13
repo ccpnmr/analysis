@@ -185,13 +185,17 @@ class IntegralList(AbstractWrapperObject):
         return parent._wrappedData.sortedIntegralLists()
 
     def _finaliseAction(self, action: str):
-        """Subclassed to handle associated integralListViews
+        """Subclassed to notify changes to associated integralListViews
         """
         super()._finaliseAction(action=action)
 
-        if action in ['change', 'create']:
-            for ilv in self.integralListViews:
-                ilv._finaliseAction(action=action)
+        # this is a can-of-worms for undelete at the minute
+        try:
+            if action in ['change']:
+                for ilv in self.integralListViews:
+                    ilv._finaliseAction(action=action)
+        except Exception as es:
+            raise RuntimeError('Error _finalising integralListViews: %s' % str(es))
 
     #=========================================================================================
     # CCPN functions

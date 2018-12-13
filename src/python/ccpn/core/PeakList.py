@@ -238,7 +238,7 @@ class PeakList(AbstractWrapperObject):
         return [x for x in parent._wrappedData.sortedPeakLists() if x.dataType == 'Peak']
 
     def _finaliseAction(self, action: str):
-        """Subclassed to handle associated peakListViews
+        """Subclassed to notify changes to associated peakListViews
         """
         super()._finaliseAction(action=action)
 

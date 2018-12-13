@@ -37,7 +37,7 @@ from ccpn.core.lib import Pid
 from ccpn.ui._implementation.Strip import Strip
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
-from ccpn.core.lib.ContextManagers import undoBlockManager
+from ccpn.core.lib.ContextManagers import undoBlockManager, deleteObject, newObject
 
 
 class SpectrumView(AbstractWrapperObject):
@@ -82,13 +82,21 @@ class SpectrumView(AbstractWrapperObject):
 
     strip = _parent
 
+    # def delete(self):
+    #     """Delete SpectrumView for all strips"""
+    #     with undoBlockManager():
+    #         index = self._parent.spectrumViews.index(self)
+    #         parent = self._parent
+    #         self._wrappedData.spectrumView.delete()
+    #         parent._removeOrderedSpectrumViewIndex(index)
+
+    # @deleteObject()
     def delete(self):
         """Delete SpectrumView for all strips"""
-        with undoBlockManager():
-            index = self._parent.spectrumViews.index(self)
-            parent = self._parent
-            self._wrappedData.spectrumView.delete()
-            parent._removeOrderedSpectrumViewIndex(index)
+        index = self._parent.spectrumViews.index(self)
+        parent = self._parent
+        self._wrappedData.spectrumView.delete()
+        parent._removeOrderedSpectrumViewIndex(index)
 
     #EJB 20181122: why????
     # @property

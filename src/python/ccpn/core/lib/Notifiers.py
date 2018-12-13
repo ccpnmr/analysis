@@ -54,6 +54,7 @@ from ccpn.util.Logging import getLogger
 
 logger = getLogger()
 
+DEBUG = False
 
 def skip(*args, **kwargs):
     """Do nothing"""
@@ -95,7 +96,7 @@ class NotifierABC(object):
         self._callback = callback
         self._kwargs = kwargs
 
-        self._debug = debug  # ability to report on individual instances
+        self._debug = debug or DEBUG  # ability to report on individual instances
         self._isBlanked = False  # ability to blank notifier
         self._isRegistered = False  # flag indicating if any Notifier was registered
 
@@ -357,7 +358,6 @@ class Notifier(NotifierABC):
 
         trigger, targetName = notifier
 
-        self._debug = True
         if self._debug:
             p2 = 'parameter2=%r ' % parameter2 if parameter2 else ''
             sys.stderr.write('--> %-25s obj=%-25s %s' % \

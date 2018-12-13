@@ -275,6 +275,12 @@ class Residue(AbstractWrapperObject):
         """
         chainFragment.__dict__['residues'] = tuple(residues)
 
+    @deleteObject()
+    def _delete(self):
+        """Delete the Residue wrapped data.
+        """
+        self._wrappedData.delete()
+
     def delete(self):
         """delete residue.
         Causes an error when just calling residue._wrappedData.delete()
@@ -292,8 +298,11 @@ class Residue(AbstractWrapperObject):
 
                 oldResidues = list(chainFragment.residues)
                 newResidues = list(chainFragment.residues)
-                delRes = newResidues.pop(newResidues.index(apiResidue))
-                delRes.delete()
+                # delRes = newResidues.pop(newResidues.index(apiResidue))
+                # delRes.delete()
+
+                newResidues.pop(newResidues.index(apiResidue))
+                self._delete()
 
                 # delete the residue from the fragment
                 chainFragment.__dict__['residues'] = tuple(newResidues)
@@ -302,6 +311,7 @@ class Residue(AbstractWrapperObject):
                 with undoStackBlocking() as addUndoItem:
                     addUndoItem(undo=partial(self._setFragmentResidues, chainFragment, oldResidues),
                                 redo=partial(self._setFragmentResidues, chainFragment, newResidues))
+
 
     #EJB 20181210: defined twice
     # @property

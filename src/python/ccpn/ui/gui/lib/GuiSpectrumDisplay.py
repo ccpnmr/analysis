@@ -260,6 +260,11 @@ class GuiSpectrumDisplay(CcpnModule):
         self._phasingTraceScale = 1.0e-7
         self.stripScaleFactor = 1.0
 
+        # self._stripNotifier = self.setNotifier(self.project,
+        #                                        [Notifier.CREATE, Notifier.DELETE],
+        #                                        'Strip',
+        #                                        self._spectrumViewChanged)
+
         self._toolbarNotifier = self.setNotifier(self.project,
                                                  [Notifier.CHANGE],
                                                  'SpectrumDisplay',
@@ -912,12 +917,12 @@ class GuiSpectrumDisplay(CcpnModule):
                 self._removeStripFromLayout(self, strip)
                 strip.setBlankingAllNotifiers(True)
 
+                #EJB 20181213: old style delete notifiers
                 # # add object delete/undelete to the undo stack
                 # addUndoItem(undo=partial(strip._wrappedData.root._unDelete,
                 #                          apiObjectsCreated, (strip._wrappedData.topObject,)),
                 #             redo=partial(strip._delete)
                 #             )
-                #
                 # # delete the strip
                 # strip._delete()
 
@@ -1078,8 +1083,18 @@ class GuiSpectrumDisplay(CcpnModule):
             log('addStrip')
 
             with undoStackBlocking() as addUndoItem:
-
                 addUndoItem(undo=self._redrawAxes)
+
+                #EJB 20181213: old style delete notifiers
+                # result = self.strips[index]._clone()
+                # if not isinstance(result, GuiStrip):
+                #     raise RuntimeError('Expected an object of class %s, obtained %s' % (GuiStrip, result.__class__))
+                # apiObjectsCreated = result._getApiObjectTree()
+                # # add object delete/undelete to the undo stack
+                # addUndoItem(undo=partial(Undo._deleteAllApiObjects, apiObjectsCreated),
+                #             redo=partial(result._wrappedData.root._unDelete,
+                #                          apiObjectsCreated, (result._wrappedData.topObject,))
+                #             )
 
                 with notificationBlanking():
                     result = self.strips[index]._clone()

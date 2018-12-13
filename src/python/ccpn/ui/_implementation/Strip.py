@@ -244,6 +244,20 @@ class Strip(AbstractWrapperObject):
         """Get wrappedData (ccpnmr.gui.Task.Strip) in serial number order"""
         return parent._wrappedData.sortedStrips()
 
+    def _finaliseAction(self, action: str):
+        super()._finaliseAction(action)
+
+        if action in ['create']:
+            for sv in self.spectrumViews:
+                sv._finaliseAction(action)
+
+                for plv in sv.peakListViews:
+                    plv._finaliseAction(action)
+                for ilv in sv.integralListViews:
+                    plv._finaliseAction(action)
+                for mlv in sv.multipletListViews:
+                    mlv._finaliseAction(action)
+
     # @deleteObject()         # - doesn't work here
     def _delete(self):
         """delete the wrappedData.

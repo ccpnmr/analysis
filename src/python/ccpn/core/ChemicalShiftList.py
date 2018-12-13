@@ -244,6 +244,7 @@ PeakList.chemicalShiftList = property(getter, setter, None,
 del getter
 del setter
 
+#=========================================================================================
 
 @newObject(ChemicalShiftList)
 def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', autoUpdate: bool = True,
@@ -260,6 +261,15 @@ def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
     :param serial: optional serial number.
     :return: a new ChemicalShiftList instance.
     """
+
+    # EJB 20181212: this is from refactored
+    # GWV 20181210: deal with already existing names by incrementing
+    # name = name.translate(Pid.remapSeparators)
+    # # find a name that is unique
+    # found = (self.getChemicalShiftList(name) is not None)
+    # while found:
+    #     name = commonUtil.incrementName(name)
+    #     found = (self.getChemicalShiftList(name) is not None)
 
     if not name:
         # Make default name

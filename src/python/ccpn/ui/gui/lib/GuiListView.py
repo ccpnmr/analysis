@@ -23,12 +23,42 @@ __date__ = "$Date$"
 # Start of code
 #=========================================================================================
 
-from ccpn.ui.gui.lib.GuiListView import GuiListViewABC
+from PyQt5 import QtCore, QtWidgets
+
+NULL_RECT = QtCore.QRectF()
 
 
-class GuiMultipletListView(GuiListViewABC):
-    """multipletList is the CCPN wrapper object
+class GuiListViewABC(QtWidgets.QGraphicsItem):
+    """Base class for gui<Type>ListView objects
     """
 
     def __init__(self):
-        super().__init__()
+        """Initialise instance.
+        """
+        QtWidgets.QGraphicsItem.__init__(self)
+
+        self.application = self.spectrumView.application
+        self.setFlag(QtWidgets.QGraphicsItem.ItemHasNoContents, True)
+
+        # flags to initiate updates to the GL windows
+        self.buildSymbols = True
+        self.buildLabels = True
+
+    def boundingRect(self):
+        return NULL_RECT
+
+    def paint(self, *args):
+        pass
+
+    def setVisible(self, visible):
+        super().setVisible(visible)
+
+        # change visibility list for the strip
+        self.spectrumView.strip._updateVisibility()
+
+        # repaint all displays - this is called for each spectrumView in the spectrumDisplay
+        # all are attached to the same click
+        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
+        GLSignals = GLNotifier(parent=self)
+        GLSignals.emitPaintEvent()

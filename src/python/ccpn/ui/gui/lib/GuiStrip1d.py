@@ -297,7 +297,7 @@ class GuiStrip1d(GuiStrip):
                 return peakListView
 
     def _addCalibrate1DXSpectrumWidget(self):
-        """add a new widget for calibrateX
+        """Add a new widget for calibrateX.
         """
         from ccpn.ui.gui.widgets.CalibrateXSpectrum1DWidget import CalibrateX1DWidgets
 
@@ -328,7 +328,7 @@ class GuiStrip1d(GuiStrip):
             self.calibrateX1DWidgets._toggleLines()
 
     def _addCalibrate1DYSpectrumWidget(self):
-        """add a new widget for calibrateY
+        """Add a new widget for calibrateY.
         """
         from ccpn.ui.gui.widgets.CalibrateYSpectrum1DWidget import CalibrateY1DWidgets
 
@@ -441,13 +441,36 @@ class GuiStrip1d(GuiStrip):
     #     #   peakListView.setVisible(True)
 
     def toggleHorizontalTrace(self):
-        """
-        Toggles whether or not horizontal trace is displayed.
+        """Toggles whether or not horizontal trace is displayed.
         """
         pass
 
     def toggleVerticalTrace(self):
+        """Toggles whether or not vertical trace is displayed.
         """
-        Toggles whether or not vertical trace is displayed.
+        pass
+
+    def cyclePeakLabelling(self):
+        """Toggles whether peak labelling is minimal is visible in the strip.
+        """
+        self.peakLabelling += 1
+        if self.peakLabelling > 2:
+            self.peakLabelling = 0
+
+        if self.spectrumViews:
+            for sV in self.spectrumViews:
+
+                for peakListView in sV.peakListViews:
+                    # peakListView.buildSymbols = True
+                    peakListView.buildLabels = True
+
+            # spawn a redraw of the GL windows
+            from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
+            GLSignals = GLNotifier(parent=None)
+            GLSignals.emitPaintEvent()
+
+    def cyclePeakSymbols(self):
+        """Cycle through peak symbol types.
         """
         pass

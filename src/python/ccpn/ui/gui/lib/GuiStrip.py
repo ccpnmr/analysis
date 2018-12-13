@@ -133,31 +133,6 @@ class GuiStrip(Frame):
         self.navigateToCursorMenu = None  #set from context menu and in CcpnOpenGL rightClick
         self._isPhasingOn = False
 
-        # GWV 20181127: moved to GuiMainWindow
-        # notifier for highlighting the strip
-        # self._stripNotifier = Notifier(self.current, [Notifier.CURRENT], 'strip', self._highlightCurrentStrip)
-
-        # Notifier for updating the peaks
-        self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
-                         'Peak', self._updateDisplayedPeaks, onceOnly=True)
-
-        # Notifier for updating the integrals
-        self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
-                         'Integral', self._updateDisplayedIntegrals, onceOnly=True)
-
-        # Notifier for updating the multiplets
-        self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
-                         'Multiplet', self._updateDisplayedMultiplets, onceOnly=True)
-
-        # Notifier for change of stripLabel
-        self.setNotifier(self.project, [Notifier.RENAME], 'NmrResidue', self._updateStripLabel)
-
-        # For now, all dropEvents are not strip specific, use spectrumDisplay's handling
-        self.setGuiNotifier(self, [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
-                            self.spectrumDisplay._processDroppedItems)
-        self.setGuiNotifier(self, [GuiNotifier.DRAGMOVEEVENT], [DropBase.URLS, DropBase.PIDS],
-                            self.spectrumDisplay._processDragEnterEvent)
-
         # set peakLabelling to the default from preferences or strip to the left
         settings = spectrumDisplay.getSettings()
         if len(spectrumDisplay.strips) > 1:
@@ -196,6 +171,37 @@ class GuiStrip(Frame):
             self._CcpnGLWidget.axisLocked = settings[AXISLOCKASPECTRATIO]
         except Exception as es:
             getLogger().debugGL('OpenGL widget not instantiated')
+
+        # initialise the notifiers
+        self.setStripNotifiers()
+
+    def setStripNotifiers(self):
+        """Set the notifiers for the strip.
+        """
+        # GWV 20181127: moved to GuiMainWindow
+        # notifier for highlighting the strip
+        # self._stripNotifier = Notifier(self.current, [Notifier.CURRENT], 'strip', self._highlightCurrentStrip)
+
+        # Notifier for updating the peaks
+        self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
+                         'Peak', self._updateDisplayedPeaks, onceOnly=True)
+
+        # Notifier for updating the integrals
+        self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
+                         'Integral', self._updateDisplayedIntegrals, onceOnly=True)
+
+        # Notifier for updating the multiplets
+        self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
+                         'Multiplet', self._updateDisplayedMultiplets, onceOnly=True)
+
+        # Notifier for change of stripLabel
+        self.setNotifier(self.project, [Notifier.RENAME], 'NmrResidue', self._updateStripLabel)
+
+        # For now, all dropEvents are not strip specific, use spectrumDisplay's handling
+        self.setGuiNotifier(self, [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
+                            self.spectrumDisplay._processDroppedItems)
+        self.setGuiNotifier(self, [GuiNotifier.DRAGMOVEEVENT], [DropBase.URLS, DropBase.PIDS],
+                            self.spectrumDisplay._processDragEnterEvent)
 
     def viewRange(self):
         return self._CcpnGLWidget.viewRange()

@@ -318,7 +318,7 @@ class DataSet(AbstractWrapperObject):
         :param name:
         :param attachedObjectPid:
         :param attachedObject:
-        :return: a new DataSet instance.
+        :return: a new Data instance.
         """
         from ccpn.core.Data import _newData
 

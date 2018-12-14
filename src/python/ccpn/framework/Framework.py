@@ -1356,17 +1356,19 @@ class Framework:
             self.project = self.newProject(dataBlock.name)
 
         self.project._wrappedData.shiftAveraging = False
-        with suspendSideBarNotifications(project=self.project):
-            with undoBlock():
-                with catchExceptions(application=self, errorStringTemplate='Error loading Nef file: %s'):
-                    self.nefReader.importNewProject(self.project, dataBlock)
-                # try:
-                #     self.nefReader.importNewProject(self.project, dataBlock)
-                # except Exception as es:
-                #     getLogger().warning('Error loading Nef file: %s' % str(es))
-                #     if self._isInDebugMode:
-                #         raise es
-                # # finally:
+        # with suspendSideBarNotifications(project=self.project):
+
+        with undoBlock():
+            with catchExceptions(application=self, errorStringTemplate='Error loading Nef file: %s'):
+                self.nefReader.importNewProject(self.project, dataBlock)
+            # try:
+            #     self.nefReader.importNewProject(self.project, dataBlock)
+            # except Exception as es:
+            #     getLogger().warning('Error loading Nef file: %s' % str(es))
+            #     if self._isInDebugMode:
+            #         raise es
+            # # finally:
+
         self.project._wrappedData.shiftAveraging = True
 
         getLogger().info('==> Loaded NEF file: "%s"' % (path,))
@@ -1385,15 +1387,17 @@ class Framework:
             self.project = self.newProject(dataBlock.name)
 
         self.project._wrappedData.shiftAveraging = False
-        with suspendSideBarNotifications(project=self.project):
-            with undoBlock():
-                with catchExceptions(application=self, errorStringTemplate='Error loading NMRStar file: %s'):
-                    self.nefReader.importNewProject(self.project, dataBlock)
+
+        # with suspendSideBarNotifications(project=self.project):
+        with undoBlock():
+            with catchExceptions(application=self, errorStringTemplate='Error loading NMRStar file: %s'):
+                self.nefReader.importNewProject(self.project, dataBlock)
         # with undoBlock():
         #     try:
         #         self.nefReader.importNewNMRStarProject(self.project, dataBlock)
         #     except Exception as es:
         #         getLogger().warning('Error loading NMRStar file: %s' % str(es))
+
         self.project._wrappedData.shiftAveraging = True
 
         getLogger().info('==> Loaded NmrStar file: "%s"' % (path,))
@@ -1416,10 +1420,11 @@ class Framework:
             self.project = self.newProject(sparkyName)
 
         self.project._wrappedData.shiftAveraging = True
-        with suspendSideBarNotifications(project=self.project):
-            with undoBlock():
-                with catchExceptions(application=self, errorStringTemplate='Error loading Sparky file: %s'):
-                    self.sparkyReader.importSparkyProject(self.project, dataBlock)
+
+        # with suspendSideBarNotifications(project=self.project):
+        with undoBlock():
+            with catchExceptions(application=self, errorStringTemplate='Error loading Sparky file: %s'):
+                self.sparkyReader.importSparkyProject(self.project, dataBlock)
         # with undoBlock():
         #     try:
         #         # insert file into project
@@ -1429,6 +1434,7 @@ class Framework:
         #     except Exception as es:
         #         getLogger().warning('Error loading Sparky file: %s' % str(es))
         #
+
         self.project._wrappedData.shiftAveraging = True
 
         getLogger().info('==> Loaded Sparky project files: "%s", building project' % (path,))

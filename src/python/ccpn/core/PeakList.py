@@ -724,8 +724,12 @@ class PeakList(AbstractWrapperObject):
             else:
                 selectedRegion.insert(ii, [limits[ii][0], limits[ii][1]])
 
-        regionToPick = selectedRegion
-        peaks = self.pickPeaksNd(regionToPick, doPos=doPos, doNeg=doNeg, minDropfactor=minDropFactor)
+        # regionToPick = selectedRegion
+        # peaks = self.pickPeaksNd(regionToPick, doPos=doPos, doNeg=doNeg, minDropfactor=minDropFactor)
+
+        axisCodeDict = dict((code, selectedRegion[ii]) for ii, code in enumerate(self.spectrum.axisCodes))
+        peaks = self.pickPeaksRegion(axisCodeDict, doPos=doPos, doNeg=doNeg, minDropfactor=minDropFactor)
+
         return peaks
 
     def reorderValues(self, values, newAxisCodeOrder):

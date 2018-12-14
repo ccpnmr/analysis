@@ -1374,7 +1374,7 @@ class Spectrum(AbstractWrapperObject):
                                  (axisCode, newAxisCodeOrder, self.axisCodes))
         return newValues
 
-    def getRegionData(self, **axisDict):
+    def getRegionData(self, exclusionBuffer=None, **axisDict):
         """Return the region of the spectrum data defined by the axis limits.
 
         Axis limits are passed in as a dict containing the axiscodes and the required limits.
@@ -1400,6 +1400,11 @@ class Spectrum(AbstractWrapperObject):
             regionData = spectrum.getRegionData(limitsDict)
             regionData = spectrum.getRegionData(Hn=(7.0, 9.0), Nh=(110, 130))
 
+        exclusionBuffer: defines the size to extend the region by in index units, e.g. [1, 1, 1]
+                            extends the region by 1 index point in all axes.
+                            Default is 0 in all axes.
+
+        :param exclusionBuffer: exclusionBuffer array of int
         :param axisDict: dict of axis limits
         :return: numpy data array
         """
@@ -1467,7 +1472,10 @@ class Spectrum(AbstractWrapperObject):
             numDim = dataSource.numDim
 
             minLinewidth = [0.0] * numDim
-            exclusionBuffer = [0] * numDim  # [1] * numDim
+
+            if not exclusionBuffer:
+                exclusionBuffer = [0] * numDim
+
             nonAdj = 0
             excludedRegions = []
             excludedDiagonalDims = []
@@ -1506,30 +1514,46 @@ class Spectrum(AbstractWrapperObject):
             nregions = [len(region) for region in regions]
 
             # # force there to be only one region which is the central tile containing the spectrum
-            nregions = numDim * [1]
+            # nregions = numDim * [1]
 
             nregionsTotal, cumulRegions = _cumulativeArray(nregions)
 
             # # allows there to be a repeating pattern of the spectrum tiled across the display
-            # for n in range(nregionsTotal):
+            result = ()
+            for n in range(nregionsTotal):
 
             # fix to just the first tile
-            n = 0
+            # n = 0
 
-            array = _arrayOfIndex(n, cumulRegions)
-            chosenRegion = [regions[i][array[i]] for i in range(numDim)]
-            startPointBufferActual = np.array([cr[0] for cr in chosenRegion])
-            endPointBufferActual = np.array([cr[1] for cr in chosenRegion])
-            tile = np.array([cr[2] for cr in chosenRegion])
-            startPointBuffer = np.array([startPointBufferActual[i] - tile[i] * npts[i] for i in range(numDim)])
-            endPointBuffer = np.array([endPointBufferActual[i] - tile[i] * npts[i] for i in range(numDim)])
+                array = _arrayOfIndex(n, cumulRegions)
+                chosenRegion = [regions[i][array[i]] for i in range(numDim)]
+                startPointBufferActual = np.array([cr[0] for cr in chosenRegion])
+                endPointBufferActual = np.array([cr[1] for cr in chosenRegion])
+                tile = np.array([cr[2] for cr in chosenRegion])
+                startPointBuffer = np.array([startPointBufferActual[i] - tile[i] * npts[i] for i in range(numDim)])
+                endPointBuffer = np.array([endPointBufferActual[i] - tile[i] * npts[i] for i in range(numDim)])
 
-            dataArray, intRegion = dataSource.getRegionData(startPointBuffer, endPointBuffer)
+                dataArray, intRegion = dataSource.getRegionData(startPointBuffer, endPointBuffer)
 
-            return dataArray, intRegion
+                # include extra exclusion buffer information
+                startPointInt, endPointInt = intRegion
+                startPointInt = np.array(startPointInt)
+                endPointInt = np.array(endPointInt)
+                startPointIntActual = np.array([startPointInt[i] + tile[i] * npts[i] for i in range(numDim)])
+                numPointInt = endPointInt - startPointInt
+                startPointBuffer = np.maximum(startPointBuffer, startPointInt)
+                endPointBuffer = np.minimum(endPointBuffer, endPointInt)
 
-        # for loop fails so return empty arrays
-        return np.array([]), np.array([])
+                result += ((dataArray, intRegion,
+                            startPoints, endPoints,
+                            startPointBufferActual, endPointBufferActual,
+                            startPointIntActual, numPointInt,
+                            startPointBuffer, endPointBuffer),)
+
+            return result           #dataArray, intRegion
+
+        # for loop fails so return empty arrays in the first element
+        return None
 
     def _getByValidAxisCodes(self, attributeName: str, axisCodes: Sequence[str] = None, exactMatch: bool = False):
         """Return values defined by attributeName in order defined by axisCodes :
@@ -1690,8 +1714,8 @@ class Spectrum(AbstractWrapperObject):
 
             with undoStackBlocking() as addUndoItem:
                 # notify spectrumViews of delete
-                addUndoItem(undo=partial(self._finaliseSpectrumViews, 'create'),
-                            redo=partial(self._finaliseSpectrumViews, 'delete'))
+                addUndoItem(undo=partial(self._notifySpectrumViews, 'create'),
+                            redo=partial(self._notifySpectrumViews, 'delete'))
 
             # delete the _wrappedData
             self._delete()
@@ -1703,7 +1727,7 @@ class Spectrum(AbstractWrapperObject):
             for sd in specViews:
                 sd[0]._removeOrderedSpectrumViewIndex(sd[1])
 
-    def _finaliseSpectrumViews(self, action):
+    def _notifySpectrumViews(self, action):
         for sv in self.spectrumViews:
             sv._finaliseAction(action)
 

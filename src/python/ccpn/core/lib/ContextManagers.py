@@ -23,6 +23,7 @@ __date__ = "$Date$"
 # Start of code
 #=========================================================================================
 
+import sys
 from contextlib import contextmanager
 import functools
 import itertools
@@ -30,13 +31,14 @@ import operator
 import typing
 import decorator
 from functools import partial
+from inspect import signature, Parameter
+
 from collections import OrderedDict
 from ccpn.core import _importOrder
 # from ccpn.core.lib import CcpnSorting
 from ccpn.core.lib import Util as coreUtil
 from ccpn.util import Common as commonUtil
 from ccpn.core.lib import Pid
-from ccpnmodel.ccpncore.api.memops import Implementation as ApiImplementation
 from ccpn.util.Logging import getLogger
 from ccpn.framework.Application import getApplication
 
@@ -219,30 +221,6 @@ def undoBlock(application=None):
 # There is also blankNotification that disables all notifiers.
 # This can be called inside any of the above.
 # """
-# #=========================================================================================
-# # Licence, Reference and Credits
-# #=========================================================================================
-# __copyright__ = ""
-# __credits__ = ""
-# __licence__ = ("")
-# __reference__ = ("")
-# #=========================================================================================
-# # Last code modification:
-# #=========================================================================================
-# __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-# __dateModified__ = "$dateModified$"
-# __version__ = "$Revision$"
-# #=========================================================================================
-# # Created:
-# #=========================================================================================
-# __author__ = "$Author: Ed Brooksbank $"
-# __date__ = "$Date$"
-# #=========================================================================================
-# # Start of code
-# #=========================================================================================
-
-from contextlib import contextmanager
-from ccpn.util.Logging import getLogger
 
 
 @contextmanager
@@ -331,10 +309,7 @@ def logCommandBlock(prefix='', get=None, isProperty=False, showArguments=[], log
         To make quotes appear around the value use: log('something', value=repr(value.pid))
 
     """
-    from inspect import signature, Parameter
-    import sys
-    # from sandbox.Geerten.Refactored.framework import getApplication
-    from ccpn.framework.Application import getApplication
+
 
     # get the current application
     application = getApplication()
@@ -419,6 +394,33 @@ def logCommandBlock(prefix='', get=None, isProperty=False, showArguments=[], log
     finally:
         # clean up log command block
         application._decreaseNotificationBlocking()
+
+
+@contextmanager
+def catchExceptions(application=None, errorStringTemplate='Error: "%s"', popupAsWarning=True):
+    """Catches exceptions in try except; logging it as warning;
+
+    errorStringTemplate: string with one '%s'; used to output the exception to logger as warning
+    popupAsWarning: flag to report output as a warning popup
+
+    raises the error again in debug mode
+    """
+    # get the current application
+    if not application:
+        application = getApplication()
+    if application is None:
+        raise RuntimeError('Error getting application')
+
+    try:
+        yield
+
+    except Exception as es:
+        getLogger().warning(errorStringTemplate % str(es))
+        if application.hasGui and popupAsWarning:
+            from ccpn.ui.gui.widgets import MessageDialog  # Local import: in case of no-gui, we never get here
+            MessageDialog.showWarning('Warning', errorStringTemplate % str(es))
+        if application._isInDebugMode:
+            raise es
 
 
 @contextmanager

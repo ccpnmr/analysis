@@ -56,6 +56,8 @@ from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Common import uniquify
 from ccpn.util.Logging import getLogger
 from ccpn.util import Layout
+from ccpn.ui.gui.Gui import Gui
+# from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 from ccpnmodel.ccpncore.api.memops import Implementation
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
@@ -64,6 +66,8 @@ from ccpn.ui.gui.guiSettings import getColourScheme
 from ccpn.framework.PathsAndUrls import userPreferencesDirectory
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import logCommandBlock
+from ccpn.core.lib.ContextManagers import catchExceptions
+
 # from functools import partial
 
 _DEBUG = False
@@ -316,6 +320,11 @@ class Framework:
         if self.level == Logging.DEBUG1 or self.level == Logging.DEBUG2 or self.level == Logging.DEBUG3:
             return True
         return False
+
+    @property
+    def hasGui(self) -> bool:
+        "Return True if application has a gui"
+        return isinstance(self.ui, Gui)
 
     def _testShortcuts0(self):
         print('>>> Testing shortcuts0')
@@ -1271,13 +1280,15 @@ class Framework:
         """
            Load project from path
            If not path then opens a file dialog box and loads project from selected file.
+
+           ReturnsProject instance or None on error
         """
         if not path:
             dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.Directory, text='Load Project',
                                 acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general)
             path = dialog.selectedFile()
             if not path:
-                return
+                return None
 
         dataType, subType, usePath = ioFormats.analyseUrl(path)
         if dataType == 'Project' and subType in (ioFormats.CCPN,
@@ -1344,24 +1355,21 @@ class Framework:
                 self._closeProject()
             self.project = self.newProject(dataBlock.name)
 
-        # self._echoBlocking += 1
-        # self.project._undo.increaseBlocking()
         self.project._wrappedData.shiftAveraging = False
-
         with suspendSideBarNotifications(project=self.project):
             with undoBlock():
-                try:
+                with catchExceptions(application=self, errorStringTemplate='Error loading Nef file: %s'):
                     self.nefReader.importNewProject(self.project, dataBlock)
-                except Exception as es:
-                    getLogger().warning('Error loading Nef file: %s' % str(es))
-                    if self._isInDebugMode:
-                        raise es
-                # finally:
-
+                # try:
+                #     self.nefReader.importNewProject(self.project, dataBlock)
+                # except Exception as es:
+                #     getLogger().warning('Error loading Nef file: %s' % str(es))
+                #     if self._isInDebugMode:
+                #         raise es
+                # # finally:
         self.project._wrappedData.shiftAveraging = True
-        # self._echoBlocking -= 1
-        # self.project._undo.decreaseBlocking()
 
+        getLogger().info('==> Loaded NEF file: "%s"' % (path,))
         return self.project
 
     def _loadNMRStarFile(self, path: str, makeNewProject=True) -> Project:
@@ -1376,20 +1384,19 @@ class Framework:
                 self._closeProject()
             self.project = self.newProject(dataBlock.name)
 
-        # self._echoBlocking += 1
-        # self.project._undo.increaseBlocking()
         self.project._wrappedData.shiftAveraging = False
-
-        with undoBlock():
-            try:
-                self.nefReader.importNewNMRStarProject(self.project, dataBlock)
-            except Exception as es:
-                getLogger().warning('Error loading NMRStar file: %s' % str(es))
-
+        with suspendSideBarNotifications(project=self.project):
+            with undoBlock():
+                with catchExceptions(application=self, errorStringTemplate='Error loading NMRStar file: %s'):
+                    self.nefReader.importNewProject(self.project, dataBlock)
+        # with undoBlock():
+        #     try:
+        #         self.nefReader.importNewNMRStarProject(self.project, dataBlock)
+        #     except Exception as es:
+        #         getLogger().warning('Error loading NMRStar file: %s' % str(es))
         self.project._wrappedData.shiftAveraging = True
-        # self._echoBlocking -= 1
-        # self.project._undo.decreaseBlocking()
 
+        getLogger().info('==> Loaded NmrStar file: "%s"' % (path,))
         return self.project
 
     def _loadSparkyProject(self, path: str, makeNewProject=True) -> Project:
@@ -1408,22 +1415,23 @@ class Framework:
                 self._closeProject()
             self.project = self.newProject(sparkyName)
 
-        # self._echoBlocking += 1
-        # self.project._undo.increaseBlocking()
-
-        with undoBlock():
-            try:
-                # insert file into project
-
-                self.sparkyReader.importSparkyProject(self.project, dataBlock)
-                sys.stderr.write('==> Loaded Sparky project files: "%s", building project\n' % (path,))
-            except Exception as es:
-                getLogger().warning('Error loading Sparky file: %s' % str(es))
-
         self.project._wrappedData.shiftAveraging = True
-        # self._echoBlocking -= 1
-        # self.project._undo.decreaseBlocking()
+        with suspendSideBarNotifications(project=self.project):
+            with undoBlock():
+                with catchExceptions(application=self, errorStringTemplate='Error loading Sparky file: %s'):
+                    self.sparkyReader.importSparkyProject(self.project, dataBlock)
+        # with undoBlock():
+        #     try:
+        #         # insert file into project
+        #
+        #         self.sparkyReader.importSparkyProject(self.project, dataBlock)
+        #         sys.stderr.write('==> Loaded Sparky project files: "%s", building project\n' % (path,))
+        #     except Exception as es:
+        #         getLogger().warning('Error loading Sparky file: %s' % str(es))
+        #
+        self.project._wrappedData.shiftAveraging = True
 
+        getLogger().info('==> Loaded Sparky project files: "%s", building project' % (path,))
         return self.project
 
     def clearRecentProjects(self):
@@ -1552,15 +1560,17 @@ class Framework:
             path = dialog.selectedFile()
             if not path:
                 return
-            paths = [path]
 
-            try:
-                for path in paths:
-                    self._loadNefFile(path=path, makeNewProject=False)
-            except Exception as es:
-                getLogger().warning('Error Importing Nef File: %s' % str(es))
-                if self._isInDebugMode:
-                    raise es
+            with catchExceptions(application=self, errorStringTemplate='Error Importing Nef File: %s'):
+                self._loadNefFile(path=path, makeNewProject=False)
+
+            # try:
+            #     for path in paths:
+            #         self._loadNefFile(path=path, makeNewProject=False)
+            # except Exception as es:
+            #     getLogger().warning('Error Importing Nef File: %s' % str(es))
+            #     if self._isInDebugMode:
+            #         raise es
 
     def _exportNEF(self):
         """

@@ -196,6 +196,7 @@ class Peak(AbstractWrapperObject):
     #         peakDim.value = value[ii]
     #         peakDim.realValue = None
 
+
     @property
     def positionError(self) -> Tuple[Optional[float], ...]:
         """Peak position error in ppm (or other relevant unit)."""
@@ -453,7 +454,7 @@ class Peak(AbstractWrapperObject):
         """Subclassed to handle associated multiplets
         """
         super()._finaliseAction(action=action)
-        print('>>>_finaliseAction Peak', action)
+
         if action in ['change', 'create', 'delete']:
             for mt in self.multiplets:
                 mt._finaliseAction(action=action)
@@ -672,6 +673,59 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
 
     return result
 
+@newObject(Peak)
+def _newPickedPeak(self: PeakList, pointPositions: Sequence[float] = None, height: float = None,
+             lineWidths: Sequence[float] = (), fitMethod: str = 'gaussian', serial: int = None) -> Peak:
+    """Create a new Peak within a peakList from a picked peak
+
+    See the Peak class for details.
+
+    :param height: height of the peak (related attributes: volume, volumeError, lineWidths)
+    :param pointPositions: peak position in points for each dimension (related attributes: positionError, pointPosition)
+    :param fitMethod: type of curve fitting
+    :param lineWidths:
+    :param serial: optional serial number.
+    :return: a new Peak instance.
+    """
+
+    apiPeakList = self._apiPeakList
+    apiPeak = apiPeakList.newPeak()
+    result = self._project._data2Obj.get(apiPeak)
+    if result is None:
+        raise RuntimeError('Unable to generate new Peak item')
+
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
+                                % (result, serial))
+
+    apiDataSource = self.spectrum._apiDataSource
+    apiDataDims = apiDataSource.sortedDataDims()
+    apiPeakDims = apiPeak.sortedPeakDims()
+
+    for i, peakDim in enumerate(apiPeakDims):
+        dataDim = apiDataDims[i]
+
+        if dataDim.className == 'FreqDataDim':
+            dataDimRef = dataDim.primaryDataDimRef
+        else:
+            dataDimRef = None
+
+        if dataDimRef:
+            peakDim.numAliasing = int(divmod(pointPositions[i], dataDim.numPointsOrig)[0])
+            peakDim.position = float(pointPositions[i] + 1 - peakDim.numAliasing * dataDim.numPointsOrig)  # API position starts at 1
+
+        else:
+            peakDim.position = float(pointPositions[i] + 1)
+
+        if fitMethod and lineWidths[i] is not None:
+            peakDim.lineWidth = dataDim.valuePerPoint * lineWidths[i]  # conversion from points to Hz
+
+    apiPeak.height = apiDataSource.scale * height
+
+    return result
 
 # Additional Notifiers:
 #

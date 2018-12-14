@@ -738,11 +738,11 @@ class PeakList(AbstractWrapperObject):
     #   return "<%s; #peaks:%d (isSimulated=%s)>" % (self.pid, len(self.peaks), self.isSimulated)
 
     def pickPeaksRegion(self, regionToPick: dict = None,
-                    doPos: bool = True, doNeg: bool = True,
-                    minLinewidth=None, exclusionBuffer=None,
-                    minDropfactor: float = 0.1, checkAllAdjacent: bool = True,
-                    fitMethod: str = 'gaussian', excludedRegions=None,
-                    excludedDiagonalDims=None, excludedDiagonalTransform=None):
+                        doPos: bool = True, doNeg: bool = True,
+                        minLinewidth=None, exclusionBuffer=None,
+                        minDropfactor: float = 0.1, checkAllAdjacent: bool = True,
+                        fitMethod: str = 'gaussian', excludedRegions=None,
+                        excludedDiagonalDims=None, excludedDiagonalTransform=None):
 
         from ccpnc.peak import Peak as CPeak
 
@@ -822,7 +822,7 @@ class PeakList(AbstractWrapperObject):
                 # check new found positions against existing ones
                 existingPositions = []
                 for peak in self.peaks:
-                    position = numpy.array([peakDim.position for peakDim in peak.sortedPeakDims()])  # ignores aliasing
+                    position = numpy.array([peakDim.position for peakDim in peak._wrappedData.sortedPeakDims()])  # ignores aliasing
                     existingPositions.append(position - 1)  # -1 because API position starts at 1
 
                 # NB we can not overwrite exclusionBuffer, because it may be used as a parameter in redong
@@ -840,6 +840,8 @@ class PeakList(AbstractWrapperObject):
                         if (delta <= numpyExclusionBuffer).all():
                             break
                     else:
+                        linewidth = len(startPoints) * [None]
+
                         if fitMethod:
                             position -= startPointBufferActual
                             numDim = len(position)
@@ -856,8 +858,8 @@ class PeakList(AbstractWrapperObject):
                                 height, centerGuess, linewidth = result[0]
 
                                 # TODO:ED constrain result to position +/- exclusionBuffer
-                                center = numpy.array(centerGuess).clip(min=position - numpyExclusionBuffer
-                                                                       , max=position + numpyExclusionBuffer)
+                                center = numpy.array(centerGuess).clip(min=position - numpyExclusionBuffer,
+                                                                       max=position + numpyExclusionBuffer)
 
                             except Exception as es:
                                 # possibly should log error??
@@ -869,33 +871,34 @@ class PeakList(AbstractWrapperObject):
                                 linewidth = dimCount * [None]
                             position = center + startPointBufferActual
 
-                        peak = self.newPeak()
+                        # peak = self.newPeak()
+                        #
+                        # # with notificationBlanking():
+                        # dataDims = dataSource.sortedDataDims()
+                        # peakDims = peak._wrappedData.sortedPeakDims()
+                        #
+                        # for i, peakDim in enumerate(peakDims):
+                        #     dataDim = dataDims[i]
+                        #
+                        #     if dataDim.className == 'FreqDataDim':
+                        #         dataDimRef = dataDim.primaryDataDimRef
+                        #     else:
+                        #         dataDimRef = None
+                        #
+                        #     if dataDimRef:
+                        #         peakDim.numAliasing = int(divmod(position[i], dataDim.numPointsOrig)[0])
+                        #         peakDim.position = float(position[i] + 1 - peakDim.numAliasing * dataDim.numPointsOrig)  # API position starts at 1
+                        #
+                        #     else:
+                        #         peakDim.position = float(position[i] + 1)
+                        #
+                        #     if fitMethod and linewidth[i] is not None:
+                        #         peakDim.lineWidth = dataDim.valuePerPoint * linewidth[i]  # conversion from points to Hz
+                        #
+                        # peak.height = dataSource.scale * height
 
-                        # change this to the V3 peak generation
-
-                        dataDims = dataSource.sortedDataDims()
-                        peakDims = peak.sortedPeakDims()
-
-                        for i, peakDim in enumerate(peakDims):
-                            dataDim = dataDims[i]
-
-                            if dataDim.className == 'FreqDataDim':
-                                dataDimRef = dataDim.primaryDataDimRef
-                            else:
-                                dataDimRef = None
-
-                            if dataDimRef:
-                                peakDim.numAliasing = int(divmod(position[i], dataDim.numPointsOrig)[0])
-                                peakDim.position = float(position[i] + 1 - peakDim.numAliasing * dataDim.numPointsOrig)  # API position starts at 1
-
-                            else:
-                                peakDim.position = float(position[i] + 1)
-
-                            if fitMethod and linewidth[i] is not None:
-                                peakDim.lineWidth = dataDim.valuePerPoint * linewidth[i]  # conversion from points to Hz
-
-                        peak.height = dataSource.scale * height
-
+                        peak = self._newPickedPeak(pointPositions=position, height=height,
+                                                   lineWidths=linewidth, fitMethod=fitMethod)
                         peaks.append(peak)
 
         return peaks
@@ -928,6 +931,27 @@ class PeakList(AbstractWrapperObject):
         if height is None:
             height = self.spectrum.getHeight(ppmPositions)
         return _newPeak(self, ppmPositions=ppmPositions, height=height, comment=comment, **kwds)
+
+    @logCommand(get='self')
+    def _newPickedPeak(self, pointPositions: Sequence[float] = None, height: float = None,
+                       lineWidths: Sequence[float] = (), fitMethod: str = 'gaussian', **kwds):
+        """Create a new Peak within a peakList from a picked peak
+
+        See the Peak class for details.
+
+        Optional keyword arguments can be passed in; see Peak._newPickedPeak for details.
+
+        :param height: height of the peak (related attributes: volume, volumeError, lineWidths)
+        :param pointPositions: peak position in points for each dimension (related attributes: positionError, pointPosition)
+        :param fitMethod: type of curve fitting
+        :param lineWidths:
+        :param serial: optional serial number.
+        :return: a new Peak instance.
+        """
+        from ccpn.core.Peak import _newPickedPeak  # imported here to avoid circular imports
+
+        return _newPickedPeak(self, pointPositions=pointPositions, height=height,
+                              lineWidths=lineWidths, fitMethod=fitMethod, **kwds)
 
 
 #=========================================================================================

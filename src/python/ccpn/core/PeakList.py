@@ -857,12 +857,10 @@ class PeakList(AbstractWrapperObject):
                                 result = CPeak.fitPeaks(dataArray, regionArray, peakArray, method)
                                 height, centerGuess, linewidth = result[0]
 
-                                # TODO:ED constrain result to position +/- exclusionBuffer
                                 center = numpy.array(centerGuess).clip(min=position - numpyExclusionBuffer,
                                                                        max=position + numpyExclusionBuffer)
 
                             except Exception as es:
-                                # possibly should log error??
                                 dimCount = len(startPoints)
                                 height = float(dataArray[tuple(position[::-1])])
                                 # have to reverse position because dataArray backwards
@@ -870,32 +868,6 @@ class PeakList(AbstractWrapperObject):
                                 center = position
                                 linewidth = dimCount * [None]
                             position = center + startPointBufferActual
-
-                        # peak = self.newPeak()
-                        #
-                        # # with notificationBlanking():
-                        # dataDims = dataSource.sortedDataDims()
-                        # peakDims = peak._wrappedData.sortedPeakDims()
-                        #
-                        # for i, peakDim in enumerate(peakDims):
-                        #     dataDim = dataDims[i]
-                        #
-                        #     if dataDim.className == 'FreqDataDim':
-                        #         dataDimRef = dataDim.primaryDataDimRef
-                        #     else:
-                        #         dataDimRef = None
-                        #
-                        #     if dataDimRef:
-                        #         peakDim.numAliasing = int(divmod(position[i], dataDim.numPointsOrig)[0])
-                        #         peakDim.position = float(position[i] + 1 - peakDim.numAliasing * dataDim.numPointsOrig)  # API position starts at 1
-                        #
-                        #     else:
-                        #         peakDim.position = float(position[i] + 1)
-                        #
-                        #     if fitMethod and linewidth[i] is not None:
-                        #         peakDim.lineWidth = dataDim.valuePerPoint * linewidth[i]  # conversion from points to Hz
-                        #
-                        # peak.height = dataSource.scale * height
 
                         peak = self._newPickedPeak(pointPositions=position, height=height,
                                                    lineWidths=linewidth, fitMethod=fitMethod)

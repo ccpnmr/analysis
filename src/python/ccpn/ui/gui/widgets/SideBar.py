@@ -77,6 +77,7 @@ from ccpn.ui.gui.popups.CreateNmrChainPopup import CreateNmrChainPopup
 # from ccpn.ui.gui.modules.NotesEditor import NotesEditorModule
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpn.core.lib.Notifiers import Notifier, NotifierBase
+from ccpn.core.lib.ContextManagers import catchExceptions
 
 
 # NB the order matters!
@@ -485,11 +486,14 @@ class SideBar(QtWidgets.QTreeWidget, Base, NotifierBase):
                                                                   phrase='create a new')
                 if okToContinue:
                     with progressManager(self.mainWindow, 'Loading project... ' + url):
-                        try:
+                        with catchExceptions():
                             obj = self.application.loadProject(url)
-                        except Exception as es:
-                            getLogger().warning('loadProject Error: %s' % str(es))
-                            obj = None
+                        # try:
+                        #     obj = self.application.loadProject(url)
+                        # except Exception as es:
+                        #     getLogger().warning('loadProject Error: %s' % str(es))
+                        #     obj = None
+
 
                         if isinstance(obj, Project):
                             try:

@@ -45,7 +45,8 @@ from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import fitExistingPeakList
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import pickNewPeaks
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, logCommandBlock, notificationBlanking
+from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, logCommandBlock, \
+    notificationBlanking, undoBlock
 
 from ccpn.util.Logging import getLogger
 
@@ -319,18 +320,19 @@ class PeakList(AbstractWrapperObject):
             posLevel = spectrum.positiveContourBase if doPos else None
             negLevel = spectrum.negativeContourBase if doNeg else None
 
-            with logCommandBlock(get='self') as log:
-                log('pickPeaksNd')
-                with notificationBlanking():
-                    apiPeaks = pickNewPeaks(self._apiPeakList, startPoint=startPoints, endPoint=endPoints,
-                                            posLevel=posLevel, negLevel=negLevel, fitMethod=fitMethod,
-                                            excludedRegions=excludedRegions, excludedDiagonalDims=excludedDiagonalDims,
-                                            excludedDiagonalTransform=excludedDiagonalTransform, minDropfactor=minDropfactor)
+            # with logCommandBlock(get='self') as log:
+            #     log('pickPeaksNd')
+            #     with notificationBlanking():
+
+            apiPeaks = pickNewPeaks(self._apiPeakList, startPoint=startPoints, endPoint=endPoints,
+                                    posLevel=posLevel, negLevel=negLevel, fitMethod=fitMethod,
+                                    excludedRegions=excludedRegions, excludedDiagonalDims=excludedDiagonalDims,
+                                    excludedDiagonalTransform=excludedDiagonalTransform, minDropfactor=minDropfactor)
 
         data2ObjDict = self._project._data2Obj
         result = [data2ObjDict[apiPeak] for apiPeak in apiPeaks]
-        for peak in result:
-            peak._finaliseAction('create')
+        # for peak in result:
+        #     peak._finaliseAction('create')
 
         return result
 
@@ -734,6 +736,169 @@ class PeakList(AbstractWrapperObject):
     # def __str__(self):
     #   """Readable string representation"""
     #   return "<%s; #peaks:%d (isSimulated=%s)>" % (self.pid, len(self.peaks), self.isSimulated)
+
+    def pickPeaksRegion(self, regionToPick: dict = None,
+                    doPos: bool = True, doNeg: bool = True,
+                    minLinewidth=None, exclusionBuffer=None,
+                    minDropfactor: float = 0.1, checkAllAdjacent: bool = True,
+                    fitMethod: str = 'gaussian', excludedRegions=None,
+                    excludedDiagonalDims=None, excludedDiagonalTransform=None):
+
+        from ccpnc.peak import Peak as CPeak
+
+        spectrum = self.spectrum
+        dataSource = spectrum._apiDataSource
+        numDim = dataSource.numDim
+
+        if fitMethod:
+            assert fitMethod in ('gaussian', 'lorentzian'), 'fitMethod = %s, must be one of ("gaussian", "lorentzian")' % fitMethod
+            method = 0 if fitMethod == 'gaussian' else 1
+
+        peaks = []
+
+        if not minLinewidth:
+            minLinewidth = [0.0] * numDim
+
+        if not exclusionBuffer:
+            exclusionBuffer = [1] * numDim
+
+        nonAdj = 1 if checkAllAdjacent else 0
+
+        if not excludedRegions:
+            excludedRegions = []
+
+        if not excludedDiagonalDims:
+            excludedDiagonalDims = []
+
+        if not excludedDiagonalTransform:
+            excludedDiagonalTransform = []
+
+        posLevel = spectrum.positiveContourBase if doPos else None
+        negLevel = spectrum.negativeContourBase if doNeg else None
+        if posLevel is None and negLevel is None:
+            return peaks
+
+        # find the regions from the spectrum
+        foundRegions = self.spectrum.getRegionData(**regionToPick)
+
+        for region in foundRegions:
+            dataArray, intRegion, \
+            startPoints, endPoints, \
+            startPointBufferActual, endPointBufferActual, \
+            startPointIntActual, numPointInt, \
+            startPointBuffer, endPointBuffer = region
+
+            if dataArray.size:
+
+                # find new peaks
+
+                # exclusion code copied from Nmr/PeakList.py
+                excludedRegionsList = [numpy.array(excludedRegion, dtype='float32') - startPointBuffer for excludedRegion in excludedRegions]
+                excludedDiagonalDimsList = []
+                excludedDiagonalTransformList = []
+                for n in range(len(excludedDiagonalDims)):
+                    dim1, dim2 = excludedDiagonalDims[n]
+                    a1, a2, b12, d = excludedDiagonalTransform[n]
+                    b12 += a1 * startPointBuffer[dim1] - a2 * startPointBuffer[dim2]
+                    excludedDiagonalDimsList.append(numpy.array((dim1, dim2), dtype='int32'))
+                    excludedDiagonalTransformList.append(numpy.array((a1, a2, b12, d), dtype='float32'))
+
+                doPos = posLevel is not None
+                doNeg = negLevel is not None
+                posLevel = posLevel or 0.0
+                negLevel = negLevel or 0.0
+
+                peakPoints = CPeak.findPeaks(dataArray, doNeg, doPos,
+                                             negLevel, posLevel, exclusionBuffer,
+                                             nonAdj, minDropfactor, minLinewidth,
+                                             excludedRegionsList, excludedDiagonalDimsList, excludedDiagonalTransformList)
+
+                peakPoints = [(numpy.array(position), height) for position, height in peakPoints]
+
+                # only keep those points which are inside original region, not extended region
+                peakPoints = [(position, height) for position, height in peakPoints if
+                              ((startPoints - startPointIntActual) <= position).all() and (position < (endPoints - startPointIntActual)).all()]
+
+                # check new found positions against existing ones
+                existingPositions = []
+                for peak in self.peaks:
+                    position = numpy.array([peakDim.position for peakDim in peak.sortedPeakDims()])  # ignores aliasing
+                    existingPositions.append(position - 1)  # -1 because API position starts at 1
+
+                # NB we can not overwrite exclusionBuffer, because it may be used as a parameter in redong
+                # and 'if not exclusionBuffer' does not work on nympy arrays.
+                numpyExclusionBuffer = numpy.array(exclusionBuffer)
+
+                for position, height in peakPoints:
+
+                    position += startPointBufferActual
+
+                    for existingPosition in existingPositions:
+                        delta = abs(existingPosition - position)
+
+                        # TODO:ED changed to '<='
+                        if (delta <= numpyExclusionBuffer).all():
+                            break
+                    else:
+                        if fitMethod:
+                            position -= startPointBufferActual
+                            numDim = len(position)
+                            firstArray = numpy.maximum(position - 2, 0)
+                            lastArray = numpy.minimum(position + 3, numPointInt)
+                            peakArray = position.reshape((1, numDim))
+                            peakArray = peakArray.astype('float32')
+                            firstArray = firstArray.astype('int32')
+                            lastArray = lastArray.astype('int32')
+                            regionArray = numpy.array((firstArray, lastArray))
+
+                            try:
+                                result = CPeak.fitPeaks(dataArray, regionArray, peakArray, method)
+                                height, centerGuess, linewidth = result[0]
+
+                                # TODO:ED constrain result to position +/- exclusionBuffer
+                                center = numpy.array(centerGuess).clip(min=position - numpyExclusionBuffer
+                                                                       , max=position + numpyExclusionBuffer)
+
+                            except Exception as es:
+                                # possibly should log error??
+                                dimCount = len(startPoints)
+                                height = float(dataArray[tuple(position[::-1])])
+                                # have to reverse position because dataArray backwards
+                                # have to float because API does not like numpy.float32
+                                center = position
+                                linewidth = dimCount * [None]
+                            position = center + startPointBufferActual
+
+                        peak = self.newPeak()
+
+                        # change this to the V3 peak generation
+
+                        dataDims = dataSource.sortedDataDims()
+                        peakDims = peak.sortedPeakDims()
+
+                        for i, peakDim in enumerate(peakDims):
+                            dataDim = dataDims[i]
+
+                            if dataDim.className == 'FreqDataDim':
+                                dataDimRef = dataDim.primaryDataDimRef
+                            else:
+                                dataDimRef = None
+
+                            if dataDimRef:
+                                peakDim.numAliasing = int(divmod(position[i], dataDim.numPointsOrig)[0])
+                                peakDim.position = float(position[i] + 1 - peakDim.numAliasing * dataDim.numPointsOrig)  # API position starts at 1
+
+                            else:
+                                peakDim.position = float(position[i] + 1)
+
+                            if fitMethod and linewidth[i] is not None:
+                                peakDim.lineWidth = dataDim.valuePerPoint * linewidth[i]  # conversion from points to Hz
+
+                        peak.height = dataSource.scale * height
+
+                        peaks.append(peak)
+
+        return peaks
 
     #===========================================================================================
     # new'Object' and other methods

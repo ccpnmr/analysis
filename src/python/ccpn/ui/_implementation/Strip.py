@@ -510,12 +510,9 @@ class Strip(AbstractWrapperObject):
         with undoBlock():
             for spectrumView in (v for v in self.spectrumViews if v.isVisible()):
 
-                validPeakListViews = [pp for pp in spectrumView.peakListViews if isinstance(pp.peakList, PeakList)
-                                      and pp.isVisible()
-                                      and spectrumView.isVisible()]
+                validPeakListViews = [pp for pp in spectrumView.peakListViews if pp.isVisible()]
 
                 for thisPeakListView in validPeakListViews:
-                    # find the first visible peakList
                     peakList = thisPeakListView.peakList
 
                     position = inPosition
@@ -545,6 +542,61 @@ class Strip(AbstractWrapperObject):
 
         return tuple(result), tuple(peakLists)
 
+    def _getAxisCodeDict(self, spectrum, selectedRegion):
+        """Generate axisCode dict from the given selectedRegion ordered by strip axes, matched to spectrum.
+        """
+        sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]
+
+        # map the limits to the correct axisCodes
+        axisCodeDict = {}
+        if spectrum.dimensionCount > 1:
+            spectrumAxisCodes = spectrum.axisCodes
+            stripAxisCodes = self.axisCodes
+
+            # get the ordering of the strip axisCodes in the spectrum
+            try:
+                indices = spectrum.getByAxisCodes('indices', stripAxisCodes)
+            except Exception as es:
+
+                # spectrum possibly no compatible here, may be 2d overlaid onto Nd
+                indices = spectrum.getByAxisCodes('indices', stripAxisCodes[0:2])
+
+            # sort the axis limits by spectrum axis order
+            for ii, ind in enumerate(indices):
+                axisCodeDict[spectrumAxisCodes[ind]] = sortedSelectedRegion[ii]
+
+        else:
+            spectrumAxisCodes = spectrum.axisCodes
+            stripAxisCodes = self.axisCodes
+
+            # get the ordering of the strip axisCodes in the spectrum
+            indices = spectrum.getByAxisCodes('indices', stripAxisCodes)
+
+            # sort the axis limits by spectrum axis order
+            for n, axisCode in enumerate(spectrumAxisCodes):
+                axisCodeDict[axisCode] = sortedSelectedRegion[indices[n]]
+
+        return axisCodeDict
+
+    def _getAxisCodeIndices(self, spectrum):
+        """Return axisCode indices matched to spectrum.
+        """
+        stripAxisCodes = self.axisCodes
+        if spectrum.dimensionCount > 1:
+            # get the ordering of the strip axisCodes in the spectrum
+            try:
+                indices = spectrum.getByAxisCodes('indices', stripAxisCodes)
+            except Exception as es:
+                # spectrum possibly no compatible here, may be 2d overlaid onto Nd
+                indices = spectrum.getByAxisCodes('indices', stripAxisCodes[0:2])
+
+        else:
+            # get the ordering of the strip axisCodes in the spectrum
+            indices = spectrum.getByAxisCodes('indices', stripAxisCodes)
+
+        return indices
+
+    @logCommand(get='self')
     def peakPickRegion(self, selectedRegion: List[List[float]]) -> Tuple[Peak]:
         """Peak pick all spectra currently displayed in strip in selectedRegion.
         """
@@ -553,59 +605,72 @@ class Strip(AbstractWrapperObject):
         project = self.project
         minDropfactor = self.application.preferences.general.peakDropFactor
 
-        with logCommandBlock(get='self') as log:
-            log('peakPickRegion')
-            with notificationBlanking():
+        # with logCommandBlock(get='self') as log:
+        #     log('peakPickRegion')
 
-                for spectrumView in self.spectrumViews:
+        with undoBlock():
+            for spectrumView in (v for v in self.spectrumViews if v.isVisible()):
 
-                    numPeakLists = [pp for pp in spectrumView.peakListViews if isinstance(pp.peakList, PeakList)]
-                    if not numPeakLists:  # this can happen if no peakLists, so create one
-                        self._project.unblankNotification()  # need this otherwise SideBar does not get updated
-                        spectrumView.spectrum.newPeakList()
-                        self._project.blankNotification()
+                # create a peakList if there isn't one
+                if not spectrumView.spectrum.peakLists:
+                    spectrumView.spectrum.newPeakList()
 
-                    validPeakListViews = [pp for pp in spectrumView.peakListViews if isinstance(pp.peakList, PeakList)
-                                          and pp.isVisible()
-                                          and spectrumView.isVisible()]
-                    # if numPeakLists:
-                    for thisPeakListView in validPeakListViews:
-                        # find the first visible peakList
-                        peakList = thisPeakListView.peakList
+                validPeakListViews = (pp for pp in spectrumView.peakListViews if pp.isVisible())
+                axisCodeDict = self._getAxisCodeDict(spectrumView.spectrum, selectedRegion)
 
-                        # peakList = spectrumView.spectrum.peakLists[0]
+                for thisPeakListView in validPeakListViews:
 
-                        if spectrumView.spectrum.dimensionCount > 1:
-                            sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]
-                            spectrumAxisCodes = spectrumView.spectrum.axisCodes
-                            stripAxisCodes = self.axisCodes
-                            sortedSpectrumRegion = [0] * spectrumView.spectrum.dimensionCount
+                    peakList = thisPeakListView.peakList
 
-                            remapIndices = commonUtil._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
-                            if remapIndices:
-                                for n, axisCode in enumerate(spectrumAxisCodes):
-                                    # idx = stripAxisCodes.index(axisCode)
-                                    idx = remapIndices[n]
-                                    sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
-                            else:
-                                sortedSpectrumRegion = sortedSelectedRegion
-
-                            newPeaks = peakList.pickPeaksNd(sortedSpectrumRegion,
+                    if spectrumView.spectrum.dimensionCount > 1:
+                        newPeaks = peakList.pickPeaksRegion(axisCodeDict,
                                                             doPos=spectrumView.displayPositiveContours,
                                                             doNeg=spectrumView.displayNegativeContours,
                                                             fitMethod='gaussian', minDropfactor=minDropfactor)
-                        else:
-                            # 1D's
-                            # NBNB This is a change - valuea are now rounded to three decimal places. RHF April 2017
-                            newPeaks = peakList.pickPeaks1d(selectedRegion[0], sorted(selectedRegion[1]), size=minDropfactor * 100)
 
-                        result.extend(newPeaks)
+                    result.extend(newPeaks)
 
-        for peak in result:
-            peak._finaliseAction('create')
+                # with notificationBlanking():
+                #
+                # for thisPeakListView in validPeakListViews:
+                #
+                #     peakList = thisPeakListView.peakList
+                #
+                #     if spectrumView.spectrum.dimensionCount > 1:
+                #         sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]
+                #         spectrumAxisCodes = spectrumView.spectrum.axisCodes
+                #         stripAxisCodes = self.axisCodes
+                #         sortedSpectrumRegion = [0] * spectrumView.spectrum.dimensionCount
+                #
+                #         remapIndices = commonUtil._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
+                #         if remapIndices:
+                #             for n, axisCode in enumerate(spectrumAxisCodes):
+                #                 # idx = stripAxisCodes.index(axisCode)
+                #                 idx = remapIndices[n]
+                #                 sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
+                #         else:
+                #             sortedSpectrumRegion = sortedSelectedRegion
+                #
+                #         newPeaks = peakList.pickPeaksNd(sortedSpectrumRegion,
+                #                                         doPos=spectrumView.displayPositiveContours,
+                #                                         doNeg=spectrumView.displayNegativeContours,
+                #                                         fitMethod='gaussian', minDropfactor=minDropfactor)
+                #         # newPeaks = peakList.pickPeaksRegion(sortedSpectrumRegion,
+                #         #                                     doPos=spectrumView.displayPositiveContours,
+                #         #                                     doNeg=spectrumView.displayNegativeContours,
+                #         #                                     fitMethod='gaussian', minDropfactor=minDropfactor)
+                #
+                #     else:
+                #         # 1D's
+                #         # NBNB This is a change - values are now rounded to three decimal places. RHF April 2017
+                #         newPeaks = peakList.pickPeaks1d(selectedRegion[0], sorted(selectedRegion[1]), size=minDropfactor * 100)
+                #
+                #     result.extend(newPeaks)
+
+        # for peak in result:
+        #     peak._finaliseAction('create')
 
         return tuple(result)
-
 
 
 @newObject(Strip)
@@ -619,6 +684,7 @@ def _newStrip(self):
         raise RuntimeError('Unable to generate new Strip item')
 
     return result
+
 
 # newStrip functions
 # We should NOT have any newStrip function, except possibly for FreeStrips
@@ -676,7 +742,6 @@ def _copyStrip(self: SpectrumDisplay, strip: Strip, newIndex=None) -> Strip:
 
 SpectrumDisplay.copyStrip = _copyStrip
 del _copyStrip
-
 
 # #TODO:RASMUS: if this is a SpectrumDisplay thing, it should not be here
 # # SpectrumDisplay.orderedStrips property

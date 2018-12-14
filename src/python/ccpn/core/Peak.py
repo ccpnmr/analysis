@@ -453,7 +453,7 @@ class Peak(AbstractWrapperObject):
         """Subclassed to handle associated multiplets
         """
         super()._finaliseAction(action=action)
-
+        print('>>>_finaliseAction Peak', action)
         if action in ['change', 'create', 'delete']:
             for mt in self.multiplets:
                 mt._finaliseAction(action=action)

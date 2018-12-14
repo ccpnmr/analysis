@@ -142,81 +142,37 @@ class NoiseTab(Widget):
                           [self.strip._CcpnGLWidget.axisB, self.strip._CcpnGLWidget.axisT]]
         for n in self.strip.orderedAxes[2:]:
             selectedRegion.append((n.region[0], n.region[1]))
-
         sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]
 
-        # map the limits to the correct axisCodes
-        axisCodeDict = {}
-        if self.spectrum.dimensionCount > 1:
-            spectrumAxisCodes = self.spectrum.axisCodes
-            stripAxisCodes = self.strip.axisCodes
+        # generate axisCodes dict
+        axisCodeDict = self.strip._getAxisCodeDict(self.spectrum, selectedRegion)
+        indices = self.strip._getAxisCodeIndices(self.spectrum)
 
-            # get the ordering of the strip axisCodes in the spectrum
-            try:
-                indices = self.spectrum.getByAxisCodes('indices', stripAxisCodes)
-            except Exception as es:
+        foundRegions = self.spectrum.getRegionData(**axisCodeDict)
 
-                # spectrum possibly no compatible here, may be 2d overlaid onto Nd
-                indices = self.spectrum.getByAxisCodes('indices', stripAxisCodes[0:2])
+        # just use the first region
+        for region in foundRegions[:1]:
+            dataArray, intRegion, *rest = region
 
-            # sort the axis limits by spectrum axis order
-            for ii, ind in enumerate(indices):
-                axisCodeDict[spectrumAxisCodes[ind]] = sortedSelectedRegion[ii]
+            if dataArray.size:
+                # calculate the noise values
+                flatData = dataArray.flatten()
 
-            # # sort the axis limits by spectrum axis order
-            # for n, axisCode in enumerate(spectrumAxisCodes):
-            #     if indices and n <len(indices):
-            #         axisCodeDict[axisCode] = sortedSelectedRegion[indices[n]]
+                self.SD = np.std(flatData)
+                self.max = np.max(flatData)
+                self.min = np.min(flatData)
+                self.mean = np.mean(flatData)
+                self.noiseLevel = self.mean + 3.0 * self.SD
 
-            # regionToPick = [0] * self.spectrum.dimensionCount
-            #
-            # remapIndices = commonUtil._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
-            # if remapIndices:
-            #     for n, axisCode in enumerate(spectrumAxisCodes):
-            #         # idx = stripAxisCodes.index(axisCode)
-            #         idx = remapIndices[n]
-            #         regionToPick[n] = sortedSelectedRegion[idx]
-            #
-            #         axisCodeDict[axisCode] = sortedSelectedRegion[idx]
-            # else:
-            #     regionToPick = sortedSelectedRegion
-            #
-            #     for n, axisCode in enumerate(spectrumAxisCodes):
-            #         axisCodeDict[axisCode] = sortedSelectedRegion[n]
+                # populate the widgets
+                for ii, ind in enumerate(indices):
+                    self.axisCodes[ii].setText('(' + ','.join(['%.3f' % rr for rr in sortedSelectedRegion[ind]]) + ')')
 
-        else:
-            spectrumAxisCodes = self.spectrum.axisCodes
-            stripAxisCodes = self.strip.axisCodes
-
-            # get the ordering of the strip axisCodes in the spectrum
-            indices = self.spectrum.getByAxisCodes('indices', stripAxisCodes)
-
-            # sort the axis limits by spectrum axis order
-            for n, axisCode in enumerate(spectrumAxisCodes):
-                axisCodeDict[axisCode] = sortedSelectedRegion[indices[n]]
-
-        dataArray, intRegion = self.spectrum.getRegionData(**axisCodeDict)
-
-        if dataArray.size:
-            # calculate the noise values
-            flatData = dataArray.flatten()
-
-            self.SD = np.std(flatData)
-            self.max = np.max(flatData)
-            self.min = np.min(flatData)
-            self.mean = np.mean(flatData)
-            self.noiseLevel = self.mean + 3.0 * self.SD
-
-            # populate the widgets
-            # for axis, region in enumerate(sortedSelectedRegion):
-
-            for ii, ind in enumerate(indices):
-                self.axisCodes[ii].setText('(' + ','.join(['%.3f' % rr for rr in sortedSelectedRegion[ind]]) + ')')
-            self.meanLabel.setText(str(self.mean))
-            self.SDLabel.setText(str(self.SD))
-            self.maxLabel.setText(str(self.max))
-            self.minLabel.setText(str(self.min))
-            self.noiseLevelSpinBox.setValue(self.noiseLevel)
+                self.meanLabel.setText(str(self.mean))
+                self.SDLabel.setText(str(self.SD))
+                self.maxLabel.setText(str(self.max))
+                self.minLabel.setText(str(self.min))
+                self.noiseLevelSpinBox.setValue(self.noiseLevel)
 
     def _setNoiseLevel(self):
         """Apply the current noiseLevel to the spectrum

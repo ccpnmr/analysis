@@ -114,6 +114,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self._setShortcuts()
         self._setUserShortcuts(preferences=self.application.preferences, mainWindow=self)
 
+        # Notifiers
         # self.application.current.registerNotify(self._resetRemoveStripAction, 'strips')
         # self.setNotifier(self.application.current, [Notifier.CURRENT], 'strip', self._resetRemoveStripAction)
         self.setNotifier(self.application.current, [Notifier.CURRENT], 'strip', self._highlightCurrentStrip)
@@ -601,21 +602,20 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         Saves application preferences. Displays message box asking user to save project or not.
         Closes Application.
         """
-        from ccpn.framework.PathsAndUrls import userPreferencesPath
-
+        #GWV 20181214: moved to Framework._savePreferences
+        #from ccpn.framework.PathsAndUrls import userPreferencesPath
         #prefPath = os.path.expanduser("~/.ccpn/v3settings.json")
-        #TODO:TJ move all of the saving of preferences to FrameWork
-        directory = os.path.dirname(userPreferencesPath)
-        if not os.path.exists(directory):
-            try:
-                os.makedirs(directory)
-            except Exception as e:
-                self._project._logger.warning('Preferences not saved: %s' % (directory, e))
-                return
-
-        prefFile = open(userPreferencesPath, 'w+')
-        json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
-        prefFile.close()
+        # directory = os.path.dirname(userPreferencesPath)
+        # if not os.path.exists(directory):
+        #     try:
+        #         os.makedirs(directory)
+        #     except Exception as e:
+        #         self._project._logger.warning('Preferences not saved: %s' % (directory, e))
+        #         return
+        #
+        # prefFile = open(userPreferencesPath, 'w+')
+        # json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
+        # prefFile.close()
 
         # set the active window to mainWindow so that the quit popup centres correctly.
         QtWidgets.QApplication.setActiveWindow(self)
@@ -625,10 +625,11 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         if reply == 'Save and Quit':
             if event:
                 event.accept()
-            prefFile = open(userPreferencesPath, 'w+')
-            json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
-            prefFile.close()
+            # prefFile = open(userPreferencesPath, 'w+')
+            # json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
+            # prefFile.close()
 
+            self.application._savePreferences()
             success = self.application.saveProject()
             if success is True:
                 # Close and clean up project
@@ -644,10 +645,11 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         elif reply == 'Quit without Saving':
             if event:
                 event.accept()
-            prefFile = open(userPreferencesPath, 'w+')
-            json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
-            prefFile.close()
+            # prefFile = open(userPreferencesPath, 'w+')
+            # json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
+            # prefFile.close()
 
+            self.application._savePreferences()
             self.deleteAllNotifiers()
             self.application._closeProject()
             QtWidgets.QApplication.quit()
@@ -666,7 +668,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         text = ''.join([line.strip().split(':', 6)[-1] + '\n' for line in l])
         editor.textBox.setText(text)
 
-    #TODO:TJ the below is in Framework (slightly different implementation) so presumably does not belong here???
     #Framework owns the command, this part juts get the file to run
     # def runMacro(self, macroFile:str=None):
     #   """

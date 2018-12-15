@@ -39,11 +39,15 @@ from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Project import Project
 from ccpn.core._implementation import Io as coreIo
 from ccpn.core.lib import CcpnNefIo, CcpnSparkyIo
+from ccpn.core.lib.Notifiers import NotifierBase
+from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.framework import Version
 from ccpn.framework.Current import Current
 from ccpn.framework.lib.Pipeline import Pipeline
 from ccpn.framework.Translation import languages, defaultLanguage
 from ccpn.framework.Translation import translator
+from ccpn.framework.PathsAndUrls import userPreferencesPath
+from ccpn.framework.PathsAndUrls import userPreferencesDirectory
 from ccpn.ui import interfaces, defaultInterface
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
@@ -63,7 +67,6 @@ from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 from ccpn.ui.gui.guiSettings import getColourScheme
-from ccpn.framework.PathsAndUrls import userPreferencesDirectory
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import logCommandBlock
 from ccpn.core.lib.ContextManagers import catchExceptions
@@ -241,7 +244,7 @@ class AutoBackup(Thread):
                     pass
 
 
-class Framework:
+class Framework(NotifierBase):
     """
     The Framework class is the base class for all applications.
     """
@@ -515,6 +518,15 @@ class Framework:
         if not self.args.skipUserPreferences:
             sys.stderr.write('==> Getting user preferences\n')
         self.preferences = getPreferences(self.args.skipUserPreferences)
+
+    def _savePreferences(self):
+        "Save the preferences to file"
+        with catchExceptions(application=self, errorStringTemplate='Error saving preferences; "%s"'):
+            directory = os.path.dirname(userPreferencesPath)
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+            with open(userPreferencesPath, 'w+') as prefFile:
+                json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
 
     def _getUserLayout(self, userPath=None):
         """defines the application.layout dictionary.
@@ -1980,6 +1992,7 @@ class Framework:
 
         # NB: this function must clan up both wrapper and ui/gui
 
+        self.deleteAllNotifiers()
         if self.ui.mainWindow:
             # ui/gui cleanup
             self._closeMainWindows()
@@ -2771,7 +2784,7 @@ def getPreferences(skipUserPreferences=False, defaultPath=None, userPath=None):
 
         # read user settings and update if not skipped
         if not skipUserPreferences:
-            from ccpn.framework.PathsAndUrls import userPreferencesPath
+            # from ccpn.framework.PathsAndUrls import userPreferencesPath
 
             preferencesPath = (userPath if userPath else os.path.expanduser(userPreferencesPath))
             if os.path.isfile(preferencesPath):

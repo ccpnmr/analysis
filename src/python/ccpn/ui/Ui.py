@@ -37,6 +37,7 @@ from ccpn.core.lib.Notifiers import NotifierBase
 
 from ccpn.util import Register
 from ccpn.util.Update import installUpdates, UpdateAgent
+from ccpn.util.Logging import getLogger
 
 
 class Ui(NotifierBase):
@@ -48,9 +49,7 @@ class Ui(NotifierBase):
     def __init__(self, application):
 
         self.application = application
-
         self.mainWindow = None
-
         self.pluginModules = []
 
     def addMenu(self, name, position=None):
@@ -114,9 +113,7 @@ class Ui(NotifierBase):
         """Echo commands strings, one by one, to logger.
         Overwritten in subclasses to handle e.g. console putput
         """
-
-        logger = self.application.project._logger
-
+        logger = getLogger()
         for command in commands:
             logger.info(command)
 
@@ -215,6 +212,7 @@ class NoUi(Ui):
         sys.stderr.write('Please restart the program to apply the updates\n')
         sys.exit(1)
 
+
 class TestUi(NoUi):
 
     def __init__(self, application):
@@ -226,9 +224,7 @@ class TestUi(NoUi):
         and store them in internal list for perusal
         """
         self.application._consoleOutput.extend(commands)
-
-        logger = self.application.project._logger
-
+        logger = getLogger()
         for command in commands:
             logger.info(command)
 

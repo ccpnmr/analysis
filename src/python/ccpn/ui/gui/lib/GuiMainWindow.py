@@ -115,9 +115,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self._setUserShortcuts(preferences=self.application.preferences, mainWindow=self)
 
         # Notifiers
+        self._setupNotifiers()
         # self.application.current.registerNotify(self._resetRemoveStripAction, 'strips')
         # self.setNotifier(self.application.current, [Notifier.CURRENT], 'strip', self._resetRemoveStripAction)
-        self.setNotifier(self.application.current, [Notifier.CURRENT], 'strip', self._highlightCurrentStrip)
+        # self.setNotifier(self.application.current, [Notifier.CURRENT], 'strip', self._highlightCurrentStrip)
 
         self.feedbackPopup = None
         self.updatePopup = None
@@ -156,6 +157,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         "Return tuple of modules currently displayed"
         return tuple([m for m in self.moduleArea.modules.values()])
 
+    def _setupNotifiers(self):
+        "Setup notifiers connecting gui to project"
+        self.setNotifier(self.application.current, [Notifier.CURRENT], 'strip', self._highlightCurrentStrip)
+
     def _activatedkeySequence(self, ev):
         key = ev.key()
         self.statusBar().showMessage('key: %s' % str(key))
@@ -185,7 +190,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         #TODO:RASMUS: assure that isNew() and isTemporary() get added to Project; remove API calls
         isNew = self._apiWindow.root.isModified  # a bit of a hack this, but should be correct
 
-        project = self._project
+        project = self.application.project
         path = project.path
         self.namespace['project'] = project
         self.namespace['runMacro'] = self.pythonConsole._runMacro

@@ -1239,24 +1239,27 @@ class Framework(NotifierBase):
     ###################################################################################################################
 
     def createNewProject(self):
-        okToContinue = self.ui.mainWindow._queryCloseProject(title='New Project',
-                                                             phrase='create a new')
-        if okToContinue:
-            project = self.newProject()
-            try:
+        "Callback for creating new project"
+        with catchExceptions(application=self, errorStringTemplate='Error creating new project:'):
+            okToContinue = self.ui.mainWindow._queryCloseProject(title='New Project',
+                                                                 phrase='create a new')
+            if okToContinue:
+                project = self.newProject()
+                if project is None:
+                    raise RuntimeError('Unable to create new project')
                 project._mainWindow.show()
                 QtWidgets.QApplication.setActiveWindow(project._mainWindow)
-            except Exception as es:
-                getLogger().warning('Error creating new project:', str(es))
 
     def newProject(self, name='default'):
-        # """Create new, empty project"""
+        """Create new, empty project; return Project instance
+        """
 
         # NB _closeProject includes a gui cleanup call
 
         if self.project is not None:
             self._closeProject()
 
+        project = None
         sys.stderr.write('==> Creating new, empty project\n')
         newName = re.sub('[^0-9a-zA-Z]+', '', name)
         if newName != name:
@@ -1265,9 +1268,7 @@ class Framework(NotifierBase):
         project = coreIo.newProject(name=newName, useFileLogger=self.useFileLogger, level=self.level)
         project._isNew = True
         # Needs to know this for restoring the GuiSpectrum Module. Could be removed after decoupling Gui and Data!
-
         self._initialiseProject(project)
-
         project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
 
         return project
@@ -1909,53 +1910,55 @@ class Framework(NotifierBase):
         Saves application preferences. Displays message box asking user to save project or not.
         Closes Application.
         """
-        prefPath = os.path.expanduser("~/.ccpn/v3settings.json")
-        directory = os.path.dirname(prefPath)
-        if not os.path.exists(directory):
-            try:
-                os.makedirs(directory)
-            except Exception as e:
-                getLogger().warning('Preferences not saved: %s' % (directory, e))
-                return
+        self.ui.mainWindow._closeEvent(event=event)
 
-        prefFile = open(prefPath, 'w+')
-        json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
-        prefFile.close()
-
-        reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
-                                        ['Save and Quit', 'Quit without Saving', 'Cancel'])  # ejb
-        if reply == 'Save and Quit':
-            if event:
-                event.accept()
-            prefFile = open(prefPath, 'w+')
-            json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
-            prefFile.close()
-
-            success = self.saveProject()
-            if success is True:
-                # Close and clean up project
-                self._closeProject()
-                QtWidgets.QApplication.quit()
-                os._exit(0)
-
-            else:
-                if event:  # ejb - don't close the project
-                    event.ignore()
-
-        elif reply == 'Quit without Saving':
-            if event:
-                event.accept()
-            prefFile = open(prefPath, 'w+')
-            json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
-            prefFile.close()
-            self._closeProject()
-
-            QtWidgets.QApplication.quit()
-            os._exit(0)
-
-        else:
-            if event:
-                event.ignore()
+        # prefPath = os.path.expanduser("~/.ccpn/v3settings.json")
+        # directory = os.path.dirname(prefPath)
+        # if not os.path.exists(directory):
+        #     try:
+        #         os.makedirs(directory)
+        #     except Exception as e:
+        #         getLogger().warning('Preferences not saved: %s' % (directory, e))
+        #         return
+        #
+        # prefFile = open(prefPath, 'w+')
+        # json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
+        # prefFile.close()
+        #
+        # reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
+        #                                 ['Save and Quit', 'Quit without Saving', 'Cancel'])  # ejb
+        # if reply == 'Save and Quit':
+        #     if event:
+        #         event.accept()
+        #     prefFile = open(prefPath, 'w+')
+        #     json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
+        #     prefFile.close()
+        #
+        #     success = self.saveProject()
+        #     if success is True:
+        #         # Close and clean up project
+        #         self._closeProject()
+        #         QtWidgets.QApplication.quit()
+        #         os._exit(0)
+        #
+        #     else:
+        #         if event:  # ejb - don't close the project
+        #             event.ignore()
+        #
+        # elif reply == 'Quit without Saving':
+        #     if event:
+        #         event.accept()
+        #     prefFile = open(prefPath, 'w+')
+        #     json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
+        #     prefFile.close()
+        #     self._closeProject()
+        #
+        #     QtWidgets.QApplication.quit()
+        #     os._exit(0)
+        #
+        # else:
+        #     if event:
+        #         event.ignore()
 
     def _closeMainWindows(self):
         tempModules = self.ui.mainWindow.application.ccpnModules

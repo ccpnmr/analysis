@@ -33,12 +33,13 @@ import re
 from ccpn.core.Project import Project
 from ccpn.ui._implementation import _uiImportOrder
 from ccpn.core import _coreClassMap
+from ccpn.core.lib.Notifiers import NotifierBase
 
 from ccpn.util import Register
 from ccpn.util.Update import installUpdates, UpdateAgent
 
 
-class Ui:
+class Ui(NotifierBase):
     """Superclass for all user interface classes"""
 
     # Factory functions for UI-specific instantiation of wrapped graphics classes

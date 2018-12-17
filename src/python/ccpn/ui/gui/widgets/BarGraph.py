@@ -36,6 +36,7 @@ from ccpn.ui.gui.lib.mouseEvents import \
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
 from ccpn.ui.gui.widgets.Menu import Menu
+from ccpn.util.Logging import getLogger
 
 current = []
 
@@ -264,19 +265,34 @@ class CustomViewBox(pg.ViewBox):
       self.setRange(xRange=self.lastRange[0])
 
 
+  def _getLimits(self,p1:float, p2:float):
 
-
-
-  def _updateSelectionBox(self, p1:float, p2:float):
-    """
-    Updates drawing of selection box as mouse is moved.
-    """
     r = QtCore.QRectF(p1, p2)
     r = self.childGroup.mapRectFromParent(r)
     self.selectionBox.setPos(r.topLeft())
     self.selectionBox.resetTransform()
     self.selectionBox.scale(r.width(), r.height())
+    minX = r.topLeft().x()
+    minY = r.topLeft().y()
+    maxX = minX + r.width()
+    maxY = minY + r.height()
+    return minX, maxX, minY, maxY
+
+  def _updateSelectionBox(self,ev, p1:float, p2:float):
+    """
+    Updates drawing of selection box as mouse is moved.
+    """
+    r = QtCore.QRectF(p1, p2)
+    # print('PPP',dir(self.mapToParent(ev.buttonDownPos())))
+
+    r = self.mapRectFromParent(r)
+    self.selectionBox.setPos(self.mapToParent(ev.buttonDownPos()))
+
+    self.selectionBox.resetTransform()
+    self.selectionBox.scale(r.width(), r.height())
     self.selectionBox.show()
+
+
 
 
   def mouseClickEvent(self, event):
@@ -299,57 +315,41 @@ class CustomViewBox(pg.ViewBox):
 
     """
 
-    xStartPosition = self.mapSceneToView(event.buttonDownPos()).x()
-    xEndPosition = self.mapSceneToView(event.pos()).x()
-    yStartPosition = self.mapSceneToView(event.buttonDownPos()).y()
-    yEndPosition = self.mapSceneToView(event.pos()).y()
-
+    selected = []
     if leftMouse(event):
       # Left-drag: Panning of the view
       pg.ViewBox.mouseDragEvent(self, event)
     elif controlLeftMouse(event):
-      self._updateSelectionBox(event.buttonDownPos(), event.pos())
-      labels = [label for label in self.childGroup.childItems() if isinstance(label, CustomLabel)]
-      # Control(Cmd)+left drag: selects label
-      self.selectionBox.show()
-      for label in labels:
-        if int(label.pos().x()) in range(int(xStartPosition), int(xEndPosition)):
-          if self.inYRange(label.pos().y(), yEndPosition, yStartPosition, ):
-            if self.application is not None:
-              obj = label.data(int(label.pos().x()))
-              if obj:
-                try:
-                  addObjToCurrent = getattr(self.application.current, 'add'+obj.className)
-                  addObjToCurrent(obj)
-                except:
-                  pass
-
-
-
-            # self.application.current.addNmrresidue(label.data(int(label.pos().x())))
-            # label.setSelected(True)
-
-
+      self._updateSelectionBox(event, event.buttonDownPos(), event.pos())
       event.accept()
       if not event.isFinish():
-        self._updateSelectionBox(event.buttonDownPos(), event.pos())
-      #   self._resetBoxes()
-      else:
+        self._updateSelectionBox(event, event.buttonDownPos(), event.pos())
+
+      else: ## the event is finished.
+        self._updateSelectionBox(event, event.buttonDownPos(), event.pos())
+        minX, maxX, minY, maxY = self._getLimits(event.buttonDownPos(), event.pos())
+        labels = [label for label in self.childGroup.childItems() if isinstance(label, CustomLabel)]
+        # Control(Cmd)+left drag: selects label
+        for label in labels:
+          if int(label.pos().x()) in range(int(minX), int(maxX)):
+            if self.inYRange(label.pos().y(), minY, maxY, ):
+              if self.application is not None:
+                obj = label.data(int(label.pos().x()))
+                selected.append(obj)
+
         self._resetBoxes()
-    #
-    # elif middleMouse(event) or \
-    #     shiftLeftMouse(event) or shiftMiddleMouse(event) \
-    #     or shiftRightMouse(event):
-    #   event.accept()
-    #   if not event.isFinish():
-    #     self._resetBoxes()
-    #     self.updateScaleBox(event.buttonDownPos(), event.pos())
-    #   else:
-    #     self._resetBoxes()
-    #
+
     else:
       self._resetBoxes()
       event.ignore()
+
+    if len(selected) > 0:
+      try:
+        currentObjs = setattr(self.application.current, selected[0]._pluralLinkName, selected)
+        self.updateSelectionFromCurrent()
+      except Exception as e:
+        getLogger().warning('Error in setting current objects. ' + str(e) )
+
 
   def inYRange(self, yValue, y1, y2):
     if round(y1,3) <= round(yValue,3) <= round(y2,3) :
@@ -359,14 +359,13 @@ class CustomViewBox(pg.ViewBox):
   def getLabels(self):
     return [label for label in self.childGroup.childItems() if isinstance(label, CustomLabel)]
 
-  def updateSelectionFromCurrent(self, current):
+  def updateSelectionFromCurrent(self):
     if self.getLabels():
-      if self.current.nmrResidues:
-         for label in self.getLabels():
-           for nmrResidue in self.current.nmrResidues:
-             if nmrResidue.sequenceCode is not None:
-               if label.data(int(nmrResidue.sequenceCode)):
-                 label.setSelected(True)
+       for label in self.getLabels():
+         for nmrResidue in self.application.current.nmrResidues:
+           if nmrResidue.sequenceCode is not None:
+             if label.data(int(nmrResidue.sequenceCode)):
+               label.setSelected(True)
 
   def upDateSelections(self, positions):
     if self.getLabels():

@@ -44,6 +44,7 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.SpectraSelectionWidget import SpectraSelectionWidget
 from ccpn.ui.gui.widgets.CheckBox import CheckBox, EditableCheckBox
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
+from ccpn.ui.gui.widgets.QuickTable import exportTableDialog
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
@@ -53,6 +54,7 @@ from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.util.Colour import spectrumColours, hexToRgb
+from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
 from ccpn.core.lib.peakUtils import getNmrResidueDeltas, MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME, DefaultAtomWeights, H, N, OTHER, C
 from ccpn.core.lib import CcpnSorting
 from ccpn.ui.gui.guiSettings import autoCorrectHexColour, getColours, CCPNGLWIDGET_HEXBACKGROUND,\
@@ -63,6 +65,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.BarGraphWidget import BarGraphWidget
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Splitter import Splitter
+from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
 import random
@@ -120,6 +123,7 @@ PreferredNmrAtoms = ['H', 'HA', 'HB', 'C', 'CA', 'CB', 'N', 'NE', 'ND']
 def _getRandomColours(numberOfColors):
   import random
   return  ["#" + ''.join([random.choice('0123456789ABCDEF') for j in range(6)]) for i in range(numberOfColors)]
+
 
 
 class CustomNmrResidueTable(NmrResidueTable):
@@ -234,26 +238,8 @@ class ChemicalShiftsMapping(CcpnModule):
       self.application = self.mainWindow.application
       self.current = self.application.current
 
-      # if len(self.project.nmrResidues):
-      #
-      #   for i in self.project.nmrResidues:
-      #     for atom in i.nmrAtoms:
-      #       # self.atoms.add(atom.name)
-      #       if 'N' in atom.name:
-      #         self.Natoms.add(atom.name)
-      #         self.atomNames.append('N')
-      #       if 'H' in atom.name:
-      #         self.Hatoms.add(atom.name)
-      #         self.atomNames.append('H')
-      #       if 'C' in atom.name:
-      #         self.Hatoms.add(atom.name)
-      #         self.atomNames.append('C')
-      #       else:
-      #         self.OtherAtoms.add(atom.name)
-      #         self.atomNames.append('Others')
-
-
     self.thresholdLinePos = DefaultThreshould
+    self._kdExportDialog = None
 
     self.showStructureIcon = Icon('icons/showStructure')
     self.updateIcon = Icon('icons/update')
@@ -262,7 +248,8 @@ class ChemicalShiftsMapping(CcpnModule):
     if self.mainWindow:
       self._setSettingsWidgets()
       self._selectCurrentNmrResiduesNotifier = Notifier(self.current , [Notifier.CURRENT] , targetName='nmrResidues'
-                                                        , callback=self._selectCurrentNmrResiduesNotifierCallback)
+                                                        , callback=self._selectCurrentNmrResiduesNotifierCallback,
+                                                        onceOnly=True)
       self._peakDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'Peak', self._peakDeletedCallBack)
 
       # self._peakChangedNotifier = Notifier(self.project, [Notifier.CHANGE], 'Peak',
@@ -275,10 +262,7 @@ class ChemicalShiftsMapping(CcpnModule):
       if self.project:
         if len(self.project.nmrChains) > 0:
           self.nmrResidueTable.ncWidget.select(self.project.nmrChains[-1].pid)
-          # self._updateNmrAtomsOption()
-          # self._hideNonNecessaryNmrAtomsOption()
           self._setThresholdLineBySTD()
-
       self.__addCheckBoxesAttr(self.nmrAtomsCheckBoxes)
 
   def __addCheckBoxesAttr(self, checkboxes):
@@ -325,7 +309,9 @@ class ChemicalShiftsMapping(CcpnModule):
 
       self.tableFrame = Frame(self.mainWidget, setLayout=True, grid=(0, 0))
       self.nmrResidueTable = CustomNmrResidueTable(parent=self.tableFrame , mainWindow=self.mainWindow,
-                                                   actionCallback= self._customActionCallBack, checkBoxCallback=self._checkBoxCallback,
+                                                   # selectionCallback=self._nmrTableSelectionCallback,
+                                                   actionCallback= self._customActionCallBack,
+                                                   checkBoxCallback=self._checkBoxCallback,
                                                    setLayout=True, grid = (0, 0))
       self.nmrResidueTable.chemicalShiftsMappingModule = self
 
@@ -359,7 +345,9 @@ class ChemicalShiftsMapping(CcpnModule):
     self.kdPlot = self._kdPlotView.addPlot()
     self.kdPlot.addLegend(offset=[1, 10])
     self._kdPlotViewbox = self.kdPlot.vb
-    self.kdPlot.setLabel('bottom', 'Concentrations')
+    self._kdPlotViewbox.mouseClickEvent = self._kdViewboxMouseClickEvent
+
+    self.kdPlot.setLabel('bottom', 'Series')
     self.kdPlot.setLabel('left', 'Deltas')
     self.kdPlot.setMenuEnabled(False)
     layoutParent.getLayout().addWidget(self._kdPlotView)
@@ -574,7 +562,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self.thresholdLAbel = Label(self.scrollAreaWidgetContents, text='Threshold value', grid=(i, 0))
     self.thresholdFrame = Frame(self.scrollAreaWidgetContents, setLayout=True, grid=(i, 1))
 
-    self.thresholdSpinBox = DoubleSpinbox(self.thresholdFrame, value=DefaultThreshould, step=0.01,
+    self.thresholdSpinBox = DoubleSpinbox(self.thresholdFrame, value=None, step=0.01,
                                           decimals=3, callback=self.updateThresholdLineValue, tipText = 'Threshold value for deltas',
                                           grid=(0, 0))
     self.thresholdButton = Button(self.thresholdFrame, text='Default', callback=self._setDefaultThreshold, tipText = 'Default: STD of deltas',
@@ -737,6 +725,12 @@ class ChemicalShiftsMapping(CcpnModule):
     pass
     # print(data)
 
+  def _nmrTableSelectionCallback(self, data):
+    """
+    Notifier Callback for selecting a row in the table
+    """
+    getLogger().Warning('Table temp disabled')
+
   def _nmrObjectChanged(self, data):
     self.updateModule()
 
@@ -769,7 +763,6 @@ class ChemicalShiftsMapping(CcpnModule):
     self.aboveBrush = 'g'
     self.belowBrush = 'r'
     self.disappearedPeakBrush = 'b'
-    thresholdPos = self.thresholdSpinBox.value()
     # check if all values are none:
     shifts = [nmrResidue._delta for nmrResidue in self.nmrResidueTable._dataFrameObject.objects]
     if not any(shifts):
@@ -852,11 +845,13 @@ class ChemicalShiftsMapping(CcpnModule):
                                    )
     if xs and ys:
       self.barGraphWidget.setViewBoxLimits(0, max(xs)*10, 0,  max(ys)*10)
+      self.barGraphWidget.customViewBox.setRange(xRange=[min(xs) - 10, max(xs) + 10], yRange=[0, max(ys)],)
 
 
   def updateThresholdLineValue(self, value):
     if self.barGraphWidget:
       self.barGraphWidget.xLine.setPos(value)
+      self.updateBarGraph()
 
   def _updateThreshold(self):
     self.thresholdSpinBox.setValue(self.barGraphWidget.xLine.pos().y())
@@ -1040,7 +1035,7 @@ class ChemicalShiftsMapping(CcpnModule):
           deltas = []
           concentrationsValues = []
           zeroSpectrum, otherSpectra = spectra[0], spectra[1:]
-          for i, spectrum in enumerate(otherSpectra):
+          for i, spectrum in enumerate(otherSpectra,1):
             if nmrResidue._includeInDeltaShift:
               delta = getNmrResidueDeltas(nmrResidue, selectedAtomNames, mode=mode, spectra=[zeroSpectrum, spectrum],
                                           atomWeights=weights)
@@ -1060,6 +1055,28 @@ class ChemicalShiftsMapping(CcpnModule):
       return pd.concat(values)
 
 
+  def _plotKdFromCurrent(self):
+    self.kdPlot.clear()
+    self._clearLegendKd()
+    colours = _getRandomColours(len(self.current.nmrResidues))
+    for nmrR, colour in zip(self.current.nmrResidues, colours):
+      nmrR._colour = colour
+    # brush = pg.functions.mkBrush(hexToRgb(colour), width=1)
+    # for nmrResidue, colour in zip(self.current.nmrResidues,colours):
+    plotData = self.getKdPlotDataFrame(self.current.nmrResidues)
+    if plotData is not None:
+      plotData = plotData.replace(np.nan, 0)
+      for obj, row, in plotData.iterrows():
+        ys = list(row.values)
+        xs = list(plotData.columns)
+        aMean = np.mean(row.values)
+        if aMean != 0.0:
+          aScaled = row.values / aMean
+        else:
+          aScaled = row.values
+        pen = pg.functions.mkPen(hexToRgb(obj._colour), width=1)
+        brush = pg.functions.mkBrush(hexToRgb(obj._colour), width=1)
+        self.kdPlot.plot(xs, aScaled, symbol='o', pen=pen, symbolBrush=brush, name=obj.pid)
 
   def _selectCurrentNmrResiduesNotifierCallback(self, data):
     # TODO replace colour
@@ -1084,24 +1101,45 @@ class ChemicalShiftsMapping(CcpnModule):
               label.setBrush(QtGui.QColor(bar.brush))
               if label.isBelowThreshold and not self.barGraphWidget.customViewBox.allLabelsShown:
                 label.setVisible(False)
-    self.kdPlot.clear()
-    self._clearLegendKd()
-    colours = _getRandomColours(len(self.current.nmrResidues))
-    for nmrR, colour in zip(self.current.nmrResidues, colours):
-      nmrR._colour = colour
-    # brush = pg.functions.mkBrush(hexToRgb(colour), width=1)
-    # for nmrResidue, colour in zip(self.current.nmrResidues,colours):
-    plotData = self.getKdPlotDataFrame(self.current.nmrResidues)
-    plotData =  plotData.replace(np.nan, 0)
-    if plotData is not None:
-      for obj, row, in plotData.iterrows():
-        ys = list(row.values)
-        xs = list(plotData.columns)
-        pen = pg.functions.mkPen(hexToRgb(obj._colour), width=1)
-        brush = pg.functions.mkBrush(hexToRgb(obj._colour), width=1)
-        self.kdPlot.plot(xs,ys, symbol='o', pen=pen, symbolBrush=brush, name=obj.pid)
+    self._plotKdFromCurrent()
 
+  def _getAllKdDataFrameForChain(self):
+    nmrChainTxt = self.nmrResidueTable.ncWidget.getText()
+    nmrChain = self.project.getByPid(nmrChainTxt)
+    if nmrChain is not None:
+      dataFrame = self.getKdPlotDataFrame(nmrChain.nmrResidues)
+      return dataFrame
 
+  def _showExportDialog(self, viewBox):
+    """
+    :param viewBox: the viewBox obj for the selected plot
+    :return:
+    """
+    if self._kdExportDialog is None:
+      self._kdExportDialog = CustomExportDialog(viewBox.scene(), titleName='Exporting')
+    self._kdExportDialog.show(viewBox)
+  
+  def _raiseKdPlotContextMenu(self, ev):
+    """ Creates all the menu items for the scatter context menu. """
+
+    self._kdContextMenu = Menu('', None, isFloatWidget=True)
+    self._kdContextMenu.addAction('Reset View', self.kdPlot.autoRange)
+    self._kdContextMenu.addSeparator()
+    
+    self._kdContextMenu.addSeparator()
+    self.exportAction = QtGui.QAction("Export...", self, triggered=partial(self._showExportDialog, self._kdPlotViewbox))
+    self.exporAllAction = QtGui.QAction("Export All...", self, triggered=partial(exportTableDialog, self._getAllKdDataFrameForChain()))
+
+    self._kdContextMenu.addAction(self.exportAction)
+    self._kdContextMenu.addAction(self.exporAllAction)
+
+    self._kdContextMenu.exec_(ev.screenPos().toPoint())
+  
+  def _kdViewboxMouseClickEvent(self, event):
+    """ click on scatter viewBox. The parent of scatterPlot. Opens the context menu at any point. """
+    if event.button() == QtCore.Qt.RightButton:
+      event.accept()
+      self._raiseKdPlotContextMenu(event)
 
   def _mouseClickEvent(self, event):
 

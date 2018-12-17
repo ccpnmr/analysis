@@ -100,7 +100,7 @@ if __name__ == '__main__':
     df = pd.DataFrame(d)
 
     widget = PandasPlot()
-    widget.plotDataFrame(dataFrame=df, kind = 'bar' , color=colors, )
+    widget.plotDataFrame(dataFrame=df,)
     widget.show(windowTitle='PCA', size=(500, 500))
 
     app.start()

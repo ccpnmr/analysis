@@ -99,6 +99,67 @@ def __sortByColumn__(self, col, newOrder):
     print('>>>sorting')
 
 
+# Exporters
+
+def dataFrameToExcel(dataFrame, path, sheet_name='Table', columns=None):
+    if dataFrame is not None:
+
+        if columns is not None and isinstance(columns, list): #this is wrong. columns can be a 1d array
+            dataFrame.to_excel(path, sheet_name=sheet_name, columns=columns)
+        else:
+            dataFrame.to_excel(path, sheet_name=sheet_name)
+
+
+def dataFrameToCsv( dataFrameObject, path, *args):
+    dataFrameObject.dataFrame.to_csv(path)
+
+def dataFrameToTsv( dataFrameObject, path, *args):
+    dataFrameObject.dataFrame.to_csv(path, sep='\t')
+
+def dataFrameToJson(self, dataFrameObject, path, *args):
+    dataFrameObject.dataFrame.to_json(path, orient='split')
+
+# def tableToDataFrame(self):
+#     return self._dataFrameObject.dataFrame[self._dataFrameObject.visibleColumnHeadings]
+
+def findExportFormats(path, dataFrame, sheet_name='Table', filterType=None, columns=None):
+    formatTypes = OrderedDict([
+        ('.xlsx', dataFrameToExcel),
+        ('.csv', dataFrameToCsv),
+        ('.tsv', dataFrameToTsv),
+        ('.json', dataFrameToJson)
+    ])
+
+    extension = os.path.splitext(path)[1]
+    if extension in formatTypes.keys():
+        formatTypes[extension](dataFrame, path, sheet_name, columns)
+        return
+    else:
+        try:
+            findExportFormats(str(path) + filterType, sheet_name)
+        except:
+            getLogger().warning('Format file not supported')
+
+
+def exportTableDialog(dataFrame, columns=None):
+    """Open the ExportDialog to export any dataFrame to different formats """
+    if dataFrame is None:
+        return
+    saveDialog = FileDialog(directory='ccpn_Table.xlsx',  # default saving name
+                                 fileMode=FileDialog.AnyFile,
+                                 filter=".xlsx;; .csv;; .tsv;; .json ",
+                                 text='Save as ',
+                                 acceptMode=FileDialog.AcceptSave,
+                                 preferences=None)
+    path = saveDialog.selectedFile()
+    filterType = saveDialog.selectedNameFilter()
+    if path:
+        findExportFormats(path, dataFrame, filterType=filterType, columns=columns)
+
+
+
+
+
 class QuickTable(TableWidget, Base):
     ICON_FILE = os.path.join(os.path.dirname(__file__), 'icons', 'editable.png')
 
@@ -665,6 +726,15 @@ QuickTable::item::selected {
         headers.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         headers.customContextMenuRequested.connect(self._raiseHeaderContextMenu)
 
+    def _getExportData(self):
+        if self._dataFrameObject is not None:
+            df = self._dataFrameObject.dataFrame
+            return df
+    def _getExportDataColums(self):
+        if self._dataFrameObject is not None:
+            visCol = self._dataFrameObject.visibleColumnHeadings
+            return visCol
+
     def _setContextMenu(self, enableExport=True, enableDelete=True):
         self.tableMenu = QtWidgets.QMenu()
         if enableExport:
@@ -968,54 +1038,69 @@ QuickTable::item::selected {
                                      acceptMode=FileDialog.AcceptSave,
                                      preferences=None)
         path = self.saveDialog.selectedFile()
+        sheet_name = 'Table'
         if path:
-            self.findExportFormats(path)
+            dataFrameObject = self._dataFrameObject
+            if dataFrameObject is not None:
+                dataFrame = dataFrameObject.dataFrame
+                visColumns = dataFrameObject.visibleColumnHeadings
+                ft = self.saveDialog.selectedNameFilter()
+                findExportFormats(path, dataFrame, sheet_name=sheet_name, filterType=ft, columns=visColumns)
 
-    def findExportFormats(self, path, sheet_name='Table'):
-        formatTypes = OrderedDict([
-            ('.xlsx', self.dataFrameToExcel),
-            ('.csv', self.dataFrameToCsv),
-            ('.tsv', self.dataFrameToTsv),
-            ('.json', self.dataFrameToJson)
-            ])
+            else:
+                if self._rawData is not None:
+                    try:
+                        df = pd.DataFrame(self._rawData).transpose()
+                        findExportFormats(path, df, sheet_name=sheet_name)
+                        # df.to_excel(path, sheet_name=sheet_name)
+                    except Exception as e:
+                        getLogger().warning(e)
 
-        extension = os.path.splitext(path)[1]
-        if extension in formatTypes.keys():
-            formatTypes[extension](self._dataFrameObject, path, sheet_name)
-            return
-        else:
-            try:
-                self.findExportFormats(str(path) + self.saveDialog.selectedNameFilter(), sheet_name)
-            except:
-                getLogger().warning('Format file not supported')
-
-    def dataFrameToExcel(self, dataFrameObject, path, sheet_name='Table'):
-        if dataFrameObject is not None:
-            visColumns = dataFrameObject.visibleColumnHeadings
-            # writer = pd.ExcelWriter(path, engine='xlsxwriter')
-            #
-            # dataFrameExcel = dataFrameObject.dataFrame.apply(pd.to_numeric, errors='ignore')
-            # dataFrameExcel.to_excel(writer, sheet_name=sheet_name, index=False, columns=visColumns)
-            dataFrameObject.dataFrame.to_excel(path, sheet_name=sheet_name, index=False, columns=visColumns)
-        else:
-            if self._rawData is not None:
-                try:
-                    df = pd.DataFrame(self._rawData).transpose()
-                    df.to_excel(path, sheet_name=sheet_name)
-                except Exception as e:
-                    getLogger().warning(e)
-
-    def dataFrameToCsv(self, dataFrameObject, path):
-        dataFrameObject.dataFrame.to_csv(path)
-
-    def dataFrameToTsv(self, dataFrameObject, path):
-        dataFrameObject.dataFrame.to_csv(path, sep='\t')
-
-    def dataFrameToJson(self, dataFrameObject, path):
-        dataFrameObject.dataFrame.to_json(path, orient='split')
-
-    def tableToDataFrame(self):
-        return self._dataFrameObject.dataFrame[self._dataFrameObject.visibleColumnHeadings]
+    # def findExportFormats(self, path, sheet_name='Table'):
+    #     formatTypes = OrderedDict([
+    #         ('.xlsx', self.dataFrameToExcel),
+    #         ('.csv', self.dataFrameToCsv),
+    #         ('.tsv', self.dataFrameToTsv),
+    #         ('.json', self.dataFrameToJson)
+    #         ])
+    #
+    #     extension = os.path.splitext(path)[1]
+    #     if extension in formatTypes.keys():
+    #         formatTypes[extension](self._dataFrameObject, path, sheet_name)
+    #         return
+    #     else:
+    #         try:
+    #             self.findExportFormats(str(path) + self.saveDialog.selectedNameFilter(), sheet_name)
+    #         except:
+    #             getLogger().warning('Format file not supported')
+    #
+    # def dataFrameToExcel(self, dataFrameObject, path, sheet_name='Table'):
+    #     if dataFrameObject is not None:
+    #         visColumns = dataFrameObject.visibleColumnHeadings
+    #         # writer = pd.ExcelWriter(path, engine='xlsxwriter')
+    #         #
+    #         # dataFrameExcel = dataFrameObject.dataFrame.apply(pd.to_numeric, errors='ignore')
+    #         # dataFrameExcel.to_excel(writer, sheet_name=sheet_name, index=False, columns=visColumns)
+    #         dataFrameObject.dataFrame.to_excel(path, sheet_name=sheet_name, index=False, columns=visColumns)
+    #     else:
+    #         if self._rawData is not None:
+    #             try:
+    #                 df = pd.DataFrame(self._rawData).transpose()
+    #                 df.to_excel(path, sheet_name=sheet_name)
+    #             except Exception as e:
+    #                 getLogger().warning(e)
+    #
+    # def dataFrameToCsv(self, dataFrameObject, path):
+    #     dataFrameObject.dataFrame.to_csv(path)
+    #
+    # def dataFrameToTsv(self, dataFrameObject, path):
+    #     dataFrameObject.dataFrame.to_csv(path, sep='\t')
+    #
+    # def dataFrameToJson(self, dataFrameObject, path):
+    #     dataFrameObject.dataFrame.to_json(path, orient='split')
+    #
+    # def tableToDataFrame(self):
+    #     return self._dataFrameObject.dataFrame[self._dataFrameObject.visibleColumnHeadings]
 
     # def tableToDataFrame(self):
     #   from pandas import DataFrame

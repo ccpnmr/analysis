@@ -121,7 +121,11 @@ class PeakFindPopup(CcpnDialog):
                 # negative only
                 doPos = False
             # Checking the third box turns the others off and sets both. Hence default
-            peakList.pickPeaksNd(positions, doPos=doPos, doNeg=doNeg, fitMethod='gaussian')
+            # peakList.pickPeaksNd(positions, doPos=doPos, doNeg=doNeg, fitMethod='gaussian')
+
+            axisCodeDict = dict((code, positions[ii]) for ii, code in enumerate(self.peakList.spectrum.axisCodes))
+            peaks = peakList.pickPeaksRegion(axisCodeDict, doPos=doPos, doNeg=doNeg,
+                                         minDropfactor = self.application.preferences.general.peakDropFactor)
 
             # for strip in self.project.strips:
             #     strip.showPeaks(peakList)

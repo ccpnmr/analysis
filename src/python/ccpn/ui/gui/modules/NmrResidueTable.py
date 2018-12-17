@@ -586,7 +586,7 @@ class NmrResidueTable(QuickTable):
         """
         Returns a sorted list of NmrAtom names
         """
-        return ', '.join(sorted(set([atom.name for atom in nmrResidue.nmrAtoms]),
+        return ', '.join(sorted(set([atom.name for atom in nmrResidue.nmrAtoms if not atom._flaggedForDelete]),
                                 key=CcpnSorting.stringSortKey))
 
     @staticmethod
@@ -594,7 +594,7 @@ class NmrResidueTable(QuickTable):
         """
         Returns peak list count
         """
-        l1 = [peak for atom in nmrResidue.nmrAtoms for peak in atom.assignedPeaks]
+        l1 = [peak for atom in nmrResidue.nmrAtoms if not atom._flaggedForDelete for peak in atom.assignedPeaks]
         return len(set(l1))
 
     # @staticmethod

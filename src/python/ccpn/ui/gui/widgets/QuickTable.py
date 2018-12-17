@@ -1545,6 +1545,10 @@ QuickTable::item::selected {
                     cellType = self._tableData['rowClass']
                     if isinstance(rowObj, cellType):
                         self._updateRowCallback(newData)
+
+                        # if trigger = 'delete':
+                        #   update the original object from getParentfromPartialPid...
+
                     else:
                         self._updateCellCallback(rowCallback, newData)
 

@@ -772,7 +772,9 @@ class PeakList(AbstractWrapperObject):
                     Default is 1 in all axis directions.
 
         minDropFactor - minimum drop factor, value between 0.0 and 1.0
-                    Ratio of max value to adjacent values in dataArray.
+                    Ratio of max value to adjacent values in dataArray. Default is 0.1
+                    i.e., difference between all adjacent values and local maximum must be greater than 10%
+                    for maximum to be considered as a peak.
 
         fitMethod - curve fitting method to find local maximum at peak location in dataArray.
                     Current methods are ('gaussian', 'lorentzian')
@@ -782,7 +784,7 @@ class PeakList(AbstractWrapperObject):
         :param doNeg: pick negative peaks
         :param minLinewidth:
         :param exclusionBuffer: array of int
-        :param minDropfactor: float defined on [0.0, 1.0]
+        :param minDropfactor: float defined on [0.0, 1.0] default is 0.1
         :param checkAllAdjacent: True/False, default True
         :param fitMethod: str in 'gaussian', 'lorentzian'
         :param excludedRegions:

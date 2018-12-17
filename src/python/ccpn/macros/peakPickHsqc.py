@@ -15,4 +15,7 @@ nRange = [100.0, 133.0] # list for 15N picking range
 regionToPick = [hRange, nRange]
 
 # Pick the peaks using only positive contours
-peaks = peakList.pickPeaksNd(regionToPick, doPos=True, doNeg=False)
+# peaks = peakList.pickPeaksNd(regionToPick, doPos=True, doNeg=False)
+
+axisCodeDict = dict((code, regionToPick[ii]) for ii, code in enumerate(peakList.spectrum.axisCodes))
+peaks = peakList.pickPeaksRegion(axisCodeDict, doPos=True, doNeg=False)

@@ -110,7 +110,10 @@ class PeakPickerNdPipe(SpectraPipe):
 
         for spectrum in self.inputData:
             if len(spectrum.peakLists) > 0:
-                spectrum.peakLists[DefaultPeakListIndex].pickPeaksNd(minDropfactor=dropFactor, doNeg=negativePeaks)
+                # spectrum.peakLists[DefaultPeakListIndex].pickPeaksNd(minDropfactor=dropFactor, doNeg=negativePeaks)
+
+                spectrum.peakLists[DefaultPeakListIndex].pickPeaksRegion(minDropfactor=dropFactor, doNeg=negativePeaks)
+
             else:
                 getLogger().warning('Error: PeakList not found for Spectrum: %s. Add a new PeakList first' % spectrum.pid)
 

@@ -24,8 +24,14 @@ queryPeakList = querySpectrum.peakLists[0]
 refPeakList = refSpectrum.peakLists[0]
 
 # Peak pick both spectra using positive contours only
-queryPeakList.pickPeaksNd(regionToPick, doNeg=False)
-refPeakList.pickPeaksNd(regionToPick, doNeg=False)
+# queryPeakList.pickPeaksNd(regionToPick, doNeg=False)
+# refPeakList.pickPeaksNd(regionToPick, doNeg=False)
+
+queryAxisCodeDict = dict((code, regionToPick[ii]) for ii, code in enumerate(queryPeakList.spectrum.axisCodes))
+queryPeakList.pickPeaksRegion(queryAxisCodeDict, doNeg=False)
+
+refAxisCodeDict = dict((code, regionToPick[ii]) for ii, code in enumerate(refPeakList.spectrum.axisCodes))
+refPeakList.pickPeaksRegion(refAxisCodeDict, doNeg=False)
 
 # Create numpy arrays containing the peak positions of 
 # each peakList

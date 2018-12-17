@@ -777,7 +777,8 @@ class PeakList(AbstractWrapperObject):
                     for maximum to be considered as a peak.
 
         fitMethod - curve fitting method to find local maximum at peak location in dataArray.
-                    Current methods are ('gaussian', 'lorentzian')
+                    Current methods are ('gaussian', 'lorentzian').
+                    Default is gaussian.
 
         :param regionToPick: dict of axis limits
         :param doPos: pick positive peaks

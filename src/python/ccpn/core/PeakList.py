@@ -765,6 +765,12 @@ class PeakList(AbstractWrapperObject):
 
         if not exclusionBuffer:
             exclusionBuffer = [1] * numDim
+        else:
+            if len(exclusionBuffer) != numDim:
+                raise ValueError('Error: pickPeaksRegion, exclusion buffer length must match dimension of spectrum')
+            for nDim in range(numDim):
+                if exclusionBuffer[nDim] < 1:
+                    raise ValueError('Error: pickPeaksRegion, exclusion buffer must contain values >= 1')
 
         nonAdj = 1 if checkAllAdjacent else 0
 
@@ -783,7 +789,7 @@ class PeakList(AbstractWrapperObject):
             return peaks
 
         # find the regions from the spectrum
-        foundRegions = self.spectrum.getRegionData(**regionToPick)
+        foundRegions = self.spectrum.getRegionData(exclusionBuffer, **regionToPick)
 
         for region in foundRegions:
             dataArray, intRegion, \

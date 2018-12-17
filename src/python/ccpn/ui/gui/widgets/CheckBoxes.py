@@ -172,6 +172,16 @@ class CheckBoxes(Widget):
             # checkBox = self.checkBoxGroup.checkBoxs[ind]
             self.callback()
 
+    def setSelectedByText(self, texts, checkFlag, presetAll=True):
+
+        if presetAll:
+            self.setChecked(not checkFlag)
+
+        self.checkBoxGroup.setExclusive(False)
+        for checkBox in self.checkBoxes:
+            if checkBox.text() in texts:
+                checkBox.setChecked(checkFlag)
+        self.checkBoxGroup.setExclusive(self.isExclusive)
 
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication

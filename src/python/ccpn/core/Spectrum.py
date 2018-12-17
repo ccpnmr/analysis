@@ -1377,7 +1377,7 @@ class Spectrum(AbstractWrapperObject):
     def getRegionData(self, exclusionBuffer=None, **axisDict):
         """Return the region of the spectrum data defined by the axis limits.
 
-        Axis limits are passed in as a dict containing the axiscodes and the required limits.
+        Axis limits are passed in as a dict containing the axis codes and the required limits.
         Each limit is defined as a key, value pair: (str, tuple),
         with the tuple supplied as (min,max) axis limits in ppm.
 
@@ -1397,12 +1397,12 @@ class Spectrum(AbstractWrapperObject):
 
         ::
 
-            regionData = spectrum.getRegionData(limitsDict)
+            regionData = spectrum.getRegionData(**limitsDict)
             regionData = spectrum.getRegionData(Hn=(7.0, 9.0), Nh=(110, 130))
 
         exclusionBuffer: defines the size to extend the region by in index units, e.g. [1, 1, 1]
                             extends the region by 1 index point in all axes.
-                            Default is 0 in all axes.
+                            Default is 1 in all axis directions.
 
         :param exclusionBuffer: exclusionBuffer array of int
         :param axisDict: dict of axis limits
@@ -1432,7 +1432,7 @@ class Spectrum(AbstractWrapperObject):
         # for ii, dataDim in enumerate(dataDims):
         spectrumReferences = self.mainSpectrumReferences
         if None in spectrumReferences:
-            raise ValueError("pickPeaksNd() only works for Frequency dimensions"
+            raise ValueError("getRegionData() only works for Frequency dimensions"
                              " with defined primary SpectrumReferences ")
         if regionToPick is None:
             regionToPick = self.aliasingLimits
@@ -1473,8 +1473,14 @@ class Spectrum(AbstractWrapperObject):
 
             minLinewidth = [0.0] * numDim
 
-            if not exclusionBuffer:
-                exclusionBuffer = [0] * numDim
+            # if not exclusionBuffer:
+            #     exclusionBuffer = [1] * numDim
+            # else:
+            #     if len(exclusionBuffer) != numDim:
+            #         raise ValueError('Error: getRegionData, exclusion buffer length must match dimension of spectrum')
+            #     for nDim in range(numDim):
+            #         if exclusionBuffer[nDim] < 1:
+            #             raise ValueError('Error: getRegionData, exclusion buffer must contain values >= 1')
 
             nonAdj = 0
             excludedRegions = []
@@ -1483,13 +1489,22 @@ class Spectrum(AbstractWrapperObject):
 
             startPoint = np.array(startPoints)
             endPoint = np.array(endPoints)
-
             startPoint, endPoint = np.minimum(startPoint, endPoint), np.maximum(startPoint, endPoint)
 
-            # extend region by exclusionBuffer
-            bufferArray = np.array(exclusionBuffer)
-            startPointBuffer = startPoint - bufferArray
-            endPointBuffer = endPoint + bufferArray
+            if not exclusionBuffer:
+                startPointBuffer = startPoint
+                endPointBuffer = endPoint
+            else:
+                if len(exclusionBuffer) != numDim:
+                    raise ValueError('Error: getRegionData, exclusion buffer length must match dimension of spectrum')
+                for nDim in range(numDim):
+                    if exclusionBuffer[nDim] < 0:
+                        raise ValueError('Error: getRegionData, exclusion buffer must contain values >= 0')
+
+                # extend region by exclusionBuffer
+                bufferArray = np.array(exclusionBuffer)
+                startPointBuffer = startPoint - bufferArray
+                endPointBuffer = endPoint + bufferArray
 
             regions = numDim * [0]
             npts = numDim * [0]

@@ -280,10 +280,11 @@ class StripPlot(Widget):
             self.listButtons.buttonTypes = buttonTypes
 
         self._spectraWidget = None
+        self.axisCodeOptions = None
 
         if includeSpectrumTable:
             # create row's of spectrum information
-            self._spectrRows = row + len(texts)
+            self._spectraRows = row + len(texts)
             self._fillSpectrumFrame()
 
         # add a spacer in the bottom-right corner to stop everything moving
@@ -465,7 +466,7 @@ class StripPlot(Widget):
             self._spectraWidget.deleteLater()
 
         self._spectraWidget = Widget(parent=self, setLayout=True, hPolicy='minimal',
-                                     grid=(0, 1), gridSpan=(self._spectrRows, 1), vAlign='top', hAlign='left')
+                                     grid=(0, 1), gridSpan=(self._spectraRows, 1), vAlign='top', hAlign='left')
 
         # calculate the maximum number of axes
         self.maxLen, self.axisLabels, self.spectrumIndex, self.validSpectrumViews = self._getSpectraFromDisplays()
@@ -479,10 +480,19 @@ class StripPlot(Widget):
                                    grid=(spectraRow, 0), gridSpan=(1, self.maxLen + 1),
                                    vAlign='top', hAlign='left')
         self.axisCodeLabel = Label(self.atomCodeFrame, 'Restricted Axes:', grid=(0, 0))
+
+        # remember current selection so can be set after redefining checkboxes
+        currentSelection = None
+        if self.axisCodeOptions:
+            currentSelection = self.axisCodeOptions.getSelectedText()
+
         self.axisCodeOptions = CheckBoxes(self.atomCodeFrame, selectedInd=None, texts=[],
                                           callback=self._changeAxisCode, grid=(0, 1))
-
         self.axisCodeOptions.setCheckBoxes(texts=self.axisLabels, tipTexts=self.axisLabels)
+
+        # set current selection back to the checkboxes
+        if currentSelection:
+            self.axisCodeOptions.setSelectedByText(currentSelection, True, presetAll=True)
 
         if not self.maxLen:
             return

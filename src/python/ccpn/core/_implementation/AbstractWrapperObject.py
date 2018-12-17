@@ -152,6 +152,9 @@ class AbstractWrapperObject(NotifierBase):
         self._id = None
         self._resetIds()
 
+        #EJB 20181217: test for preDelete
+        self._flaggedForDelete = False
+
     def _resetIds(self):
         # reset id
         oldId = self._id
@@ -969,6 +972,12 @@ class AbstractWrapperObject(NotifierBase):
         iterator = (project._context2Notifiers.setdefault((name, action), OrderedDict())
                     for name in (className, 'AbstractWrapperObject'))
         pendingNotifications = project._pendingNotifications
+
+        #EJB 20181217: test for preDelete
+        if action == 'delete':
+            self._flaggedForDelete = True
+        else:
+            self._flaggedForDelete = False
 
         if action == 'rename':
             # Special case

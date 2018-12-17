@@ -58,6 +58,9 @@ class NmrAtomPopup(CcpnDialog):
         else:
             atomNames = sorted(set([x for y in PROTEIN_ATOM_NAMES.values() for x in y]))
 
+        if self.nmrAtom.name not in atomNames:
+            atomNames.insert(0, self.nmrAtom.name)
+
         self.nmrAtomNamePulldown.setData(texts=atomNames)
 
         if nmrAtom.name:
@@ -73,6 +76,9 @@ class NmrAtomPopup(CcpnDialog):
             atomNames = sorted(set([x for y in PROTEIN_ATOM_NAMES.values() for x in y if x.startswith(nucleus)]))
         else:
             atomNames = sorted(set([x for y in PROTEIN_ATOM_NAMES.values() for x in y]))
+
+        if self.nmrAtom.name not in atomNames:
+            atomNames.insert(0, self.nmrAtom.name)
 
         self.nmrAtomNamePulldown.setData(texts=atomNames)
 

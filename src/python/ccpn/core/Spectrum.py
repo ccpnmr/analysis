@@ -1404,7 +1404,7 @@ class Spectrum(AbstractWrapperObject):
                             extends the region by 1 index point in all axes.
                             Default is 1 in all axis directions.
 
-        :param exclusionBuffer: exclusionBuffer array of int
+        :param exclusionBuffer: array of int
         :param axisDict: dict of axis limits
         :return: numpy data array
         """

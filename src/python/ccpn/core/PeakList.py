@@ -741,12 +741,55 @@ class PeakList(AbstractWrapperObject):
     #   """Readable string representation"""
     #   return "<%s; #peaks:%d (isSimulated=%s)>" % (self.pid, len(self.peaks), self.isSimulated)
 
-    def pickPeaksRegion(self, regionToPick: dict = None,
+    def pickPeaksRegion(self, regionToPick: dict = {},
                         doPos: bool = True, doNeg: bool = True,
                         minLinewidth=None, exclusionBuffer=None,
                         minDropfactor: float = 0.1, checkAllAdjacent: bool = True,
                         fitMethod: str = 'gaussian', excludedRegions=None,
                         excludedDiagonalDims=None, excludedDiagonalTransform=None):
+        """Pick peaks in the region defined by the regionToPick dict.
+
+        Axis limits are passed in as a dict containing the axis codes and the required limits.
+        Each limit is defined as a key, value pair: (str, tuple),
+        with the tuple supplied as (min,max) axis limits in ppm.
+
+        For axisCodes that are not included, the limits will by taken from the aliasingLimits of the spectrum.
+
+        Illegal axisCodes will raise an error.
+
+        Example dict:
+
+        ::
+
+            {'Hn': (7.0, 9.0),
+             'Nh': (110, 130)
+             }
+
+        doPos, doNeg - pick positive/negative peaks or both.
+
+        exclusionBuffer defines the size to extend the region by in index units, e.g. [1, 1, 1]
+                    extends the region by 1 index point in all axes.
+                    Default is 1 in all axis directions.
+
+        minDropFactor - minimum drop factor, value between 0.0 and 1.0
+                    Ratio of max value to adjacent values in dataArray.
+
+        fitMethod - curve fitting method to find local maximum at peak location in dataArray.
+                    Current methods are ('gaussian', 'lorentzian')
+
+        :param regionToPick: dict of axis limits
+        :param doPos: pick positive peaks
+        :param doNeg: pick negative peaks
+        :param minLinewidth:
+        :param exclusionBuffer: array of int
+        :param minDropfactor: float defined on [0.0, 1.0]
+        :param checkAllAdjacent: True/False, default True
+        :param fitMethod: str in 'gaussian', 'lorentzian'
+        :param excludedRegions:
+        :param excludedDiagonalDims:
+        :param excludedDiagonalTransform:
+        :return:
+        """
 
         from ccpnc.peak import Peak as CPeak
 

@@ -28,6 +28,7 @@ from os.path import isfile, join
 import pathlib
 import pandas as pd
 from ccpn.util.Logging import getLogger, _debug3
+from ccpn.core.lib.ContextManagers import undoBlock
 
 
 ################################       Excel Headers Warning      ######################################################
@@ -122,7 +123,7 @@ class ExcelReader(object):
         self.sheets = self._getSheets(self.pandasFile)
         self.dataframes = self._getDataFrameFromSheets(self.sheets)
 
-        with suspendSideBarNotifications(self._project):
+        with undoBlock():
             self.substancesDicts = self._createSubstancesDataFrames(self.dataframes)
             self.samplesDicts = self._createSamplesDataDicts(self.dataframes)
             self.spectrumGroups = self._createSpectrumGroups(self.dataframes)

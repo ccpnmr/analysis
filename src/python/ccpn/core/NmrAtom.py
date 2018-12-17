@@ -14,7 +14,7 @@ __reference__ = ("For publications, please use reference from http://www.ccpn.ac
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
 __dateModified__ = "$dateModified: 2017-09-20 17:23:40 +0100 (Wed, September 20, 2017) $"
-__version__ = "$Revision: 3.0.b3 $"
+__version__ = "$Revision: 3.0.b4 $"
 #=========================================================================================
 # Created
 #=========================================================================================

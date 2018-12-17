@@ -185,7 +185,7 @@ class PreferencesPopup(CcpnDialog):
         self.languageBox.setCurrentIndex(self.languageBox.findText(self.preferences.general.language))
         self.languageBox.currentIndexChanged.connect(self._changeLanguage)
 
-        # disabled for 3.0.b3
+        # disabled for 3.0.b4
         row += 1
         self.colourSchemeLabel = Label(parent, text="Colour Scheme ", grid=(row, 0))
         self.colourSchemeBox = PulldownList(parent, grid=(row, 1), hAlign='l')

@@ -1558,6 +1558,8 @@ class Spectrum(AbstractWrapperObject):
                 numPointInt = endPointInt - startPointInt
                 startPointBuffer = np.maximum(startPointBuffer, startPointInt)
                 endPointBuffer = np.minimum(endPointBuffer, endPointInt)
+                if np.any(numPointInt <= 2):  # return if any of the dimensions has <= 2 points
+                    continue
 
                 result += ((dataArray, intRegion,
                             startPoints, endPoints,

@@ -832,12 +832,12 @@ class PeakList(AbstractWrapperObject):
 
                 # check new found positions against existing ones
                 existingPositions = []
-                for peak in self.peaks:
-                    position = numpy.array([peakDim.position for peakDim in peak._wrappedData.sortedPeakDims()])  # ignores aliasing
+                for apiPeak in self._wrappedData.peaks:
+                    position = numpy.array([peakDim.position for peakDim in apiPeak.sortedPeakDims()])  # ignores aliasing
                     existingPositions.append(position - 1)  # -1 because API position starts at 1
 
-                # NB we can not overwrite exclusionBuffer, because it may be used as a parameter in redong
-                # and 'if not exclusionBuffer' does not work on nympy arrays.
+                # NB we can not overwrite exclusionBuffer, because it may be used as a parameter in redoing
+                # and 'if not exclusionBuffer' does not work on numpy arrays.
                 numpyExclusionBuffer = numpy.array(exclusionBuffer)
 
                 for position, height in peakPoints:

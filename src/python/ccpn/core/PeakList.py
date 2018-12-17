@@ -791,7 +791,7 @@ class PeakList(AbstractWrapperObject):
         :param excludedRegions:
         :param excludedDiagonalDims:
         :param excludedDiagonalTransform:
-        :return:
+        :return: list of peaks.
         """
 
         from ccpnc.peak import Peak as CPeak

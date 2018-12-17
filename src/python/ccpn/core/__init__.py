@@ -310,7 +310,8 @@ for className in _coreImportOrder:
         if cls not in parentClass._childClasses:
             # Should not be necessary to check, but apparently this code can be executed twice
             parentClass._childClasses.append(cls)
-    _coreClassMap[className] = cls
+    _coreClassMap[cls.className] = cls
+    _coreClassMap[cls.shortClassName] = cls
 
 # Wrapped graphics data classes
 from ccpn.ui._implementation import _uiImportOrder
@@ -324,7 +325,8 @@ for className in _uiImportOrder:
         if cls not in parentClass._childClasses:
             # Should not be necessary to check, but apparently this code can be executed twice
             parentClass._childClasses.append(cls)
-    _coreClassMap[className] = cls
+    _coreClassMap[cls.className] = cls
+    _coreClassMap[cls.shortClassName] = cls
 
 # connect classes to project
 # NB - customisation for different UIs is done by inserting _factoryFunctions

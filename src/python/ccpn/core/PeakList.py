@@ -818,6 +818,7 @@ class PeakList(AbstractWrapperObject):
                 posLevel = posLevel or 0.0
                 negLevel = negLevel or 0.0
 
+                # Note: requires an exclusionBuffer of 1 in all axis directions
                 peakPoints = CPeak.findPeaks(dataArray, doNeg, doPos,
                                              negLevel, posLevel, exclusionBuffer,
                                              nonAdj, minDropfactor, minLinewidth,

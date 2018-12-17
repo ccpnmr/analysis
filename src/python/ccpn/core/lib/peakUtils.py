@@ -39,6 +39,15 @@ N = 'N'
 C = 'C'
 DefaultAtomWeights = OrderedDict(((H, 7.00), (N, 1.00), (C, 4.00), (OTHER, 1.00)))
 
+
+class Dictlist(dict):
+  def __setitem__(self, key, value):
+    try:
+      self[key]
+    except KeyError:
+      super(Dictlist, self).__setitem__(key, [])
+    self[key].append(value)
+
 def getMultipletPosition(multiplet, dim, unit='ppm'):
     try:
       if multiplet.position[dim] is None:
@@ -254,6 +263,7 @@ def _traverse(o, tree_types=(list, tuple)):
 def __filterPeaksBySelectedNmrAtomOption(nmrResidue, nmrAtomsNames, spectra):
   peaks = []
   nmrAtoms = []
+  peakLists = [sp.peakLists[-1] for sp in spectra] # take only the last peakList if more then 1
   for nmrAtomName in nmrAtomsNames:
     nmrAtom = nmrResidue.getNmrAtom(str(nmrAtomName))
     if nmrAtom is not None:
@@ -264,8 +274,9 @@ def __filterPeaksBySelectedNmrAtomOption(nmrResidue, nmrAtomsNames, spectra):
     for peak in nmrAtom.assignedPeaks:
       if peak.peakList.spectrum in spectra:
         if nmrAtom.name in nmrAtomsNames:
-          filteredPeaks.append(peak)
-          nmrAtomsNamesAvailable.append(nmrAtom.name)
+          if peak.peakList in peakLists:
+            filteredPeaks.append(peak)
+            nmrAtomsNamesAvailable.append(nmrAtom.name)
   if len(list(set(filteredPeaks))) == len(spectra): # deals when a residue is assigned to multiple peaks
     if len(list(set(nmrAtomsNamesAvailable))) == len(nmrAtomsNames):
       peaks += filteredPeaks

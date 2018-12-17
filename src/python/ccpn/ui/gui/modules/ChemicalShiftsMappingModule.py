@@ -636,6 +636,10 @@ class ChemicalShiftsMapping(CcpnModule):
 
     i += 1
 
+    self.scaleKd = Label(self.scrollAreaWidgetContents, text='Scale Kds', grid=(i, 0))
+    self.scaleKdCb = CheckBox(self.scrollAreaWidgetContents, checked=True, callback=self._plotKdFromCurrent, grid=(i, 1))
+    i += 1
+
     self.updateButton = Button(self.scrollAreaWidgetContents, text='Update All', callback=self.updateModule,
                                grid=(i, 1))
     i += 1
@@ -958,6 +962,7 @@ class ChemicalShiftsMapping(CcpnModule):
       spectraWithPeaks = [peak.peakList.spectrum for peak in peaks]
       spectraWithMissingPeaks = [spectrum for spectrum in spectra if spectrum not in spectraWithPeaks]
       nmrResidue._spectraWithMissingPeaks = spectraWithMissingPeaks
+
       return nmrResidue._spectraWithMissingPeaks
 
 
@@ -1076,7 +1081,10 @@ class ChemicalShiftsMapping(CcpnModule):
           aScaled = row.values
         pen = pg.functions.mkPen(hexToRgb(obj._colour), width=1)
         brush = pg.functions.mkBrush(hexToRgb(obj._colour), width=1)
-        self.kdPlot.plot(xs, aScaled, symbol='o', pen=pen, symbolBrush=brush, name=obj.pid)
+        if self.scaleKdCb.isChecked():
+          self.kdPlot.plot(xs, aScaled, symbol='o', pen=pen, symbolBrush=brush, name=obj.pid)
+        else:
+          self.kdPlot.plot(xs, ys, symbol='o', pen=pen, symbolBrush=brush, name=obj.pid)
 
   def _selectCurrentNmrResiduesNotifierCallback(self, data):
     # TODO replace colour
@@ -1124,6 +1132,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
     self._kdContextMenu = Menu('', None, isFloatWidget=True)
     self._kdContextMenu.addAction('Reset View', self.kdPlot.autoRange)
+    self._kdContextMenu.addAction('Legend', self._togleKdLegend)
     self._kdContextMenu.addSeparator()
     
     self._kdContextMenu.addSeparator()
@@ -1134,7 +1143,13 @@ class ChemicalShiftsMapping(CcpnModule):
     self._kdContextMenu.addAction(self.exporAllAction)
 
     self._kdContextMenu.exec_(ev.screenPos().toPoint())
-  
+
+  def _togleKdLegend(self):
+    if self.kdPlot.legend.isVisible():
+      self.kdPlot.legend.hide()
+    else:
+      self.kdPlot.legend.show()
+
   def _kdViewboxMouseClickEvent(self, event):
     """ click on scatter viewBox. The parent of scatterPlot. Opens the context menu at any point. """
     if event.button() == QtCore.Qt.RightButton:

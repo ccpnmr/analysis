@@ -38,8 +38,10 @@ from PyQt5.QtGui import QKeySequence
 
 from ccpn.util.Svg import Svg
 from ccpn.ui.gui.lib.mouseEvents import SELECT, setCurrentMouseMode, getCurrentMouseMode
-from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
-from ccpn.ui.gui.lib.GuiStrip import GuiStrip
+from ccpn.ui.gui.lib import GuiSpectrumDisplay
+from ccpn.ui.gui.lib import GuiSpectrumView
+from ccpn.ui.gui.lib import GuiStrip
+from ccpn.ui.gui.lib import GuiPeakListView
 from ccpn.ui.gui.lib.GuiWindow import GuiWindow
 
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
@@ -56,6 +58,7 @@ from ccpn.util.Common import uniquify
 from ccpn.util import Logging
 
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
+from ccpn.core.Peak import Peak
 
 
 #from ccpn.util.Logging import getLogger
@@ -113,12 +116,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self._initProject()
         self._setShortcuts()
         self._setUserShortcuts(preferences=self.application.preferences, mainWindow=self)
-
         # Notifiers
         self._setupNotifiers()
-        # self.application.current.registerNotify(self._resetRemoveStripAction, 'strips')
-        # self.setNotifier(self.application.current, [Notifier.CURRENT], 'strip', self._resetRemoveStripAction)
-        # self.setNotifier(self.application.current, [Notifier.CURRENT], 'strip', self._highlightCurrentStrip)
 
         self.feedbackPopup = None
         self.updatePopup = None
@@ -158,8 +157,19 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         return tuple([m for m in self.moduleArea.modules.values()])
 
     def _setupNotifiers(self):
-        "Setup notifiers connecting gui to project"
+        """Setup notifiers connecting gui to current and project
+        """
+        # Marks
+        self.setNotifier(self.application.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
+                         'Mark', GuiStrip._updateDisplayedMarks)
+        # current notifiers
         self.setNotifier(self.application.current, [Notifier.CURRENT], 'strip', self._highlightCurrentStrip)
+        self.setNotifier(self.application.current, [Notifier.CURRENT], 'peaks', GuiStrip._updateSelectedPeaks)
+        self.setNotifier(self.application.current, [Notifier.CURRENT], 'integrals', GuiStrip._updateSelectedIntegrals)
+        self.setNotifier(self.application.current, [Notifier.CURRENT], 'multiplets', GuiStrip._updateSelectedMultiplets)
+        # Peaks
+        self.setNotifier(self.application.project, [Notifier.DELETE], 'Peak', GuiSpectrumDisplay._deletedPeak)
+        self.setNotifier(self.application.project, [Notifier.RENAME], 'NmrAtom', GuiPeakListView._updateAssignmentsNmrAtom)
 
     def _activatedkeySequence(self, ev):
         key = ev.key()
@@ -787,7 +797,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
     # _mouseMovedSignal = QtCore.pyqtSignal(dict)
 
-    def _mousePositionMoved(self, strip: GuiStrip, position: QtCore.QPointF):
+    def _mousePositionMoved(self, strip: GuiStrip.GuiStrip, position: QtCore.QPointF):
         """ CCPN INTERNAL: called from ViewBox
         This is called when the mouse cursor position has changed in some strip
         :param strip: The strip the mouse cursor is hovering over

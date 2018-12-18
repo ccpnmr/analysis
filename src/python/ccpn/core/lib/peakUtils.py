@@ -263,7 +263,9 @@ def _traverse(o, tree_types=(list, tuple)):
 def __filterPeaksBySelectedNmrAtomOption(nmrResidue, nmrAtomsNames, spectra):
   peaks = []
   nmrAtoms = []
-  peakLists = [sp.peakLists[-1] for sp in spectra] # take only the last peakList if more then 1
+
+  peakLists = [sp.peakLists[-1] if len(sp.peakLists)>0 else getLogger().warn('No PeakList for %s' %sp)
+               for sp in spectra ] # take only the last peakList if more then 1
   for nmrAtomName in nmrAtomsNames:
     nmrAtom = nmrResidue.getNmrAtom(str(nmrAtomName))
     if nmrAtom is not None:
@@ -277,6 +279,7 @@ def __filterPeaksBySelectedNmrAtomOption(nmrResidue, nmrAtomsNames, spectra):
           if peak.peakList in peakLists:
             filteredPeaks.append(peak)
             nmrAtomsNamesAvailable.append(nmrAtom.name)
+
   if len(list(set(filteredPeaks))) == len(spectra): # deals when a residue is assigned to multiple peaks
     if len(list(set(nmrAtomsNamesAvailable))) == len(nmrAtomsNames):
       peaks += filteredPeaks

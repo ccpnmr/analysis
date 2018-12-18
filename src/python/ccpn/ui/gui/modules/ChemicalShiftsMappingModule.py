@@ -1,7 +1,7 @@
 """
 Module Documentation here
 # TODO : when update module, keep focus on selected item in the table, keep same zoom on the plot
-check zoom
+
 
 """
 #=========================================================================================
@@ -638,6 +638,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
     self.scaleKd = Label(self.scrollAreaWidgetContents, text='Scale Kds', grid=(i, 0))
     self.scaleKdCb = CheckBox(self.scrollAreaWidgetContents, checked=True, callback=self._plotKdFromCurrent, grid=(i, 1))
+    self._plotKdFromCurrent()
     i += 1
 
     self.updateButton = Button(self.scrollAreaWidgetContents, text='Update All', callback=self.updateModule,
@@ -951,8 +952,7 @@ class ChemicalShiftsMapping(CcpnModule):
         if not silent:
           self.updateTable(self.nmrResidueTable._nmrChain)
           self.updateBarGraph()
-
-
+          self._plotKdFromCurrent()
 
   def _updatedPeakCount(self, nmrResidue, spectra):
     if len(nmrResidue.nmrAtoms)>0:
@@ -1085,6 +1085,7 @@ class ChemicalShiftsMapping(CcpnModule):
           self.kdPlot.plot(xs, aScaled, symbol='o', pen=pen, symbolBrush=brush, name=obj.pid)
         else:
           self.kdPlot.plot(xs, ys, symbol='o', pen=pen, symbolBrush=brush, name=obj.pid)
+    self.kdPlot.autoRange()
 
   def _selectCurrentNmrResiduesNotifierCallback(self, data):
     # TODO replace colour

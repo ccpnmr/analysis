@@ -97,6 +97,10 @@ class NmrResidue(AbstractWrapperObject):
     _delta = None
     _includeInDeltaShift = True  # default included in the calculation
 
+    # Number of fields that comprise the object's pid; Used to get parent id's
+    _numberOfIdFields = 2
+
+
     # CCPN properties
     @property
     def _apiResonanceGroup(self) -> ApiResonanceGroup:

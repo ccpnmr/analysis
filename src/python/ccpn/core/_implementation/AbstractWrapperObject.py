@@ -129,6 +129,10 @@ class AbstractWrapperObject(NotifierBase):
     # Default values for parameters to 'new' function. Overridden in subclasses
     _defaultInitValues = None
 
+    # Number of fields that comprise the object's pid; usually 1 but overridden in some subclasses
+    # e.g. NmrResidue and Residue. Used to get parent id's
+    _numberOfIdFields = 1
+
     # Implementation methods
 
     def __init__(self, project: 'Project', wrappedData: ApiImplementation.DataObject):

@@ -47,8 +47,8 @@ def pid2PluralName(pid: str) -> str:
 
 
 def getParentPid(childPid) -> Pid.Pid:
-    """Get the pid of parent of childPid; only uses Pid defintions (i.e. does not involve the actual objects)
-    :returns Pid instance of parent
+    """Get the pid of parent of childPid; only uses Pid definitions (i.e. does not involve the actual objects)
+    :returns Pid instance defining parent
     """
     if not isinstance(childPid, (str, Pid.Pid)):
         raise ValueError('Invalid pid "%s"' % childPid)

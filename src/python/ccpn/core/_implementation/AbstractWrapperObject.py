@@ -978,6 +978,8 @@ class AbstractWrapperObject(NotifierBase):
         pendingNotifications = project._pendingNotifications
 
         #EJB 20181217: test for preDelete
+        #       required for some table updates that need to ignore cell contents that
+        #       are about to be deleted
         if action == 'delete':
             self._flaggedForDelete = True
         else:

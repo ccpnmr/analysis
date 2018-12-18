@@ -39,11 +39,15 @@ from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Project import Project
 from ccpn.core._implementation import Io as coreIo
 from ccpn.core.lib import CcpnNefIo, CcpnSparkyIo
+from ccpn.core.lib.Notifiers import NotifierBase
+from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.framework import Version
 from ccpn.framework.Current import Current
 from ccpn.framework.lib.Pipeline import Pipeline
 from ccpn.framework.Translation import languages, defaultLanguage
 from ccpn.framework.Translation import translator
+from ccpn.framework.PathsAndUrls import userPreferencesPath
+from ccpn.framework.PathsAndUrls import userPreferencesDirectory
 from ccpn.ui import interfaces, defaultInterface
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
@@ -63,7 +67,6 @@ from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 from ccpn.ui.gui.guiSettings import getColourScheme
-from ccpn.framework.PathsAndUrls import userPreferencesDirectory
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import logCommandBlock
 from ccpn.core.lib.ContextManagers import catchExceptions
@@ -241,7 +244,7 @@ class AutoBackup(Thread):
                     pass
 
 
-class Framework:
+class Framework(NotifierBase):
     """
     The Framework class is the base class for all applications.
     """
@@ -515,6 +518,15 @@ class Framework:
         if not self.args.skipUserPreferences:
             sys.stderr.write('==> Getting user preferences\n')
         self.preferences = getPreferences(self.args.skipUserPreferences)
+
+    def _savePreferences(self):
+        "Save the preferences to file"
+        with catchExceptions(application=self, errorStringTemplate='Error saving preferences; "%s"'):
+            directory = os.path.dirname(userPreferencesPath)
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+            with open(userPreferencesPath, 'w+') as prefFile:
+                json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
 
     def _getUserLayout(self, userPath=None):
         """defines the application.layout dictionary.
@@ -1229,24 +1241,27 @@ class Framework:
     ###################################################################################################################
 
     def createNewProject(self):
-        okToContinue = self.ui.mainWindow._queryCloseProject(title='New Project',
-                                                             phrase='create a new')
-        if okToContinue:
-            project = self.newProject()
-            try:
+        "Callback for creating new project"
+        with catchExceptions(application=self, errorStringTemplate='Error creating new project:'):
+            okToContinue = self.ui.mainWindow._queryCloseProject(title='New Project',
+                                                                 phrase='create a new')
+            if okToContinue:
+                project = self.newProject()
+                if project is None:
+                    raise RuntimeError('Unable to create new project')
                 project._mainWindow.show()
                 QtWidgets.QApplication.setActiveWindow(project._mainWindow)
-            except Exception as es:
-                getLogger().warning('Error creating new project:', str(es))
 
     def newProject(self, name='default'):
-        # """Create new, empty project"""
+        """Create new, empty project; return Project instance
+        """
 
         # NB _closeProject includes a gui cleanup call
 
         if self.project is not None:
             self._closeProject()
 
+        project = None
         sys.stderr.write('==> Creating new, empty project\n')
         newName = re.sub('[^0-9a-zA-Z]+', '', name)
         if newName != name:
@@ -1255,9 +1270,7 @@ class Framework:
         project = coreIo.newProject(name=newName, useFileLogger=self.useFileLogger, level=self.level)
         project._isNew = True
         # Needs to know this for restoring the GuiSpectrum Module. Could be removed after decoupling Gui and Data!
-
         self._initialiseProject(project)
-
         project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
 
         return project
@@ -1905,53 +1918,55 @@ class Framework:
         Saves application preferences. Displays message box asking user to save project or not.
         Closes Application.
         """
-        prefPath = os.path.expanduser("~/.ccpn/v3settings.json")
-        directory = os.path.dirname(prefPath)
-        if not os.path.exists(directory):
-            try:
-                os.makedirs(directory)
-            except Exception as e:
-                getLogger().warning('Preferences not saved: %s' % (directory, e))
-                return
+        self.ui.mainWindow._closeEvent(event=event)
 
-        prefFile = open(prefPath, 'w+')
-        json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
-        prefFile.close()
-
-        reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
-                                        ['Save and Quit', 'Quit without Saving', 'Cancel'])  # ejb
-        if reply == 'Save and Quit':
-            if event:
-                event.accept()
-            prefFile = open(prefPath, 'w+')
-            json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
-            prefFile.close()
-
-            success = self.saveProject()
-            if success is True:
-                # Close and clean up project
-                self._closeProject()
-                QtWidgets.QApplication.quit()
-                os._exit(0)
-
-            else:
-                if event:  # ejb - don't close the project
-                    event.ignore()
-
-        elif reply == 'Quit without Saving':
-            if event:
-                event.accept()
-            prefFile = open(prefPath, 'w+')
-            json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
-            prefFile.close()
-            self._closeProject()
-
-            QtWidgets.QApplication.quit()
-            os._exit(0)
-
-        else:
-            if event:
-                event.ignore()
+        # prefPath = os.path.expanduser("~/.ccpn/v3settings.json")
+        # directory = os.path.dirname(prefPath)
+        # if not os.path.exists(directory):
+        #     try:
+        #         os.makedirs(directory)
+        #     except Exception as e:
+        #         getLogger().warning('Preferences not saved: %s' % (directory, e))
+        #         return
+        #
+        # prefFile = open(prefPath, 'w+')
+        # json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
+        # prefFile.close()
+        #
+        # reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
+        #                                 ['Save and Quit', 'Quit without Saving', 'Cancel'])  # ejb
+        # if reply == 'Save and Quit':
+        #     if event:
+        #         event.accept()
+        #     prefFile = open(prefPath, 'w+')
+        #     json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
+        #     prefFile.close()
+        #
+        #     success = self.saveProject()
+        #     if success is True:
+        #         # Close and clean up project
+        #         self._closeProject()
+        #         QtWidgets.QApplication.quit()
+        #         os._exit(0)
+        #
+        #     else:
+        #         if event:  # ejb - don't close the project
+        #             event.ignore()
+        #
+        # elif reply == 'Quit without Saving':
+        #     if event:
+        #         event.accept()
+        #     prefFile = open(prefPath, 'w+')
+        #     json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
+        #     prefFile.close()
+        #     self._closeProject()
+        #
+        #     QtWidgets.QApplication.quit()
+        #     os._exit(0)
+        #
+        # else:
+        #     if event:
+        #         event.ignore()
 
     def _closeMainWindows(self):
         tempModules = self.ui.mainWindow.application.ccpnModules
@@ -1978,8 +1993,9 @@ class Framework:
     def _closeProject(self):
         """Close project and clean up - when opening another or quitting application"""
 
-        # NB: this function must clan up both wrapper and ui/gui
+        # NB: this function must clean up both wrapper and ui/gui
 
+        self.deleteAllNotifiers()
         if self.ui.mainWindow:
             # ui/gui cleanup
             self._closeMainWindows()
@@ -2771,7 +2787,7 @@ def getPreferences(skipUserPreferences=False, defaultPath=None, userPath=None):
 
         # read user settings and update if not skipped
         if not skipUserPreferences:
-            from ccpn.framework.PathsAndUrls import userPreferencesPath
+            # from ccpn.framework.PathsAndUrls import userPreferencesPath
 
             preferencesPath = (userPath if userPath else os.path.expanduser(userPreferencesPath))
             if os.path.isfile(preferencesPath):

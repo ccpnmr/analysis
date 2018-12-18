@@ -38,8 +38,10 @@ from PyQt5.QtGui import QKeySequence
 
 from ccpn.util.Svg import Svg
 from ccpn.ui.gui.lib.mouseEvents import SELECT, setCurrentMouseMode, getCurrentMouseMode
-from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
-from ccpn.ui.gui.lib.GuiStrip import GuiStrip
+from ccpn.ui.gui.lib import GuiSpectrumDisplay
+from ccpn.ui.gui.lib import GuiSpectrumView
+from ccpn.ui.gui.lib import GuiStrip
+from ccpn.ui.gui.lib import GuiPeakListView
 from ccpn.ui.gui.lib.GuiWindow import GuiWindow
 
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
@@ -56,6 +58,7 @@ from ccpn.util.Common import uniquify
 from ccpn.util import Logging
 
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
+from ccpn.core.Peak import Peak
 
 
 #from ccpn.util.Logging import getLogger
@@ -113,10 +116,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self._initProject()
         self._setShortcuts()
         self._setUserShortcuts(preferences=self.application.preferences, mainWindow=self)
-
-        # self.application.current.registerNotify(self._resetRemoveStripAction, 'strips')
-        # self.setNotifier(self.application.current, [Notifier.CURRENT], 'strip', self._resetRemoveStripAction)
-        self.setNotifier(self.application.current, [Notifier.CURRENT], 'strip', self._highlightCurrentStrip)
+        # Notifiers
+        self._setupNotifiers()
 
         self.feedbackPopup = None
         self.updatePopup = None
@@ -155,6 +156,21 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         "Return tuple of modules currently displayed"
         return tuple([m for m in self.moduleArea.modules.values()])
 
+    def _setupNotifiers(self):
+        """Setup notifiers connecting gui to current and project
+        """
+        # Marks
+        self.setNotifier(self.application.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
+                         'Mark', GuiStrip._updateDisplayedMarks)
+        # current notifiers
+        self.setNotifier(self.application.current, [Notifier.CURRENT], 'strip', self._highlightCurrentStrip)
+        self.setNotifier(self.application.current, [Notifier.CURRENT], 'peaks', GuiStrip._updateSelectedPeaks)
+        self.setNotifier(self.application.current, [Notifier.CURRENT], 'integrals', GuiStrip._updateSelectedIntegrals)
+        self.setNotifier(self.application.current, [Notifier.CURRENT], 'multiplets', GuiStrip._updateSelectedMultiplets)
+        # Peaks
+        self.setNotifier(self.application.project, [Notifier.DELETE], 'Peak', GuiSpectrumDisplay._deletedPeak)
+        self.setNotifier(self.application.project, [Notifier.RENAME], 'NmrAtom', GuiPeakListView._updateAssignmentsNmrAtom)
+
     def _activatedkeySequence(self, ev):
         key = ev.key()
         self.statusBar().showMessage('key: %s' % str(key))
@@ -184,7 +200,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         #TODO:RASMUS: assure that isNew() and isTemporary() get added to Project; remove API calls
         isNew = self._apiWindow.root.isModified  # a bit of a hack this, but should be correct
 
-        project = self._project
+        project = self.application.project
         path = project.path
         self.namespace['project'] = project
         self.namespace['runMacro'] = self.pythonConsole._runMacro
@@ -601,21 +617,20 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         Saves application preferences. Displays message box asking user to save project or not.
         Closes Application.
         """
-        from ccpn.framework.PathsAndUrls import userPreferencesPath
-
+        #GWV 20181214: moved to Framework._savePreferences
+        #from ccpn.framework.PathsAndUrls import userPreferencesPath
         #prefPath = os.path.expanduser("~/.ccpn/v3settings.json")
-        #TODO:TJ move all of the saving of preferences to FrameWork
-        directory = os.path.dirname(userPreferencesPath)
-        if not os.path.exists(directory):
-            try:
-                os.makedirs(directory)
-            except Exception as e:
-                self._project._logger.warning('Preferences not saved: %s' % (directory, e))
-                return
-
-        prefFile = open(userPreferencesPath, 'w+')
-        json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
-        prefFile.close()
+        # directory = os.path.dirname(userPreferencesPath)
+        # if not os.path.exists(directory):
+        #     try:
+        #         os.makedirs(directory)
+        #     except Exception as e:
+        #         self._project._logger.warning('Preferences not saved: %s' % (directory, e))
+        #         return
+        #
+        # prefFile = open(userPreferencesPath, 'w+')
+        # json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
+        # prefFile.close()
 
         # set the active window to mainWindow so that the quit popup centres correctly.
         QtWidgets.QApplication.setActiveWindow(self)
@@ -625,10 +640,11 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         if reply == 'Save and Quit':
             if event:
                 event.accept()
-            prefFile = open(userPreferencesPath, 'w+')
-            json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
-            prefFile.close()
+            # prefFile = open(userPreferencesPath, 'w+')
+            # json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
+            # prefFile.close()
 
+            self.application._savePreferences()
             success = self.application.saveProject()
             if success is True:
                 # Close and clean up project
@@ -644,10 +660,11 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         elif reply == 'Quit without Saving':
             if event:
                 event.accept()
-            prefFile = open(userPreferencesPath, 'w+')
-            json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
-            prefFile.close()
+            # prefFile = open(userPreferencesPath, 'w+')
+            # json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
+            # prefFile.close()
 
+            self.application._savePreferences()
             self.deleteAllNotifiers()
             self.application._closeProject()
             QtWidgets.QApplication.quit()
@@ -666,7 +683,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         text = ''.join([line.strip().split(':', 6)[-1] + '\n' for line in l])
         editor.textBox.setText(text)
 
-    #TODO:TJ the below is in Framework (slightly different implementation) so presumably does not belong here???
     #Framework owns the command, this part juts get the file to run
     # def runMacro(self, macroFile:str=None):
     #   """
@@ -781,7 +797,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
     # _mouseMovedSignal = QtCore.pyqtSignal(dict)
 
-    def _mousePositionMoved(self, strip: GuiStrip, position: QtCore.QPointF):
+    def _mousePositionMoved(self, strip: GuiStrip.GuiStrip, position: QtCore.QPointF):
         """ CCPN INTERNAL: called from ViewBox
         This is called when the mouse cursor position has changed in some strip
         :param strip: The strip the mouse cursor is hovering over

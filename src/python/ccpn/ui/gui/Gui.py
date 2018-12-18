@@ -98,15 +98,15 @@ class Gui(Ui):
         # notifier = project.registerNotifier('Strip', 'create', GuiStrip.GuiStrip._resetRemoveStripAction)
         # project.duplicateNotifier('Strip', 'delete', notifier)
 
-        # TODO:ED not sure this is the best place
-        project.registerNotifier('Mark', 'create', GuiStrip._updateDisplayedMarks)
-        project.registerNotifier('Mark', 'change', GuiStrip._updateDisplayedMarks)
-        project.registerNotifier('Mark', 'delete', GuiStrip._updateDisplayedMarks)
+        # GWV 20181216: moved to GuiMainWindow
+        # project.registerNotifier('Mark', 'create', GuiStrip._updateDisplayedMarks)
+        # project.registerNotifier('Mark', 'change', GuiStrip._updateDisplayedMarks)
+        # project.registerNotifier('Mark', 'delete', GuiStrip._updateDisplayedMarks)
 
-        # TODO:ED sorry - don't actually want _appBase
-        self._currentPeakNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'peaks', GuiStrip._updateSelectedPeaks)
-        self._currentIntegralNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'integrals', GuiStrip._updateSelectedIntegrals)
-        self._currentMultipletNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'multiplets', GuiStrip._updateSelectedMultiplets)
+        # GWV 20181216: moved to GuiMainWindow
+        # self._currentPeakNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'peaks', GuiStrip._updateSelectedPeaks)
+        # self._currentIntegralNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'integrals', GuiStrip._updateSelectedIntegrals)
+        # self._currentMultipletNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'multiplets', GuiStrip._updateSelectedMultiplets)
 
         from ccpn.ui.gui.lib import GuiSpectrumDisplay
 
@@ -144,7 +144,7 @@ class Gui(Ui):
         # project.registerNotifier('MultipletListView', 'change',
         #                          GuiMultipletListView.GuiMultipletListView._changedMultipletListView)
 
-        # TODO:ED need to unregister these notifiers on close
+        # GWV 20181216: moved to GuiMainWindow
         # self._updateNotifier1 = Notifier(project,
         #                                  triggers=[Notifier.RENAME],
         #                                  targetName='NmrAtom',

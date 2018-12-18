@@ -71,6 +71,7 @@ from ccpn.util.Logging import getLogger
 from types import SimpleNamespace
 from contextlib import contextmanager
 from ccpn.core.lib.ContextManagers import undoBlockManager
+from ccpn.core.lib.Util import getParentObjectFromPid
 
 # BG_COLOR = QtGui.QColor('#E0E0E0')
 # TODO:ED add some documentation here
@@ -1625,11 +1626,21 @@ QuickTable::item::selected {
 
                     # check whether we are the row object or still a cell object
                     cellType = self._tableData['rowClass']
-                    if isinstance(rowObj, cellType):
+                    if type(rowObj) is cellType:
+
                         self._updateRowCallback(newData)
 
-                        # if trigger = 'delete':
-                        #   update the original object from getParentfromPartialPid...
+                        if data[Notifier.TRIGGER] == 'rename':
+                            #update the original object from getParentfromPartialPid...
+
+                            # find the original parent row object from the oldPid
+                            oldPid = data[Notifier.OLDPID]
+                            cellParent = getParentObjectFromPid(self.project, oldPid)
+                            if cellParent is not rowObj:
+
+                                # if it has changed then update the original row
+                                newData[Notifier.OBJECT] = cellParent
+                                self._updateRowCallback(newData)
 
                     else:
                         self._updateCellCallback(rowCallback, newData)

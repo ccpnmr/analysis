@@ -54,7 +54,9 @@ class Residue(AbstractWrapperObject):
 
   # Qualified name of matching API class
   _apiClassQualifiedName = ApiResidue._metaclass.qualifiedName()
-  
+
+  # Number of fields that comprise the object's pid; Used to get parent id's
+  _numberOfIdFields = 2
 
   # CCPN properties  
   @property

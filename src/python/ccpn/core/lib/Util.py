@@ -46,6 +46,24 @@ def pid2PluralName(pid: str) -> str:
         return cls._pluralLinkName
 
 
+def getParentPid(childPid) -> Pid.Pid:
+    """Get the pid of parent of childPid; only uses Pid defintions (i.e. does not involve the actual objects)
+    :returns Pid instance of parent
+    """
+    if not isinstance(childPid, (str, Pid.Pid)):
+        raise ValueError('Invalid pid "%s"' % childPid)
+    childPid = Pid.Pid(childPid)
+    if childPid.type not in _coreClassMap:
+        raise ValueError('Invalid pid "%s"' % childPid)
+
+    klass = _coreClassMap[childPid.type]
+    parentClass = klass._parentClass
+    offset = klass._numberOfIdFields
+    fields = [parentClass.shortClassName] + list(childPid.fields[:-offset])
+    parentPid = Pid.Pid.new(*fields)
+    return parentPid
+
+
 def getParentObjectFromPid(project, pid):
     """Get a parent object from a pid, which may represent a deleted object.
 
@@ -56,9 +74,6 @@ def getParentObjectFromPid(project, pid):
         getParentObjectFromPid(pid) -> 'NR:A.40.ALA'
     """
     if not isinstance(pid, (str, Pid.Pid)):
-        raise ValueError('Invalid pid "%s"' % pid)
-    pid = Pid.Pid(pid)
-    if pid.type not in _coreClassMap:
         raise ValueError('Invalid pid "%s"' % pid)
 
     obj = None
@@ -71,10 +86,8 @@ def getParentObjectFromPid(project, pid):
         pass
 
     if obj is None:
-        parentClass = _coreClassMap[pid.type]._parentClass
-        fields = [parentClass.shortClassName] + list(pid.fields[:-1])
-        parentPid = Pid.Pid.new(*fields)
-        obj = project.getByPid(parentPid)
+       parentPid = getParentPid(pid)
+       obj = project.getByPid(parentPid)
     return obj
 
 

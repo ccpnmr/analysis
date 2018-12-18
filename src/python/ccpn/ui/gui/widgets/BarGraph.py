@@ -275,7 +275,7 @@ class CustomViewBox(pg.ViewBox):
         self.selectionBox.scale(r.width(), r.height())
         self.selectionBox.show()
 
-  def mouseClickEvent(self, event):
+    def mouseClickEvent(self, event):
 
         if event.button() == QtCore.Qt.RightButton:
             event.accept()

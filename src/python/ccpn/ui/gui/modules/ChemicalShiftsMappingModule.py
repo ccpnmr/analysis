@@ -894,13 +894,13 @@ class ChemicalShiftsMapping(CcpnModule):
           if len(nmrAtoms) <= 1:
             navigateToNmrResidueInDisplay(display=strip.spectrumDisplay,
                                           nmrResidue=nmrResidue,
-                                          widths=_getCurrentZoomRatio(strip.viewBox.viewRange()),
+                                          widths=_getCurrentZoomRatio(strip.viewRange()),
                                           markPositions=True
                                           )
           else:
             navigateToNmrAtomsInStrip(strip,
                                       nmrAtoms=nmrAtoms,
-                                      widths=_getCurrentZoomRatio(strip.viewBox.viewRange()),
+                                      widths=_getCurrentZoomRatio(strip.viewRange()),
                                       markPositions=True
                                       )
       else:
@@ -1190,13 +1190,13 @@ class ChemicalShiftsMapping(CcpnModule):
                  if len(nmrAtoms) <= 1:
                    navigateToNmrResidueInDisplay(display=strip.spectrumDisplay,
                                                  nmrResidue=nmrResidue,
-                                                 widths=_getCurrentZoomRatio(strip.viewBox.viewRange()),
+                                                 widths=_getCurrentZoomRatio(strip.viewRange()),
                                                  markPositions=True
                                              )
                  else:
                    navigateToNmrAtomsInStrip(strip,
                                              nmrAtoms=nmrAtoms,
-                                             widths=_getCurrentZoomRatio(strip.viewBox.viewRange()),
+                                             widths=_getCurrentZoomRatio(strip.viewRange()),
                                              markPositions=True
                                              )
              else:

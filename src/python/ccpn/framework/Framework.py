@@ -61,7 +61,7 @@ from ccpn.util.Common import uniquify
 from ccpn.util.Logging import getLogger
 from ccpn.util import Layout
 from ccpn.ui.gui.Gui import Gui
-from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
+# from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 from ccpnmodel.ccpncore.api.memops import Implementation
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats

@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-03-22 15:13:45 +0000 (Wed, March 22, 2017) $"
 from PyQt5 import QtCore, QtGui
 from ccpn.ui.gui.lib.GuiListView import GuiListViewABC
 
+
 NULL_RECT = QtCore.QRectF()
 IDENTITY = QtGui.QTransform()
 IDENTITY.reset()

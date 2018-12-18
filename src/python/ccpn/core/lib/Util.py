@@ -38,6 +38,7 @@ def pid2PluralName(pid: str) -> str:
     """Get plural class name, (e.g. 'peaks', 'spectra' from short-form or long-form, Pid string
     Unrecognised strings are returned unchanged"""
     from ccpn.core.Project import Project
+
     tag = pid.split(Pid.PREFIXSEP, 1)[0]
     cls = Project._className2Class.get(tag)
     if cls is None:
@@ -86,8 +87,8 @@ def getParentObjectFromPid(project, pid):
         pass
 
     if obj is None:
-       parentPid = getParentPid(pid)
-       obj = project.getByPid(parentPid)
+        parentPid = getParentPid(pid)
+        obj = project.getByPid(parentPid)
     return obj
 
 
@@ -106,7 +107,7 @@ def expandDollarFilePath(project: 'Project', filePath: str) -> str:
         '$INSIDE/'   : 'insideData',
         '$ALONGSIDE/': 'alongsideData',
         '$DATA/'     : 'remoteData',
-    }
+        }
 
     if not filePath.startswith('$'):
         # Nothing to expand

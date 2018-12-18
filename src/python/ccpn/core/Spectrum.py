@@ -142,8 +142,8 @@ class Spectrum(AbstractWrapperObject):
 
     MAXDIM = 4  # Maximum dimensionality
 
-    PLANEDATACACHE   = '_planeDataCache'  # Attribute name for the planeData cache
-    SLICEDATACACHE   = '_sliceDataCache'  # Attribute name for the slicedata cache
+    PLANEDATACACHE = '_planeDataCache'  # Attribute name for the planeData cache
+    SLICEDATACACHE = '_sliceDataCache'  # Attribute name for the slicedata cache
     SLICE1DDATACACHE = '_slice1DDataCache'  # Attribute name for the 1D slicedata cache
 
     def __init__(self, project: Project, wrappedData: Nmr.ShiftList):
@@ -1149,15 +1149,15 @@ class Spectrum(AbstractWrapperObject):
             raise RuntimeError('Unable to get 1D slice data for %s' % self)
 
         # # store the unscaled value internally so need to multiply the return value again
-            # if self.getSliceData() is  None:
-            #     return np.array([0]*len(self.positions))
-            # else:
-            #     self._intensities = self.getSliceData() / self.scale
-            #
-            #
-            # # OLD - below not needed any more since now scaled in getSliceData()
-            # # if self._intensities is not None:
-            # #   self._intensities *= self.scale
+        # if self.getSliceData() is  None:
+        #     return np.array([0]*len(self.positions))
+        # else:
+        #     self._intensities = self.getSliceData() / self.scale
+        #
+        #
+        # # OLD - below not needed any more since now scaled in getSliceData()
+        # # if self._intensities is not None:
+        # #   self._intensities *= self.scale
 
         return self._intensities
 
@@ -1204,13 +1204,13 @@ class Spectrum(AbstractWrapperObject):
         return self._apiDataSource.getPositionValue(position)
 
     @cached(SLICE1DDATACACHE, maxItems=1, debug=False)
-    def _get1DSliceData(self, position, sliceDim:int):
+    def _get1DSliceData(self, position, sliceDim: int):
         """Internal routine to get 1D sliceData;
         """
         return self._apiDataSource.getSliceData(position=position, sliceDim=sliceDim)
 
     @cached(SLICEDATACACHE, maxItems=1024, debug=False)
-    def _getSliceDataFromPlane(self, position, xDim:int, yDim:int, sliceDim:int):
+    def _getSliceDataFromPlane(self, position, xDim: int, yDim: int, sliceDim: int):
         """Internal routine to get sliceData; optimised to use (buffered) getPlaneData
         CCPNINTERNAL: used in CcpnOpenGL
         """
@@ -1231,16 +1231,16 @@ class Spectrum(AbstractWrapperObject):
         :param sliceDim: Dimension of the slice (1-based)
         :return: numpy data array
         """
-        if self.dimensionCount==1:
+        if self.dimensionCount == 1:
             result = self._get1DSliceData(position=position, sliceDim=sliceDim)
         else:
             position[sliceDim - 1] = 1  # To improve caching; position, dimensions are 1-based
             if sliceDim > 1:
                 result = self._getSliceDataFromPlane(position=position, xDim=1, yDim=sliceDim,
-                                                   sliceDim=sliceDim)
+                                                     sliceDim=sliceDim)
             else:
-                result = self._getSliceDataFromPlane(position=position, xDim=sliceDim, yDim=sliceDim+1,
-                                                   sliceDim=sliceDim)
+                result = self._getSliceDataFromPlane(position=position, xDim=sliceDim, yDim=sliceDim + 1,
+                                                     sliceDim=sliceDim)
         # Optionally scale data depending on self.scale
         if self.scale is not None:
             if self.scale == 0.0:
@@ -1287,8 +1287,8 @@ class Spectrum(AbstractWrapperObject):
 
         position = list(position)  # assure we have a list so we can assign below
         # set the points of xDim, yDim to 1 as these do not matter (to improve caching)
-        position[xDim-1] = 1  # position is 1-based
-        position[yDim-1] = 1
+        position[xDim - 1] = 1  # position is 1-based
+        position[yDim - 1] = 1
         result = self._getPlaneData(position=position, xDim=xDim, yDim=yDim)
         # Optionally scale data depending on self.scale
         if self.scale is not None:
@@ -1566,8 +1566,8 @@ class Spectrum(AbstractWrapperObject):
             result = ()
             for n in range(nregionsTotal):
 
-            # fix to just the first tile
-            # n = 0
+                # fix to just the first tile
+                # n = 0
 
                 array = _arrayOfIndex(n, cumulRegions)
                 chosenRegion = [regions[i][array[i]] for i in range(numDim)]
@@ -1596,7 +1596,7 @@ class Spectrum(AbstractWrapperObject):
                             startPointIntActual, numPointInt,
                             startPointBuffer, endPointBuffer),)
 
-            return result           #dataArray, intRegion
+            return result  #dataArray, intRegion
 
         # for loop fails so return empty arrays in the first element
         return None

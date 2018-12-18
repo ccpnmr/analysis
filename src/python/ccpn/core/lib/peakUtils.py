@@ -40,6 +40,7 @@ N = 'N'
 C = 'C'
 DefaultAtomWeights = OrderedDict(((H, 7.00), (N, 1.00), (C, 4.00), (OTHER, 1.00)))
 
+
 class Dictlist(dict):
     def __setitem__(self, key, value):
         try:
@@ -47,6 +48,7 @@ class Dictlist(dict):
         except KeyError:
             super(Dictlist, self).__setitem__(key, [])
         self[key].append(value)
+
 
 def getMultipletPosition(multiplet, dim, unit='ppm'):
     try:
@@ -272,40 +274,40 @@ def _traverse(o, tree_types=(list, tuple)):
 
 
 def __filterPeaksBySelectedNmrAtomOption(nmrResidue, nmrAtomsNames, spectra):
-  peaks = []
-  nmrAtoms = []
+    peaks = []
+    nmrAtoms = []
 
-  peakLists = [sp.peakLists[-1] if len(sp.peakLists)>0 else getLogger().warn('No PeakList for %s' %sp)
-               for sp in spectra ] # take only the last peakList if more then 1
-  for nmrAtomName in nmrAtomsNames:
-    nmrAtom = nmrResidue.getNmrAtom(str(nmrAtomName))
-    if nmrAtom is not None:
-      nmrAtoms.append(nmrAtom)
-  filteredPeaks = []
-  nmrAtomsNamesAvailable = []
-  for nmrAtom in nmrAtoms:
-    for peak in nmrAtom.assignedPeaks:
-      if peak.peakList.spectrum in spectra:
-        if nmrAtom.name in nmrAtomsNames:
-          if peak.peakList in peakLists:
-            filteredPeaks.append(peak)
-            nmrAtomsNamesAvailable.append(nmrAtom.name)
+    peakLists = [sp.peakLists[-1] if len(sp.peakLists) > 0 else getLogger().warn('No PeakList for %s' % sp)
+                 for sp in spectra]  # take only the last peakList if more then 1
+    for nmrAtomName in nmrAtomsNames:
+        nmrAtom = nmrResidue.getNmrAtom(str(nmrAtomName))
+        if nmrAtom is not None:
+            nmrAtoms.append(nmrAtom)
+    filteredPeaks = []
+    nmrAtomsNamesAvailable = []
+    for nmrAtom in nmrAtoms:
+        for peak in nmrAtom.assignedPeaks:
+            if peak.peakList.spectrum in spectra:
+                if nmrAtom.name in nmrAtomsNames:
+                    if peak.peakList in peakLists:
+                        filteredPeaks.append(peak)
+                        nmrAtomsNamesAvailable.append(nmrAtom.name)
 
-  if len(list(set(filteredPeaks))) == len(spectra): # deals when a residue is assigned to multiple peaks
-    if len(list(set(nmrAtomsNamesAvailable))) == len(nmrAtomsNames):
-      peaks += filteredPeaks
-  else:
-    for peak in filteredPeaks:
-      assignedNmrAtoms = _traverse(peak.assignedNmrAtoms)
-      if all(assignedNmrAtoms):
-        assignedNmrAtoms = [na.name for na in assignedNmrAtoms]
-        if len(assignedNmrAtoms) > 1:
-          if list(assignedNmrAtoms) == nmrAtomsNames:
-            peaks += [peak]
-        if len(nmrAtomsNames) == 1:
-          if nmrAtomsNames[0] in assignedNmrAtoms:
-            peaks += [peak]
-  return peaks
+    if len(list(set(filteredPeaks))) == len(spectra):  # deals when a residue is assigned to multiple peaks
+        if len(list(set(nmrAtomsNamesAvailable))) == len(nmrAtomsNames):
+            peaks += filteredPeaks
+    else:
+        for peak in filteredPeaks:
+            assignedNmrAtoms = _traverse(peak.assignedNmrAtoms)
+            if all(assignedNmrAtoms):
+                assignedNmrAtoms = [na.name for na in assignedNmrAtoms]
+                if len(assignedNmrAtoms) > 1:
+                    if list(assignedNmrAtoms) == nmrAtomsNames:
+                        peaks += [peak]
+                if len(nmrAtomsNames) == 1:
+                    if nmrAtomsNames[0] in assignedNmrAtoms:
+                        peaks += [peak]
+    return peaks
 
 
 def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atomWeights=None):

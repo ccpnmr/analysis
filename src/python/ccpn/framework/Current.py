@@ -56,7 +56,7 @@ from ccpn.ui._implementation.Strip import Strip
 
 SingularOnly = 'singularOnly'
 Remove = 'remove'
-PCAcompontents = 'pcaComponents'
+PCAcomponents = 'pcaComponents'
 
 _currentClasses = {
     SpectrumGroup    : {SingularOnly: True},
@@ -74,14 +74,14 @@ _currentClasses = {
     SpectrumHit      : {SingularOnly: True},
     Substance        : {},
     Multiplet        : {}
-}
+    }
 
 _currentExtraFields = {
-    'positions': {'docTemplate': "last cursor %s"},
+    'positions'      : {'docTemplate': "last cursor %s"},
     'cursorPositions': {'singularOnly': True, 'docTemplate': 'last cursor %s - (posX,posY) tuple'},
-    'axisCodes': {'singularOnly': True, 'docTemplate': 'last selected %s'},
-    PCAcompontents:{'docTemplate':'last selected %s, of any obj kind'},
-}
+    'axisCodes'      : {'singularOnly': True, 'docTemplate': 'last selected %s'},
+    PCAcomponents    : {'docTemplate': 'last selected %s, of any obj kind'},
+    }
 
 # Fields in current (there is a current.xyz attribute with related functions
 # for every 'xyz' in fields
@@ -371,7 +371,7 @@ class Current:
 
                 # Trigger the notifiers
                 if self._blanking == 0:
-                    funcs = getFieldItem(self._notifies) or () # getFieldItem(obj) returns obj[field]
+                    funcs = getFieldItem(self._notifies) or ()  # getFieldItem(obj) returns obj[field]
                     for func in funcs:
                         func(value)
 
@@ -379,16 +379,20 @@ class Current:
         def getter(self):
             ll = getField(self)
             return ll[-1] if ll else None
+
         def setter(self, value):
             setField(self, [value])
+
         setattr(cls, singular, property(getter, setter, None, "Current %s" % singular))
 
         if not singularOnly:
             # define the plural properties
             def getter(self):
                 return tuple(getField(self))
+
             def setter(self, value):
                 setField(self, list(value))
+
             setattr(cls, plural, property(getter, setter, None, "Current %s" % plural))
 
             # define the add'Field' method
@@ -397,6 +401,7 @@ class Current:
                 values = getField(self)
                 if value not in values:
                     setField(self, values + [value])
+
             setattr(cls, 'add' + singular[0].upper() + singular[1:], adder)
 
             # define the remove'Field' method
@@ -406,12 +411,14 @@ class Current:
                 if value in values:
                     values.remove(value)
                 setField(self, values)
+
             setattr(cls, 'remove' + singular[0].upper() + singular[1:], remover)
 
             # define the clear'Field' method
             def clearer(self):
                 """Clear current.%s""" % plural
                 setField(self, [])
+
             setattr(cls, 'clear' + plural[0].upper() + plural[1:], clearer)
 
         # if not isinstance(param, str):
@@ -429,7 +436,8 @@ class Current:
 
     def _cleanUp(self, cDict, fieldName):
         "Callback for deletion of an object in the project"
-        from ccpn.core.lib.Notifiers import Notifier ## needs to be local to avoid circular imports
+        from ccpn.core.lib.Notifiers import Notifier  ## needs to be local to avoid circular imports
+
         self.increaseBlanking()
         obj = cDict[Notifier.OBJECT]
         values = getattr(self, fieldName)
@@ -440,7 +448,7 @@ class Current:
     def _registerNotifiers(self):
         """Registers the notifiers to cleanup current.fieldName on deletion of an object
         """
-        from ccpn.core.lib.Notifiers import Notifier ## needs to be local to avoid circular imports
+        from ccpn.core.lib.Notifiers import Notifier  ## needs to be local to avoid circular imports
 
         self._notifiers = []
         for cls in _currentClasses:

@@ -227,10 +227,9 @@ class SampleComponent(AbstractWrapperObject):
 #=========================================================================================
 
 
-
-
 def getter(self: SpectrumHit) -> SampleComponent:
     return self._project._data2Obj.get(self._apiSpectrumHit.sampleComponent)
+
 
 SpectrumHit.sampleComponent = property(getter, None, None,
                                        "ccpn.SampleComponent in which ccpn.SpectrumHit is found")

@@ -146,7 +146,7 @@ class AbstractWrapperObject(NotifierBase):
         data2Obj = project._data2Obj
         if wrappedData in data2Obj:
             raise ValueError(
-                'Cannot create new object "%s": one already exists for "%s"' % (self.className, wrappedData))
+                    'Cannot create new object "%s": one already exists for "%s"' % (self.className, wrappedData))
 
         # initialise
         self._project = project
@@ -685,7 +685,7 @@ class AbstractWrapperObject(NotifierBase):
                         ('_endDeleteCommandBlock', {}, className, 'endDeleteBlock'),
                         ('_finaliseApiUnDelete', {}, className, 'undelete'),
                         ('_modifiedApiObject', {}, className, ''),
-                    ]
+                        ]
         else:
             # Project class. Start generation here
             Project = cls
@@ -704,7 +704,7 @@ class AbstractWrapperObject(NotifierBase):
             cc._linkWrapperClasses(newAncestors, Project=Project)
 
     @classmethod
-    def _getChildClasses(cls, recursion:bool = False) -> list:
+    def _getChildClasses(cls, recursion: bool = False) -> list:
         """
         :param recursion: use recursion to also add child objects
         :return: list of valid child classes of cls
@@ -979,7 +979,9 @@ class AbstractWrapperObject(NotifierBase):
 
         #EJB 20181217: test for preDelete
         #       required for some table updates that need to ignore cell contents that
-        #       are about to be deleted
+        #       are about to be deleted.
+        #       e.g. deleting an nmrAtom from nmrResidue - 'delete' fired but nmrAtom still exists
+        #       so the row update must be able to ignore 'deleted' nmrAtoms
         if action == 'delete':
             self._flaggedForDelete = True
         else:

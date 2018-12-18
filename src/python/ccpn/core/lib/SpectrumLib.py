@@ -552,7 +552,8 @@ def getDefaultSpectrumColours(self: 'DataSource') -> Tuple[str, str]:
     #
     return (spectrumHexColours[ii], spectrumHexColours[ii + 1])
 
-def get1DdataInRange(x,y, xRange):
+
+def get1DdataInRange(x, y, xRange):
     """
 
     :param x:
@@ -562,7 +563,7 @@ def get1DdataInRange(x,y, xRange):
 
     """
     if xRange is None:
-      return x,y
+        return x, y
     point1, point2 = np.max(xRange), np.min(xRange)
     x_filtered = np.where((x <= point1) & (x >= point2))
     y_filtered = y[x_filtered]

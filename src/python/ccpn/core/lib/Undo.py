@@ -19,7 +19,7 @@ __reference__ = ("For publications, please use reference from http://www.ccpn.ac
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:33:00 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b3 $"
+__version__ = "$Revision: 3.0.b4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -261,7 +261,6 @@ class Undo(deque):
             return
 
         if self._debug:
-
             getLogger().debug('undo._newItem %s %s %s' % (self.blocking, undoPartial,
                                                           redoPartial))
 

@@ -38,9 +38,10 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import concentrationUnits
 
-TYPECOMPONENT =  ['Select', 'Compound', 'Solvent', 'Buffer', 'Target', 'Inhibitor ', 'Other']
-C_COMPONENT_UNIT = concentrationUnits #['Select', 'Molar', 'g/L', 'L/L', 'mol/mol', 'g/g']
-Labelling = ['None','Type_New', '15N', '15N,13C', '15N,13C,2H', 'ILV','ILVA','ILVAT', 'SAIL', '1,3-13C- and 2-13C-Glycerol']
+
+TYPECOMPONENT = ['Select', 'Compound', 'Solvent', 'Buffer', 'Target', 'Inhibitor ', 'Other']
+C_COMPONENT_UNIT = concentrationUnits  #['Select', 'Molar', 'g/L', 'L/L', 'mol/mol', 'g/g']
+Labelling = ['None', 'Type_New', '15N', '15N,13C', '15N,13C,2H', 'ILV', 'ILVA', 'ILVAT', 'SAIL', '1,3-13C- and 2-13C-Glycerol']
 
 
 class EditSampleComponentPopup(CcpnDialog):
@@ -235,10 +236,10 @@ class EditSampleComponentPopup(CcpnDialog):
 
     def _getCallBacksDict(self):
         return {
-            self._typeComponent: str(self.typePulldownList.get()),
-            self._concentrationChanged: self._getConcentrationValue(),
+            self._typeComponent           : str(self.typePulldownList.get()),
+            self._concentrationChanged    : self._getConcentrationValue(),
             self._concentrationUnitChanged: str(self.concentrationUnitPulldownList.get()),
-            self._commentChanged: str(self.commentLineEdit.text())
+            self._commentChanged          : str(self.commentLineEdit.text())
             }
 
     def _initialOptionsCallBack(self):

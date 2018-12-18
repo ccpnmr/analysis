@@ -270,16 +270,16 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         """
         self.namespace = {'application': self.application,
-                          'current': self.application.current,
+                          'current'    : self.application.current,
                           'preferences': self.application.preferences,
-                          'redo': self.application.redo,
-                          'undo': self.application.undo,
+                          'redo'       : self.application.redo,
+                          'undo'       : self.application.undo,
 
-                          'ui': self.application.ui,
-                          'mainWindow': self,
-                          'project': self.application.project,
+                          'ui'         : self.application.ui,
+                          'mainWindow' : self,
+                          'project'    : self.application.project,
                           'loadProject': self.application.loadProject,
-                          'newProject': self.application.newProject,
+                          'newProject' : self.application.newProject,
                           }
         self.pythonConsole = IpythonConsole(self)
 

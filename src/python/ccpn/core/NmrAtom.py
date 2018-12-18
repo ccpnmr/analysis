@@ -366,7 +366,7 @@ class NmrAtom(AbstractWrapperObject):
         """Subclassed to handle associated ChemicalShift instances
         """
         super()._finaliseAction(action=action)
-        # propagate the rename to associated ChemcialShift instances
+        # propagate the rename to associated ChemicalShift instances
         if action == 'rename':
             for cs in self.chemicalShifts:
                 cs._finaliseAction(action=action)
@@ -379,6 +379,7 @@ class NmrAtom(AbstractWrapperObject):
     # new'Object' and other methods
     # Call appropriate routines in their respective locations
     #===========================================================================================
+
 
 #=========================================================================================
 # Connections to parents:
@@ -466,7 +467,7 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
                     except ValueError:
                         self.project._logger.warning(
                                 "Could not reset serial of %s to %s - keeping original value" % (previous, serial)
-                        )
+                                )
                     previous._finaliseAction('rename')
 
     dd = {'resonanceGroup': resonanceGroup, 'isotopeCode': isotopeCode}

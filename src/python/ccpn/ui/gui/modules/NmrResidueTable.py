@@ -283,16 +283,16 @@ class NmrResidueTable(QuickTable):
 
         # initialise the table
         super().__init__(parent=parent,
-                            mainWindow=self.mainWindow,
-                            dataFrameObject=None,
-                            setLayout=True,
-                            autoResize=True, multiSelect=multiSelect,
-                            actionCallback=actionCallback,
-                            selectionCallback=selectionCallback,
-                            checkBoxCallback=checkBoxCallback,
-                            grid=(3, 0), gridSpan=(1, 6),
-                            enableDelete=True
-                            )
+                         mainWindow=self.mainWindow,
+                         dataFrameObject=None,
+                         setLayout=True,
+                         autoResize=True, multiSelect=multiSelect,
+                         actionCallback=actionCallback,
+                         selectionCallback=selectionCallback,
+                         checkBoxCallback=checkBoxCallback,
+                         grid=(3, 0), gridSpan=(1, 6),
+                         enableDelete=True
+                         )
         self.moduleParent = moduleParent
 
         # Notifier object to update the table if the peaks change

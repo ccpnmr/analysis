@@ -315,7 +315,6 @@ class Residue(AbstractWrapperObject):
                     addUndoItem(undo=partial(self._setFragmentResidues, chainFragment, oldResidues),
                                 redo=partial(self._setFragmentResidues, chainFragment, newResidues))
 
-
     #EJB 20181210: defined twice
     # @property
     # def nextResidue(self) -> 'Residue':

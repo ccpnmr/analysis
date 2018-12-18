@@ -764,8 +764,6 @@ class GuiStrip(Frame):
     def _showMousePosition(self, pos: QtCore.QPointF):
         """Displays mouse position for both axes by axis code.
         """
-        if not self._finaliseDone: return
-
         if self.isDeleted:
             return
 
@@ -791,15 +789,12 @@ class GuiStrip(Frame):
         """
         Zooms x axis of strip to the specified region
         """
-        if not self._finaliseDone: return
-
         padding = self.application.preferences.general.stripRegionPadding
         self.viewBox.setXRange(x1, x2, padding=padding)
 
     def zoomY(self, y1: float, y2: float):
         """Zooms y axis of strip to the specified region
         """
-        if not self._finaliseDone: return
         padding = self.application.preferences.general.stripRegionPadding
         self.viewBox.setYRange(y1, y2, padding=padding)
 

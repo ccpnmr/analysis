@@ -100,7 +100,6 @@ class NmrResidue(AbstractWrapperObject):
     # Number of fields that comprise the object's pid; Used to get parent id's
     _numberOfIdFields = 2
 
-
     # CCPN properties
     @property
     def _apiResonanceGroup(self) -> ApiResonanceGroup:
@@ -1112,7 +1111,7 @@ class NmrResidue(AbstractWrapperObject):
     #=========================================================================================
 
     @classmethod
-    def _getAllWrappedData(cls, parent: NmrChain)-> list:
+    def _getAllWrappedData(cls, parent: NmrChain) -> list:
         """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""
         return parent._wrappedData.sortedResonanceGroups()
 
@@ -1257,7 +1256,7 @@ def _newNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None, 
     if residueType == '':
         residueType = None
 
-    dd = {'name': residueType, 'details': comment,
+    dd = {'name'       : residueType, 'details': comment,
           'residueType': residueType, 'directNmrChain': apiNmrChain}
 
     # Convert value to string, and check

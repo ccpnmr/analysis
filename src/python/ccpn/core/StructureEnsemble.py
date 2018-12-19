@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import collections
-
+from functools import partial
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
@@ -33,7 +33,8 @@ from ccpn.core.lib import Undo
 from ccpn.util.StructureData import EnsembleData
 from ccpnmodel.ccpncore.api.ccp.molecule.MolStructure import StructureEnsemble as ApiStructureEnsemble
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
+    logCommandBlock, renameObject
 from ccpn.util.Logging import getLogger
 from ccpn.util import Common as commonUtil
 
@@ -90,7 +91,7 @@ class StructureEnsemble(AbstractWrapperObject):
 
     @name.setter
     def name(self, value: str):
-        """set name of ChemicalShiftList."""
+        """set name of StructureEnsemble."""
         self.rename(value)
 
     @property
@@ -156,23 +157,19 @@ class StructureEnsemble(AbstractWrapperObject):
         """get wrappedData for all NmrConstraintStores linked to NmrProject"""
         return parent._wrappedData.molSystem.sortedStructureEnsembles()
 
+    @logCommand(get='self')
     def rename(self, value: str):
         """Rename StructureEnsemble, changing its name and Pid.
-        NB, the serial remains immutable."""
+        NB, the serial remains immutable.
+        """
+        self._validateName(value=value, allowWhitespace=False)
 
-        if not isinstance(value, str):
-            raise TypeError("StructureEnsemble name must be a string")
-        if not value:
-            raise ValueError("StructureEnsemble name must be set")
-        if Pid.altCharacter in value:
-            raise ValueError("Character %s not allowed in StructureEnsemble name" % Pid.altCharacter)
-        previous = self.getByRelativeId(value)
-        if previous not in (None, self):
-            raise ValueError("%s already exists" % previous.longPid)
-
-        with logCommandBlock(get='self') as log:
-            log('rename', value)
+        with renameObject(self) as addUndoItem:
+            oldName = self.name
             self._wrappedData.name = value
+
+            addUndoItem(undo=partial(self.rename, oldName),
+                        redo=partial(self.rename, value))
 
     #=========================================================================================
     # CCPN functions

@@ -827,6 +827,26 @@ def deleteObject():
 
     return theDecorator
 
+@contextmanager
+def renameObject(self):
+    """ A decorator to wrap the rename(self) method of the V3 core classes
+    calls self._finaliseAction('rename', 'change') after the rename
+    """
+    # get the current application
+    application = getApplication()
+
+    with notificationBlanking(application=application):
+        with undoStackBlocking(application=application) as addUndoItem:
+
+            try:
+                # transfer control to the calling function
+                yield addUndoItem
+
+            except AttributeError as es:
+                raise es
+
+    self._finaliseAction('rename')
+
 
 class BlankedPartial(object):
     """Wrapper (like partial) to call func(**kwds) with blanking

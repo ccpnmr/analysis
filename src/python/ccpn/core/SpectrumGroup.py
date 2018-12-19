@@ -34,7 +34,8 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import SpectrumGroup as ApiSpectrumGroup
 from ccpnmodel.ccpncore.lib import Util as coreUtil
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock, undoStackBlocking
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
+    logCommandBlock, undoStackBlocking, renameObject
 from ccpn.util.Logging import getLogger
 
 
@@ -77,6 +78,11 @@ class SpectrumGroup(AbstractWrapperObject):
         """Name of SpectrumGroup, part of identifier"""
         return self._wrappedData.name
 
+    @name.setter
+    def name(self, value:str):
+        """set name of SpectrumGroup."""
+        self.rename(value)
+
     @property
     def serial(self) -> str:
         """Serial number  of SpectrumGroup, used for sorting"""
@@ -108,27 +114,18 @@ class SpectrumGroup(AbstractWrapperObject):
         """get wrappedData for all SpectrumGroups linked to NmrProject"""
         return parent._wrappedData.sortedSpectrumGroups()
 
+    @logCommand(get='self')
     def rename(self, value: str):
-        """Rename SpectrumGroup, changing its name and Pid"""
-        oldName = self.name
-        if not value:
-            raise ValueError("SpectrumGroup name must be set")
-        elif Pid.altCharacter in value:
-            raise ValueError("Character %s not allowed in ccpn.SpectrumGroup.name" % Pid.altCharacter)
-        previous = self.getByRelativeId(value)
-        if previous not in (None, self):
-            raise ValueError("%s already exists" % previous.longPid)
+        """Rename SpectrumGroup, changing its name and Pid.
+        """
+        self._validateName(value=value, allowWhitespace=False)
 
-        with logCommandBlock(get='self') as log:
-            log('rename')
-            with undoStackBlocking() as addUndoItem:
-                self._wrappedData.__dict__['name'] = value
-                # coreUtil._resetParentLink(self._wrappedData, 'spectrumGroups', {'name':value})
-                self._finaliseAction('rename')
-                self._finaliseAction('change')
+        with renameObject(self) as addUndoItem:
+            oldName = self.name
+            self._wrappedData.__dict__['name'] = value
 
-                addUndoItem(undo=partial(self.rename, oldName),
-                            redo=partial(self.rename, value))
+            addUndoItem(undo=partial(self.rename, oldName),
+                        redo=partial(self.rename, value))
 
     #=========================================================================================
     # CCPN functions

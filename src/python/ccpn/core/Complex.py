@@ -37,7 +37,8 @@ from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Chain as ApiChain
 from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import ChainGroup as ApiChainGroup
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock, undoStackBlocking
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
+    logCommandBlock, undoStackBlocking, renameObject
 from ccpn.util.Logging import getLogger
 
 
@@ -77,6 +78,11 @@ class Complex(AbstractWrapperObject):
         """Name of Complex, part of identifier"""
         return self._wrappedData.name
 
+    @name.setter
+    def name(self, value:str):
+        """set name of Complex."""
+        self.rename(value)
+
     @property
     def serial(self) -> str:
         """Serial number of Complex, used for sorting"""
@@ -112,27 +118,18 @@ class Complex(AbstractWrapperObject):
         else:
             return molSystem.sortedChainGroups()
 
+    @logCommand(get='self')
     def rename(self, value: str):
-        """Rename Complex, changing its name and Pid"""
-        oldName = self.name
-        if not value:
-            raise ValueError("Complex name must be set")
-        elif Pid.altCharacter in value:
-            raise ValueError("Character %s not allowed in ccpn.Complex.name" % Pid.altCharacter)
-        previous = self.getByRelativeId(value)
-        if previous not in (None, self):
-            raise ValueError("%s already exists" % previous.longPid)
+        """Rename Complex, changing its name and Pid.
+        """
+        self._validateName(value=value, allowWhitespace=False)
 
-        with logCommandBlock(get='self') as log:
-            log('rename')
-            with undoStackBlocking() as addUndoItem:
-                self._wrappedData.__dict__['name'] = value
-                # coreUtil._resetParentLink(self._wrappedData, 'chainGroups', {'name':value})
-                self._finaliseAction('rename')
-                self._finaliseAction('change')
+        with renameObject(self) as addUndoItem:
+            oldName = self.name
+            self._wrappedData.__dict__['name'] = value
 
-                addUndoItem(undo=partial(self.rename, oldName),
-                            redo=partial(self.rename, value))
+            addUndoItem(undo=partial(self.rename, oldName),
+                        redo=partial(self.rename, value))
 
     #=========================================================================================
     # CCPN functions

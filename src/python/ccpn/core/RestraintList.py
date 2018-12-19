@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import operator
 import collections
 from typing import Sequence
-
+from functools import partial
 from ccpn.core.lib import Pid
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
@@ -37,7 +37,8 @@ from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import AbstractConstraintList as ApiAbstractConstraintList
 from ccpn.util.Tensor import Tensor
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
+    logCommandBlock, renameObject
 from ccpn.util.Logging import getLogger
 
 
@@ -143,6 +144,11 @@ class RestraintList(AbstractWrapperObject):
     def name(self) -> str:
         """name of Restraint List"""
         return self._wrappedData.name
+
+    @name.setter
+    def name(self, value:str):
+        """Set name of RestraintList."""
+        self.rename(value)
 
     @property
     def comment(self) -> str:
@@ -258,17 +264,18 @@ class RestraintList(AbstractWrapperObject):
         """get wrappedData - all ConstraintList children of parent NmrConstraintStore"""
         return parent._wrappedData.sortedConstraintLists()
 
+    @logCommand(get='self')
     def rename(self, value: str):
-        """rename RestraintList, changing its name and Pid."""
-        if not value:
-            raise ValueError("RestraintList name must be set")
+        """Rename RestraintList, changing its name and Pid.
+        """
+        self._validateName(value=value, allowWhitespace=False)
 
-        elif Pid.altCharacter in value:
-            raise ValueError("Character %s not allowed in ccpn.RestraintList.name:" % Pid.altCharacter)
-
-        with logCommandBlock(get='self') as log:
-            log('rename')
+        with renameObject(self) as addUndoItem:
+            oldName = self.name
             self._wrappedData.name = value
+
+            addUndoItem(undo=partial(self.rename, oldName),
+                        redo=partial(self.rename, value))
 
     #=========================================================================================
     # CCPN functions

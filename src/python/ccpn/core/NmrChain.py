@@ -39,7 +39,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrChain as ApiNmrChain
 from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.lib import Constants
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, logCommandBlock, undoStackBlocking
+from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, logCommandBlock, undoStackBlocking, renameObject
 
 
 class NmrChain(AbstractWrapperObject):
@@ -108,6 +108,7 @@ class NmrChain(AbstractWrapperObject):
 
     @label.setter
     def label(self, value: str):
+        """Set label of NmrChain."""
         self._wrappedData.label = value
 
     @property
@@ -150,31 +151,6 @@ class NmrChain(AbstractWrapperObject):
     #   else:
     #     # NB The API code will throw ValueError if there is already an NmrChain with that code
     #     self.rename(value._wrappedData.code)
-
-    def rename(self, value: str):
-        """Rename NmrChain, changing its shortName and Pid.
-        Use the 'deassign' function if you want to revert to the canonical name"""
-
-        # NBNB TODO Allow renaming to names of teh form '@123' (?)
-
-        wrappedData = self._apiNmrChain
-        if self._wrappedData.isConnected:
-            raise ValueError("Connected NmrChain cannot be renamed")
-        elif not value:
-            raise ValueError("NmrChain name must be set")
-        elif value == wrappedData.code:
-            return
-        elif wrappedData.code == Constants.defaultNmrChainCode:
-            raise ValueError("NmrChain:%s cannot be renamed" % Constants.defaultNmrChainCode)
-        elif Pid.altCharacter in value:
-            raise ValueError("Character %s not allowed in ccpn.NmrChain.shortName" % Pid.altCharacter)
-        previous = self.getByRelativeId(value)
-        if previous not in (None, self):
-            raise ValueError("%s already exists" % previous.longPid)
-
-        with logCommandBlock(get='self') as log:
-            log('rename')
-            wrappedData.code = value
 
     def deassign(self):
         """Reset NmrChain back to its originalName, cutting all assignment links"""
@@ -320,6 +296,30 @@ class NmrChain(AbstractWrapperObject):
     def _getAllWrappedData(cls, parent: Project) -> list:
         """get wrappedData (Nmr.NmrChains) for all NmrChain children of parent Project"""
         return parent._wrappedData.sortedNmrChains()
+
+    @logCommand(get='self')
+    def rename(self, value: str):
+        """Rename NmrChain, changing its shortName and Pid.
+        Use the 'deassign' function if you want to revert to the canonical name"""
+
+        # NBNB TODO Allow renaming to names of the form '@123' (?)
+        wrappedData = self._apiNmrChain
+
+        if self._wrappedData.isConnected:
+            raise ValueError("Connected NmrChain cannot be renamed")
+        elif value == wrappedData.code:
+            return
+        elif wrappedData.code == Constants.defaultNmrChainCode:
+            raise ValueError("NmrChain:%s cannot be renamed" % Constants.defaultNmrChainCode)
+
+        self._validateName(value=value, allowWhitespace=False)
+
+        with renameObject(self) as addUndoItem:
+            oldName = self.shortName
+            wrappedData.code = value
+
+            addUndoItem(undo=partial(self.rename, oldName),
+                        redo=partial(self.rename, value))
 
     #=========================================================================================
     # CCPN functions

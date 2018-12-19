@@ -78,7 +78,7 @@ from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple, _getProjection
 from ccpn.core.lib.Cache import cached
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
-    logCommandBlock, undoStackBlocking
+    logCommandBlock, undoStackBlocking, renameObject
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import axisCodeMapping
 from ccpn.util.Logging import getLogger
@@ -177,6 +177,11 @@ class Spectrum(AbstractWrapperObject):
     def name(self) -> str:
         """short form of name, used for id"""
         return self._wrappedData.name
+
+    @name.setter
+    def name(self, value:str):
+        """set name of Spectrum."""
+        self.rename(value)
 
     @property
     def _parent(self) -> Project:
@@ -1800,21 +1805,18 @@ class Spectrum(AbstractWrapperObject):
         """get wrappedData (Nmr.DataSources) for all Spectrum children of parent Project"""
         return list(x for y in parent._wrappedData.sortedExperiments() for x in y.sortedDataSources())
 
+    @logCommand(get='self')
     def rename(self, value: str):
-        """Rename Spectrum, changing its name and Pid"""
-        if not isinstance(value, str):
-            raise TypeError("Spectrum name must be a string")  # ejb
-        elif not value:
-            raise ValueError("Spectrum name must be set")  # ejb
-        elif Pid.altCharacter in value:
-            raise ValueError("Character %s not allowed in Spectrum name" % Pid.altCharacter)
-        previous = self.getByRelativeId(value)
-        if previous not in (None, self):
-            raise ValueError("%s already exists" % previous.longPid)
+        """Rename Spectrum, changing its name and Pid.
+        """
+        self._validateName(value=value, allowWhitespace=False)
 
-        with logCommandBlock(get='self') as log:
-            log('rename')
+        with renameObject(self) as addUndoItem:
+            oldName = self.name
             self._wrappedData.name = value
+
+            addUndoItem(undo=partial(self.rename, oldName),
+                        redo=partial(self.rename, value))
 
     def _finaliseAction(self, action: str):
         """Subclassed to handle associated spectrumViews instances

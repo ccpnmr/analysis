@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import collections
 import typing
-
+from functools import partial
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.Project import Project
 from ccpn.core.Residue import Residue
@@ -37,7 +37,8 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGro
 from ccpnmodel.ccpncore.lib.Constants import defaultNmrChainCode
 from ccpn.core import _importOrder
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, renameObject, \
+    ccpNmrV3CoreSetter, logCommandBlock
 from ccpn.util.Logging import getLogger
 
 
@@ -878,39 +879,6 @@ class NmrResidue(AbstractWrapperObject):
             apiResonanceGroup.sequenceCode = None
             apiResonanceGroup.resetResidueType(None)
 
-    def rename(self, value: str = None):
-        """Rename NmrResidue. changing its sequenceCode, residueType, or both.
-
-        The value is a dot-separated string `sequenceCode`.`residueType`.
-        Values like None, 'abc', or 'abc.' will set the residueType to None.
-        Values like None or '.abc' will set the sequenceCode to None,
-        resetting it to its canonical form, '@`serial`."""
-
-        # NBNB TODO - consider changing signature to sequenceCode, residueType
-
-        apiResonanceGroup = self._apiResonanceGroup
-        sequenceCode = residueType = None
-        if value:
-            if Pid.altCharacter in value:
-                raise ValueError("Character %s not allowed in ccpn.NmrResidue id: %s" %
-                                 (Pid.altCharacter, value))
-            ll = value.split(Pid.IDSEP, 1)
-            sequenceCode = ll[0] or None
-            if len(ll) > 1:
-                residueType = ll[1] or None
-
-        if sequenceCode:
-            # Check if name is not already used
-            partialId = '%s.%s.' % (self._parent._id, sequenceCode.translate(Pid.remapSeparators))
-            ll = self._project.getObjectsByPartialId(className=self.className, idStartsWith=partialId)
-            if ll and ll != [self]:
-                raise ValueError("Cannot rename %s to %s.%s - assignment already exists" % (self, self.nmrChain.id, value))
-
-        with logCommandBlock(get='self') as log:
-            log('rename')
-            apiResonanceGroup.sequenceCode = sequenceCode
-            apiResonanceGroup.resetResidueType(residueType)
-
     def moveToNmrChain(self, newNmrChain: typing.Union['NmrChain', str] = '@-', sequenceCode: str = None, residueType: str = None):
         """Move residue to newNmrChain, breaking connected NmrChain if necessary.
         Optionally rename residue using sequenceCode and residueType
@@ -1114,6 +1082,45 @@ class NmrResidue(AbstractWrapperObject):
     def _getAllWrappedData(cls, parent: NmrChain) -> list:
         """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""
         return parent._wrappedData.sortedResonanceGroups()
+
+    @logCommand(get='self')
+    def rename(self, value: str = None):
+        """Rename NmrResidue. changing its sequenceCode, residueType, or both.
+
+        The value is a dot-separated string `sequenceCode`.`residueType`.
+        Values like None, 'abc', or 'abc.' will set the residueType to None.
+        Values like None or '.abc' will set the sequenceCode to None,
+        resetting it to its canonical form, '@`serial`."""
+
+        # NBNB TODO - consider changing signature to sequenceCode, residueType
+
+        with renameObject(self) as addUndoItem:
+            apiResonanceGroup = self._apiResonanceGroup
+            sequenceCode = residueType = None
+            if value:
+                if Pid.altCharacter in value:
+                    raise ValueError("Character %s not allowed in ccpn.NmrResidue id: %s" %
+                                     (Pid.altCharacter, value))
+                ll = value.split(Pid.IDSEP, 1)
+                sequenceCode = ll[0] or None
+                if len(ll) > 1:
+                    residueType = ll[1] or None
+
+            if sequenceCode:
+                # Check if name is not already used
+                partialId = '%s.%s.' % (self._parent._id, sequenceCode.translate(Pid.remapSeparators))
+                ll = self._project.getObjectsByPartialId(className=self.className, idStartsWith=partialId)
+                if ll and ll != [self]:
+                    raise ValueError("Cannot rename %s to %s.%s - assignment already exists" % (self, self.nmrChain.id, value))
+
+            # with logCommandBlock(get='self') as log:
+            #     log('rename')
+            oldName = '.'.join((apiResonanceGroup.sequenceCode, apiResonanceGroup.residueType or ''))
+            apiResonanceGroup.sequenceCode = sequenceCode
+            apiResonanceGroup.resetResidueType(residueType)
+
+            addUndoItem(undo=partial(self.rename, oldName),
+                        redo=partial(self.rename, value))
 
     #=========================================================================================
     # CCPN functions

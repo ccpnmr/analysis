@@ -27,13 +27,14 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import collections
 import typing  # ejb - added for 'header'
 from ccpn.util import Constants as utilConstants
-
+from functools import partial
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Note as ApiNote
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
+    logCommandBlock, renameObject
 from ccpn.util.Logging import getLogger
 from ccpn.util import Common as commonUtil
 
@@ -133,24 +134,19 @@ class Note(AbstractWrapperObject):
         """get wrappedData for all Notes linked to NmrProject"""
         return parent._wrappedData.sortedNotes()
 
+    @logCommand(get='self')
     def rename(self, value: str):
         """Rename Note, changing its name and Pid.
 
         NB, the serial remains immutable."""
+        self._validateName(value=value, allowWhitespace=False)
 
-        if not isinstance(value, str):
-            raise TypeError("Note name must be a string")
-        if not value:
-            raise ValueError("Note name must be set")
-        if Pid.altCharacter in value:
-            raise ValueError("Character %s not allowed in Note name" % Pid.altCharacter)
-        previous = self.getByRelativeId(value)
-        if previous not in (None, self):
-            raise ValueError("%s already exists" % previous.longPid)
-
-        with logCommandBlock(get='self') as log:
-            log('rename')
+        with renameObject(self) as addUndoItem:
+            oldName = self.name
             self._wrappedData.name = value
+
+            addUndoItem(undo=partial(self.rename, oldName),
+                        redo=partial(self.rename, value))
 
     #=========================================================================================
     # CCPN functions

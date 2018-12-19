@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import collections
 import datetime
+from functools import partial
 from typing import Sequence, Optional
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
@@ -37,7 +38,8 @@ from ccpn.util.Common import name2IsotopeCode
 from ccpn.core.lib import Pid
 from ccpn.util import Common as commonUtil
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
+    logCommandBlock, renameObject
 from ccpn.util.Logging import getLogger
 
 
@@ -101,7 +103,8 @@ class DataSet(AbstractWrapperObject):
 
     @title.setter
     def title(self, value: str):
-        # self._wrappedData.name = value
+        """Set title of the DataSet.
+        """
         self.rename(value)
 
     # fix for now
@@ -215,21 +218,18 @@ class DataSet(AbstractWrapperObject):
         """get wrappedData for all NmrConstraintStores linked to NmrProject"""
         return parent._wrappedData.sortedNmrConstraintStores()
 
+    @logCommand(get='self')
     def rename(self, value: str):
         """Rename DataSet, changing its name and Pid.
         NB, the serial remains immutable."""
+        self._validateName(value=value, allowWhitespace=False)
 
-        if not isinstance(value, str):
-            raise TypeError("DataSet name must be a string")
-        if not value:
-            raise ValueError("DataSet name must be set")
-        if Pid.altCharacter in value:
-            raise ValueError("Character %s not allowed in DataSet name" % Pid.altCharacter)
-        previous = self.getByRelativeId(value)
-        if previous not in (None, self):
-            raise ValueError("%s already exists" % previous.longPid)
+        with renameObject(self) as addUndoItem:
+            oldName = self.name
+            self._wrappedData.name = value
 
-        self._wrappedData.name = value
+            addUndoItem(undo=partial(self.rename, oldName),
+                        redo=partial(self.rename, value))
 
     #=========================================================================================
     # CCPN functions

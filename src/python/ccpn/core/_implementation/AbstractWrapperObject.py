@@ -1020,6 +1020,24 @@ class AbstractWrapperObject(NotifierBase):
                     for notifier in dd:
                         notifier(self)
 
+    def _validateName(self, value: str, allowWhitespace: bool = False, allowEmpty: bool = False):
+        attrib = self.className
+        if not isinstance(value, str):
+            raise TypeError("%s name must be a string" % attrib)
+        if not value and not allowEmpty:
+            raise ValueError("%s name must be set" % attrib)
+        if Pid.altCharacter in value:
+            raise ValueError("Character %s not allowed in %s name" % (Pid.altCharacter, attrib))
+        if not allowWhitespace and commonUtil.contains_whitespace(value):
+            raise ValueError("whitespace not allowed in %s name" % attrib)
+
+        previous = self.getByRelativeId(value)
+        if previous not in (None, self):
+            raise ValueError("%s already exists" % previous.longPid)
+
+        # will only get here if all the tests pass
+        return True
+
     def resetSerial(self, newSerial: int):
         """ADVANCED Reset serial of object to newSerial, resetting parent link
         and the nextSerial of the parent.

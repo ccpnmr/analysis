@@ -29,7 +29,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import collections
 import typing
-
+from functools import partial
 from ccpn.util import Common as commonUtil
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
@@ -42,7 +42,8 @@ from ccpnmodel.ccpncore.api.ccp.lims import Sample
 from ccpn.core.lib import Pid
 from typing import Tuple, Optional, Union, Sequence
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock, undoBlockManager
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
+    logCommandBlock, undoBlockManager, renameObject
 from ccpn.util.Logging import getLogger
 
 
@@ -191,20 +192,6 @@ class Chain(AbstractWrapperObject):
         with undoBlockManager():
             self._wrappedData.molecule.isFinalised = True
 
-    # Implementation functions
-
-    def rename(self, value: str):
-        """Rename Chain, changing its shortName and Pid."""
-        _validateName('Chain name', value=value, includeWhitespace=True)
-
-        previous = self.getByRelativeId(value)
-        if previous not in (None, self):
-            raise ValueError("%s already exists" % previous.longPid)
-
-        with logCommandBlock(get='self') as log:
-            log('rename')
-            self._apiChain.renameChain(value)
-
     def renumberResidues(self, offset: int, start: int = None,
                          stop: int = None):
         """Renumber residues in range start-stop (inclusive) by adding offset
@@ -293,23 +280,20 @@ class Chain(AbstractWrapperObject):
         else:
             return molSystem.sortedChains()
 
+    @logCommand(get='self')
+    def rename(self, value: str):
+        """Rename Chain, changing its shortName and Pid.
+        """
+        self._validateName(value=value, allowWhitespace=False)
+
+        with renameObject(self) as addUndoItem:
+            oldName = self.shortName
+            self._apiChain.renameChain(value)
+
+            addUndoItem(undo=partial(self.rename, oldName),
+                        redo=partial(self.rename, value))
 
 #=========================================================================================
-
-def _validateName(attrib: str, value: str, includeWhitespace: bool = False):
-    from ccpn.util.Common import contains_whitespace
-
-    if not isinstance(value, str):
-        raise TypeError("%s must be a string" % attrib)  # ejb catch non-string
-    if not value:
-        raise ValueError("%s must be set" % attrib)  # ejb catch empty string
-    if Pid.altCharacter in value:
-        raise ValueError("Character %s not allowed in %s" % (Pid.altCharacter, attrib))
-    if includeWhitespace and contains_whitespace(value):
-        raise ValueError("whitespace not allowed in %s" % attrib)
-
-    # will only get here if all the tests pass
-    return True
 
 
 @newObject(Chain)

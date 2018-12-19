@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from typing import Optional
 import collections
+from functools import partial
 from ccpnmodel.ccpncore.lib import Util as coreUtil
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import Data as ApiData
@@ -36,7 +37,8 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.Project import Project
 from ccpn.core.DataSet import DataSet
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock, undoStackBlocking
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
+    logCommandBlock, undoStackBlocking, renameObject
 from ccpn.util.Logging import getLogger
 from functools import partial
 
@@ -77,6 +79,11 @@ class Data(AbstractWrapperObject):
     def name(self) -> str:
         """name of Data object, used in Pid and to identify the Data object. """
         return self._wrappedData.name
+
+    @name.setter
+    def name(self, value:str):
+        """set name of Data object."""
+        self.rename(value)
 
     @property
     def _parent(self) -> DataSet:
@@ -167,27 +174,18 @@ class Data(AbstractWrapperObject):
         """get wrappedData - all Data children of parent NmrConstraintStore"""
         return parent._wrappedData.sortedData()
 
+    @logCommand(get='self')
     def rename(self, value: str):
-        """Rename Data, changing its name and Pid"""
-        oldName = self.name
+        """Rename Data, changing its name and Pid.
+        """
+        self._validateName(value=value, allowWhitespace=False)
 
-        if not value:
-            raise ValueError("Data name must be set")
-        elif Pid.altCharacter in value:
-            raise ValueError("Character %s not allowed in ccpn.Data.name" % Pid.altCharacter)
-        previous = self.getByRelativeId(value)
-        if previous not in (None, self):
-            raise ValueError("%s already exists" % previous.longPid)
+        with renameObject(self) as addUndoItem:
+            oldName = self.name
+            coreUtil._resetParentLink(self._wrappedData, 'data', {'name': value})
 
-        with logCommandBlock(get='self') as log:
-            log('rename')
-            with undoStackBlocking() as addUndoItem:
-                coreUtil._resetParentLink(self._wrappedData, 'data', {'name': value})
-                self._finaliseAction('rename')
-                self._finaliseAction('change')
-
-                addUndoItem(undo=partial(self.rename, oldName),
-                            redo=partial(self.rename, value))
+            addUndoItem(undo=partial(self.rename, oldName),
+                        redo=partial(self.rename, value))
 
     #=========================================================================================
     # CCPN functions

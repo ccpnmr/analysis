@@ -41,13 +41,14 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.lib import Util as coreUtil
 from ccpnmodel.ccpncore.lib.molecule import MoleculeModify
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, \
+    ccpNmrV3CoreSetter, logCommandBlock, renameObject
 from ccpn.util.Logging import getLogger
 
 
 _apiClassNameMap = {
     'MolComponent': 'Molecule',
-    'Substance': 'Material'
+    'Substance'   : 'Material'
     }
 
 
@@ -560,68 +561,72 @@ class Substance(AbstractWrapperObject):
         else:
             return componentStore.sortedComponents()
 
+    def _finaliseAction(self, action: str):
+        """Subclassed to notify changes to associated integralListViews
+        """
+        super()._finaliseAction(action=action)
+
+        try:
+            if action in ['rename']:
+                for sampleComponent in self.sampleComponents:
+                    for spectrumHit in sampleComponent.spectrumHits:
+                        spectrumHit._finaliseAction(action=action)
+                    sampleComponent._finaliseAction(action=action)
+
+        except Exception as es:
+            raise RuntimeError('Error _finalising Substance.spectrumHits: %s' % str(es))
+
+    @logCommand(get='self')
     def rename(self, name: str = None, labelling: str = None):
         """Rename Substance, changing its name and/or labelling and Pid, and rename
-        SampleComponents and SpectrumHits with matching names. If name is None, the existing value w
-        ill be used. Labelling 'None'  means 'Natural abundance'"""
+        SampleComponents and SpectrumHits with matching names. If name is None, the existing value
+        will be used. Labelling 'None'  means 'Natural abundance'"""
 
         # ejb - name should always be passed in, strange not to
 
         oldName = self.name
-        if name is None:  # ejb - stupid renaming in substancePopup
+        if name is None:
             name = oldName
-        if not isinstance(name, str):
-            raise TypeError("ccpn.Substance.name must be a string")  # ejb
-        elif not name:
-            raise ValueError("ccpn.Substance.name must be set")  # ejb
-        elif Pid.altCharacter in name:
-            raise ValueError("Character %s not allowed in ccpn.Substance.name" % Pid.altCharacter)
+        self._validateName(value=name, allowWhitespace=False)
 
         oldLabelling = self.labelling
         apiLabeling = labelling
         if labelling is None:
             apiLabeling = DEFAULT_LABELLING
-        elif not isinstance(labelling, str):
-            raise TypeError("ccpn.Substance.labelling must be a string")
         elif not labelling:
-            # raise ValueError("ccpn.Substance.labelling must be set")
             apiLabeling = DEFAULT_LABELLING
+        self._validateName(value=labelling, allowWhitespace=False, allowEmpty=True)
 
-        elif Pid.altCharacter in labelling:
-            raise ValueError("Character %s not allowed in ccpn.Substance.labelling" % Pid.altCharacter)
-
-        from ccpn.core.lib.ContextManagers import logCommandBlock, undoStackBlocking
-
-        with logCommandBlock(get='self') as log:
-            log('rename')
-            with undoStackBlocking() as addUndoItem:
-
-                renamedObjects = [self]
-                for sampleComponent in self.sampleComponents:
-                    for spectrumHit in sampleComponent.spectrumHits:
-                        coreUtil._resetParentLink(spectrumHit._wrappedData, 'spectrumHits',
-                                                  OrderedDict((('substanceName', name),
-                                                               ('sampledDimension', spectrumHit.pseudoDimensionNumber),
-                                                               ('sampledPoint', spectrumHit.pointNumber)))
-                                                  )
-                        renamedObjects.append(spectrumHit)
-
-                    # NB this must be done AFTER the spectrumHit loop to avoid breaking links
-                    coreUtil._resetParentLink(sampleComponent._wrappedData, 'sampleComponents',
-                                              OrderedDict((('name', name), ('labeling', apiLabeling)))
+        with renameObject(self) as addUndoItem:
+            # renamedObjects = [self]
+            for sampleComponent in self.sampleComponents:
+                for spectrumHit in sampleComponent.spectrumHits:
+                    coreUtil._resetParentLink(spectrumHit._wrappedData, 'spectrumHits',
+                                              OrderedDict((('substanceName', name),
+                                                           ('sampledDimension', spectrumHit.pseudoDimensionNumber),
+                                                           ('sampledPoint', spectrumHit.pointNumber)))
                                               )
-                    renamedObjects.append(sampleComponent)
+                    # renamedObjects.append(spectrumHit)
 
-                # NB this must be done AFTER the sampleComponent loop to avoid breaking links
-                coreUtil._resetParentLink(self._wrappedData, 'components',
+                # NB this must be done AFTER the spectrumHit loop to avoid breaking links
+                coreUtil._resetParentLink(sampleComponent._wrappedData, 'sampleComponents',
                                           OrderedDict((('name', name), ('labeling', apiLabeling)))
                                           )
-                for obj in renamedObjects:
-                    obj._finaliseAction('rename')
-                    obj._finaliseAction('change')
+                # renamedObjects.append(sampleComponent)
 
-                addUndoItem(undo=partial(self.rename, oldName, oldLabelling),
-                             redo=partial(self.rename, name, labelling))
+            # NB this must be done AFTER the sampleComponent loop to avoid breaking links
+            coreUtil._resetParentLink(self._wrappedData, 'components',
+                                      OrderedDict((('name', name), ('labeling', apiLabeling)))
+
+                                      )
+
+            # now processed by the _finaliseAction above
+            # for obj in renamedObjects:
+            #     obj._finaliseAction('rename')
+            #     obj._finaliseAction('change')
+
+            addUndoItem(undo=partial(self.rename, oldName, oldLabelling),
+                        redo=partial(self.rename, name, labelling))
 
     #=========================================================================================
     # CCPN functions
@@ -634,7 +639,7 @@ class Substance(AbstractWrapperObject):
 
     @logCommand(get='self')
     def createChain(self, shortName: str = None, role: str = None,
-                                  comment: str = None, **kwds):
+                    comment: str = None, **kwds):
         """Create new Chain that matches Substance
 
         See the Chain class for details.
@@ -649,6 +654,7 @@ class Substance(AbstractWrapperObject):
         from ccpn.core.Chain import _createChainFromSubstance
 
         return _createChainFromSubstance(self, shortName=shortName, role=role, comment=comment, **kwds)
+
 
 #=========================================================================================
 # Connections to parents:
@@ -723,7 +729,7 @@ def _newSubstance(self: Project, name: str = None, labelling: str = None, substa
         oldSubstance = apiComponentStore.findFirstComponent(name=name)
 
     params = {
-        'name': name, 'labeling': apiLabeling, 'userCode': userCode, 'synonyms': synonyms,
+        'name'   : name, 'labeling': apiLabeling, 'userCode': userCode, 'synonyms': synonyms,
         'details': comment
         }
 

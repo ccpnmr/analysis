@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import collections
 import operator
 from typing import Union, Tuple, Optional
-
+from functools import partial
 from ccpn.core.Residue import Residue
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Peak import Peak
@@ -40,7 +40,7 @@ from ccpnmodel.ccpncore.lib import Constants
 from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpn.util.Common import name2IsotopeCode
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, deleteObject, logCommandBlock
+from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, deleteObject, logCommandBlock, renameObject
 from ccpn.util.Logging import getLogger
 
 
@@ -189,33 +189,6 @@ class NmrAtom(AbstractWrapperObject):
 
         data2Obj = self._project._data2Obj
         return sorted(data2Obj[x] for x in set(apiPeaks))
-
-    def rename(self, value: str = None):
-        """Rename the NmrAtom, changing its name, Pid, and internal representation."""
-
-        # NBNB TODO change so you can set names of the form '@123' (?)
-
-        # NB This is a VERY special case
-        # - API code and notifiers will take care of resetting id and Pid
-
-        with logCommandBlock(get='self') as log:
-            log('rename')
-            if value is None:
-                self.deassign()
-
-            else:
-                if Pid.altCharacter in value:
-                    raise ValueError("Character %s not allowed in ccpn.NmrAtom.name" % Pid.altCharacter)
-
-                isotopeCode = self._wrappedData.isotopeCode
-                newIsotopeCode = name2IsotopeCode(value)
-                if newIsotopeCode is not None:
-                    if isotopeCode == '?':
-                        self._wrappedData.isotopeCode = newIsotopeCode
-                    elif newIsotopeCode != isotopeCode:
-                        raise ValueError("Cannot rename %s type NmrAtom to %s" % (isotopeCode, value))
-
-                self._wrappedData.name = value
 
     def deassign(self):
         """Reset NmrAtom back to its originalName, cutting all assignment links"""
@@ -370,6 +343,37 @@ class NmrAtom(AbstractWrapperObject):
         if action == 'rename':
             for cs in self.chemicalShifts:
                 cs._finaliseAction(action=action)
+
+    @logCommand(get='self')
+    def rename(self, value: str = None):
+        """Rename the NmrAtom, changing its name, Pid, and internal representation."""
+
+        # NBNB TODO change so you can set names of the form '@123' (?)
+
+        # NB This is a VERY special case
+        # - API code and notifiers will take care of resetting id and Pid
+
+        with renameObject(self) as addUndoItem:
+            oldName = self.name
+
+            if value is None:
+                self.deassign()
+
+            else:
+                self._validateName(value=value, allowWhitespace=False)
+
+                isotopeCode = self._wrappedData.isotopeCode
+                newIsotopeCode = name2IsotopeCode(value)
+                if newIsotopeCode is not None:
+                    if isotopeCode == '?':
+                        self._wrappedData.isotopeCode = newIsotopeCode
+                    elif newIsotopeCode != isotopeCode:
+                        raise ValueError("Cannot rename %s type NmrAtom to %s" % (isotopeCode, value))
+
+                self._wrappedData.name = value
+
+            addUndoItem(undo=partial(self.rename, oldName),
+                        redo=partial(self.rename, value))
 
     #=========================================================================================
     # CCPN functions

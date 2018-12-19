@@ -33,7 +33,8 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Residue as ApiResidue
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock, undoStackBlocking, notificationBlanking
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
+    logCommandBlock, undoStackBlocking, notificationBlanking, renameObject
 from ccpn.util.Logging import getLogger
 
 
@@ -416,38 +417,40 @@ class Residue(AbstractWrapperObject):
         # for substances
         return parent._apiChain.sortedResidues()
 
+    @logCommand(get='self')
     def rename(self, sequenceCode: str = None):
         """Reset Residue.sequenceCode (residueType is immutable).
         Renaming to None sets the sequence code to the seqId (serial number equivalent)
         """
-        apiResidue = self._wrappedData
+        with renameObject(self) as addUndoItem:
+            apiResidue = self._wrappedData
 
-        with logCommandBlock(get='self') as log:
-            log('rename', sequenceCode)
+            if sequenceCode is None:
+                seqCode = apiResidue.seqId
+                seqInsertCode = ' '
 
-            with notificationBlanking():
-                if sequenceCode is None:
-                    seqCode = apiResidue.seqId
-                    seqInsertCode = ' '
+            else:
+                # Parse values from sequenceCode
+                code, ss, offset = commonUtil.parseSequenceCode(sequenceCode)
+                if code is None or offset is not None:
+                    raise ValueError("Illegal value for Residue.sequenceCode: %s" % sequenceCode)
+                seqCode = code
+                seqInsertCode = ss or ' '
 
-                else:
-                    # Parse values from sequenceCode
-                    code, ss, offset = commonUtil.parseSequenceCode(sequenceCode)
-                    if code is None or offset is not None:
-                        raise ValueError("Illegal value for Residue.sequenceCode: %s" % sequenceCode)
-                    seqCode = code
-                    seqInsertCode = ss or ' '
+            previous = apiResidue.chain.findFirstResidue(seqCode=seqCode, seqInsertCode=seqInsertCode)
+            if (previous not in (None, apiResidue)):
+                raise ValueError("New sequenceCode %s clashes with existing Residue %s"
+                                 % (sequenceCode, self._project._data2Obj.get(previous)))
 
-                previous = apiResidue.chain.findFirstResidue(seqCode=seqCode, seqInsertCode=seqInsertCode)
-                if (previous not in (None, apiResidue)):
-                    raise ValueError("New sequenceCode %s clashes with existing Residue %s"
-                                     % (sequenceCode, self._project._data2Obj.get(previous)))
+            if apiResidue.seqInsertCode and apiResidue.seqInsertCode != ' ':
+                oldSequenceCode = '.'.join((str(apiResidue.seqCode), apiResidue.seqInsertCode))
+            else:
+                oldSequenceCode = str(apiResidue.seqCode)
+            apiResidue.seqCode = seqCode
+            apiResidue.seqInsertCode = seqInsertCode
 
-                apiResidue.seqCode = seqCode
-                apiResidue.seqInsertCode = seqInsertCode
-
-            self._finaliseAction('rename')
-            # self._finaliseAction('change')
+            addUndoItem(undo=partial(self.rename, oldSequenceCode),
+                        redo=partial(self.rename, sequenceCode))
 
     #===========================================================================================
     # new'Object' and other methods

@@ -29,7 +29,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import collections
 import operator
 from typing import Tuple, Sequence, List
-
+from functools import partial
 from ccpn.util import Common as commonUtil
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Project import Project
@@ -39,7 +39,7 @@ from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock, renameObject
 from ccpn.util.Logging import getLogger
 
 
@@ -165,21 +165,18 @@ class ChemicalShiftList(AbstractWrapperObject):
         return list(x for x in parent._apiNmrProject.sortedMeasurementLists()
                     if x.className == 'ShiftList')
 
+    @logCommand(get='self')
     def rename(self, value: str):
-        """Rename ChemicalShiftList, changing its name and Pid."""
-        if not isinstance(value, str):
-            raise TypeError("ChemicalShiftList name must be a string")  # ejb catch non-string
-        if not value:
-            raise ValueError("ChemicalShiftList name must be set")  # ejb catch empty string
-        if Pid.altCharacter in value:
-            raise ValueError("Character %s not allowed in ChemicalShiftList name" % Pid.altCharacter)
-        previous = self.getByRelativeId(value)
-        if previous not in (None, self):
-            raise ValueError("%s already exists" % previous.longPid)
+        """Rename ChemicalShiftList, changing its name and Pid.
+        """
+        self._validateName(value=value, allowWhitespace=False)
 
-        with logCommandBlock(get='self') as log:
-            log('rename')
+        with renameObject(self) as addUndoItem:
+            oldName = self.name
             self._wrappedData.name = value
+
+            addUndoItem(undo=partial(self.rename, oldName),
+                        redo=partial(self.rename, value))
 
     #=========================================================================================
     # CCPN functions

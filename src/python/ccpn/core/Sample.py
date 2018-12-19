@@ -40,7 +40,8 @@ from ccpnmodel.ccpncore.api.ccp.lims.Sample import Sample as ApiSample
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.lib import Util as coreUtil
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock, undoStackBlocking
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
+    logCommandBlock, undoStackBlocking, renameObject
 from ccpn.util.Logging import getLogger
 
 
@@ -266,27 +267,16 @@ class Sample(AbstractWrapperObject):
         return parent._wrappedData.sampleStore.sortedSamples()
 
     def rename(self, value: str):
-        """Rename Sample, changing its name and Pid."""
-        oldName = self.name
-        if not isinstance(value, str):
-            raise TypeError("Sample name must be a string")  # ejb
-        elif not value:
-            raise ValueError("Sample name must be set")  # ejb
-        elif Pid.altCharacter in value:
-            raise ValueError("Character %s not allowed in ccpn.Sample.name" % Pid.altCharacter)
-        previous = self.getByRelativeId(value)
-        if previous not in (None, self):
-            raise ValueError("%s already exists" % previous.longPid)
+        """Rename Sample, changing its name and Pid.
+        """
+        self._validateName(value=value, allowWhitespace=False)
 
-        with logCommandBlock(get='self') as log:
-            log('rename')
-            with undoStackBlocking() as addUndoItem:
-                self._wrappedData.__dict__['name'] = value
-                self._finaliseAction('rename')
-                self._finaliseAction('change')
+        with renameObject(self) as addUndoItem:
+            oldName = self.name
+            self._wrappedData.__dict__['name'] = value
 
-                addUndoItem(undo=partial(self.rename, oldName),
-                            redo=partial(self.rename, value))
+            addUndoItem(undo=partial(self.rename, oldName),
+                        redo=partial(self.rename, value))
 
     #=========================================================================================
     # CCPN functions

@@ -72,7 +72,7 @@ class SpectrumToolBar(ToolBar):
 
         # self.widget.project.blankNotification()
         # newIndex = [newIndex.index(ii) for ii in self.widget.getOrderedSpectrumViewsIndex()]
-        newIndex = [self.widget.getOrderedSpectrumViewsIndex()[ii] for ii in newIndex]
+        newIndex = tuple(self.widget.getOrderedSpectrumViewsIndex()[ii] for ii in newIndex)
         self.widget.setOrderedSpectrumViewsIndex(newIndex)
 
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier

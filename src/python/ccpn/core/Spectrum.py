@@ -1759,7 +1759,7 @@ class Spectrum(AbstractWrapperObject):
                 obj.delete()
 
             with undoStackBlocking() as addUndoItem:
-                # notify spectrumViews of delete
+                # notify spectrumViews of delete/create
                 addUndoItem(undo=partial(self._notifySpectrumViews, 'create'),
                             redo=partial(self._notifySpectrumViews, 'delete'))
 

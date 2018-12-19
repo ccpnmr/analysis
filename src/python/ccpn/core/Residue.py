@@ -307,7 +307,7 @@ class Residue(AbstractWrapperObject):
                 newResidues.pop(newResidues.index(apiResidue))
                 self._delete()
 
-                # delete the residue from the fragment
+                # delete the residue from the fragment (no undo items entered into stack)
                 chainFragment.__dict__['residues'] = tuple(newResidues)
 
                 # add new undo item to set the residues in the chainFragment

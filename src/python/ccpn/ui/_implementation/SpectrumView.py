@@ -90,7 +90,11 @@ class SpectrumView(AbstractWrapperObject):
 
             index = self._parent.spectrumViews.index(self)
             parent = self._parent
+
+            # self._finaliseAction('delete')
+            # with notificationBlanking():
             self._wrappedData.spectrumView.delete()
+
             parent._removeOrderedSpectrumViewIndex(index)
 
     #EJB 20181122: why????

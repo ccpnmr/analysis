@@ -1356,12 +1356,15 @@ class GuiSpectrumDisplay(CcpnModule):
         with logCommandBlock(get='self') as log:
             log('displaySpectrum', spectrum=repr(spectrum.pid))
 
+            oldIndex = self.getOrderedSpectrumViewsIndex()
+
+
             newSpectrum = self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
             if newSpectrum:
                 newInd = self.spectrumViews.index(newSpectrum)
-                index = list(self.getOrderedSpectrumViewsIndex())
-                index = [(ii + 1) if (ii >= newInd) else ii for ii in index]
-                index.append(newInd)
+                index = self.getOrderedSpectrumViewsIndex()
+                index = tuple((ii + 1) if (ii >= newInd) else ii for ii in index)
+                index += (newInd,)
 
                 # index = list(self.getOrderedSpectrumViewsIndex())
                 # index.append(len(index))

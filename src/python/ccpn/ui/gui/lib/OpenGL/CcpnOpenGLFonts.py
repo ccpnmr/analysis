@@ -222,8 +222,8 @@ class GLString(GLVertexArray):
                  angle=0.0, width=None, height=None, GLContext=None, blendMode=True,
                  clearArrays=False):
         super().__init__(renderMode=GLRENDERMODE_DRAW, blendMode=blendMode,
-                                       GLContext=GLContext, drawMode=GL.GL_TRIANGLES,
-                                       dimension=2, clearArrays=clearArrays)
+                         GLContext=GLContext, drawMode=GL.GL_TRIANGLES,
+                         dimension=2, clearArrays=clearArrays)
         if text is None:
             text = ''
 
@@ -244,7 +244,7 @@ class GLString(GLVertexArray):
 
         self.indexOffset = 0
         penX = 0
-        penY = 0       # offset the string from (0, 0) and use (x, y) in shader
+        penY = 0  # offset the string from (0, 0) and use (x, y) in shader
         prev = None
 
         # cs, sn = math.cos(angle), math.sin(angle)
@@ -321,7 +321,7 @@ class GLString(GLVertexArray):
         self.numVertices = len(self.vertices) // 2
         self.attribs = np.array((x + ox, y + oy) * self.numVertices, dtype=np.float32)
         self.offsets = np.array((x, y) * self.numVertices, dtype=np.float32)
-        self.stringOffset = None        # (ox, oy)
+        self.stringOffset = None  # (ox, oy)
 
         # create VBOs from the arrays
         self.defineTextArrayVBO(enableVBO=True)

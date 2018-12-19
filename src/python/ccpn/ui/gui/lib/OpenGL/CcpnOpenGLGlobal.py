@@ -33,6 +33,7 @@ from ccpn.framework.PathsAndUrls import fontsPath
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import CcpnGLFont
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLShader import ShaderProgram
 
+
 DEFAULTFONT = 'OpenSans-Regular'
 SUBSTITUTEFONT = 'OpenSans-Regular'
 DEFAULTFONTSIZE = '13'
@@ -58,7 +59,7 @@ class GLGlobalData(QtWidgets.QWidget):
 
     def getNextClientIndex(self):
         self._glClientIndex += 1
-        return 1        #self._glClientIndex
+        return 1  #self._glClientIndex
 
     def loadFonts(self):
         for fontFile in FONTLIST:
@@ -346,33 +347,33 @@ class GLGlobalData(QtWidgets.QWidget):
         # main shader for all plotting
         self._shaderProgram1 = ShaderProgram(vertex=self._vertexShader1,
                                              fragment=self._fragmentShader1,
-                                             attributes={'pMatrix': (16, np.float32),
-                                                         'mvMatrix': (16, np.float32),
-                                                         'dataMatrix': (16, np.float32),
+                                             attributes={'pMatrix'      : (16, np.float32),
+                                                         'mvMatrix'     : (16, np.float32),
+                                                         'dataMatrix'   : (16, np.float32),
                                                          'parameterList': (4, np.int32),
-                                                         'background': (4, np.float32)})
+                                                         'background'   : (4, np.float32)})
 
         # currently not being used
         self._shaderProgram2 = ShaderProgram(vertex=self._vertexShader2,
                                              fragment=self._fragmentShader2,
-                                             attributes={'pMatrix': (16, np.float32),
-                                                         'mvMatrix': (16, np.float32),
+                                             attributes={'pMatrix'         : (16, np.float32),
+                                                         'mvMatrix'        : (16, np.float32),
                                                          'positiveContours': (4, np.float32),
                                                          'negativeContours': (4, np.float32)})
 
         # currently not being used
         self._shaderProgram3 = ShaderProgram(vertex=self._vertexShader3,
                                              fragment=self._fragmentShader3,
-                                             attributes={'pMatrix': (16, np.float32),
+                                             attributes={'pMatrix' : (16, np.float32),
                                                          'mvMatrix': (16, np.float32)})
 
         # main shader for all the text
         self._shaderProgramTex = ShaderProgram(vertex=self._vertexShaderTex,
                                                fragment=self._fragmentShaderTex,
-                                               attributes={'pTexMatrix': (16, np.float32),
-                                                           'mvTexMatrix': (16, np.float32),
-                                                           'axisScale': (4, np.float32),
-                                                           'background': (4, np.float32),
-                                                           'viewport': (4, np.float32),
-                                                           'texture': (1, np.uint32),
+                                               attributes={'pTexMatrix'  : (16, np.float32),
+                                                           'mvTexMatrix' : (16, np.float32),
+                                                           'axisScale'   : (4, np.float32),
+                                                           'background'  : (4, np.float32),
+                                                           'viewport'    : (4, np.float32),
+                                                           'texture'     : (1, np.uint32),
                                                            'blendEnabled': (1, np.uint32)})

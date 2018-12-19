@@ -93,9 +93,9 @@ class PeakPicker1DPipe(SpectraPipe):
     pipeName = PipeName
 
     _kwargs = {
-        ExcludeRegions: DefaultExcludeRegions,
+        ExcludeRegions  : DefaultExcludeRegions,
         NoiseLevelFactor: DefaultNoiseThresholdFactor,
-        NegativePeaks: True,
+        NegativePeaks   : True,
 
         }
 

@@ -6,7 +6,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -23,31 +23,28 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 
-
-
-
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 
+
 class MyModule(CcpnModule):
-  '''
-  This is example of CCPN module Usage. See below how to run it alone for graphical testing purposes.
-  '''
-  includeSettingsWidget = True
-  maxSettingsState = 2
-  settingsPosition = 'top'
+    '''
+    This is example of CCPN module Usage. See below how to run it alone for graphical testing purposes.
+    '''
+    includeSettingsWidget = True
+    maxSettingsState = 2
+    settingsPosition = 'top'
 
-  className = 'MyModule'
+    className = 'MyModule'
 
-  def __init__(self, mainWindow, name):
-    super().__init__(mainWindow=mainWindow, name=name)
+    def __init__(self, mainWindow, name):
+        super().__init__(mainWindow=mainWindow, name=name)
 
-    # mainWidget
-    self.aLabel = Label(parent=self.mainWidget, text='Testing my module', grid=(0, 0))
+        # mainWidget
+        self.aLabel = Label(parent=self.mainWidget, text='Testing my module', grid=(0, 0))
 
-    # settingsWidget
-    self.testingLabel = Label(parent=self.settingsWidget, text='Testing my settings space', grid=(0, 0), hAlign='c')
-
+        # settingsWidget
+        self.testingLabel = Label(parent=self.settingsWidget, text='Testing my settings space', grid=(0, 0), hAlign='c')
 
 
 '''
@@ -59,37 +56,30 @@ Copy and past this script at the botton of the CcpnModule file you want to run.
 '''
 
 if __name__ == '__main__':
-  from PyQt5 import QtGui, QtWidgets
-  from ccpn.ui.gui.widgets.Application import TestApplication
-  from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
-  from ccpn.ui.gui.widgets.CheckBox import EditableCheckBox, CheckBox
+    from PyQt5 import QtGui, QtWidgets
+    from ccpn.ui.gui.widgets.Application import TestApplication
+    from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
+    from ccpn.ui.gui.widgets.CheckBox import EditableCheckBox, CheckBox
 
 
+    app = TestApplication()
+    win = QtWidgets.QMainWindow()
 
+    moduleArea = CcpnModuleArea(mainWindow=None)
 
-  app = TestApplication()
-  win = QtWidgets.QMainWindow()
+    module = MyModule(mainWindow=None, name='My Module')
+    cb = EditableCheckBox(module.settingsWidget, text='HELLO', checked=False, grid=(0, 0))
 
-  moduleArea = CcpnModuleArea(mainWindow=None)
+    state = module.widgetsState
+    cb.setChecked(True)
+    module.restoreWidgetsState(**state)
 
-  module = MyModule(mainWindow=None, name='My Module')
-  cb = EditableCheckBox(module.settingsWidget, text='HELLO', checked=False,  grid=(0,0))
+    moduleArea.addModule(module)
 
-  state = module.widgetsState
-  cb.setChecked(True)
-  module.restoreWidgetsState(**state)
+    win.setCentralWidget(moduleArea)
+    win.resize(1000, 500)
+    win.setWindowTitle('Testing %s' % module.moduleName)
+    win.show()
 
-  moduleArea.addModule(module)
-
-  win.setCentralWidget(moduleArea)
-  win.resize(1000, 500)
-  win.setWindowTitle('Testing %s' % module.moduleName)
-  win.show()
-
-
-  app.start()
-  win.close()
-
-
-
-
+    app.start()
+    win.close()

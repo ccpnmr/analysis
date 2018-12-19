@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -32,40 +32,39 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.core.lib import Undo
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
+
 class NotesPopup(CcpnDialog):
-  """
-  Open a small popup to allow changing the name of a Note
-  """
-  def __init__(self, parent=None, mainWindow=None, title='Notes', note=None, **kwds):
     """
-    Initialise the widget
+    Open a small popup to allow changing the name of a Note
     """
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
-    self.mainWindow = mainWindow
-    self.application = mainWindow.application
-    self.project = mainWindow.application.project
-    self.current = mainWindow.application.current
-    self.note = note
+    def __init__(self, parent=None, mainWindow=None, title='Notes', note=None, **kwds):
+        """
+        Initialise the widget
+        """
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
-    self.noteLabel = Label(self, "Note Name: "+self.note.pid, grid=(0, 0))
-    self.noteText = LineEdit(self, self.note.name, grid=(0, 1))
-    ButtonList(self, ['Cancel', 'OK'], [self.reject, self._okButton], grid=(1, 1))
+        self.mainWindow = mainWindow
+        self.application = mainWindow.application
+        self.project = mainWindow.application.project
+        self.current = mainWindow.application.current
+        self.note = note
 
-  def _okButton(self):
-    """
-    When ok button pressed: update Note and exit
-    """
-    #TODO:ED doesn't need _startCommandEchoBlock yet
-    newName = self.noteText.text()
-    if str(newName) != self.note.name:
-      try:
-        self.note.rename(newName)     # rename covers the undo event
-        self.accept()
-      except Exception as e:
-        showWarning('Notes', str(e))
-    else:
-      self.accept()                   # no change so accept and exit
+        self.noteLabel = Label(self, "Note Name: " + self.note.pid, grid=(0, 0))
+        self.noteText = LineEdit(self, self.note.name, grid=(0, 1))
+        ButtonList(self, ['Cancel', 'OK'], [self.reject, self._okButton], grid=(1, 1))
 
-
-
+    def _okButton(self):
+        """
+        When ok button pressed: update Note and exit
+        """
+        #TODO:ED doesn't need _startCommandEchoBlock yet
+        newName = self.noteText.text()
+        if str(newName) != self.note.name:
+            try:
+                self.note.rename(newName)  # rename covers the undo event
+                self.accept()
+            except Exception as e:
+                showWarning('Notes', str(e))
+        else:
+            self.accept()  # no change so accept and exit

@@ -1,4 +1,3 @@
-
 """Module Documentation here
 
 """
@@ -10,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -30,65 +29,64 @@ from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 
 class RestraintListTest(WrapperTesting):
+    # Path of project to load (None for new project)
+    projectPath = None
 
-  # Path of project to load (None for new project)
-  projectPath = None
+    def test_newDistanceRestraintList(self):
+        dataSet = self.project.newDataSet()
+        newList = dataSet.newRestraintList('Distance')
+        # Undo and redo all operations
+        self.undo.undo()
+        self.undo.redo()
 
-  def test_newDistanceRestraintList(self):
-    dataSet = self.project.newDataSet()
-    newList = dataSet.newRestraintList('Distance')
-    # Undo and redo all operations
-    self.undo.undo()
-    self.undo.redo()
+    def test_newDihedralRestraintList(self):
+        dataSet = self.project.newDataSet()
+        newList = dataSet.newRestraintList('Dihedral')
+        # Undo and redo all operations
+        self.undo.undo()
+        self.undo.redo()
 
-  def test_newDihedralRestraintList(self):
-    dataSet = self.project.newDataSet()
-    newList = dataSet.newRestraintList('Dihedral')
-    # Undo and redo all operations
-    self.undo.undo()
-    self.undo.redo()
+    def test_newCsaRestraintList(self):
+        dataSet = self.project.newDataSet()
+        newList = dataSet.newRestraintList('Csa')
+        # Undo and redo all operations
+        self.undo.undo()
+        self.undo.redo()
 
-  def test_newCsaRestraintList(self):
-    dataSet = self.project.newDataSet()
-    newList = dataSet.newRestraintList('Csa')
-    # Undo and redo all operations
-    self.undo.undo()
-    self.undo.redo()
+    def test_newRdcRestraintList(self):
+        dataSet = self.project.newDataSet()
+        newList = dataSet.newRestraintList('Rdc')
+        # Undo and redo all operations
+        self.undo.undo()
+        self.undo.redo()
 
-  def test_newRdcRestraintList(self):
-    dataSet = self.project.newDataSet()
-    newList = dataSet.newRestraintList('Rdc')
-    # Undo and redo all operations
-    self.undo.undo()
-    self.undo.redo()
+    def test_newChemicalShiftRestraintList(self):
+        dataSet = self.project.newDataSet()
+        newList = dataSet.newRestraintList('ChemicalShift')
+        # Undo and redo all operations
+        self.undo.undo()
+        self.undo.redo()
 
-  def test_newChemicalShiftRestraintList(self):
-    dataSet = self.project.newDataSet()
-    newList = dataSet.newRestraintList('ChemicalShift')
-    # Undo and redo all operations
-    self.undo.undo()
-    self.undo.redo()
+    def test_newJCouplingRestraintList(self):
+        dataSet = self.project.newDataSet()
+        newList = dataSet.newRestraintList('JCoupling')
+        # Undo and redo all operations
+        self.undo.undo()
+        self.undo.redo()
 
-  def test_newJCouplingRestraintList(self):
-    dataSet = self.project.newDataSet()
-    newList = dataSet.newRestraintList('JCoupling')
-    # Undo and redo all operations
-    self.undo.undo()
-    self.undo.redo()
-
-  def test_renameDistanceRestraintList(self):
-    dataSet = self.project.newDataSet()
-    newList = dataSet.newRestraintList('Distance', name='Boom', comment='blah', unit='A',
-                                            potentialType='logNormal', tensorMagnitude=1.0,
-                                            tensorRhombicity=1.0, tensorIsotropicValue=0.0,
-                                            tensorChainCode='A', tensorSequenceCode='11',
-                                            tensorResidueType='TENSOR', origin='NOE')
-    self.project.newUndoPoint()
-    # Undo and redo all operations
-    newList.rename('Chikka')
-    self.undo.undo()
-    self.assertEqual(newList.name, 'Boom')
-    self.undo.undo()
-    self.undo.redo()
-    self.undo.redo()
-    self.assertEqual(newList.name, 'Chikka')
+    def test_renameDistanceRestraintList(self):
+        dataSet = self.project.newDataSet()
+        newList = dataSet.newRestraintList('Distance', name='Boom', comment='blah', unit='A',
+                                           potentialType='logNormal', tensorMagnitude=1.0,
+                                           tensorRhombicity=1.0, tensorIsotropicValue=0.0,
+                                           tensorChainCode='A', tensorSequenceCode='11',
+                                           tensorResidueType='TENSOR', origin='NOE')
+        self.project.newUndoPoint()
+        # Undo and redo all operations
+        newList.rename('Chikka')
+        self.undo.undo()
+        self.assertEqual(newList.name, 'Boom')
+        self.undo.undo()
+        self.undo.redo()
+        self.undo.redo()
+        self.assertEqual(newList.name, 'Chikka')

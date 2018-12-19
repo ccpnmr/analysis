@@ -38,7 +38,6 @@ class GuiIntegralListView(GuiListViewABC):
     def __init__(self):
         super().__init__()
 
-
 # def _getSpectrumPlotItem(spectrum, plotWidget):
 #     for i in plotWidget.items():
 #         if isinstance(i, pg.PlotDataItem):

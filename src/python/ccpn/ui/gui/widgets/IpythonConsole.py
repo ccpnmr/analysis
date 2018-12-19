@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -38,12 +38,13 @@ from qtconsole.rich_jupyter_widget import RichJupyterWidget
 from qtconsole.inprocess import QtInProcessKernelManager
 from ccpn.util.Logging import getLogger
 
+
 class IpythonConsole(Widget):
 
     def __init__(self, mainWindow, namespace=None, **kwds):
 
         if namespace is None:
-          namespace = mainWindow.namespace
+            namespace = mainWindow.namespace
 
         super().__init__(parent=mainWindow, setLayout=True, **kwds)
         # Base._init(self, setLayout=True, **kwds)
@@ -54,7 +55,6 @@ class IpythonConsole(Widget):
 
         self.mainWindow = mainWindow
         self.mainWindow.pythonConsole = self
-
 
         self.ipythonWidget = RichJupyterWidget(self, gui_completion='plain')
         #TODO:GEERTEN: Sort Stylesheet issues
@@ -104,7 +104,7 @@ class IpythonConsole(Widget):
         #                         direction='H', hAlign='c',
         #                         grid=(1,0))
 
-        self.splitter.setStretchFactor(1,8)
+        self.splitter.setStretchFactor(1, 8)
         self.splitter.setChildrenCollapsible(False)
         self.splitter.setStyleSheet("QSplitter::handle { background-color: gray }")
         self.getLayout().addWidget(self.splitter)
@@ -118,104 +118,92 @@ class IpythonConsole(Widget):
         self.hide()
 
     def setProject(self, project):
-      self.project = project
+        self.project = project
 
-    def _runMacro(self, macroFile:str):
-      """
-      # CCPN INTERNAL - called in runMacro method of GuiMainWindow.
-      Executes the specified macro file in the python console.
-      """
-      if macroFile:
-        self.ipythonWidget.execute('%run -i {}'.format(macroFile))
+    def _runMacro(self, macroFile: str):
+        """
+        # CCPN INTERNAL - called in runMacro method of GuiMainWindow.
+        Executes the specified macro file in the python console.
+        """
+        if macroFile:
+            self.ipythonWidget.execute('%run -i {}'.format(macroFile))
 
-      try:
-        self.mainWindow._fillRecentMacrosMenu()
-      except Exception as e:
-        getLogger().debug('Impossible to fill the menus with recent macros %s'%e)
+        try:
+            self.mainWindow._fillRecentMacrosMenu()
+        except Exception as e:
+            getLogger().debug('Impossible to fill the menus with recent macros %s' % e)
 
     def _startChannels(self):
-      """
-      # CCPN INTERNAL - called in constructor of PythonConsoleModule.
-      """
-      self.ipythonWidget.kernel_client = self.ipythonWidget.kernel_manager.client()
-      self.ipythonWidget.kernel_client.start_channels()
+        """
+        # CCPN INTERNAL - called in constructor of PythonConsoleModule.
+        """
+        self.ipythonWidget.kernel_client = self.ipythonWidget.kernel_manager.client()
+        self.ipythonWidget.kernel_client.start_channels()
 
     def _stopChannels(self):
-      """
-      # CCPN INTERNAL - called in constructor of PythonConsoleModule.
-      """
-      self.ipythonWidget.kernel_client.stop_channels()
-      self.ipythonWidget.kernel_client = None
+        """
+        # CCPN INTERNAL - called in constructor of PythonConsoleModule.
+        """
+        self.ipythonWidget.kernel_client.stop_channels()
+        self.ipythonWidget.kernel_client = None
 
     def _showHistory(self):
-      """
-      Shows the history of commands executed inside the python console.
-      """
-      self.ipythonWidget.execute('%history')
+        """
+        Shows the history of commands executed inside the python console.
+        """
+        self.ipythonWidget.execute('%history')
 
-
-    def _write(self, msg:str=None, html=False):
-      """
-      writes the specified string to the python console text box.
-      """
-      try:
-        self.textEditor.moveCursor(QtGui.QTextCursor.End)
-        if html:
-            self.textEditor.textCursor().insertHtml(msg)
-        else:
-          # self.textEditor.textCursor().insertHtml("</div><br><div style='font-weight: normal; background-color: #FFF;'>")
-          self.textEditor.insertPlainText(msg)
-          # self.textEditor.insertPlainText('\n')
-          self.mainWindow.statusBar().showMessage(msg)
-        if self.mainWindow.recordingMacro is True:
-          try:
-            self.mainWindow.editor.textBox.insertPlainText(msg)
-          except:
-            getLogger().warning('Warning: macro editor does not exist')
-      except Exception as e:
-        getLogger().warning('Error on IpythonConsole: %s' %e)
-
+    def _write(self, msg: str = None, html=False):
+        """
+        writes the specified string to the python console text box.
+        """
+        try:
+            self.textEditor.moveCursor(QtGui.QTextCursor.End)
+            if html:
+                self.textEditor.textCursor().insertHtml(msg)
+            else:
+                # self.textEditor.textCursor().insertHtml("</div><br><div style='font-weight: normal; background-color: #FFF;'>")
+                self.textEditor.insertPlainText(msg)
+                # self.textEditor.insertPlainText('\n')
+                self.mainWindow.statusBar().showMessage(msg)
+            if self.mainWindow.recordingMacro is True:
+                try:
+                    self.mainWindow.editor.textBox.insertPlainText(msg)
+                except:
+                    getLogger().warning('Warning: macro editor does not exist')
+        except Exception as e:
+            getLogger().warning('Error on IpythonConsole: %s' % e)
 
     def _setUndoWaypoint(self):
-      """Set Undo waypoint, if undo is present"""
-      if hasattr(self, 'project'):
-        undo = self.project._undo
-        if undo is not None:
-          self.project.newUndoPoint()
+        """Set Undo waypoint, if undo is present"""
+        if hasattr(self, 'project'):
+            undo = self.project._undo
+            if undo is not None:
+                self.project.newUndoPoint()
 
+    def writeConsoleCommand(self, command: str, **objectParameters):
+        """Set keyword:value objectParameters to point to the relevant objects,
+        echo command in console, and set Undo
 
+        Example calls:
 
-    def writeConsoleCommand(self, command:str, **objectParameters):
-      """Set keyword:value objectParameters to point to the relevant objects,
-      echo command in console, and set Undo
+        writeConsoleCommand("application.createSpectrumDisplay(spectrum)", spectrum=spectrumOrPid)
 
-      Example calls:
+        writeConsoleCommand(
+           "newAssignment = peak.assignDimension(axisCode=%s, value=[newNmrAtom]" % axisCode,
+           peak=peakOrPid)
+        """
 
-      writeConsoleCommand("application.createSpectrumDisplay(spectrum)", spectrum=spectrumOrPid)
+        # write lines getting objects by their Pids
 
-      writeConsoleCommand(
-         "newAssignment = peak.assignDimension(axisCode=%s, value=[newNmrAtom]" % axisCode,
-         peak=peakOrPid)
-      """
+        for parameter in sorted(objectParameters):
+            value = objectParameters[parameter]
+            if not isinstance(value, str):
+                value = value.pid
+            self._write("%s = project.getByPid('%s')\n" % (parameter, value))
 
-      # write lines getting objects by their Pids
+        # execute command
+        self._write(msg=command + '\n')  # ED: newLine IS needed here
 
-      for parameter in sorted(objectParameters):
-        value = objectParameters[parameter]
-        if not isinstance(value, str):
-          value = value.pid
-        self._write("%s = project.getByPid('%s')\n" % (parameter, value))
-
-      # execute command
-      self._write(msg=command+'\n')    # ED: newLine IS needed here
-
-      # set undo step
-      self._setUndoWaypoint()
-
-
-
-
-
-
-
-
+        # set undo step
+        self._setUndoWaypoint()

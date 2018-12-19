@@ -78,41 +78,42 @@ from ccpn.core.lib.Notifiers import Notifier, NotifierBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.core.lib.ContextManagers import undoBlockManager
 
+
 CommonWidgets = {
-    CheckBox.__name__: (CheckBox.get, CheckBox.setChecked),
-    ColourDialog.__name__: (ColourDialog.getColor, ColourDialog.setColour),
-    DoubleSpinbox.__name__: (DoubleSpinbox.value, DoubleSpinbox.setValue),
+    CheckBox.__name__                   : (CheckBox.get, CheckBox.setChecked),
+    ColourDialog.__name__               : (ColourDialog.getColor, ColourDialog.setColour),
+    DoubleSpinbox.__name__              : (DoubleSpinbox.value, DoubleSpinbox.setValue),
     # Label.__name__:                   (Label.get,                   Label.setText),
-    LineEdit.__name__: (LineEdit.get, LineEdit.setText),
-    LineEditButtonDialog.__name__: (LineEditButtonDialog.get, LineEditButtonDialog.setText),
-    PulldownList.__name__: (PulldownList.currentText, PulldownList.set),
-    RadioButtons.__name__: (RadioButtons.get, RadioButtons.set),
-    RadioButton.__name__: (RadioButton.isChecked, RadioButton.setChecked),
+    LineEdit.__name__                   : (LineEdit.get, LineEdit.setText),
+    LineEditButtonDialog.__name__       : (LineEditButtonDialog.get, LineEditButtonDialog.setText),
+    PulldownList.__name__               : (PulldownList.currentText, PulldownList.set),
+    RadioButtons.__name__               : (RadioButtons.get, RadioButtons.set),
+    RadioButton.__name__                : (RadioButton.isChecked, RadioButton.setChecked),
 
-    Slider.__name__: (Slider.get, Slider.setValue),
-    Spinbox.__name__: (Spinbox.value, Spinbox.set),
-    TextEditor.__name__: (TextEditor.get, TextEditor.setText),
-    GLTargetButtonSpinBoxes.__name__: (GLTargetButtonSpinBoxes.get, GLTargetButtonSpinBoxes.setValues),
+    Slider.__name__                     : (Slider.get, Slider.setValue),
+    Spinbox.__name__                    : (Spinbox.value, Spinbox.set),
+    TextEditor.__name__                 : (TextEditor.get, TextEditor.setText),
+    GLTargetButtonSpinBoxes.__name__    : (GLTargetButtonSpinBoxes.get, GLTargetButtonSpinBoxes.setValues),
 
-    PulldownListCompoundWidget.__name__: (PulldownListCompoundWidget.getText, PulldownListCompoundWidget.select),  #PulldownList
-    ListCompoundWidget.__name__: (ListCompoundWidget.getTexts, ListCompoundWidget.setTexts),  #PulldownList based
-    CheckBoxCompoundWidget.__name__: (CheckBoxCompoundWidget.get, CheckBoxCompoundWidget.set),
+    PulldownListCompoundWidget.__name__ : (PulldownListCompoundWidget.getText, PulldownListCompoundWidget.select),  #PulldownList
+    ListCompoundWidget.__name__         : (ListCompoundWidget.getTexts, ListCompoundWidget.setTexts),  #PulldownList based
+    CheckBoxCompoundWidget.__name__     : (CheckBoxCompoundWidget.get, CheckBoxCompoundWidget.set),
     DoubleSpinBoxCompoundWidget.__name__: (DoubleSpinBoxCompoundWidget.getValue, DoubleSpinBoxCompoundWidget.setValue),  #D oubleSpinbox
-    SelectorWidget.__name__: (SelectorWidget.getText, SelectorWidget.select),  #PulldownList
-    InputPulldown.__name__: (InputPulldown.currentText, InputPulldown.set),  #PulldownList
-    ColourSelectionWidget.__name__: (ColourSelectionWidget.currentText, ColourSelectionWidget.setColour),  #PulldownList
-    LineEditPopup.__name__: (LineEditPopup.get, LineEditPopup.set),
-    QCodeEditor.__name__: (QCodeEditor.get, QCodeEditor.set)
+    SelectorWidget.__name__             : (SelectorWidget.getText, SelectorWidget.select),  #PulldownList
+    InputPulldown.__name__              : (InputPulldown.currentText, InputPulldown.set),  #PulldownList
+    ColourSelectionWidget.__name__      : (ColourSelectionWidget.currentText, ColourSelectionWidget.setColour),  #PulldownList
+    LineEditPopup.__name__              : (LineEditPopup.get, LineEditPopup.set),
+    QCodeEditor.__name__                : (QCodeEditor.get, QCodeEditor.set)
 
     # ADD TABLES
     # ADD Others
     }
 
 settingsWidgetPositions = {
-    'top': {'settings': (0, 0), 'widget': (1, 0)},
+    'top'   : {'settings': (0, 0), 'widget': (1, 0)},
     'bottom': {'settings': (1, 0), 'widget': (0, 0)},
-    'left': {'settings': (0, 0), 'widget': (0, 1)},
-    'right': {'settings': (0, 1), 'widget': (0, 0)},
+    'left'  : {'settings': (0, 0), 'widget': (0, 1)},
+    'right' : {'settings': (0, 1), 'widget': (0, 0)},
     }
 ALL = '<all>'
 DoubleUnderscore = '__'
@@ -1101,6 +1102,7 @@ class CcpnModuleLabel(DockLabel):
 class DropAreaSelectedOverlay(QtWidgets.QWidget):
     """Overlay widget that draws highlight over the current module during a drag-drop operation
     """
+
     def __init__(self, parent):
         """Initialise widget
         """

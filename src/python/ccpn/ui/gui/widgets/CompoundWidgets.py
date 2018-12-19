@@ -86,7 +86,7 @@ class ListCompoundWidget(CompoundBaseWidget):
             top=[(0, 0), (1, 0), (2, 0)],
             bottom=[(2, 0), (0, 0), (1, 0)],
             horizontal=[(0, 0), (0, 1), (0, 2)],
-    )
+            )
 
     def __init__(self, parent=None, showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
@@ -232,7 +232,7 @@ class EntryCompoundWidget(CompoundBaseWidget):
             right=[(0, 1), (0, 0)],
             top=[(0, 0), (1, 0)],
             bottom=[(1, 0), (0, 0)],
-    )
+            )
 
     def __init__(self, parent=None, showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
@@ -307,7 +307,7 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
             right=[(0, 1), (0, 0)],
             top=[(0, 0), (1, 0)],
             bottom=[(1, 0), (0, 0)],
-    )
+            )
 
     def __init__(self, parent=None, showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
@@ -418,7 +418,7 @@ class CheckBoxCompoundWidget(CompoundBaseWidget):
             right=[(0, 1), (0, 0)],
             top=[(0, 0), (1, 0)],
             bottom=[(1, 0), (0, 0)],
-    )
+            )
 
     def __init__(self, parent=None, showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
@@ -492,7 +492,7 @@ class DoubleSpinBoxCompoundWidget(CompoundBaseWidget):
             right=[(0, 1), (0, 0)],
             top=[(0, 0), (1, 0)],
             bottom=[(1, 0), (0, 0)],
-    )
+            )
 
     def __init__(self, parent=None, showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
@@ -657,6 +657,7 @@ if __name__ == '__main__':
     from ccpn.ui.gui.widgets.BasePopup import BasePopup
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
+
     app = TestApplication()
 
 
@@ -677,7 +678,7 @@ if __name__ == '__main__':
     policyDict = dict(
             vAlign='top',
             # hAlign='left',
-    )
+            )
     # policyDict = dict(
     #   hAlign='left',
     # )

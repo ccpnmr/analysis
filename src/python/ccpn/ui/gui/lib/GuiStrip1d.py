@@ -121,10 +121,10 @@ class GuiStrip1d(GuiStrip):
         self._integralMenu = _get1dIntegralMenu(self)
         self._multipletMenu = _get1dMultipletMenu(self)
 
-        self._contextMenus.update({DefaultMenu: self._defaultMenu,
-                                   PhasingMenu: self._phasingMenu,
-                                   PeakMenu: self._peakMenu,
-                                   IntegralMenu: self._integralMenu,
+        self._contextMenus.update({DefaultMenu  : self._defaultMenu,
+                                   PhasingMenu  : self._phasingMenu,
+                                   PeakMenu     : self._peakMenu,
+                                   IntegralMenu : self._integralMenu,
                                    MultipletMenu: self._multipletMenu})
 
         # self.plotWidget.plotItem.setAcceptDrops(True)
@@ -211,6 +211,7 @@ class GuiStrip1d(GuiStrip):
         """show the export strip to file dialog
         """
         from ccpn.ui.gui.popups.ExportStripToFile import ExportStripToFilePopup as ExportDialog
+
         self.exportPdf = ExportDialog(parent=self.mainWindow,
                                       mainWindow=self.mainWindow,
                                       strips=self.spectrumDisplay.strips,
@@ -304,7 +305,7 @@ class GuiStrip1d(GuiStrip):
         sdWid = self.spectrumDisplay.mainWidget
         self.widgetIndex += 1
         self.calibrateX1DWidgets = CalibrateX1DWidgets(sdWid, mainWindow=self.mainWindow, strip=self,
-                                                       grid=(self.widgetIndex, 0), gridSpan=(1,7))
+                                                       grid=(self.widgetIndex, 0), gridSpan=(1, 7))
 
     # def _toggleCalibrateXSpectrum(self):
     #   ''' calibrate the spectra in the strip to the new point '''
@@ -335,7 +336,7 @@ class GuiStrip1d(GuiStrip):
         sdWid = self.spectrumDisplay.mainWidget
         self.widgetIndex += 1
         self.calibrateY1DWidgets = CalibrateY1DWidgets(sdWid, mainWindow=self.mainWindow, strip=self,
-                                                       grid=(self.widgetIndex, 0), gridSpan=(1,7))
+                                                       grid=(self.widgetIndex, 0), gridSpan=(1, 7))
 
     # def _toggleCalibrateYSpectrum(self):
     #   ''' calibrate the spectra in the strip to the new point '''
@@ -360,14 +361,14 @@ class GuiStrip1d(GuiStrip):
 
     def _getInitialOffset(self):
         offSets = []
-        offSet = 0 # Default
+        offSet = 0  # Default
         for i, spectrumView in enumerate(self.spectrumViews):
             sp = spectrumView.spectrum
             y = sp.intensities
             offSet = np.std(y)
             offSets.append(offSet)
-        if len(offSets)>0:
-            offSet= np.mean(offSets)
+        if len(offSets) > 0:
+            offSet = np.mean(offSets)
         return offSet
 
     def _toggleOffsetWidget(self):

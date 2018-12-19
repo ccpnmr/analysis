@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification
@@ -33,34 +33,36 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ccpn.util import Path
 
+
 class SplashScreen(QtWidgets.QSplashScreen):
 
-  def __init__(self, dummy=None, wait=1):
+    def __init__(self, dummy=None, wait=1):
 
-    splashImagePath = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
-                                                        'splash-screen.png')
-    #print(splashImagePath)
-    pixmap = QtGui.QPixmap(splashImagePath)
-    #super(QtGui.QSplashScreen, self).__init__(pixmap, QtCore.Qt.WindowStaysOnTopHint)
-    QtWidgets.QSplashScreen.__init__(self, pixmap, QtCore.Qt.WindowStaysOnTopHint)
+        splashImagePath = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
+                                       'splash-screen.png')
+        #print(splashImagePath)
+        pixmap = QtGui.QPixmap(splashImagePath)
+        #super(QtGui.QSplashScreen, self).__init__(pixmap, QtCore.Qt.WindowStaysOnTopHint)
+        QtWidgets.QSplashScreen.__init__(self, pixmap, QtCore.Qt.WindowStaysOnTopHint)
 
-    self.show()
+        self.show()
 
-    # dummy window; to have something going
-    if dummy:
-      self.w = QtWidgets.QWidget()
-      self.w.resize(dummy[0],dummy[1])
-      self.w.show()
+        # dummy window; to have something going
+        if dummy:
+            self.w = QtWidgets.QWidget()
+            self.w.resize(dummy[0], dummy[1])
+            self.w.show()
 
-    self.wait = wait
-  #
-  # def info(self, text):
-  #   self.showMessage(text, color=QtCore.Qt.white, alignment = QtCore.Qt.AlignBottom)
+        self.wait = wait
 
-  def close(self):
-    import time
-    time.sleep(self.wait)
-    if hasattr(self,'w'):
-        self.w.close()
-    super(QtWidgets.QSplashScreen, self).close()
+    #
+    # def info(self, text):
+    #   self.showMessage(text, color=QtCore.Qt.white, alignment = QtCore.Qt.AlignBottom)
 
+    def close(self):
+        import time
+
+        time.sleep(self.wait)
+        if hasattr(self, 'w'):
+            self.w.close()
+        super(QtWidgets.QSplashScreen, self).close()

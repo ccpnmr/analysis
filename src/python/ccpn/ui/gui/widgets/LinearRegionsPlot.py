@@ -48,13 +48,13 @@ class LinearRegionsPlot(LinearRegionItem):
             orientation = LinearRegionItem.Horizontal
 
         colours = {
-            'green': (0, 111, 20, 50),
-            'yellow': (0, 111, 20, 50),
-            'blue': None,  # Default,
+            'green'      : (0, 111, 20, 50),
+            'yellow'     : (0, 111, 20, 50),
+            'blue'       : None,  # Default,
             'transparent': (0, 111, 20, 50),
-            'grey': (255, 255, 255, 50),
-            'red': (255, 0, 0, 50),
-            'purple': (178, 102, 255, 50)
+            'grey'       : (255, 255, 255, 50),
+            'red'        : (255, 0, 0, 50),
+            'purple'     : (178, 102, 255, 50)
             }
         if colour in colours.keys():
             brush = colours[colour]

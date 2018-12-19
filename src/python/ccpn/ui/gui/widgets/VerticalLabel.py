@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -33,14 +33,13 @@ from ccpn.framework.Translation import translator
 class VerticalLabel(QtWidgets.QWidget, Base):
 
     def __init__(self, parent, text, **kwargs):
+        super().__init__(parent)
+        Base._init(self, **kwargs)
 
-      super().__init__(parent)
-      Base._init(self, **kwargs)
-
-      text = translator.translate(text)
-      self.text = text
-      self.setText(text)
-      self.height = parent.height()
+        text = translator.translate(text)
+        self.text = text
+        self.setText(text)
+        self.height = parent.height()
 
     def paintEvent(self, event):
         painter = QtGui.QPainter(self)
@@ -51,8 +50,7 @@ class VerticalLabel(QtWidgets.QWidget, Base):
         painter.end()
 
     def setText(self, text):
+        text = translator.translate(text)
 
-      text = translator.translate(text)
-
-      self.text = text
-      self.repaint()
+        self.text = text
+        self.repaint()

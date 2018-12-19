@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -40,213 +40,212 @@ from ccpn.util.Logging import getLogger
 
 class ButtonList(Widget):
 
-  def __init__(self, parent=None, texts=None, callbacks=None, icons=None,
-               tipTexts=None, direction='h', commands=None, images=None, **kwds):
+    def __init__(self, parent=None, texts=None, callbacks=None, icons=None,
+                 tipTexts=None, direction='h', commands=None, images=None, **kwds):
 
-    super().__init__(parent, setLayout=True, **kwds)     # ejb - added setLayout
+        super().__init__(parent, setLayout=True, **kwds)  # ejb - added setLayout
 
-    self.buttonNames = {}
+        self.buttonNames = {}
 
-    if commands:
-      print("qtgui.ButtonList.commands is deprecated; use .callbacks")
-      callbacks = commands
+        if commands:
+            print("qtgui.ButtonList.commands is deprecated; use .callbacks")
+            callbacks = commands
 
-    if images:
-      print("qtgui.ButtonList.images is deprecated; use .icons")
-      icons = images
+        if images:
+            print("qtgui.ButtonList.images is deprecated; use .icons")
+            icons = images
 
-    if texts is None:
-      texts = []
+        if texts is None:
+            texts = []
 
-    if callbacks is None:
-      callbacks = []
+        if callbacks is None:
+            callbacks = []
 
-    assert len(texts) == len(callbacks)
+        assert len(texts) == len(callbacks)
 
-    direction = direction.lower()
-    self.direction = direction
-    
-    if tipTexts is None:
-      tipTexts = []
-      
-    if icons is None:
-      icons = []
+        direction = direction.lower()
+        self.direction = direction
 
-    while len(tipTexts) < len(texts):
-      tipTexts.append(None)  
+        if tipTexts is None:
+            tipTexts = []
 
-    while len(icons) < len(texts):
-      icons.append(None)  
+        if icons is None:
+            icons = []
 
-    self.buttons = []
-    self.addButtons(texts, callbacks, icons, tipTexts)
+        while len(tipTexts) < len(texts):
+            tipTexts.append(None)
 
-    # set focus always on the last button (which is usually the ok, or run button)
-    if len(self.buttons)>0:
-      lastButton = self.buttons[-1]
-      lastButton.setFocus()
+        while len(icons) < len(texts):
+            icons.append(None)
 
+        self.buttons = []
+        self.addButtons(texts, callbacks, icons, tipTexts)
 
+        # set focus always on the last button (which is usually the ok, or run button)
+        if len(self.buttons) > 0:
+            lastButton = self.buttons[-1]
+            lastButton.setFocus()
 
-  def addButtons(self, texts, callbacks, icons=None, tipTexts=None):
-  
-    if tipTexts is None:
-      tipTexts = []
-      
-    if icons is None:
-      icons = []
+    def addButtons(self, texts, callbacks, icons=None, tipTexts=None):
 
-    while len(tipTexts) < len(texts):
-      tipTexts.append(None)  
+        if tipTexts is None:
+            tipTexts = []
 
-    while len(icons) < len(texts):
-      icons.append(None)  
-    
-    j = len(self.buttons)
+        if icons is None:
+            icons = []
 
-    for i, text in enumerate(texts):
-      if 'h' in self.direction:
-        grid = (0,i+j)
-      else:
-        grid = (i+j,0)
-        
-      button = Button(self, text, callbacks[i], icons[i],
-                      tipText=tipTexts[i], grid=grid)
-      # button.setMinimumWidth(20)
+        while len(tipTexts) < len(texts):
+            tipTexts.append(None)
 
-      width = button.fontMetrics().boundingRect(text).width() + 7
-      button.setMinimumWidth(width*1.5)
+        while len(icons) < len(texts):
+            icons.append(None)
 
-      self.buttons.append(button)
-      self.buttonNames[text] = i+j
+        j = len(self.buttons)
 
-  def setButtonEnabled(self, buttonName:str, enable:bool=True):
-    """
-    Enable/Disable a button by name
-    :param buttonName(str) - name of the button:
-    :param enable(bool) - True or False:
-    """
-    if buttonName in self.buttonNames.keys():
-      self.buttons[self.buttonNames[buttonName]].setEnabled(enable)
-    else:
-      getLogger().warning('Button %s not found in the list' % buttonName)
+        for i, text in enumerate(texts):
+            if 'h' in self.direction:
+                grid = (0, i + j)
+            else:
+                grid = (i + j, 0)
 
-  def setButtonVisible(self, buttonName:str, visible:bool=True):
-    """
-    Show/hide a button by name
-    :param buttonName(str) - name of the button:
-    :param visible(bool) - True or False:
-    """
-    if buttonName in self.buttonNames.keys():
-      if visible:
-        self.buttons[self.buttonNames[buttonName]].show()
-      else:
-        self.buttons[self.buttonNames[buttonName]].hide()
-    else:
-      getLogger().warning('Button %s not found in the list' % buttonName)
+            button = Button(self, text, callbacks[i], icons[i],
+                            tipText=tipTexts[i], grid=grid)
+            # button.setMinimumWidth(20)
+
+            width = button.fontMetrics().boundingRect(text).width() + 7
+            button.setMinimumWidth(width * 1.5)
+
+            self.buttons.append(button)
+            self.buttonNames[text] = i + j
+
+    def setButtonEnabled(self, buttonName: str, enable: bool = True):
+        """
+        Enable/Disable a button by name
+        :param buttonName(str) - name of the button:
+        :param enable(bool) - True or False:
+        """
+        if buttonName in self.buttonNames.keys():
+            self.buttons[self.buttonNames[buttonName]].setEnabled(enable)
+        else:
+            getLogger().warning('Button %s not found in the list' % buttonName)
+
+    def setButtonVisible(self, buttonName: str, visible: bool = True):
+        """
+        Show/hide a button by name
+        :param buttonName(str) - name of the button:
+        :param visible(bool) - True or False:
+        """
+        if buttonName in self.buttonNames.keys():
+            if visible:
+                self.buttons[self.buttonNames[buttonName]].show()
+            else:
+                self.buttons[self.buttonNames[buttonName]].hide()
+        else:
+            getLogger().warning('Button %s not found in the list' % buttonName)
 
 
 class UtilityButtonList(ButtonList):
 
-  def __init__(self, parent,
-               webBrowser=None, helpUrl=None, helpMsg=None,
-               doClone=True, doHelp=True, doClose=True,
-               cloneText=None, helpText=None, closeText=None,
-               cloneCmd=None, helpCmd=None, closeCmd=None,
-               cloneTip='Duplicate window', helpTip='Show help', closeTip='Close window',
-               *args, **kwds):
-    
-    ButtonList.__init__(self, parent, *args, **kwds)
-    
-    self.helpUrl = helpUrl
-    self.helpMsg = helpMsg
-    
-    self.popup = parent.window()
-    if not isinstance(self.popup, BasePopup):
-      self.popup = None
-   
-    if self.popup and not webBrowser:
-      webBrowser = WebBrowser(self.popup)
- 
-    self.webBrowser = webBrowser
+    def __init__(self, parent,
+                 webBrowser=None, helpUrl=None, helpMsg=None,
+                 doClone=True, doHelp=True, doClose=True,
+                 cloneText=None, helpText=None, closeText=None,
+                 cloneCmd=None, helpCmd=None, closeCmd=None,
+                 cloneTip='Duplicate window', helpTip='Show help', closeTip='Close window',
+                 *args, **kwds):
 
-    _callbacks = []
-    _texts    = []
-    _icons   = []
-    _tipTexts = []
-    
-    _doActions = [(doClone, cloneCmd, self.duplicatePopup, cloneText, 'icons/window-duplicate.png', cloneTip),
-                  (doHelp,   helpCmd, self.launchHelp, helpText,  'icons/system-help.png',       helpTip),
-                  (doClose, closeCmd, self.closePopup, closeText, 'icons/window-close.png',     closeTip),]
-    
-    for doAction, userCmd, defaultCmd, text, image, tipText in _doActions:
-      if doAction:
-        _callbacks.append(userCmd or defaultCmd)
-        _tipTexts.append(tipText)
-        _texts.append(text)
-        
-        if image:
-          icon = Icon(image)
+        ButtonList.__init__(self, parent, *args, **kwds)
+
+        self.helpUrl = helpUrl
+        self.helpMsg = helpMsg
+
+        self.popup = parent.window()
+        if not isinstance(self.popup, BasePopup):
+            self.popup = None
+
+        if self.popup and not webBrowser:
+            webBrowser = WebBrowser(self.popup)
+
+        self.webBrowser = webBrowser
+
+        _callbacks = []
+        _texts = []
+        _icons = []
+        _tipTexts = []
+
+        _doActions = [(doClone, cloneCmd, self.duplicatePopup, cloneText, 'icons/window-duplicate.png', cloneTip),
+                      (doHelp, helpCmd, self.launchHelp, helpText, 'icons/system-help.png', helpTip),
+                      (doClose, closeCmd, self.closePopup, closeText, 'icons/window-close.png', closeTip), ]
+
+        for doAction, userCmd, defaultCmd, text, image, tipText in _doActions:
+            if doAction:
+                _callbacks.append(userCmd or defaultCmd)
+                _tipTexts.append(tipText)
+                _texts.append(text)
+
+                if image:
+                    icon = Icon(image)
+                else:
+                    icon = None
+
+                _icons.append(icon)
+
+        self.addButtons(_texts, _callbacks, _icons, _tipTexts)
+
+    def duplicatePopup(self):
+
+        if self.popup:
+            try:
+                newPopup = self.popup.__class__(self.popup.parent)
+                x, y, w, h = self.getGeometry()
+                newPopup.setGeometry(x + 25, y + 25, w, h)
+
+            except:
+                pass
+
+    def launchHelp(self):
+
+        if self.helpUrl and self.webBrowser:
+            self.webBrowser.open(self.helpUrl)
+
+        elif self.popup:
+            from ccpn.ui.gui.widgets.WebView import WebViewPopup
+
+            popup = WebViewPopup(self.popup, url=self.helpMsg or ccpnUrl + '/documentation')
+
+    def closePopup(self):
+
+        if self.popup:
+            self.popup.close()
+
         else:
-          icon = None  
-        
-        _icons.append(icon)       
+            self.destroy()
 
-    self.addButtons(_texts, _callbacks, _icons, _tipTexts)
-
-  def duplicatePopup(self):
-     
-    if self.popup:
-      try:
-        newPopup = self.popup.__class__(self.popup.parent)
-        x,y, w, h = self.getGeometry()
-        newPopup.setGeometry(x+25, y+25, w, h)
-      
-      except:
-        pass
-  
-  def launchHelp(self):
-  
-    if self.helpUrl and self.webBrowser:
-      self.webBrowser.open(self.helpUrl)
-      
-    elif self.popup:
-      from ccpn.ui.gui.widgets.WebView import WebViewPopup
-      popup = WebViewPopup(self.popup, url=self.helpMsg or ccpnUrl + '/documentation')
-  
-  def closePopup(self):
-  
-    if self.popup:
-      self.popup.close()
-      
-    else:
-      self.destroy()  
-  
 
 if __name__ == '__main__':
+    from ccpn.ui.gui.widgets.Application import TestApplication
+    from ccpn.ui.gui.widgets.BasePopup import BasePopup
+    from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
-  from ccpn.ui.gui.widgets.Application import TestApplication
-  from ccpn.ui.gui.widgets.BasePopup import BasePopup
-  from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
-  def callback(text):
-    print('callback', text)
+    def callback(text):
+        print('callback', text)
 
-  texts = ['abc', 'def', 'ghi']
-  callbacks = [lambda t=text: callback(t) for text in texts]
-  icons = [None, None, 'icons/applications-system.png']
 
-  app = TestApplication()
-  popup = CcpnDialog(windowTitle='Test ButtonList')
+    texts = ['abc', 'def', 'ghi']
+    callbacks = [lambda t=text: callback(t) for text in texts]
+    icons = [None, None, 'icons/applications-system.png']
 
-  # popup.setSize(200,200)
-  popup.setGeometry(200,200,200,200)
+    app = TestApplication()
+    popup = CcpnDialog(windowTitle='Test ButtonList')
 
-  buttons = ButtonList(parent=popup, texts=texts, callbacks=callbacks, icons=icons, grid=(2,2))
-  # utils = UtilityButtonList(parent=popup, texts=texts, callbacks=callbacks, helpUrl=ccpnUrl+"/software")
+    # popup.setSize(200,200)
+    popup.setGeometry(200, 200, 200, 200)
 
-  popup.show()
-  popup.raise_()
+    buttons = ButtonList(parent=popup, texts=texts, callbacks=callbacks, icons=icons, grid=(2, 2))
+    # utils = UtilityButtonList(parent=popup, texts=texts, callbacks=callbacks, helpUrl=ccpnUrl+"/software")
 
-  app.start()
+    popup.show()
+    popup.raise_()
 
+    app.start()

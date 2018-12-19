@@ -122,11 +122,11 @@ class GuiStrip(Frame):
         self.axisPositionDict = {}  # axisCode --> position
 
         self._contextMenuMode = DefaultMenu
-        self._contextMenus = {DefaultMenu: None,
-                              PeakMenu: None,
-                              PhasingMenu: None,
+        self._contextMenus = {DefaultMenu  : None,
+                              PeakMenu     : None,
+                              PhasingMenu  : None,
                               MultipletMenu: None,
-                              IntegralMenu: None
+                              IntegralMenu : None
                               }
 
         self.navigateToPeakMenu = None  #set from context menu and in CcpnOpenGL rightClick
@@ -1100,7 +1100,6 @@ class GuiStrip(Frame):
         # rebuild the axes for each strip
         self.spectrumDisplay.showAxes(stretchValue=True, widths=False)
 
-
     def navigateToPosition(self, positions: typing.List[float],
                            axisCodes: typing.List[str] = None,
                            widths: typing.List[float] = None):
@@ -1114,7 +1113,6 @@ class GuiStrip(Frame):
             self.navigateToPosition(peak.position, peak.axisCodes)
         else:
             MessageDialog.showMessage('No Peak', 'Select a peak first')
-
 
     def _raiseContextMenu(self, event: QtGui.QMouseEvent):
         """

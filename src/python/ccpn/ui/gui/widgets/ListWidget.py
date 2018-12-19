@@ -11,7 +11,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                  "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -23,7 +22,6 @@ __version__ = "$Revision: 3.0.b4 $"
 #=========================================================================================
 __author__ = "$Author: Geerten Vuister $"
 __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
-
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -69,7 +67,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
         self.setAcceptDrops(acceptDrops)
         self.contextMenu = contextMenu
         self.callback = callback
-        self.objects = {id(obj):obj for obj in objects} if objects else {}     # list(objects) or [])
+        self.objects = {id(obj): obj for obj in objects} if objects else {}  # list(objects) or [])
         self._items = list(objects or [])
         self.multiSelect = multiSelect
         self.dropSource = None
@@ -113,7 +111,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
         self.clear()
         self.cleared.emit()
 
-        self.objects = {id(obj):obj for obj in objects}     # list(objects)
+        self.objects = {id(obj): obj for obj in objects}  # list(objects)
         for obj in objects:
             if hasattr(obj, name):
                 item = QtWidgets.QListWidgetItem(getattr(obj, name), self)
@@ -140,7 +138,6 @@ class ListWidget(QtWidgets.QListWidget, Base):
             else:
                 if not item.text() in self.getTexts():
                     super(ListWidget, self).addItem(item)
-
 
     def hideAllItems(self):
         for i in range(self.count()):
@@ -394,7 +391,6 @@ class ListWidget(QtWidgets.QListWidget, Base):
         seen = set()
         uniq = [i for i in self.getItems() if i.text() not in seen and not seen.add(i.text())]
         removeDuplicates = [self.model().removeRow(self.row(i)) for i in self.getItems() if i not in uniq]
-
 
 
 from ccpn.ui.gui.widgets.Frame import Frame
@@ -784,23 +780,19 @@ if __name__ == '__main__':
     def droppedCallback(*r):
         print(r)
 
+
     app = TestApplication()
 
     texts = ['Int', 'Float', 'String', '']
     objects = [int, float, str, 'Green']
 
-
-
-
     popup = CcpnDialog(windowTitle='Test widget', setLayout=True)
-    widget = ListWidget(parent=popup,allowDuplicates=True, acceptDrops=True, grid=(0,0))
+    widget = ListWidget(parent=popup, allowDuplicates=True, acceptDrops=True, grid=(0, 0))
     widget2 = ListWidget(parent=popup, allowDuplicates=False, acceptDrops=True, grid=(0, 1))
     widget2.dropped.connect(droppedCallback)
 
-
-    for i in ['a','a','c']:
+    for i in ['a', 'a', 'c']:
         widget.addItem(i)
     popup.show()
     popup.raise_()
     app.start()
-

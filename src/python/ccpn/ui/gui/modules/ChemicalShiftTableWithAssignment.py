@@ -22,7 +22,6 @@ __version__ = "$Revision: 3.0.b4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: geertenv $"
 __date__ = "$Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $"
 #=========================================================================================
@@ -305,7 +304,7 @@ class ChemicalShiftTableWithAssignment(CcpnModule):
             self.assignedPeaksTable._peakList = self.emptyObject()
 
             self.assignedPeaksTable._peakList.peaks = list(
-                set([pk for nmrAtom in self.application.current.nmrResidue.nmrAtoms for pk in nmrAtom.assignedPeaks]))
+                    set([pk for nmrAtom in self.application.current.nmrResidue.nmrAtoms for pk in nmrAtom.assignedPeaks]))
 
             self.project.blankNotification()
             objs = self.assignedPeaksTable.getSelectedObjects()

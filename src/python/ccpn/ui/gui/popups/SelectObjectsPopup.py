@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -32,39 +32,39 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
 
 
 class SelectObjectsPopup(CcpnDialog):
-  def __init__(self, parent=None, mainWindow=None,
-               dim=None, objects=None,
-               title='Select Objects', **kwds):
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
+    def __init__(self, parent=None, mainWindow=None,
+                 dim=None, objects=None,
+                 title='Select Objects', **kwds):
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
-    self.mainWindow = mainWindow
-    self.project = self.mainWindow.project
-    self.application =  self.mainWindow.application
+        self.mainWindow = mainWindow
+        self.project = self.mainWindow.project
+        self.application = self.mainWindow.application
 
-    self._parent = parent
-    if len(objects)>0:
-      if self.project.getByPid(objects[0]._pluralLinkName) == 'spectra':
-        objects = [spectrum.pid for spectrum in self.project.spectra if len(spectrum.axisCodes) >= dim]
-      else:
-        objects=[object.pid for object in objects]
+        self._parent = parent
+        if len(objects) > 0:
+            if self.project.getByPid(objects[0]._pluralLinkName) == 'spectra':
+                objects = [spectrum.pid for spectrum in self.project.spectra if len(spectrum.axisCodes) >= dim]
+            else:
+                objects = [object.pid for object in objects]
 
-      label1a = Label(self, text="Selected %s" % self.project.getByPid(objects[0])._pluralLinkName, grid=(0, 0))
-      objects.insert(0, '  ')
-      self.objectPulldown = PulldownList(self, grid=(1, 0), callback=self._selectObject)
-      self.objectPulldown.setData(objects)
-      self.objectListWidget = ListWidget(self, grid=(2, 0))
+            label1a = Label(self, text="Selected %s" % self.project.getByPid(objects[0])._pluralLinkName, grid=(0, 0))
+            objects.insert(0, '  ')
+            self.objectPulldown = PulldownList(self, grid=(1, 0), callback=self._selectObject)
+            self.objectPulldown.setData(objects)
+            self.objectListWidget = ListWidget(self, grid=(2, 0))
 
-      self.buttonBox = ButtonList(self, grid=(3, 0), texts=['Cancel', 'Ok'],
-                                  callbacks=[self.reject, self._setObjects])
+            self.buttonBox = ButtonList(self, grid=(3, 0), texts=['Cancel', 'Ok'],
+                                        callbacks=[self.reject, self._setObjects])
 
-  def _selectObject(self, item):
-    self.objectListWidget.addItem(item)
+    def _selectObject(self, item):
+        self.objectListWidget.addItem(item)
 
-  def _setObjects(self):
-    self._parent.objects = [self.objectListWidget.item(i).text() for i in range(self.objectListWidget.count())]
-    self.accept()
-    # return [self.objectListWidget.item(i).text() for i in range(self.objectListWidget.count())]
+    def _setObjects(self):
+        self._parent.objects = [self.objectListWidget.item(i).text() for i in range(self.objectListWidget.count())]
+        self.accept()
+        # return [self.objectListWidget.item(i).text() for i in range(self.objectListWidget.count())]

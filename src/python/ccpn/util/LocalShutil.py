@@ -10,8 +10,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -21,7 +20,6 @@ __version__ = "$Revision: 3.0.b4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
@@ -31,6 +29,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Deliberate
 from shutil import *
 import os
+
+
 # Override copytree to ignore copystat errors:
 # def copytree(src, dst, symlinks=False, ignore=None, copy_function=copy2,
 #              ignore_dangling_symlinks=False):
@@ -94,10 +94,10 @@ def copytree(src, dst, symlinks=False, ignore=None, copy_function=copy,
                     os.symlink(linkto, dstname)
                     # copystat(srcname, dstname, follow_symlinks=not symlinks)
                     try:
-                      copystat(srcname, dstname, follow_symlinks=not symlinks)
+                        copystat(srcname, dstname, follow_symlinks=not symlinks)
                     except OSError as why:
-                      print('WARNING from symlink copying: file permissions could not be copied. '
-                            'Ignored - known problem on Windows-type file systems')
+                        print('WARNING from symlink copying: file permissions could not be copied. '
+                              'Ignored - known problem on Windows-type file systems')
                     # ignore dangling symlink if the flag is on
                     if not os.path.exists(linkto) and ignore_dangling_symlinks:
                         continue
@@ -126,7 +126,7 @@ def copytree(src, dst, symlinks=False, ignore=None, copy_function=copy,
             print('WARNING: file permissions could not be copied. '
                   'Ignored - known problem on Windows-type file systems')
     if errors:
-        print ("""ERRORS in shutil copytree recursive copying. Some possible reasons:
+        print("""ERRORS in shutil copytree recursive copying. Some possible reasons:
 - Absolute file name too long
 - Permission errors
 - Mismatch between Windows and Linux file systems
@@ -134,4 +134,3 @@ Copy is incomplete.
 """)
         raise Error(errors)
     return dst
-

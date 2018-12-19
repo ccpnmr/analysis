@@ -6,7 +6,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -23,43 +23,40 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-
 from pyqtgraph.dockarea.Dock import DockLabel, Dock
-
 from ccpn.ui.gui.guiSettings import moduleLabelFont
 
+
 class CcpnDock(Dock):
-  def __init__(self, name):
-    super().__init__(name=name, area=self)
-    self.label.hide()
-    self.label = CcpnDockLabel(name.upper(), self)
-    self.label.show()
-    self.label.closeButton.clicked.connect(self.closeModule)
-    self.label.fixedWidth = True
-    self.autoOrientation = False
-    self.mainWidget = QtWidgets.QWidget(self)
-    self.settingsWidget = QtWidgets.QWidget(self)
-    self.addWidget(self.mainWidget, 0, 0)
-    self.addWidget(self.settingsWidget, 1, 0)
+    def __init__(self, name):
+        super().__init__(name=name, area=self)
+        self.label.hide()
+        self.label = CcpnDockLabel(name.upper(), self)
+        self.label.show()
+        self.label.closeButton.clicked.connect(self.closeModule)
+        self.label.fixedWidth = True
+        self.autoOrientation = False
+        self.mainWidget = QtWidgets.QWidget(self)
+        self.settingsWidget = QtWidgets.QWidget(self)
+        self.addWidget(self.mainWidget, 0, 0)
+        self.addWidget(self.settingsWidget, 1, 0)
 
-  def resizeEvent(self, event):
-    self.setOrientation('vertical', force=True)
-    self.resizeOverlay(self.size())
+    def resizeEvent(self, event):
+        self.setOrientation('vertical', force=True)
+        self.resizeOverlay(self.size())
 
-  def closeDock(self):
-    self.close()
+    def closeDock(self):
+        self.close()
+
 
 class CcpnDockLabel(DockLabel):
 
     def __init__(self, *args):
-      super().__init__(showCloseButton=True, *args)
-      self.setFont(moduleLabelFont)
+        super().__init__(showCloseButton=True, *args)
+        self.setFont(moduleLabelFont)
 
     def mousePressEvent(self, ev):
         if ev.button() == QtCore.Qt.LeftButton:
             self.pressPos = ev.pos()
             self.startedDrag = False
             ev.accept()
-
-
-

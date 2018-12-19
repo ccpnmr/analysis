@@ -84,9 +84,9 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
     # def boundingRect(self):  # seems necessary to have
     #     return self._currentBoundingRect
 
-        # Earlier versions too large value (~1400,1000);
-        # i.e larger then inital MainWIndow size; reduced to (900, 700); but (100, 150) appears
-        # to give less flicker in Scrolled Strips.
+    # Earlier versions too large value (~1400,1000);
+    # i.e larger then inital MainWIndow size; reduced to (900, 700); but (100, 150) appears
+    # to give less flicker in Scrolled Strips.
 
     # override of Qt setVisible
     def setVisible(self, visible):

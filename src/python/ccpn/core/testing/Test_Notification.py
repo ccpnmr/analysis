@@ -97,7 +97,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -116,245 +116,239 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import unittest
 from ccpn.core.testing.WrapperTesting import WrapperTesting
 
+
 def notifyfunc(obj, value=None, ll=None):
-  if not hasattr(obj, '_test_notifier_list'):
-     obj._test_notifier_list = ll
-  obj._test_notifier_list.append(value)
-  # print('TestFunc', len(ll), ll[-1], value)
+    if not hasattr(obj, '_test_notifier_list'):
+        obj._test_notifier_list = ll
+    obj._test_notifier_list.append(value)
+    # print('TestFunc', len(ll), ll[-1], value)
+
 
 def notifyrenamefunc(obj, oldPid, value=None, ll=None):
-  if not hasattr(obj, '_test_notifier_list'):
-     obj._test_notifier_list = ll
-  obj._test_notifier_list.append(value)
-  # print('TestFunc', len(ll), ll[-1], value, oldPid)
+    if not hasattr(obj, '_test_notifier_list'):
+        obj._test_notifier_list = ll
+    obj._test_notifier_list.append(value)
+    # print('TestFunc', len(ll), ll[-1], value, oldPid)
 
 
 class NotificationTest(WrapperTesting):
+    # Path of project to load (None for new project)
+    projectPath = None
 
-  # Path of project to load (None for new project)
-  projectPath = None
+    def test_notifiers_1(self):
+        project = self.project
+        ll = []
+        not1 = project.registerNotifier('Note', 'create', notifyfunc,
+                                        parameterDict={'value': 'createx', 'll': ll})
+        not2 = project.registerNotifier('Note', 'delete', notifyfunc,
+                                        parameterDict={'value': 'deletex', 'll': ll})
+        not3 = project.registerNotifier('Note', 'change', notifyfunc,
+                                        parameterDict={'value': 'changex', 'll': ll})
 
-  def test_notifiers_1(self):
-    project = self.project
-    ll = []
-    not1 = project.registerNotifier('Note','create',  notifyfunc,
-                              parameterDict={'value':'createx', 'll':ll})
-    not2 = project.registerNotifier('Note','delete',  notifyfunc,
-                              parameterDict={'value':'deletex', 'll':ll})
-    not3 = project.registerNotifier('Note','change',  notifyfunc,
-                              parameterDict={'value':'changex', 'll':ll})
+        registered = project._context2Notifiers
+        self.assertEqual(registered.get(('Note', 'create')), {not1: False})
+        self.assertEqual(registered.get(('Note', 'delete')), {not2: False})
+        self.assertEqual(registered.get(('Note', 'change')), {not3: False})
 
-    registered = project._context2Notifiers
-    self.assertEqual(registered.get(('Note','create')), {not1:False})
-    self.assertEqual(registered.get(('Note','delete')), {not2:False})
-    self.assertEqual(registered.get(('Note','change')), {not3:False})
+        project.newUndoPoint()
 
-    project.newUndoPoint()
+        note1 = project.newNote(name='test1')
+        note2 = project.newNote(name='test2')
 
-    note1 = project.newNote(name='test1')
-    note2 = project.newNote(name='test2')
+        project._undo.undo()
+        project._undo.undo()
+        project._undo.redo()
+        project._undo.redo()
+        self.assertEqual(ll, ['createx', 'createx', 'deletex', 'deletex', 'createx', 'createx'])
+        project.newUndoPoint()
+        note1.text = 'Wauuhhhw'
+        note2.text = 'Howwwll!'
+        project._undo.undo()
+        self.assertIsNone(note1.text)
+        self.assertIsNone(note2.text)
+        project._undo.redo()
+        self.assertEqual(note1.text, 'Wauuhhhw')
+        self.assertEqual(note2.text, 'Howwwll!')
+        self.assertEqual(ll, ['createx', 'createx', 'deletex', 'deletex', 'createx', 'createx',
+                              'changex', 'changex', 'changex', 'changex', 'changex', 'changex'])
 
-    project._undo.undo()
-    project._undo.undo()
-    project._undo.redo()
-    project._undo.redo()
-    self.assertEqual(ll, ['createx', 'createx', 'deletex', 'deletex', 'createx', 'createx'])
-    project.newUndoPoint()
-    note1.text = 'Wauuhhhw'
-    note2.text = 'Howwwll!'
-    project._undo.undo()
-    self.assertIsNone(note1.text)
-    self.assertIsNone(note2.text)
-    project._undo.redo()
-    self.assertEqual(note1.text, 'Wauuhhhw')
-    self.assertEqual(note2.text, 'Howwwll!')
-    self.assertEqual(ll,['createx', 'createx', 'deletex', 'deletex', 'createx', 'createx',
-                         'changex', 'changex', 'changex', 'changex', 'changex', 'changex'])
+        project.removeNotifier(not1)
+        project.unRegisterNotifier('Note', 'change', not3)
+        project.unRegisterNotifier('Note', 'delete', not2)
+        self.assertEqual(registered.get(('Note', 'create')), {})
+        self.assertEqual(registered.get(('Note', 'delete')), {})
+        self.assertEqual(registered.get(('Note', 'change')), {})
 
-    project.removeNotifier(not1)
-    project.unRegisterNotifier('Note','change', not3)
-    project.unRegisterNotifier('Note','delete', not2)
-    self.assertEqual(registered.get(('Note','create')), {})
-    self.assertEqual(registered.get(('Note','delete')), {})
-    self.assertEqual(registered.get(('Note','change')), {})
+    def test_notifiers_multiple(self):
+        project = self.project
+        ll = []
+        not1 = project.registerNotifier('Note', 'create', notifyfunc,
+                                        parameterDict={'value': 'createx', 'll': ll}, onceOnly=True)
+        not2 = project.registerNotifier('Note', 'delete', notifyfunc,
+                                        parameterDict={'value': 'deletex', 'll': ll}, onceOnly=True)
+        registered = project._context2Notifiers
+        self.assertEqual(registered.get(('Note', 'create')), {not1: True})
+        self.assertEqual(registered.get(('Note', 'delete')), {not2: True})
 
+        project.newUndoPoint()
 
-  def test_notifiers_multiple(self):
-    project = self.project
-    ll = []
-    not1 = project.registerNotifier('Note','create',  notifyfunc,
-                              parameterDict={'value':'createx', 'll':ll}, onceOnly=True)
-    not2 = project.registerNotifier('Note','delete',  notifyfunc,
-                              parameterDict={'value':'deletex', 'll':ll}, onceOnly=True)
-    registered = project._context2Notifiers
-    self.assertEqual(registered.get(('Note','create')), {not1:True})
-    self.assertEqual(registered.get(('Note','delete')), {not2:True})
+        note1 = project.newNote(name='test1')
+        note2 = project.newNote(name='test2')
 
-    project.newUndoPoint()
+        project._undo.undo()
+        project._undo.undo()
+        project._undo.redo()
+        project._undo.redo()
+        self.assertEqual(ll, ['createx', 'createx', 'deletex', 'deletex', 'createx', 'createx'])
+        project.newUndoPoint()
+        note1.text = 'Wauuhhhw'
+        note2.text = 'Howwwll!'
+        project._undo.undo()
+        self.assertIsNone(note1.text)
+        self.assertIsNone(note2.text)
+        project._undo.redo()
+        self.assertEqual(note1.text, 'Wauuhhhw')
+        self.assertEqual(note2.text, 'Howwwll!')
+        self.assertEqual(ll, ['createx', 'createx', 'deletex', 'deletex', 'createx', 'createx',
+                              'createx', 'createx', 'createx', 'createx', 'createx', 'createx'])
 
-    note1 = project.newNote(name='test1')
-    note2 = project.newNote(name='test2')
+        project.removeNotifier(not1)
+        self.assertEqual(registered.get(('Note', 'create')), {})
+        self.assertEqual(registered.get(('Note', 'delete')), {not2: True})
+        self.assertEqual(registered.get(('Note', 'change')), {})
+        project.unRegisterNotifier('Note', 'delete', not2)
+        self.assertEqual(registered.get(('Note', 'create')), {})
+        self.assertEqual(registered.get(('Note', 'delete')), {})
+        self.assertEqual(registered.get(('Note', 'change')), {})
 
-    project._undo.undo()
-    project._undo.undo()
-    project._undo.redo()
-    project._undo.redo()
-    self.assertEqual(ll, ['createx', 'createx', 'deletex', 'deletex', 'createx', 'createx'])
-    project.newUndoPoint()
-    note1.text = 'Wauuhhhw'
-    note2.text = 'Howwwll!'
-    project._undo.undo()
-    self.assertIsNone(note1.text)
-    self.assertIsNone(note2.text)
-    project._undo.redo()
-    self.assertEqual(note1.text, 'Wauuhhhw')
-    self.assertEqual(note2.text, 'Howwwll!')
-    self.assertEqual(ll,['createx', 'createx', 'deletex', 'deletex', 'createx', 'createx',
-                         'createx', 'createx', 'createx', 'createx', 'createx', 'createx'])
+    # NOtifier suspension has been temporarily disabled,
+    # due to problems with suspended delete notifiers.
+    # This test should be reinstated, and the supension should be reinstated and fixed
+    @unittest.skip
+    def test_notifiers_suspend(self):
+        project = self.project
+        ll = []
+        not1 = project.registerNotifier('Note', 'create', notifyfunc,
+                                        parameterDict={'value': 'createx', 'll': ll}, onceOnly=True)
+        not2 = project.registerNotifier('Note', 'delete', notifyfunc,
+                                        parameterDict={'value': 'deletex', 'll': ll}, onceOnly=True)
+        registered = project._context2Notifiers
+        project.suspendNotification()
+        project.newUndoPoint()
 
-    project.removeNotifier(not1)
-    self.assertEqual(registered.get(('Note','create')), {})
-    self.assertEqual(registered.get(('Note','delete')), {not2:True})
-    self.assertEqual(registered.get(('Note','change')), {})
-    project.unRegisterNotifier('Note','delete', not2)
-    self.assertEqual(registered.get(('Note','create')), {})
-    self.assertEqual(registered.get(('Note','delete')), {})
-    self.assertEqual(registered.get(('Note','change')), {})
+        note1 = project.newNote(name='test1')
+        note2 = project.newNote(name='test2')
 
-  # NOtifier suspension has been temporarily disabled,
-  # due to problems with suspended delete notifiers.
-  # This test should be reinstated, and the supension should be reinstated and fixed
-  @unittest.skip
-  def test_notifiers_suspend(self):
-    project = self.project
-    ll = []
-    not1 = project.registerNotifier('Note','create',  notifyfunc,
-                              parameterDict={'value':'createx', 'll':ll}, onceOnly=True)
-    not2 = project.registerNotifier('Note','delete',  notifyfunc,
-                              parameterDict={'value':'deletex', 'll':ll}, onceOnly=True)
-    registered = project._context2Notifiers
-    project.suspendNotification()
-    project.newUndoPoint()
+        project._undo.undo()
+        project._undo.redo()
+        project.newUndoPoint()
+        note1.text = 'Wauuhhhw'
+        note2.text = 'Howwwll!'
+        project._undo.undo()
+        project._undo.redo()
 
-    note1 = project.newNote(name='test1')
-    note2 = project.newNote(name='test2')
+        # NBNB This currently fails, because we have temporarily disabled notification suspension
+        self.assertEqual(ll, [])
+        project.resumeNotification()
+        self.assertEqual(ll, ['deletex', 'createx'])
 
-    project._undo.undo()
-    project._undo.redo()
-    project.newUndoPoint()
-    note1.text = 'Wauuhhhw'
-    note2.text = 'Howwwll!'
-    project._undo.undo()
-    project._undo.redo()
+        project.removeNotifier(not1)
+        project.unRegisterNotifier('Note', 'delete', not2)
+        self.assertEqual(registered.get(('Note', 'create')), {})
+        self.assertEqual(registered.get(('Note', 'delete')), {})
 
-    # NBNB This currently fails, because we have temporarily disabled notification suspension
-    self.assertEqual(ll, [])
-    project.resumeNotification()
-    self.assertEqual(ll, ['deletex',  'createx'])
+    def test_notifiers_rename(self):
+        project = self.project
+        ll = []
 
-    project.removeNotifier(not1)
-    project.unRegisterNotifier('Note','delete', not2)
-    self.assertEqual(registered.get(('Note','create')), {})
-    self.assertEqual(registered.get(('Note','delete')), {})
+        not1 = project.registerNotifier('Spectrum', 'create', notifyfunc,
+                                        parameterDict={'value': 'newSpectrum', 'll': ll})
+        not2 = project.registerNotifier('Spectrum', 'delete', notifyfunc,
+                                        parameterDict={'value': 'delSpectrum', 'll': ll})
+        not3 = project.registerNotifier('Spectrum', 'change', notifyfunc,
+                                        parameterDict={'value': 'modSpectrum', 'll': ll})
+        not4 = project.registerNotifier('PeakList', 'create', notifyfunc,
+                                        parameterDict={'value': 'newPeakList', 'll': ll})
+        not5 = project.registerNotifier('PeakList', 'delete', notifyfunc,
+                                        parameterDict={'value': 'delPeakList', 'll': ll})
+        not6 = project.registerNotifier('PeakList', 'change', notifyfunc,
+                                        parameterDict={'value': 'modPeakList', 'll': ll})
+        not7 = project.registerNotifier('Peak', 'create', notifyfunc,
+                                        parameterDict={'value': 'newPeak', 'll': ll})
+        not8 = project.registerNotifier('Peak', 'delete', notifyfunc,
+                                        parameterDict={'value': 'delPeak', 'll': ll})
+        not9 = project.registerNotifier('Peak', 'change', notifyfunc,
+                                        parameterDict={'value': 'modPeak', 'll': ll})
+        not10 = project.registerNotifier('Spectrum', 'rename', notifyrenamefunc,
+                                         parameterDict={'value': 'renameSpectrum', 'll': ll})
+        not11 = project.registerNotifier('PeakList', 'rename', notifyrenamefunc,
+                                         parameterDict={'value': 'renamePeakList', 'll': ll})
+        not12 = project.registerNotifier('Peak', 'rename', notifyrenamefunc,
+                                         parameterDict={'value': 'renamePeak', 'll': ll})
+        not1 = project.registerNotifier('Spectrum', 'create', notifyfunc,
+                                        parameterDict={'value': 'newSpectrum2', 'll': ll})
 
+        spectrum = project.createDummySpectrum(axisCodes=('Fn', 'Nf'), name='HF-hsqc')
+        peakList = spectrum.peakLists[0]
+        peak1 = peakList.newPeak(ppmPositions=(1.0, 2.0))
+        self.assertEqual(ll, ['newSpectrum', 'newSpectrum2', 'newPeakList', 'newPeak'])
+        self.assertEqual(peak1.pid, 'PK:HF-hsqc.1.1')
+        spectrum.rename('HF-copy')
+        self.assertEqual(ll, ['newSpectrum', 'newSpectrum2', 'newPeakList', 'newPeak',
+                              'modSpectrum', 'renameSpectrum', 'renamePeakList', 'renamePeak'])
+        self.assertEqual(spectrum.pid, 'SP:HF-copy')
+        self.assertEqual(peakList.pid, 'PL:HF-copy.1')
+        self.assertEqual(peak1.pid, 'PK:HF-copy.1.1')
+        self.assertEqual(peak1.position, (1.0, 2.0))
+        self.assertEqual(spectrum.referencePoints, (1.0, 1.0))
+        spectrum.referencePoints = (11., 11.)
+        self.assertEqual(peak1.position, (11.0, 12.0))
+        spectrum.delete()
 
+        self.assertEqual(ll[:-3], ['newSpectrum', 'newSpectrum2', 'newPeakList', 'newPeak',
+                                   'modSpectrum', 'renameSpectrum', 'renamePeakList', 'renamePeak',
+                                   'modPeak', 'modSpectrum', 'modPeak', 'modSpectrum', ])
+        # NB cascading object deletions do not happen in reproducible order
+        self.assertEqual(set(ll[-3:]), {'delSpectrum', 'delPeak', 'delPeakList'})
+        self.assertEqual(spectrum.pid, 'SP:HF-copy-Deleted')
+        self.assertEqual(peakList.pid, 'PL:HF-copy.1-Deleted')
+        self.assertEqual(peak1.pid, 'PK:HF-copy.1.1-Deleted')
 
-  def test_notifiers_rename(self):
+    def test_notifiers_crosslink(self):
+        project = self.project
+        ll = []
 
-    project = self.project
-    ll = []
-
-    not1 = project.registerNotifier('Spectrum','create',  notifyfunc,
-                              parameterDict={'value':'newSpectrum', 'll':ll})
-    not2 = project.registerNotifier('Spectrum','delete',  notifyfunc,
-                              parameterDict={'value':'delSpectrum', 'll':ll})
-    not3 = project.registerNotifier('Spectrum','change',  notifyfunc,
-                              parameterDict={'value':'modSpectrum', 'll':ll})
-    not4 = project.registerNotifier('PeakList','create',  notifyfunc,
-                              parameterDict={'value':'newPeakList', 'll':ll})
-    not5 = project.registerNotifier('PeakList','delete',  notifyfunc,
-                              parameterDict={'value':'delPeakList', 'll':ll})
-    not6 = project.registerNotifier('PeakList','change',  notifyfunc,
-                              parameterDict={'value':'modPeakList', 'll':ll})
-    not7 = project.registerNotifier('Peak','create',  notifyfunc,
-                              parameterDict={'value':'newPeak', 'll':ll})
-    not8 = project.registerNotifier('Peak','delete',  notifyfunc,
-                              parameterDict={'value':'delPeak', 'll':ll})
-    not9 = project.registerNotifier('Peak','change',  notifyfunc,
-                              parameterDict={'value':'modPeak', 'll':ll})
-    not10 = project.registerNotifier('Spectrum','rename',  notifyrenamefunc,
-                              parameterDict={'value':'renameSpectrum', 'll':ll})
-    not11 = project.registerNotifier('PeakList','rename',  notifyrenamefunc,
-                              parameterDict={'value':'renamePeakList', 'll':ll})
-    not12 = project.registerNotifier('Peak','rename',  notifyrenamefunc,
-                              parameterDict={'value':'renamePeak', 'll':ll})
-    not1 = project.registerNotifier('Spectrum','create',  notifyfunc,
-                              parameterDict={'value':'newSpectrum2', 'll':ll})
-
-    spectrum = project.createDummySpectrum(axisCodes=('Fn', 'Nf'), name='HF-hsqc')
-    peakList = spectrum.peakLists[0]
-    peak1 = peakList.newPeak(ppmPositions=(1.0,2.0))
-    self.assertEqual(ll, ['newSpectrum', 'newSpectrum2', 'newPeakList', 'newPeak'])
-    self.assertEqual(peak1.pid, 'PK:HF-hsqc.1.1')
-    spectrum.rename('HF-copy')
-    self.assertEqual(ll, ['newSpectrum', 'newSpectrum2', 'newPeakList', 'newPeak',
-                          'modSpectrum', 'renameSpectrum', 'renamePeakList', 'renamePeak'])
-    self.assertEqual(spectrum.pid, 'SP:HF-copy')
-    self.assertEqual(peakList.pid, 'PL:HF-copy.1')
-    self.assertEqual(peak1.pid, 'PK:HF-copy.1.1')
-    self.assertEqual(peak1.position, (1.0,2.0))
-    self.assertEqual(spectrum.referencePoints, (1.0,1.0))
-    spectrum.referencePoints = (11.,11.)
-    self.assertEqual(peak1.position, (11.0,12.0))
-    spectrum.delete()
-
-    self.assertEqual(ll[:-3],['newSpectrum', 'newSpectrum2', 'newPeakList', 'newPeak',
-                         'modSpectrum', 'renameSpectrum', 'renamePeakList', 'renamePeak',
-                         'modPeak', 'modSpectrum', 'modPeak', 'modSpectrum',])
-    # NB cascading object deletions do not happen in reproducible order
-    self.assertEqual(set(ll[-3:]), {'delSpectrum','delPeak', 'delPeakList'})
-    self.assertEqual(spectrum.pid, 'SP:HF-copy-Deleted')
-    self.assertEqual(peakList.pid, 'PL:HF-copy.1-Deleted')
-    self.assertEqual(peak1.pid, 'PK:HF-copy.1.1-Deleted')
-
-
-  def test_notifiers_crosslink(self):
-
-    project = self.project
-    ll = []
-
-    not1 = project.registerNotifier('Spectrum','change',  notifyfunc,
-                              parameterDict={'value':'modSpectrum', 'll':ll})
-    not2 = project.registerNotifier('SpectrumGroup','change',  notifyfunc,
-                              parameterDict={'value':'modSpectrumGroup', 'll':ll})
-    not3 = project.registerNotifier('Spectrum','rename',  notifyrenamefunc,
-                              parameterDict={'value':'renameSpectrum', 'll':ll})
-    not4 = project.registerNotifier('SpectrumGroup','rename',  notifyrenamefunc,
-                              parameterDict={'value':'renameSpectrumGroup', 'll':ll})
-    not5 = project.registerNotifier('SpectrumGroup','Spectrum',  notifyfunc,
-                              parameterDict={'value':'modLink', 'll':ll})
-    spectrum = project.createDummySpectrum(axisCodes=('Fn', 'Nf'), name='HF-hsqc')
-    spectrum2 = project.createDummySpectrum(axisCodes=('Hc', 'Ch'), name='HC-hsqc')
-    spectrumGroup = project.newSpectrumGroup(name='Groupie')
-    spectrumGroup2 = project.newSpectrumGroup(name='Sloupie')
-    spectrumGroup.spectra = (spectrum,)
-    self.assertEquals(ll, ['modSpectrumGroup', 'modLink'])
-    spectrumGroup.spectra = ()
-    self.assertEquals(ll, ['modSpectrumGroup', 'modLink', 'modSpectrumGroup', 'modLink'])
-    del ll[:]
-    self.assertFalse(bool(spectrum.spectrumGroups))
-    tt = (spectrumGroup,)
-    spectrum.spectrumGroups = tt
-    self.assertEquals(ll, ['modSpectrum', 'modLink'])
-    spectrum.rename('HF-copy')
-    self.assertEquals(ll, ['modSpectrum', 'modLink', 'modSpectrum', 'renameSpectrum'])
-    del ll[:]
-    spectrum.spectrumGroups = (spectrumGroup, spectrumGroup2)
-    self.assertEquals(ll, ['modSpectrum', 'modLink'])
-    spectrumGroup.delete()
-    self.assertEquals(ll, ['modSpectrum', 'modLink'])
-    spectrum.spectrumGroups = ()
-    self.assertEquals(ll, ['modSpectrum', 'modLink', 'modSpectrum', 'modLink'])
-    spectrumGroup3 = project.newSpectrumGroup(name='Heapie', spectra=(spectrum, spectrum2))
-    self.assertEquals(ll, ['modSpectrum', 'modLink', 'modSpectrum', 'modLink'])
-
+        not1 = project.registerNotifier('Spectrum', 'change', notifyfunc,
+                                        parameterDict={'value': 'modSpectrum', 'll': ll})
+        not2 = project.registerNotifier('SpectrumGroup', 'change', notifyfunc,
+                                        parameterDict={'value': 'modSpectrumGroup', 'll': ll})
+        not3 = project.registerNotifier('Spectrum', 'rename', notifyrenamefunc,
+                                        parameterDict={'value': 'renameSpectrum', 'll': ll})
+        not4 = project.registerNotifier('SpectrumGroup', 'rename', notifyrenamefunc,
+                                        parameterDict={'value': 'renameSpectrumGroup', 'll': ll})
+        not5 = project.registerNotifier('SpectrumGroup', 'Spectrum', notifyfunc,
+                                        parameterDict={'value': 'modLink', 'll': ll})
+        spectrum = project.createDummySpectrum(axisCodes=('Fn', 'Nf'), name='HF-hsqc')
+        spectrum2 = project.createDummySpectrum(axisCodes=('Hc', 'Ch'), name='HC-hsqc')
+        spectrumGroup = project.newSpectrumGroup(name='Groupie')
+        spectrumGroup2 = project.newSpectrumGroup(name='Sloupie')
+        spectrumGroup.spectra = (spectrum,)
+        self.assertEquals(ll, ['modSpectrumGroup', 'modLink'])
+        spectrumGroup.spectra = ()
+        self.assertEquals(ll, ['modSpectrumGroup', 'modLink', 'modSpectrumGroup', 'modLink'])
+        del ll[:]
+        self.assertFalse(bool(spectrum.spectrumGroups))
+        tt = (spectrumGroup,)
+        spectrum.spectrumGroups = tt
+        self.assertEquals(ll, ['modSpectrum', 'modLink'])
+        spectrum.rename('HF-copy')
+        self.assertEquals(ll, ['modSpectrum', 'modLink', 'modSpectrum', 'renameSpectrum'])
+        del ll[:]
+        spectrum.spectrumGroups = (spectrumGroup, spectrumGroup2)
+        self.assertEquals(ll, ['modSpectrum', 'modLink'])
+        spectrumGroup.delete()
+        self.assertEquals(ll, ['modSpectrum', 'modLink'])
+        spectrum.spectrumGroups = ()
+        self.assertEquals(ll, ['modSpectrum', 'modLink', 'modSpectrum', 'modLink'])
+        spectrumGroup3 = project.newSpectrumGroup(name='Heapie', spectra=(spectrum, spectrum2))
+        self.assertEquals(ll, ['modSpectrum', 'modLink', 'modSpectrum', 'modLink'])

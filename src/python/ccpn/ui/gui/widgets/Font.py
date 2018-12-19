@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -27,6 +27,7 @@ __date__ = "$Date: 2017-03-16 18:20:01 +0000 (Thu, March 16, 2017) $"
 
 from PyQt5 import QtGui, QtWidgets
 
+
 # This only works when we have a QtApp instance working; hence it need to go somewhere else.
 #from ccpn.framework.PathsAndUrls import fontsPath
 #QtGui.QFontDatabase.addApplicationFont(os.path.join(fontsPath, 'open-sans/OpenSans-Regular.ttf'))
@@ -34,26 +35,25 @@ from PyQt5 import QtGui, QtWidgets
 
 class Font(QtGui.QFont):
 
-  def __init__(self, fontName, size, bold=False, italic=False, underline=False, strikeout=False):
-    """
-    Initialise the font fontName
-    :param fontName: font name
-    :param size: size of font
-    :param bold (optional): make font bold
-    :param italic (optional):make fint italic
+    def __init__(self, fontName, size, bold=False, italic=False, underline=False, strikeout=False):
+        """
+        Initialise the font fontName
+        :param fontName: font name
+        :param size: size of font
+        :param bold (optional): make font bold
+        :param italic (optional):make fint italic
 
-     to retrieve:
-     self.fontName -> fontName
-     QFont methods:
-     self.pointSize() -> size
-     self.italic() -> italic
-     self.bold() -> bold
-    """
+         to retrieve:
+         self.fontName -> fontName
+         QFont methods:
+         self.pointSize() -> size
+         self.italic() -> italic
+         self.bold() -> bold
+        """
 
-    QtGui.QFont.__init__(self, fontName, size)
-    self.fontName = fontName
-    self.setBold(bold)
-    self.setItalic(italic)
-    self.setUnderline(underline)
-    self.setStrikeOut(strikeout)
-
+        QtGui.QFont.__init__(self, fontName, size)
+        self.fontName = fontName
+        self.setBold(bold)
+        self.setItalic(italic)
+        self.setUnderline(underline)
+        self.setStrikeOut(strikeout)

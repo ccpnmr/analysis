@@ -49,21 +49,21 @@ class FileDialog(QtWidgets.QFileDialog):
         QtWidgets.QFileDialog.__init__(self, parent, caption=text, **kwds)
 
         staticFunctionDict = {
-            (0, 0): 'getOpenFileName',
-            (0, 1): 'getOpenFileName',
-            (0, 2): 'getExistingDirectory',
-            (0, 3): 'getOpenFileNames',
-            (1, 0): 'getSaveFileName',
-            (1, 1): 'getSaveFileName',
-            (1, 2): 'getSaveFileName',
-            (1, 3): 'getSaveFileName',
-            (self.AcceptOpen, self.AnyFile): 'getOpenFileName',
-            (self.AcceptOpen, self.ExistingFile): 'getOpenFileName',
-            (self.AcceptOpen, self.Directory): 'getExistingDirectory',
+            (0, 0)                               : 'getOpenFileName',
+            (0, 1)                               : 'getOpenFileName',
+            (0, 2)                               : 'getExistingDirectory',
+            (0, 3)                               : 'getOpenFileNames',
+            (1, 0)                               : 'getSaveFileName',
+            (1, 1)                               : 'getSaveFileName',
+            (1, 2)                               : 'getSaveFileName',
+            (1, 3)                               : 'getSaveFileName',
+            (self.AcceptOpen, self.AnyFile)      : 'getOpenFileName',
+            (self.AcceptOpen, self.ExistingFile) : 'getOpenFileName',
+            (self.AcceptOpen, self.Directory)    : 'getExistingDirectory',
             (self.AcceptOpen, self.ExistingFiles): 'getOpenFileNames',
-            (self.AcceptSave, self.AnyFile): 'getSaveFileName',
-            (self.AcceptSave, self.ExistingFile): 'getSaveFileName',
-            (self.AcceptSave, self.Directory): 'getSaveFileName',
+            (self.AcceptSave, self.AnyFile)      : 'getSaveFileName',
+            (self.AcceptSave, self.ExistingFile) : 'getSaveFileName',
+            (self.AcceptSave, self.Directory)    : 'getSaveFileName',
             (self.AcceptSave, self.ExistingFiles): 'getSaveFileName',
             }
 
@@ -134,7 +134,6 @@ class FileDialog(QtWidgets.QFileDialog):
 
 
 class NefFileDialog(QtWidgets.QFileDialog):
-
     _selectPath = os.path.expanduser('~')
 
     def __init__(self, parent=None, fileMode=QtWidgets.QFileDialog.AnyFile, text=None,
@@ -146,21 +145,21 @@ class NefFileDialog(QtWidgets.QFileDialog):
         QtWidgets.QFileDialog.__init__(self, parent, caption=text, **kwds)
 
         self.staticFunctionDict = {
-            (0, 0): 'getOpenFileName',
-            (0, 1): 'getOpenFileName',
-            (0, 2): 'getExistingDirectory',
-            (0, 3): 'getOpenFileNames',
-            (1, 0): 'getSaveFileName',
-            (1, 1): 'getSaveFileName',
-            (1, 2): 'getSaveFileName',
-            (1, 3): 'getSaveFileName',
-            (self.AcceptOpen, self.AnyFile): 'getOpenFileName',
-            (self.AcceptOpen, self.ExistingFile): 'getOpenFileName',
-            (self.AcceptOpen, self.Directory): 'getExistingDirectory',
+            (0, 0)                               : 'getOpenFileName',
+            (0, 1)                               : 'getOpenFileName',
+            (0, 2)                               : 'getExistingDirectory',
+            (0, 3)                               : 'getOpenFileNames',
+            (1, 0)                               : 'getSaveFileName',
+            (1, 1)                               : 'getSaveFileName',
+            (1, 2)                               : 'getSaveFileName',
+            (1, 3)                               : 'getSaveFileName',
+            (self.AcceptOpen, self.AnyFile)      : 'getOpenFileName',
+            (self.AcceptOpen, self.ExistingFile) : 'getOpenFileName',
+            (self.AcceptOpen, self.Directory)    : 'getExistingDirectory',
             (self.AcceptOpen, self.ExistingFiles): 'getOpenFileNames',
-            (self.AcceptSave, self.AnyFile): 'getSaveFileName',
-            (self.AcceptSave, self.ExistingFile): 'getSaveFileName',
-            (self.AcceptSave, self.Directory): 'getSaveFileName',
+            (self.AcceptSave, self.AnyFile)      : 'getSaveFileName',
+            (self.AcceptSave, self.ExistingFile) : 'getSaveFileName',
+            (self.AcceptSave, self.Directory)    : 'getSaveFileName',
             (self.AcceptSave, self.ExistingFiles): 'getSaveFileName',
             }
 
@@ -243,6 +242,7 @@ class NefFileDialog(QtWidgets.QFileDialog):
         else:
             self.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
             self.result = self.exec_()
+
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.LineEdit import LineEdit

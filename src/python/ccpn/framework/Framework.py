@@ -71,6 +71,7 @@ from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import logCommandBlock
 from ccpn.core.lib.ContextManagers import catchExceptions
 
+
 # from functools import partial
 
 _DEBUG = False
@@ -340,6 +341,7 @@ class Framework(NotifierBase):
 
         # register the programme for later
         from ccpn.framework.Application import ApplicationContainer
+
         container = ApplicationContainer()
         container.register(self)
 
@@ -829,7 +831,7 @@ class Framework(NotifierBase):
 
         self._increaseNotificationBlocking()
         getLogger().debug2('command=%s, echoBlocking=%s, undo.blocking=%s'
-                          % (command, self._echoBlocking, undo.blocking))
+                           % (command, self._echoBlocking, undo.blocking))
 
     #TODO:TJ: Why is this a private method; it is and should be used all over the code?
     def _endCommandBlock(self):
@@ -1776,7 +1778,6 @@ class Framework(NotifierBase):
         else:
             raise RuntimeError('Error: decreaseNotificationBlocking, already at 0')
 
-
     def saveLogFile(self):
         pass
 
@@ -1993,7 +1994,7 @@ class Framework(NotifierBase):
     def _closeProject(self):
         """Close project and clean up - when opening another or quitting application"""
 
-        # NB: this function must clan up both wrapper and ui/gui
+        # NB: this function must clean up both wrapper and ui/gui
 
         self.deleteAllNotifiers()
         if self.ui.mainWindow:

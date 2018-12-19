@@ -106,7 +106,7 @@ class NoiseThresholdPipe(SpectraPipe):
 
     _kwargs = {
         EstimateNoiseThreshold: DefaultEstimateNoiseThreshold,
-        NoiseThreshold: DefaultNoiseThreshold
+        NoiseThreshold        : DefaultNoiseThreshold
         }
 
     def runPipe(self, spectra):

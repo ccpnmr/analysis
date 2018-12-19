@@ -9,8 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -20,84 +19,79 @@ __version__ = "$Revision: 3.0.b4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: Luca Mureddu $"
 __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
+
+
 #=========================================================================================
 # Start of code
 #=========================================================================================
-#====================================
-
 
 
 class Pipeline(object):
-  '''
-  Pipeline class.
-  To run insert the pipes in the queue.
-
-  '''
-  className = 'Pipeline'
-
-  def __init__(self, application, pipelineName=None, pipes=None ):
-
-    self.pipelineName = pipelineName
-    self._kwargs = {}
-
-    self.inputData = set()
-    self.spectrumGroups = set()
-    self.queue = [] # Pipes to be ran
-    self.updateInputData = False
-
-    self.application = application
-    self.current = self.application.current
-    self.preferences = self.application.preferences
-    self.ui = self.application.ui
-    self.project = self.application.project
-
-    self.mainWindow = self.ui.mainWindow
-
-
-    if pipes is not None:
-      self.pipes = [cls(application=application) for cls in pipes]
-    else:
-      self.pipes = []
-
-  @property
-  def pipes(self):
-    return self._pipes
-
-  @pipes.setter
-  def pipes(self, pipes):
     '''
+    Pipeline class.
+    To run insert the pipes in the queue.
+
     '''
+    className = 'Pipeline'
 
-    if pipes is not None:
-      allPipes = []
-      for pipe in pipes:
-          pipe.pipeline = self
-          allPipes.append(pipe)
-      self._pipes = allPipes
-    else:
-      self._pipes = []
+    def __init__(self, application, pipelineName=None, pipes=None):
 
+        self.pipelineName = pipelineName
+        self._kwargs = {}
 
-  def _updateRunArgs(self, arg, value):
-    self._kwargs[arg] = value
+        self.inputData = set()
+        self.spectrumGroups = set()
+        self.queue = []  # Pipes to be ran
+        self.updateInputData = False
 
-  def runPipeline(self):
-    '''Run all pipes in the specified order '''
-    self._kwargs = {}
-    if len(self.queue)>0:
-      for pipe in self.queue:
-        if pipe is not None:
-            self.updateInputData = False
-            pipe.inputData = self.inputData
-            pipe.spectrumGroups = self.spectrumGroups
-            result = pipe.runPipe(self.inputData)
-            # if not result: # that means the ran pipe does not return a valid data to use as input for next pipes
-            #   break
-            self.inputData = result or set()
+        self.application = application
+        self.current = self.application.current
+        self.preferences = self.application.preferences
+        self.ui = self.application.ui
+        self.project = self.application.project
 
-    return self.inputData
+        self.mainWindow = self.ui.mainWindow
 
+        if pipes is not None:
+            self.pipes = [cls(application=application) for cls in pipes]
+        else:
+            self.pipes = []
 
+    @property
+    def pipes(self):
+        return self._pipes
+
+    @pipes.setter
+    def pipes(self, pipes):
+        '''
+        '''
+
+        if pipes is not None:
+            allPipes = []
+            for pipe in pipes:
+                pipe.pipeline = self
+                allPipes.append(pipe)
+            self._pipes = allPipes
+        else:
+            self._pipes = []
+
+    def _updateRunArgs(self, arg, value):
+        self._kwargs[arg] = value
+
+    def runPipeline(self):
+        '''Run all pipes in the specified order '''
+        self._kwargs = {}
+        if len(self.queue) > 0:
+            for pipe in self.queue:
+                if pipe is not None:
+                    self.updateInputData = False
+                    pipe.inputData = self.inputData
+                    pipe.spectrumGroups = self.spectrumGroups
+                    result = pipe.runPipe(self.inputData)
+                    # if not result: # that means the ran pipe does not return a valid data to use as input for next pipes
+                    #   break
+                    self.inputData = result or set()
+
+        return self.inputData

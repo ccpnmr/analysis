@@ -117,23 +117,24 @@ classesInTopLevel = ('SG', 'SP', 'SA', 'SU', 'MC', 'MX', 'NC', 'CL', 'SE', 'DS',
 
 NEW_ITEM_DICT = {
 
-    'SP': 'newPeakList',
-    'NC': 'newNmrResidue',
-    'NR': 'newNmrAtom',
-    'DS': 'newRestraintList',
-    'RL': 'newRestraint',
-    'SE': 'newModel',
-    'Notes': 'newNote',
+    'SP'                : 'newPeakList',
+    'NC'                : 'newNmrResidue',
+    'NR'                : 'newNmrAtom',
+    'DS'                : 'newRestraintList',
+    'RL'                : 'newRestraint',
+    'SE'                : 'newModel',
+    'Notes'             : 'newNote',
     'StructureEnsembles': 'newStructureEnsemble',
-    'Samples': 'newSample',
-    'NmrChains': 'newNmrChain',
-    'Chains': 'newChain',
-    'Substances': 'newSubstance',
+    'Samples'           : 'newSample',
+    'NmrChains'         : 'newNmrChain',
+    'Chains'            : 'newChain',
+    'Substances'        : 'newSubstance',
     'ChemicalShiftLists': 'newChemicalShiftList',
-    'DataSets': 'newDataSet',
-    'SpectrumGroups': 'newSpectrumGroup',
-    'Complexes': 'newComplex',
+    'DataSets'          : 'newDataSet',
+    'SpectrumGroups'    : 'newSpectrumGroup',
+    'Complexes'         : 'newComplex',
     }
+
 
 def _openItemObject(mainWindow, objs, **kwds):
     """
@@ -226,6 +227,7 @@ def _openSampleSpectra(mainWindow, sample, position=None, relativeTo=None):
         if all(sample.spectra[0].dimensionCount) == 1:
             mainWindow.application.current.strip.autoRange()
 
+
 def _openPeakList(mainWindow, peakList, position=None, relativeTo=None):
     application = mainWindow.application
     application.showPeakTable(peakList=peakList, position=position, relativeTo=relativeTo)
@@ -272,17 +274,17 @@ def _openIntegralList(mainWindow, integralList, position=None, relativeTo=None):
 
 
 OpenObjAction = {
-    Spectrum: _openSpectrumDisplay,
-    PeakList: _openPeakList,
-    MultipletList: _openMultipletList,
-    NmrChain: _openNmrResidueTable,
-    Chain: _openResidueTable,
-    SpectrumGroup: _openSpectrumGroup,
-    Sample: _openSampleSpectra,
+    Spectrum         : _openSpectrumDisplay,
+    PeakList         : _openPeakList,
+    MultipletList    : _openMultipletList,
+    NmrChain         : _openNmrResidueTable,
+    Chain            : _openResidueTable,
+    SpectrumGroup    : _openSpectrumGroup,
+    Sample           : _openSampleSpectra,
     ChemicalShiftList: _openChemicalShiftList,
-    RestraintList: _openRestraintList,
-    Note: _openNote,
-    IntegralList: _openIntegralList,
+    RestraintList    : _openRestraintList,
+    Note             : _openNote,
+    IntegralList     : _openIntegralList,
     StructureEnsemble: _openStructureTable
     }
 
@@ -494,7 +496,6 @@ class SideBar(QtWidgets.QTreeWidget, Base, NotifierBase):
                         #     getLogger().warning('loadProject Error: %s' % str(es))
                         #     obj = None
 
-
                         if isinstance(obj, Project):
                             try:
                                 obj._mainWindow.sideBar.fillSideBar(obj)
@@ -540,39 +541,39 @@ class SideBar(QtWidgets.QTreeWidget, Base, NotifierBase):
             className = cls.className
 
             self._notifierList.append(self.setNotifier(self.project,
-                                               [Notifier.DELETE],
-                                               className,
-                                               self._removeItem,
-                                               onceOnly=True))
+                                                       [Notifier.DELETE],
+                                                       className,
+                                                       self._removeItem,
+                                                       onceOnly=True))
 
             if className != 'NmrResidue':
                 self._notifierList.append(self.setNotifier(self.project,
-                                                   [Notifier.CREATE],
-                                                   className,
-                                                   self._createItem))
+                                                           [Notifier.CREATE],
+                                                           className,
+                                                           self._createItem))
 
                 self._notifierList.append(self.setNotifier(self.project,
-                                                   [Notifier.RENAME],
-                                                   className,
-                                                   self._renameItem,
+                                                           [Notifier.RENAME],
+                                                           className,
+                                                           self._renameItem,
+                                                           onceOnly=True))
+
+        self._notifierList.append(self.setNotifier(self.project,
+                                                   [Notifier.CREATE],
+                                                   'NmrResidue',
+                                                   self._refreshParentNmrChain,
                                                    onceOnly=True))
 
         self._notifierList.append(self.setNotifier(self.project,
-                                           [Notifier.CREATE],
-                                           'NmrResidue',
-                                           self._refreshParentNmrChain,
-                                           onceOnly=True))
+                                                   [Notifier.RENAME],
+                                                   'NmrResidue',
+                                                   self._renameNmrResidueItem,
+                                                   onceOnly=True))
 
         self._notifierList.append(self.setNotifier(self.project,
-                                           [Notifier.RENAME],
-                                           'NmrResidue',
-                                           self._renameNmrResidueItem,
-                                           onceOnly=True))
-
-        self._notifierList.append(self.setNotifier(self.project,
-                                           [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE],
-                                           'SpectrumGroup',
-                                           self._refreshSidebarSpectra))
+                                                   [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE],
+                                                   'SpectrumGroup',
+                                                   self._refreshSidebarSpectra))
 
         # TODO:ED Add similar set of notifiers, and similar function for Complex/Chain
 
@@ -685,7 +686,6 @@ class SideBar(QtWidgets.QTreeWidget, Base, NotifierBase):
 
         GLSignals = GLNotifier(parent=self)
         GLSignals.emitEvent(triggers=[GLNotifier.GLALLPEAKS, GLNotifier.GLALLINTEGRALS, GLNotifier.GLALLMULTIPLETS])
-
 
     def _cloneObject(self, objs):
         """Clones the specified objects"""
@@ -991,7 +991,6 @@ class SideBar(QtWidgets.QTreeWidget, Base, NotifierBase):
             # if dd:
             #   for obj in sorted(dd.values()):
             #     self._createItem(obj)
-
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # mouse events

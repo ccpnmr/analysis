@@ -103,7 +103,7 @@ class GuiNotifier(NotifierABC):
     _triggerKeywords = (DROPEVENT, ENTEREVENT, DRAGMOVEEVENT)
 
     def __init__(self, theObject: Any, triggers: list, targetName: list,
-                       callback: Callable[..., str], debug=False, **kwargs):
+                 callback: Callable[..., str], debug=False, **kwargs):
         """
         Create GuiNotifier object;
 
@@ -175,7 +175,7 @@ class GuiNotifier(NotifierABC):
             elif trigger == GuiNotifier.DRAGMOVEEVENT:
                 self._theObject.setDragMoveEventCallback(None)
 
-        super().unRegister() # the end as it clears all attributes
+        super().unRegister()  # the end as it clears all attributes
 
     def __call__(self, data: dict, notifier: tuple = None):
         """
@@ -193,7 +193,7 @@ class GuiNotifier(NotifierABC):
         if self._debug:
             sys.stderr.write('>>> Notifier.__call__: %s \n--> notifier=%s data=%s\n' % \
                              (self, notifier, data)
-            )
+                             )
 
         # DROPEVENT
         if trigger == GuiNotifier.DROPEVENT:

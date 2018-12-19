@@ -9,8 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -33,17 +32,17 @@ nDim = len(current.strip.axisOrder)
 
 # check if we have sufficient dimensions for the swap
 if nDim < 3:
-  print('Too few dimensions for XZ flip')
+    print('Too few dimensions for XZ flip')
 else:
-  # create a list with X and Z axes swapped.
-  axisOrder = [current.strip.axisOrder[2], current.strip.axisOrder[1], current.strip.axisOrder[0]]
+    # create a list with X and Z axes swapped.
+    axisOrder = [current.strip.axisOrder[2], current.strip.axisOrder[1], current.strip.axisOrder[0]]
 
-   # add any remaining axes of the strip to the list
-  if nDim > len(axisOrder):
-    axisOrder.extend(current.strip.axisOrder[3:])
+    # add any remaining axes of the strip to the list
+    if nDim > len(axisOrder):
+        axisOrder.extend(current.strip.axisOrder[3:])
 
-  # create a new spectrum display with the new axis order
-  spectra = current.strip.spectra
-  newDisplay = ui.mainWindow.createSpectrumDisplay(spectra[0], axisOrder=axisOrder)
-  for spectrum in spectra[1:]:
-    newDisplay.displaySpectrum(spectrum)
+    # create a new spectrum display with the new axis order
+    spectra = current.strip.spectra
+    newDisplay = ui.mainWindow.createSpectrumDisplay(spectra[0], axisOrder=axisOrder)
+    for spectrum in spectra[1:]:
+        newDisplay.displaySpectrum(spectrum)

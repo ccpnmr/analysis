@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -33,34 +33,34 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 
 class StructurePopup(CcpnDialog):
-  """
-  Open a small popup to allow changing the label of a StructureEnsemble
-  """
-  def __init__(self, parent=None, mainWindow=None, title='StructureEnsembles', structure=None, **kwds):
     """
-    Initialise the widget
+    Open a small popup to allow changing the label of a StructureEnsemble
     """
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
-    self.mainWindow = mainWindow
-    self.application = mainWindow.application
-    self.project = mainWindow.application.project
-    self.current = mainWindow.application.current
+    def __init__(self, parent=None, mainWindow=None, title='StructureEnsembles', structure=None, **kwds):
+        """
+        Initialise the widget
+        """
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
-    self.structure = structure
-    self.structureLabel = Label(self, "Structure Name: "+self.structure.pid, grid=(0, 0))
-    self.structureText = LineEdit(self, self.structure.name, grid=(0, 1))
-    ButtonList(self, ['Cancel', 'OK'], [self.reject, self._okButton], grid=(1, 1))
+        self.mainWindow = mainWindow
+        self.application = mainWindow.application
+        self.project = mainWindow.application.project
+        self.current = mainWindow.application.current
 
-  def _okButton(self):
-    """
-    When ok button pressed: update StructureEnsemble and exit
-    """
-    newName = self.structureText.text()
-    try:
-      if str(newName) != self.structure.name:
-        self.structure.rename(newName)
-      self.accept()
-    except Exception as es:
-      showWarning(self.windowTitle(), str(es))
+        self.structure = structure
+        self.structureLabel = Label(self, "Structure Name: " + self.structure.pid, grid=(0, 0))
+        self.structureText = LineEdit(self, self.structure.name, grid=(0, 1))
+        ButtonList(self, ['Cancel', 'OK'], [self.reject, self._okButton], grid=(1, 1))
 
+    def _okButton(self):
+        """
+        When ok button pressed: update StructureEnsemble and exit
+        """
+        newName = self.structureText.text()
+        try:
+            if str(newName) != self.structure.name:
+                self.structure.rename(newName)
+            self.accept()
+        except Exception as es:
+            showWarning(self.windowTitle(), str(es))

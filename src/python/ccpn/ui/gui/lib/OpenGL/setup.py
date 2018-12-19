@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -29,6 +29,7 @@ from distutils.core import setup
 from distutils.extension import Extension
 import sys
 
+
 if __name__ == '__main__':
 
     if '--use-cython' in sys.argv:
@@ -42,15 +43,17 @@ if __name__ == '__main__':
     # but puts .so files into a subdirectory /python
     # ignore 'does not match fully qualified name' warnings
     extensions = [Extension('CcpnOpenGLContours',
-                            ['CcpnOpenGLContours'+ext],
+                            ['CcpnOpenGLContours' + ext],
                             language='c',
-                            include_dirs=['c/']),]
+                            include_dirs=['c/']), ]
 
     if USE_CYTHON:
         from Cython.Build import cythonize
+
+
         extensions = cythonize(extensions,
-                            annotate=True)
+                               annotate=True)
 
     setup(
-        ext_modules = extensions
-    )
+            ext_modules=extensions
+            )

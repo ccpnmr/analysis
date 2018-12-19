@@ -349,9 +349,9 @@ class GLExporter():
             colourGroups = OrderedDict()
             self._appendIndexLineGroup(indArray=self._parent.gridList[0],
                                        colourGroups=colourGroups,
-                                       plotDim={PLOTLEFT: self.displayScale * self.mainL,
+                                       plotDim={PLOTLEFT  : self.displayScale * self.mainL,
                                                 PLOTBOTTOM: self.displayScale * self.mainB,
-                                                PLOTWIDTH: self.displayScale * self.mainW,
+                                                PLOTWIDTH : self.displayScale * self.mainW,
                                                 PLOTHEIGHT: self.displayScale * self.mainH},
                                        name='grid',
                                        ratioLine=True)
@@ -403,7 +403,7 @@ class GLExporter():
                                                                height=self.displayScale * self.mainH)
                             if newLine:
                                 if colourPath not in colourGroups:
-                                    colourGroups[colourPath] = {PDFLINES: [],
+                                    colourGroups[colourPath] = {PDFLINES      : [],
                                                                 PDFSTROKEWIDTH: 0.5 * self.baseThickness,
                                                                 PDFSTROKECOLOR: colour, PDFSTROKELINECAP: 1}
                                 colourGroups[colourPath][PDFLINES].append(newLine)
@@ -422,9 +422,9 @@ class GLExporter():
                         # drawVertexColor
                         self._appendVertexLineGroup(indArray=thisSpec,
                                                     colourGroups=colourGroups,
-                                                    plotDim={PLOTLEFT: self.displayScale * self.mainL,
+                                                    plotDim={PLOTLEFT  : self.displayScale * self.mainL,
                                                              PLOTBOTTOM: self.displayScale * self.mainB,
-                                                             PLOTWIDTH: self.displayScale * self.mainW,
+                                                             PLOTWIDTH : self.displayScale * self.mainW,
                                                              PLOTHEIGHT: self.displayScale * self.mainH},
                                                     name='spectrumContours%s' % spectrumView.pid,
                                                     mat=mat)
@@ -470,9 +470,9 @@ class GLExporter():
                                                    height=self.displayScale * self.mainH)
                 if newLine:
                     if colourPath not in colourGroups:
-                        colourGroups[colourPath] = {PDFLINES: [],
-                                                    PDFSTROKEWIDTH: 0.5 * self.baseThickness,
-                                                    PDFSTROKECOLOR: colour,
+                        colourGroups[colourPath] = {PDFLINES        : [],
+                                                    PDFSTROKEWIDTH  : 0.5 * self.baseThickness,
+                                                    PDFSTROKECOLOR  : colour,
                                                     PDFSTROKELINECAP: 1, PDFCLOSEPATH: False}
                     colourGroups[colourPath][PDFLINES].append(newLine)
 
@@ -486,9 +486,9 @@ class GLExporter():
         self._appendIndexLineGroupFill(indArray=self._parent._GLPeaks._GLSymbols,
                                        listView='peakList',
                                        colourGroups=colourGroups,
-                                       plotDim={PLOTLEFT: self.displayScale * self.mainL,
+                                       plotDim={PLOTLEFT  : self.displayScale * self.mainL,
                                                 PLOTBOTTOM: self.displayScale * self.mainB,
-                                                PLOTWIDTH: self.displayScale * self.mainW,
+                                                PLOTWIDTH : self.displayScale * self.mainW,
                                                 PLOTHEIGHT: self.displayScale * self.mainH},
                                        name='peakSymbols',
                                        fillMode=None,
@@ -503,9 +503,9 @@ class GLExporter():
         self._appendIndexLineGroupFill(indArray=self._parent._GLMultiplets._GLSymbols,
                                        listView='multipletList',
                                        colourGroups=colourGroups,
-                                       plotDim={PLOTLEFT: self.displayScale * self.mainL,
+                                       plotDim={PLOTLEFT  : self.displayScale * self.mainL,
                                                 PLOTBOTTOM: self.displayScale * self.mainB,
-                                                PLOTWIDTH: self.displayScale * self.mainW,
+                                                PLOTWIDTH : self.displayScale * self.mainW,
                                                 PLOTHEIGHT: self.displayScale * self.mainH},
                                        name='multipletSymbols',
                                        fillMode=None,
@@ -519,9 +519,9 @@ class GLExporter():
         colourGroups = OrderedDict()
         self._appendIndexLineGroup(indArray=self._parent._marksList,
                                    colourGroups=colourGroups,
-                                   plotDim={PLOTLEFT: self.displayScale * self.mainL,
+                                   plotDim={PLOTLEFT  : self.displayScale * self.mainL,
                                             PLOTBOTTOM: self.displayScale * self.mainB,
-                                            PLOTWIDTH: self.displayScale * self.mainW,
+                                            PLOTWIDTH : self.displayScale * self.mainW,
                                             PLOTHEIGHT: self.displayScale * self.mainH},
                                    name='marks')
         self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='marks')
@@ -534,9 +534,9 @@ class GLExporter():
         self._appendIndexLineGroupFill(indArray=self._parent._GLIntegrals._GLSymbols,
                                        listView='integralList',
                                        colourGroups=colourGroups,
-                                       plotDim={PLOTLEFT: self.displayScale * self.mainL,
+                                       plotDim={PLOTLEFT  : self.displayScale * self.mainL,
                                                 PLOTBOTTOM: self.displayScale * self.mainB,
-                                                PLOTWIDTH: self.displayScale * self.mainW,
+                                                PLOTWIDTH : self.displayScale * self.mainW,
                                                 PLOTHEIGHT: self.displayScale * self.mainH},
                                        name='IntegralListsFill',
                                        fillMode=GL.GL_FILL,
@@ -618,9 +618,9 @@ class GLExporter():
         colourGroups = OrderedDict()
         self._appendIndexLineGroup(indArray=self._parent._externalRegions,
                                    colourGroups=colourGroups,
-                                   plotDim={PLOTLEFT: self.displayScale * self.mainL,
+                                   plotDim={PLOTLEFT  : self.displayScale * self.mainL,
                                             PLOTBOTTOM: self.displayScale * self.mainB,
-                                            PLOTWIDTH: self.displayScale * self.mainW,
+                                            PLOTWIDTH : self.displayScale * self.mainW,
                                             PLOTHEIGHT: self.displayScale * self.mainH},
                                    name='regions')
         self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='regions')
@@ -806,9 +806,9 @@ class GLExporter():
 
                 self._appendVertexLineGroup(indArray=hTrace,
                                             colourGroups=colourGroups,
-                                            plotDim={PLOTLEFT: self.displayScale * self.mainL,
+                                            plotDim={PLOTLEFT  : self.displayScale * self.mainL,
                                                      PLOTBOTTOM: self.displayScale * self.mainB,
-                                                     PLOTWIDTH: self.displayScale * self.mainW,
+                                                     PLOTWIDTH : self.displayScale * self.mainW,
                                                      PLOTHEIGHT: self.displayScale * self.mainH},
                                             name='hTrace%s' % hTrace.spectrumView.pid,
                                             includeLastVertex=not self._parent.is1D,
@@ -825,9 +825,9 @@ class GLExporter():
 
                 self._appendVertexLineGroup(indArray=vTrace,
                                             colourGroups=colourGroups,
-                                            plotDim={PLOTLEFT: self.displayScale * self.mainL,
+                                            plotDim={PLOTLEFT  : self.displayScale * self.mainL,
                                                      PLOTBOTTOM: self.displayScale * self.mainB,
-                                                     PLOTWIDTH: self.displayScale * self.mainW,
+                                                     PLOTWIDTH : self.displayScale * self.mainW,
                                                      PLOTHEIGHT: self.displayScale * self.mainH},
                                             name='vTrace%s' % vTrace.spectrumView.pid,
                                             includeLastVertex=not self._parent.is1D,
@@ -857,8 +857,8 @@ class GLExporter():
                                                    height=self.displayScale * self.mainH)
                 if newLine:
                     if colourPath not in colourGroups:
-                        colourGroups[colourPath] = {PDFLINES: [], PDFSTROKEWIDTH: 0.5 * infLine.lineWidth, PDFSTROKECOLOR: colour,
-                                                    PDFSTROKELINECAP: 1, PDFCLOSEPATH: False,
+                        colourGroups[colourPath] = {PDFLINES          : [], PDFSTROKEWIDTH: 0.5 * infLine.lineWidth, PDFSTROKECOLOR: colour,
+                                                    PDFSTROKELINECAP  : 1, PDFCLOSEPATH: False,
                                                     PDFSTROKEDASHARRAY: GLLINE_STYLES_ARRAY[infLine.lineStyle]}
                     colourGroups[colourPath][PDFLINES].append(newLine)
 
@@ -951,9 +951,9 @@ class GLExporter():
                 if self.params[GLAXISMARKS]:
                     self._appendIndexLineGroup(indArray=self._parent.gridList[1],
                                                colourGroups=colourGroups,
-                                               plotDim={PLOTLEFT: self.displayScale * (self.mainW - self._parent.AXIS_LINE),
+                                               plotDim={PLOTLEFT  : self.displayScale * (self.mainW - self._parent.AXIS_LINE),
                                                         PLOTBOTTOM: self.displayScale * self.mainB,
-                                                        PLOTWIDTH: self.displayScale * self._parent.AXIS_LINE,
+                                                        PLOTWIDTH : self.displayScale * self._parent.AXIS_LINE,
                                                         PLOTHEIGHT: self.displayScale * self.mainH},
                                                name='gridAxes',
                                                setColour=self.foregroundColour,
@@ -970,9 +970,9 @@ class GLExporter():
 
                     self._appendIndexLineGroup(indArray=tempVertexArray,
                                                colourGroups=colourGroups,
-                                               plotDim={PLOTLEFT: self.displayScale * (self.mainW - self._parent.AXIS_LINE),
+                                               plotDim={PLOTLEFT  : self.displayScale * (self.mainW - self._parent.AXIS_LINE),
                                                         PLOTBOTTOM: self.displayScale * self.mainB,
-                                                        PLOTWIDTH: self.displayScale * self._parent.AXIS_LINE,
+                                                        PLOTWIDTH : self.displayScale * self._parent.AXIS_LINE,
                                                         PLOTHEIGHT: self.displayScale * self.mainH},
                                                name='gridAxes',
                                                setColour=self.foregroundColour,
@@ -984,9 +984,9 @@ class GLExporter():
                 if self.params[GLAXISMARKS]:
                     self._appendIndexLineGroup(indArray=self._parent.gridList[2],
                                                colourGroups=colourGroups,
-                                               plotDim={PLOTLEFT: 0.0,
+                                               plotDim={PLOTLEFT  : 0.0,
                                                         PLOTBOTTOM: self.displayScale * self.mainB,
-                                                        PLOTWIDTH: self.displayScale * self.mainW,
+                                                        PLOTWIDTH : self.displayScale * self.mainW,
                                                         PLOTHEIGHT: self.displayScale * self._parent.AXIS_LINE},
                                                name='gridAxes',
                                                setColour=self.foregroundColour,
@@ -1003,9 +1003,9 @@ class GLExporter():
 
                     self._appendIndexLineGroup(indArray=tempVertexArray,
                                                colourGroups=colourGroups,
-                                               plotDim={PLOTLEFT: self.displayScale * (self.mainW - self._parent.AXIS_LINE),
+                                               plotDim={PLOTLEFT  : self.displayScale * (self.mainW - self._parent.AXIS_LINE),
                                                         PLOTBOTTOM: self.displayScale * self.mainB,
-                                                        PLOTWIDTH: self.displayScale * self._parent.AXIS_LINE,
+                                                        PLOTWIDTH : self.displayScale * self._parent.AXIS_LINE,
                                                         PLOTHEIGHT: self.displayScale * self.mainH},
                                                name='gridAxes',
                                                setColour=self.foregroundColour,
@@ -1124,9 +1124,9 @@ class GLExporter():
         scale = self.displayScale
         return Clipped_Flowable(width=self.pixWidth, height=self.pixHeight,
                                 mainPlot=self._mainPlot,
-                                mainDim={PLOTLEFT: 0,  #scale*self.mainL,
+                                mainDim={PLOTLEFT  : 0,  #scale*self.mainL,
                                          PLOTBOTTOM: 0,  #scale*self.mainB,
-                                         PLOTWIDTH: self.pixWidth,  #scale*self.mainW,
+                                         PLOTWIDTH : self.pixWidth,  #scale*self.mainW,
                                          PLOTHEIGHT: self.pixHeight  #scale*self.mainH
                                          }
                                 )

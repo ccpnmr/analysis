@@ -73,6 +73,7 @@ from contextlib import contextmanager
 from ccpn.core.lib.ContextManagers import undoBlockManager
 from ccpn.core.lib.Util import getParentObjectFromPid
 
+
 # BG_COLOR = QtGui.QColor('#E0E0E0')
 # TODO:ED add some documentation here
 
@@ -117,20 +118,23 @@ def _moduleId(module):
 def dataFrameToExcel(dataFrame, path, sheet_name='Table', columns=None):
     if dataFrame is not None:
 
-        if columns is not None and isinstance(columns, list): #this is wrong. columns can be a 1d array
+        if columns is not None and isinstance(columns, list):  #this is wrong. columns can be a 1d array
             dataFrame.to_excel(path, sheet_name=sheet_name, columns=columns)
         else:
             dataFrame.to_excel(path, sheet_name=sheet_name)
 
 
-def dataFrameToCsv( dataFrameObject, path, *args):
+def dataFrameToCsv(dataFrameObject, path, *args):
     dataFrameObject.dataFrame.to_csv(path)
 
-def dataFrameToTsv( dataFrameObject, path, *args):
+
+def dataFrameToTsv(dataFrameObject, path, *args):
     dataFrameObject.dataFrame.to_csv(path, sep='\t')
+
 
 def dataFrameToJson(self, dataFrameObject, path, *args):
     dataFrameObject.dataFrame.to_json(path, orient='split')
+
 
 # def tableToDataFrame(self):
 #     return self._dataFrameObject.dataFrame[self._dataFrameObject.visibleColumnHeadings]
@@ -141,7 +145,7 @@ def findExportFormats(path, dataFrame, sheet_name='Table', filterType=None, colu
         ('.csv', dataFrameToCsv),
         ('.tsv', dataFrameToTsv),
         ('.json', dataFrameToJson)
-    ])
+        ])
 
     extension = os.path.splitext(path)[1]
     if extension in formatTypes.keys():
@@ -159,18 +163,15 @@ def exportTableDialog(dataFrame, columns=None):
     if dataFrame is None:
         return
     saveDialog = FileDialog(directory='ccpn_Table.xlsx',  # default saving name
-                                 fileMode=FileDialog.AnyFile,
-                                 filter=".xlsx;; .csv;; .tsv;; .json ",
-                                 text='Save as ',
-                                 acceptMode=FileDialog.AcceptSave,
-                                 preferences=None)
+                            fileMode=FileDialog.AnyFile,
+                            filter=".xlsx;; .csv;; .tsv;; .json ",
+                            text='Save as ',
+                            acceptMode=FileDialog.AcceptSave,
+                            preferences=None)
     path = saveDialog.selectedFile()
     filterType = saveDialog.selectedNameFilter()
     if path:
         findExportFormats(path, dataFrame, filterType=filterType, columns=columns)
-
-
-
 
 
 class QuickTable(TableWidget, Base):
@@ -236,7 +237,7 @@ QuickTable::item::selected {
         # initialise the internal data storage
         self._dataFrameObject = dataFrameObject
         self._tableBlockingLevel = 0
-                
+
         # set stylesheet
         self.colours = getColours()
         styleSheet = self.styleSheet % self.colours
@@ -296,7 +297,7 @@ QuickTable::item::selected {
         self._actionCallback = actionCallback
         self._selectionCallback = selectionCallback
         #self._silenceCallback = False
-        
+
         if self._actionCallback:
             self.doubleClicked.connect(self._doubleClickCallback)
         else:
@@ -795,6 +796,7 @@ QuickTable::item::selected {
         if self._dataFrameObject is not None:
             df = self._dataFrameObject.dataFrame
             return df
+
     def _getExportDataColums(self):
         if self._dataFrameObject is not None:
             visCol = self._dataFrameObject.visibleColumnHeadings
@@ -1637,7 +1639,6 @@ QuickTable::item::selected {
                             oldPid = data[Notifier.OLDPID]
                             cellParent = getParentObjectFromPid(self.project, oldPid)
                             if cellParent is not rowObj:
-
                                 # if it has changed then update the original row
                                 newData[Notifier.OBJECT] = cellParent
                                 self._updateRowCallback(newData)
@@ -1742,19 +1743,19 @@ QuickTable::item::selected {
                                             searchCallBack._pluralLinkName,
                                             self._searchCallBack)
 
-        self._tableData = {'updateFunc': updateFunc,
-                           'changeFunc': changeFunc,
-                           'tableSelection': tableSelection,
-                           'pullDownWidget': pullDownWidget,
-                           'tableClass': tableClass,
-                           'rowClass': rowClass,
-                           'cellClassNames': cellClassNames,
-                           'tableName': tableName,
-                           'className': className,
-                           'classCallBack': callBackClass._pluralLinkName if callBackClass else None,
+        self._tableData = {'updateFunc'           : updateFunc,
+                           'changeFunc'           : changeFunc,
+                           'tableSelection'       : tableSelection,
+                           'pullDownWidget'       : pullDownWidget,
+                           'tableClass'           : tableClass,
+                           'rowClass'             : rowClass,
+                           'cellClassNames'       : cellClassNames,
+                           'tableName'            : tableName,
+                           'className'            : className,
+                           'classCallBack'        : callBackClass._pluralLinkName if callBackClass else None,
                            'selectCurrentCallBack': selectCurrentCallBack,
-                           'searchCallBack': searchCallBack,
-                           'moduleParent': moduleParent
+                           'searchCallBack'       : searchCallBack,
+                           'moduleParent'         : moduleParent
                            }
 
         # add a cleaner id to the opened quickTable list
@@ -1765,19 +1766,19 @@ QuickTable::item::selected {
     def setDefaultTableData(self):
         """Populate an empty table data object
         """
-        self._tableData = {'updateFunc': None,
-                           'changeFunc': None,
-                           'tableSelection': None,
-                           'pullDownWidget': None,
-                           'tableClass': None,
-                           'rowClass': None,
-                           'cellClassNames': None,
-                           'tableName': None,
-                           'className': None,
-                           'classCallBack': None,
+        self._tableData = {'updateFunc'           : None,
+                           'changeFunc'           : None,
+                           'tableSelection'       : None,
+                           'pullDownWidget'       : None,
+                           'tableClass'           : None,
+                           'rowClass'             : None,
+                           'cellClassNames'       : None,
+                           'tableName'            : None,
+                           'className'            : None,
+                           'classCallBack'        : None,
                            'selectCurrentCallBack': None,
-                           'searchCallBack': None,
-                           'moduleParent': blankId
+                           'searchCallBack'       : None,
+                           'moduleParent'         : blankId
                            }
 
     def _initialiseTableNotifiers(self):

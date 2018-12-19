@@ -183,6 +183,7 @@ class CheckBoxes(Widget):
                 checkBox.setChecked(checkFlag)
         self.checkBoxGroup.setExclusive(self.isExclusive)
 
+
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.widgets.BasePopup import BasePopup

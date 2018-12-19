@@ -37,34 +37,35 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 
 from ccpn.util.Logging import getLogger
 
+
 HALIGN_DICT = {
-    'left': QtCore.Qt.AlignLeft,
-    'right': QtCore.Qt.AlignRight,
+    'left'  : QtCore.Qt.AlignLeft,
+    'right' : QtCore.Qt.AlignRight,
     'center': QtCore.Qt.AlignHCenter,
     'centre': QtCore.Qt.AlignHCenter,
-    'l': QtCore.Qt.AlignLeft,
-    'r': QtCore.Qt.AlignRight,
-    'c': QtCore.Qt.AlignHCenter,
+    'l'     : QtCore.Qt.AlignLeft,
+    'r'     : QtCore.Qt.AlignRight,
+    'c'     : QtCore.Qt.AlignHCenter,
     }
 
 VALIGN_DICT = {
-    'top': QtCore.Qt.AlignTop,
+    'top'   : QtCore.Qt.AlignTop,
     'bottom': QtCore.Qt.AlignBottom,
     'center': QtCore.Qt.AlignVCenter,
     'centre': QtCore.Qt.AlignVCenter,
-    't': QtCore.Qt.AlignTop,
-    'b': QtCore.Qt.AlignBottom,
-    'c': QtCore.Qt.AlignVCenter,
+    't'     : QtCore.Qt.AlignTop,
+    'b'     : QtCore.Qt.AlignBottom,
+    'c'     : QtCore.Qt.AlignVCenter,
     }
 
 POLICY_DICT = {
-    'fixed': QtWidgets.QSizePolicy.Fixed,
-    'minimum': QtWidgets.QSizePolicy.Minimum,
-    'maximum': QtWidgets.QSizePolicy.Maximum,
-    'preferred': QtWidgets.QSizePolicy.Preferred,
-    'expanding': QtWidgets.QSizePolicy.Expanding,
+    'fixed'           : QtWidgets.QSizePolicy.Fixed,
+    'minimum'         : QtWidgets.QSizePolicy.Minimum,
+    'maximum'         : QtWidgets.QSizePolicy.Maximum,
+    'preferred'       : QtWidgets.QSizePolicy.Preferred,
+    'expanding'       : QtWidgets.QSizePolicy.Expanding,
     'minimumExpanding': QtWidgets.QSizePolicy.MinimumExpanding,
-    'ignored': QtWidgets.QSizePolicy.Ignored,
+    'ignored'         : QtWidgets.QSizePolicy.Ignored,
     }
 
 

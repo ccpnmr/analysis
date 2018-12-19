@@ -95,86 +95,86 @@ class GLNotifier(QtWidgets.QWidget):
 
     def emitPaintEvent(self, source=None):
         if source:
-            self.glEvent.emit({GLNotifier.GLSOURCE: source,
-                               GLNotifier.GLTARGETS: [],
+            self.glEvent.emit({GLNotifier.GLSOURCE  : source,
+                               GLNotifier.GLTARGETS : [],
                                GLNotifier.GLTRIGGERS: []})
         else:
             self.glEvent.emit({})
 
     def emitEvent(self, source=None, strip=None, display=None, targets=[], triggers=[], values={}):
-        aDict = {GLNotifier.GLSOURCE: source,
-                 GLNotifier.GLSTRIP: strip,
+        aDict = {GLNotifier.GLSOURCE         : source,
+                 GLNotifier.GLSTRIP          : strip,
                  GLNotifier.GLSPECTRUMDISPLAY: display,
-                 GLNotifier.GLTARGETS: tuple(targets),
-                 GLNotifier.GLTRIGGERS: tuple(triggers),
-                 GLNotifier.GLVALUES: values,
+                 GLNotifier.GLTARGETS        : tuple(targets),
+                 GLNotifier.GLTRIGGERS       : tuple(triggers),
+                 GLNotifier.GLVALUES         : values,
                  }
         self.glEvent.emit(aDict)
 
     def emitEventToSpectrumDisplay(self, source=None, strip=None, display=None, targets=[], triggers=[], values={}):
-        aDict = {GLNotifier.GLSOURCE: source,
-                 GLNotifier.GLSTRIP: strip,
+        aDict = {GLNotifier.GLSOURCE         : source,
+                 GLNotifier.GLSTRIP          : strip,
                  GLNotifier.GLSPECTRUMDISPLAY: display,
-                 GLNotifier.GLTARGETS: tuple(targets),
-                 GLNotifier.GLTRIGGERS: tuple(triggers),
-                 GLNotifier.GLVALUES: values,
+                 GLNotifier.GLTARGETS        : tuple(targets),
+                 GLNotifier.GLTRIGGERS       : tuple(triggers),
+                 GLNotifier.GLVALUES         : values,
                  }
         self.glEvent.emit(aDict)
 
     def _emitAllAxesChanged(self, source=None, strip=None,
                             axisB=None, axisT=None, axisL=None, axisR=None):
-        aDict = {GLNotifier.GLSOURCE: source,
-                 GLNotifier.GLSTRIP: strip,
+        aDict = {GLNotifier.GLSOURCE         : source,
+                 GLNotifier.GLSTRIP          : strip,
                  GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay,
-                 GLNotifier.GLAXISVALUES: {GLNotifier.GLBOTTOMAXISVALUE: axisB,
-                                           GLNotifier.GLTOPAXISVALUE: axisT,
-                                           GLNotifier.GLLEFTAXISVALUE: axisL,
-                                           GLNotifier.GLRIGHTAXISVALUE: axisR}
+                 GLNotifier.GLAXISVALUES     : {GLNotifier.GLBOTTOMAXISVALUE: axisB,
+                                                GLNotifier.GLTOPAXISVALUE   : axisT,
+                                                GLNotifier.GLLEFTAXISVALUE  : axisL,
+                                                GLNotifier.GLRIGHTAXISVALUE : axisR}
                  }
         self.glAllAxesChanged.emit(aDict)
 
     def _emitXAxisChanged(self, source=None, strip=None,
                           axisB=None, axisT=None, axisL=None, axisR=None):
-        aDict = {GLNotifier.GLSOURCE: source,
-                 GLNotifier.GLSTRIP: strip,
+        aDict = {GLNotifier.GLSOURCE         : source,
+                 GLNotifier.GLSTRIP          : strip,
                  GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay,
-                 GLNotifier.GLAXISVALUES: {GLNotifier.GLBOTTOMAXISVALUE: axisB,
-                                           GLNotifier.GLTOPAXISVALUE: axisT,
-                                           GLNotifier.GLLEFTAXISVALUE: axisL,
-                                           GLNotifier.GLRIGHTAXISVALUE: axisR}
+                 GLNotifier.GLAXISVALUES     : {GLNotifier.GLBOTTOMAXISVALUE: axisB,
+                                                GLNotifier.GLTOPAXISVALUE   : axisT,
+                                                GLNotifier.GLLEFTAXISVALUE  : axisL,
+                                                GLNotifier.GLRIGHTAXISVALUE : axisR}
                  }
         self.glXAxisChanged.emit(aDict)
 
     def _emitMouseMoved(self, source=None, coords=None, mouseMovedDict=None):
-        aDict = {GLNotifier.GLSOURCE: source,
-                 GLNotifier.GLMOUSECOORDS: coords,
+        aDict = {GLNotifier.GLSOURCE        : source,
+                 GLNotifier.GLMOUSECOORDS   : coords,
                  GLNotifier.GLMOUSEMOVEDDICT: mouseMovedDict}
         self.glMouseMoved.emit(aDict)
 
     def _emitYAxisChanged(self, source=None, strip=None,
                           axisB=None, axisT=None, axisL=None, axisR=None):
-        aDict = {GLNotifier.GLSOURCE: source,
-                 GLNotifier.GLSTRIP: strip,
+        aDict = {GLNotifier.GLSOURCE         : source,
+                 GLNotifier.GLSTRIP          : strip,
                  GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay,
-                 GLNotifier.GLAXISVALUES: {GLNotifier.GLBOTTOMAXISVALUE: axisB,
-                                           GLNotifier.GLTOPAXISVALUE: axisT,
-                                           GLNotifier.GLLEFTAXISVALUE: axisL,
-                                           GLNotifier.GLRIGHTAXISVALUE: axisR}
+                 GLNotifier.GLAXISVALUES     : {GLNotifier.GLBOTTOMAXISVALUE: axisB,
+                                                GLNotifier.GLTOPAXISVALUE   : axisT,
+                                                GLNotifier.GLLEFTAXISVALUE  : axisL,
+                                                GLNotifier.GLRIGHTAXISVALUE : axisR}
                  }
         self.glYAxisChanged.emit(aDict)
 
     def _emitAxisLockChanged(self, source=None, strip=None, lock=False):
-        aDict = {GLNotifier.GLSOURCE: source,
-                 GLNotifier.GLSTRIP: strip,
+        aDict = {GLNotifier.GLSOURCE         : source,
+                 GLNotifier.GLSTRIP          : strip,
                  GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay,
-                 GLNotifier.GLVALUES: lock
+                 GLNotifier.GLVALUES         : lock
                  }
         self.glAxisLockChanged.emit(aDict)
 
     def _emitAxisUnitsChanged(self, source=None, strip=None, dataDict={}):
-        aDict = {GLNotifier.GLSOURCE: source,
-                 GLNotifier.GLSTRIP: strip,
+        aDict = {GLNotifier.GLSOURCE         : source,
+                 GLNotifier.GLSTRIP          : strip,
                  GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay,
-                 GLNotifier.GLVALUES: dataDict
+                 GLNotifier.GLVALUES         : dataDict
                  }
         self.glAxisUnitsChanged.emit(aDict)

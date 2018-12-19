@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -30,43 +30,45 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Label import Label
 
+
 class Spinbox(QtGui.QSpinBox, Base):
 
-  def __init__(self, parent, prefix=None, value=None,step=None, min=None, max=None, showButtons=True, **kwds):
+    def __init__(self, parent, prefix=None, value=None, step=None, min=None, max=None, showButtons=True, **kwds):
 
-    super().__init__(parent)
-    Base._init(self, **kwds)
+        super().__init__(parent)
+        Base._init(self, **kwds)
 
-    if min is not None:
-      self.setMinimum(min)
-    if max is not None:
-      self.setMaximum(max)
-    if value is not None: #set Value only after you set min and max
-      self.setValue(value)
-    if step is not None:
-      self.setSingleStep(step)
-    if prefix:
-      self.setPrefix(prefix+' ')
-    if showButtons is False:
-      self.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
+        if min is not None:
+            self.setMinimum(min)
+        if max is not None:
+            self.setMaximum(max)
+        if value is not None:  #set Value only after you set min and max
+            self.setValue(value)
+        if step is not None:
+            self.setSingleStep(step)
+        if prefix:
+            self.setPrefix(prefix + ' ')
+        if showButtons is False:
+            self.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
 
-  def get(self):
-    return self.value()
+    def get(self):
+        return self.value()
 
-  def set(self, p_int):
-    self.setValue(p_int)
+    def set(self, p_int):
+        self.setValue(p_int)
+
 
 if __name__ == '__main__':
-  from ccpn.ui.gui.widgets.Application import TestApplication
-  from ccpn.ui.gui.popups.Dialog import CcpnDialog
+    from ccpn.ui.gui.widgets.Application import TestApplication
+    from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
-  app = TestApplication()
-  popup = CcpnDialog()
-  sb = Spinbox(popup, step=10, grid=(0,0))
-  sb.setPrefix('H Weight ')
 
-  popup.show()
-  popup.raise_()
+    app = TestApplication()
+    popup = CcpnDialog()
+    sb = Spinbox(popup, step=10, grid=(0, 0))
+    sb.setPrefix('H Weight ')
 
-  app.start()
+    popup.show()
+    popup.raise_()
 
+    app.start()

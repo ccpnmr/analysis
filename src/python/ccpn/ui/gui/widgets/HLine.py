@@ -47,9 +47,9 @@ class HLine(Widget):
         self.lineHeight = int(height / 3)
 
         self.styles = {
-            'SolidLine': QtCore.Qt.SolidLine,
-            'DashLine': QtCore.Qt.DashLine,
-            'DashDotLine': QtCore.Qt.DashDotLine,
+            'SolidLine'     : QtCore.Qt.SolidLine,
+            'DashLine'      : QtCore.Qt.DashLine,
+            'DashDotLine'   : QtCore.Qt.DashDotLine,
             'DashDotDotLine': QtCore.Qt.DashDotDotLine,
             }
 

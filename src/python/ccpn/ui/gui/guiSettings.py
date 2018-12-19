@@ -11,7 +11,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                  "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -21,7 +20,6 @@ __version__ = "$Revision: 3.0.b4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: geertenv $"
 __date__ = "$Date: 2016-11-15 21:37:50 +0000 (Tue, 15 Nov 2016) $"
 #=========================================================================================
@@ -100,30 +98,30 @@ COLOUR_SCHEMES = (LIGHT, DARK, DEFAULT)
 SPECTRUM_HEXCOLOURS = 'spectrumHexColours'
 
 MARK_LINE_COLOUR_DICT = {
-    'CA': '#0080FF',  # aqua
-    'CB': '#6666FF',  # orchid
-    'CG': '#0048FF',
-    'CD': '#006DFF',
-    'CE': '#0091FF',
-    'CZ': '#00B6FF',
-    'CH': '#00DAFF',
-    'C': '#00FFFF',
-    'Cn': '#00FFFF',
-    'HA': '#FF0000',
-    'HB': '#FF0024',
-    'HG': '#FF0048',
-    'HD': '#FF006D',
-    'HE': '#FF0091',
-    'HZ': '#FF00B6',
-    'HH': '#FF00DA',
-    'H': '#FF00FF',
-    'Hn': '#FF00FF',
-    'N': '#00FF00',
-    'Nh': '#00FF00',
-    'ND': '#3FFF00',
-    'NE': '#7FFF00',
-    'NZ': '#BFFF00',
-    'NH': '#FFFF00',
+    'CA'   : '#0080FF',  # aqua
+    'CB'   : '#6666FF',  # orchid
+    'CG'   : '#0048FF',
+    'CD'   : '#006DFF',
+    'CE'   : '#0091FF',
+    'CZ'   : '#00B6FF',
+    'CH'   : '#00DAFF',
+    'C'    : '#00FFFF',
+    'Cn'   : '#00FFFF',
+    'HA'   : '#FF0000',
+    'HB'   : '#FF0024',
+    'HG'   : '#FF0048',
+    'HD'   : '#FF006D',
+    'HE'   : '#FF0091',
+    'HZ'   : '#FF00B6',
+    'HH'   : '#FF00DA',
+    'H'    : '#FF00FF',
+    'Hn'   : '#FF00FF',
+    'N'    : '#00FF00',
+    'Nh'   : '#00FF00',
+    'ND'   : '#3FFF00',
+    'NE'   : '#7FFF00',
+    'NZ'   : '#BFFF00',
+    'NH'   : '#FFFF00',
     DEFAULT: '#e0e0e0'
     }
 
@@ -205,82 +203,82 @@ colourSchemes = {
     # all colours defined here
     DEFAULT: {
 
-        CCPNGLWIDGET_HEXBACKGROUND: '#FFFFFF',
-        CCPNGLWIDGET_BACKGROUND: (0.99, 0.99, 0.99, 1.0),
-        CCPNGLWIDGET_FOREGROUND: (0.05, 0.05, 0.05, 1.0),  #'#080000'
-        CCPNGLWIDGET_PICKCOLOUR: (0.2, 0.5, 0.9, 1.0),
-        CCPNGLWIDGET_GRID: (0.5, 0.0, 0.0, 1.0),  #'#080000'
-        CCPNGLWIDGET_HIGHLIGHT: (0.23, 0.23, 1.0, 1.0),  #'#3333ff'
-        CCPNGLWIDGET_LABELLING: (0.05, 0.05, 0.05, 1.0),
-        CCPNGLWIDGET_PHASETRACE: (0.2, 0.2, 0.2, 1.0),
-        CCPNGLWIDGET_ZOOMAREA: (0.8, 0.9, 0.2, 0.3),
-        CCPNGLWIDGET_PICKAREA: (0.2, 0.5, 0.9, 0.3),
-        CCPNGLWIDGET_SELECTAREA: (0.8, 0.2, 0.9, 0.3),
-        CCPNGLWIDGET_ZOOMLINE: (0.6, 0.7, 0.2, 1.0),
-        CCPNGLWIDGET_MOUSEMOVELINE: (0.8, 0.2, 0.9, 1.0),
+        CCPNGLWIDGET_HEXBACKGROUND    : '#FFFFFF',
+        CCPNGLWIDGET_BACKGROUND       : (0.99, 0.99, 0.99, 1.0),
+        CCPNGLWIDGET_FOREGROUND       : (0.05, 0.05, 0.05, 1.0),  #'#080000'
+        CCPNGLWIDGET_PICKCOLOUR       : (0.2, 0.5, 0.9, 1.0),
+        CCPNGLWIDGET_GRID             : (0.5, 0.0, 0.0, 1.0),  #'#080000'
+        CCPNGLWIDGET_HIGHLIGHT        : (0.23, 0.23, 1.0, 1.0),  #'#3333ff'
+        CCPNGLWIDGET_LABELLING        : (0.05, 0.05, 0.05, 1.0),
+        CCPNGLWIDGET_PHASETRACE       : (0.2, 0.2, 0.2, 1.0),
+        CCPNGLWIDGET_ZOOMAREA         : (0.8, 0.9, 0.2, 0.3),
+        CCPNGLWIDGET_PICKAREA         : (0.2, 0.5, 0.9, 0.3),
+        CCPNGLWIDGET_SELECTAREA       : (0.8, 0.2, 0.9, 0.3),
+        CCPNGLWIDGET_ZOOMLINE         : (0.6, 0.7, 0.2, 1.0),
+        CCPNGLWIDGET_MOUSEMOVELINE    : (0.8, 0.2, 0.9, 1.0),
 
-        CCPNGLWIDGET_MULTIPLETLINK: FIREBRICK,
+        CCPNGLWIDGET_MULTIPLETLINK    : FIREBRICK,
 
-        CCPNMODULELABEL_BACKGROUND: '#FFFFFF',
-        CCPNMODULELABEL_FOREGROUND: TEXT_COLOUR,
+        CCPNMODULELABEL_BACKGROUND    : '#FFFFFF',
+        CCPNMODULELABEL_FOREGROUND    : TEXT_COLOUR,
 
-        GUICHAINLABEL_TEXT: TEXT_COLOUR,
+        GUICHAINLABEL_TEXT            : TEXT_COLOUR,
 
-        GUICHAINRESIDUE_UNASSIGNED: 'black',
-        GUICHAINRESIDUE_ASSIGNED: GREEN1,
-        GUICHAINRESIDUE_POSSIBLE: 'orange',
-        GUICHAINRESIDUE_WARNING: WARNING_RED,
-        GUICHAINRESIDUE_DRAGENTER: MARISHINO,
-        GUICHAINRESIDUE_DRAGLEAVE: 'black',  # '#666e98',
+        GUICHAINRESIDUE_UNASSIGNED    : 'black',
+        GUICHAINRESIDUE_ASSIGNED      : GREEN1,
+        GUICHAINRESIDUE_POSSIBLE      : 'orange',
+        GUICHAINRESIDUE_WARNING       : WARNING_RED,
+        GUICHAINRESIDUE_DRAGENTER     : MARISHINO,
+        GUICHAINRESIDUE_DRAGLEAVE     : 'black',  # '#666e98',
 
-        GUINMRATOM_SELECTED: TEXT_COLOUR,
-        GUINMRATOM_NOTSELECTED: '#FDFDFC',
+        GUINMRATOM_SELECTED           : TEXT_COLOUR,
+        GUINMRATOM_NOTSELECTED        : '#FDFDFC',
 
-        GUINMRRESIDUE: TEXT_COLOUR,
+        GUINMRRESIDUE                 : TEXT_COLOUR,
 
-        GUISTRIP_PIVOT: MARISHINO,
+        GUISTRIP_PIVOT                : MARISHINO,
 
-        LABEL_FOREGROUND: TEXT_COLOUR,
-        DIVIDER: TEXT_COLOUR,
+        LABEL_FOREGROUND              : TEXT_COLOUR,
+        DIVIDER                       : TEXT_COLOUR,
 
-        SEQUENCEGRAPHMODULE_LINE: 'black',
-        SEQUENCEGRAPHMODULE_TEXT: TEXT_COLOUR,
+        SEQUENCEGRAPHMODULE_LINE      : 'black',
+        SEQUENCEGRAPHMODULE_TEXT      : TEXT_COLOUR,
 
-        SEQUENCEMODULE_DRAGMOVE: MEDIUM_BLUE,
-        SEQUENCEMODULE_TEXT: TEXT_COLOUR,
+        SEQUENCEMODULE_DRAGMOVE       : MEDIUM_BLUE,
+        SEQUENCEMODULE_TEXT           : TEXT_COLOUR,
 
-        QUICKTABLE_BACKGROUND: 'white',
-        QUICKTABLE_ALT_BACKGROUND: LIGHT_GREY,
-        QUICKTABLE_ITEM_FOREGROUND: TEXT_COLOUR,
+        QUICKTABLE_BACKGROUND         : 'white',
+        QUICKTABLE_ALT_BACKGROUND     : LIGHT_GREY,
+        QUICKTABLE_ITEM_FOREGROUND    : TEXT_COLOUR,
         QUICKTABLE_SELECTED_FOREGROUND: 'black',
         QUICKTABLE_SELECTED_BACKGROUND: '#FFFCBA',
 
-        STRIPHEADER_FOREGROUND: TEXT_COLOUR,
-        STRIPHEADER_BACKGROUND: '#ebebeb',
+        STRIPHEADER_FOREGROUND        : TEXT_COLOUR,
+        STRIPHEADER_BACKGROUND        : '#ebebeb',
 
-        MARKS_COLOURS: MARK_LINE_COLOUR_DICT,
-        SPECTRUM_HEXCOLOURS: spectrumHexDarkColours
+        MARKS_COLOURS                 : MARK_LINE_COLOUR_DICT,
+        SPECTRUM_HEXCOLOURS           : spectrumHexDarkColours
         },
 
     # Overridden for dark colour scheme
-    DARK: {
+    DARK   : {
 
         CCPNGLWIDGET_HEXBACKGROUND: '#0F0F0F',
-        CCPNGLWIDGET_BACKGROUND: (0.1, 0.1, 0.1, 1.0),
-        CCPNGLWIDGET_FOREGROUND: (0.9, 1.0, 1.0, 1.0),  #'#f7ffff'
-        CCPNGLWIDGET_PICKCOLOUR: (0.2, 0.5, 0.9, 1.0),
-        CCPNGLWIDGET_GRID: (0.9, 1.0, 1.0, 1.0),  #'#f7ffff'
-        CCPNGLWIDGET_HIGHLIGHT: (0.2, 1.0, 0.3, 1.0),  #'#00ff00'
-        CCPNGLWIDGET_LABELLING: (1.0, 1.0, 1.0, 1.0),
-        CCPNGLWIDGET_PHASETRACE: (0.8, 0.8, 0.8, 1.0),
-        CCPNGLWIDGET_ZOOMLINE: (1.0, 0.9, 0.2, 1.0),
+        CCPNGLWIDGET_BACKGROUND   : (0.1, 0.1, 0.1, 1.0),
+        CCPNGLWIDGET_FOREGROUND   : (0.9, 1.0, 1.0, 1.0),  #'#f7ffff'
+        CCPNGLWIDGET_PICKCOLOUR   : (0.2, 0.5, 0.9, 1.0),
+        CCPNGLWIDGET_GRID         : (0.9, 1.0, 1.0, 1.0),  #'#f7ffff'
+        CCPNGLWIDGET_HIGHLIGHT    : (0.2, 1.0, 0.3, 1.0),  #'#00ff00'
+        CCPNGLWIDGET_LABELLING    : (1.0, 1.0, 1.0, 1.0),
+        CCPNGLWIDGET_PHASETRACE   : (0.8, 0.8, 0.8, 1.0),
+        CCPNGLWIDGET_ZOOMLINE     : (1.0, 0.9, 0.2, 1.0),
         CCPNGLWIDGET_MULTIPLETLINK: LIGHTCORAL,
 
-        SPECTRUM_HEXCOLOURS: spectrumHexLightColours
+        SPECTRUM_HEXCOLOURS       : spectrumHexLightColours
         },
 
     # Overridden for light colour scheme
-    LIGHT: {
+    LIGHT  : {
 
         }
     }
@@ -294,6 +292,7 @@ MARK_LINE_COLOUR_DICT_DARK = dict([(k, autoCorrectHexColour(v, colourSchemes[DAR
 # insert the marks colours into colourScheme
 colourSchemes[LIGHT][MARKS_COLOURS] = MARK_LINE_COLOUR_DICT_LIGHT
 colourSchemes[DARK][MARKS_COLOURS] = MARK_LINE_COLOUR_DICT_DARK
+
 
 def getColourScheme():
     """

@@ -277,11 +277,11 @@ class CcpnModuleArea(ModuleArea, DropBase):  #, DropBase):
 
         neededContainer = {
             'bottom': 'vertical',
-            'top': 'vertical',
-            'left': 'horizontal',
-            'right': 'horizontal',
-            'above': 'tab',
-            'below': 'tab'
+            'top'   : 'vertical',
+            'left'  : 'horizontal',
+            'right' : 'horizontal',
+            'above' : 'tab',
+            'below' : 'tab'
             }[position]
 
         if relativeTo is None:
@@ -317,11 +317,11 @@ class CcpnModuleArea(ModuleArea, DropBase):  #, DropBase):
 
         insertPos = {
             'bottom': 'after',
-            'top': 'before',
-            'left': 'before',
-            'right': 'after',
-            'above': 'before',
-            'below': 'after'
+            'top'   : 'before',
+            'left'  : 'before',
+            'right' : 'after',
+            'above' : 'before',
+            'below' : 'after'
             }[position]
         if container is not None:
             container.insert(module, insertPos, neighbor)

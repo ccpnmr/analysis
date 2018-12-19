@@ -6,7 +6,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -28,107 +28,107 @@ from ccpnmodel.ccpncore.memops.ApiError import ApiError
 
 
 class TestSampleComponentCreation(WrapperTesting):
-  """
-  Test functions that require a valid Sample to be instantiated.
-  """
+    """
+    Test functions that require a valid Sample to be instantiated.
+    """
 
-  #=========================================================================================
-  # setUp     Initialise a valid Sample
-  #=========================================================================================
+    #=========================================================================================
+    # setUp     Initialise a valid Sample
+    #=========================================================================================
 
-  def setUp(self):
-    """
-    Create a valid Sample with the name 'ValidSample'
-    This is required to attach the sampleComponents.
-    """
-    with self.initialSetup():
-      self.sample = self.project.newSample('ValidSample')
+    def setUp(self):
+        """
+        Create a valid Sample with the name 'ValidSample'
+        This is required to attach the sampleComponents.
+        """
+        with self.initialSetup():
+            self.sample = self.project.newSample('ValidSample')
 
-  #=========================================================================================
-  # test_newSampleComponent_bad_name
-  #=========================================================================================
+    #=========================================================================================
+    # test_newSampleComponent_bad_name
+    #=========================================================================================
 
-  def test_newSampleComponent(self):
-    """
-    Test that creating a new SampleComponent with no parameter raises an error and
-    no component is added.
-    """
-    # with self.assertRaisesRegexp(TypeError, 'required positional argument'):
-    #   self.sample.newSampleComponent()
-    #
-    with self.assertRaisesRegexp(TypeError, 'SampleComponent name must be a string'):
-      self.sample.newSampleComponent()
-    self.assertEqual(len(self.project.sampleComponents), 0)
-    self.assertEqual(len(self.project.substances), 0)
+    def test_newSampleComponent(self):
+        """
+        Test that creating a new SampleComponent with no parameter raises an error and
+        no component is added.
+        """
+        # with self.assertRaisesRegexp(TypeError, 'required positional argument'):
+        #   self.sample.newSampleComponent()
+        #
+        with self.assertRaisesRegexp(TypeError, 'SampleComponent name must be a string'):
+            self.sample.newSampleComponent()
+        self.assertEqual(len(self.project.sampleComponents), 0)
+        self.assertEqual(len(self.project.substances), 0)
 
-  def test_newSampleComponent_ES(self):
-    """
-    Test that creating a new SampleComponent with an empty string raises an error and
-    no component is added.
-    """
-    # with self.assertRaisesRegexp(ApiError, 'Empty string not allowed'):
-    #   self.sample.newSampleComponent('')
-    #
-    with self.assertRaisesRegexp(ValueError, 'SampleComponent name must be set'):
-      self.sample.newSampleComponent('')
-    self.assertEqual(len(self.project.sampleComponents), 0)
-    self.assertEqual(len(self.project.substances), 0)
+    def test_newSampleComponent_ES(self):
+        """
+        Test that creating a new SampleComponent with an empty string raises an error and
+        no component is added.
+        """
+        # with self.assertRaisesRegexp(ApiError, 'Empty string not allowed'):
+        #   self.sample.newSampleComponent('')
+        #
+        with self.assertRaisesRegexp(ValueError, 'SampleComponent name must be set'):
+            self.sample.newSampleComponent('')
+        self.assertEqual(len(self.project.sampleComponents), 0)
+        self.assertEqual(len(self.project.substances), 0)
 
-  def test_newSampleComponent_Badname(self):
-    """
-    Test that creating a new SampleComponent '^Badname' raises an error and
-    no component is added.
-    ^ is a bad character and not to be included in strings.
-    """
-    with self.assertRaisesRegexp(ValueError, 'Character'):
-      self.sample.newSampleComponent('^Badname')
-    self.assertEqual(len(self.project.sampleComponents), 0)
-    self.assertEqual(len(self.project.substances), 0)
+    def test_newSampleComponent_Badname(self):
+        """
+        Test that creating a new SampleComponent '^Badname' raises an error and
+        no component is added.
+        ^ is a bad character and not to be included in strings.
+        """
+        with self.assertRaisesRegexp(ValueError, 'Character'):
+            self.sample.newSampleComponent('^Badname')
+        self.assertEqual(len(self.project.sampleComponents), 0)
+        self.assertEqual(len(self.project.substances), 0)
 
-  def test_newSampleComponent_None(self):
-    """
-    Test that creating a new SampleComponent with None raises an error and
-    no component is added.
-    """
-    # with self.assertRaisesRegexp(ApiError, 'Line input is not of a valid type'):
-    #   self.sample.newSampleComponent(None)
-    #
-    with self.assertRaisesRegexp(TypeError, 'SampleComponent name must be a string'):
-      self.sample.newSampleComponent(None)
-    self.assertEqual(len(self.project.sampleComponents), 0)
-    self.assertEqual(len(self.project.substances), 0)
+    def test_newSampleComponent_None(self):
+        """
+        Test that creating a new SampleComponent with None raises an error and
+        no component is added.
+        """
+        # with self.assertRaisesRegexp(ApiError, 'Line input is not of a valid type'):
+        #   self.sample.newSampleComponent(None)
+        #
+        with self.assertRaisesRegexp(TypeError, 'SampleComponent name must be a string'):
+            self.sample.newSampleComponent(None)
+        self.assertEqual(len(self.project.sampleComponents), 0)
+        self.assertEqual(len(self.project.substances), 0)
 
-  def test_newSampleComponent_Int(self):
-    """
-    Test that creating a new SampleComponent with 42 (non-string) raises an error and
-    no component is added.
-    """
-    # with self.assertRaisesRegexp(TypeError, 'not iterable'):
-    #   self.sample.newSampleComponent(42)
-    #
-    with self.assertRaisesRegexp(TypeError, 'SampleComponent name must be a string'):
-      self.sample.newSampleComponent(42)
-    self.assertEqual(len(self.project.sampleComponents), 0)
-    self.assertEqual(len(self.project.substances), 0)
+    def test_newSampleComponent_Int(self):
+        """
+        Test that creating a new SampleComponent with 42 (non-string) raises an error and
+        no component is added.
+        """
+        # with self.assertRaisesRegexp(TypeError, 'not iterable'):
+        #   self.sample.newSampleComponent(42)
+        #
+        with self.assertRaisesRegexp(TypeError, 'SampleComponent name must be a string'):
+            self.sample.newSampleComponent(42)
+        self.assertEqual(len(self.project.sampleComponents), 0)
+        self.assertEqual(len(self.project.substances), 0)
 
-  #=========================================================================================
-  # test_newSampleComponent_good_name
-  #=========================================================================================
+    #=========================================================================================
+    # test_newSampleComponent_good_name
+    #=========================================================================================
 
-  def test_newSampleComponent_good_name(self):
-    """
-    Test that the new sampleComponent has been created and added to the component list, and the
-    first element in the list is the correct sampleComponent.
-    """
-    self.assertEqual(len(self.project.sampleComponents), 0)
-    self.assertEqual(len(self.project.substances), 0)
+    def test_newSampleComponent_good_name(self):
+        """
+        Test that the new sampleComponent has been created and added to the component list, and the
+        first element in the list is the correct sampleComponent.
+        """
+        self.assertEqual(len(self.project.sampleComponents), 0)
+        self.assertEqual(len(self.project.substances), 0)
 
-    newSC = self.sample.newSampleComponent('Valid SampleComponent')
+        newSC = self.sample.newSampleComponent('Valid SampleComponent')
 
-    self.assertEqual(newSC.pid, 'SC:ValidSample.Valid SampleComponent.')
-    self.assertEqual(len(self.project.sampleComponents), 1)
-    self.assertEqual(len(self.project.substances), 1)
-    self.assertIs(self.project.sampleComponents[0], newSC)
+        self.assertEqual(newSC.pid, 'SC:ValidSample.Valid SampleComponent.')
+        self.assertEqual(len(self.project.sampleComponents), 1)
+        self.assertEqual(len(self.project.substances), 1)
+        self.assertIs(self.project.sampleComponents[0], newSC)
 
 
 #========================================================================================
@@ -137,30 +137,30 @@ class TestSampleComponentCreation(WrapperTesting):
 
 class TestSampleComponentLinks(WrapperTesting):
 
-  #========================================================================================
-  # setUp         Initialise a new Sample for testing cross links
-  #=========================================================================================
+    #========================================================================================
+    # setUp         Initialise a new Sample for testing cross links
+    #=========================================================================================
 
-  def setUp(self):
-    """
-    Create a valid Sample with the name 'ValidSample'
-    This is required to attach the sampleComponents.
-    """
-    with self.initialSetup():
-      self.sample = self.project.newSample('ValidSample')
+    def setUp(self):
+        """
+        Create a valid Sample with the name 'ValidSample'
+        This is required to attach the sampleComponents.
+        """
+        with self.initialSetup():
+            self.sample = self.project.newSample('ValidSample')
 
-  #=========================================================================================
-  # test_crosslinks
-  #=========================================================================================
+    #=========================================================================================
+    # test_crosslinks
+    #=========================================================================================
 
-  def test_crosslinks(self):
-    """
-    Test that the cross-links are created correctly.
-    """
-    chain1 = self.project.createChain(sequence='QWERTYIPASDF', molType='protein',
-                                      compoundName='typewriter')
-    dna = self.project.createPolymerSubstance(sequence='ATTACGCAT', name='attackcat',
-                                              molType='DNA',)
+    def test_crosslinks(self):
+        """
+        Test that the cross-links are created correctly.
+        """
+        chain1 = self.project.createChain(sequence='QWERTYIPASDF', molType='protein',
+                                          compoundName='typewriter')
+        dna = self.project.createPolymerSubstance(sequence='ATTACGCAT', name='attackcat',
+                                                  molType='DNA', )
 
 
 #=========================================================================================
@@ -168,86 +168,86 @@ class TestSampleComponentLinks(WrapperTesting):
 #=========================================================================================
 
 class TestSampleComponent_properties(WrapperTesting):
-  """
-  Test functions that require a valid Sample and attached SampleComponent to be instantiated.
-  """
+    """
+    Test functions that require a valid Sample and attached SampleComponent to be instantiated.
+    """
 
-  #========================================================================================
-  # setUp         Initialise a new Sample and SampleComponent
-  #=========================================================================================
+    #========================================================================================
+    # setUp         Initialise a new Sample and SampleComponent
+    #=========================================================================================
 
-  def setUp(self):
-    """
-    Create a valid Sample with the name 'ValidSample' and a
-    SampleComponent with the name 'ValidSampleComponent'.
-    """
-    with self.initialSetup():
-      self.sample = self.project.newSample('ValidSample')
-      self.newSampleComponent = self.sample.newSampleComponent(name='ValidSampleComponent')
+    def setUp(self):
+        """
+        Create a valid Sample with the name 'ValidSample' and a
+        SampleComponent with the name 'ValidSampleComponent'.
+        """
+        with self.initialSetup():
+            self.sample = self.project.newSample('ValidSample')
+            self.newSampleComponent = self.sample.newSampleComponent(name='ValidSampleComponent')
 
-  #=========================================================================================
-  # test_properties_SampleComponent
-  #=========================================================================================
+    #=========================================================================================
+    # test_properties_SampleComponent
+    #=========================================================================================
 
-  def test_properties_SampleComponent_labelling(self):
-    """
-    Test that SampleComponent attribute .labelling is populated.
-    Read the attribute, if it not populated then an error is raised.
-    """
-    labelling = self.newSampleComponent.labelling
+    def test_properties_SampleComponent_labelling(self):
+        """
+        Test that SampleComponent attribute .labelling is populated.
+        Read the attribute, if it not populated then an error is raised.
+        """
+        labelling = self.newSampleComponent.labelling
 
-  def test_properties_SampleComponent_role(self):
-    """
-    Test that SampleComponent attribute .role is populated.
-    Read the attribute, if it not populated then an error is raised.
-    If no error, then test the setter by setting and then getting to check consistent.
-    Similarly for all set/get properties.
-    """
-    checkGetSetAttr(self, self.newSampleComponent, 'role', 'solvent')
+    def test_properties_SampleComponent_role(self):
+        """
+        Test that SampleComponent attribute .role is populated.
+        Read the attribute, if it not populated then an error is raised.
+        If no error, then test the setter by setting and then getting to check consistent.
+        Similarly for all set/get properties.
+        """
+        checkGetSetAttr(self, self.newSampleComponent, 'role', 'solvent')
 
-  def test_properties_SampleComponent_concentration(self):
-    """
-    Test that SampleComponent attribute .concentration is populated.
-    """
-    checkGetSetAttr(self, self.newSampleComponent, 'concentration', 0.5)
+    def test_properties_SampleComponent_concentration(self):
+        """
+        Test that SampleComponent attribute .concentration is populated.
+        """
+        checkGetSetAttr(self, self.newSampleComponent, 'concentration', 0.5)
 
-  def test_properties_SampleComponent_concentrationError(self):
-    """
-    Test that SampleComponent attribute .concentrationError is populated.
-    """
-    checkGetSetAttr(self, self.newSampleComponent, 'concentrationError', 0.5)
+    def test_properties_SampleComponent_concentrationError(self):
+        """
+        Test that SampleComponent attribute .concentrationError is populated.
+        """
+        checkGetSetAttr(self, self.newSampleComponent, 'concentrationError', 0.5)
 
-  def test_properties_SampleComponent_concentrationUnit(self):
-    """
-    Test that SampleComponent attribute .concentrationUnit is populated.
-    """
-    checkGetSetAttr(self, self.newSampleComponent, 'concentrationUnit', 'mole')
+    def test_properties_SampleComponent_concentrationUnit(self):
+        """
+        Test that SampleComponent attribute .concentrationUnit is populated.
+        """
+        checkGetSetAttr(self, self.newSampleComponent, 'concentrationUnit', 'mole')
 
-  def test_properties_SampleComponent_purity(self):
-    """
-    Test that SampleComponent attribute .purity is populated.
-    """
-    checkGetSetAttr(self, self.newSampleComponent, 'purity', 0.5)
+    def test_properties_SampleComponent_purity(self):
+        """
+        Test that SampleComponent attribute .purity is populated.
+        """
+        checkGetSetAttr(self, self.newSampleComponent, 'purity', 0.5)
 
-  def test_properties_SampleComponent_comment(self):
-    """
-    Test that SampleComponent attribute .comment is populated.
-    """
-    checkGetSetAttr(self, self.newSampleComponent, 'comment', 'Comment')
+    def test_properties_SampleComponent_comment(self):
+        """
+        Test that SampleComponent attribute .comment is populated.
+        """
+        checkGetSetAttr(self, self.newSampleComponent, 'comment', 'Comment')
 
-  def test_properties_SampleComponent_spectrumHits(self):
-    """
-    Test that SampleComponent attribute .spectrumHits is populated.
-    """
-    spectrumHits = self.newSampleComponent.spectrumHits
+    def test_properties_SampleComponent_spectrumHits(self):
+        """
+        Test that SampleComponent attribute .spectrumHits is populated.
+        """
+        spectrumHits = self.newSampleComponent.spectrumHits
 
-  #=========================================================================================
-  # test_properties_SampleComponent   expectedFailure
-  #=========================================================================================
+    #=========================================================================================
+    # test_properties_SampleComponent   expectedFailure
+    #=========================================================================================
 
-  # @expectedFailure
-  def test_properties_SampleComponent_isotopeCode2Fraction(self):
-    """
-    Test that SampleComponent attribute .isotopeCode2Fraction is populated.
-    """
-    isotopeCode2Fraction = self.newSampleComponent.isotopeCode2Fraction
+    # @expectedFailure
+    def test_properties_SampleComponent_isotopeCode2Fraction(self):
+        """
+        Test that SampleComponent attribute .isotopeCode2Fraction is populated.
+        """
+        isotopeCode2Fraction = self.newSampleComponent.isotopeCode2Fraction

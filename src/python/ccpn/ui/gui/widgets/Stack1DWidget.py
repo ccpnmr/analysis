@@ -69,6 +69,7 @@ class Offset1DWidget(Frame):
     def setValue(self, value):
         self.boxOffset.set(value)
 
+
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.popups.Dialog import CcpnDialog

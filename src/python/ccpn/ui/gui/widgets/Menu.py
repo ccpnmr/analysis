@@ -34,7 +34,6 @@ from ccpn.framework.Translation import translator
 
 class Menu(QtWidgets.QMenu, Base):
     def __init__(self, title, parent, isFloatWidget=False, **kwds):
-
         super().__init__(parent)
         Base._init(self, isFloatWidget=isFloatWidget, **kwds)
 

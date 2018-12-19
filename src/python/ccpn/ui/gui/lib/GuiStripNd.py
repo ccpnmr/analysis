@@ -153,10 +153,10 @@ class GuiStripNd(GuiStrip):
         self._integralMenu = _getNdIntegralMenu(self)
         self._multipletMenu = _getNdMultipletMenu(self)
 
-        self._contextMenus.update({DefaultMenu: self._defaultMenu,
-                                   PhasingMenu: self._phasingMenu,
-                                   PeakMenu: self._peakMenu,
-                                   IntegralMenu: self._integralMenu,
+        self._contextMenus.update({DefaultMenu  : self._defaultMenu,
+                                   PhasingMenu  : self._phasingMenu,
+                                   PeakMenu     : self._peakMenu,
+                                   IntegralMenu : self._integralMenu,
                                    MultipletMenu: self._multipletMenu})
 
         # self.viewBox.invertX()
@@ -797,7 +797,7 @@ class GuiStripNd(GuiStrip):
         sdWid = self.spectrumDisplay.mainWidget
         self.widgetIndex += 1
         self.calibrateXNDWidgets = CalibrateXNDWidgets(sdWid, mainWindow=self.mainWindow, strip=self,
-                                                       grid=(self.widgetIndex, 0), gridSpan=(1,7))
+                                                       grid=(self.widgetIndex, 0), gridSpan=(1, 7))
 
     def toggleCalibrateX(self):
         if self.calibrateXAction.isChecked():
@@ -819,7 +819,7 @@ class GuiStripNd(GuiStrip):
         sdWid = self.spectrumDisplay.mainWidget
         self.widgetIndex += 1
         self.calibrateYNDWidgets = CalibrateYNDWidgets(sdWid, mainWindow=self.mainWindow, strip=self,
-                                                       grid=(self.widgetIndex, 0), gridSpan=(1,7))
+                                                       grid=(self.widgetIndex, 0), gridSpan=(1, 7))
 
     def toggleCalibrateY(self):
         if self.calibrateYAction.isChecked():

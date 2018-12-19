@@ -312,23 +312,23 @@ class SubstancePropertiesPopup(CcpnDialog):
 
     def _getCallBacksDict(self):
         return {
-            self._renameLabelSubstance: str(self.nameSubstance.text()),  # ejb - swap for the next two
+            self._renameLabelSubstance     : str(self.nameSubstance.text()),  # ejb - swap for the next two
             # self._changeNameSubstance: str(self.nameSubstance.text()),
             # self._labellingChanged:str(self.labelling.text()),
-            self._chemicalNameChanged: [name.strip() for name in self.chemicalName.text().split(SEP.strip()) if name.strip()],
-            self._smilesChanged: str(self.smilesLineEdit.text()),
-            self._empiricalFormulaChanged: str(self.empiricalFormula.text()),
-            self._molecularMassChanged: self.molecularMass.text(),
-            self._referenceSpectraChanged: self.referenceSpectra.getObject(),
-            self._userCodeChanged: str(self.userCode.text()),
-            self._casNumberChanged: str(self.casNumber.text()),
-            self._atomCountChanged: self.atomCount.text(),
-            self._ringCountChanged: self.ringCount.text(),
-            self._hBondDonorCountChanged: self.hBondDonorCount.text(),
+            self._chemicalNameChanged      : [name.strip() for name in self.chemicalName.text().split(SEP.strip()) if name.strip()],
+            self._smilesChanged            : str(self.smilesLineEdit.text()),
+            self._empiricalFormulaChanged  : str(self.empiricalFormula.text()),
+            self._molecularMassChanged     : self.molecularMass.text(),
+            self._referenceSpectraChanged  : self.referenceSpectra.getObject(),
+            self._userCodeChanged          : str(self.userCode.text()),
+            self._casNumberChanged         : str(self.casNumber.text()),
+            self._atomCountChanged         : self.atomCount.text(),
+            self._ringCountChanged         : self.ringCount.text(),
+            self._hBondDonorCountChanged   : self.hBondDonorCount.text(),
             self._hBondAcceptorCountChanged: self.hBondAcceptorCount.text(),
-            self._polarSurfaceAreaChanged: self.polarSurfaceArea.text(),
-            self._logPChanged: self.logP.text(),
-            self._commentChanged: str(self.comment.text()),
+            self._polarSurfaceAreaChanged  : self.polarSurfaceArea.text(),
+            self._logPChanged              : self.logP.text(),
+            self._commentChanged           : str(self.comment.text()),
 
             }
 
@@ -577,7 +577,7 @@ class SubstancePropertiesPopup(CcpnDialog):
 
         with undoBlockManager():
             try:
-                    # dependent on whether the popup is called as createNew or editExisting
+                # dependent on whether the popup is called as createNew or editExisting
                 if self.createNewSubstance:
                     self._createNewSubstance()
 

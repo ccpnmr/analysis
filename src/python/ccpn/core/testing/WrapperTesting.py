@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -39,21 +39,21 @@ from ccpnmodel.ccpncore.testing.CoreTesting import TEST_PROJECTS_PATH
 #=========================================================================================
 
 def checkGetSetAttr(cls, obj, attrib, value, *funcOut):
-  """
-  Test that the object has a populated attribute.
-  Read the attribute using getattr(), if it not populated then an error is raised.
-  If populated, then test the setter/getter are consistent.
+    """
+    Test that the object has a populated attribute.
+    Read the attribute using getattr(), if it not populated then an error is raised.
+    If populated, then test the setter/getter are consistent.
 
-  :param obj:
-  :param attrib:
-  :param value:
-  """
-  thisParam = getattr(obj, attrib)
-  setattr(obj, attrib, value)
-  if not funcOut:
-    cls.assertEqual(getattr(obj, attrib), value)
-  else:
-    cls.assertEqual(getattr(obj, attrib), funcOut[0])
+    :param obj:
+    :param attrib:
+    :param value:
+    """
+    thisParam = getattr(obj, attrib)
+    setattr(obj, attrib, value)
+    if not funcOut:
+        cls.assertEqual(getattr(obj, attrib), value)
+    else:
+        cls.assertEqual(getattr(obj, attrib), funcOut[0])
 
 
 #=========================================================================================
@@ -61,56 +61,56 @@ def checkGetSetAttr(cls, obj, attrib, value, *funcOut):
 #=========================================================================================
 
 class WrapperTesting(unittest.TestCase):
-  """Base class for all testing of wrapper code that requires projects."""
+    """Base class for all testing of wrapper code that requires projects."""
 
-  # Path for project to load - can be overridden in subclasses
-  projectPath = None
+    # Path for project to load - can be overridden in subclasses
+    projectPath = None
 
-  @contextlib.contextmanager
-  def initialSetup(self):
-    # if self.projectPath is None:
-    #   self.project = core.newProject('default')
-    # else:
-    #   self.project = core.loadProject(os.path.join(TEST_PROJECTS_PATH, self.projectPath))
+    @contextlib.contextmanager
+    def initialSetup(self):
+        # if self.projectPath is None:
+        #   self.project = core.newProject('default')
+        # else:
+        #   self.project = core.loadProject(os.path.join(TEST_PROJECTS_PATH, self.projectPath))
 
-    projectPath = self.projectPath
-    if projectPath is not None:
-      projectPath = os.path.join(TEST_PROJECTS_PATH, projectPath)
-    self.framework = Framework.createFramework(projectPath=projectPath)
-    self.project = self.framework.project
-    if self.project is None:
-      self.tearDown()
-      raise RuntimeError("No project found for project path %s" % projectPath)
+        projectPath = self.projectPath
+        if projectPath is not None:
+            projectPath = os.path.join(TEST_PROJECTS_PATH, projectPath)
+        self.framework = Framework.createFramework(projectPath=projectPath)
+        self.project = self.framework.project
+        if self.project is None:
+            self.tearDown()
+            raise RuntimeError("No project found for project path %s" % projectPath)
 
-    self.project._resetUndo(debug=True, application=self.framework)
-    self.undo = self.project._undo
-    self.undo.debug = True
-    try:
-      yield
-    except:
-      self.tearDown()
-      raise
+        self.project._resetUndo(debug=True, application=self.framework)
+        self.undo = self.project._undo
+        self.undo.debug = True
+        try:
+            yield
+        except:
+            self.tearDown()
+            raise
 
-  def setUp(self):
-    with self.initialSetup():
-      pass
+    def setUp(self):
+        with self.initialSetup():
+            pass
 
-  def tearDown(self):
-    if self.framework:
-      self.framework._closeProject()
-    self.framework = self.project = self.undo = None
+    def tearDown(self):
+        if self.framework:
+            self.framework._closeProject()
+        self.framework = self.project = self.undo = None
 
-  def loadData(self, dataPath):
-    """load data relative to TEST_PROJECTS_PATH (unless dataPath is absolute"""
-    if not os.path.isabs(dataPath):
-      dataPath = os.path.join(TEST_PROJECTS_PATH, dataPath)
-    dataList = self.project.loadData(dataPath)
-    #
-    return dataList
+    def loadData(self, dataPath):
+        """load data relative to TEST_PROJECTS_PATH (unless dataPath is absolute"""
+        if not os.path.isabs(dataPath):
+            dataPath = os.path.join(TEST_PROJECTS_PATH, dataPath)
+        dataList = self.project.loadData(dataPath)
+        #
+        return dataList
 
-  def raiseDelayedError(self, *args, **kwargs):
-    """Debugging tool. To raise an error the """
-    if hasattr(self, 'delayedError') and self.delayedError:
-      self.delayedError -= 1
-    else:
-      raise Exception('Deliberate delayed error!!')
+    def raiseDelayedError(self, *args, **kwargs):
+        """Debugging tool. To raise an error the """
+        if hasattr(self, 'delayedError') and self.delayedError:
+            self.delayedError -= 1
+        else:
+            raise Exception('Deliberate delayed error!!')

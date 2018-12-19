@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification
@@ -34,7 +34,8 @@ from ccpn.framework.PathsAndUrls import ccpnUrl
 from ccpn.ui.gui.widgets.BasePopup import BasePopup
 from ccpn.ui.gui.widgets.Base import Base
 
-# # # #  T D  # # # # 
+
+# # # #  T D  # # # #
 # Back
 # Forward
 # Reload
@@ -45,35 +46,35 @@ from ccpn.ui.gui.widgets.Base import Base
 
 class WebViewPanel(QtWebEngineWidgets.QWebEngineView, Base):
 
-  def __init__(self, parent, **kwds):
-    super().__init__(parent=parent)
-    Base._init(self, **kwds)
-    
+    def __init__(self, parent, **kwds):
+        super().__init__(parent=parent)
+        Base._init(self, **kwds)
+
+
 class WebViewPopup(BasePopup):
 
-  def __init__(self, parent=None, url=None, **kwds):
-  
-    BasePopup.__init__(self, parent=parent, title='Web View', **kwds)
+    def __init__(self, parent=None, url=None, **kwds):
+        BasePopup.__init__(self, parent=parent, title='Web View', **kwds)
 
-    self.webViewPanel = WebViewPanel(self)
-    
-    if url:
-      self.setUrl(url)
-   
-  def setUrl(self, urlText):
-  
-    qUrl = QtCore.QUrl(urlText)
-    self.webViewPanel.setUrl(qUrl)
+        self.webViewPanel = WebViewPanel(self)
+
+        if url:
+            self.setUrl(url)
+
+    def setUrl(self, urlText):
+        qUrl = QtCore.QUrl(urlText)
+        self.webViewPanel.setUrl(qUrl)
+
 
 if __name__ == '__main__':
-  
-  from ccpn.ui.gui.widgets.Application import TestApplication
-  
-  app = TestApplication()
+    from ccpn.ui.gui.widgets.Application import TestApplication
 
-  popup = WebViewPopup(url=ccpnUrl)
-  
-  popup.show()
-  popup.raise_()
 
-  app.start()
+    app = TestApplication()
+
+    popup = WebViewPopup(url=ccpnUrl)
+
+    popup.show()
+    popup.raise_()
+
+    app.start()

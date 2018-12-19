@@ -39,9 +39,11 @@ from urllib.request import urlopen
 
 from datetime import datetime
 
+
 ccpn2Url = 'http://www.ccpn.ac.uk'
 
 from ccpn.util import Path
+
 
 SERVER = ccpn2Url + '/'
 SERVER_DB_ROOT = 'ccpNmrUpdate'
@@ -101,7 +103,6 @@ def isBinaryFile(fileName):
     """
     if os.path.isfile(fileName):
         with open(fileName, 'rb') as fileObj:
-
             # read the first 1024 bytes of the file
             firstData = fileObj.read(1024)
 
@@ -111,11 +112,11 @@ def isBinaryFile(fileName):
 
             return isBinary
 
+
 def isBinaryData(data):
     """Check whether the byte-string is binary
     """
     if data:
-
         # check the first 1024 bytes of the file
         firstData = data[0:max(1024, len(data))]
         firstData = bytearray(firstData, encoding='utf-8')
@@ -126,8 +127,10 @@ def isBinaryData(data):
 
         return isBinary
 
+
 def downloadFile(serverScript, serverDbRoot, fileName):
     import ssl
+
     context = ssl._create_unverified_context()
 
     fileName = os.path.join(serverDbRoot, fileName)
@@ -136,7 +139,7 @@ def downloadFile(serverScript, serverDbRoot, fileName):
     try:
         response = urlopen(addr, context=context)
 
-        data = response.read()                  # just split for testing
+        data = response.read()  # just split for testing
         data = data.decode('utf-8')
         response.close()
 
@@ -344,12 +347,12 @@ class UpdateAgent(object):
 
         if installErrorCount > 0:
             self.showError('Add file error', '%d file%s not added because not on installation path %s' % (
-            installErrorCount, installErrorCount > 1 and 's' or '', installLocation))
+                installErrorCount, installErrorCount > 1 and 's' or '', installLocation))
 
         if existsErrorCount > 0:
             self.showError('Add file error',
                            '%d file%s not added because already in update list (but now selected for committal)' % (
-                           existsErrorCount, existsErrorCount > 1 and 's' or ''))
+                               existsErrorCount, existsErrorCount > 1 and 's' or ''))
 
     def haveWriteAccess(self):
         """See if can write files to local installation."""
@@ -385,7 +388,7 @@ class UpdateAgent(object):
             if n != len(updateFiles):
                 self.showError('Update problem',
                                '%d update%s installed, %d not installed, see console for error messages' % (
-                               n, ss, len(updateFiles) - n))
+                                   n, ss, len(updateFiles) - n))
             else:
                 self.showInfo('Update%s installed' % ss, '%d update%s installed successfully' % (n, ss))
         else:

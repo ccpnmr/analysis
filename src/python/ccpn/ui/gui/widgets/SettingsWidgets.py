@@ -45,6 +45,7 @@ from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO
 
+
 ALL = '<all>'
 
 STRIPPLOT_PEAKS = 'peaks'
@@ -130,8 +131,8 @@ class SpectrumDisplaySettings(Widget):
     def getValues(self):
         """Return a dict containing the current settings
         """
-        return {AXISXUNITS: self.xAxisUnitsButtons.getIndex(),
-                AXISYUNITS: self.yAxisUnitsButtons.getIndex(),
+        return {AXISXUNITS         : self.xAxisUnitsButtons.getIndex(),
+                AXISYUNITS         : self.yAxisUnitsButtons.getIndex(),
                 AXISLOCKASPECTRATIO: self.lockAspectCheckBox.isChecked()}
 
     @pyqtSlot()

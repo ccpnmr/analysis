@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -30,59 +30,61 @@ from ccpn.util.PrintFile import PrintFile
 
 class Svg(PrintFile):
 
-  def __enter__(self):
+    def __enter__(self):
 
-    PrintFile.__enter__(self)
-    self.fp.write('<svg width="%s" height="%s">\n' % (self.width, self.height))
+        PrintFile.__enter__(self)
+        self.fp.write('<svg width="%s" height="%s">\n' % (self.width, self.height))
 
-    return self
+        return self
 
-  def __exit__(self, *args):
+    def __exit__(self, *args):
 
-    self.fp.write('</svg>\n')
-    PrintFile.__exit__(self)
+        self.fp.write('</svg>\n')
+        PrintFile.__exit__(self)
 
-  def startRegion(self, xOutputRegion, yOutputRegion, xNumber=0, yNumber=0):
-    
-    self.x0, self.x1 = xOutputRegion
-    self.y0, self.y1 = yOutputRegion
-    self.xNumber = xNumber
-    self.yNumber = yNumber
-    
-    self.fp.write('''<defs>
+    def startRegion(self, xOutputRegion, yOutputRegion, xNumber=0, yNumber=0):
+
+        self.x0, self.x1 = xOutputRegion
+        self.y0, self.y1 = yOutputRegion
+        self.xNumber = xNumber
+        self.yNumber = yNumber
+
+        self.fp.write('''<defs>
   <clipPath id="cpth_{4}_{5}">
   <polyline points="{0},{2} {1},{2} {1},{3} {0},{3} {0},{2}" />
   </clipPath>
 </defs>
 '''.format(self.x0, self.x1, self.y0, self.y1, self.xNumber, self.yNumber))
 
-  def writeLine(self, x1, y1, x2, y2, colour='#000000'):
+    def writeLine(self, x1, y1, x2, y2, colour='#000000'):
 
-    if self.xNumber is not None and self.yNumber is not None:
-      self.fp.write('<line x1="%s" y1="%s" x2="%s" y2="%s" style="fill:none;stroke:%s;stroke-width:1" clip-path="url(#cpth_%d_%d)" />\n' % (x1, y1, x2, y2, colour, self.xNumber, self.yNumber))
-    else:
-      self.fp.write('<line x1="%s" y1="%s" x2="%s" y2="%s" style="fill:none;stroke:%s;stroke-width:1" />\n' % (x1, y1, x2, y2, colour))
+        if self.xNumber is not None and self.yNumber is not None:
+            self.fp.write('<line x1="%s" y1="%s" x2="%s" y2="%s" style="fill:none;stroke:%s;stroke-width:1" clip-path="url(#cpth_%d_%d)" />\n' % (
+            x1, y1, x2, y2, colour, self.xNumber, self.yNumber))
+        else:
+            self.fp.write('<line x1="%s" y1="%s" x2="%s" y2="%s" style="fill:none;stroke:%s;stroke-width:1" />\n' % (x1, y1, x2, y2, colour))
 
-  def writePolyline(self, polyline, colour='#000000'):
+    def writePolyline(self, polyline, colour='#000000'):
 
-    if len(polyline) == 0:
-      return
-    
-    self.fp.write('<polyline points="')
-    for (x, y) in polyline:
-      self.fp.write('%s,%s' % (x, self.height-y))
-      self.fp.write(' ')
-    (x, y) = polyline[0] # close loop
-    self.fp.write('%s,%s' % (x, self.height-y))
-   
-    if self.xNumber is not None and self.yNumber is not None:
-      self.fp.write('" style="fill:none;stroke:%s;stroke-width:0.3" clip-path="url(#cpth_%d_%d)" />\n' % (colour, self.xNumber, self.yNumber))
-    else:
-      self.fp.write('" style="fill:none;stroke:%s;stroke-width:0.3" />\n' % (colour,))
+        if len(polyline) == 0:
+            return
 
-  def writeText(self, text, x, y, colour='#000000', fontsize=10, fontfamily='Lucida Grande'):
-    
-    if self.xNumber is not None and self.yNumber is not None:
-      self.fp.write('<text x="%s" y="%s" fill="%s" font-family="%s" font-size="%s" clip-path="url(#cpth_%d_%d)">%s</text>\n' % (x, y, colour, fontsize, fontfamily, self.xNumber, self.yNumber, text))
-    else:
-      self.fp.write('<text x="%s" y="%s" fill="%s" font-family="%s" font-size="%s">%s</text>\n' % (x, y, colour, fontsize, fontfamily, text))
+        self.fp.write('<polyline points="')
+        for (x, y) in polyline:
+            self.fp.write('%s,%s' % (x, self.height - y))
+            self.fp.write(' ')
+        (x, y) = polyline[0]  # close loop
+        self.fp.write('%s,%s' % (x, self.height - y))
+
+        if self.xNumber is not None and self.yNumber is not None:
+            self.fp.write('" style="fill:none;stroke:%s;stroke-width:0.3" clip-path="url(#cpth_%d_%d)" />\n' % (colour, self.xNumber, self.yNumber))
+        else:
+            self.fp.write('" style="fill:none;stroke:%s;stroke-width:0.3" />\n' % (colour,))
+
+    def writeText(self, text, x, y, colour='#000000', fontsize=10, fontfamily='Lucida Grande'):
+
+        if self.xNumber is not None and self.yNumber is not None:
+            self.fp.write('<text x="%s" y="%s" fill="%s" font-family="%s" font-size="%s" clip-path="url(#cpth_%d_%d)">%s</text>\n' % (
+            x, y, colour, fontsize, fontfamily, self.xNumber, self.yNumber, text))
+        else:
+            self.fp.write('<text x="%s" y="%s" fill="%s" font-family="%s" font-size="%s">%s</text>\n' % (x, y, colour, fontsize, fontfamily, text))

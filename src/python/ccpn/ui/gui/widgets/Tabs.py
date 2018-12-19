@@ -20,7 +20,6 @@ Basic Usage:
   
 """
 
-
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -29,7 +28,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -51,35 +50,35 @@ from ccpn.ui.gui.widgets.Base import Base
 
 
 class Tabs(QtWidgets.QTabWidget, Base):
-  def __init__(self, parent,  **kwds):
-    super().__init__(parent)
-    Base._init(self, **kwds)
+    def __init__(self, parent, **kwds):
+        super().__init__(parent)
+        Base._init(self, **kwds)
 
 
 if __name__ == '__main__':
-  from ccpn.ui.gui.widgets.Application import TestApplication
-  from ccpn.ui.gui.widgets.Frame import Frame
-  from ccpn.ui.gui.widgets.Label import Label
-  from ccpn.ui.gui.popups.Dialog import CcpnDialog
+    from ccpn.ui.gui.widgets.Application import TestApplication
+    from ccpn.ui.gui.widgets.Frame import Frame
+    from ccpn.ui.gui.widgets.Label import Label
+    from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
-  app = TestApplication()
-  popup = CcpnDialog()
 
-  tabWidget = Tabs(popup, grid=(0, 0), gridSpan=(1, 3))
+    app = TestApplication()
+    popup = CcpnDialog()
 
-  tab1Frame = Frame(popup, setLayout=True)
-  for i in range(5):
-    Label(tab1Frame, "Example tab 1", grid=(i, 0))
+    tabWidget = Tabs(popup, grid=(0, 0), gridSpan=(1, 3))
 
-  tabWidget.addTab(tab1Frame, 'Tab1')
+    tab1Frame = Frame(popup, setLayout=True)
+    for i in range(5):
+        Label(tab1Frame, "Example tab 1", grid=(i, 0))
 
-  tab2Frame = Frame(popup, setLayout=True)
-  for i in range(5):
-    Label(tab2Frame, "Example tab 2", grid=(i, 0))
-  tabWidget.addTab(tab2Frame, 'Tab2')
+    tabWidget.addTab(tab1Frame, 'Tab1')
 
-  popup.show()
-  popup.raise_()
+    tab2Frame = Frame(popup, setLayout=True)
+    for i in range(5):
+        Label(tab2Frame, "Example tab 2", grid=(i, 0))
+    tabWidget.addTab(tab2Frame, 'Tab2')
 
-  app.start()
+    popup.show()
+    popup.raise_()
 
+    app.start()

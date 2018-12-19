@@ -182,19 +182,20 @@ class PrintTreeCheckBoxes(ProjectTreeCheckBoxes):
 
     # set the items in the project that can be printed
     checkList = []
-        # SPECTRA,
-        # PeakList._pluralLinkName,
-        # IntegralList._pluralLinkName,
-        # MultipletList._pluralLinkName,
-        # ]
+    # SPECTRA,
+    # PeakList._pluralLinkName,
+    # IntegralList._pluralLinkName,
+    # MultipletList._pluralLinkName,
+    # ]
 
     # all items can be selected
     selectableItems = []
-        # SPECTRA,
-        # PeakList._pluralLinkName,
-        # IntegralList._pluralLinkName,
-        # MultipletList._pluralLinkName,
-        # ]
+
+    # SPECTRA,
+    # PeakList._pluralLinkName,
+    # IntegralList._pluralLinkName,
+    # MultipletList._pluralLinkName,
+    # ]
 
     def __init__(self, parent=None, project=None, maxSize=(250, 300), **kwds):
         super(PrintTreeCheckBoxes, self).__init__(parent=parent, project=project, maxSize=maxSize, **kwds)

@@ -226,6 +226,7 @@ def isClose(a, b, relTolerance=1e-05, absTolerance=1e-08):
     Inspired by numpy.isclose()"""
     return (abs(a - b) <= (absTolerance + relTolerance * abs(b)))
 
+
 def isIterable(obj) -> bool:
     "Returns True if obj is iterable"
     try:
@@ -234,6 +235,7 @@ def isIterable(obj) -> bool:
     except TypeError:
         pass
     return False
+
 
 def getTimeStamp():
     """Get iso-formtted timestamp"""

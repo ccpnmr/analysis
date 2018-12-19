@@ -10,7 +10,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                  "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -118,7 +117,7 @@ class Ui(NotifierBase):
             logger.info(command)
 
     def _execUpdates(self):
-        raise('ERROR: ..to be subclassed by ui types')
+        raise ('ERROR: ..to be subclassed by ui types')
 
     def _checkUpdates(self):
         applicationVersion = __version__.split()[1]  # ejb - read from the header
@@ -155,6 +154,7 @@ class NoUi(Ui):
         # sys.stderr.write('\n### Please register, using another application, or in Gui Mode\n')
 
         from ccpn.framework.PathsAndUrls import licensePath
+
         try:
             self.application.showLicense()
         except:
@@ -227,4 +227,3 @@ class TestUi(NoUi):
         logger = getLogger()
         for command in commands:
             logger.info(command)
-

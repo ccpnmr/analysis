@@ -33,7 +33,6 @@ from ccpn.ui.gui.widgets.Base import Base
 class ToolButton(QtWidgets.QToolButton, Base):
 
     def __init__(self, parent=None, **kwds):
-
         super().__init__(parent)
         Base._init(self, **kwds)
 

@@ -100,6 +100,8 @@ import ccpn.util.Phasing as Phasing
 from ccpn.ui.gui.lib.mouseEvents import \
     leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, controlShiftRightMouse, \
     middleMouse, shiftMiddleMouse, rightMouse, shiftRightMouse, controlRightMouse, PICK
+
+
 # from ccpn.core.lib.Notifiers import Notifier
 
 try:
@@ -139,6 +141,7 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
 from ccpn.core.lib.ContextManagers import undoBlockManager
 from ccpn.util.decorators import profile
+
 
 UNITS_PPM = 'ppm'
 UNITS_HZ = 'Hz'
@@ -1209,10 +1212,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
         moveFactor = 5
         moveDict = {
-            QtCore.Qt.Key_Left: (-self.pixelX * moveFactor, 0),
+            QtCore.Qt.Key_Left : (-self.pixelX * moveFactor, 0),
             QtCore.Qt.Key_Right: (self.pixelX * moveFactor, 0),
-            QtCore.Qt.Key_Up: (0, self.pixelX * moveFactor),
-            QtCore.Qt.Key_Down: (0, -self.pixelX * moveFactor)
+            QtCore.Qt.Key_Up   : (0, self.pixelX * moveFactor),
+            QtCore.Qt.Key_Down : (0, -self.pixelX * moveFactor)
             }
 
         if type(event) == QtGui.QKeyEvent:
@@ -1942,9 +1945,9 @@ class CcpnGLWidget(QOpenGLWidget):
             mouseMovedDict = self.current.mouseMovedDict
         except:
             # initialise a new mouse moved dict
-            mouseMovedDict = {'strip': self.strip,
+            mouseMovedDict = {'strip'           : self.strip,
                               AXIS_MATCHATOMTYPE: {},
-                              AXIS_FULLATOMNAME: {}}  #     dict(strip=self.strip)   #strip)
+                              AXIS_FULLATOMNAME : {}}  #     dict(strip=self.strip)   #strip)
 
         xPos = yPos = 0
         for n, axisCode in enumerate(self._axisCodes):
@@ -2266,7 +2269,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # re-enable notifiers
         # self.project.unblankNotification()
-
 
     def enableTexture(self):
         GL.glEnable(GL.GL_BLEND)
@@ -5520,25 +5522,25 @@ class CcpnGLWidget(QOpenGLWidget):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # need to use the class below to make everything more generic
 GLOptions = {
-    'opaque': {
+    'opaque'     : {
         GL.GL_DEPTH_TEST: True,
-        GL.GL_BLEND: False,
+        GL.GL_BLEND     : False,
         GL.GL_ALPHA_TEST: False,
-        GL.GL_CULL_FACE: False,
+        GL.GL_CULL_FACE : False,
         },
     'translucent': {
         GL.GL_DEPTH_TEST: True,
-        GL.GL_BLEND: True,
+        GL.GL_BLEND     : True,
         GL.GL_ALPHA_TEST: False,
-        GL.GL_CULL_FACE: False,
-        'glBlendFunc': (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA),
+        GL.GL_CULL_FACE : False,
+        'glBlendFunc'   : (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA),
         },
-    'additive': {
+    'additive'   : {
         GL.GL_DEPTH_TEST: False,
-        GL.GL_BLEND: True,
+        GL.GL_BLEND     : True,
         GL.GL_ALPHA_TEST: False,
-        GL.GL_CULL_FACE: False,
-        'glBlendFunc': (GL.GL_SRC_ALPHA, GL.GL_ONE),
+        GL.GL_CULL_FACE : False,
+        'glBlendFunc'   : (GL.GL_SRC_ALPHA, GL.GL_ONE),
         },
     }
 

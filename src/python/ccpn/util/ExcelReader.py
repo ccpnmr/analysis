@@ -305,7 +305,6 @@ class ExcelReader(object):
         :obj: obj to link the spectrum to. E.g. Sample or Substance,
         '''
         data = self._project.loadData(filePath)
-        # data = self._project._wrappedData.loadDataSource(filePath, 'Bruker')
         if data is not None:
             if len(data) > 0:
                 self._linkSpectrumToObj(obj, data[0], dct)

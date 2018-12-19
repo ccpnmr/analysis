@@ -96,7 +96,7 @@ class PeakFilterNdPipe(SpectraPipe):
 
     _kwargs = {
         FilterFactor: DefaultFilterFactor,
-        DeletePeaks: DefaultDeletePeaks,
+        DeletePeaks : DefaultDeletePeaks,
         }
 
     def runPipe(self, spectra):

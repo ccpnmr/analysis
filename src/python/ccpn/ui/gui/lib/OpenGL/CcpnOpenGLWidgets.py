@@ -51,15 +51,15 @@ from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_REGIONSHADE, CCPNGLWIDGET_INTEG
 
 
 REGION_COLOURS = {
-    'green': (0, 1.0, 0.1, CCPNGLWIDGET_REGIONSHADE),
-    'yellow': (0.9, 1.0, 0.05, CCPNGLWIDGET_REGIONSHADE),
-    'blue': (0.2, 0.1, 1.0, CCPNGLWIDGET_REGIONSHADE),
+    'green'      : (0, 1.0, 0.1, CCPNGLWIDGET_REGIONSHADE),
+    'yellow'     : (0.9, 1.0, 0.05, CCPNGLWIDGET_REGIONSHADE),
+    'blue'       : (0.2, 0.1, 1.0, CCPNGLWIDGET_REGIONSHADE),
     'transparent': (1.0, 1.0, 1.0, 0.01),
-    'grey': (1.0, 1.0, 1.0, CCPNGLWIDGET_REGIONSHADE),
-    'red': (1.0, 0.1, 0.2, CCPNGLWIDGET_REGIONSHADE),
-    'purple': (0.7, 0.4, 1.0, CCPNGLWIDGET_REGIONSHADE),
-    None: (0.2, 0.1, 1.0, CCPNGLWIDGET_REGIONSHADE),
-    'highlight': (0.5, 0.5, 0.5, CCPNGLWIDGET_REGIONSHADE)
+    'grey'       : (1.0, 1.0, 1.0, CCPNGLWIDGET_REGIONSHADE),
+    'red'        : (1.0, 0.1, 0.2, CCPNGLWIDGET_REGIONSHADE),
+    'purple'     : (0.7, 0.4, 1.0, CCPNGLWIDGET_REGIONSHADE),
+    None         : (0.2, 0.1, 1.0, CCPNGLWIDGET_REGIONSHADE),
+    'highlight'  : (0.5, 0.5, 0.5, CCPNGLWIDGET_REGIONSHADE)
     }
 
 
@@ -311,8 +311,8 @@ class GLInfiniteLine(GLRegion):
 class GLExternalRegion(GLVertexArray):
     def __init__(self, project=None, GLContext=None, spectrumView=None, integralListView=None):
         super().__init__(renderMode=GLRENDERMODE_REBUILD, blendMode=True,
-                                               GLContext=GLContext, drawMode=GL.GL_QUADS,
-                                               dimension=2)
+                         GLContext=GLContext, drawMode=GL.GL_QUADS,
+                         dimension=2)
         self.project = project
         self._regions = []
         self.spectrumView = spectrumView
@@ -557,7 +557,7 @@ class GLExternalRegion(GLVertexArray):
 class GLIntegralRegion(GLExternalRegion):
     def __init__(self, project=None, GLContext=None, spectrumView=None, integralListView=None):
         super().__init__(project=project, GLContext=GLContext,
-                                               spectrumView=spectrumView, integralListView=integralListView)
+                         spectrumView=spectrumView, integralListView=integralListView)
 
     def _addRegion(self, values=None, axisCode=None, orientation=None,
                    brush=None, colour='blue',

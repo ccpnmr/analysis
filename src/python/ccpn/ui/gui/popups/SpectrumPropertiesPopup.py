@@ -55,6 +55,7 @@ from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.core.lib.ContextManagers import logCommandBlock, undoStackBlocking, undoBlockManager
 
+
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
 
 
@@ -717,7 +718,7 @@ class DimensionsTab(Widget):
             row += 1
             # Label(self, text=str(spectrum.isotopeCodes[i]), grid=(row, i + 1), hAlign='l', vAlign='t', )
 
-            self.isotopeCodePullDowns[i] = PulldownList(self, grid=(row, i+1), vAlign='t')
+            self.isotopeCodePullDowns[i] = PulldownList(self, grid=(row, i + 1), vAlign='t')
             isotopeList = [code for code in DEFAULT_ISOTOPE_DICT.values() if code]
             self.isotopeCodePullDowns[i].setData(isotopeList)
             self.isotopeCodePullDowns[i].setMaxVisibleItems(10)
@@ -837,14 +838,14 @@ class DimensionsTab(Widget):
 
     def _queueSetIsotopeCodes(self, valueGetter, dim):
         self._changes['IsotopeCodes{}'.format(dim)] = partial(self._setIsotopeCodes,
-                                                           self.spectrum, dim, valueGetter())
+                                                              self.spectrum, dim, valueGetter())
 
     def _setIsotopeCodes(self, spectrum, dim, value):
         isotopeCodes = list(spectrum.isotopeCodes)
         isotopeCodes[dim] = str(value)
         spectrum.isotopeCodes = isotopeCodes
         showWarning('Change Isotope Code', 'Caution is advised when changing isotope codes\n'
-                                        'It can adversely affect spectrumDisplays and peak/integral/multiplet lists.')
+                                           'It can adversely affect spectrumDisplays and peak/integral/multiplet lists.')
 
         self.pythonConsole.writeConsoleCommand("spectrum.isotopeCodes = {0}".format(isotopeCodes), spectrum=spectrum)
         self._writeLoggingMessage("spectrum.referenceValues = {0}".format(isotopeCodes))
@@ -1155,8 +1156,7 @@ class SpectrumDisplayPropertiesPopupNd(CcpnDialog):
         # self.tabWidget.setMinimumWidth(
         #         max(self.MINIMUM_WIDTH, self.MINIMUM_WIDTH_PER_TAB * len(self.orderedSpectra)))
 
-
-        self.tabWidget = Tabs(self, setLayout=True, grid=(0,0), gridSpan=(2,4))
+        self.tabWidget = Tabs(self, setLayout=True, grid=(0, 0), gridSpan=(2, 4))
 
         self._contoursTab = []
         for specNum, thisSpec in enumerate(self.orderedSpectra):

@@ -10,7 +10,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -33,24 +33,24 @@ nDim = len(current.strip.axisOrder)
 
 # check if we have sufficient dimensions for the swap
 if nDim < 2:
-  print('Too few dimensions for XY flip of peakList')
+    print('Too few dimensions for XY flip of peakList')
 
 else:
-  # create a list with X and Y axes swapped.
+    # create a list with X and Y axes swapped.
 
-  project.suspendNotification()
-  try:
-    for spec in current.strip.spectra:
-      for peak in spec.peaks:
+    project.suspendNotification()
+    try:
+        for spec in current.strip.spectra:
+            for peak in spec.peaks:
 
-        newPosition = [peak.position[1], peak.position[0]]
-    
-        if nDim > 2:
-          newPosition = newPosition.extend(peak.position[2:])
+                newPosition = [peak.position[1], peak.position[0]]
 
-        peak.position = newPosition
-  except:
-    getLogger().warning('Error flipping peak list axes')
+                if nDim > 2:
+                    newPosition = newPosition.extend(peak.position[2:])
 
-  finally:
-    project.resumeNotification()
+                peak.position = newPosition
+    except:
+        getLogger().warning('Error flipping peak list axes')
+
+    finally:
+        project.resumeNotification()

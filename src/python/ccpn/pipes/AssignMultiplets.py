@@ -97,9 +97,9 @@ class FindMultipletsPipe(SpectraPipe):
 
     _kwargs = {
 
-        ExcludeRegions: DefaultExcludeRegions,
-        NoiseThreshold: DefaultNoiseThreshold,
-        NegativePeaks: False,
+        ExcludeRegions  : DefaultExcludeRegions,
+        NoiseThreshold  : DefaultNoiseThreshold,
+        NegativePeaks   : False,
         MinimalLineWidth: DefaultMinimalLineWidth,
         }
 

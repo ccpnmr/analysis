@@ -72,9 +72,9 @@ class DemoPipe2(Pipe):
 
     autoGuiParams = [
         {'variable': ReferenceSpectrum,
-         'value': ('spectrum1', 'spectrum2'),
-         'label': 'Select Spectrum',
-         'default': 'spectrum2'},
+         'value'   : ('spectrum1', 'spectrum2'),
+         'label'   : 'Select Spectrum',
+         'default' : 'spectrum2'},
 
         ]
 

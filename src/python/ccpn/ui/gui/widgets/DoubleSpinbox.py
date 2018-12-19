@@ -10,14 +10,12 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                  "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:52 +0100 (Fri, July 07, 2017) $"
 __version__ = "$Revision: 3.0.b4 $"
-
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -96,7 +94,7 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
             self.setPrefix(prefix + ' ')
 
         if suffix:
-            self.setSuffix(' '+suffix)
+            self.setSuffix(' ' + suffix)
 
         self._callback = None
         self.setCallback(callback)
@@ -131,14 +129,15 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
         self._callback = callback
 
 
-
 # Regular expression to find floats. Match groups are the whole string, the
 # whole coefficient, the decimal part of the coefficient, and the exponent
 # part.
 _float_re = re.compile(r'(([+-]?\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?)')
 
+
 def fexp(f):
     return int(floor(log10(abs(f)))) if f != 0 else 0
+
 
 # def valid_float_string(string):
 #     match = _float_re.search(string)
@@ -161,8 +160,9 @@ def fexp(f):
 class ScientificDoubleSpinBox(DoubleSpinbox):
     """Constructs a spinbox in which the values can be set using Sci notation
     """
+
     def __init__(self, *args, **kwargs):
-        self.validator = QtGui.QDoubleValidator()       #                   FloatValidator()
+        self.validator = QtGui.QDoubleValidator()  #                   FloatValidator()
         self.validator.Notation = 1
         super(ScientificDoubleSpinBox, self).__init__(*args, **kwargs)
         self.setDecimals(1000)
@@ -187,7 +187,7 @@ class ScientificDoubleSpinBox(DoubleSpinbox):
         groups = _float_re.search(text).groups()
         decimal = float(groups[1])
         # decimal += steps
-        decimal += steps * 10**fexp(decimal/10)     #     (decimal / 10)
+        decimal += steps * 10 ** fexp(decimal / 10)  #     (decimal / 10)
         new_string = '{:g}'.format(decimal) + (groups[3] if groups[3] else '')
 
         # the double convert ensures number stays to the closest Sci notation

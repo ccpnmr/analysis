@@ -125,7 +125,7 @@ def notify(trigger, preExecution=False):
         func = args[0]
         args = args[1:]  # Optional 'self' is now args[0]
         self = args[0]
-        project = self.project # we need a reference now, as the func could be deleting the obj
+        project = self.project  # we need a reference now, as the func could be deleting the obj
 
         if preExecution:
             # call the notification
@@ -153,14 +153,12 @@ def propertyUndo():
 
     @decorator.decorator
     def theDecorator(*args, **kwds):
-
         func = args[0]
         args = args[1:]  # Optional 'self' is now args[0]
         self = args[0]
 
         _undo = self.project._undo
         with undoBlock():
-
             # Execute the function while blocking all additions to the call undo stack
             _undo.increaseBlocking()
 
@@ -179,7 +177,6 @@ def propertyUndo():
         return result
 
     return theDecorator
-
 
 
 #----------------------------------------------------------------------------------------------
@@ -397,7 +394,7 @@ if __name__ == '__main__':
         ba = sig.bind(par, *args, flag=flag, **kwds)
         ba.apply_defaults()  # fill in the missing parameters
         kinds = dict([(pName, p.kind) for pName, p in sig.parameters.items()])  # get the parameters kinds that determine
-                                                                                # how to print them
+        # how to print them
 
         pStrings = []
         for pName, pValue in ba.arguments.items():
@@ -406,16 +403,17 @@ if __name__ == '__main__':
                 pStrings.extend([repr(p) for p in pValue])
 
             elif kinds[pName] == inspect.Parameter.VAR_KEYWORD:  # variable keywords
-                pStrings.extend(['{0!s}={1!r}'.format(k, v) for (k,v) in pValue.items()])
+                pStrings.extend(['{0!s}={1!r}'.format(k, v) for (k, v) in pValue.items()])
 
             elif kinds[pName] == inspect.Parameter.POSITIONAL_ONLY or \
-                    kinds[pName] == inspect.Parameter.POSITIONAL_OR_KEYWORD   :  # positional keywords
+                    kinds[pName] == inspect.Parameter.POSITIONAL_OR_KEYWORD:  # positional keywords
                 pStrings.append(repr(pValue))
 
             elif kinds[pName] == inspect.Parameter.KEYWORD_ONLY:  #  keywords
                 pStrings.append('{0!s}={1!r}'.format(pName, pValue))
 
         print(', '.join(pStrings))
+
 
     # logCommand('myPrefix.')
 
@@ -424,4 +422,3 @@ if __name__ == '__main__':
 
 
     func('test', 1, 2, myPar='myValue')
-

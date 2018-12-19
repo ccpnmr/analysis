@@ -283,16 +283,16 @@ class SamplePropertiesPopup(CcpnDialog):
 
     def _getCallBacksDict(self):
         return {
-            self._changeSampleName: self.sampleNameLineEdit.text(),
-            self._sampleAmountUnitChanged: self.sampleAmountUnitRadioButtons.get(),
-            self._sampleAmountChanged: self.sampleAmountLineEdit.text(),
-            self._samplepHchanged: self.samplepHDoubleSpinbox.value(),
+            self._changeSampleName          : self.sampleNameLineEdit.text(),
+            self._sampleAmountUnitChanged   : self.sampleAmountUnitRadioButtons.get(),
+            self._sampleAmountChanged       : self.sampleAmountLineEdit.text(),
+            self._samplepHchanged           : self.samplepHDoubleSpinbox.value(),
             self._sampleIonicStrengthChanged: self.ionicStrengthLineEdit.text(),
-            self._batchIdentifierChanged: self.batchIdentifierLineEdit.text(),
-            self._plateIdentifierChanged: self.plateIdentifierLineEdit.text(),
-            self._rowNumberChanged: self.rowNumberLineEdit.text(),
-            self._columnNumberChanged: self.columnNumberLineEdit.text(),
-            self._commentChanged: self.commentTextEditor.text()
+            self._batchIdentifierChanged    : self.batchIdentifierLineEdit.text(),
+            self._plateIdentifierChanged    : self.plateIdentifierLineEdit.text(),
+            self._rowNumberChanged          : self.rowNumberLineEdit.text(),
+            self._columnNumberChanged       : self.columnNumberLineEdit.text(),
+            self._commentChanged            : self.commentTextEditor.text()
             }
 
     #========================================================================================

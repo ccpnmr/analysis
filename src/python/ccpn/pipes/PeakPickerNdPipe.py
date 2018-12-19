@@ -94,7 +94,7 @@ class PeakPickerNdPipe(SpectraPipe):
     pipeName = PipeName
 
     _kwargs = {
-        DropFactor: DefaultDropFactor,
+        DropFactor   : DefaultDropFactor,
         NegativePeaks: DefaultNegativePeaks,
 
         }

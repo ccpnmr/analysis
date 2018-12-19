@@ -9,8 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -20,12 +19,12 @@ __version__ = "$Revision: 3.0.b4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
 from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 # NBNB These two imports are NECESSARY,
@@ -34,41 +33,40 @@ from ccpn.ui._implementation import Mark
 
 
 class MarkTest(WrapperTesting):
+    # Path of project to load (None for new project)
+    projectPath = 'CcpnCourse1a'
 
-  # Path of project to load (None for new project)
-  projectPath = 'CcpnCourse1a'
+    axisCodes = ('H', 'Hn', 'C', 'C')
+    positions = (4.33, 7.92, 49.65, 17.28)
+    units = ('ppm', 'ppm', 'ppm', 'Hz')
+    labels = ('Proton', 'NHproton', 'carbon', 'carbonhz')
 
-  axisCodes = ('H', 'Hn', 'C', 'C')
-  positions = (4.33, 7.92, 49.65, 17.28)
-  units = ('ppm', 'ppm', 'ppm', 'Hz')
-  labels = ('Proton', 'NHproton', 'carbon', 'carbonhz')
+    def test_create_mark(self):
+        mark1 = self.project.newMark('red', positions=self.positions, axisCodes=self.axisCodes,
+                                     units=self.units, labels=self.labels)
+        assert mark1.positions == self.positions
+        assert mark1.axisCodes == self.axisCodes
+        assert mark1.units == self.units
+        assert mark1.labels == self.labels
 
-  def test_create_mark(self):
-    mark1 = self.project.newMark('red', positions=self.positions, axisCodes=self.axisCodes,
-                               units=self.units, labels=self.labels)
-    assert mark1.positions == self.positions
-    assert mark1.axisCodes == self.axisCodes
-    assert mark1.units == self.units
-    assert mark1.labels == self.labels
+        mark1.delete()
 
-    mark1.delete()
+    # GWV 20181127: not used
+    # def test_extend_mark(self):
+    #   data = (1.27, 'Hc', None, None)
+    #   mark1 = self.project.newMark('red', positions=self.positions, axisCodes=self.axisCodes,
+    #                               units=self.units, labels=self.labels)
+    #   mark1.newLine(*data)
+    #
+    #   ll = list(zip(self.positions, self.axisCodes, self.units, self.labels))
+    #   ll.append((1.27, 'Hc', 'ppm', None))
+    #
+    #   assert mark1.rulerData == tuple(Mark.RulerData(*x) for x in ll)
+    #
+    #   mark1.delete()
 
-  # GWV 20181127: not used
-  # def test_extend_mark(self):
-  #   data = (1.27, 'Hc', None, None)
-  #   mark1 = self.project.newMark('red', positions=self.positions, axisCodes=self.axisCodes,
-  #                               units=self.units, labels=self.labels)
-  #   mark1.newLine(*data)
-  #
-  #   ll = list(zip(self.positions, self.axisCodes, self.units, self.labels))
-  #   ll.append((1.27, 'Hc', 'ppm', None))
-  #
-  #   assert mark1.rulerData == tuple(Mark.RulerData(*x) for x in ll)
-  #
-  #   mark1.delete()
-
-  # GWV 20181127: not used
-  # def test_create_single_mark(self):
-  #   data = (1.27, 'Hc', None, None)
-  #   mark1 = self.project.newSimpleMark('red', data[0], data[1])
-  #   assert  mark1.rulerData == (Mark.RulerData(1.27, 'Hc', 'ppm', None),)
+    # GWV 20181127: not used
+    # def test_create_single_mark(self):
+    #   data = (1.27, 'Hc', None, None)
+    #   mark1 = self.project.newSimpleMark('red', data[0], data[1])
+    #   assert  mark1.rulerData == (Mark.RulerData(1.27, 'Hc', 'ppm', None),)

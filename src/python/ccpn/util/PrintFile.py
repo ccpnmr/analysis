@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -29,38 +29,37 @@ from abc import ABC, abstractmethod
 
 
 class PrintFile(ABC):
-  
-  def __init__(self, path, xCount=1, yCount=1, width=800, height=800):
-    
-    self.path = path
-    self.xCount = xCount
-    self.yCount = yCount
-    self.width = width
-    self.height = height
 
-    self.xNumber = None
-    self.yNumber = None
+    def __init__(self, path, xCount=1, yCount=1, width=800, height=800):
+        self.path = path
+        self.xCount = xCount
+        self.yCount = yCount
+        self.width = width
+        self.height = height
 
-  def __enter__(self):
-    self.fp = open(self.path, 'wt')
+        self.xNumber = None
+        self.yNumber = None
 
-    return self
+    def __enter__(self):
+        self.fp = open(self.path, 'wt')
 
-  def __exit__(self, *args):
-    self.fp.close()
+        return self
 
-  @abstractmethod
-  def startRegion(self, xOutputRegion, yOutputRegion, xNumber=0, yNumber=0):
-    pass
+    def __exit__(self, *args):
+        self.fp.close()
 
-  @abstractmethod
-  def writeLine(self, x1, y1, x2, y2, colour='#000000'):
-    pass
+    @abstractmethod
+    def startRegion(self, xOutputRegion, yOutputRegion, xNumber=0, yNumber=0):
+        pass
 
-  @abstractmethod
-  def writePolyline(self, polyline, colour='#000000'):
-    pass
+    @abstractmethod
+    def writeLine(self, x1, y1, x2, y2, colour='#000000'):
+        pass
 
-  @abstractmethod
-  def writeText(self, text, x, y, colour='#000000', fontsize=10, fontfamily='Verdana'):
-    pass
+    @abstractmethod
+    def writePolyline(self, polyline, colour='#000000'):
+        pass
+
+    @abstractmethod
+    def writeText(self, text, x, y, colour='#000000', fontsize=10, fontfamily='Verdana'):
+        pass

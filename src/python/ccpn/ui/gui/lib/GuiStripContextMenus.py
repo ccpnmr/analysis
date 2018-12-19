@@ -39,8 +39,8 @@ ITEM = 'Item'
 SEPARATOR = 'Separator'
 
 ItemTypes = {
-    MENU: Menu.addMenu.__name__,
-    ITEM: Menu.addItem.__name__,
+    MENU     : Menu.addMenu.__name__,
+    ITEM     : Menu.addItem.__name__,
     SEPARATOR: Menu._addSeparator.__name__
     }
 
@@ -54,7 +54,7 @@ class _SCMitem(object):
         :param kwargs: needed  any of _kwrgs: name, icon, tooltip, shortcut, checkable, checked, callback, stripMethodName
         or any other accepted by Base or Action widgets
         '''
-        self._kwrgs = {'name': '', 'icon': None, 'tooltip': '', 'shortcut': None, 'checkable': False,
+        self._kwrgs = {'name'   : '', 'icon': None, 'tooltip': '', 'shortcut': None, 'checkable': False,
                        'checked': False, 'callback': None, 'stripMethodName': '', 'obj': self}
         self._kwrgs.update(kwargs)
         for k, v in self._kwrgs.items():
@@ -365,6 +365,7 @@ def _stackSpectraDefaultItem(strip):
                     typeItem=ItemTypes.get(ITEM), toolTip='Stack Spectra',
                     checkable=True, checked=strip._CcpnGLWidget._stackingMode,
                     callback=strip.toggleStack, stripMethodName='stackAction')
+
 
 def _stackSpectraPhaseItem(strip):
     return _SCMitem(name='Stack Spectra',

@@ -1,17 +1,3 @@
-
-
-from ccpn.util.testing.SubclassLoaderTestSuperclass import Superclass
-
-
-class A(Superclass):
-  pass
-
-class B(Superclass):
-  pass
-
-class C:
-  pass
-
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -20,7 +6,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -35,3 +21,18 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
+
+from ccpn.util.testing.SubclassLoaderTestSuperclass import Superclass
+
+
+class A(Superclass):
+    pass
+
+
+class B(Superclass):
+    pass
+
+
+class C:
+    pass

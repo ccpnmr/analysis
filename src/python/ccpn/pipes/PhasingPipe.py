@@ -130,10 +130,10 @@ class Phasing1DPipe(SpectraPipe):
     pipeName = PipeName
 
     _kwargs = {
-        Ph0: DefaultPh0,
-        Ph1: DefaultPh0,
+        Ph0  : DefaultPh0,
+        Ph1  : DefaultPh0,
         Pivot: DefaultPivot,
-        Auto: DefaultAutoValue
+        Auto : DefaultAutoValue
         }
 
     def runPipe(self, spectra):

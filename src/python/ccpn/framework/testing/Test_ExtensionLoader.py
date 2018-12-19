@@ -6,7 +6,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -28,6 +28,7 @@ import os
 from ccpn.framework.lib.ExtensionLoader import getPlugins
 from ccpn.util.Path import getPythonDirectory
 
+
 # class TestExtensionLoader(unittest.TestCase):
 #
 #   def setUp(self):
@@ -43,8 +44,8 @@ from ccpn.util.Path import getPythonDirectory
 
 class TestPluginLoader(unittest.TestCase):
 
-  def test(self):
-    Plugins = getPlugins()
-    for Plugin in Plugins:
-      plugin = Plugin()
-      plugin.run()
+    def test(self):
+        Plugins = getPlugins()
+        for Plugin in Plugins:
+            plugin = Plugin()
+            plugin.run()

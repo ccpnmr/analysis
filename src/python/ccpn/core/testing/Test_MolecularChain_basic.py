@@ -6,7 +6,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -27,18 +27,17 @@ from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 class TestPhysicalChainCreation(WrapperTesting):
 
-  def test_createPhysicalChain(self):
-    c = self.project.createChain('acd', molType='protein')
+    def test_createPhysicalChain(self):
+        c = self.project.createChain('acd', molType='protein')
 
-    self.assertEqual(len(self.project.chains), 1)
-    self.assertIs(self.project.chains[0], c)
-    self.assertEqual(c.pid, 'MC:A')
+        self.assertEqual(len(self.project.chains), 1)
+        self.assertIs(self.project.chains[0], c)
+        self.assertEqual(c.pid, 'MC:A')
 
+    def test_createPhysicalChainFromPolymerSubstance(self):
+        s = self.project.createPolymerSubstance('acd', name='test', molType='protein')
+        c = s.createChain()
 
-  def test_createPhysicalChainFromPolymerSubstance(self):
-    s = self.project.createPolymerSubstance('acd', name='test', molType='protein')
-    c = s.createChain()
-
-    self.assertIs(self.project.chains[0], c)
-    self.assertEqual(c.pid, 'MC:A')
-    self.assertIs(c.substances[0], s)
+        self.assertIs(self.project.chains[0], c)
+        self.assertEqual(c.pid, 'MC:A')
+        self.assertIs(c.substances[0], s)

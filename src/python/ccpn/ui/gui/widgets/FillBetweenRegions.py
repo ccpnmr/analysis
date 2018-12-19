@@ -6,7 +6,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -29,11 +29,9 @@ from pyqtgraph.graphicsItems.FillBetweenItem import FillBetweenItem
 
 
 class FillBetweenRegions(FillBetweenItem):
-  """
-  GraphicsItem filling the space between two PlotDataItems.
-  """
-  def __init__(self, curve1, curve2, brush = None, **kwds):
+    """
+    GraphicsItem filling the space between two PlotDataItems.
+    """
 
-    super().__init__(curve1=curve1, curve2=curve2, brush=brush, **kwds)
-
-
+    def __init__(self, curve1, curve2, brush=None, **kwds):
+        super().__init__(curve1=curve1, curve2=curve2, brush=brush, **kwds)

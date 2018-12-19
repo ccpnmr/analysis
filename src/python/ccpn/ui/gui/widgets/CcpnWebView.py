@@ -6,7 +6,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -29,32 +29,31 @@ from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 
 
 class CcpnWebView(CcpnModule):
+    className = 'CcpnWebView'
 
-  className = 'CcpnWebView'
+    IGNORE_SHORTCUTS = False
 
-  IGNORE_SHORTCUTS = False
+    def __init__(self, mainWindow=None, name='CcpNmr V3 Documentation', urlPath=None):
+        """
+        Initialise the Module widgets
+        """
+        super().__init__(mainWindow=mainWindow, name=name)
 
-  def __init__(self, mainWindow=None, name='CcpNmr V3 Documentation', urlPath=None):
-    """
-    Initialise the Module widgets
-    """
-    super().__init__(mainWindow=mainWindow, name=name)
+        self.webView = QWebEngineView()
+        self.addWidget(self.webView, 0, 0, 1, 1)  # make it the first item
 
-    self.webView = QWebEngineView()
-    self.addWidget(self.webView, 0, 0, 1, 1)  # make it the first item
+        urlPath = 'file://' + urlPath  # webEngine needs to prefix
+        self.webView.load(QUrl(urlPath))
+        self.webView.show()
 
-    urlPath = 'file://'+urlPath               # webEngine needs to prefix
-    self.webView.load(QUrl(urlPath))
-    self.webView.show()
+    # def _closeModule(self):
+    #   """
+    #   CCPN-INTERNAL: used to close the module
+    #   """
+    #   super(CcpnWebView, self)._closeModule()
 
-  # def _closeModule(self):
-  #   """
-  #   CCPN-INTERNAL: used to close the module
-  #   """
-  #   super(CcpnWebView, self)._closeModule()
-
-  def close(self):
-    """
-    Close the table from the commandline
-    """
-    self._closeModule()
+    def close(self):
+        """
+        Close the table from the commandline
+        """
+        self._closeModule()

@@ -211,7 +211,7 @@ class ExportStripToFilePopup(ExportDialog):
         Label(foregroundColourFrame, text="Foreground Colour", vAlign='c', hAlign='l', grid=(0, 0))
         self.foregroundColourBox = PulldownList(foregroundColourFrame, vAlign='t', grid=(0, 1))
         self.foregroundColourButton = Button(foregroundColourFrame, vAlign='t', hAlign='l', grid=(0, 2), hPolicy='fixed',
-                                   callback=self._changeForegroundButton, icon='icons/colours')
+                                             callback=self._changeForegroundButton, icon='icons/colours')
 
         # populate initial pulldown from background colour
         spectrumColourKeys = list(spectrumColours.keys())
@@ -237,7 +237,7 @@ class ExportStripToFilePopup(ExportDialog):
         Label(backgroundColourFrame, text="Background Colour", vAlign='c', hAlign='l', grid=(0, 0))
         self.backgroundColourBox = PulldownList(backgroundColourFrame, vAlign='t', grid=(0, 1))
         self.backgroundColourButton = Button(backgroundColourFrame, vAlign='t', hAlign='l', grid=(0, 2), hPolicy='fixed',
-                                   callback=self._changeBackgroundButton, icon='icons/colours')
+                                             callback=self._changeBackgroundButton, icon='icons/colours')
 
         # populate initial pulldown from background colour
         spectrumColourKeys = list(spectrumColours.keys())
@@ -289,7 +289,7 @@ class ExportStripToFilePopup(ExportDialog):
             exportExtension = EXPORTSVGEXTENSION
 
         currentPath = os.path.expanduser(self.project.path)
-        self.updateFilename(os.path.join(currentPath, self.objectPulldown.getText()+exportExtension))
+        self.updateFilename(os.path.join(currentPath, self.objectPulldown.getText() + exportExtension))
 
         self.setMinimumSize(self.sizeHint())
 
@@ -336,12 +336,12 @@ class ExportStripToFilePopup(ExportDialog):
             self.spectrumDisplay = self.objects[selected][0]
             self.strip = self.spectrumDisplay.strips[0]
 
-            self.updateFilename(self.spectrumDisplay.id+exportExtension)
+            self.updateFilename(self.spectrumDisplay.id + exportExtension)
         else:
             self.spectrumDisplay = None
             self.strip = self.objects[selected][0]
 
-            self.updateFilename(self.strip.id+exportExtension)
+            self.updateFilename(self.strip.id + exportExtension)
 
         selectedList = self.treeView.getItems()
         self._populateTreeView(selectedList)
@@ -480,11 +480,11 @@ class ExportStripToFilePopup(ExportDialog):
                           )
 
         if selectList is None:
-            selectList = {GLSPECTRUMBORDERS: QtCore.Qt.Checked if self.application.preferences.general.showSpectrumBorder else QtCore.Qt.Unchecked,
-                          GLSPECTRUMCONTOURS: QtCore.Qt.Checked,
-                          GLGRIDLINES: QtCore.Qt.Checked if self.strip.gridVisible else QtCore.Qt.Unchecked,
+            selectList = {GLSPECTRUMBORDERS   : QtCore.Qt.Checked if self.application.preferences.general.showSpectrumBorder else QtCore.Qt.Unchecked,
+                          GLSPECTRUMCONTOURS  : QtCore.Qt.Checked,
+                          GLGRIDLINES         : QtCore.Qt.Checked if self.strip.gridVisible else QtCore.Qt.Unchecked,
                           GLSHOWSPECTRAONPHASE: QtCore.Qt.Checked if self.strip._CcpnGLWidget._showSpectraOnPhasing else QtCore.Qt.Unchecked
-            }
+                          }
         self.printList = []
 
         # add Print Options to the treeView
@@ -507,12 +507,12 @@ class ExportStripToFilePopup(ExportDialog):
         if selected == EXPORTPDF:
             self._dialogFilter = EXPORTPDFFILTER
             self.updateDialog()
-            self.updateFilename(lastPath+EXPORTPDFEXTENSION)
+            self.updateFilename(lastPath + EXPORTPDFEXTENSION)
 
         elif selected == EXPORTSVG:
             self._dialogFilter = EXPORTSVGFILTER
             self.updateDialog()
-            self.updateFilename(lastPath+EXPORTSVGEXTENSION)
+            self.updateFilename(lastPath + EXPORTSVGEXTENSION)
 
     def buildParameters(self):
         """build parameters dict from the user widgets, to be passed to the export method.
@@ -550,17 +550,17 @@ class ExportStripToFilePopup(ExportDialog):
 
         if strip:
             # return the parameters
-            params = {GLFILENAME: self.exitFilename,
+            params = {GLFILENAME       : self.exitFilename,
                       GLSPECTRUMDISPLAY: spectrumDisplay,
-                      GLSTRIP: strip,
-                      GLWIDGET: strip._CcpnGLWidget,
-                      GLPRINTTYPE: prType,
-                      GLPAGETYPE: pageType,
-                      GLFOREGROUND: foregroundColour,
-                      GLBACKGROUND: backgroundColour,
-                      GLBASETHICKNESS: baseThickness,
+                      GLSTRIP          : strip,
+                      GLWIDGET         : strip._CcpnGLWidget,
+                      GLPRINTTYPE      : prType,
+                      GLPAGETYPE       : pageType,
+                      GLFOREGROUND     : foregroundColour,
+                      GLBACKGROUND     : backgroundColour,
+                      GLBASETHICKNESS  : baseThickness,
                       GLSYMBOLTHICKNESS: symbolThickness,
-                      GLSELECTEDPIDS: self.treeView.getSelectedObjectsPids()
+                      GLSELECTEDPIDS   : self.treeView.getSelectedObjectsPids()
                       }
             selectedList = self.treeView.getSelectedItems()
             for itemName in self.fullList:

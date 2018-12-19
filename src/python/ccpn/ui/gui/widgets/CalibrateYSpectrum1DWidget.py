@@ -37,6 +37,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.core.lib.ContextManagers import undoBlockManager
 
+
 OP = 'Calibrate Y - Original Position: '
 NP = 'New Position: '
 
@@ -133,7 +134,7 @@ class CalibrateY1DWidgets(Frame):
     def _newPositionLineCallback(self):
         # self.newPosition = self.infiniteLine.pos().y()
 
-        self.newPosition = self.infiniteLine.values                         # [0]
+        self.newPosition = self.infiniteLine.values  # [0]
         self.boxNewPosition.setValue(round(self.newPosition, 3))
 
     def _newPositionBoxCallback(self):
@@ -143,7 +144,7 @@ class CalibrateY1DWidgets(Frame):
             self.infiniteLine.setValue(self.newPosition)
 
     def _originalPositionLineCallback(self):
-        self.originalPosition = self.originalPosInfiniteLine.values                 # [0]
+        self.originalPosition = self.originalPosInfiniteLine.values  # [0]
         self.boxOriginalPosition.setValue(round(self.originalPosition, 3))
 
     def _originalPositionBoxCallback(self):
@@ -220,7 +221,7 @@ class CalibrateY1DWidgets(Frame):
 
         if self.GLWidget:
             # spawn a redraw of the GL windows
-            self.GLWidget._moveAxes((0.0, toPos-fromPos))
+            self.GLWidget._moveAxes((0.0, toPos - fromPos))
             self.GLSignals.emitPaintEvent()
 
     def _cancel(self):

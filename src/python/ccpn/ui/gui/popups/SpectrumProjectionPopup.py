@@ -75,7 +75,7 @@ class SpectrumProjectionPopup(CcpnDialog):
         # action buttons
         self.buttonBox = ButtonList(self, grid=(7, 0), gridSpan=(1, 2), hAlign='r',
                                     callbacks=[self.reject, self.makeProjection],
-                                    texts=['Close','Make Projection'])
+                                    texts=['Close', 'Make Projection'])
 
         # update all widgets to correct settings
         if self.application.current.strip is not None:
@@ -95,7 +95,7 @@ class SpectrumProjectionPopup(CcpnDialog):
         """Callback when setting projection axis"""
         spectrum = self.project.getByPid(self.spectrumPulldown.currentText())
         path = '/'.join(spectrum.filePath.split('/')[:-1]) + '/' + spectrum.name + '-' + '-'.join(
-            self.axisCodes) + '.dat'
+                self.axisCodes) + '.dat'
         self.filePathLineEdit.setText(path)
 
     def _setMethod(self, method):

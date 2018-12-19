@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -31,6 +31,7 @@ import logging
 import os
 import time
 from inspect import stack
+
 
 DEBUG1 = logging.DEBUG  # = 10
 DEBUG2 = 9
@@ -59,131 +60,139 @@ logger = None
 defaultLogger = logging.getLogger('defaultLogger')
 defaultLogger.propagate = False
 
+
 def getLogger():
+    global logger, defaultLogger
 
-  global logger, defaultLogger
+    if not logger:
+        defaultLogger._loggingCommandBlock = 0
+        return defaultLogger
 
-  if not logger:
-    defaultLogger._loggingCommandBlock = 0
-    return defaultLogger
+    logger._loggingCommandBlock = 0
+    return logger
 
-  logger._loggingCommandBlock = 0
-  return logger
 
 def _debugGLError(logger, msg, *args, **kwargs):
-  stk = stack()
-  stk = [stk[st][3] for st in range(min(3, len(stk)), 0, -1)]
-  fmsg = ['['+'/'.join(stk)+'] ' + msg]
-  if args: fmsg.append(', '.join([str(arg) for arg in args]))
-  if kwargs: fmsg.append(', '.join([str(ky)+'='+str(kwargs[ky]) for ky in kwargs.keys()]))
-  logger.log(DEBUG1, '; '.join(fmsg))
+    stk = stack()
+    stk = [stk[st][3] for st in range(min(3, len(stk)), 0, -1)]
+    fmsg = ['[' + '/'.join(stk) + '] ' + msg]
+    if args: fmsg.append(', '.join([str(arg) for arg in args]))
+    if kwargs: fmsg.append(', '.join([str(ky) + '=' + str(kwargs[ky]) for ky in kwargs.keys()]))
+    logger.log(DEBUG1, '; '.join(fmsg))
+
 
 def _debug1(logger, msg, *args, **kwargs):
-  fmsg = [msg]
-  if args: fmsg.append(', '.join([str(arg) for arg in args]))
-  if kwargs: fmsg.append(', '.join([str(ky)+'='+str(kwargs[ky]) for ky in kwargs.keys()]))
-  logger.log(DEBUG1, '; '.join(fmsg))
+    fmsg = [msg]
+    if args: fmsg.append(', '.join([str(arg) for arg in args]))
+    if kwargs: fmsg.append(', '.join([str(ky) + '=' + str(kwargs[ky]) for ky in kwargs.keys()]))
+    logger.log(DEBUG1, '; '.join(fmsg))
+
 
 def _debug2(logger, msg, *args, **kwargs):
-  fmsg = [msg]
-  if args: fmsg.append(', '.join([str(arg) for arg in args]))
-  if kwargs: fmsg.append(', '.join([str(ky)+'='+str(kwargs[ky]) for ky in kwargs.keys()]))
-  logger.log(DEBUG2, '; '.join(fmsg))
+    fmsg = [msg]
+    if args: fmsg.append(', '.join([str(arg) for arg in args]))
+    if kwargs: fmsg.append(', '.join([str(ky) + '=' + str(kwargs[ky]) for ky in kwargs.keys()]))
+    logger.log(DEBUG2, '; '.join(fmsg))
+
 
 def _debug3(logger, msg, *args, **kwargs):
-  fmsg = [msg]
-  if args: fmsg.append(', '.join([str(arg) for arg in args]))
-  if kwargs: fmsg.append(', '.join([str(ky)+'='+str(kwargs[ky]) for ky in kwargs.keys()]))
-  logger.log(DEBUG3, '; '.join(fmsg))
+    fmsg = [msg]
+    if args: fmsg.append(', '.join([str(arg) for arg in args]))
+    if kwargs: fmsg.append(', '.join([str(ky) + '=' + str(kwargs[ky]) for ky in kwargs.keys()]))
+    logger.log(DEBUG3, '; '.join(fmsg))
+
 
 def _info(logger, msg, *args, **kwargs):
-  fmsg = [msg]
-  if args: fmsg.append(', '.join([str(arg) for arg in args]))
-  if kwargs: fmsg.append(', '.join([str(ky)+'='+str(kwargs[ky]) for ky in kwargs.keys()]))
-  logger.log(INFO, '; '.join(fmsg))
+    fmsg = [msg]
+    if args: fmsg.append(', '.join([str(arg) for arg in args]))
+    if kwargs: fmsg.append(', '.join([str(ky) + '=' + str(kwargs[ky]) for ky in kwargs.keys()]))
+    logger.log(INFO, '; '.join(fmsg))
 
 
 def createLogger(loggerName, memopsRoot, stream=None, level=None, mode='a',
                  removeOldLogsDays=MAX_LOG_FILE_DAYS):
-  """Return a (unique) logger for this memopsRoot and with given programName, if any.
-     Puts log output into a log file but also optionally can have output go to
-     another, specified, stream (e.g. a console)
-  """
+    """Return a (unique) logger for this memopsRoot and with given programName, if any.
+       Puts log output into a log file but also optionally can have output go to
+       another, specified, stream (e.g. a console)
+    """
 
-  global logger
+    global logger
 
-  assert mode in ('a', 'w'), 'for now mode must be "a" or "w"'
+    assert mode in ('a', 'w'), 'for now mode must be "a" or "w"'
 
-  #TODO: remove Api calls
-  from ccpnmodel.ccpncore.lib.Io import Api as apiIo
-  repositoryPath = apiIo.getRepositoryPath(memopsRoot, 'userData')
-  logDirectory = os.path.join(repositoryPath, 'logs')
+    #TODO: remove Api calls
+    from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 
-  today = datetime.date.today()
-  fileName = 'log_%s_%02d%02d%02d.txt' % (loggerName, today.year, today.month, today.day)
+    repositoryPath = apiIo.getRepositoryPath(memopsRoot, 'userData')
+    logDirectory = os.path.join(repositoryPath, 'logs')
 
-  logPath = os.path.join(logDirectory, fileName)
+    today = datetime.date.today()
+    fileName = 'log_%s_%02d%02d%02d.txt' % (loggerName, today.year, today.month, today.day)
 
-  if os.path.exists(logDirectory):
-    if os.path.exists(logPath) and os.path.isdir(logPath):
-      raise Exception('log file "%s" is a directory' % logPath)
-  else:
-    os.makedirs(logDirectory)
+    logPath = os.path.join(logDirectory, fileName)
 
-  _removeOldLogFiles(logPath, removeOldLogsDays)
+    if os.path.exists(logDirectory):
+        if os.path.exists(logPath) and os.path.isdir(logPath):
+            raise Exception('log file "%s" is a directory' % logPath)
+    else:
+        os.makedirs(logDirectory)
 
-  if logger:
-    # there seems no way to close the logger itself
-    # and just closing the handler does not work
-    # (and certainly do not want to close stdout or stderr)
-    for handler in logger.handlers:
-      logger.removeHandler(handler)
-  else:
-    logger = logging.getLogger(loggerName)
-    logger.propagate = False
+    _removeOldLogFiles(logPath, removeOldLogsDays)
 
-  logger.logPath = logPath  # just for convenience
-  logger.shutdown = logging.shutdown  # just for convenience but tricky
+    if logger:
+        # there seems no way to close the logger itself
+        # and just closing the handler does not work
+        # (and certainly do not want to close stdout or stderr)
+        for handler in logger.handlers:
+            logger.removeHandler(handler)
+    else:
+        logger = logging.getLogger(loggerName)
+        logger.propagate = False
 
-  if level is None:
-    level = defaultLogLevel
+    logger.logPath = logPath  # just for convenience
+    logger.shutdown = logging.shutdown  # just for convenience but tricky
 
-  logger.setLevel(level)
+    if level is None:
+        level = defaultLogLevel
 
-  handler = logging.FileHandler(logPath, mode=mode)
-  _setupHandler(handler, level)
+    logger.setLevel(level)
 
-  if stream:
-    handler = logging.StreamHandler(stream)
+    handler = logging.FileHandler(logPath, mode=mode)
     _setupHandler(handler, level)
 
-  # logger.debug1 = logger.debug
-  logger.info = functools.partial(_info, logger)
-  logger.debug1 = functools.partial(_debug1, logger)
-  logger.debug = logger.debug1
-  logger.debug2 = functools.partial(_debug2, logger)
-  logger.debug3 = functools.partial(_debug3, logger)
-  logger.debugGL = functools.partial(_debugGLError, logger)
+    if stream:
+        handler = logging.StreamHandler(stream)
+        _setupHandler(handler, level)
 
-  logging.addLevelName(DEBUG2, 'DEBUG2')
-  logging.addLevelName(DEBUG3, 'DEBUG3')
+    # logger.debug1 = logger.debug
+    logger.info = functools.partial(_info, logger)
+    logger.debug1 = functools.partial(_debug1, logger)
+    logger.debug = logger.debug1
+    logger.debug2 = functools.partial(_debug2, logger)
+    logger.debug3 = functools.partial(_debug3, logger)
+    logger.debugGL = functools.partial(_debugGLError, logger)
 
-  return logger
+    logging.addLevelName(DEBUG2, 'DEBUG2')
+    logging.addLevelName(DEBUG3, 'DEBUG3')
+
+    return logger
+
 
 def _setupHandler(handler, level):
-  """Add a stream handler for this logger."""
+    """Add a stream handler for this logger."""
 
-  # handler = logging.StreamHandler(stream)
-  handler.setLevel(level)
+    # handler = logging.StreamHandler(stream)
+    handler.setLevel(level)
 
-  #format = '%(levelname)s: %(module)s:%(funcName)s:%(asctime)s:%(message)s'
-  #format = '%(levelname)-7s: %(module)s.%(funcName)s : %(message)s'
-  format = '%(levelname)-7s: %(message)-90s    (%(module)s.%(funcName)s:%(lineno)s)'
+    #format = '%(levelname)s: %(module)s:%(funcName)s:%(asctime)s:%(message)s'
+    #format = '%(levelname)-7s: %(module)s.%(funcName)s : %(message)s'
+    format = '%(levelname)-7s: %(message)-90s    (%(module)s.%(funcName)s:%(lineno)s)'
 
-  formatter = logging.Formatter(format)
-  handler.setFormatter(formatter)
+    formatter = logging.Formatter(format)
+    handler.setFormatter(formatter)
 
-  logger.addHandler(handler)
+    logger.addHandler(handler)
+
 
 # def _addStreamHandler(logger, stream, level=logging.WARNING):
 #   """Add a stream handler for this logger."""
@@ -198,23 +207,24 @@ def _setupHandler(handler, level):
 #   logger.addHandler(handler)
 
 def _removeOldLogFiles(logPath, removeOldLogsDays=MAX_LOG_FILE_DAYS):
-  """Remove old log files."""
+    """Remove old log files."""
 
-  logDirectory = os.path.dirname(logPath)
-  logFiles = [os.path.join(logDirectory, x) for x in os.listdir(logDirectory)]
-  logFiles = [logFile for logFile in logFiles if logFile != logPath and not os.path.isdir(logFile)]
+    logDirectory = os.path.dirname(logPath)
+    logFiles = [os.path.join(logDirectory, x) for x in os.listdir(logDirectory)]
+    logFiles = [logFile for logFile in logFiles if logFile != logPath and not os.path.isdir(logFile)]
 
-  currentTime = time.time()
-  removeTime = currentTime - removeOldLogsDays * 24 * 3600
-  for logFile in logFiles:
-    # print ('### checking', logFile)
-    mtime = os.path.getmtime(logFile)
-    if mtime < removeTime:
-      os.remove(logFile)
+    currentTime = time.time()
+    removeTime = currentTime - removeOldLogsDays * 24 * 3600
+    for logFile in logFiles:
+        # print ('### checking', logFile)
+        mtime = os.path.getmtime(logFile)
+        if mtime < removeTime:
+            os.remove(logFile)
+
 
 def setLevel(logger, level=logging.INFO):
-  """Set the logger level (including for the handlers)"""
+    """Set the logger level (including for the handlers)"""
 
-  logger.setLevel(level)
-  for handler in logger.handlers:
-    handler.setLevel(level)
+    logger.setLevel(level)
+    for handler in logger.handlers:
+        handler.setLevel(level)

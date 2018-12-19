@@ -24,6 +24,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
 """Color specification"""
 
 from collections import OrderedDict
@@ -36,6 +37,7 @@ def _ccpnHex(val):
     """
     return "{0:#0{1}x}".format(int(val), 4)
 
+
 def rgbaToHex(r, g, b, a=255):
     return '#' + ''.join([_ccpnHex(x)[2:] for x in (r, g, b, a)])
 
@@ -46,15 +48,15 @@ def rgbToHex(r, g, b):
 
 def rgbaRatioToHex(r, g, b, a=1.0):
     return '#' + ''.join([_ccpnHex(x)[2:] for x in (int(255.0 * r),
-                                               int(255.0 * g),
-                                               int(255.0 * b),
-                                               int(255.0 * a))])
+                                                    int(255.0 * g),
+                                                    int(255.0 * b),
+                                                    int(255.0 * a))])
 
 
 def rgbRatioToHex(r, g, b):
     return '#' + ''.join([_ccpnHex(x)[2:] for x in (int(255.0 * r),
-                                               int(255.0 * g),
-                                               int(255.0 * b))])
+                                                    int(255.0 * g),
+                                                    int(255.0 * b))])
 
 
 def hexToRgb(hx):
@@ -81,7 +83,7 @@ rY = 0.212655
 gY = 0.715158
 bY = 0.072187
 COLOUR_LIGHT_THRESHOLD = 80
-COLOUR_DARK_THRESHOLD = (256-COLOUR_LIGHT_THRESHOLD)
+COLOUR_DARK_THRESHOLD = (256 - COLOUR_LIGHT_THRESHOLD)
 COLOUR_THRESHOLD = 60
 
 
@@ -152,10 +154,10 @@ def invertRGB(r, g, b):
     # rgbprimeIn r, g, b in range 0-255
     cie = np.dot(COLORMATRIXJPEG, rgbprimeIn)
     ycbcr = np.add(cie, COLORMATRIXJPEGCONST)
-    ycbcr = np.clip(ycbcr, [0,0,0], [255,255,255])
+    ycbcr = np.clip(ycbcr, [0, 0, 0], [255, 255, 255])
 
     # invert the luma
-    ycbcr[0] = 256-ycbcr[0]
+    ycbcr[0] = 256 - ycbcr[0]
     ycbcr = np.add(ycbcr, COLORMATRIXJPEGINVOFFSET)
 
     rgbprimeOut = np.dot(COLORMATRIXJPEGINV, ycbcr)
@@ -164,17 +166,17 @@ def invertRGB(r, g, b):
     # return tuple([255*inv_gam_sRGB(col) for col in rgbprimeOut])
 
     # clip the colours
-    rgbprimeOut = np.clip(rgbprimeOut, [0,0,0], [255,255,255])
+    rgbprimeOut = np.clip(rgbprimeOut, [0, 0, 0], [255, 255, 255])
     return tuple([float(col) for col in rgbprimeOut])
 
 
 colourNameToHexDict = {
-    'red': '#ff0000',
-    'green': '#00ff00',
-    'blue': '#0000ff',
-    'yellow': '#ffff00',
+    'red'    : '#ff0000',
+    'green'  : '#00ff00',
+    'blue'   : '#0000ff',
+    'yellow' : '#ffff00',
     'magenta': '#ff00ff',
-    'cyan': '#ffff00',
+    'cyan'   : '#ffff00',
     }
 
 spectrumColours = OrderedDict([('#cb1400', 'red'),
@@ -509,7 +511,7 @@ def autoCorrectHexColour(colour, referenceHexColour='#ffffff', addNewColour=True
     rgb = hexToRgb(referenceHexColour)
     gRef = gray(*rgb)
 
-    if abs(g-gRef) < COLOUR_THRESHOLD:
+    if abs(g - gRef) < COLOUR_THRESHOLD:
         newCol = invertRGB(*hexToRgb(colour))
         hx = rgbToHex(*newCol)
         if addNewColour:
@@ -517,6 +519,7 @@ def autoCorrectHexColour(colour, referenceHexColour='#ffffff', addNewColour=True
         return hx
 
     return colour
+
 
 # def _setNewColour(colList, newCol:str):
 #

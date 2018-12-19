@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification
@@ -31,104 +31,104 @@ import webbrowser as wb
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.WebView import WebViewPopup
 
-browserNames = ['firefox','netscape','mozilla','konqueror','kfm','mosaic',
-                'grail','w3m','windows-default','internet-config']
+
+browserNames = ['firefox', 'netscape', 'mozilla', 'konqueror', 'kfm', 'mosaic',
+                'grail', 'w3m', 'windows-default', 'internet-config']
+
 
 class WebBrowser:
 
-  def __init__(self, parent, name=None, url=None):
-  
-    names = getBrowserList()
-    if names and (not name):
-      name = names[0]
-    
-    self.name   = name
-    
-    if url:
-      self.open(url)
-  
-  def open(self, url):
-    
-    try:
-      browser = wb.get(self.name)
-      browser.open(url)
-      
-    except:
-      WebViewPopup(url)
+    def __init__(self, parent, name=None, url=None):
+
+        names = getBrowserList()
+        if names and (not name):
+            name = names[0]
+
+        self.name = name
+
+        if url:
+            self.open(url)
+
+    def open(self, url):
+
+        try:
+            browser = wb.get(self.name)
+            browser.open(url)
+
+        except:
+            WebViewPopup(url)
 
 
 class WebBrowserPulldown(PulldownList):
 
-  def __init__(self, parent, browser=None, **kwds):
+    def __init__(self, parent, browser=None, **kwds):
 
-    super().__init__(parent, **kwds)
+        super().__init__(parent, **kwds)
 
-    self.browserList = getBrowserList()
+        self.browserList = getBrowserList()
 
-    if not browser:
-      browser = getDefaultBrowser()
+        if not browser:
+            browser = getDefaultBrowser()
 
-    if self.browserList:
-      if (not browser) or (browser not in self.browserList):
-        browser = self.browserList[0]
-    self.browser = browser
+        if self.browserList:
+            if (not browser) or (browser not in self.browserList):
+                browser = self.browserList[0]
+        self.browser = browser
 
-    if self.browserList:
-      self.setup(self.browserList, self.browserList, self.browserList.index(self.browser))
-    
-    self.callback = self.setWebBrowser
+        if self.browserList:
+            self.setup(self.browserList, self.browserList, self.browserList.index(self.browser))
 
-  def setWebBrowser(self, name):
+        self.callback = self.setWebBrowser
 
-    if name != self.browser:
-      self.browser = name
+    def setWebBrowser(self, name):
 
-  def destroy(self):
+        if name != self.browser:
+            self.browser = name
 
-    pass
+    def destroy(self):
+
+        pass
 
 
 def getBrowserList():
+    browsers = []
+    default = getDefaultBrowser()
+    if default:
+        browsers = [default, ]
 
-  browsers = []
-  default  = getDefaultBrowser()
-  if default:
-    browsers = [default,]
-  
-  for name in browserNames:
-    if name == default:
-      continue
-  
-    try:
-      wb.get(name)
-      browsers.append(name)
-    except:
-      
-      try:
-        if wb._iscommand(name):
-          wb.register(name, None, wb.Netscape(name))
-          wb.get(name)
-          browsers.append(name)
-      except:
-        continue
+    for name in browserNames:
+        if name == default:
+            continue
 
-  return browsers
+        try:
+            wb.get(name)
+            browsers.append(name)
+        except:
+
+            try:
+                if wb._iscommand(name):
+                    wb.register(name, None, wb.Netscape(name))
+                    wb.get(name)
+                    browsers.append(name)
+            except:
+                continue
+
+    return browsers
 
 
 def getDefaultBrowser():
+    try:
+        br = wb.get()
+    except:
+        return
 
-  try:
-    br = wb.get()
-  except:
-    return
-  
-  if not hasattr(br, 'name'):
-    # Max OS X
-    return
-  
-  try:
-    wb.get(br.name)
-  except:
-    wb.register(br.name, None, br)
-  
-  return br.name
+    if not hasattr(br, 'name'):
+        # Max OS X
+        return
+
+    try:
+        wb.get(br.name)
+    except:
+        wb.register(br.name, None, br)
+
+    return br.name

@@ -41,6 +41,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from decimal import Decimal
 import math
 
+
 def fExp(number) -> int:
     (sign, digits, exponent) = Decimal(number).as_tuple()
     return int(len(digits) + exponent - 1)
@@ -58,8 +59,5 @@ def fRepr(number) -> tuple:
 def fRound(number) -> float:
     """round to nearest base-10 value"""
     f, e = fRepr(number)
-    f = float(int(f+0.5))
-    return f*math.pow(10.0, e)
-
-
-
+    f = float(int(f + 0.5))
+    return f * math.pow(10.0, e)

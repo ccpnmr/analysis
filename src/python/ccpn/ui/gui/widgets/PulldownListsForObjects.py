@@ -235,7 +235,7 @@ class _PulldownABC(PulldownListCompoundWidget):
         "Callback to update the selection from current change"
         obj = self.getCurrentObject()
         if DEBUG: sys.stderr.write('>>> %s._updateFromCurrent() "%s": %s\n' %
-                        (self, self._currentAttributeName, obj))
+                                   (self, self._currentAttributeName, obj))
         self._updatePulldownList()
         if obj is not None:
             value = self.object2value(obj)
@@ -246,13 +246,13 @@ class _PulldownABC(PulldownListCompoundWidget):
 
     def _callback(self, value):
         "Callback when selecting the pulldown"
-        if DEBUG: sys.stderr.write('>>> %s._callback() selecting pulldown: %s\n' %(self, value))
+        if DEBUG: sys.stderr.write('>>> %s._callback() selecting pulldown: %s\n' % (self, value))
         if self._userCallback:
             value = self._userCallback(value)
         if self._setCurrent and value != SELECT and len(value) > 0:
             obj = self.value2object(value)
             if DEBUG: sys.stderr.write('>>> %s._callback() selecting pulldown: setting current.%s to %s\n' %
-                            (self, self._currentAttributeName, obj))
+                                       (self, self._currentAttributeName, obj))
             setattr(self.current, self._currentAttributeName, [obj])
         if DEBUG: sys.stderr.write('  < %s._callback() selecting pulldown\n' % self)
 
@@ -262,7 +262,6 @@ class _PulldownABC(PulldownListCompoundWidget):
     @staticmethod
     def onDestroyed(widget):
         if DEBUG: sys.stderr.write('>>> being destroyed:\n', widget)
-
 
 
 #==========================================================================================================

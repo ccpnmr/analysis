@@ -9,8 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -20,7 +19,6 @@ __version__ = "$Revision: 3.0.b4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: TJ Ragan $"
 __date__ = "$Date: 2016-05-16 06:41:02 +0100 (Mon, 16 May 2016) $"
 #=========================================================================================
@@ -31,6 +29,7 @@ import os
 import subprocess
 import re
 
+
 __all__ = ['applicationVersion', 'revision']
 
 applicationVersion = '3.0.0.m0'
@@ -39,38 +38,41 @@ __revision = None
 
 
 def revision(update=True):
-  global __revision
-  if __revision is None:
-    try:
-      __revision = _getRevisionNumber()
-    except:
-      __revision = REVISION
-    if update is True:
-      _changeStoredRevisionNumber()
-  return __revision
+    global __revision
+    if __revision is None:
+        try:
+            __revision = _getRevisionNumber()
+        except:
+            __revision = REVISION
+        if update is True:
+            _changeStoredRevisionNumber()
+    return __revision
 
 
 def _getRevisionNumber():
-  thisScriptDir = os.path.dirname(os.path.realpath(__file__))
-  svnInfo = str(subprocess.check_output(["svn", "info"], cwd=thisScriptDir))
-  m = re.search('Revision:\s([0-9]+)', svnInfo)
-  revisionNumber = m.group(1)
-  return revisionNumber
+    thisScriptDir = os.path.dirname(os.path.realpath(__file__))
+    svnInfo = str(subprocess.check_output(["svn", "info"], cwd=thisScriptDir))
+    m = re.search('Revision:\s([0-9]+)', svnInfo)
+    revisionNumber = m.group(1)
+    return revisionNumber
 
 
 def _changeStoredRevisionNumber():
-  thisScript = os.path.realpath(__file__)
-  with open(thisScript) as f:
-    s = re.sub("""(REVISION\s*=\s*')[0-9]*'""",
-               "\g<1>{}'".format(revision()),
-               f.read())
-  with open(thisScript, 'w') as f:
-    f.write(s)
+    thisScript = os.path.realpath(__file__)
+    with open(thisScript) as f:
+        s = re.sub("""(REVISION\s*=\s*')[0-9]*'""",
+                   "\g<1>{}'".format(revision()),
+                   f.read())
+    with open(thisScript, 'w') as f:
+        f.write(s)
 
 
 def main():
-  print(revision(update=True))
+    print(revision(update=True))
+
 
 if __name__ == '__main__':
-  import sys
-  sys.exit(main())
+    import sys
+
+
+    sys.exit(main())

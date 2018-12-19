@@ -1,6 +1,3 @@
-#=========================================================================================
-# Licence, Reference and Credits
-#=========================================================================================
 #!/usr/bin/env python
 
 """python-recursive-import-test [<options>] [<dir> ...]
@@ -13,14 +10,15 @@ modules to be imported individually.  This has important consequences in large
 codebases, and allows more flexibility.
 """
 
-__version__ = "Revision: 1.10 "
-
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
 __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -66,7 +64,8 @@ def find_pyfiles(dirs):
                 packroot = dirname(packroot)
 
             for fn in pyfiles:
-                yield join(root[len(packroot)+1:], fn)
+                yield join(root[len(packroot) + 1:], fn)
+
 
 def filename2module(fn):
     """
@@ -75,17 +74,18 @@ def filename2module(fn):
     if basename(fn) == '__init__.py':
         fn = dirname(fn)
     return re.sub('\.py$', '', fn.replace(os.sep, '.'))
-    
+
 
 def main():
     import optparse
+
     parser = optparse.OptionParser(__doc__.strip())
     opts, args = parser.parse_args()
 
     for fn in find_pyfiles(args or ('.',)):
         modname = filename2module(fn)
         print("import %s" % modname)
-        subprocess.call( ('python', '-c', 'import %s' % modname) )
+        subprocess.call(('python', '-c', 'import %s' % modname))
 
 
 ##############################################################################
@@ -97,35 +97,35 @@ def find_all_pyfiles(topDirectory, ignoreDirs=(), ignoreFiles=()):
     """
     dn = packroot = abspath(topDirectory)
     for root, dirs, files in os.walk(dn, followlinks=True):
-      for r in ignoreDirs:
-        try:
-          dirs.remove(r)
-          print("test skipping:  %s/%s" % (root,r))
-        except ValueError:
-          pass
+        for r in ignoreDirs:
+            try:
+                dirs.remove(r)
+                print("test skipping:  %s/%s" % (root, r))
+            except ValueError:
+                pass
 
-      for fn in files:
-        if fn.endswith('.py'):
-          if fn in ignoreFiles:
-            print("test skipping:  %s/%s" % (root,fn))
-          else:
-            yield join(root[len(packroot)+1:], fn)
+        for fn in files:
+            if fn.endswith('.py'):
+                if fn in ignoreFiles:
+                    print("test skipping:  %s/%s" % (root, fn))
+                else:
+                    yield join(root[len(packroot) + 1:], fn)
 
-def importAllPyfiles(topDirectory, ignoreDirs=(),ignoreFiles=(), addToSysPath:str=None):
-  """Test import all python files in a directory tree.
-  topDirectory must be (intended to be) on the Python path"""
 
-  for fn in find_all_pyfiles(topDirectory, ignoreDirs=ignoreDirs, ignoreFiles=ignoreFiles):
-    modname = filename2module(fn)
-    print("test import %s :" % modname)
-    if addToSysPath:
-      subprocess.call( ('python','-t', '-c',
-                        'import sys; sys.path.append("%s"); import %s'
-                        % (addToSysPath, modname) ) )
-    else:
-      subprocess.call( ('python', '-t', '-c', 'import %s' % modname) )
+def importAllPyfiles(topDirectory, ignoreDirs=(), ignoreFiles=(), addToSysPath: str = None):
+    """Test import all python files in a directory tree.
+    topDirectory must be (intended to be) on the Python path"""
+
+    for fn in find_all_pyfiles(topDirectory, ignoreDirs=ignoreDirs, ignoreFiles=ignoreFiles):
+        modname = filename2module(fn)
+        print("test import %s :" % modname)
+        if addToSysPath:
+            subprocess.call(('python', '-t', '-c',
+                             'import sys; sys.path.append("%s"); import %s'
+                             % (addToSysPath, modname)))
+        else:
+            subprocess.call(('python', '-t', '-c', 'import %s' % modname))
 
 
 if __name__ == '__main__':
     main()
-

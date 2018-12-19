@@ -550,7 +550,7 @@ class GuiPipeline(CcpnModule, Pipeline):
 
             # This could happen when saving for the first time a project, which dynamically changes path
             getLogger().debug(
-                'Saving path not existing. %s. Directory path changed to default %s' % (str(self.savePipelineLineEdit.lineEdit.text()), savingPath))
+                    'Saving path not existing. %s. Directory path changed to default %s' % (str(self.savePipelineLineEdit.lineEdit.text()), savingPath))
             self.savePipelineLineEdit.lineEdit.setText(str(savingPath))
             self.pipelineSettingsParams['savePath'] = savingPath
         pipelineName = str(self.pipelineNameLabel.text())

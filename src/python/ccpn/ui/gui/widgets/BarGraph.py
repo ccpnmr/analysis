@@ -248,8 +248,7 @@ class CustomViewBox(pg.ViewBox):
         if (self.viewRange()[0][1] - self.viewRange()[0][0]) < 10:
             self.setRange(xRange=self.lastRange[0])
 
-
-    def _getLimits(self,p1:float, p2:float):
+    def _getLimits(self, p1: float, p2: float):
         r = QtCore.QRectF(p1, p2)
         r = self.childGroup.mapRectFromParent(r)
         self.selectionBox.setPos(r.topLeft())
@@ -261,7 +260,7 @@ class CustomViewBox(pg.ViewBox):
         maxY = minY + r.height()
         return minX, maxX, minY, maxY
 
-    def _updateSelectionBox(self,ev, p1:float, p2:float):
+    def _updateSelectionBox(self, ev, p1: float, p2: float):
         """
         Updates drawing of selection box as mouse is moved.
         """
@@ -284,7 +283,6 @@ class CustomViewBox(pg.ViewBox):
         elif event.button() == QtCore.Qt.LeftButton:
 
             event.accept()
-
 
     def mouseDragEvent(self, event):
         """
@@ -327,7 +325,6 @@ class CustomViewBox(pg.ViewBox):
                 self.updateSelectionFromCurrent()
             except Exception as e:
                 getLogger().warning('Error in setting current objects. ' + str(e))
-
 
     def inYRange(self, yValue, y1, y2):
         if round(y1, 3) <= round(yValue, 3) <= round(y2, 3):

@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -27,17 +27,19 @@ __date__ = "$Date: 2017-05-17 13:51:05 +0000 (Wed, May 17, 2017) $"
 
 from PyQt5 import QtGui, QtWidgets, QtCore
 
+
 class Spacer(QtWidgets.QSpacerItem):
-  """
-  Widget used to put spaces into modules and popups.
-  """
-  def __init__(self, parent=None, *args, **kwds):
+    """
+    Widget used to put spaces into modules and popups.
     """
 
-    :param parent:
-    :param args:
-    :param kwds:
-    """
-    QtWidgets.QSpacerItem.__init__(self, *args)
+    def __init__(self, parent=None, *args, **kwds):
+        """
 
-    parent.layout().addItem(self, kwds['grid'][0], kwds['grid'][1], kwds['gridSpan'][0], kwds['gridSpan'][1])
+        :param parent:
+        :param args:
+        :param kwds:
+        """
+        QtWidgets.QSpacerItem.__init__(self, *args)
+
+        parent.layout().addItem(self, kwds['grid'][0], kwds['grid'][1], kwds['gridSpan'][0], kwds['gridSpan'][1])

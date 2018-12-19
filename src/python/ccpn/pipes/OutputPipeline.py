@@ -133,8 +133,8 @@ class OutputSpectraPipe(SpectraPipe):
     guiPipe = OutputPipelineGuiPipe
     pipeName = PipeName
     _kwargs = {
-        SavePath: DefaultPath,
-        SaveHDF5: False,
+        SavePath      : DefaultPath,
+        SaveHDF5      : False,
         SaveOutputMode: ''
         }
 

@@ -92,10 +92,10 @@ class CalculateAreaPipe(SpectraPipe):
     pipeName = PipeName
 
     _kwargs = {
-        NoiseThreshold: DefaultNoiseThreshold,
-        MinimalLineWidth: DefaultMinimalLineWidth,
+        NoiseThreshold        : DefaultNoiseThreshold,
+        MinimalLineWidth      : DefaultMinimalLineWidth,
         EstimateNoiseThreshold: True,
-        FindPeak: DefaultFindPeak
+        FindPeak              : DefaultFindPeak
         }
 
     def runPipe(self, spectra):

@@ -47,13 +47,13 @@ FileNames = 'fileNames'
 LayoutState = "layoutState"
 
 DefaultLayoutFile = {
-    Warning: WarningMessage,
-    General: {
-        ApplicationName: "",
+    Warning    : WarningMessage,
+    General    : {
+        ApplicationName   : "",
         ApplicationVersion: ""
         },
-    GuiModules: [],
-    FileNames: [],
+    GuiModules : [],
+    FileNames  : [],
     LayoutState: {}
     }
 

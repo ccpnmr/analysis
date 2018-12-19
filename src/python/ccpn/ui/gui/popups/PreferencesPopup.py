@@ -506,7 +506,7 @@ class PreferencesPopup(CcpnDialog):
         intensityLimit = self.preferences.general.intensityLimit
         self.showIntensityLimitLabel = Label(parent, text='Minimum Intensity Limit', grid=(row, 0), hAlign='r')
         self.showIntensityLimitBox = ScientificDoubleSpinBox(parent,  #step=1,
-                                                          min=1e-6, grid=(row, 1), hAlign='l')
+                                                             min=1e-6, grid=(row, 1), hAlign='l')
         self.showIntensityLimitBox.setValue(intensityLimit)
         self.showIntensityLimitBox.setMinimumWidth(LineEditsMinimumWidth)
         self.showIntensityLimitBox.editingFinished.connect(self._setIntensityLimit)

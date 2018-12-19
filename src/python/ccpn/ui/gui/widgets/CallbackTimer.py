@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -27,41 +27,45 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from PyQt5 import QtCore, QtWidgets
 
+
 class CallbackTimer(QtCore.QTimer):
-  def __init__(self, callback):
-    super().__init__()
-    self.setSingleShot(True)
-    # self.connect(self, QtCore.PYQT_SIGNAL('timeout()'), callback)
-    self.timeout.connect(callback)
+    def __init__(self, callback):
+        super().__init__()
+        self.setSingleShot(True)
+        # self.connect(self, QtCore.PYQT_SIGNAL('timeout()'), callback)
+        self.timeout.connect(callback)
+
 
 if __name__ == '__main__':
 
-  from ccpn.ui.gui.widgets.Application import TestApplication
-  from ccpn.ui.gui.widgets.Button import Button
-  from ccpn.ui.gui.widgets.MainWindow import MainWindow
+    from ccpn.ui.gui.widgets.Application import TestApplication
+    from ccpn.ui.gui.widgets.Button import Button
+    from ccpn.ui.gui.widgets.MainWindow import MainWindow
 
-  def callbackFunc():
 
-    print('callbackFunc()')
+    def callbackFunc():
 
-  timer = CallbackTimer(callbackFunc)
-  
-  def startTimer():
-    
-    if not timer.isActive():
-      print('start timer')
-      timer.start()
-    
-  app = TestApplication()
+        print('callbackFunc()')
 
-  window = MainWindow()
-  frame = window.mainFrame
 
-  button = Button(frame, text='Start timer', callback=startTimer, grid=(0,0))
-  button = Button(frame, text='Quit', callback=app.quit, grid=(1,0))
+    timer = CallbackTimer(callbackFunc)
 
-  window.show()
 
-  app.start()
+    def startTimer():
 
-    
+        if not timer.isActive():
+            print('start timer')
+            timer.start()
+
+
+    app = TestApplication()
+
+    window = MainWindow()
+    frame = window.mainFrame
+
+    button = Button(frame, text='Start timer', callback=startTimer, grid=(0, 0))
+    button = Button(frame, text='Quit', callback=app.quit, grid=(1, 0))
+
+    window.show()
+
+    app.start()

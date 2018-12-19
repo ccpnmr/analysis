@@ -78,16 +78,16 @@ from ccpn.ui.gui.widgets.Widget import Widget
 class Frame(QtWidgets.QFrame, Base):
     FRAME_DICT = {
         # Shadow
-        'plain': QtWidgets.QFrame.Plain,
-        'raised': QtWidgets.QFrame.Raised,
-        'sunken': QtWidgets.QFrame.Sunken,
+        'plain'      : QtWidgets.QFrame.Plain,
+        'raised'     : QtWidgets.QFrame.Raised,
+        'sunken'     : QtWidgets.QFrame.Sunken,
         # Shapes
-        'noFrame': QtWidgets.QFrame.NoFrame,
-        'box': QtWidgets.QFrame.Box,
-        'panel': QtWidgets.QFrame.Panel,
+        'noFrame'    : QtWidgets.QFrame.NoFrame,
+        'box'        : QtWidgets.QFrame.Box,
+        'panel'      : QtWidgets.QFrame.Panel,
         'styledPanel': QtWidgets.QFrame.StyledPanel,
-        'hLine': QtWidgets.QFrame.HLine,
-        'vLine': QtWidgets.QFrame.VLine,
+        'hLine'      : QtWidgets.QFrame.HLine,
+        'vLine'      : QtWidgets.QFrame.VLine,
         }
 
     def __init__(self, parent=None, showBorder=False, fShape=None, fShadow=None,
@@ -143,6 +143,7 @@ class Frame(QtWidgets.QFrame, Base):
     # def dragMoveEvent(self, ev):
     #     print('>>>dragMoveEvent Frame', repr(self))
     #     # self._thisparent.dragMoveEvent(ev)
+
 
 class ScrollableFrame(Frame):
     "A scrollable frame"

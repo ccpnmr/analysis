@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -32,6 +32,7 @@ User plugins are to go in this directory
 loadedPlugins = []
 
 import pkgutil as _pkgutil
-for loader, name, isPpkg in _pkgutil.walk_packages(__path__):
-  module = loader.find_module(name).load_module(name)
 
+
+for loader, name, isPpkg in _pkgutil.walk_packages(__path__):
+    module = loader.find_module(name).load_module(name)

@@ -6,7 +6,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -24,26 +24,27 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from ccpn.ui.gui import guiSettings
 
+
 #TODO:WAYNE: move to CcpnModule/CcpnModuleArea/GuiMainWindow, depending what it is used for
 # remove the file when complete
 
 MODULE_DICT = {
-  'Sequence Graph'           : 'showSequenceGraph',
-  'Peak Assigner'            : 'showPeakAssigner',
-  'Atom Selector'            : 'showAtomSelector',
-  'Backbone Assignment'      : 'showBackboneAssignmentModule',
-  'Sidechain Assignment'     : 'showSidechainAssignmentModule',
-  'Chemical Shift Table'     : 'showChemicalShiftTable',
-  # 'MACRO EDITOR'             : 'editMacro',
-  'Nmr Residue Table'        : 'showNmrResidueTable',
-  'Peak List'                : 'showPeakTable',
-  'Pick And Assign'          : 'showPickAndAssignModule',
-  'Reference ChemicalShifts' : 'showRefChemicalShifts',
-  'ResidueInformation'       : 'showResidueInformation',
-  'Sequence'                 : 'toggleSequenceModule',
-  'Parassign Setup'          : 'showParassignSetup',
-  # 'API DOCUMENTATION'        : 'showApiDocumentation',
-  'Python Console'           : 'toggleConsole',
-  'Blank Display'            : 'addBlankDisplay',
-  # 'NOTES EDITOR'             : 'showNotesEditor'
-               }
+    'Sequence Graph'          : 'showSequenceGraph',
+    'Peak Assigner'           : 'showPeakAssigner',
+    'Atom Selector'           : 'showAtomSelector',
+    'Backbone Assignment'     : 'showBackboneAssignmentModule',
+    'Sidechain Assignment'    : 'showSidechainAssignmentModule',
+    'Chemical Shift Table'    : 'showChemicalShiftTable',
+    # 'MACRO EDITOR'             : 'editMacro',
+    'Nmr Residue Table'       : 'showNmrResidueTable',
+    'Peak List'               : 'showPeakTable',
+    'Pick And Assign'         : 'showPickAndAssignModule',
+    'Reference ChemicalShifts': 'showRefChemicalShifts',
+    'ResidueInformation'      : 'showResidueInformation',
+    'Sequence'                : 'toggleSequenceModule',
+    'Parassign Setup'         : 'showParassignSetup',
+    # 'API DOCUMENTATION'        : 'showApiDocumentation',
+    'Python Console'          : 'toggleConsole',
+    'Blank Display'           : 'addBlankDisplay',
+    # 'NOTES EDITOR'             : 'showNotesEditor'
+    }

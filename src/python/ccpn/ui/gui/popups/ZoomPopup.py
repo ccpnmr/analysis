@@ -46,10 +46,11 @@ from ccpn.util.floatUtils import fRound
 
 # default steps sizes of the DoubleSpinBox, ..
 # used in ZoomPopup
-spinBoxStepsByAxisCode = {'H': 0.05,
-                               'C': 0.5,
-                               'N': 0.5,
-                               'intensity': 1e4, }
+spinBoxStepsByAxisCode = {'H'        : 0.05,
+                          'C'        : 0.5,
+                          'N'        : 0.5,
+                          'intensity': 1e4, }
+
 
 class ZoomPopup(CcpnDialog):
     """
@@ -86,7 +87,7 @@ class ZoomPopup(CcpnDialog):
                     minVal = -maxVal
                     region = list(self.current.strip.axes[ii].region)
                     # assume we want 50 steps to cover the current region
-                    step = (region[1]-region[0])/50.0
+                    step = (region[1] - region[0]) / 50.0
                     # round to some sensible number
                     step = fRound(step)
                     suffix = None
@@ -95,9 +96,9 @@ class ZoomPopup(CcpnDialog):
                     suffix = self.current.strip.axes[ii].unit
                     step = steps.setdefault(axisCode[0:1], 0.5)
                     # assure that we can zoom to the largest range of all displayed spectra (plus a bit extra)
-                    minVal = 0.9*min([s.aliasingLimits[dim][0] for s in self.current.strip.spectra])
+                    minVal = 0.9 * min([s.aliasingLimits[dim][0] for s in self.current.strip.spectra])
                     minVal = _round(minVal, step, -0.5)
-                    maxVal = 1.1*max([s.aliasingLimits[dim][1] for s in self.current.strip.spectra])
+                    maxVal = 1.1 * max([s.aliasingLimits[dim][1] for s in self.current.strip.spectra])
                     maxVal = _round(maxVal, step, 1.5)
 
                 region = list(self.current.strip.axes[ii].region)
@@ -108,19 +109,19 @@ class ZoomPopup(CcpnDialog):
 
                 dim1MinLabel = Label(self, text='%s-min' % axisCode, grid=(2 + ii, 0), vAlign='t')
                 dim1MinDoubleSpinBox = DoubleSpinbox(self, suffix=suffix, step=step,
-                                                           min=minVal, max=maxVal, value=region[0],
-                                                           grid=(2 + ii, 1), vAlign='t')
+                                                     min=minVal, max=maxVal, value=region[0],
+                                                     grid=(2 + ii, 1), vAlign='t')
 
                 dim1MaxLabel = Label(self, text='%s-max' % axisCode, grid=(2 + ii, 2), vAlign='t')
                 dim1MaxDoubleSpinBox = DoubleSpinbox(self, suffix=suffix, step=step,
-                                                           min=minVal, max=maxVal, value=region[1],
-                                                           grid=(2 + ii, 3))
+                                                     min=minVal, max=maxVal, value=region[1],
+                                                     grid=(2 + ii, 3))
 
                 self.minPositionBoxes.append(dim1MinDoubleSpinBox)
                 self.maxPositionBoxes.append(dim1MaxDoubleSpinBox)
 
             self.buttonBox = ButtonList(self, grid=(5, 0), gridSpan=(1, 4), texts=['Zoom', 'Done'],
-                                              callbacks=[self._zoom, self.reject])
+                                        callbacks=[self._zoom, self.reject])
         else:
             self.close()
 
@@ -133,6 +134,7 @@ class ZoomPopup(CcpnDialog):
             self.current.strip.zoom(positions[0], positions[1])
 
         self.accept()
+
 
 def _round(value, step, offset=0.5):
     """Round value in multiples of step as int(n+offset)*step"""

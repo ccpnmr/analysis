@@ -6,7 +6,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -21,7 +21,6 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-
 
 
 #### NON GUI IMPORTS
@@ -40,7 +39,6 @@ def myAlgorithm(data):
     return data
 
 
-
 ########################################################################################################################
 ##########################################     GUI PIPE    #############################################################
 ########################################################################################################################
@@ -49,19 +47,15 @@ def myAlgorithm(data):
 ## the guiPipeline will still appear as an empty guiPipe but without widgets.
 
 
-
 ########################################################################################################################
 ##########################################       PIPE      #############################################################
 ########################################################################################################################
 
 
-
 class DemoPipe3(PandasPipe):
-  'Pandas pipe with No Gui, Feeds with a dataFrame, returns a DataFrame '
-  pipeName = 'NoGui Pandas Pipe'
+    'Pandas pipe with No Gui, Feeds with a dataFrame, returns a DataFrame '
+    pipeName = 'NoGui Pandas Pipe'
 
-  def runPipe(self, dataframe:pd.DataFrame) -> pd.DataFrame:
-    outputDataframe = myAlgorithm(dataframe)
-    return outputDataframe
-
-
+    def runPipe(self, dataframe: pd.DataFrame) -> pd.DataFrame:
+        outputDataframe = myAlgorithm(dataframe)
+        return outputDataframe

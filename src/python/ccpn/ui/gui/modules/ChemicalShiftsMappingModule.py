@@ -1,5 +1,35 @@
 """
-Module Documentation here
+Module Documentation:
+  This module has three sections:
+    - bar chart
+    - scatter plot
+    - table
+
+
+  This module plots a bar chart of NmrResidue number as function of delta shift for its (nmrAtoms) assigned peaks.
+
+  ** Only  NmrResidue with an integer as sequenceCode is allowed **.
+    E.G.: YES -->  sequenceCode = 44;
+          NO  -->  sequenceCode = '44i-1';
+
+  There are four modes of delta calculation: POSITIONS, HEIGHT, VOLUME, LINEWIDTHS
+    The delta shift for POSITIONS and LINEWIDTHS is calculated from the peak properties as following,
+    assuming the NmrAtoms of interest H and N:
+
+      CSPi = √((Δδ_Hi )^2+α(Δδ_Ni )^2 )
+
+    The delta shift for HEIGHT and VOLUME is calculated from the peak properties as following:
+      CSPi = √((Δδ )^2
+
+  The peaks used are as default taken from the last peak list for the selected spectra (settings tab).
+  Any sensible combination of NmrAtoms is allowed,
+
+
+
+
+
+
+
 # TODO : when update module, keep focus on selected item in the table, keep same zoom on the plot
 
 
@@ -55,7 +85,7 @@ from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.util.Colour import spectrumColours, hexToRgb
 from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
-from ccpn.core.lib.peakUtils import getNmrResidueDeltas, MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME, DefaultAtomWeights, H, N, OTHER, C
+from ccpn.core.lib.peakUtils import getNmrResidueDeltas, fittedCurve,bindingCurve, MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME, DefaultAtomWeights, H, N, OTHER, C
 from ccpn.core.lib import CcpnSorting
 from ccpn.ui.gui.guiSettings import autoCorrectHexColour, getColours, CCPNGLWIDGET_HEXBACKGROUND,\
   GUISTRIP_PIVOT, DIVIDER, CCPNGLWIDGET_SELECTAREA, CCPNGLWIDGET_HIGHLIGHT
@@ -109,6 +139,7 @@ def chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues,
         f.write('''\ncmd.deselect()''')
 
   return filePath
+
 
 DefaultConcentration = 0.0
 DefaultConcentrationUnit = concentrationUnits[0]
@@ -350,6 +381,9 @@ class ChemicalShiftsMapping(CcpnModule):
     self.kdPlot.setLabel('bottom', 'Series')
     self.kdPlot.setLabel('left', 'Deltas')
     self.kdPlot.setMenuEnabled(False)
+    self.kdLine = pg.InfiniteLine(angle=90, pos=1, pen='b',
+                                  movable=False, label=' ') # label needs to be defined here.
+    self._kdPlotViewbox.addItem(self.kdLine)
     layoutParent.getLayout().addWidget(self._kdPlotView)
 
 
@@ -583,6 +617,7 @@ class ChemicalShiftsMapping(CcpnModule):
     i += 1
     self.belowThresholdColourLabel = Label(self.scrollAreaWidgetContents, text='Below Threshold Colour', grid=(i, 0))
     self.belowThresholdColourBox = PulldownList(self.scrollAreaWidgetContents, grid=(i, 1))
+
     for item in spectrumColours.items():
       pix = QtGui.QPixmap(QtCore.QSize(20, 20))
       pix.fill(QtGui.QColor(item[0]))
@@ -919,6 +954,12 @@ class ChemicalShiftsMapping(CcpnModule):
     except ValueError:
       return False
 
+  def _setNmrColours(self,nmrResidues):
+    colours = _getRandomColours(nmrResidues)
+    for nmrR, colour in zip(nmrResidues, colours):
+      if not hasattr(nmrR, 'colour'):
+        nmrR._colour = colour
+
   def updateModule(self, silent=False):
     '''
 
@@ -1021,7 +1062,8 @@ class ChemicalShiftsMapping(CcpnModule):
     except Exception as e:
       getLogger().warning('Pymol not started. Check executable.', e)
 
-  def getKdPlotDataFrame(self, nmrResidues):
+
+  def getBindingCurves(self, nmrResidues):
 
     selectedAtomNames = [cb.text() for cb in self.nmrAtomsCheckBoxes if cb.isChecked()]
     mode = self.modeButtons.getSelectedText()
@@ -1030,8 +1072,6 @@ class ChemicalShiftsMapping(CcpnModule):
     weights = {}
     for atomWSB in self.atomWeightSpinBoxes:
       weights.update({atomWSB.objectName(): atomWSB.value()})
-
-
     values = []
     for nmrResidue in nmrResidues:
       if self._isInt(nmrResidue.sequenceCode):
@@ -1059,33 +1099,36 @@ class ChemicalShiftsMapping(CcpnModule):
     if len(values)>0:
       return pd.concat(values)
 
+  def _getScaledBindingCurves(self, bindingCurves):
+    if isinstance(bindingCurves, pd.DataFrame):
+      aMean = bindingCurves.mean(axis=1) # mean of each row
+      scaled = bindingCurves.div(aMean,axis=0) # divide each row by its mean
+      return scaled
 
   def _plotKdFromCurrent(self):
     self.kdPlot.clear()
     self._clearLegendKd()
+    self.kdPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=None)
+
     colours = _getRandomColours(len(self.current.nmrResidues))
     for nmrR, colour in zip(self.current.nmrResidues, colours):
       nmrR._colour = colour
-    # brush = pg.functions.mkBrush(hexToRgb(colour), width=1)
-    # for nmrResidue, colour in zip(self.current.nmrResidues,colours):
-    plotData = self.getKdPlotDataFrame(self.current.nmrResidues)
+    plotData = self.getBindingCurves(self.current.nmrResidues)
+    if self.scaleKdCb.isChecked():
+      plotData = self._getScaledBindingCurves(plotData)
+
     if plotData is not None:
       plotData = plotData.replace(np.nan, 0)
       for obj, row, in plotData.iterrows():
         ys = list(row.values)
         xs = list(plotData.columns)
-        aMean = np.mean(row.values)
-        if aMean != 0.0:
-          aScaled = row.values / aMean
-        else:
-          aScaled = row.values
+
         pen = pg.functions.mkPen(hexToRgb(obj._colour), width=1)
         brush = pg.functions.mkBrush(hexToRgb(obj._colour), width=1)
-        if self.scaleKdCb.isChecked():
-          self.kdPlot.plot(xs, aScaled, symbol='o', pen=pen, symbolBrush=brush, name=obj.pid)
-        else:
-          self.kdPlot.plot(xs, ys, symbol='o', pen=pen, symbolBrush=brush, name=obj.pid)
+        self.kdPlot.plot(xs, ys, symbol='o', pen=pen, symbolBrush=brush, name=obj.pid)
+
     self.kdPlot.autoRange()
+    self.kdPlot.setLabel('left', 'Deltas')
 
   def _selectCurrentNmrResiduesNotifierCallback(self, data):
     # TODO replace colour
@@ -1112,12 +1155,69 @@ class ChemicalShiftsMapping(CcpnModule):
                 label.setVisible(False)
     self._plotKdFromCurrent()
 
-  def _getAllKdDataFrameForChain(self):
+  def _getAllBindingCurvesDataFrameForChain(self):
     nmrChainTxt = self.nmrResidueTable.ncWidget.getText()
     nmrChain = self.project.getByPid(nmrChainTxt)
     if nmrChain is not None:
-      dataFrame = self.getKdPlotDataFrame(nmrChain.nmrResidues)
+      dataFrame = self.getBindingCurves(nmrChain.nmrResidues)
       return dataFrame
+
+  def _plotFittedCallback(self):
+    plotData = self.getBindingCurves(self.current.nmrResidues)
+    if not  self.scaleKdCb.isChecked():
+      getLogger().info('Fitting mode allowed only on scaled binding curves ')
+
+    plotData = self._getScaledBindingCurves(plotData)
+    self._plotFittedBindingCurves(plotData)
+
+
+  def _plotFittedBindingCurves(self, bindingCurves):
+    from scipy.optimize import curve_fit
+
+    if bindingCurves is not None:
+      plotData = bindingCurves.replace(np.nan, 0)
+      # xs = []
+      # ys = []
+      # for obj, row, in plotData.iterrows():
+      #   ys.extend(list(row.values))
+      #   xs.extend(list(plotData.columns))
+      # x = np.array([0, 0.5, 1, 1.5, 2])
+      # y = np.array([0, 0.75, 1.28, 1.53, 1.648])
+      # xs = np.array(sorted(x))
+      # ys = np.array(sorted(y))
+
+      ys = plotData.values.flatten(order='F')
+      xss = np.array([plotData.columns]*plotData.shape[0])
+      xs = xss.flatten(order='F')
+      print(xs,ys)
+      param = curve_fit(bindingCurve, xs, ys)
+      kdUnscaled, bmax = param[0]
+      yScaled = ys / bmax
+      paramScaled = curve_fit(bindingCurve, xs, yScaled)
+      xMax = max(xs)
+      xStep = 0.01
+      xf = np.arange(0, xMax+xStep, step=xStep)
+      yf = bindingCurve(xf, *paramScaled[0])
+      kd = paramScaled[0][0]
+      self._clearLegendKd()
+      self.kdPlot.clear()
+      self.kdPlot.plot(xs, yScaled, symbol='o', pen=None)
+      self.kdPlot.plot(xf, yf, name='Fitted')
+      self.kdLine.setValue(kd)
+      self.kdLine.label.setText(str(kd))
+      self.kdPlot.setLabel('left', '%')
+      print(kdUnscaled,kd)
+      self.kdPlot.setRange(xRange=[0, max(xf)], yRange=[0, 1])
+      self.kdPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=1)
+      self.kdPlot.autoRange()
+    else:
+      getLogger().warning('No data found. Impossible to fit binding curves ')
+
+
+  def _clearBindingPlot(self):
+    self.kdPlot.clear()
+    self._clearLegendKd()
+    self.kdLine.hide()
 
   def _showExportDialog(self, viewBox):
     """
@@ -1135,10 +1235,12 @@ class ChemicalShiftsMapping(CcpnModule):
     self._kdContextMenu.addAction('Reset View', self.kdPlot.autoRange)
     self._kdContextMenu.addAction('Legend', self._togleKdLegend)
     self._kdContextMenu.addSeparator()
-    
+    self._kdContextMenu.addAction('Fit curve(s)', self._plotFittedCallback)
+    self._kdContextMenu.addSeparator()
+
     self._kdContextMenu.addSeparator()
     self.exportAction = QtGui.QAction("Export...", self, triggered=partial(self._showExportDialog, self._kdPlotViewbox))
-    self.exporAllAction = QtGui.QAction("Export All...", self, triggered=partial(exportTableDialog, self._getAllKdDataFrameForChain()))
+    self.exporAllAction = QtGui.QAction("Export All...", self, triggered=partial(exportTableDialog, self._getAllBindingCurvesDataFrameForChain()))
 
     self._kdContextMenu.addAction(self.exportAction)
     self._kdContextMenu.addAction(self.exporAllAction)

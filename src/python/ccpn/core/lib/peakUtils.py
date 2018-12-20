@@ -25,6 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import numpy as np
 from ccpn.util.Logging import getLogger
 from collections import OrderedDict
+from scipy.optimize import curve_fit
 
 POSITIONS = 'positions'
 HEIGHT = 'height'
@@ -365,7 +366,21 @@ def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atom
   return
 
 
+def bindingCurve(x,kd,bmax):
+    return (bmax*x)/(x+kd)
 
+def fittedCurve(x,y, func, xFitting, ):
+  """
+
+  :param x:
+  :param y:
+  :param func:
+  :param xFitting: x array for the fitting curve. E.g. np.arange(0, 2.01, step=0.01)
+  :return:
+  """
+  param = curve_fit(func, x, y)
+  yf = func(xFitting, *param[0])
+  return yf
 
 
 

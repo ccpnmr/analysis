@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2018-12-20 14:07:59 +0000 (Thu, December 20, 2018) $"
+__dateModified__ = "$dateModified: 2018-12-20 16:42:44 +0000 (Thu, December 20, 2018) $"
 __version__ = "$Revision: 3.0.b4 $"
 #=========================================================================================
 # Created
@@ -36,8 +36,6 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import SPECTRUM_STACKEDMATRIX, SPECTR
 from collections import OrderedDict, Iterable
 import io
 import numpy as np
-
-
 
 try:
     from OpenGL import GL, GLU, GLUT

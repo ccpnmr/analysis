@@ -102,6 +102,7 @@ from ccpn.ui.gui.lib.mouseEvents import \
     middleMouse, shiftMiddleMouse, rightMouse, shiftRightMouse, controlRightMouse, PICK
 
 
+
 # from ccpn.core.lib.Notifiers import Notifier
 
 try:

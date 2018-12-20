@@ -38,6 +38,7 @@ import io
 import numpy as np
 
 
+
 try:
     from OpenGL import GL, GLU, GLUT
 except ImportError:

@@ -1108,7 +1108,7 @@ class ChemicalShiftsMapping(CcpnModule):
   def _plotKdFromCurrent(self):
     self.kdPlot.clear()
     self._clearLegendKd()
-    self.kdPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=None)
+    # self.kdPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=None)
 
     colours = _getRandomColours(len(self.current.nmrResidues))
     for nmrR, colour in zip(self.current.nmrResidues, colours):
@@ -1189,7 +1189,6 @@ class ChemicalShiftsMapping(CcpnModule):
       ys = plotData.values.flatten(order='F')
       xss = np.array([plotData.columns]*plotData.shape[0])
       xs = xss.flatten(order='F')
-      print(xs,ys)
       param = curve_fit(bindingCurve, xs, ys)
       kdUnscaled, bmax = param[0]
       yScaled = ys / bmax
@@ -1206,9 +1205,8 @@ class ChemicalShiftsMapping(CcpnModule):
       self.kdLine.setValue(kd)
       self.kdLine.label.setText(str(kd))
       self.kdPlot.setLabel('left', '%')
-      print(kdUnscaled,kd)
       self.kdPlot.setRange(xRange=[0, max(xf)], yRange=[0, 1])
-      self.kdPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=1)
+      # self.kdPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=1)
       self.kdPlot.autoRange()
     else:
       getLogger().warning('No data found. Impossible to fit binding curves ')

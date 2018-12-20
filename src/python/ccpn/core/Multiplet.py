@@ -294,20 +294,22 @@ class Multiplet(AbstractWrapperObject):
         finally:
             return result
 
-    @property
-    def ppmPositions(self) -> Optional[Tuple[float, ...]]:
-        """Peak position in ppm (or other relevant unit) in dimension order calculated as Center Of Mass."""
-        result = None
-        try:
-            pks = self.peaks
-            # pksPos = [pp.position for pp in pks]
-            if pks:
-                # self._position = tuple(sum(item) for item in zip(*pksPos))
-                self._position = _calculateCenterOfMass(self)
-                result = self._position
+    ppmPositions = position
 
-        finally:
-            return result
+    # @property
+    # def ppmPositions(self) -> Optional[Tuple[float, ...]]:
+    #     """Peak position in ppm (or other relevant unit) in dimension order calculated as Center Of Mass."""
+    #     result = None
+    #     try:
+    #         pks = self.peaks
+    #         # pksPos = [pp.position for pp in pks]
+    #         if pks:
+    #             # self._position = tuple(sum(item) for item in zip(*pksPos))
+    #             self._position = _calculateCenterOfMass(self)
+    #             result = self._position
+    #
+    #     finally:
+    #         return result
 
     @property
     def positionError(self) -> Tuple[Optional[float], ...]:

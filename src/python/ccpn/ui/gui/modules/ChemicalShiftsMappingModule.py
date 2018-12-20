@@ -84,6 +84,7 @@ from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.util.Colour import spectrumColours, hexToRgb
+from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
 from ccpn.core.lib.peakUtils import getNmrResidueDeltas, fittedCurve,bindingCurve, MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME, DefaultAtomWeights, H, N, OTHER, C
 from ccpn.core.lib import CcpnSorting
@@ -270,7 +271,7 @@ class ChemicalShiftsMapping(CcpnModule):
       self.current = self.application.current
 
     self.thresholdLinePos = DefaultThreshould
-    self._kdExportDialog = None
+    self._bindingExportDialog = None
 
     self.showStructureIcon = Icon('icons/showStructure')
     self.updateIcon = Icon('icons/update')
@@ -346,8 +347,20 @@ class ChemicalShiftsMapping(CcpnModule):
                                                    setLayout=True, grid = (0, 0))
       self.nmrResidueTable.chemicalShiftsMappingModule = self
 
-      self.kdPlotFrame = Frame(self.nmrResidueTable._parent, setLayout=True, grid = (3, 6))
-      self._setKdPlot(layoutParent=self.kdPlotFrame)
+      self.tabWidget = Tabs(self.nmrResidueTable._parent, setLayout=True, grid=(3, 6))
+      ## 1 Tab Scatter
+      self.bindingPlotFrame = Frame(self.mainWidget, setLayout=True)
+      # self.bindingPlotFrame.setContentsMargins(1, 10, 1, 10)
+      self._setBindingPlot(layoutParent=self.bindingPlotFrame)
+      self.tabWidget.addTab(self.bindingPlotFrame, 'Binding Curve')
+
+      ## 2 Tab Vectors
+      self.fittingFrame = Frame(self.mainWidget, setLayout=True)
+      # self.fittingFrame.setContentsMargins(1, 10, 1, 10)
+      self.tabWidget.addTab(self.fittingFrame, 'Fitting')
+      
+      
+      
 
       self.showOnViewerButton = Button(self.nmrResidueTable._widget, tipText='Show on Molecular Viewer',
                                        icon=self.showStructureIcon,
@@ -369,28 +382,28 @@ class ChemicalShiftsMapping(CcpnModule):
       self.splitter.setStretchFactor(0, 1)
       self.mainWidget.setContentsMargins(5, 5, 5, 5)  # l,t,r,b
 
-  def _setKdPlot(self, layoutParent):
+  def _setBindingPlot(self, layoutParent):
     ###  Plot setup
-    self._kdPlotView = pg.GraphicsLayoutWidget()
-    self._kdPlotView.setBackground(BackgroundColour)
-    self.kdPlot = self._kdPlotView.addPlot()
-    self.kdPlot.addLegend(offset=[1, 10])
-    self._kdPlotViewbox = self.kdPlot.vb
-    self._kdPlotViewbox.mouseClickEvent = self._kdViewboxMouseClickEvent
+    self._bindingPlotView = pg.GraphicsLayoutWidget()
+    self._bindingPlotView.setBackground(BackgroundColour)
+    self.bindingPlot = self._bindingPlotView.addPlot()
+    self.bindingPlot.addLegend(offset=[1, 10])
+    self._bindingPlotViewbox = self.bindingPlot.vb
+    self._bindingPlotViewbox.mouseClickEvent = self._bindingViewboxMouseClickEvent
 
-    self.kdPlot.setLabel('bottom', 'Series')
-    self.kdPlot.setLabel('left', 'Deltas')
-    self.kdPlot.setMenuEnabled(False)
-    self.kdLine = pg.InfiniteLine(angle=90, pos=1, pen='b',
+    self.bindingPlot.setLabel('bottom', 'Series')
+    self.bindingPlot.setLabel('left', 'Deltas')
+    self.bindingPlot.setMenuEnabled(False)
+    self.bindingLine = pg.InfiniteLine(angle=90, pos=1, pen='b',
                                   movable=False, label=' ') # label needs to be defined here.
-    self._kdPlotViewbox.addItem(self.kdLine)
-    layoutParent.getLayout().addWidget(self._kdPlotView)
+    self._bindingPlotViewbox.addItem(self.bindingLine)
+    layoutParent.getLayout().addWidget(self._bindingPlotView)
 
 
-  def _clearLegendKd(self):
-    while self.kdPlot.legend.layout.count() > 0:
-      self.kdPlot.legend.layout.removeAt(0)
-    self.kdPlot.legend.items = []
+  def _clearLegendBindingC(self):
+    while self.bindingPlot.legend.layout.count() > 0:
+      self.bindingPlot.legend.layout.removeAt(0)
+    self.bindingPlot.legend.items = []
 
 
   def _checkSpectraWithPeakListsOnly(self):
@@ -671,9 +684,9 @@ class ChemicalShiftsMapping(CcpnModule):
 
     i += 1
 
-    self.scaleKd = Label(self.scrollAreaWidgetContents, text='Scale Kds', grid=(i, 0))
-    self.scaleKdCb = CheckBox(self.scrollAreaWidgetContents, checked=True, callback=self._plotKdFromCurrent, grid=(i, 1))
-    self._plotKdFromCurrent()
+    self.scaleBindingC = Label(self.scrollAreaWidgetContents, text='Scale Binding Curves', grid=(i, 0))
+    self.scaleBindingCCb = CheckBox(self.scrollAreaWidgetContents, checked=True, callback=self._plotBindingCFromCurrent, grid=(i, 1))
+    self._plotBindingCFromCurrent()
     i += 1
 
     self.updateButton = Button(self.scrollAreaWidgetContents, text='Update All', callback=self.updateModule,
@@ -993,7 +1006,7 @@ class ChemicalShiftsMapping(CcpnModule):
         if not silent:
           self.updateTable(self.nmrResidueTable._nmrChain)
           self.updateBarGraph()
-          self._plotKdFromCurrent()
+          self._plotBindingCFromCurrent()
 
   def _updatedPeakCount(self, nmrResidue, spectra):
     if len(nmrResidue.nmrAtoms)>0:
@@ -1105,16 +1118,16 @@ class ChemicalShiftsMapping(CcpnModule):
       scaled = bindingCurves.div(aMean,axis=0) # divide each row by its mean
       return scaled
 
-  def _plotKdFromCurrent(self):
-    self.kdPlot.clear()
-    self._clearLegendKd()
-    # self.kdPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=None)
+  def _plotBindingCFromCurrent(self):
+    self.bindingPlot.clear()
+    self._clearLegendBindingC()
+    # self.bindingPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=None)
 
     colours = _getRandomColours(len(self.current.nmrResidues))
     for nmrR, colour in zip(self.current.nmrResidues, colours):
       nmrR._colour = colour
     plotData = self.getBindingCurves(self.current.nmrResidues)
-    if self.scaleKdCb.isChecked():
+    if self.scaleBindingCCb.isChecked():
       plotData = self._getScaledBindingCurves(plotData)
 
     if plotData is not None:
@@ -1125,10 +1138,10 @@ class ChemicalShiftsMapping(CcpnModule):
 
         pen = pg.functions.mkPen(hexToRgb(obj._colour), width=1)
         brush = pg.functions.mkBrush(hexToRgb(obj._colour), width=1)
-        self.kdPlot.plot(xs, ys, symbol='o', pen=pen, symbolBrush=brush, name=obj.pid)
+        self.bindingPlot.plot(xs, ys, symbol='o', pen=pen, symbolBrush=brush, name=obj.pid)
 
-    self.kdPlot.autoRange()
-    self.kdPlot.setLabel('left', 'Deltas')
+    self.bindingPlot.autoRange()
+    self.bindingPlot.setLabel('left', 'Deltas')
 
   def _selectCurrentNmrResiduesNotifierCallback(self, data):
     # TODO replace colour
@@ -1153,7 +1166,7 @@ class ChemicalShiftsMapping(CcpnModule):
               label.setBrush(QtGui.QColor(bar.brush))
               if label.isBelowThreshold and not self.barGraphWidget.customViewBox.allLabelsShown:
                 label.setVisible(False)
-    self._plotKdFromCurrent()
+    self._plotBindingCFromCurrent()
 
   def _getAllBindingCurvesDataFrameForChain(self):
     nmrChainTxt = self.nmrResidueTable.ncWidget.getText()
@@ -1164,7 +1177,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
   def _plotFittedCallback(self):
     plotData = self.getBindingCurves(self.current.nmrResidues)
-    if not  self.scaleKdCb.isChecked():
+    if not  self.scaleBindingCCb.isChecked():
       getLogger().info('Fitting mode allowed only on scaled binding curves ')
 
     plotData = self._getScaledBindingCurves(plotData)
@@ -1190,72 +1203,72 @@ class ChemicalShiftsMapping(CcpnModule):
       xss = np.array([plotData.columns]*plotData.shape[0])
       xs = xss.flatten(order='F')
       param = curve_fit(bindingCurve, xs, ys)
-      kdUnscaled, bmax = param[0]
+      bindingUnscaled, bmax = param[0]
       yScaled = ys / bmax
       paramScaled = curve_fit(bindingCurve, xs, yScaled)
       xMax = max(xs)
       xStep = 0.01
       xf = np.arange(0, xMax+xStep, step=xStep)
       yf = bindingCurve(xf, *paramScaled[0])
-      kd = paramScaled[0][0]
-      self._clearLegendKd()
-      self.kdPlot.clear()
-      self.kdPlot.plot(xs, yScaled, symbol='o', pen=None)
-      self.kdPlot.plot(xf, yf, name='Fitted')
-      self.kdLine.setValue(kd)
-      self.kdLine.label.setText(str(kd))
-      self.kdPlot.setLabel('left', '%')
-      self.kdPlot.setRange(xRange=[0, max(xf)], yRange=[0, 1])
-      # self.kdPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=1)
-      self.kdPlot.autoRange()
+      binding = paramScaled[0][0]
+      self._clearLegendBindingC()
+      self.bindingPlot.clear()
+      self.bindingPlot.plot(xs, yScaled, symbol='o', pen=None)
+      self.bindingPlot.plot(xf, yf, name='Fitted')
+      self.bindingLine.setValue(binding)
+      self.bindingLine.label.setText(str(binding))
+      self.bindingPlot.setLabel('left', '%')
+      self.bindingPlot.setRange(xRange=[0, max(xf)], yRange=[0, 1])
+      # self.bindingPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=1)
+      self.bindingPlot.autoRange()
     else:
       getLogger().warning('No data found. Impossible to fit binding curves ')
 
 
   def _clearBindingPlot(self):
-    self.kdPlot.clear()
-    self._clearLegendKd()
-    self.kdLine.hide()
+    self.bindingPlot.clear()
+    self._clearLegendBindingC()
+    self.bindingLine.hide()
 
   def _showExportDialog(self, viewBox):
     """
     :param viewBox: the viewBox obj for the selected plot
     :return:
     """
-    if self._kdExportDialog is None:
-      self._kdExportDialog = CustomExportDialog(viewBox.scene(), titleName='Exporting')
-    self._kdExportDialog.show(viewBox)
+    if self._bindingExportDialog is None:
+      self._bindingExportDialog = CustomExportDialog(viewBox.scene(), titleName='Exporting')
+    self._bindingExportDialog.show(viewBox)
   
-  def _raiseKdPlotContextMenu(self, ev):
+  def _raiseBindingCPlotContextMenu(self, ev):
     """ Creates all the menu items for the scatter context menu. """
 
-    self._kdContextMenu = Menu('', None, isFloatWidget=True)
-    self._kdContextMenu.addAction('Reset View', self.kdPlot.autoRange)
-    self._kdContextMenu.addAction('Legend', self._togleKdLegend)
-    self._kdContextMenu.addSeparator()
-    self._kdContextMenu.addAction('Fit curve(s)', self._plotFittedCallback)
-    self._kdContextMenu.addSeparator()
+    self._bindingContextMenu = Menu('', None, isFloatWidget=True)
+    self._bindingContextMenu.addAction('Reset View', self.bindingPlot.autoRange)
+    self._bindingContextMenu.addAction('Legend', self._togleBindingCLegend)
+    self._bindingContextMenu.addSeparator()
+    self._bindingContextMenu.addAction('Fit curve(s)', self._plotFittedCallback)
+    self._bindingContextMenu.addSeparator()
 
-    self._kdContextMenu.addSeparator()
-    self.exportAction = QtGui.QAction("Export...", self, triggered=partial(self._showExportDialog, self._kdPlotViewbox))
+    self._bindingContextMenu.addSeparator()
+    self.exportAction = QtGui.QAction("Export...", self, triggered=partial(self._showExportDialog, self._bindingPlotViewbox))
     self.exporAllAction = QtGui.QAction("Export All...", self, triggered=partial(exportTableDialog, self._getAllBindingCurvesDataFrameForChain()))
 
-    self._kdContextMenu.addAction(self.exportAction)
-    self._kdContextMenu.addAction(self.exporAllAction)
+    self._bindingContextMenu.addAction(self.exportAction)
+    self._bindingContextMenu.addAction(self.exporAllAction)
 
-    self._kdContextMenu.exec_(ev.screenPos().toPoint())
+    self._bindingContextMenu.exec_(ev.screenPos().toPoint())
 
-  def _togleKdLegend(self):
-    if self.kdPlot.legend.isVisible():
-      self.kdPlot.legend.hide()
+  def _togleBindingCLegend(self):
+    if self.bindingPlot.legend.isVisible():
+      self.bindingPlot.legend.hide()
     else:
-      self.kdPlot.legend.show()
+      self.bindingPlot.legend.show()
 
-  def _kdViewboxMouseClickEvent(self, event):
+  def _bindingViewboxMouseClickEvent(self, event):
     """ click on scatter viewBox. The parent of scatterPlot. Opens the context menu at any point. """
     if event.button() == QtCore.Qt.RightButton:
       event.accept()
-      self._raiseKdPlotContextMenu(event)
+      self._raiseBindingCPlotContextMenu(event)
 
   def _mouseClickEvent(self, event):
 

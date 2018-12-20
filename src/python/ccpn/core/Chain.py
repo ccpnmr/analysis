@@ -322,7 +322,7 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
     if not shortName:
         shortName = apiMolSystem.nextChainCode()
     else:
-        _validateName('shortName', value=shortName, includeWhitespace=False)  # ejb - test the name
+        self._validateName('shortName', value=shortName, allowWhitespace=False)
 
     previous = self._project.getChain(shortName.translate(Pid.remapSeparators))
     if previous is not None:
@@ -332,7 +332,7 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
     if compoundName is None:
         name = self._uniqueSubstanceName()
     elif apiRefComponentStore.findFirstComponent(name=compoundName) is None:
-        _validateName('compoundName', value=compoundName, includeWhitespace=False)  # ejb - test the name
+        self._validateName('compoundName', value=compoundName, allowWhitespace=False)
 
         name = compoundName
     else:

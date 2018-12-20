@@ -19,14 +19,12 @@ April 2017: First design by Geerten Vuister
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
 __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                  "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -38,7 +36,6 @@ __version__ = "$Revision: 3.0.b4 $"
 #=========================================================================================
 __author__ = "$Author: Geerten Vuister $"
 __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
-
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -55,6 +52,7 @@ from ccpn.util.Logging import getLogger
 logger = getLogger()
 
 DEBUG = True
+
 
 def skip(*args, **kwargs):
     """Do nothing"""
@@ -119,7 +117,7 @@ class NotifierABC(object):
     def unRegister(self):
         "Reset the attributes"
         if self._debug:
-            sys.stderr.write('>>> unRegister %s\n' % self )
+            sys.stderr.write('>>> unRegister %s\n' % self)
         self._theObject = None
         self._callback = None
         self._unregister = []
@@ -225,8 +223,8 @@ class Notifier(NotifierABC):
         :param debug: set debug
         :param **kwargs: optional keyword,value arguments to callback
         """
-        from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject # local import to avoid cycles
-        from ccpn.framework.Current import Current # local import to avoid cycles
+        from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject  # local import to avoid cycles
+        from ccpn.framework.Current import Current  # local import to avoid cycles
 
         super().__init__(theObject=theObject, triggers=triggers, targetName=targetName, debug=debug,
                          callback=callback, **kwargs
@@ -333,7 +331,7 @@ class Notifier(NotifierABC):
             else:
                 self._project.unRegisterNotifier(targetName, trigger, func)
 
-        super().unRegister() # the end as it clears all attributes
+        super().unRegister()  # the end as it clears all attributes
 
     def __call__(self, obj: Any, parameter2: Any = None, notifier: tuple = None):
         """
@@ -362,7 +360,7 @@ class Notifier(NotifierABC):
             p2 = 'parameter2=%r ' % parameter2 if parameter2 else ''
             sys.stderr.write('--> %-25s obj=%-25s %s' % \
                              (notifier, obj, p2)
-            )
+                             )
 
         notifierFired = False
         callbackDict = dict(
@@ -373,7 +371,7 @@ class Notifier(NotifierABC):
                 targetName=targetName,
                 previousValue=None,
                 value=None,
-        )
+                )
 
         # CURRENT special case
         if trigger == Notifier.CURRENT:
@@ -433,7 +431,7 @@ class Notifier(NotifierABC):
             value1 = list(value1)
         if isinstance(value2, tuple):
             value1 = list(value2)
-        return value1==value2
+        return value1 == value2
 
 
 # def currentNotifier(attributeName, callback, onlyOnce=False, debug=False, **kwargs):
@@ -469,10 +467,10 @@ class NotifierBase(object):
         if not isinstance(objNotifiers, _NotifiersDict):
             raise RuntimeError('Invalid NotifiersDict, got %s, expected %s' %
                                (type(objNotifiers), type(_NotifiersDict))
-                              )
+                               )
         return objNotifiers
 
-    def setNotifier(self, theObject:'AbstractWrapperObject', triggers: list, targetName: str, callback: Callable[..., str], **kwargs) -> Notifier:
+    def setNotifier(self, theObject: 'AbstractWrapperObject', triggers: list, targetName: str, callback: Callable[..., str], **kwargs) -> Notifier:
         """
         Set Notifier for Ccpn V3 object theObject
 
@@ -494,7 +492,7 @@ class NotifierBase(object):
         objNotifiers[id] = notifier
         return notifier
 
-    def setGuiNotifier(self, theObject:'AbstractWrapperObject', triggers: list, targetName: str, callback: Callable[..., str], **kwargs) -> Notifier:
+    def setGuiNotifier(self, theObject: 'AbstractWrapperObject', triggers: list, targetName: str, callback: Callable[..., str], **kwargs) -> Notifier:
         """
         Set Notifier for Ccpn V3 object theObject
 
@@ -530,10 +528,10 @@ class NotifierBase(object):
 
         objNotifiers = self._getObjectNotifiersDict()
         notifier.unRegister()
-        del(objNotifiers[notifier.id])
-        del(notifier)
+        del (objNotifiers[notifier.id])
+        del (notifier)
 
-    def hasNotifier(self, notifier: Notifier=None) -> bool:
+    def hasNotifier(self, notifier: Notifier = None) -> bool:
         """
         return True if theObject has set notifier or
         has any notifier (when notifier==None)
@@ -552,7 +550,7 @@ class NotifierBase(object):
             return True
 
         if not isinstance(notifier, NotifierABC):
-           raise ValueError('"%s" is not a valid notifier instance' % notifier)
+            raise ValueError('"%s" is not a valid notifier instance' % notifier)
 
         if notifier.id in objNotifiers:
             return True

@@ -9,8 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -20,31 +19,30 @@ __version__ = "$Revision: 3.0.b4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
 from ccpn.core.testing.WrapperTesting import WrapperTesting
+
 
 spectrumName = 'HSQC-115'
 
+
 class SpectrumTest(WrapperTesting):
+    # Path of project to load (None for new project
+    projectPath = 'CcpnCourse1a'
 
-  # Path of project to load (None for new project
-  projectPath = 'CcpnCourse1a'
+    def test_getPlaneData(self):
+        spectrum = self.project.getSpectrum(spectrumName)
+        planeData = spectrum.getPlaneData()
+        print('planeData.shape =', planeData.shape)
+        print('planeData =', planeData[508:, 2045:])
 
-  def test_getPlaneData(self):
-    spectrum = self.project.getSpectrum(spectrumName)
-    planeData = spectrum.getPlaneData()
-    print('planeData.shape =', planeData.shape)
-    print('planeData =', planeData[508:,2045:])
-    
-  def test_getSliceData(self):
-    spectrum = self.project.getSpectrum(spectrumName)
-    sliceData = spectrum.getSliceData()
-    print('sliceData.shape =', sliceData.shape)
-    print('sliceData =', sliceData)
-    
-
+    def test_getSliceData(self):
+        spectrum = self.project.getSpectrum(spectrumName)
+        sliceData = spectrum.getSliceData()
+        print('sliceData.shape =', sliceData.shape)
+        print('sliceData =', sliceData)

@@ -7,7 +7,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                  "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -19,7 +18,6 @@ __version__ = "$Revision: 3.0.b4 $"
 #=========================================================================================
 __author__ = "$Author: Geerten Vuister $"
 __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
-
 #=========================================================================================
 # Start of code
 #=========================================================================================

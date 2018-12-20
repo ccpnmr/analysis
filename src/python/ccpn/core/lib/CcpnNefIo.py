@@ -170,7 +170,7 @@ _isALoop = ()
 # Note the _parametersFromSaveFrame and _parakmetersFromLoopRow functions
 # that make a parameters dictionary (for use in object creation), using these mappings
 nef2CcpnMap = {
-    'nef_nmr_meta_data': OD((
+    'nef_nmr_meta_data'              : OD((
         ('format_name', None),
         ('format_version', None),
         ('program_name', None),
@@ -184,16 +184,16 @@ nef2CcpnMap = {
         ('nef_program_script', _isALoop),
         ('nef_run_history', _isALoop),
         )),
-    'nef_related_entries': OD((
+    'nef_related_entries'            : OD((
         ('database_name', None),
         ('database_accession_code', None),
         )),
-    'nef_program_script': OD((
+    'nef_program_script'             : OD((
         ('program_name', None),
         ('script_name', None),
         ('script', None),
         )),
-    'nef_run_history': OD((
+    'nef_run_history'                : OD((
         ('run_number', 'serial'),
         ('program_name', 'programName'),
         ('program_version', 'programVersion'),
@@ -203,11 +203,11 @@ nef2CcpnMap = {
         ('ccpn_output_uuid', 'outputDataUuid'),
         )),
 
-    'nef_molecular_system': OD((
+    'nef_molecular_system'           : OD((
         ('nef_sequence', _isALoop),
         ('nef_covalent_links', _isALoop),
         )),
-    'nef_sequence': OD((
+    'nef_sequence'                   : OD((
         ('index', None),
         ('chain_code', 'chain.shortName'),
         ('sequence_code', 'sequenceCode'),
@@ -220,7 +220,7 @@ nef2CcpnMap = {
         ('ccpn_compound_name', 'chain.compoundName'),
         ('ccpn_chain_comment', 'chain.comment'),
         )),
-    'nef_covalent_links': OD((
+    'nef_covalent_links'             : OD((
         ('chain_code_1', None),
         ('sequence_code_1', None),
         ('residue_name_1', None),
@@ -231,14 +231,14 @@ nef2CcpnMap = {
         ('atom_name_2', None),
         )),
 
-    'nef_chemical_shift_list': OD((
+    'nef_chemical_shift_list'        : OD((
         ('ccpn_serial', 'serial'),
         ('ccpn_auto_update', 'autoUpdate'),
         ('ccpn_is_simulated', 'isSimulated'),
         ('ccpn_comment', 'comment'),
         ('nef_chemical_shift', _isALoop),
         )),
-    'nef_chemical_shift': OD((
+    'nef_chemical_shift'             : OD((
         ('chain_code', None),
         ('sequence_code', None),
         ('residue_name', None),
@@ -251,7 +251,7 @@ nef2CcpnMap = {
         ('ccpn_comment', 'comment'),
         )),
 
-    'nef_distance_restraint_list': OD((
+    'nef_distance_restraint_list'    : OD((
         ('potential_type', 'potentialType'),
         ('restraint_origin', 'origin'),
         ('ccpn_tensor_chain_code', 'tensorChainCode'),
@@ -266,7 +266,7 @@ nef2CcpnMap = {
         ('ccpn_comment', 'comment'),
         ('nef_distance_restraint', _isALoop),
         )),
-    'nef_distance_restraint': OD((
+    'nef_distance_restraint'         : OD((
         ('index', None),
         ('restraint_id', 'restraint.serial'),
         ('restraint_combination_id', 'combinationId'),
@@ -289,7 +289,7 @@ nef2CcpnMap = {
         ('ccpn_comment', 'restraint.comment'),
         )),
 
-    'nef_dihedral_restraint_list': OD((
+    'nef_dihedral_restraint_list'    : OD((
         ('potential_type', 'potentialType'),
         ('restraint_origin', 'origin'),
         ('ccpn_tensor_chain_code', 'tensorChainCode'),
@@ -304,7 +304,7 @@ nef2CcpnMap = {
         ('ccpn_comment', 'comment'),
         ('nef_dihedral_restraint', _isALoop),
         )),
-    'nef_dihedral_restraint': OD((
+    'nef_dihedral_restraint'         : OD((
         ('index', None),
         ('restraint_id', 'restraint.serial'),
         ('restraint_combination_id', 'combinationId'),
@@ -336,7 +336,7 @@ nef2CcpnMap = {
         ('ccpn_comment', 'restraint.comment'),
         )),
 
-    'nef_rdc_restraint_list': OD((
+    'nef_rdc_restraint_list'         : OD((
         ('potential_type', 'potentialType'),
         ('restraint_origin', 'origin'),
         ('tensor_magnitude', 'tensorMagnitude'),
@@ -351,7 +351,7 @@ nef2CcpnMap = {
         ('ccpn_comment', 'comment'),
         ('nef_rdc_restraint', _isALoop),
         )),
-    'nef_rdc_restraint': OD((
+    'nef_rdc_restraint'              : OD((
         ('index', None),
         ('restraint_id', 'restraint.serial'),
         ('restraint_combination_id', 'combinationId'),
@@ -377,7 +377,7 @@ nef2CcpnMap = {
         ('ccpn_comment', 'restraint.comment'),
         )),
 
-    'nef_nmr_spectrum': OD((
+    'nef_nmr_spectrum'               : OD((
         ('num_dimensions', 'spectrum.dimensionCount'),
         ('chemical_shift_list', None),
         ('experiment_classification', 'spectrum.experimentType'),
@@ -424,7 +424,7 @@ nef2CcpnMap = {
         ('ccpn_spectrum_hit', _isALoop),
         )),
 
-    'nef_spectrum_dimension': OD((
+    'nef_spectrum_dimension'         : OD((
         ('dimension_id', None),
         ('axis_unit', 'axisUnits'),
         ('axis_code', 'isotopeCodes'),
@@ -438,7 +438,7 @@ nef2CcpnMap = {
         )),
 
     # NB PseudoDimensions are not yet supported
-    'ccpn_spectrum_dimension': OD((
+    'ccpn_spectrum_dimension'        : OD((
         ('dimension_id', None),
         ('point_count', 'pointCounts'),
         ('reference_point', 'referencePoints'),
@@ -464,7 +464,7 @@ nef2CcpnMap = {
         ('is_indirect', None),
         )),
     # NBNB: boxWidths and lineWidths are NOT included.
-    'nef_peak': OD((
+    'nef_peak'                       : OD((
         ('index', None),
         ('peak_id', 'serial'),
         ('volume', 'volume'),
@@ -568,7 +568,7 @@ nef2CcpnMap = {
         )),
     # NB SpectrumHit crosslink to sample and sampleComponent are derived
     # And need not be stored here.
-    'ccpn_spectrum_hit': OD((
+    'ccpn_spectrum_hit'              : OD((
         ('ccpn_substance_name', 'substanceName'),
         ('ccpn_pseudo_dimension_number', 'pseudoDimensionNumber'),
         ('ccpn_point_number', 'pointNumber'),
@@ -582,33 +582,33 @@ nef2CcpnMap = {
         ('ccpn_comment', 'comment'),
         )),
 
-    'nef_peak_restraint_links': OD((
+    'nef_peak_restraint_links'       : OD((
         ('nef_peak_restraint_link', _isALoop),
         )),
-    'nef_peak_restraint_link': OD((
+    'nef_peak_restraint_link'        : OD((
         ('nmr_spectrum_id', None),
         ('peak_id', None),
         ('restraint_list_id', None),
         ('restraint_id', None),
         )),
 
-    'ccpn_complex': OD((
+    'ccpn_complex'                   : OD((
         ('name', 'name'),
         ('ccpn_complex_chain', _isALoop),
         )),
-    'ccpn_complex_chain': OD((
+    'ccpn_complex_chain'             : OD((
         ('complex_chain_code', None),
         )),
 
-    'ccpn_spectrum_group': OD((
+    'ccpn_spectrum_group'            : OD((
         ('name', 'name'),
         ('ccpn_group_spectrum', _isALoop),
         )),
-    'ccpn_group_spectrum': OD((
+    'ccpn_group_spectrum'            : OD((
         ('nmr_spectrum_id', None),
         )),
 
-    'ccpn_integral_list': OD((
+    'ccpn_integral_list'             : OD((
         ('serial', None),
         ('name', 'title'),
         ('symbol_colour', 'symbolColour'),
@@ -616,7 +616,7 @@ nef2CcpnMap = {
         ('comment', 'comment'),
         )),
 
-    'ccpn_integral': OD((
+    'ccpn_integral'                  : OD((
         ('integral_list_serial', 'integralList.serial'),
         ('integral_serial', None),
 
@@ -639,7 +639,7 @@ nef2CcpnMap = {
         ('comment', 'comment'),
         )),
 
-    'ccpn_multiplet_list': OD((
+    'ccpn_multiplet_list'            : OD((
         ('serial', None),
         ('name', 'title'),
         ('symbol_colour', 'symbolColour'),
@@ -647,7 +647,7 @@ nef2CcpnMap = {
         ('comment', 'comment'),
         )),
 
-    'ccpn_multiplet': OD((
+    'ccpn_multiplet'                 : OD((
         ('multiplet_list_serial', 'multipletList.serial'),
         ('multiplet_serial', None),
         ('height', 'height'),
@@ -666,25 +666,25 @@ nef2CcpnMap = {
         ('comment', 'comment'),
         )),
 
-    'ccpn_multiplet_peaks': OD((
+    'ccpn_multiplet_peaks'           : OD((
         ('multiplet_list_serial', None),
         ('multiplet_serial', None),
         ('multiplet_peak', None),
         )),
 
-    'ccpn_peak_cluster_list': OD((
+    'ccpn_peak_cluster_list'         : OD((
         # ('serial',None),
         # ('comment','comment'),
         ('ccpn_peak_clusters', _isALoop),
         ('ccpn_peak_cluster_peaks', _isALoop),
         )),
-    'ccpn_peak_clusters': OD((
+    'ccpn_peak_clusters'             : OD((
         ('serial', None),
         ('annotation', 'annotation'),
         # ('peak', None),
         # ('ccpn_peak_cluster',_isALoop),
         )),
-    'ccpn_peak_cluster_peaks': OD((
+    'ccpn_peak_cluster_peaks'        : OD((
         ('serial', None),
         ('peak', None),
         # ('name',None),
@@ -692,7 +692,7 @@ nef2CcpnMap = {
         )),
 
     # NB Sample crosslink to spectrum is handled on the spectrum side
-    'ccpn_sample': OD((
+    'ccpn_sample'                    : OD((
         ('name', 'name'),
         ('pH', 'ph'),
         ('ionic_strength', 'ionicStrength'),
@@ -708,7 +708,7 @@ nef2CcpnMap = {
         ('comment', 'comment'),
         ('ccpn_sample_component', _isALoop),
         )),
-    'ccpn_sample_component': OD((
+    'ccpn_sample_component'          : OD((
         ('name', 'name'),
         ('labelling', 'labelling'),
         ('role', 'role'),
@@ -719,7 +719,7 @@ nef2CcpnMap = {
         ('comment', 'comment'),
         )),
 
-    'ccpn_substance': OD((
+    'ccpn_substance'                 : OD((
         ('name', 'name'),
         ('labelling', 'labelling'),
         ('substance_type', None),
@@ -743,17 +743,17 @@ nef2CcpnMap = {
         ('comment', 'comment'),
         ('ccpn_substance_synonym', _isALoop),
         )),
-    'ccpn_substance_synonym': OD((
+    'ccpn_substance_synonym'         : OD((
         ('synonym', None),
         )),
 
-    'ccpn_assignment': OD((
+    'ccpn_assignment'                : OD((
         ('nmr_chain', _isALoop),
         ('nmr_residue', _isALoop),
         ('nmr_atom', _isALoop),
         )),
 
-    'nmr_chain': OD((
+    'nmr_chain'                      : OD((
         ('short_name', 'shortName'),
         ('serial', None),
         ('label', 'label'),
@@ -761,7 +761,7 @@ nef2CcpnMap = {
         ('comment', 'comment'),
         )),
 
-    'nmr_residue': OD((
+    'nmr_residue'                    : OD((
         ('chain_code', 'nmrChain.shortName'),
         ('sequence_code', 'sequenceCode'),
         # ('residue_name',None),
@@ -770,7 +770,7 @@ nef2CcpnMap = {
         ('comment', 'comment'),
         )),
 
-    'nmr_atom': OD((
+    'nmr_atom'                       : OD((
         ('chain_code', 'nmrResidue.nmrChain.shortName'),
         ('sequence_code', 'nmrResidue.sequenceCode'),
         ('serial', None),
@@ -779,7 +779,7 @@ nef2CcpnMap = {
         ('comment', 'comment'),
         )),
 
-    'ccpn_dataset': OD((
+    'ccpn_dataset'                   : OD((
         ('serial', 'serial'),
         ('title', 'title'),
         ('program_name', 'programName'),
@@ -792,7 +792,7 @@ nef2CcpnMap = {
         ('ccpn_calculation_data', _isALoop),
         )),
 
-    'ccpn_calculation_step': OD((
+    'ccpn_calculation_step'          : OD((
         ('serial', None),
         ('program_name', 'programName'),
         ('program_version', 'programVersion'),
@@ -802,14 +802,14 @@ nef2CcpnMap = {
         ('output_data_uuid', 'outputDataUuid'),
         )),
 
-    'ccpn_calculation_data': OD((
+    'ccpn_calculation_data'          : OD((
         ('data_name', 'name'),
         ('attached_object_pid', 'attachedObjectPid'),
         ('parameter_name', None),
         ('parameter_value', None),
         )),
 
-    'ccpn_restraint_list': OD((
+    'ccpn_restraint_list'            : OD((
         ('potential_type', 'potentialType'),
         ('restraint_origin', 'origin'),
         ('tensor_chain_code', 'tensorChainCode'),
@@ -829,7 +829,7 @@ nef2CcpnMap = {
         ('comment', 'comment'),
         ('ccpn_restraint', _isALoop),
         )),
-    'ccpn_restraint': OD((
+    'ccpn_restraint'                 : OD((
         ('index', None),
         ('restraint_id', 'restraint.serial'),
         ('restraint_combination_id', 'combinationId'),
@@ -865,10 +865,10 @@ nef2CcpnMap = {
         ('ccpn_comment', 'restraint.comment'),
         )),
 
-    'ccpn_notes': OD((
+    'ccpn_notes'                     : OD((
         ('ccpn_note', _isALoop),
         )),
-    'ccpn_note': OD((
+    'ccpn_note'                      : OD((
         ('serial', None),
         ('name', 'name'),
         ('created', None),
@@ -876,10 +876,10 @@ nef2CcpnMap = {
         ('text', 'text'),
         )),
 
-    'ccpn_additional_data': OD((
+    'ccpn_additional_data'           : OD((
         ('ccpn_internal_data', _isALoop),
         )),
-    'ccpn_internal_data': OD((
+    'ccpn_internal_data'             : OD((
         ('ccpn_object_pid', None),
         ('internal_data_string', None)
         )),
@@ -1901,15 +1901,15 @@ class CcpnNefWriter:
         # Get name map for per-dimension attributes
         max = spectrum.dimensionCount + 1
         multipleAttributes = {
-            'position': tuple('position_%s' % ii for ii in range(1, max)),
+            'position'     : tuple('position_%s' % ii for ii in range(1, max)),
             'positionError': tuple('position_uncertainty_%s' % ii for ii in range(1, max)),
-            'chainCodes': tuple('chain_code_%s' % ii for ii in range(1, max)),
+            'chainCodes'   : tuple('chain_code_%s' % ii for ii in range(1, max)),
             'sequenceCodes': tuple('sequence_code_%s' % ii for ii in range(1, max)),
-            'residueTypes': tuple('residue_name_%s' % ii for ii in range(1, max)),
-            'atomNames': tuple('atom_name_%s' % ii for ii in range(1, max)),
-            'slopes': tuple('slopes_%s' % ii for ii in range(1, max)),
-            'lowerLimits': tuple('lower_limits_%s' % ii for ii in range(1, max)),
-            'upperLimits': tuple('upper_limits_%s' % ii for ii in range(1, max)),
+            'residueTypes' : tuple('residue_name_%s' % ii for ii in range(1, max)),
+            'atomNames'    : tuple('atom_name_%s' % ii for ii in range(1, max)),
+            'slopes'       : tuple('slopes_%s' % ii for ii in range(1, max)),
+            'lowerLimits'  : tuple('lower_limits_%s' % ii for ii in range(1, max)),
+            'upperLimits'  : tuple('upper_limits_%s' % ii for ii in range(1, max)),
             }
 
         index = 0
@@ -3393,7 +3393,7 @@ class CcpnNefReader:
         # Get name map for per-dimension attributes
         max = spectrum.dimensionCount + 1
         multipleAttributes = {
-            'slopes': tuple('slopes_%s' % ii for ii in range(1, max)),
+            'slopes'     : tuple('slopes_%s' % ii for ii in range(1, max)),
             'lowerLimits': tuple('lower_limits_%s' % ii for ii in range(1, max)),
             'upperLimits': tuple('upper_limits_%s' % ii for ii in range(1, max)),
             }
@@ -3538,12 +3538,12 @@ class CcpnNefReader:
         # Get name map for per-dimension attributes
         max = dimensionCount + 1
         multipleAttributes = {
-            'position': tuple('position_%s' % ii for ii in range(1, max)),
+            'position'     : tuple('position_%s' % ii for ii in range(1, max)),
             'positionError': tuple('position_uncertainty_%s' % ii for ii in range(1, max)),
-            'chainCodes': tuple('chain_code_%s' % ii for ii in range(1, max)),
+            'chainCodes'   : tuple('chain_code_%s' % ii for ii in range(1, max)),
             'sequenceCodes': tuple('sequence_code_%s' % ii for ii in range(1, max)),
-            'residueTypes': tuple('residue_name_%s' % ii for ii in range(1, max)),
-            'atomNames': tuple('atom_name_%s' % ii for ii in range(1, max)),
+            'residueTypes' : tuple('residue_name_%s' % ii for ii in range(1, max)),
+            'atomNames'    : tuple('atom_name_%s' % ii for ii in range(1, max)),
             }
 
         peaks = {}

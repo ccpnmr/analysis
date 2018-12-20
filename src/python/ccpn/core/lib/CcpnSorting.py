@@ -8,8 +8,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -19,97 +18,100 @@ __version__ = "$Revision: 3.0.b4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
 import re
-from ccpn.util import  Sorting
+from ccpn.util import Sorting
+
+
 SPLITONDOTS = re.compile("([.])")
 
 _keyCache = {}
 
+
 #
-def stringSortKey(key:str) -> tuple:
-  """Sort key for strings.
+def stringSortKey(key: str) -> tuple:
+    """Sort key for strings.
 
-  Usage: sorted(aList, key=stringSortKey) or aList.sort(key=stringSortKey)
+    Usage: sorted(aList, key=stringSortKey) or aList.sort(key=stringSortKey)
 
-  Custom CCPN version of stringSortKey that sorts Pids on their individual components.
+    Custom CCPN version of stringSortKey that sorts Pids on their individual components.
 
-  Advanced:
+    Advanced:
 
-  Splits on embedded dots before further processing, and
-  Returns an alternating tuple of (possibly empty) strings interspersed with (float,string) tuples,
-  where the float is the converted value of the substring.
-  First and last element are always strings.
+    Splits on embedded dots before further processing, and
+    Returns an alternating tuple of (possibly empty) strings interspersed with (float,string) tuples,
+    where the float is the converted value of the substring.
+    First and last element are always strings.
 
-  If the entire string evaluates to a float, the result is ('', '(floatVal, stringVal), '')
+    If the entire string evaluates to a float, the result is ('', '(floatVal, stringVal), '')
 
-  Otherwise the numeric tuples are (intVal, subStringVal).
-  Substrings recognised as integers are an optional series of ' ',
-  an optional sign, and a series of digits - or REGEX '[ ]*[+-]?\d+'
-  For this type the key tuple is extended by (0,''),
-  # so that end-of-key sorts as 0 rather thn coming first.
+    Otherwise the numeric tuples are (intVal, subStringVal).
+    Substrings recognised as integers are an optional series of ' ',
+    an optional sign, and a series of digits - or REGEX '[ ]*[+-]?\d+'
+    For this type the key tuple is extended by (0,''),
+    # so that end-of-key sorts as 0 rather thn coming first.
 
-  Example of sorting order
-  ['', 'NaN', '-1', '-1A', '0.0', '1', '2', '15', '3.2e12', 'Inf',
-  'Ahh', 'b',  'b2', 'b12', 'bb', 'ciao'] """
+    Example of sorting order
+    ['', 'NaN', '-1', '-1A', '0.0', '1', '2', '15', '3.2e12', 'Inf',
+    'Ahh', 'b',  'b2', 'b12', 'bb', 'ciao'] """
 
-  keyEnd = ((0,''),'')
+    keyEnd = ((0, ''), '')
 
-  global _keyCache
-  result = _keyCache.get(key)
+    global _keyCache
+    result = _keyCache.get(key)
 
-  if result is None:
-    tt = Sorting._floatStringKey(key)
-    if tt:
-      # Read as floating point number if possible
-      result = (tt,)
-    elif '.'  in key:
-      # Otherwise treat dot ('.') as a field separator
-      ll = [Sorting._numericSplitString(x) for x in SPLITONDOTS.split(key) if x != '']
-      # result = tuple(x if x[-1] else x + keyEnd for x in ll)
-      result = tuple(x + keyEnd for x in ll)
-    else:
-      # Simple string
-      result = Sorting._numericSplitString(key)
-      # if len(result) > 1 and result[-1] == '':
-      if len(result) > 1:
-        # String ended with a numeric field. Add keyEnd so that this sorts as 0
-        # against keys where the next field is also numeric
-        result += keyEnd
-      result = (result,)
+    if result is None:
+        tt = Sorting._floatStringKey(key)
+        if tt:
+            # Read as floating point number if possible
+            result = (tt,)
+        elif '.' in key:
+            # Otherwise treat dot ('.') as a field separator
+            ll = [Sorting._numericSplitString(x) for x in SPLITONDOTS.split(key) if x != '']
+            # result = tuple(x if x[-1] else x + keyEnd for x in ll)
+            result = tuple(x + keyEnd for x in ll)
+        else:
+            # Simple string
+            result = Sorting._numericSplitString(key)
+            # if len(result) > 1 and result[-1] == '':
+            if len(result) > 1:
+                # String ended with a numeric field. Add keyEnd so that this sorts as 0
+                # against keys where the next field is also numeric
+                result += keyEnd
+            result = (result,)
+        #
+        _keyCache[key] = result
     #
-    _keyCache[key] = result
-  #
-  return result
+    return result
 
 
 def _ccpnOrderedKey(key):
-  """Special case sorting key for CCPN - groups CCPN AbstractWrapperObjects together
-  before sorting by class name"""
+    """Special case sorting key for CCPN - groups CCPN AbstractWrapperObjects together
+    before sorting by class name"""
 
-  # import here to avoid circular imports
-  from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+    # import here to avoid circular imports
+    from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 
-  cls = key.__class__
+    cls = key.__class__
 
-  ordering = 0
-  if isinstance(key, AbstractWrapperObject):
-    ordering = -1
-  #
-  return (ordering, cls.__name__, id(cls), key)
+    ordering = 0
+    if isinstance(key, AbstractWrapperObject):
+        ordering = -1
+    #
+    return (ordering, cls.__name__, id(cls), key)
 
 
 def universalSortKey(key):
-  """Custom universalSortKey, used to sort a list of mixed-type Python objects.
+    """Custom universalSortKey, used to sort a list of mixed-type Python objects.
 
-  Usage: sorted(aList, key=universalSortKey) or aList.sort(key=universalSortKey)
+    Usage: sorted(aList, key=universalSortKey) or aList.sort(key=universalSortKey)
 
-  Uses the local stringSortKey variant for strings and
-  CCPN WrapperObjects sorted together"""
-  return Sorting.universalSortKey(key, _stringOrderingHook=stringSortKey,
-                                  _orderedKeyHook=_ccpnOrderedKey)
+    Uses the local stringSortKey variant for strings and
+    CCPN WrapperObjects sorted together"""
+    return Sorting.universalSortKey(key, _stringOrderingHook=stringSortKey,
+                                    _orderedKeyHook=_ccpnOrderedKey)

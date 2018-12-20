@@ -54,7 +54,6 @@ class OrderedSpectrumViews(object):
         """
         if isinstance(self._parent._ccpnInternalData, dict) and \
                 SPECTRUMVIEWINDEX in self._parent._ccpnInternalData:
-
             return self._parent._ccpnInternalData[SPECTRUMVIEWINDEX]
 
     def _storeOrderedSpectrumViewIndex(self, spectrumViewIndex: Tuple[int]):
@@ -129,7 +128,6 @@ class OrderedSpectrumViews(object):
         with logCommandBlock(get='self') as log:
             log('setOrderedSpectrumViewsIndex')
             with undoStackBlocking() as addUndoItem:
-
                 # _oldSpectrumViews = self._spectrumViewIndex
                 _oldSpectrumViews = self._retrieveOrderedSpectrumViewIndex()
                 self._storeOrderedSpectrumViewIndex(spectrumViewIndex=spectrumIndex)

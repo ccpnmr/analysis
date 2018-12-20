@@ -10,7 +10,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                  "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -20,7 +19,6 @@ __version__ = "$Revision: 3.0.b4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: tjragan $"
 __date__ = "$Date: 2016-05-18 09:27:23 +0100 (Wed, 18 May 2016) $"
 #=========================================================================================
@@ -28,9 +26,7 @@ __date__ = "$Date: 2016-05-18 09:27:23 +0100 (Wed, 18 May 2016) $"
 #=========================================================================================
 
 import os
-
 from PyQt5 import QtGui, QtWidgets, QtCore
-
 from ccpn.util import Path
 
 

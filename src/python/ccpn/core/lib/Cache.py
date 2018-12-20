@@ -38,7 +38,7 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y"
-                )
+                 )
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -58,11 +58,13 @@ import decorator
 import inspect
 import sys
 
-DEBUG = False   # global debug
+
+DEBUG = False  # global debug
+
 
 class Cache(object):
     """
-    A chache object;
+    A cache object;
 
     - Retains (item, value) pairs; item must be a hash-able object (e.g. tuple)
     - Retains either maxItem or unlimited number of objects.
@@ -80,20 +82,20 @@ class Cache(object):
         self._maxItems = maxItems  # maximum number of cached items
         self._name = name  # name of the cache (main for debugging)
         self._debug = DEBUG or debug  # debug flag for this cache instance
-        self._items = []   # List (FIFO stack) of items in the cache
+        self._items = []  # List (FIFO stack) of items in the cache
         self._cacheDict = {}  # cached (item, value) dict
 
     def add(self, item, value):
         """add item,value to the cache
         """
         if item in self._items:  # not using hasItem() to save another call
-            return   # item is already cached
+            return  # item is already cached
 
         if self._maxItems and len(self._items) == self._maxItems:
             # need to remove one item first
             itm = self._items.pop(0)
             if self._debug: sys.stderr.write('DEBUG> %s ... removing "%s"\n' % (self, itm))
-            del(self._cacheDict[itm])
+            del (self._cacheDict[itm])
 
         if self._debug: sys.stderr.write('DEBUG> %s ... Adding "%s"\n' % (self, item))
         self._cacheDict[item] = value
@@ -144,17 +146,17 @@ def cached(attributeName, maxItems=0, debug=False):
         # create an item hash from *args and **kwds, skipping the obj argument
         ba = inspect.signature(func).bind(*args, **kwds)
         ba.apply_defaults()
-        allArgs = ba.arguments # ordered dict of (argument,value) pairs; first corresponds to object
+        allArgs = ba.arguments  # ordered dict of (argument,value) pairs; first corresponds to object
 
         argumentNames = [k for k in allArgs.keys()][1:]  # skip the first one which is the object
         # sort to maintain a consistent tuple of tuples item to cache
         argumentNames.sort()
-        item = tuple([ (k,allArgs[k]) for k in argumentNames ])
+        item = tuple([(k, allArgs[k]) for k in argumentNames])
         # convert to a string
         item = repr(item)
 
         if not hasattr(obj, attributeName):
-            name = '%s.%s' % (obj,attributeName)
+            name = '%s.%s' % (obj, attributeName)
             setattr(obj, attributeName, Cache(maxItems=maxItems, name=name, debug=debug))
         cache = getattr(obj, attributeName)
         if not isinstance(cache, Cache):
@@ -192,15 +194,14 @@ def _clear(attributeName):
                 cache.clear()
         result = func(*args, **kwds)
         return result
+
     return decoratedFunc
+
 
 cached.clear = _clear
 
-
 if __name__ == "__main__":
-
     class myclass(object):
-
         CACHE = 'cache'
 
         @cached(CACHE, maxItems=2, debug=True)
@@ -213,6 +214,7 @@ if __name__ == "__main__":
 
         def __str__(self):
             return '<myclass>'
+
 
     a = myclass()
     print(a.add('aap noot mies'.split()))

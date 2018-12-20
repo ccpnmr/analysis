@@ -1,31 +1,3 @@
-"""Module Documentation here
-
-"""
-#=========================================================================================
-# Licence, Reference and Credits
-#=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
-__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
-#=========================================================================================
-# Last code modification
-#=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:16 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b2 $"
-#=========================================================================================
-# Created
-#=========================================================================================
-
-__author__ = "$Author: rhfogh $"
-__date__ = "$Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
-#=========================================================================================
-# Start of code
-#=========================================================================================
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
@@ -40,6 +12,30 @@ __date__ = "$Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
 #
 # All configuration values have a default; values that are commented out
 # serve to show the default.
+
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
+                 "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
+                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+#=========================================================================================
+# Last code modification
+#=========================================================================================
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2017-07-07 16:32:16 +0100 (Fri, July 07, 2017) $"
+__version__ = "$Revision: 3.0.b4 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: rhfogh $"
+__date__ = "$Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
+#=========================================================================================
+# Start of code
+#=========================================================================================
 
 import sys
 import os

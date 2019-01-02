@@ -105,7 +105,7 @@ class GLRegion(QtWidgets.QWidget):
     def values(self, values):
         self._values = tuple(values)
         try:
-            self._glList.renderMode = GLRENDERMODE_RESCALE
+            self._glList.renderMode = GLRENDERMODE_REBUILD
         except Exception as es:
             pass
 
@@ -250,7 +250,7 @@ class GLRegion(QtWidgets.QWidget):
                                                          dimension=2, GLContext=self._parent)
 
             intArea.numVertices = len(self._object._1Dregions[1]) * 2
-            intArea.vertices = np.empty(intArea.numVertices * 2)
+            intArea.vertices = np.empty(intArea.numVertices * 2, dtype=np.float32)
             intArea.vertices[::4] = self._object._1Dregions[1]
             intArea.vertices[2::4] = self._object._1Dregions[1]
             intArea.vertices[1::4] = self._object._1Dregions[0]
@@ -262,8 +262,9 @@ class GLRegion(QtWidgets.QWidget):
                 solidColour = list(self._brush)
             solidColour[3] = 1.0
 
-            intArea.colors = np.array(solidColour * intArea.numVertices)
+            intArea.colors = np.array(solidColour * intArea.numVertices, dtype=np.float32)
 
+            intArea.defineVertexColorVBO(enableVBO=True)
 
 class GLInfiniteLine(GLRegion):
     valuesChanged = pyqtSignal(float)
@@ -320,18 +321,21 @@ class GLExternalRegion(GLVertexArray):
         self.GLContext = GLContext
 
     def drawIndexArray(self):
-        # draw twice top cover the outline
+        # draw twice to highlight the outline
         self.fillMode = GL.GL_LINE
         super().drawIndexArray()
         self.fillMode = GL.GL_FILL
         super().drawIndexArray()
 
+    def defineIndexVBO(self, enableVBO=False):
+        super().defineIndexVBO(enableVBO=enableVBO)
+
     def drawIndexVBO(self, enableVBO=False):
-        # draw twice top cover the outline
+        # draw twice to highlight the outline
         self.fillMode = GL.GL_LINE
-        super().drawIndexVBO(enableVBO=False)
+        super().drawIndexVBO(enableVBO=enableVBO)
         self.fillMode = GL.GL_FILL
-        super().drawIndexVBO(enableVBO=False)
+        super().drawIndexVBO(enableVBO=enableVBO)
 
     def _clearRegions(self):
         self._regions = []
@@ -380,7 +384,7 @@ class GLExternalRegion(GLVertexArray):
                 axisCode = self._parent._axisCodes[0]
                 orientation = 'v'
 
-        self._regions.append(GLRegion(self._parent, self,
+        newRegion = GLRegion(self._parent, self,
                                       values=values,
                                       axisCode=axisCode,
                                       orientation=orientation,
@@ -390,7 +394,11 @@ class GLExternalRegion(GLVertexArray):
                                       visible=visible,
                                       bounds=bounds,
                                       obj=obj,
-                                      objectView=objectView))
+                                      objectView=objectView)
+        self._regions.append(newRegion)
+
+        # # set up the VBOs
+        newRegion._integralArea.defineVertexColorVBO(enableVBO=True)
 
         axisIndex = 0
         for ps, psCode in enumerate(self._parent.axisOrder[0:2]):
@@ -418,19 +426,30 @@ class GLExternalRegion(GLVertexArray):
 
         colour = brush
         index = self.numVertices
-        self.indices = np.append(self.indices, (index, index + 1, index + 2, index + 3,
-                                                index, index + 1, index, index + 1,
-                                                index + 1, index + 2, index + 1, index + 2,
-                                                index + 2, index + 3, index + 2, index + 3,
-                                                index, index + 3, index, index + 3))
-        self.vertices = np.append(self.vertices, (x0, y0, x0, y1, x1, y1, x1, y0))
-        self.colors = np.append(self.colors, colour * 4)
-        self.attribs = np.append(self.attribs, (axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1))
+
+        if self.indices.size:
+            self.indices = np.append(self.indices, np.array((index, index + 1, index + 2, index + 3,
+                                                             index, index + 1, index, index + 1,
+                                                             index + 1, index + 2, index + 1, index + 2,
+                                                             index + 2, index + 3, index + 2, index + 3,
+                                                             index, index + 3, index, index + 3), dtype=np.uint32))
+            self.vertices = np.append(self.vertices, np.array((x0, y0, x0, y1, x1, y1, x1, y0), dtype=np.float32))
+            self.colors = np.append(self.colors, np.array(colour * 4, dtype=np.float32))
+            self.attribs = np.append(self.attribs, (axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1))
+        else:
+            self.indices = np.array((index, index + 1, index + 2, index + 3,
+                                                    index, index + 1, index, index + 1,
+                                                    index + 1, index + 2, index + 1, index + 2,
+                                                    index + 2, index + 3, index + 2, index + 3,
+                                                    index, index + 3, index, index + 3), dtype=np.uint32)
+            self.vertices = np.array((x0, y0, x0, y1, x1, y1, x1, y0), dtype=np.float32)
+            self.colors = np.array(colour * 4, dtype=np.float32)
+            self.attribs = np.append(self.attribs, (axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1))
 
         index += 4
         self.numVertices += 4
 
-        return self._regions[-1]
+        return newRegion
 
     def _rebuildIntegralAreas(self):
         self._rebuild(checkBuild=True)
@@ -465,6 +484,8 @@ class GLExternalRegion(GLVertexArray):
                                axisR + pixelX, axis1, axisR + pixelX, axis0]
 
                 self.vertices[pp:pp + 8] = offsets
+
+        self.defineIndexVBO(enableVBO=True)
 
     def _resize(self):
         axisT = self._parent.axisT
@@ -504,6 +525,8 @@ class GLExternalRegion(GLVertexArray):
             self.attribs[pp + 7] = axis1
             pp += 8
 
+        self.defineIndexVBO(enableVBO=True)
+
     def _rebuild(self, checkBuild=False):
         axisT = self._parent.axisT
         axisB = self._parent.axisB
@@ -541,18 +564,27 @@ class GLExternalRegion(GLVertexArray):
 
             colour = reg.brush
             index = self.numVertices
-            self.indices = np.append(self.indices, (index, index + 1, index + 2, index + 3,
-                                                    index, index + 1, index, index + 1,
-                                                    index + 1, index + 2, index + 1, index + 2,
-                                                    index + 2, index + 3, index + 2, index + 3,
-                                                    index, index + 3, index, index + 3))
-            self.vertices = np.append(self.vertices, (x0, y0, x0, y1, x1, y1, x1, y0))
-            self.colors = np.append(self.colors, colour * 4)
-            self.attribs = np.append(self.attribs, (axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1))
+            if self.indices.size:
+                self.indices = np.append(self.indices, np.array((index, index + 1, index + 2, index + 3,
+                                                                 index, index + 1, index, index + 1,
+                                                                 index + 1, index + 2, index + 1, index + 2,
+                                                                 index + 2, index + 3, index + 2, index + 3,
+                                                                 index, index + 3, index, index + 3), dtype=np.uint32))
+                self.vertices = np.append(self.vertices, np.array((x0, y0, x0, y1, x1, y1, x1, y0), dtype=np.float32))
+                self.colors = np.append(self.colors, np.array(colour * 4, dtype=np.float32))
+                self.attribs = np.append(self.attribs, (axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1))
+            else:
+                self.indices = np.array((index, index + 1, index + 2, index + 3,
+                                         index, index + 1, index, index + 1,
+                                         index + 1, index + 2, index + 1, index + 2,
+                                         index + 2, index + 3, index + 2, index + 3,
+                                         index, index + 3, index, index + 3), dtype=np.uint32)
+                self.vertices = np.array((x0, y0, x0, y1, x1, y1, x1, y0), dtype=np.float32)
+                self.colors = np.array(colour * 4, dtype=np.float32)
+                self.attribs = np.append(self.attribs, (axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1))
 
             index += 4
             self.numVertices += 4
-
 
 class GLIntegralRegion(GLExternalRegion):
     def __init__(self, project=None, GLContext=None, spectrumView=None, integralListView=None):
@@ -641,14 +673,24 @@ class GLIntegralRegion(GLExternalRegion):
             colour[3] = CCPNGLWIDGET_INTEGRALSHADE
 
             index = self.numVertices
-            self.indices = np.append(self.indices, (index, index + 1, index + 2, index + 3,
-                                                    index, index + 1, index, index + 1,
-                                                    index + 1, index + 2, index + 1, index + 2,
-                                                    index + 2, index + 3, index + 2, index + 3,
-                                                    index, index + 3, index, index + 3))
-            self.vertices = np.append(self.vertices, (x0, y0, x0, y1, x1, y1, x1, y0))
-            self.colors = np.append(self.colors, colour * 4)
-            self.attribs = np.append(self.attribs, (axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1))
+            if self.indices.size:
+                self.indices = np.append(self.indices, np.array((index, index + 1, index + 2, index + 3,
+                                                                 index, index + 1, index, index + 1,
+                                                                 index + 1, index + 2, index + 1, index + 2,
+                                                                 index + 2, index + 3, index + 2, index + 3,
+                                                                 index, index + 3, index, index + 3), dtype=np.uint32))
+                self.vertices = np.append(self.vertices, np.array((x0, y0, x0, y1, x1, y1, x1, y0), dtype=np.float32))
+                self.colors = np.append(self.colors, np.array(colour * 4, dtype=np.float32))
+                self.attribs = np.append(self.attribs, (axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1))
+            else:
+                self.indices = np.array((index, index + 1, index + 2, index + 3,
+                                         index, index + 1, index, index + 1,
+                                         index + 1, index + 2, index + 1, index + 2,
+                                         index + 2, index + 3, index + 2, index + 3,
+                                         index, index + 3, index, index + 3), dtype=np.uint32)
+                self.vertices = np.array((x0, y0, x0, y1, x1, y1, x1, y0), dtype=np.float32)
+                self.colors = np.array(colour * 4, dtype=np.float32)
+                self.attribs = np.append(self.attribs, (axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1))
 
             index += 4
             self.numVertices += 4
@@ -708,6 +750,8 @@ class GLIntegralRegion(GLExternalRegion):
             self.attribs[pp + 5] = axis0
             self.attribs[pp + 7] = axis1
 
+        self.defineIndexVBO(enableVBO=True)
+
     def _rebuild(self, checkBuild=False):
         axisT = self._parent.axisT
         axisB = self._parent.axisB
@@ -732,14 +776,16 @@ class GLIntegralRegion(GLExternalRegion):
             # TODO:ED check axis units - assume 'ppm' for the minute
             if axisIndex == 0:
                 # vertical ruler
-                pos0 = x0 = reg.values[0]
-                pos1 = x1 = reg.values[1]
+                pos0 = x0 = reg._object.limits[0][0]                # reg.values[0]
+                pos1 = x1 = reg._object.limits[0][1]                # reg.values[1]
+                reg._values = (pos0, pos1)                          # not nice, but feed back in to current _values
                 y0 = axisT + pixelY
                 y1 = axisB - pixelY
             else:
                 # horizontal ruler
-                pos0 = y0 = reg.values[0]
-                pos1 = y1 = reg.values[1]
+                pos0 = y0 = reg._object.limits[0][0]                # reg.values[0]
+                pos1 = y1 = reg._object.limits[0][1]                # reg.values[1]
+                reg._values = (pos0, pos1)                          # not nice, but feed back in to current _values
                 x0 = axisL - pixelX
                 x1 = axisR + pixelX
 
@@ -748,14 +794,24 @@ class GLIntegralRegion(GLExternalRegion):
                 solidColour[3] = CCPNGLWIDGET_INTEGRALSHADE
 
                 index = self.numVertices
-                self.indices = np.append(self.indices, (index, index + 1, index + 2, index + 3,
-                                                        index, index + 1, index, index + 1,
-                                                        index + 1, index + 2, index + 1, index + 2,
-                                                        index + 2, index + 3, index + 2, index + 3,
-                                                        index, index + 3, index, index + 3))
-                self.vertices = np.append(self.vertices, (x0, y0, x0, y1, x1, y1, x1, y0))
-                self.colors = np.append(self.colors, solidColour * 4)
-                self.attribs = np.append(self.attribs, (axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1))
+                if self.indices.size:
+                    self.indices = np.append(self.indices, np.array((index, index + 1, index + 2, index + 3,
+                                                            index, index + 1, index, index + 1,
+                                                            index + 1, index + 2, index + 1, index + 2,
+                                                            index + 2, index + 3, index + 2, index + 3,
+                                                            index, index + 3, index, index + 3), dtype=np.uint32))
+                    self.vertices = np.append(self.vertices, np.array((x0, y0, x0, y1, x1, y1, x1, y0), dtype=np.float32))
+                    self.colors = np.append(self.colors, np.array(solidColour * 4, dtype=np.float32))
+                    self.attribs = np.append(self.attribs, (axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1))
+                else:
+                    self.indices = np.array((index, index + 1, index + 2, index + 3,
+                                             index, index + 1, index, index + 1,
+                                             index + 1, index + 2, index + 1, index + 2,
+                                             index + 2, index + 3, index + 2, index + 3,
+                                             index, index + 3, index, index + 3), dtype=np.uint32)
+                    self.vertices = np.array((x0, y0, x0, y1, x1, y1, x1, y0), dtype=np.float32)
+                    self.colors = np.array(solidColour * 4, dtype=np.float32)
+                    self.attribs = np.append(self.attribs, (axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1))
 
                 index += 4
                 self.numVertices += 4
@@ -772,3 +828,9 @@ class GLIntegralRegion(GLExternalRegion):
                 if hasattr(reg, '_integralArea') and reg._integralArea.renderMode == GLRENDERMODE_REBUILD:
                     reg._integralArea.renderMode = GLRENDERMODE_DRAW
                     reg._rebuildIntegral()
+
+            # rebuild VBO for the integral shape
+            # reg._integralArea.defineVertexColorVBO(enableVBO=True)
+
+        # redefined VBO for the highlighting
+        self.defineIndexVBO(enableVBO=True)

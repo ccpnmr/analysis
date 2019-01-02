@@ -113,6 +113,7 @@ class GLLabelling():
 
         self._GLSymbols = {}
         self._GLLabels = {}
+        self._ordering = ()
 
         self.autoColour = self._GLParent.SPECTRUMPOSCOLOUR
 
@@ -1837,7 +1838,7 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
         lineThickness = strip.symbolThickness / 2.0
 
         drawList = self._GLSymbols[objListView]
-        drawList.indices = np.empty(0, dtype=np.uint32)
+        drawList.indices = np.array([], dtype=np.uint32)
 
         index = 0
         indexPtr = 0
@@ -2646,6 +2647,8 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
 
         for integralListView, specView in self._visibleListViews:
             if not integralListView.isDeleted and integralListView in self._GLSymbols.keys():
+
+                # draw the boxes around the highlighted integral areas
                 self._GLSymbols[integralListView].drawIndexVBO(enableVBO=True)
 
                 # draw the integralAreas if they exist
@@ -2659,7 +2662,8 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
                                                                                               specView][
                                                                                               GLDefs.SPECTRUM_STACKEDMATRIX])
 
-                        integralArea._integralArea.drawVertexColor()
+                        # draw the actual integral areas
+                        integralArea._integralArea.drawVertexColorVBO(enableVBO=True)
 
         self._GLParent.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._GLParent._IMatrix)
 
@@ -2743,10 +2747,27 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
                 return
 
     def _changeSymbol(self, integral):
+
+        # self.buildSymbols()
+
         for ils in self._GLSymbols.values():
             for reg in ils._regions:
                 if reg._object == integral:
-                    ils._resize()
+                    # ils._resize()
+                    print('>>>_changeSymbol', ils, integral)
+
+                    if hasattr(reg, '_integralArea'):
+                        # reg[0].renderMode = GLRENDERMODE_REBUILD
+                        # reg._rebuildIntegral()
+
+                        reg._integralArea.renderMode = GLRENDERMODE_REBUILD
+                        ils._rebuildIntegralAreas()
+                        # ils.defineIndexVBO(enableVBO=True)
+
+                        # ils.renderMode = GLRENDERMODE_RESCALE
+                        # reg._integralArea.renderMode = GLRENDERMODE_REBUILD
+                        # self.buildSymbols()
+                        # need to change the parent list
                     return
 
     def _appendLabel(self, spectrumView, objListView, stringList, obj):

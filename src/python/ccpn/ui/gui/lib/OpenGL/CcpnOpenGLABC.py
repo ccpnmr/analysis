@@ -619,12 +619,9 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         self.globalGL._shaderProgram1.setBackground(self.background)
         self.globalGL._shaderProgramTex.makeCurrent()
         self.globalGL._shaderProgramTex.setBackground(self.background)
-        self.doneCurrent()
         if not silent:
             self.update()
-
         self.doneCurrent()
-        self.update()
 
     def enableTexture(self):
         GL.glEnable(GL.GL_BLEND)

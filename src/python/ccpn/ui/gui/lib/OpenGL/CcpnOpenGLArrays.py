@@ -178,6 +178,8 @@ class GLVertexArray():
         else:
 
             # getLogger().info('>>>drawIndexVBO')
+            if not self.indices.size:
+                return
 
             if self.blendMode:
                 GL.glEnable(GL.GL_BLEND)

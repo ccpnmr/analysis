@@ -1556,18 +1556,18 @@ class CcpnGLWidget(QOpenGLWidget):
         """
         self.makeCurrent()
         GL.glClearColor(*col)
-        self.background = col
+        self.background = np.array(col, dtype=np.float32)
 
         self.globalGL._shaderProgram1.makeCurrent()
         self.globalGL._shaderProgram1.setBackground(self.background)
         self.globalGL._shaderProgramTex.makeCurrent()
         self.globalGL._shaderProgramTex.setBackground(self.background)
-        self.doneCurrent()
         if not silent:
             self.update()
-
         self.doneCurrent()
-        self.update()
+
+        # self.doneCurrent()
+        # self.update()
 
     def mapMouseToAxis(self, pnt):
         if isinstance(pnt, QPoint):
@@ -2031,10 +2031,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
                         reg[0].values = values
 
-                        # NOTE:ED check moving of _baseline
-                        if hasattr(reg[0], '_integralArea'):
-                            # reg[0].renderMode = GLRENDERMODE_REBUILD
-                            reg[0]._rebuildIntegral()
+                        # # NOTE:ED check moving of _baseline
+                        # if hasattr(reg[0], '_integralArea'):
+                        #     # reg[0].renderMode = GLRENDERMODE_REBUILD
+                        #     reg[0]._rebuildIntegral()
                 else:
 
                     # Main mouse drag event - handle moving the axes with the mouse
@@ -2963,14 +2963,14 @@ class CcpnGLWidget(QOpenGLWidget):
             self.buildMarks = False
 
         self.buildMarksRulers()
-        self._marksList.drawIndexVBO(enableVBO=False)
+        self._marksList.drawIndexVBO(enableVBO=True)
 
     def drawRegions(self):
         if self.strip.isDeleted:
             return
 
         self.buildRegions()
-        self._externalRegions.drawIndexVBO(enableVBO=False)
+        self._externalRegions.drawIndexVBO(enableVBO=True)
 
     def drawMarksAxisCodes(self):
         if self.strip.isDeleted:

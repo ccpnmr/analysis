@@ -2747,28 +2747,18 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
                 return
 
     def _changeSymbol(self, integral):
-
-        # self.buildSymbols()
-
+        """update the vertex list attached to the integral
+        """
         for ils in self._GLSymbols.values():
             for reg in ils._regions:
                 if reg._object == integral:
-                    # ils._resize()
-                    print('>>>_changeSymbol', ils, integral)
-
                     if hasattr(reg, '_integralArea'):
-                        # reg[0].renderMode = GLRENDERMODE_REBUILD
-                        # reg._rebuildIntegral()
 
+                        # set the rebuild flag for this region
                         reg._integralArea.renderMode = GLRENDERMODE_REBUILD
                         ils._rebuildIntegralAreas()
-                        # ils.defineIndexVBO(enableVBO=True)
 
-                        # ils.renderMode = GLRENDERMODE_RESCALE
-                        # reg._integralArea.renderMode = GLRENDERMODE_REBUILD
-                        # self.buildSymbols()
-                        # need to change the parent list
-                    return
+                        return
 
     def _appendLabel(self, spectrumView, objListView, stringList, obj):
         """Append a new label to the end of the list

@@ -106,8 +106,8 @@ from ccpn.ui.gui.lib.mouseEvents import \
 # from ccpn.core.lib.Notifiers import Notifier
 
 try:
-    # used to test whether all the arrays are defined correctly - conflicts with pyqt window manager resize
-    # os.environ.update({'PYOPENGL_ERROR_ON_COPY': 'false'})
+    # used to test whether all the arrays are defined correctly
+    # os.environ.update({'PYOPENGL_ERROR_ON_COPY': 'true'})
 
     from OpenGL import GL, GLU, GLUT
 except ImportError:
@@ -2925,9 +2925,9 @@ class CcpnGLWidget(QOpenGLWidget):
                         colG = int(colour.strip('# ')[2:4], 16) / 255.0
                         colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
-                        drawList.indices = np.append(drawList.indices, (index, index + 1))
-                        drawList.vertices = np.append(drawList.vertices, (x0, y0, x1, y1))
-                        drawList.colors = np.append(drawList.colors, (colR, colG, colB, 1.0) * 2)
+                        drawList.indices = np.append(drawList.indices, np.array((index, index + 1), dtype=np.uint32))
+                        drawList.vertices = np.append(drawList.vertices, np.array((x0, y0, x1, y1), dtype=np.float32))
+                        drawList.colors = np.append(drawList.colors, np.array((colR, colG, colB, 1.0) * 2, dtype=np.float32))
                         drawList.attribs = np.append(drawList.attribs, (axisIndex, pos, axisIndex, pos))
 
                         # build the string and add the extra axis code

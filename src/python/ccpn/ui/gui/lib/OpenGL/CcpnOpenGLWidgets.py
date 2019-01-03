@@ -290,7 +290,7 @@ class GLInfiniteLine(GLRegion):
     def values(self, value):
         self._values = value
         try:
-            self._glList.renderMode = GLRENDERMODE_RESCALE
+            self._glList.renderMode = GLRENDERMODE_REBUILD
         except Exception as es:
             pass
 

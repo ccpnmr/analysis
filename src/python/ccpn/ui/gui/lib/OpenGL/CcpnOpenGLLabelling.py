@@ -892,21 +892,21 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 if _isInPlane or _isInFlankingPlane:
                     if self._isSelected(obj):
                         _selected = True
-                        drawList.indices = np.append(drawList.indices, (index, index + 1, index + 2, index + 3,
+                        drawList.indices = np.append(drawList.indices, np.array((index, index + 1, index + 2, index + 3,
                                                                         index, index + 2, index + 2, index + 1,
-                                                                        index, index + 3, index + 3, index + 1))
+                                                                        index, index + 3, index + 3, index + 1), dtype=np.uint32))
                     else:
-                        drawList.indices = np.append(drawList.indices, (index, index + 1, index + 2, index + 3))
+                        drawList.indices = np.append(drawList.indices, np.array((index, index + 1, index + 2, index + 3), dtype=np.uint32))
 
                 # add extra indices for the multiplet
                 extraIndices = self.appendExtraIndices(drawList, index + 4, obj)
 
-                drawList.vertices = np.append(drawList.vertices, (p0[0] - r, p0[1] - w,
+                drawList.vertices = np.append(drawList.vertices, np.array((p0[0] - r, p0[1] - w,
                                                                   p0[0] + r, p0[1] + w,
                                                                   p0[0] + r, p0[1] - w,
-                                                                  p0[0] - r, p0[1] + w))
-                drawList.colors = np.append(drawList.colors, (*cols, fade) * GLDefs.LENCOLORS)
-                drawList.attribs = np.append(drawList.attribs, (p0[0], p0[1]) * 4)
+                                                                  p0[0] - r, p0[1] + w), dtype=np.float32))
+                drawList.colors = np.append(drawList.colors, np.array((*cols, fade) * GLDefs.LENCOLORS, dtype=np.float32))
+                drawList.attribs = np.append(drawList.attribs, np.array((p0[0], p0[1]) * 4, dtype=np.float32))
                 # drawList.offsets = np.append(drawList.offsets, (p0[0]+r, p0[1]+w) * 4)
 
                 # add extra vertices for the multiplet
@@ -944,33 +944,33 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 _selected = False
 
                 if _isInPlane or _isInFlankingPlane:
-                    drawList.indices = np.append(drawList.indices, tuple(val for an in ang
-                                                                         for val in (index + (2 * an), index + (2 * an) + 1)))
+                    drawList.indices = np.append(drawList.indices, np.array(tuple(val for an in ang
+                                                                         for val in (index + (2 * an), index + (2 * an) + 1)), dtype=np.uint32))
 
                     if self._isSelected(obj):
                         _selected = True
-                        drawList.indices = np.append(drawList.indices, (index + np2, index + np2 + 2,
+                        drawList.indices = np.append(drawList.indices, np.array((index + np2, index + np2 + 2,
                                                                         index + np2 + 2, index + np2 + 1,
                                                                         index + np2, index + np2 + 3,
-                                                                        index + np2 + 3, index + np2 + 1))
+                                                                        index + np2 + 3, index + np2 + 1), dtype=np.uint32))
 
                 # add extra indices for the multiplet
                 extraIndices = 0  #self.appendExtraIndices(drawList, index + np2, obj)
 
                 # draw an ellipse at lineWidth
-                drawList.vertices = np.append(drawList.vertices, tuple(val for an in ang
+                drawList.vertices = np.append(drawList.vertices, np.array(tuple(val for an in ang
                                                                        for val in (p0[0] - r * math.sin(skip * an * angPlus / numPoints),
                                                                                    p0[1] - w * math.cos(skip * an * angPlus / numPoints),
                                                                                    p0[0] - r * math.sin((skip * an + 1) * angPlus / numPoints),
-                                                                                   p0[1] - w * math.cos((skip * an + 1) * angPlus / numPoints))))
-                drawList.vertices = np.append(drawList.vertices, (p0[0] - r, p0[1] - w,
+                                                                                   p0[1] - w * math.cos((skip * an + 1) * angPlus / numPoints))), dtype=np.float32))
+                drawList.vertices = np.append(drawList.vertices, np.array((p0[0] - r, p0[1] - w,
                                                                   p0[0] + r, p0[1] + w,
                                                                   p0[0] + r, p0[1] - w,
                                                                   p0[0] - r, p0[1] + w,
-                                                                  p0[0], p0[1]))
+                                                                  p0[0], p0[1]), dtype=np.float32))
 
-                drawList.colors = np.append(drawList.colors, (*cols, fade) * (np2 + 5))
-                drawList.attribs = np.append(drawList.attribs, (p0[0], p0[1]) * (np2 + 5))
+                drawList.colors = np.append(drawList.colors, np.array((*cols, fade) * (np2 + 5), dtype=np.float32))
+                drawList.attribs = np.append(drawList.attribs, np.array((p0[0], p0[1]) * (np2 + 5), dtype=np.float32))
                 # drawList.offsets = np.append(drawList.offsets, (p0[0]+r, p0[1]+w) * (np2 + 5))
                 # drawList.lineWidths = (0, 0)
 
@@ -1010,26 +1010,26 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
                 if _isInPlane or _isInFlankingPlane:
                     drawList.indices = np.append(drawList.indices,
-                                                 tuple(val for an in ang
-                                                       for val in (index + (2 * an), index + (2 * an) + 1, index + np2 + 4)))
+                                                 np.array(tuple(val for an in ang
+                                                       for val in (index + (2 * an), index + (2 * an) + 1, index + np2 + 4)), dtype=np.uint32))
 
                 # add extra indices for the multiplet
                 extraIndices = 0  #self.appendExtraIndices(drawList, index + np2 + 4, obj)
 
                 # draw an ellipse at lineWidth
-                drawList.vertices = np.append(drawList.vertices, tuple(val for an in ang
+                drawList.vertices = np.append(drawList.vertices, np.array(tuple(val for an in ang
                                                                        for val in (p0[0] - r * math.sin(skip * an * angPlus / numPoints),
                                                                                    p0[1] - w * math.cos(skip * an * angPlus / numPoints),
                                                                                    p0[0] - r * math.sin((skip * an + 1) * angPlus / numPoints),
-                                                                                   p0[1] - w * math.cos((skip * an + 1) * angPlus / numPoints))))
-                drawList.vertices = np.append(drawList.vertices, (p0[0] - r, p0[1] - w,
+                                                                                   p0[1] - w * math.cos((skip * an + 1) * angPlus / numPoints))), dtype=np.float32))
+                drawList.vertices = np.append(drawList.vertices, np.array((p0[0] - r, p0[1] - w,
                                                                   p0[0] + r, p0[1] + w,
                                                                   p0[0] + r, p0[1] - w,
                                                                   p0[0] - r, p0[1] + w,
-                                                                  p0[0], p0[1]))
+                                                                  p0[0], p0[1]), dtype=np.float32))
 
-                drawList.colors = np.append(drawList.colors, (*cols, fade) * (np2 + 5))
-                drawList.attribs = np.append(drawList.attribs, (p0[0], p0[1]) * (np2 + 5))
+                drawList.colors = np.append(drawList.colors, np.array((*cols, fade) * (np2 + 5), dtype=np.float32))
+                drawList.attribs = np.append(drawList.attribs, np.array((p0[0], p0[1]) * (np2 + 5), dtype=np.float32))
                 # drawList.offsets = np.append(drawList.offsets, (p0[0]+r, p0[1]+w) * (np2 + 5))
                 # drawList.lineWidths = (0, 0)
 
@@ -1208,13 +1208,13 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                         if self._isSelected(obj):
                             _selected = True
                             cols = self._GLParent.highlightColour[:3]
-                            drawList.indices = np.append(drawList.indices, (index, index + 1, index + 2, index + 3,
+                            drawList.indices = np.append(drawList.indices, np.array((index, index + 1, index + 2, index + 3,
                                                                             index, index + 2, index + 2, index + 1,
-                                                                            index, index + 3, index + 3, index + 1))
+                                                                            index, index + 3, index + 3, index + 1), dtype=np.uint32))
                         else:
                             cols = listCol
 
-                            drawList.indices = np.append(drawList.indices, (index, index + 1, index + 2, index + 3))
+                            drawList.indices = np.append(drawList.indices, np.array((index, index + 1, index + 2, index + 3), dtype=np.uint32))
 
                         # make sure that links for the multiplets are added
                         extraIndices = self.appendExtraIndices(drawList, index + 4, obj)
@@ -1245,16 +1245,16 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                     _isInPlane, _isInFlankingPlane, fade = self.objIsInVisiblePlanes(spectrumView, obj)
 
                     if _isInPlane or _isInFlankingPlane:
-                        drawList.indices = np.append(drawList.indices, tuple(val for an in ang
-                                                                             for val in (index + (2 * an), index + (2 * an) + 1)))
+                        drawList.indices = np.append(drawList.indices, np.array(tuple(val for an in ang
+                                                                             for val in (index + (2 * an), index + (2 * an) + 1)), dtype=np.uint32))
 
                         if self._isSelected(obj):
                             _selected = True
                             cols = self._GLParent.highlightColour[:3]
-                            drawList.indices = np.append(drawList.indices, (index + np2, index + np2 + 2,
+                            drawList.indices = np.append(drawList.indices, np.array((index + np2, index + np2 + 2,
                                                                             index + np2 + 2, index + np2 + 1,
                                                                             index + np2, index + np2 + 3,
-                                                                            index + np2 + 3, index + np2 + 1))
+                                                                            index + np2 + 3, index + np2 + 1), dtype=np.uint32))
                         else:
                             cols = listCol
 
@@ -1284,8 +1284,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                     _isInPlane, _isInFlankingPlane, fade = self.objIsInVisiblePlanes(spectrumView, obj)
 
                     if _isInPlane or _isInFlankingPlane:
-                        drawList.indices = np.append(drawList.indices, tuple(val for an in ang
-                                                                             for val in (index + (2 * an), index + (2 * an) + 1, index + np2 + 4)))
+                        drawList.indices = np.append(drawList.indices, np.array(tuple(val for an in ang
+                                                                             for val in (index + (2 * an), index + (2 * an) + 1, index + np2 + 4)), dtype=np.uint32))
                         if self._isSelected(obj):
                             _selected = True
                             cols = self._GLParent.highlightColour[:3]
@@ -1790,7 +1790,10 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         for objListView, specView in self._visibleListViews:
             if not objListView.isDeleted and objListView in self._GLSymbols.keys():
                 # self._GLSymbols[objListView].drawIndexArray()
-                self._GLSymbols[objListView].drawIndexVBO(enableVBO=False)
+                try:
+                    self._GLSymbols[objListView].drawIndexVBO(enableVBO=False)
+                except Exception as es:
+                    pass
 
         GL.glLineWidth(1.0)
 
@@ -1863,13 +1866,13 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
                         # if hasattr(obj, '_isSelected') and obj._isSelected:
                         _selected = True
                         cols = self._GLParent.highlightColour[:3]
-                        drawList.indices = np.append(drawList.indices, (index, index + 1, index + 2, index + 3,
+                        drawList.indices = np.append(drawList.indices, np.array((index, index + 1, index + 2, index + 3,
                                                                         index, index + 2, index + 2, index + 1,
-                                                                        index, index + 3, index + 3, index + 1))
+                                                                        index, index + 3, index + 3, index + 1), dtype=np.uint32))
                     else:
                         cols = listCol
 
-                        drawList.indices = np.append(drawList.indices, (index, index + 1, index + 2, index + 3))
+                        drawList.indices = np.append(drawList.indices, np.array((index, index + 1, index + 2, index + 3), dtype=np.uint32))
 
                     # make sure that links for the multiplets are added
                     extraIndices = self.appendExtraIndices(drawList, index + 4, obj)
@@ -2108,23 +2111,23 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
 
             # draw a cross
             _selected = False
-            drawList.indices = np.append(drawList.indices, (index, index + 1, index + 2, index + 3))
+            drawList.indices = np.append(drawList.indices, np.array((index, index + 1, index + 2, index + 3), dtype=np.uint32))
 
             if self._isSelected(obj):
                 # if hasattr(obj, '_isSelected') and obj._isSelected:
                 _selected = True
-                drawList.indices = np.append(drawList.indices, (index, index + 2, index + 2, index + 1,
-                                                                index, index + 3, index + 3, index + 1))
+                drawList.indices = np.append(drawList.indices, np.array((index, index + 2, index + 2, index + 1,
+                                                                index, index + 3, index + 3, index + 1), dtype=np.uint32))
 
             # add extra indices for the multiplet
             extraIndices = self.appendExtraIndices(drawList, index + 4, obj)
 
-            drawList.vertices = np.append(drawList.vertices, (p0[0] - r, p0[1] - w,
+            drawList.vertices = np.append(drawList.vertices, np.array((p0[0] - r, p0[1] - w,
                                                               p0[0] + r, p0[1] + w,
                                                               p0[0] + r, p0[1] - w,
-                                                              p0[0] - r, p0[1] + w))
-            drawList.colors = np.append(drawList.colors, (*cols, 1.0) * 4)
-            drawList.attribs = np.append(drawList.attribs, (p0[0], p0[1]) * 4)
+                                                              p0[0] - r, p0[1] + w), dtype=np.float32))
+            drawList.colors = np.append(drawList.colors, np.array((*cols, 1.0) * 4, dtype=np.float32))
+            drawList.attribs = np.append(drawList.attribs, np.array((p0[0], p0[1]) * 4, dtype=np.float32))
             # drawList.offsets = np.append(drawList.offsets, (p0[0]+r, p0[1]+w) * 4)
 
             # add extra vertices for the multiplet
@@ -2368,8 +2371,8 @@ class GLmultipletListMethods():
             return 0
 
         insertNum = len(multiplet.peaks)
-        drawList.indices = np.append(drawList.indices, tuple(val for ii in range(insertNum)
-                                                             for val in (index, 1 + index + ii)))
+        drawList.indices = np.append(drawList.indices, np.array(tuple(val for ii in range(insertNum)
+                                                             for val in (index, 1 + index + ii)), dtype=np.uint32))
         return insertNum + 1
 
     def insertExtraIndices(self, drawList, indexPTR, index, multiplet):
@@ -2422,9 +2425,9 @@ class GLmultipletNdLabelling(GLmultipletListMethods, GLpeakNdLabelling):
             posList += p1
 
         numVertices = len(multiplet.peaks) + 1  # len(posList)
-        drawList.vertices = np.append(drawList.vertices, posList)
-        drawList.colors = np.append(drawList.colors, (*cols, fade) * numVertices)
-        drawList.attribs = np.append(drawList.attribs, p0 * numVertices)
+        drawList.vertices = np.append(drawList.vertices, np.array(posList, dtype=np.float32))
+        drawList.colors = np.append(drawList.colors, np.array((*cols, fade) * numVertices, dtype=np.float32))
+        drawList.attribs = np.append(drawList.attribs, np.array(p0 * numVertices, dtype=np.float32))
         # drawList.offsets = np.append(drawList.offsets, p0 * numVertices)
 
         return numVertices
@@ -2499,9 +2502,9 @@ class GLmultiplet1dLabelling(GLmultipletListMethods, GLpeak1dLabelling):
             posList += p1
 
         numVertices = len(multiplet.peaks) + 1
-        drawList.vertices = np.append(drawList.vertices, posList)
-        drawList.colors = np.append(drawList.colors, (*cols, fade) * numVertices)
-        drawList.attribs = np.append(drawList.attribs, p0 * numVertices)
+        drawList.vertices = np.append(drawList.vertices, np.array(posList, dtype=np.float32))
+        drawList.colors = np.append(drawList.colors, np.array((*cols, fade) * numVertices, dtype=np.float32))
+        drawList.attribs = np.append(drawList.attribs, np.array(p0 * numVertices, dtype=np.float32))
         # drawList.offsets = np.append(drawList.attribs, p0 * numVertices)
 
         return numVertices

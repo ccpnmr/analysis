@@ -107,7 +107,7 @@ from ccpn.ui.gui.lib.mouseEvents import \
 
 try:
     # used to test whether all the arrays are defined correctly
-    # os.environ.update({'PYOPENGL_ERROR_ON_COPY': 'true'})
+    os.environ.update({'PYOPENGL_ERROR_ON_COPY': 'true'})
 
     from OpenGL import GL, GLU, GLUT
 except ImportError:
@@ -2820,62 +2820,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
             drawList.defineIndexVBO(enableVBO=True)
 
-        return
-
-        # drawList = self._regionList
-        #
-        # if drawList.renderMode == GLRENDERMODE_REBUILD:
-        #     drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
-        #     drawList.refreshMode = GLREFRESHMODE_REBUILD
-        #     drawList.clearArrays()
-        #
-        #     # build the marks VBO
-        #     index = 0
-        #     for region in self._regions:
-        #
-        #         if not region.visible:
-        #             continue
-        #
-        #         for ps, psCode in enumerate(self.axisOrder[0:2]):
-        #             if self._preferences.matchAxisCode == 0:  # default - match atom type
-        #
-        #                 if region.axisCode[0] == psCode[0]:
-        #                     axisIndex = ps
-        #             elif self._preferences.matchAxisCode == 1:  # match full code
-        #                 if region.axisCode == psCode:
-        #                     axisIndex = ps
-        #
-        #         # NOTE:ED check axis units - assume 'ppm' for the minute
-        #         if axisIndex == 0:
-        #             # vertical ruler
-        #             pos0 = x0 = region.values[0]
-        #             pos1 = x1 = region.values[1]
-        #             y0 = self.axisT
-        #             y1 = self.axisB
-        #         else:
-        #             # horizontal ruler
-        #             pos0 = y0 = region.values[0]
-        #             pos1 = y1 = region.values[1]
-        #             x0 = self.axisL
-        #             x1 = self.axisR
-        #
-        #         colour = region.brush
-        #         drawList.indices = np.append(drawList.indices, (index, index + 1, index + 2, index + 3,
-        #                                                         index, index + 1, index, index + 1,
-        #                                                         index + 1, index + 2, index + 1, index + 2,
-        #                                                         index + 2, index + 3, index + 2, index + 3,
-        #                                                         index, index + 3, index, index + 3))
-        #         drawList.vertices = np.append(drawList.vertices, (x0, y0, x0, y1, x1, y1, x1, y0))
-        #         drawList.colors = np.append(drawList.colors, colour * 4)
-        #         drawList.attribs = np.append(drawList.attribs,
-        #                                      (axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1))
-        #
-        #         index += 4
-        #         drawList.numVertices += 4
-        #
-        # elif drawList.renderMode == GLRENDERMODE_RESCALE:
-        #     drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
-
     def buildMarksRulers(self):
         drawList = self._marksList
 
@@ -3178,6 +3122,8 @@ class CcpnGLWidget(QOpenGLWidget):
                     offsets = [self.axisL, axisPosition,
                                self.axisR, axisPosition]
                 self._marksList.vertices[pp:pp + 4] = offsets
+
+            self._marksList.defineIndexVBO(enableVBO=True)
 
     def _rescaleMarksAxisCode(self, mark):
         vertices = mark.numVertices

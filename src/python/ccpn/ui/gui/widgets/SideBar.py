@@ -175,8 +175,8 @@ def _openSpectrumDisplay(mainWindow, spectrum, position=None, relativeTo=None):
 
     if len(spectrumDisplay.strips) > 0:
         mainWindow.current.strip = spectrumDisplay.strips[0]
-        if spectrum.dimensionCount == 1:
-            spectrumDisplay._maximiseRegions()
+        # if spectrum.dimensionCount == 1:
+        spectrumDisplay._maximiseRegions()
             # mainWindow.current.strip.plotWidget.autoRange()
 
     mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
@@ -206,8 +206,8 @@ def _openSpectrumGroup(mainWindow, spectrumGroup, position=None, relativeTo=None
         spectrumDisplay.spectrumGroupToolBar.show()
         spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
         mainWindow.application.current.strip = spectrumDisplay.strips[0]
-        if any([sp.dimensionCount for sp in spectrumGroup.spectra]) == 1:
-            spectrumDisplay._maximiseRegions()
+        # if any([sp.dimensionCount for sp in spectrumGroup.spectra]) == 1:
+        spectrumDisplay._maximiseRegions()
 
 
 def _openSampleSpectra(mainWindow, sample, position=None, relativeTo=None):

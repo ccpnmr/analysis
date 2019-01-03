@@ -777,6 +777,12 @@ class GuiStrip(Frame):
         except:
             format = "%s: %.3f  %s: %.4g"
 
+    def _maximiseRegions(self):
+        try:
+            self._CcpnGLWidget._maximiseRegions()
+        except Exception as es:
+            getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
+
     def zoom(self, xRegion: typing.Tuple[float, float], yRegion: typing.Tuple[float, float]):
         """Zooms strip to the specified region.
         """

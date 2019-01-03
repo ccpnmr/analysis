@@ -1790,10 +1790,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         for objListView, specView in self._visibleListViews:
             if not objListView.isDeleted and objListView in self._GLSymbols.keys():
                 # self._GLSymbols[objListView].drawIndexArray()
-                try:
-                    self._GLSymbols[objListView].drawIndexVBO(enableVBO=False)
-                except Exception as es:
-                    pass
+                self._GLSymbols[objListView].drawIndexVBO(enableVBO=False)
 
         GL.glLineWidth(1.0)
 

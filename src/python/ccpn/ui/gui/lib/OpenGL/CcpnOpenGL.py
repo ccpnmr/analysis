@@ -107,7 +107,7 @@ from ccpn.ui.gui.lib.mouseEvents import \
 
 try:
     # used to test whether all the arrays are defined correctly
-    os.environ.update({'PYOPENGL_ERROR_ON_COPY': 'true'})
+    # os.environ.update({'PYOPENGL_ERROR_ON_COPY': 'true'})
 
     from OpenGL import GL, GLU, GLUT
 except ImportError:

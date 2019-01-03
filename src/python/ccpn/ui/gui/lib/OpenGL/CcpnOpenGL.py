@@ -3774,14 +3774,15 @@ class CcpnGLWidget(QOpenGLWidget):
             = spectrumView._getTraceParams(self.cursorCoordinate)
 
         if spectrumView not in self._lastTracePoint:
-            self._lastTracePoint[spectrumView] = [-1, -1]
+            numDim = len(spectrumView.strip.axes)
+            self._lastTracePoint[spectrumView] = [-1] * numDim
 
         lastTrace = self._lastTracePoint[spectrumView]
 
         point = [int(p + 0.5) for p in point]
 
         # get the correct ordering for horizontal/vertical
-        axisCodes = [a.code for a in spectrumView.strip.axes][0:2]
+        axisCodes = [a.code for a in spectrumView.strip.axes]                       # [0:2]
         planeDims = spectrumView.spectrum.getByAxisCodes('indices', axisCodes)
 
         if point[planeDims[0]] >= xNumPoints or point[planeDims[1]] >= yNumPoints:
@@ -3842,7 +3843,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 ref = spectrumView.spectrum.mainSpectrumReferences
 
                 # get the correct axis ordering for the refDims
-                axisCodes = [a.code for a in spectrumView.strip.axes][0:2]
+                axisCodes = [a.code for a in spectrumView.strip.axes]                               # [0:2]
                 planeDims = spectrumView.spectrum.getByAxisCodes('indices', axisCodes)
 
                 # rounds the wrong way when point values are adjusted from negative
@@ -3905,7 +3906,7 @@ class CcpnGLWidget(QOpenGLWidget):
                         = spectrumView._getTraceParams(position)
 
                     # get the correct axis ordering for the refDims
-                    axisCodes = [a.code for a in spectrumView.strip.axes][0:2]
+                    axisCodes = [a.code for a in spectrumView.strip.axes]                   # [0:2]
                     planeDims = spectrumView.spectrum.getByAxisCodes('indices', axisCodes)
 
                     # rounds the wrong way when point values are adjusted from negative

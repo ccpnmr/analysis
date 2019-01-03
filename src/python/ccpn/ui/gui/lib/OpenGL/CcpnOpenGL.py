@@ -586,7 +586,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def _setRegion(self, region, value):
         self.strip.project._undo.increaseBlocking()
-        region = value
+        region.region = value
         self.strip.project._undo.decreaseBlocking()
 
     def _maximiseRegions(self):

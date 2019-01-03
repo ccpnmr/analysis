@@ -1120,7 +1120,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def _rescaleAllAxes(self, update=True):
         self._testAxisLimits()
-        self.rescale(rescaleStaticHTraces=False, rescaleStaticVTraces=False)
+        self.rescale(rescaleStaticHTraces=True, rescaleStaticVTraces=True)
 
         # spawn rebuild event for the grid
         for li in self.gridList:
@@ -3894,13 +3894,6 @@ class CcpnGLWidget(QOpenGLWidget):
                 ref = spectrumView.spectrum.mainSpectrumReferences
                 pivot = ref[axisIndex].valueToPoint(pivotPpm)
 
-                # get the correct axis ordering for the refDims
-                axisCodes = [a.code for a in spectrumView.strip.axes][0:2]
-                planeDims = spectrumView.spectrum.getByAxisCodes('indices', axisCodes)
-
-                # rounds the wrong way when point values are adjusted from negative
-                intPositionPixel = [ref[planeDims[ax]].pointToValue(int(ref[planeDims[ax]].valueToPoint(pp) + 0.5)) for ax, pp in enumerate(positionPixel)]
-
                 if self.is1D:
                     inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints = spectrumView._getTraceParams(
                             position)
@@ -3910,6 +3903,13 @@ class CcpnGLWidget(QOpenGLWidget):
                 else:
                     inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints \
                         = spectrumView._getTraceParams(position)
+
+                    # get the correct axis ordering for the refDims
+                    axisCodes = [a.code for a in spectrumView.strip.axes][0:2]
+                    planeDims = spectrumView.spectrum.getByAxisCodes('indices', axisCodes)
+
+                    # rounds the wrong way when point values are adjusted from negative
+                    intPositionPixel = [ref[planeDims[ax]].pointToValue(int(ref[planeDims[ax]].valueToPoint(pp) + 0.5)) for ax, pp in enumerate(positionPixel)]
 
                     if direction == 0:
                         self._newStaticHTraceData(spectrumView, self._staticHTraces, point, xDataDim, xMinFrequency,

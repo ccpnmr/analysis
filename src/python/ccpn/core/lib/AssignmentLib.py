@@ -434,7 +434,7 @@ def getSpinSystemsLocation(project: Project, nmrResidues: typing.List[NmrResidue
 def nmrAtomPairsByDimensionTransfer(peakLists: typing.Sequence[PeakList]) -> dict:
     """From one or more peakLists belonging to the same spectrum,
     get a dictionary of magnetisationTransferTuple (See Spectrum.magnetisationTransfers
-    for documentation) to a set of NmrAtom pairs tha are coupled by the magnetisation transfer.
+    for documentation) to a set of NmrAtom pairs that are coupled by the magnetisation transfer.
     If the two dimensions have the same nucleus, the NmrAtom pairs are sorted, otherwise
     they are in the dimension order.
 

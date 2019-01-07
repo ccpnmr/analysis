@@ -412,8 +412,12 @@ class ChemicalShiftsMapping(CcpnModule):
     self.scatterPlot.mouseDoubleClickEvent = self._scatterMouseDoubleClickEvent
     # self._scatterViewbox.mouseClickEvent = self._scatterViewboxMouseClickEvent #use this for right click Context menu
     # self._scatterViewbox.scene().sigMouseMoved.connect(self.mouseMoved) #use this if you need the mouse Posit
+    self.scatterXLine = pg.InfiniteLine(angle=90, pos=0, pen=OriginAxes)
+    self.scatterYLine = pg.InfiniteLine(angle=0, pos=0, pen=OriginAxes)
 
     self._plotItem.addItem(self.scatterPlot)
+    self._plotItem.addItem(self.scatterXLine)
+    self._plotItem.addItem(self.scatterYLine)
     layoutParent.getLayout().addWidget(self._scatterView)
 
 

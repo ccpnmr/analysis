@@ -593,12 +593,6 @@ class ChemicalShiftsMapping(CcpnModule):
       df.index = self.tableData["_object"]
       return df
 
-  # def _selectScatterPoints(self):
-  #   self.scatterPlot.clear()
-  #   if self.current:
-  #     self.current.nmrResidues = self._selectedObjs # does selection through notifier
-
-
 
   def _plotScatters(self, dataFrame, xAxisLabel=DELTAS, yAxisLabel=eKD, selectedObjs=None):
     """
@@ -1263,6 +1257,7 @@ class ChemicalShiftsMapping(CcpnModule):
         if not silent:
           self.updateTable(self.nmrResidueTable._nmrChain)
           self.updateBarGraph()
+          self._plotScatters(self._getScatterData(), selectedObjs=self.current.nmrResidues)
           self._plotBindingCFromCurrent()
 
   def _updatedPeakCount(self, nmrResidue, spectra):
@@ -1442,6 +1437,11 @@ class ChemicalShiftsMapping(CcpnModule):
 
   def _plotFittedBindingCurves(self, bindingCurves):
     from scipy.optimize import curve_fit
+
+    self.fittingPlot.clear()
+    self._clearLegend(self.fittingPlot.legend)
+    self.fittingLine.hide()
+
     if bindingCurves is not None:
       plotData = bindingCurves.replace(np.nan, 0)
       ys = plotData.values.flatten(order='F')
@@ -1456,12 +1456,11 @@ class ChemicalShiftsMapping(CcpnModule):
       xf = np.arange(0, xMax+xStep, step=xStep)
       yf = bindingCurve(xf, *paramScaled[0])
       binding = paramScaled[0][0]
-      self._clearLegend(self.fittingPlot.legend)
-      self.fittingPlot.clear()
       self.fittingPlot.plot(xs, yScaled, symbol='o', pen=None)
       self.fittingPlot.plot(xf, yf, name='Fitted')
       self.fittingLine.setValue(binding)
       self.fittingLine.label.setText(str(round(binding,3)))
+      self.fittingLine.show()
       self.fittingPlot.setLabel('left', '%')
       self.fittingPlot.setRange(xRange=[0, max(xf)], yRange=[0, 1])
       self.bindingPlot.autoRange()

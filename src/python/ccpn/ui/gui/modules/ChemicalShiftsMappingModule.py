@@ -2,14 +2,14 @@
 Module Documentation:
   This module has three sections:
     - bar chart
-    - scatter plot
+    - scatter plots
     - table
 
 
   This module plots a bar chart of NmrResidue number as function of delta shift for its (nmrAtoms) assigned peaks.
 
   ** Only  NmrResidue with an integer as sequenceCode is allowed **.
-    E.G.: YES -->  sequenceCode = 44;
+    E.G.: OK  -->  sequenceCode = 44;
           NO  -->  sequenceCode = '44i-1';
 
   There are four modes of delta calculation: POSITIONS, HEIGHT, VOLUME, LINEWIDTHS
@@ -23,10 +23,6 @@ Module Documentation:
 
   The peaks used are as default taken from the last peak list for the selected spectra (settings tab).
   Any sensible combination of NmrAtoms is allowed,
-
-
-
-
 
 
 
@@ -58,93 +54,51 @@ __date__ = "$Date: 2017-04-07 10:28:43 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from functools import partial
-from PyQt5 import QtCore, QtGui, QtWidgets
-import random
 import os
 import numpy as np
 import pyqtgraph as pg
+import random
+import pandas as pd
+from functools import partial
+from PyQt5 import QtCore, QtWidgets, QtGui
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTable
 from ccpn.ui.gui.widgets.BarGraph import BarGraph
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
-from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.SpectraSelectionWidget import SpectraSelectionWidget
 from ccpn.ui.gui.widgets.CheckBox import CheckBox, EditableCheckBox
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.QuickTable import exportTableDialog
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
-import random
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 from ccpn.ui.gui.widgets.HLine import HLine
-from ccpn.ui.gui.widgets.Column import ColumnClass
-from ccpn.core.lib.Notifiers import Notifier
-from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex
 from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
-from ccpn.core.lib.peakUtils import getNmrResidueDeltas, getKd,bindingCurve, MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME, DefaultAtomWeights, H, N, OTHER, C
-from ccpn.core.lib import CcpnSorting
-from ccpn.ui.gui.lib.mouseEvents import \
-  leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, \
-  middleMouse, shiftMiddleMouse, controlMiddleMouse, controlShiftMiddleMouse, \
-  rightMouse, shiftRightMouse, controlRightMouse, controlShiftRightMouse
-from ccpn.ui.gui.guiSettings import autoCorrectHexColour, getColours, CCPNGLWIDGET_HEXBACKGROUND,\
-  GUISTRIP_PIVOT, DIVIDER, CCPNGLWIDGET_SELECTAREA, CCPNGLWIDGET_HIGHLIGHT
-from ccpn.core.NmrChain import NmrChain
-from ccpn.core.Project import Project
-from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.lib.mouseEvents import leftMouse, controlLeftMouse
+from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND, GUISTRIP_PIVOT, CCPNGLWIDGET_HIGHLIGHT
 from ccpn.ui.gui.widgets.BarGraphWidget import BarGraphWidget
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
-import random
+from ccpn.ui.gui.modules.NmrResidueTable import _CSMNmrResidueTable
 from ccpn.ui.gui.widgets.ConcentrationsWidget import ConcentrationWidget
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
+from ccpn.ui.gui.modules.PyMolUtil import _chemicalShiftMappingPymolTemplate
+from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import concentrationUnits
-import  pandas as pd
 from ccpn.util.Common import splitDataFrameWithinRange
-
-
-def chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues, belowThresholdResidues,
-                                      missingdResidues, colourMissing, colourAboveThreshold,
-                                      colourBelowThreshold, selection):
-
-  if os.path.exists(pdbPath):
-    warn = 'This script is auto-generated. Any changes here will be lost.'
-    with open(filePath, 'w') as f:
-      f.write('''\n"""''' + warn + '''"""''')
-      f.write('''\nfrom pymol import cmd''')
-      f.write('''\n''')
-      f.write('''\ncmd.load("''' + pdbPath + '''") ''')
-      f.write('''\ncmd.hide('lines')''')
-      f.write('''\ncmd.show('cartoon')''')
-      f.write('''\ncmd.color('white')''')
-      if len(aboveThresholdResidues)>0:
-        f.write('''\ncmd.select('aboveThreshold', 'res  ''' + aboveThresholdResidues + ''' ')''')
-        f.write('''\ncmd.set_color("AboveColour", " ''' + str(colourAboveThreshold) + ''' ")''')
-        f.write('''\ncmd.color('AboveColour', 'aboveThreshold')''')
-      if len(belowThresholdResidues) > 0:
-        f.write('''\ncmd.select('belowThreshold', 'res  ''' + belowThresholdResidues + ''' ')''')
-        f.write('''\ncmd.set_color("BelowColour", " ''' + str(colourBelowThreshold) + ''' ")''')
-        f.write('''\ncmd.color('BelowColour', 'belowThreshold')''')
-      if len(missingdResidues) > 0:
-        f.write('''\ncmd.select('missing', 'res  ''' + missingdResidues + ''' ')''')
-        f.write('''\ncmd.set_color("MissingColour", " ''' + str(colourMissing) + ''' ")''')
-        f.write('''\ncmd.color('MissingColour', 'missing')''')
-      if len(selection)>0:
-        f.write('''\ncmd.select('Selected', 'res  ''' + selection + ''' ')''')
-      else:
-        f.write('''\ncmd.deselect()''')
-
-  return filePath
+from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRandomColours
+from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.lib.peakUtils import getNmrResidueDeltas, getKd,bindingCurve, MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME, DefaultAtomWeights, H, N, OTHER, C
+from ccpn.core.lib import CcpnSorting
+from ccpn.core.NmrChain import NmrChain
+from ccpn.core.Project import Project
 
 
 DefaultConcentration = 0.0
@@ -160,95 +114,6 @@ MORE, LESS = 'More', 'Fewer'
 PreferredNmrAtoms = ['H', 'HA', 'HB', 'C', 'CA', 'CB', 'N', 'NE', 'ND']
 DELTAS = "Deltas"
 eKD =  "Estimated Kd"
-
-def _getRandomColours(numberOfColors):
-  return  ["#" + ''.join([random.choice('0123456789ABCDEF') for j in range(6)]) for i in range(numberOfColors)]
-
-
-
-class CustomNmrResidueTable(NmrResidueTable):
-  """
-  Custon nmrResidue Table with extra  columns
-  """
-  # deltaShiftsColumn = ('Deltas', lambda nmrResidue: nmrResidue._delta, '', None)
-  # estimatedKdColumn = ('Estimated Kd', lambda nmrResidue: nmrResidue._estimatedKd, '', None)
-
-  def __init__(self, parent=None, mainWindow=None, moduleParent=None, actionCallback=None, selectionCallback=None,
-               checkBoxCallback=None, nmrChain=None, **kwds):
-
-    # NmrResidueTable.__init__(self, parent=parent, application=application,actionCallback=actionCallback,
-    #                          selectionCallback=selectionCallback, nmrChain=nmrChain, multiSelect = True, **kwds)
-
-    NmrResidueTable.__init__(self, parent=parent, mainWindow=mainWindow,
-                             moduleParent=moduleParent,
-                             actionCallback=actionCallback,
-                             selectionCallback=selectionCallback,
-                             checkBoxCallback = checkBoxCallback,
-                             nmrChain=nmrChain,
-                             multiSelect=True,
-                             **kwds)
-
-    self.NMRcolumns = ColumnClass([
-        ('#', lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None),
-        ('Pid', lambda nmrResidue:nmrResidue.pid, 'Pid of NmrResidue', None),
-        ('_object', lambda nmrResidue:nmrResidue, 'Object', None),
-        ('Index', lambda nmrResidue: NmrResidueTable._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
-        ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None),
-        ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None),
-        ('Selected', lambda nmrResidue: CustomNmrResidueTable._getSelectedNmrAtomNames(nmrResidue), 'NmrAtoms selected in NmrResidue', None),
-        ('Spectra', lambda nmrResidue: CustomNmrResidueTable._getNmrResidueSpectraCount(nmrResidue)
-         , 'Number of spectra selected for calculating the deltas', None),
-        (DELTAS, lambda nmrResidue: nmrResidue._delta, '', None),
-        (eKD, lambda nmrResidue: nmrResidue._estimatedKd, '', None),
-        ('Include', lambda nmrResidue: nmrResidue._includeInDeltaShift, 'Include this residue in the Mapping calculation', lambda nmr, value: CustomNmrResidueTable._setChecked(nmr, value)),
-        # ('Flag', lambda nmrResidue: nmrResidue._flag,  '',  None),
-        ('Comment', lambda nmr: NmrResidueTable._getCommentText(nmr), 'Notes', lambda nmr, value: NmrResidueTable._setComment(nmr, value))
-      ])        #[Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
-
-    self._widget.setFixedHeight(45)
-    self.chemicalShiftsMappingModule = None
-
-
-  @staticmethod
-  def _setChecked(obj, value):
-    """
-    CCPN-INTERNAL: Insert a comment into QuickTable
-    """
-
-    obj._includeInDeltaShift = value
-    obj._finaliseAction('change')
-
-  @staticmethod
-  def _getNmrResidueSpectraCount(nmrResidue):
-
-    """
-    CCPN-INTERNAL: Insert an index into ObjectTable
-    """
-    try:
-      return nmrResidue.spectraCount
-    except:
-      return None
-
-  @staticmethod
-  def _getSelectedNmrAtomNames(nmrResidue):
-
-    """
-    CCPN-INTERNAL: Insert an index into ObjectTable
-    """
-    try:
-      return ', '.join(nmrResidue.selectedNmrAtomNames)
-    except:
-      return None
-
-  def _selectPullDown(self, value):
-    ''' Used for automatic restoring of widgets '''
-    self.ncWidget.select(value)
-    try:
-      if self.chemicalShiftsMappingModule is not None:
-        self.chemicalShiftsMappingModule.updateModule()
-    except Exception as e:
-      getLogger().warn('Impossible update chemicalShiftsMappingModule from restoring %s' %e)
-
 
 
 class ChemicalShiftsMapping(CcpnModule):
@@ -344,11 +209,11 @@ class ChemicalShiftsMapping(CcpnModule):
       self.barGraphWidget.customViewBox.mouseClickEvent = self._viewboxMouseClickEvent
 
       self.tableFrame = Frame(self.mainWidget, setLayout=True, grid=(0, 0))
-      self.nmrResidueTable = CustomNmrResidueTable(parent=self.tableFrame , mainWindow=self.mainWindow,
-                                                   # selectionCallback=self._nmrTableSelectionCallback,
-                                                   actionCallback= self._customActionCallBack,
-                                                   checkBoxCallback=self._checkBoxCallback,
-                                                   setLayout=True, grid = (0, 0))
+      self.nmrResidueTable = _CSMNmrResidueTable(parent=self.tableFrame, mainWindow=self.mainWindow,
+                                                 # selectionCallback=self._nmrTableSelectionCallback,
+                                                 actionCallback= self._customActionCallBack,
+                                                 checkBoxCallback=self._checkBoxCallback,
+                                                 setLayout=True, grid = (0, 0))
       self.nmrResidueTable.chemicalShiftsMappingModule = self
 
       self.tabWidget = Tabs(self.nmrResidueTable._parent, setLayout=True, grid=(3, 6))
@@ -1315,7 +1180,7 @@ class ChemicalShiftsMapping(CcpnModule):
     colourMissing = hexToRgb(self.disappearedPeakBrush)
 
 
-    scriptPath = chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues, belowThresholdResidues,
+    scriptPath = _chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues, belowThresholdResidues,
                                                    missingdResidues, colourMissing, colourAboveThreshold, colourBelowThreshold,
                                                    selection)
 

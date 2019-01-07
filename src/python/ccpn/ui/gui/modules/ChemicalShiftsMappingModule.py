@@ -83,11 +83,15 @@ from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.util.Colour import spectrumColours, hexToRgb
+from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex
 from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
-from ccpn.core.lib.peakUtils import getNmrResidueDeltas, fittedCurve,bindingCurve, MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME, DefaultAtomWeights, H, N, OTHER, C
+from ccpn.core.lib.peakUtils import getNmrResidueDeltas, getKd,bindingCurve, MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME, DefaultAtomWeights, H, N, OTHER, C
 from ccpn.core.lib import CcpnSorting
+from ccpn.ui.gui.lib.mouseEvents import \
+  leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, \
+  middleMouse, shiftMiddleMouse, controlMiddleMouse, controlShiftMiddleMouse, \
+  rightMouse, shiftRightMouse, controlRightMouse, controlShiftRightMouse
 from ccpn.ui.gui.guiSettings import autoCorrectHexColour, getColours, CCPNGLWIDGET_HEXBACKGROUND,\
   GUISTRIP_PIVOT, DIVIDER, CCPNGLWIDGET_SELECTAREA, CCPNGLWIDGET_HIGHLIGHT
 from ccpn.core.NmrChain import NmrChain
@@ -105,7 +109,7 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.util.Constants import concentrationUnits
 import  pandas as pd
-
+from ccpn.util.Common import splitDataFrameWithinRange
 
 
 def chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues, belowThresholdResidues,
@@ -147,10 +151,14 @@ DefaultConcentrationUnit = concentrationUnits[0]
 DefaultThreshould = 0.1
 PymolScriptName = 'chemicalShiftMapping_Pymol_Template.py'
 BackgroundColour = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
+# colours
+OriginAxes = pg.functions.mkPen(hexToRgb(getColours()[GUISTRIP_PIVOT]), width=1, style=QtCore.Qt.DashLine)
+SelectedPoint = pg.functions.mkPen(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
 
 MORE, LESS = 'More', 'Fewer'
 PreferredNmrAtoms = ['H', 'HA', 'HB', 'C', 'CA', 'CB', 'N', 'NE', 'ND']
-
+DELTAS = "Deltas"
+eKD =  "Estimated Kd"
 
 def _getRandomColours(numberOfColors):
   import random
@@ -160,10 +168,10 @@ def _getRandomColours(numberOfColors):
 
 class CustomNmrResidueTable(NmrResidueTable):
   """
-  Custon nmrResidue Table with extra Delta column
+  Custon nmrResidue Table with extra  columns
   """
-  deltaShiftsColumn = ('Deltas', lambda nmrResidue: nmrResidue._delta, '', None)
-
+  # deltaShiftsColumn = ('Deltas', lambda nmrResidue: nmrResidue._delta, '', None)
+  # estimatedKdColumn = ('Estimated Kd', lambda nmrResidue: nmrResidue._estimatedKd, '', None)
 
   def __init__(self, parent=None, mainWindow=None, moduleParent=None, actionCallback=None, selectionCallback=None,
                checkBoxCallback=None, nmrChain=None, **kwds):
@@ -190,7 +198,8 @@ class CustomNmrResidueTable(NmrResidueTable):
         ('Selected', lambda nmrResidue: CustomNmrResidueTable._getSelectedNmrAtomNames(nmrResidue), 'NmrAtoms selected in NmrResidue', None),
         ('Spectra', lambda nmrResidue: CustomNmrResidueTable._getNmrResidueSpectraCount(nmrResidue)
          , 'Number of spectra selected for calculating the deltas', None),
-        ('Deltas', lambda nmrResidue: nmrResidue._delta, '', None),
+        (DELTAS, lambda nmrResidue: nmrResidue._delta, '', None),
+        (eKD, lambda nmrResidue: nmrResidue._estimatedKd, '', None),
         ('Include', lambda nmrResidue: nmrResidue._includeInDeltaShift, 'Include this residue in the Mapping calculation', lambda nmr, value: CustomNmrResidueTable._setChecked(nmr, value)),
         # ('Flag', lambda nmrResidue: nmrResidue._flag,  '',  None),
         ('Comment', lambda nmr: NmrResidueTable._getCommentText(nmr), 'Notes', lambda nmr, value: NmrResidueTable._setComment(nmr, value))
@@ -354,12 +363,17 @@ class ChemicalShiftsMapping(CcpnModule):
       self._setBindingPlot(layoutParent=self.bindingPlotFrame)
       self.tabWidget.addTab(self.bindingPlotFrame, 'Binding Curve')
 
-      ## 2 Tab Vectors
+      ## 2 Tab fitting
       self.fittingFrame = Frame(self.mainWidget, setLayout=True)
       # self.fittingFrame.setContentsMargins(1, 10, 1, 10)
+      self._setFittingPlot(layoutParent=self.fittingFrame)
       self.tabWidget.addTab(self.fittingFrame, 'Fitting')
-      
-      
+
+      ## 3 Tab scatter Kd-deltas
+      self.scatterFrame = Frame(self.mainWidget, setLayout=True)
+      self.scatterFrame.setContentsMargins(1, 10, 1, 10)
+      self._setScatterTabWidgets(layoutParent=self.scatterFrame)
+      self.tabWidget.addTab(self.scatterFrame, 'Scatter')
       
 
       self.showOnViewerButton = Button(self.nmrResidueTable._widget, tipText='Show on Molecular Viewer',
@@ -382,6 +396,27 @@ class ChemicalShiftsMapping(CcpnModule):
       self.splitter.setStretchFactor(0, 1)
       self.mainWidget.setContentsMargins(5, 5, 5, 5)  # l,t,r,b
 
+
+
+  def _setScatterTabWidgets(self, layoutParent):
+    ### Scatter Plot setup
+    self._scatterView = pg.GraphicsLayoutWidget()
+    self._scatterView.setBackground(BackgroundColour)
+    self._plotItem = self._scatterView.addPlot()
+    self._scatterViewbox = self._plotItem.vb
+    self._addScatterSelectionBox()
+    self._plotItem.setMenuEnabled(False)
+    self._scatterViewbox.mouseDragEvent = self._scatterMouseDragEvent
+    self.scatterPlot = pg.ScatterPlotItem(size=10, pen=pg.mkPen(None), brush=pg.mkBrush(255, 0, 0))
+    self.scatterPlot.mouseClickEvent = self._scatterMouseClickEvent
+    self.scatterPlot.mouseDoubleClickEvent = self._scatterMouseDoubleClickEvent
+    # self._scatterViewbox.mouseClickEvent = self._scatterViewboxMouseClickEvent #use this for right click Context menu
+    # self._scatterViewbox.scene().sigMouseMoved.connect(self.mouseMoved) #use this if you need the mouse Posit
+
+    self._plotItem.addItem(self.scatterPlot)
+    layoutParent.getLayout().addWidget(self._scatterView)
+
+
   def _setBindingPlot(self, layoutParent):
     ###  Plot setup
     self._bindingPlotView = pg.GraphicsLayoutWidget()
@@ -394,17 +429,224 @@ class ChemicalShiftsMapping(CcpnModule):
     self.bindingPlot.setLabel('bottom', 'Series')
     self.bindingPlot.setLabel('left', 'Deltas')
     self.bindingPlot.setMenuEnabled(False)
-    self.bindingLine = pg.InfiniteLine(angle=90, pos=1, pen='b',
-                                  movable=False, label=' ') # label needs to be defined here.
-    self._bindingPlotViewbox.addItem(self.bindingLine)
     layoutParent.getLayout().addWidget(self._bindingPlotView)
+  
+  def _setFittingPlot(self, layoutParent):
+    ###  Plot setup
+    self._fittingPlotView = pg.GraphicsLayoutWidget()
+    self._fittingPlotView.setBackground(BackgroundColour)
+    self.fittingPlot = self._fittingPlotView.addPlot()
+    self.fittingPlot.addLegend(offset=[1, 10])
+    self._fittingPlotViewbox = self.fittingPlot.vb
+    # self._fittingPlotViewbox.mouseClickEvent = self._fittingViewboxMouseClickEvent
+
+    # self.fittingPlot.setLabel('bottom', 'Series')
+    self.fittingPlot.setLabel('left', '%')
+    self.fittingPlot.setMenuEnabled(False)
+    self.fittingLine = pg.InfiniteLine(angle=90, pen='b',  movable=False, label=' ') # label needs to be defined here.
+    self._fittingPlotViewbox.addItem(self.fittingLine)
+    self.fittingPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=1)
+
+    layoutParent.getLayout().addWidget(self._fittingPlotView)
 
 
-  def _clearLegendBindingC(self):
-    while self.bindingPlot.legend.layout.count() > 0:
-      self.bindingPlot.legend.layout.removeAt(0)
-    self.bindingPlot.legend.items = []
+  def _clearLegend(self, legend):
+    while legend.layout.count() > 0:
+      legend.layout.removeAt(0)
+    legend.items = []
 
+  ########### Selection box for scatter Plot ############
+
+  def _addScatterSelectionBox(self):
+    self._scatterSelectionBox = QtWidgets.QGraphicsRectItem(0, 0, 1, 1)
+    self._scatterSelectionBox.setPen(pg.functions.mkPen((255, 0, 255), width=1))
+    self._scatterSelectionBox.setBrush(pg.functions.mkBrush(255, 100, 255, 100))
+    self._scatterSelectionBox.setZValue(1e9)
+    self._scatterViewbox.addItem(self._scatterSelectionBox, ignoreBounds=True)
+    self._scatterSelectionBox.hide()
+
+  def _updateScatterSelectionBox(self, p1: float, p2: float):
+    """
+    Updates drawing of selection box as mouse is moved.
+    """
+    vb = self._scatterViewbox
+    r = QtCore.QRectF(p1, p2)
+    r = vb.childGroup.mapRectFromParent(r)
+    self._scatterSelectionBox.setPos(r.topLeft())
+    self._scatterSelectionBox.resetTransform()
+    self._scatterSelectionBox.scale(r.width(), r.height())
+    self._scatterSelectionBox.show()
+    minX = r.topLeft().x()
+    minY = r.topLeft().y()
+    maxX = minX + r.width()
+    maxY = minY + r.height()
+    return [minX, maxX, minY, maxY]
+
+  def _resetSelectionBox(self):
+    "Reset/Hide the boxes "
+    self._successiveClicks = None
+    self._scatterSelectionBox.hide()
+    self._scatterViewbox.rbScaleBox.hide()
+
+    ###########  scatter Mouse Events ############
+
+  def _scatterMouseDoubleClickEvent(self, event):
+    """
+    re-implementation of scatter double click event
+    """
+    from ccpn.ui.gui.lib.Strip import navigateToNmrAtomsInStrip, _getCurrentZoomRatio, navigateToNmrResidueInDisplay
+
+    if self.current.strip is not None:
+        strip = self.current.strip
+        nmrResidue = self.current.nmrResidue
+        if len(nmrResidue.selectedNmrAtomNames) > 0:
+            nmrAtoms = [nmrResidue.getNmrAtom(str(i)) for i in nmrResidue.selectedNmrAtomNames]
+            if len(nmrAtoms) <= 1:
+                navigateToNmrResidueInDisplay(display=strip.spectrumDisplay,
+                                              nmrResidue=nmrResidue,
+                                              widths=_getCurrentZoomRatio(strip.viewBox.viewRange()),
+                                              markPositions=True
+                                              )
+            else:
+                navigateToNmrAtomsInStrip(strip,
+                                          nmrAtoms=nmrAtoms,
+                                          widths=_getCurrentZoomRatio(strip.viewBox.viewRange()),
+                                          markPositions=True
+                                          )
+    else:
+        if len(self.project.strips) > 0:
+            selectFirst = MessageDialog.showYesNo('No Strip selected.', ' Use first available?')
+            if selectFirst:
+                self.current.strip = self.project.strips[0]
+                self._scatterMouseDoubleClickEvent(event)
+        else:
+            getLogger().warning('Impossible to navigate to peak position. Set a current strip first')
+
+  def _scatterMouseClickEvent(self, ev):
+    """
+      Re-implementation of scatter mouse event to allow selections of a single point
+    """
+    plot = self.scatterPlot
+    pts = plot.pointsAt(ev.pos())
+    obj = None
+    if len(pts) > 0:
+        point = pts[0]
+        obj = point.data()
+
+    if leftMouse(ev):
+        if obj:
+            self._selectedObjs = [obj]
+            if self.current:
+                self.current.nmrResidues = self._selectedObjs
+            ev.accept()
+        else:
+            # "no spots, clear selection"
+            self._selectedObjs = []
+            if self.current:
+                self.current.nmrResidues = self._selectedObjs
+            ev.accept()
+
+    elif controlLeftMouse(ev):
+        # Control-left-click;  add to selection
+        self._selectedObjs.extend([obj])
+        if self.current:
+            self.current.nmrResidues = self._selectedObjs
+        ev.accept()
+
+    else:
+        ev.ignore()
+
+  def _scatterMouseDragEvent(self, event, *args):
+    """
+    Re-implementation of PyQtGraph mouse drag event to allow custom actions off of different mouse
+    drag events. Same as spectrum Display. Check Spectrum Display View Box for more documentation.
+    Known bug: left drag on the axis, raises a pyqtgraph exception
+    """
+    if leftMouse(event):
+        pg.ViewBox.mouseDragEvent(self._scatterViewbox, event)
+
+    elif controlLeftMouse(event):
+
+        self._updateScatterSelectionBox(event.buttonDownPos(), event.pos())
+        event.accept()
+        if not event.isFinish():
+            self._updateScatterSelectionBox(event.buttonDownPos(), event.pos())
+        else:  ## the event is finished.
+            pts = self._updateScatterSelectionBox(event.buttonDownPos(), event.pos())
+
+            i, o = splitDataFrameWithinRange(self._getScatterData(),
+                                                           DELTAS,eKD, *pts)
+            # self._selectedObjs.extend(i.index)
+            self.current.nmrResidues = i.index
+            self._resetSelectionBox()
+
+    else:
+        self._resetSelectionBox()
+        event.ignore()
+
+  def _getScatterData(self):
+      df = self.tableData[[DELTAS, eKD]]
+      df.index = self.tableData["_object"]
+      return df
+
+  # def _selectScatterPoints(self):
+  #   self.scatterPlot.clear()
+  #   if self.current:
+  #     self.current.nmrResidues = self._selectedObjs # does selection through notifier
+
+
+
+  def _plotScatters(self, dataFrame, xAxisLabel=DELTAS, yAxisLabel=eKD, selectedObjs=None):
+    """
+
+    :param dataFrame: in the format from the PCA Class
+          index: Pid --> obj
+          Columns: Deltas Kds,  values: floats
+    :return:  transform the dataFrame in the (pyqtGraph) plottable data format and plot it on the scatterPlot
+
+    """
+    if selectedObjs is None:
+      selectedObjs = self._selectedObjs
+
+    if dataFrame is None:
+      self.scatterPlot.clear()
+      return
+    spots = []
+    for obj, row in dataFrame.iterrows():
+      dd = {'pos': [0, 0], 'data': 'obj', 'brush': pg.mkBrush(255, 0, 0), 'symbol': 'o', 'size': 10, 'pen':None} #red default
+      dd['pos'] = [row[xAxisLabel], row[yAxisLabel]]
+      dd['data'] = obj
+      if hasattr(obj, '_colour'):
+        dd['brush'] = pg.functions.mkBrush(hexToRgb(obj._colour))
+      if obj in selectedObjs:
+        dd['pen'] = SelectedPoint
+      spots.append(dd)
+    self._plotSpots(spots)
+    self._plotItem.setLabel('bottom', xAxisLabel)
+    self._plotItem.setLabel('left', yAxisLabel)
+
+  def _plotSpots(self, spots):
+    """
+    plots the data in the format requested by the pg.ScatterPlot widget
+    :param spots: a list of dict with these Key:value
+                [{
+                'pos': [0, 0], # [x,y] which will be the single spot position
+                'data': 'pid', any python object. pid for NMR residue
+                'brush': pg.mkBrush(255, 255, 255, 120), the colour of the spot
+                'symbol': 'o', will give the shape of the spot
+                'size': 10,
+                'pen' = pg.mkPen(None)
+                 }, ...]
+    :return:
+    """
+    self.scatterPlot.clear()
+    self.scatterPlot.addPoints(spots)
+
+  def _scatterViewboxMouseClickEvent(self, event):
+    """ click on scatter viewBox. The parent of scatterPlot. Opens the context menu at any point. """
+    if event.button() == QtCore.Qt.RightButton:
+        event.accept()
+        self._raiseScatterContextMenu(event)
 
   def _checkSpectraWithPeakListsOnly(self):
     for cb in self.spectraSelectionWidget.allSpectraCheckBoxes:
@@ -687,14 +929,12 @@ class ChemicalShiftsMapping(CcpnModule):
     self.scaleBindingC = Label(self.scrollAreaWidgetContents, text='Scale Binding Curves', grid=(i, 0))
     self.scaleBindingCCb = CheckBox(self.scrollAreaWidgetContents, checked=True, callback=self._plotBindingCFromCurrent, grid=(i, 1))
     self._plotBindingCFromCurrent()
+
     i += 1
 
     self.updateButton = Button(self.scrollAreaWidgetContents, text='Update All', callback=self.updateModule,
                                grid=(i, 1))
     i += 1
-    # Spacer(self.scrollAreaWidgetContents, 3, 3
-    #        , QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
-    #        , grid=(i,3), gridSpan=(1,1))
 
   def _toggleRelativeContribuitions(self):
     value = self.modeButtons.getSelectedText()
@@ -712,6 +952,19 @@ class ChemicalShiftsMapping(CcpnModule):
         i.show()
       for i in self.nmrAtomsLabels:
         i.show()
+
+  @property
+  def tableData(self):
+      """
+      :return: dataFrame containg all data on the Chemical Shift Mapping Module table
+      """
+      try:
+         return self.nmrResidueTable._dataFrameObject.dataFrame
+
+      except Exception as err:
+          getLogger().warning("Error getting Chemical Shift Mapping data. %s" %err)
+
+      return
 
   def _setDefaultThreshold(self):
     self.updateModule(silent=True)
@@ -732,20 +985,12 @@ class ChemicalShiftsMapping(CcpnModule):
 
   def updateTable(self, nmrChain):
     self.nmrResidueTable.ncWidget.select(nmrChain.pid)
-    # self.nmrResidueTable.setColumns(self.nmrResidueTable.NMRcolumns)
-
-    # self.nmrResidueTable.setObjects([nr for nr in nmrChain.nmrResidues if nr._delta])
-
     self.nmrResidueTable._update(nmrChain)
-
     self.nmrResidueTable._selectOnTableCurrentNmrResidues(self.current.nmrResidues)
 
   def _displayTableForNmrChain(self, nmrChain):
     self.updateModule()
     self._hideNonNecessaryNmrAtomsOption()
-
-    # self.updateTable(nmrChain)
-    # self.updateBarGraph()
 
   def _peakDeletedCallBack(self, data):
     if len(self.current.peaks) == 0:
@@ -1001,6 +1246,14 @@ class ChemicalShiftsMapping(CcpnModule):
               nmrResidueAtoms = [atom.name for atom in nmrResidue.nmrAtoms]
               nmrResidue.selectedNmrAtomNames =  [atom for atom in nmrResidueAtoms if atom in selectedAtomNames]
               nmrResidue._delta = getNmrResidueDeltas(nmrResidue, selectedAtomNames, mode=mode, spectra=spectra, atomWeights=weights)
+              df = self.getBindingCurves([nmrResidue])
+              bindingCurves = self._getScaledBindingCurves(df)
+              if bindingCurves is not None:
+                plotData = bindingCurves.replace(np.nan, 0)
+                y = plotData.values.flatten(order='F')
+                xss = np.array([plotData.columns] * plotData.shape[0])
+                x = xss.flatten(order='F')
+                nmrResidue._estimatedKd = getKd(bindingCurve, x,y)
             else:
               nmrResidue._delta = None
         if not silent:
@@ -1120,7 +1373,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
   def _plotBindingCFromCurrent(self):
     self.bindingPlot.clear()
-    self._clearLegendBindingC()
+    self._clearLegend(self.bindingPlot.legend)
     # self.bindingPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=None)
 
     colours = _getRandomColours(len(self.current.nmrResidues))
@@ -1142,6 +1395,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
     self.bindingPlot.autoRange()
     self.bindingPlot.setLabel('left', 'Deltas')
+    self._plotFittedCallback()
 
   def _selectCurrentNmrResiduesNotifierCallback(self, data):
     # TODO replace colour
@@ -1167,6 +1421,7 @@ class ChemicalShiftsMapping(CcpnModule):
               if label.isBelowThreshold and not self.barGraphWidget.customViewBox.allLabelsShown:
                 label.setVisible(False)
     self._plotBindingCFromCurrent()
+    self._plotScatters(self._getScatterData(), selectedObjs=self.current.nmrResidues)
 
   def _getAllBindingCurvesDataFrameForChain(self):
     nmrChainTxt = self.nmrResidueTable.ncWidget.getText()
@@ -1177,28 +1432,14 @@ class ChemicalShiftsMapping(CcpnModule):
 
   def _plotFittedCallback(self):
     plotData = self.getBindingCurves(self.current.nmrResidues)
-    if not  self.scaleBindingCCb.isChecked():
-      getLogger().info('Fitting mode allowed only on scaled binding curves ')
-
     plotData = self._getScaledBindingCurves(plotData)
     self._plotFittedBindingCurves(plotData)
 
 
   def _plotFittedBindingCurves(self, bindingCurves):
     from scipy.optimize import curve_fit
-
     if bindingCurves is not None:
       plotData = bindingCurves.replace(np.nan, 0)
-      # xs = []
-      # ys = []
-      # for obj, row, in plotData.iterrows():
-      #   ys.extend(list(row.values))
-      #   xs.extend(list(plotData.columns))
-      # x = np.array([0, 0.5, 1, 1.5, 2])
-      # y = np.array([0, 0.75, 1.28, 1.53, 1.648])
-      # xs = np.array(sorted(x))
-      # ys = np.array(sorted(y))
-
       ys = plotData.values.flatten(order='F')
       xss = np.array([plotData.columns]*plotData.shape[0])
       xs = xss.flatten(order='F')
@@ -1211,23 +1452,21 @@ class ChemicalShiftsMapping(CcpnModule):
       xf = np.arange(0, xMax+xStep, step=xStep)
       yf = bindingCurve(xf, *paramScaled[0])
       binding = paramScaled[0][0]
-      self._clearLegendBindingC()
-      self.bindingPlot.clear()
-      self.bindingPlot.plot(xs, yScaled, symbol='o', pen=None)
-      self.bindingPlot.plot(xf, yf, name='Fitted')
-      self.bindingLine.setValue(binding)
-      self.bindingLine.label.setText(str(binding))
-      self.bindingPlot.setLabel('left', '%')
-      self.bindingPlot.setRange(xRange=[0, max(xf)], yRange=[0, 1])
-      # self.bindingPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=1)
+      self._clearLegend(self.fittingPlot.legend)
+      self.fittingPlot.clear()
+      self.fittingPlot.plot(xs, yScaled, symbol='o', pen=None)
+      self.fittingPlot.plot(xf, yf, name='Fitted')
+      self.fittingLine.setValue(binding)
+      self.fittingLine.label.setText(str(round(binding,3)))
+      self.fittingPlot.setLabel('left', '%')
+      self.fittingPlot.setRange(xRange=[0, max(xf)], yRange=[0, 1])
       self.bindingPlot.autoRange()
-    else:
-      getLogger().warning('No data found. Impossible to fit binding curves ')
+
 
 
   def _clearBindingPlot(self):
     self.bindingPlot.clear()
-    self._clearLegendBindingC()
+    # self._clearLegendBindingC()
     self.bindingLine.hide()
 
   def _showExportDialog(self, viewBox):
@@ -1245,8 +1484,6 @@ class ChemicalShiftsMapping(CcpnModule):
     self._bindingContextMenu = Menu('', None, isFloatWidget=True)
     self._bindingContextMenu.addAction('Reset View', self.bindingPlot.autoRange)
     self._bindingContextMenu.addAction('Legend', self._togleBindingCLegend)
-    self._bindingContextMenu.addSeparator()
-    self._bindingContextMenu.addAction('Fit curve(s)', self._plotFittedCallback)
     self._bindingContextMenu.addSeparator()
 
     self._bindingContextMenu.addSeparator()

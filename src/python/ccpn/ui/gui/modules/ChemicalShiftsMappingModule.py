@@ -78,6 +78,7 @@ from ccpn.ui.gui.widgets.QuickTable import exportTableDialog
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
+import random
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 from ccpn.ui.gui.widgets.HLine import HLine
@@ -161,7 +162,6 @@ DELTAS = "Deltas"
 eKD =  "Estimated Kd"
 
 def _getRandomColours(numberOfColors):
-  import random
   return  ["#" + ''.join([random.choice('0123456789ABCDEF') for j in range(6)]) for i in range(numberOfColors)]
 
 
@@ -292,11 +292,6 @@ class ChemicalShiftsMapping(CcpnModule):
                                                         , callback=self._selectCurrentNmrResiduesNotifierCallback,
                                                         onceOnly=True)
       self._peakDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'Peak', self._peakDeletedCallBack)
-
-      # self._peakChangedNotifier = Notifier(self.project, [Notifier.CHANGE], 'Peak',
-      #                                        self._peakChangedCallBack, onceOnly=True)
-      # self._peakChangedNotifier.lastPeakPos = None
-
       self._nrChangedNotifier = Notifier(self.project, [Notifier.CHANGE], 'NmrResidue',self._nmrObjectChanged)
       self._nrDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'NmrResidue',self._nmrResidueDeleted)
 
@@ -614,7 +609,7 @@ class ChemicalShiftsMapping(CcpnModule):
       dd = {'pos': [0, 0], 'data': 'obj', 'brush': pg.mkBrush(255, 0, 0), 'symbol': 'o', 'size': 10, 'pen':None} #red default
       dd['pos'] = [row[xAxisLabel], row[yAxisLabel]]
       dd['data'] = obj
-      if hasattr(obj, '_colour'):
+      if obj._colour:
         dd['brush'] = pg.functions.mkBrush(hexToRgb(obj._colour))
       if obj in selectedObjs:
         dd['pen'] = SelectedPoint
@@ -926,7 +921,6 @@ class ChemicalShiftsMapping(CcpnModule):
 
     self.scaleBindingC = Label(self.scrollAreaWidgetContents, text='Scale Binding Curves', grid=(i, 0))
     self.scaleBindingCCb = CheckBox(self.scrollAreaWidgetContents, checked=True, callback=self._plotBindingCFromCurrent, grid=(i, 1))
-    self._plotBindingCFromCurrent()
 
     i += 1
 
@@ -987,12 +981,19 @@ class ChemicalShiftsMapping(CcpnModule):
     self.nmrResidueTable._selectOnTableCurrentNmrResidues(self.current.nmrResidues)
 
   def _displayTableForNmrChain(self, nmrChain):
+    self._addNmrResidueColour(nmrChain)
     self.updateModule()
     self._hideNonNecessaryNmrAtomsOption()
 
   def _peakDeletedCallBack(self, data):
     if len(self.current.peaks) == 0:
       self.updateModule()
+
+  def _addNmrResidueColour(self, nmrChain):
+      colours = _getRandomColours(len(nmrChain.nmrResidues))
+      for nmrR, colour in zip(nmrChain.nmrResidues, colours):
+          if nmrR._colour is None:
+              nmrR._colour = colour
 
   # def _peakChangedCallBack(self, data):
   #
@@ -1375,9 +1376,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self._clearLegend(self.bindingPlot.legend)
     # self.bindingPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=None)
 
-    colours = _getRandomColours(len(self.current.nmrResidues))
-    for nmrR, colour in zip(self.current.nmrResidues, colours):
-      nmrR._colour = colour
+
     plotData = self.getBindingCurves(self.current.nmrResidues)
     if self.scaleBindingCCb.isChecked():
       plotData = self._getScaledBindingCurves(plotData)

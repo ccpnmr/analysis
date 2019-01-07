@@ -94,6 +94,7 @@ class NmrResidue(AbstractWrapperObject):
   _delta = None
   _includeInDeltaShift = True   # default included in the calculation
   _estimatedKd = None
+  _colour = None
 
   # CCPN properties  
   @property

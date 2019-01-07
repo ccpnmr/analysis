@@ -93,6 +93,7 @@ class NmrResidue(AbstractWrapperObject):
   # used in chemical shift mapping
   _delta = None
   _includeInDeltaShift = True   # default included in the calculation
+  _estimatedKd = None
 
   # CCPN properties  
   @property

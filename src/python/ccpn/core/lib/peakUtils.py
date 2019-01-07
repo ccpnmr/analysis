@@ -365,22 +365,17 @@ def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atom
     return round(float(np.mean(deltas)),3)
   return
 
+def getKd(func, x, y):
+    param = curve_fit(func, x, y)
+    bindingUnscaled, bmax = param[0]
+    yScaled = y / bmax
+    paramScaled = curve_fit(func, x, yScaled)
+    kd, bmax =  paramScaled[0]
+    return kd
 
 def bindingCurve(x,kd,bmax):
     return (bmax*x)/(x+kd)
 
-def fittedCurve(x,y, func, xFitting, ):
-  """
-
-  :param x:
-  :param y:
-  :param func:
-  :param xFitting: x array for the fitting curve. E.g. np.arange(0, 2.01, step=0.01)
-  :return:
-  """
-  param = curve_fit(func, x, y)
-  yf = func(xFitting, *param[0])
-  return yf
 
 
 

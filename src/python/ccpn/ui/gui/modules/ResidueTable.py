@@ -379,7 +379,7 @@ class ResidueTable(QuickTable):
         """
         Returns a sorted list of Atom names
         """
-        return ', '.join(sorted(set([atom.name for atom in residue.atoms]),
+        return ', '.join(sorted(set([atom.name for atom in residue.atoms if not atom._flaggedForDelete]),
                                 key=CcpnSorting.stringSortKey))
 
     @staticmethod

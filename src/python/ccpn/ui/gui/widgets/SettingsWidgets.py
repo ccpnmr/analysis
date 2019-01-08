@@ -661,11 +661,14 @@ class SequenceGraphSettings(Widget):
                         #minimumWidths=(colwidth, 0),
                         fixedWidths=(colwidth, 30),
                         orientation='left',
-                        labelText=data['label'],
-                        tipText=data['tipText'],
-                        checked=data['checked'],
-                        callback=data['callBack']
+                        labelText=data['label'] if 'label' in data else '',
+                        tipText=data['tipText'] if 'tipText' in data else '',
+                        checked=data['checked'] if 'checked' in data else False,
+                        callback=data['callBack'] if 'callBack' in data else None,
+                        # enabled=data['enabled']
                         )
+                if 'enabled' in data:
+                    newItem.setEnabled(data['enabled'])
 
                 self.checkBoxes[item] = {'checkBox'  : newItem,
                                          'item'      : item,

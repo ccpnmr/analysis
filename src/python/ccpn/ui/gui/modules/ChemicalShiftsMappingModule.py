@@ -249,7 +249,12 @@ class ChemicalShiftsMapping(CcpnModule):
     self.barGraphWidget = None
 
     if self.application:
-      self.splitter = Splitter(horizontal=False)
+      self.plotsTableSplitter = Splitter() # TABLE | PLOTS
+      self.barsTableSplitter = Splitter() # -------------
+                                          #     BARS
+
+      self.plotsTableSplitter.setOrientation(QtCore.Qt.Horizontal)
+      self.barsTableSplitter.setOrientation(QtCore.Qt.Vertical)
 
       self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application, grid = (1, 0))
       self.barGraphWidget.setViewBoxLimits(0,None,0,None)
@@ -264,6 +269,8 @@ class ChemicalShiftsMapping(CcpnModule):
                                                  checkBoxCallback=self._checkBoxCallback,
                                                  setLayout=True, grid = (0, 0))
       self.nmrResidueTable.chemicalShiftsMappingModule = self
+
+
 
       self.tabWidget = Tabs(self.nmrResidueTable._parent, setLayout=True, grid=(3, 6))
       ## 1 Tab Scatter
@@ -299,11 +306,19 @@ class ChemicalShiftsMapping(CcpnModule):
       self.nmrResidueTable.displayTableForNmrChain = self._displayTableForNmrChain
       self.barGraphWidget.customViewBox.selectAboveThreshold = self._selectNmrResiduesAboveThreshold
 
-      self.splitter.addWidget(self.tableFrame)
-      self.splitter.addWidget(self.barGraphWidget)
-      self.mainWidget.getLayout().addWidget(self.splitter)
-      self.splitter.setStretchFactor(0, 1)
+      self.plotsTableSplitter.addWidget(self.tableFrame)
+      self.plotsTableSplitter.addWidget(self.tabWidget)
+
+      self.plotsTableSplitter.setStretchFactor(0, 1)
       self.mainWidget.setContentsMargins(5, 5, 5, 5)  # l,t,r,b
+
+      self.barsTableSplitter.addWidget(self.plotsTableSplitter)
+      self.barsTableSplitter.addWidget(self.barGraphWidget)
+      # self.barsTableSplitter.setStretchFactor(0, 1)
+      self.mainWidget.getLayout().addWidget(self.barsTableSplitter)
+
+
+
 
 
 

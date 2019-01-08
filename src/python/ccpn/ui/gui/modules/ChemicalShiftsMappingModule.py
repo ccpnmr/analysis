@@ -153,9 +153,8 @@ class ChemicalShiftsMapping(CcpnModule):
     self._setWidgets()
     if self.mainWindow:
       self._setSettingsWidgets()
-      self._selectCurrentNmrResiduesNotifier = Notifier(self.current , [Notifier.CURRENT] , targetName='nmrResidues'
-                                                        , callback=self._selectCurrentNmrResiduesNotifierCallback,
-                                                        onceOnly=True)
+      self._selectCurrentNRNotifier = Notifier(self.current, [Notifier.CURRENT], targetName='nmrResidues',
+                                               callback=self._selectCurrentNmrResiduesNotifierCallback,onceOnly=True)
       self._peakDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'Peak', self._peakDeletedCallBack)
       self._nrChangedNotifier = Notifier(self.project, [Notifier.CHANGE], 'NmrResidue',self._nmrObjectChanged)
       self._nrDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'NmrResidue',self._nmrResidueDeleted)
@@ -164,13 +163,59 @@ class ChemicalShiftsMapping(CcpnModule):
         if len(self.project.nmrChains) > 0:
           self.nmrResidueTable.ncWidget.select(self.project.nmrChains[-1].pid)
           self._setThresholdLineBySTD()
-      self.__addCheckBoxesAttr(self.nmrAtomsCheckBoxes)
+      self._addCheckBoxesAttr(self.nmrAtomsCheckBoxes)
 
-  def __addCheckBoxesAttr(self, checkboxes):
+
+  #########################################
+  ########### Public Functions ############
+  #########################################
+
+  ## These functions allow users to get the raw data displayed in the module widgets
+
+
+  @property
+  def tableData(self):
+      """
+      :return: dataFrame containg all data on the Chemical Shift Mapping Module table
+      """
+      try:
+         return self.nmrResidueTable._dataFrameObject.dataFrame
+
+      except Exception as err:
+          getLogger().warning("Error getting Chemical Shift Mapping data. %s" %err)
+
+      return
+
+  def updateTable(self, nmrChain):
+    """ Updates all widgets based on the nmrChain """
+    self.nmrResidueTable.ncWidget.select(nmrChain.pid)
+    self.nmrResidueTable._update(nmrChain)
+    self.nmrResidueTable._selectOnTableCurrentNmrResidues(self.current.nmrResidues)
+
+  def getBindingCurves(self, nmrResidues):
+    """ Gets binding curve as dataFrame. Index nmrResidue Object, columns: value units, raw values: floats  """
+    return self._getBindingCurves(nmrResidues)
+
+  def close(self):
+    """
+    Close the table from the commandline
+    """
+    self._closeModule()
+
+
+  ##############################################
+  ########### Private GUI Functions ############
+  ##############################################
+
+
+
+  #######   Settings widgets callbacks ######
+  #######   Main widgets callbacks ######
+
+  def _addCheckBoxesAttr(self, checkboxes):
     '''For restoring layouts only '''
     for n, w in enumerate(checkboxes):
       setattr(self,w.text(), w )
-
 
   def _availableNmrAtoms(self,source=None, nmrAtomType = None):
     '''
@@ -194,6 +239,10 @@ class ChemicalShiftsMapping(CcpnModule):
         else:
           return allAvailable
     return []
+
+  #######
+  #######   Main widgets creation     ######
+  #######
 
   def _setWidgets(self):
     self.nmrResidueTable = None
@@ -352,7 +401,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self._scatterSelectionBox.hide()
     self._scatterViewbox.rbScaleBox.hide()
 
-    ###########  scatter Mouse Events ############
+  ###########  scatter Mouse Events ############
 
   def _scatterMouseDoubleClickEvent(self, event):
     """
@@ -664,6 +713,9 @@ class ChemicalShiftsMapping(CcpnModule):
       return True
     return False
 
+  ####################################################
+  #######   Settings widgets creation  ###############
+  ####################################################
 
   def _setSettingsWidgets(self):
 
@@ -683,28 +735,22 @@ class ChemicalShiftsMapping(CcpnModule):
     self.inputLabel = Label(self.scrollAreaWidgetContents, text='Select Data Input', grid=(i, 0), vAlign='t')
     self.spectraSelectionWidget = SpectraSelectionWidget(self.scrollAreaWidgetContents, mainWindow=self.mainWindow, grid=(i,1), gridSpan=(1,2))
     self._checkSpectraWithPeakListsOnly()
-    self.__addCheckBoxesAttr(self.spectraSelectionWidget.allSpectraCheckBoxes)
-    self.__addCheckBoxesAttr(self.spectraSelectionWidget.allSG_CheckBoxes)
+    self._addCheckBoxesAttr(self.spectraSelectionWidget.allSpectraCheckBoxes)
+    self._addCheckBoxesAttr(self.spectraSelectionWidget.allSG_CheckBoxes)
 
     i += 1
     self.concentrationLabel = Label(self.scrollAreaWidgetContents, text='Concentrations', grid=(i, 0), vAlign='t')
     self.concentrationButton = Button(self.scrollAreaWidgetContents, text='Setup...', callback=self._setupConcentrationsPopup,
                                       grid=(i, 1))
-
     # self.spectraSelectionWidget.setMaximumHeight(150)
     i += 1
     self.modeLabel = Label(self.scrollAreaWidgetContents, text='Calculation mode ', grid=(i, 0))
     self.modeButtons = RadioButtons(self.scrollAreaWidgetContents, selectedInd=0, texts=MODES, callback=self._toggleRelativeContribuitions, grid=(i, 1))
     i += 1
-
-
     self.atomsLabel = Label(self.scrollAreaWidgetContents, text='Select Nmr Atoms', grid=(i, 0))
     self.nmrAtomsFrame = Frame(self.scrollAreaWidgetContents,setLayout=True, grid=(i, 1))
     self._updateNmrAtomsOption()
     self._hideNonNecessaryNmrAtomsOption()
-    i += 1
-
-
     i += 1
     self.thresholdLAbel = Label(self.scrollAreaWidgetContents, text='Threshold value', grid=(i, 0))
     self.thresholdFrame = Frame(self.scrollAreaWidgetContents, setLayout=True, grid=(i, 1))
@@ -740,8 +786,6 @@ class ChemicalShiftsMapping(CcpnModule):
     except:
       self.belowThresholdColourBox.select(random.choice(self.belowThresholdColourBox.texts))
 
-
-
     i += 1
     disappearedTipText = 'Mark NmrResidue bar with selected colour where assigned peaks have disapperead from the spectra'
     self.disappearedColourLabel = Label(self.scrollAreaWidgetContents, text='Disappeared Peaks Colour', grid=(i, 0))
@@ -760,8 +804,6 @@ class ChemicalShiftsMapping(CcpnModule):
     self.disappearedBarThresholdSpinBox = DoubleSpinbox(self.scrollAreaWidgetContents, value=1, step=0.01,
                                           decimals=3, callback=None, grid=(i, 1))
     i += 1
-
-
     # molecular Structure
     self.molecularStructure= Label(self.scrollAreaWidgetContents, text='Molecular Structure', grid=(i, 0))
     texts = ['PDB','CCPN Ensembles','Fetch From Server']
@@ -770,7 +812,6 @@ class ChemicalShiftsMapping(CcpnModule):
     self.molecularStructureRadioButton.set(texts[0])
     self.molecularStructureRadioButton.setEnabled(False)
     self.molecularStructureRadioButton.setToolTip('Not implemented yet')
-
     i += 1
     self.mvWidgetContents = Frame(self.scrollAreaWidgetContents, setLayout=True, grid=(i, 1))
     self.pdbLabel = Label(self.mvWidgetContents, text='PDB File Path', grid=(0, 0))
@@ -780,15 +821,10 @@ class ChemicalShiftsMapping(CcpnModule):
       scriptPath = self.application.pymolScriptsPath
     self.pathPDB = LineEditButtonDialog(self.mvWidgetContents, textDialog='Select PDB File',
                                         filter="PDB files (*.pdb)", directory=scriptPath, grid=(0,1))
-
-
     i += 1
-
     self.scaleBindingC = Label(self.scrollAreaWidgetContents, text='Scale Binding Curves', grid=(i, 0))
     self.scaleBindingCCb = CheckBox(self.scrollAreaWidgetContents, checked=True, callback=self._plotBindingCFromCurrent, grid=(i, 1))
-
     i += 1
-
     self.updateButton = Button(self.scrollAreaWidgetContents, text='Update All', callback=self.updateModule,
                                grid=(i, 1))
     i += 1
@@ -801,27 +837,12 @@ class ChemicalShiftsMapping(CcpnModule):
         i.hide()
       for i in self.nmrAtomsLabels:
         i.hide()
-
-
-
     else:
       for i in self.atomWeightSpinBoxes:
         i.show()
       for i in self.nmrAtomsLabels:
         i.show()
 
-  @property
-  def tableData(self):
-      """
-      :return: dataFrame containg all data on the Chemical Shift Mapping Module table
-      """
-      try:
-         return self.nmrResidueTable._dataFrameObject.dataFrame
-
-      except Exception as err:
-          getLogger().warning("Error getting Chemical Shift Mapping data. %s" %err)
-
-      return
 
   def _setDefaultThreshold(self):
     self.updateModule(silent=True)
@@ -840,10 +861,6 @@ class ChemicalShiftsMapping(CcpnModule):
 
 
 
-  def updateTable(self, nmrChain):
-    self.nmrResidueTable.ncWidget.select(nmrChain.pid)
-    self.nmrResidueTable._update(nmrChain)
-    self.nmrResidueTable._selectOnTableCurrentNmrResidues(self.current.nmrResidues)
 
   def _displayTableForNmrChain(self, nmrChain):
     self._addNmrResidueColour(nmrChain)
@@ -1110,7 +1127,7 @@ class ChemicalShiftsMapping(CcpnModule):
               nmrResidueAtoms = [atom.name for atom in nmrResidue.nmrAtoms]
               nmrResidue.selectedNmrAtomNames =  [atom for atom in nmrResidueAtoms if atom in selectedAtomNames]
               nmrResidue._delta = getNmrResidueDeltas(nmrResidue, selectedAtomNames, mode=mode, spectra=spectra, atomWeights=weights)
-              df = self.getBindingCurves([nmrResidue])
+              df = self._getBindingCurves([nmrResidue])
               bindingCurves = self._getScaledBindingCurves(df)
               if bindingCurves is not None:
                 plotData = bindingCurves.replace(np.nan, 0)
@@ -1161,7 +1178,6 @@ class ChemicalShiftsMapping(CcpnModule):
         pp.exec_()
         return
 
-
     while not pdbPath.endswith('.pdb'):
       sucess = self.pathPDB._openFileDialog()
       if sucess:
@@ -1194,7 +1210,7 @@ class ChemicalShiftsMapping(CcpnModule):
       getLogger().warning('Pymol not started. Check executable.', e)
 
 
-  def getBindingCurves(self, nmrResidues):
+  def _getBindingCurves(self, nmrResidues):
 
     selectedAtomNames = [cb.text() for cb in self.nmrAtomsCheckBoxes if cb.isChecked()]
     mode = self.modeButtons.getSelectedText()
@@ -1242,7 +1258,7 @@ class ChemicalShiftsMapping(CcpnModule):
     # self.bindingPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=None)
 
 
-    plotData = self.getBindingCurves(self.current.nmrResidues)
+    plotData = self._getBindingCurves(self.current.nmrResidues)
     if self.scaleBindingCCb.isChecked():
       plotData = self._getScaledBindingCurves(plotData)
 
@@ -1290,11 +1306,11 @@ class ChemicalShiftsMapping(CcpnModule):
     nmrChainTxt = self.nmrResidueTable.ncWidget.getText()
     nmrChain = self.project.getByPid(nmrChainTxt)
     if nmrChain is not None:
-      dataFrame = self.getBindingCurves(nmrChain.nmrResidues)
+      dataFrame = self._getBindingCurves(nmrChain.nmrResidues)
       return dataFrame
 
   def _plotFittedCallback(self):
-    plotData = self.getBindingCurves(self.current.nmrResidues)
+    plotData = self._getBindingCurves(self.current.nmrResidues)
     plotData = self._getScaledBindingCurves(plotData)
     self._plotFittedBindingCurves(plotData)
 
@@ -1497,18 +1513,14 @@ class ChemicalShiftsMapping(CcpnModule):
         newSampleComponent.concentrationUnit = concentrationUnit
 
 
-  def close(self):
-    """
-    Close the table from the commandline
-    """
-    self._closeModule()
+
 
   def _closeModule(self):
     """
     Re-implementation of closeModule function from CcpnModule to unregister notification on current
     """
-    if self._selectCurrentNmrResiduesNotifier is not None:
-      self._selectCurrentNmrResiduesNotifier.unRegister()
+    if self._selectCurrentNRNotifier is not None:
+      self._selectCurrentNRNotifier.unRegister()
     # self._peakChangedNotifier.unRegister()
     if self._peakDeletedNotifier:
       self._peakDeletedNotifier.unRegister()

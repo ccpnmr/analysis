@@ -2146,13 +2146,17 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.strip.isDeleted:
             return
 
-        # stop notifiers interfering with paint event
-        self.project.blankNotification()
-
         # check whether the visible spectra list needs updating
         if self._visibleSpectrumViewsChange:
             self._visibleSpectrumViewsChange = False
             self._updateVisibleSpectrumViews()
+
+        # if there are no spectra then skip the paintGL event
+        if not self._ordering:
+            return
+
+        # stop notifiers interfering with paint event
+        self.project.blankNotification()
 
         # self._ordering = self.spectrumDisplay.orderedSpectrumViews(self._ordering:                             # strip.spectrumViews)
         # self._GLPeaks.setListViews(self._ordering)

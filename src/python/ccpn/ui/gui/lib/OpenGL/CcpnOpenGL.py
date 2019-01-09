@@ -586,7 +586,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def _setRegion(self, region, value):
         self.strip.project._undo.increaseBlocking()
-        region.region = value
+        if region:
+            region.region = value
         self.strip.project._undo.decreaseBlocking()
 
     def _maximiseRegions(self):
@@ -2146,7 +2147,7 @@ class CcpnGLWidget(QOpenGLWidget):
             return
 
         # stop notifiers interfering with paint event
-        # self.project.blankNotification()
+        self.project.blankNotification()
 
         # check whether the visible spectra list needs updating
         if self._visibleSpectrumViewsChange:
@@ -2270,7 +2271,7 @@ class CcpnGLWidget(QOpenGLWidget):
         GL.glEnd()
 
         # re-enable notifiers
-        # self.project.unblankNotification()
+        self.project.unblankNotification()
 
     def enableTexture(self):
         GL.glEnable(GL.GL_BLEND)

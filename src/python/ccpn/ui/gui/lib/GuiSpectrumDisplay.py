@@ -830,6 +830,8 @@ class GuiSpectrumDisplay(CcpnModule):
             while layout.count():
                 _widgets.append(layout.takeAt(0).widget())
             _widgets.remove(strip)
+
+            # strip.hide()
             strip.setParent(None)  # set widget parent to None to hide,
             # was previously handled by addWidget to tempStore
 
@@ -863,6 +865,7 @@ class GuiSpectrumDisplay(CcpnModule):
             while layout.count():
                 _widgets.append(layout.takeAt(0).widget())
             _widgets.insert(currentIndex, strip)
+            # strip.show()
 
             if spectrumDisplay.stripDirection == 'Y':
                 for m, widgStrip in enumerate(_widgets):  # build layout again

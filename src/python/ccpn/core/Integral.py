@@ -238,7 +238,7 @@ class Integral(AbstractWrapperObject):
 
         if spectrum.dimensionCount == 1:
             for ii in range(spectrum.dimensionCount):
-                limits = value[ii]
+                limits = value[ii] if value and len(value) > ii else ()
                 if len(limits) == 2:
                     limit1, limit2 = limits
                     x = self.integralList.spectrum.positions

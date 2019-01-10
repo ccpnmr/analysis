@@ -1,7 +1,6 @@
 """
 Module Documentation
-"""
-""" 
+
   This module has three sections plus settings:
   
   ------------------------------- 
@@ -30,24 +29,30 @@ Module Documentation
   See tutorials for more information.
   
   Macros:
-  >>> # Example 1, open the TStar project. 
-    from ccpn.util.Common import splitDataFrameWithinRange
+  # Example 1: On a the TStar project with all peaks correctly fitted to their spectra, this macro will show how to
+              extrapolate data from the CSM module and plot different properties.
+              Paste into the Macro editor Module or directly into the PythonConsole Module and run it.
+
+    >>>
     import numpy as np
+    from ccpn.util.Common import splitDataFrameWithinRange
     from ccpn.ui.gui.widgets.PandasPlot import PandasPlot
+    from ccpn.ui.gui.modules.NmrResidueTable import KD, Deltas
+    from ccpn.core.lib.DataFrameObject import  DATAFRAME_OBJECT
     
-    moduleName = 'Chemical Shift Mapping:1' # 1 or any other displayed you want to get information from.
+    moduleName = 'Chemical Shift Mapping:1' # The displayed CSM module name you want to get information from.
     csm = mainWindow.moduleArea.modules[moduleName]
-    tableData = csm.tableData # dataframe as the displayed table. See ttps://pandas.pydata.org for documentation.
-    tableData.index = tableData['_object']
-    deltasColumn = tableData['Deltas'] # Deltas or the exact name in the table column 
-    deltasROI = [np.std(deltasColumn), np.max(deltasColumn)] # Deltas Region of Interest 
-    kdsROI = [0.01, 0.2]  # Kds Region of Interest 
-    inner, outer =  splitDataFrameWithinRange(tableData, 'Deltas', 'kd', *deltasROI, *kdsROI)
-    inner.index = [nr.sequenceCode+" "+nr.residueType for nr in inner.index] # labels 
+    tableData = csm.tableData # dataframe as the displayed table. See https://pandas.pydata.org for Pandas documentation.
+    tableData.index = tableData[DATAFRAME_OBJECT] # will add the NmrResidue object as index to the dataFrame
+    deltasColumn = tableData[Deltas] # name in the table column
+    deltasROI = [np.std(deltasColumn), np.max(deltasColumn)] # Deltas Region of Interest. Min the std of all deltas.
+    kdsROI = [0.01, 0.2]  # Kds Region of Interest.
+    inner, outer =  splitDataFrameWithinRange(tableData, Deltas, KD, *deltasROI, *kdsROI) # Split the data based on ROIs
+    inner.index = [nr.sequenceCode+" "+nr.residueType for nr in inner.index] # will be used to make labels on the plot.
     widget = PandasPlot()
-    widget.plotDataFrame(dataFrame=inner, kind='bar')
+    plot = widget.plotDataFrame(dataFrame=inner, kind='bar',title='KDs and Deltas') # See Pandas and Matplotlib for plots customisations.
     widget.show(windowTitle='Macro CSM', size=(500, 500))
-  >>>      
+    >>>
     
     
   
@@ -125,9 +130,10 @@ from ccpn.util.Constants import concentrationUnits
 from ccpn.util.Common import splitDataFrameWithinRange
 from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRandomColours
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.core.lib.peakUtils import getNmrResidueDeltas,_getKd, oneSiteBindingCurve, OneSiteBindingCurve,_fit1SiteBindCurve,\
+from ccpn.core.lib.peakUtils import getNmrResidueDeltas,_getKd, oneSiteBindingCurve, _fit1SiteBindCurve,\
                                     MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME, DefaultAtomWeights, H, N, OTHER, C
 from ccpn.core.lib import CcpnSorting
+from ccpn.core.lib.DataFrameObject import  DATAFRAME_OBJECT
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.Project import Project
 
@@ -188,6 +194,9 @@ class ChemicalShiftsMapping(CcpnModule):
     self.showStructureIcon = Icon('icons/showStructure')
     self.updateIcon = Icon('icons/update')
     self._kDunit = DefaultKDunit
+    self._availableFittingPlots  = {
+                          ONESITE: self._plot1SiteBindFitting, # Only this implemented
+                          }
 
     self._initMainWidgets()
     self._initSettingsWidgets()
@@ -980,7 +989,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
   def _getScatterData(self):
       df = self.tableData[[Deltas, KD]]
-      df.index = self.tableData["_object"]
+      df.index = self.tableData[DATAFRAME_OBJECT]
       return df
 
 
@@ -1427,15 +1436,13 @@ class ChemicalShiftsMapping(CcpnModule):
     plotData = self._getScaledBindingCurves(plotData)
 
     if plotData is not None:
-      if self.fittingModeRB.get() == ONESITE:
-        self._plotFittedBindingCurves(plotData)
+      if self.fittingModeRB.get() in self._availableFittingPlots:
+        ff = self._availableFittingPlots.get(self.fittingModeRB.get())
+        ff(plotData)
       else:
         getLogger().warning(NIY)
 
-
-
-
-  def _plotFittedBindingCurves(self, bindingCurves):
+  def _plot1SiteBindFitting(self, bindingCurves):
     """ """
     if bindingCurves is None:
       return
@@ -1646,25 +1653,25 @@ class ChemicalShiftsMapping(CcpnModule):
     super(ChemicalShiftsMapping, self)._closeModule()
 
 
-if __name__ == '__main__':
-  from PyQt5 import QtGui, QtWidgets
-  from ccpn.ui.gui.widgets.Application import TestApplication
-  from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
-
-
-  app = TestApplication()
-  win = QtWidgets.QMainWindow()
-
-  moduleArea = CcpnModuleArea(mainWindow=None)
-  # module = ChemicalShiftsMapping(mainWindow=None, name='My Module')
-  # moduleArea.addModule(module)
-
-
-  win.setCentralWidget(moduleArea)
-  win.resize(1000, 500)
-  # win.setWindowTitle('Testing %s' % module.moduleName)
-  win.show()
-
-
-  app.start()
-  win.close()
+# if __name__ == '__main__':
+#   from PyQt5 import QtGui, QtWidgets
+#   from ccpn.ui.gui.widgets.Application import TestApplication
+#   from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
+#
+#
+#   app = TestApplication()
+#   win = QtWidgets.QMainWindow()
+#
+#   moduleArea = CcpnModuleArea(mainWindow=None)
+#   # module = ChemicalShiftsMapping(mainWindow=None, name='My Module')
+#   # moduleArea.addModule(module)
+#
+#
+#   win.setCentralWidget(moduleArea)
+#   win.resize(1000, 500)
+#   # win.setWindowTitle('Testing %s' % module.moduleName)
+#   win.show()
+#
+#
+#   app.start()
+#   win.close()

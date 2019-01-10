@@ -380,7 +380,7 @@ def exponentialDecayCurve(t, a, tau, c):
     return a * np.exp(-t / tau) + c
 
 
-def _fit1SiteBindCurve(bindingCurves, aFunc=oneSiteBindingCurve, xfStep=0.01, xfMax=None):
+def _fit1SiteBindCurve(bindingCurves, aFunc=oneSiteBindingCurve, xfStep=0.01, xfPercent=30):
     """
     :param bindingCurves: DataFrame as: Columns -> float or int.
                                                   Used as xs points (e.g. concentration/time/etc value)
@@ -396,8 +396,8 @@ def _fit1SiteBindCurve(bindingCurves, aFunc=oneSiteBindingCurve, xfStep=0.01, xf
 
     :param aFunc:  Default: oneSiteBindingCurve.
     :param xfStep: number of x points for generating the fitted curve.
-    :param xfMax: max X value of the fitted curve. Used for calculating the xfitted values.
-                  Default xfMax = max(xs) + xfStep
+    :param xfPercent: percent to add to max X value of the fitted curve, so to have a longer curve after the last
+                    experimental value.
 
     :return: tuple of parameters for plotting fitted curves.
              x_atHalf_Y: the x value for half of Y. Used as estimated  kd
@@ -407,6 +407,7 @@ def _fit1SiteBindCurve(bindingCurves, aFunc=oneSiteBindingCurve, xfStep=0.01, xf
              yf: array the fitted curve
     """
     from scipy.optimize import curve_fit
+    from ccpn.util.Common import percentage
 
     if aFunc is None or not callable(aFunc):
         getLogger().warning("Error. Fitting curve %s is not callable" % aFunc)
@@ -423,8 +424,10 @@ def _fit1SiteBindCurve(bindingCurves, aFunc=oneSiteBindingCurve, xfStep=0.01, xf
     xhalfUnscaled, bMaxUnscaled = param[0]
     yScaled = ys / bMaxUnscaled  #scales y to have values 0-1
     paramScaled = curve_fit(aFunc, xs, yScaled)
-    if xfMax is None:
-        xfMax = max(xs) + xfStep
+
+    xfRange = np.max(xs) - np.min(xs)
+    xfPerc = percentage(xfPercent, xfRange)
+    xfMax = np.max(xs) + xfPerc
     xf = np.arange(0, xfMax, step=xfStep)
     yf = aFunc(xf, *paramScaled[0])
     x_atHalf_Y, bmax = paramScaled[0]

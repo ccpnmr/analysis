@@ -619,6 +619,8 @@ def _getChildren(obj, path=None):
     children.append(path)
   return children
 
+def percentage(percent, whole):
+  return (percent * whole) / 100.0
 
 def splitDataFrameWithinRange(dataframe, column1, column2, minX, maxX, minY, maxY):
   """

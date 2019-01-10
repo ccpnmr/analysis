@@ -840,7 +840,7 @@ class _CSMNmrResidueTable(NmrResidueTable):
     self.ncWidget.select(value)
     try:
       if self.chemicalShiftsMappingModule is not None:
-        self.chemicalShiftsMappingModule.updateModule()
+        self.chemicalShiftsMappingModule._updateModule()
     except Exception as e:
       getLogger().warn('Impossible update chemicalShiftsMappingModule from restoring %s' %e)
 

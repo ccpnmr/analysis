@@ -43,7 +43,6 @@ Module Documentation
     moduleName = 'Chemical Shift Mapping:1' # The displayed CSM module name you want to get information from.
     csm = mainWindow.moduleArea.modules[moduleName]
     tableData = csm.tableData # dataframe as the displayed table. See https://pandas.pydata.org for Pandas documentation.
-    tableData.index = tableData[DATAFRAME_OBJECT] # will add the NmrResidue object as index to the dataFrame
     deltasColumn = tableData[Deltas] # name in the table column
     deltasROI = [np.std(deltasColumn), np.max(deltasColumn)] # Deltas Region of Interest. Min the std of all deltas.
     kdsROI = [0.01, 0.2]  # Kds Region of Interest.
@@ -84,8 +83,6 @@ __date__ = "$Date: 2017-04-07 10:28:43 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-# TODOs :
-# when update module, keep focus on selected item in the table, keep same zoom on the plot
 
 import os
 import numpy as np
@@ -125,6 +122,7 @@ from ccpn.ui.gui.widgets.ConcentrationsWidget import ConcentrationWidget
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.modules.PyMolUtil import _chemicalShiftMappingPymolTemplate
+from ccpn.ui.gui.lib.Strip import navigateToNmrAtomsInStrip, _getCurrentZoomRatio, navigateToNmrResidueInDisplay
 from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import concentrationUnits
 from ccpn.util.Common import splitDataFrameWithinRange
@@ -160,7 +158,6 @@ OriginAxes = pg.functions.mkPen(hexToRgb(getColours()[GUISTRIP_PIVOT]), width=1,
 SelectedPoint = pg.functions.mkPen(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
 
 
-
 class ChemicalShiftsMapping(CcpnModule):
 
   includeSettingsWidget = True
@@ -168,11 +165,76 @@ class ChemicalShiftsMapping(CcpnModule):
   settingsPosition = 'left'
   className = 'ChemicalShiftsMapping'
 
+  ######################################################################################################################
+  ######################################          Public Functions        ##############################################
+  ######################################################################################################################
+  ## These functions help users to get raw data displayed in the module widgets
+
+  @property
+  def tableData(self):
+      """
+      :return: dataFrame containing all data on the Chemical Shift Mapping Module table
+
+                       |     Columns    | "as the displayed table"
+      | index          |    #   | Index | Pid, _object, Sequence, Deltas, Kd ...
+      |----------------+--------|-------|
+      | 1              |    1   |   1   |
+      | 2              |    2   |   2   |
+
+      """
+      if self.nmrResidueTable._dataFrameObject:
+        df = self.nmrResidueTable._dataFrameObject.dataFrame
+        df.index = df[DATAFRAME_OBJECT]
+        return df
+
+      else:
+          getLogger().warning("Error getting Chemical Shift Mapping data. DataFrame on NmrResidueTable not defined")
+
+
+  def getBindingCurves(self, nmrResidues):
+    """ Gets binding curve as dataFrame for specific NmrResidues.
+      Returns a DataFrame as: Index -> nmrResidue Object, columns: int or float, raw values: int or float
+
+                       |     Columns    |as the concentration/time/etc value
+      | index          |    1   |   2   |
+      |----------------+--------|-------|
+      | nmrResidue1    |    1.0 |   1.1 |
+      | nmrResidue2    |    2.0 |   1.2 |
+
+     """
+    return self._getBindingCurves(nmrResidues)
+
+
+  ########### GUI Public Functions ############
+
+  def refresh(self):
+    """ Updates all widgets and data in the CSM module"""
+    self._updateModule()
+
+  def close(self):
+    """ Closes the CSM module """
+    self._closeModule()
+
+  @property
+  def thresholdValue(self):
+    """ Gets the threshold value currently displayed on the graph   """
+    return self.thresholdSpinBox.value()
+
+  def setThresholdValue(self, value):
+    """Sets the Threshold Line to a new value and updates the graph """
+    self.thresholdSpinBox.set(value)
+
+
+  ######################################################################################################################
+  ######################################          Private Functions        #############################################
+  ######################################################################################################################
+
+
   def __init__(self, mainWindow, name='Chemical Shift Mapping', nmrChain= None, **kwds):
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name, settingButton=True)
 
-    BarGraph.mouseClickEvent = self._mouseClickEvent
-    BarGraph.mouseDoubleClickEvent = self._mouseDoubleClickEvent
+    BarGraph.mouseClickEvent = self._barGraphClickEvent
+    BarGraph.mouseDoubleClickEvent = self._navigateToNmrItems
 
     self.mainWindow = mainWindow
     self.OtherAtoms = set()
@@ -193,6 +255,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
     self.showStructureIcon = Icon('icons/showStructure')
     self.updateIcon = Icon('icons/update')
+    self._zoomOnInit = True
     self._kDunit = DefaultKDunit
     self._availableFittingPlots  = {
                           ONESITE: self._plot1SiteBindFitting, # Only this implemented
@@ -210,64 +273,9 @@ class ChemicalShiftsMapping(CcpnModule):
       if len(self.project.nmrChains) > 0:
         self.nmrResidueTable.ncWidget.select(self.project.nmrChains[-1].pid)
         self._setThresholdLineBySTD()
+        self._setKdUnit()
     self._addCheckBoxesAttr(self.nmrAtomsCheckBoxes)
 
-
-  #########################################
-  ########### Public Functions ############
-  #########################################
-
-  ## These functions allow users to get the raw data displayed in the module widgets
-
-
-  @property
-  def tableData(self):
-      """
-      :return: dataFrame containing all data on the Chemical Shift Mapping Module table
-
-                       |     Columns    | "as the displayed table"
-      | index          |    #   | Index | Pid, _object, Sequence, Deltas, Kd ...
-      |----------------+--------|-------|
-      | 1              |    1   |   1   |
-      | 2              |    2   |   2   |
-
-      """
-      try:
-         return self.nmrResidueTable._dataFrameObject.dataFrame
-
-      except Exception as err:
-          getLogger().warning("Error getting Chemical Shift Mapping data. %s" %err)
-
-      return
-
-  def getBindingCurves(self, nmrResidues):
-    """ Gets binding curve as dataFrame for specific NmrResidues.
-      Returns a DataFrame as: Index -> nmrResidue Object, columns: int or float, raw values: int or float
-
-                       |     Columns    |as the concentration/time/etc value
-      | index          |    1   |   2   |
-      |----------------+--------|-------|
-      | nmrResidue1    |    1.0 |   1.1 |
-      | nmrResidue2    |    2.0 |   1.2 |
-
-     """
-    return self._getBindingCurves(nmrResidues)
-
-
-  ########### GUI Public Functions ############
-
-
-
-  def close(self):
-    """
-    Close the table from the commandline
-    """
-    self._closeModule()
-
-
-  ##################################################
-  #############   Private GUI Functions ############
-  ##################################################
 
   #####################################################
   #############   Main widgets creation    ############
@@ -325,7 +333,7 @@ class ChemicalShiftsMapping(CcpnModule):
                                      grid = (1, 1), hAlign='l')
     self.showOnViewerButton.setFixedHeight(25)
     self.updateButton1 = Button(self.nmrResidueTable._widget, text='', icon=self.updateIcon, tipText='Update all',
-                                callback=self.updateModule, grid=(1, 2), hAlign='r' )
+                                callback=self._updateModule, grid=(1, 2), hAlign='r')
     self.updateButton1.setFixedHeight(25)
 
     self.hPlotsTableSplitter.addWidget(self.nmrResidueTable)
@@ -468,11 +476,15 @@ class ChemicalShiftsMapping(CcpnModule):
     # self.fittingModeEditor = TextEditor(self.scrollAreaWidgetContents,    grid=(i, 1))
     # self.fittingModeEditor.hide()
     i += 1
-    self.updateButton = Button(self.scrollAreaWidgetContents, text='Update All', callback=self.updateModule,
+    self.updateButton = Button(self.scrollAreaWidgetContents, text='Update All', callback=self._updateModule,
                                grid=(i, 1))
     i += 1
 
-  #######   set main widgets  ######
+
+
+  #####################################################
+  #################   Bar Graph        ################
+  #####################################################
 
   def _setBarGraphWidget(self):
     ### barGraph Widget Plot setup
@@ -482,6 +494,225 @@ class ChemicalShiftsMapping(CcpnModule):
     self.barGraphWidget.customViewBox.mouseClickEvent = self._viewboxMouseClickEvent
     self.barGraphWidget.customViewBox.selectAboveThreshold = self._selectNmrResiduesAboveThreshold
 
+
+  def _viewboxMouseClickEvent(self, event):
+    if event.button() == QtCore.Qt.RightButton:
+      event.accept()
+      self.barGraphWidget.customViewBox._raiseContextMenu(event)
+      self.barGraphWidget.customViewBox._resetBoxes()
+
+    elif event.button() == QtCore.Qt.LeftButton:
+      self.barGraphWidget.customViewBox._resetBoxes()
+      self.application.current.clearNmrResidues()
+      event.accept()
+
+  def _selectBarLabel(self, value):
+    for bar in self.barGraphWidget.barGraphs:
+      for label in bar.labels:
+        if label.text() == value:
+          label.setSelected(True)
+
+  def _barGraphClickEvent(self, event):
+
+    position = int(event.pos().x())
+    df = self.tableData
+    objDf = df.loc[df['Sequence'] == str(position)]
+
+    if len(objDf.index)>0:
+      obj = objDf.index[0]
+      selected = set(self.current.nmrResidues)
+      if leftMouse(event):
+        self.current.nmrResidue = obj
+        self._selectBarLabel(position)
+        event.accept()
+
+      elif controlLeftMouse(event):
+      # Control-left-click;  add to selection
+        selected.add(obj)
+        self.current.nmrResidues = selected
+        event.accept()
+      else:
+        event.ignore()
+
+  #####################################################
+  #################   NMR Table         ################
+  #####################################################
+
+  def _customActionCallBack(self, data):
+    nmrResidue = data[Notifier.OBJECT]
+    if nmrResidue:
+      xPos = int(nmrResidue.sequenceCode)
+      yPos = nmrResidue._delta
+      if xPos and yPos:
+        xr, yr = _getCurrentZoomRatio(self.barGraphWidget.customViewBox.viewRange())
+        self.barGraphWidget.customViewBox.setRange(xRange=[xPos-(xr/2), xPos+(xr/2)], yRange=[0, yPos+(yr/2)],)
+    self._navigateToNmrItems()
+
+  #####################################################
+  #################   Binding Plot     ################
+  #####################################################
+
+  def _setBindingPlot(self, layoutParent):
+    ###  Plot setup
+    self._bindingPlotView = pg.GraphicsLayoutWidget()
+    self._bindingPlotView.setBackground(BackgroundColour)
+    self.bindingPlot = self._bindingPlotView.addPlot()
+    self.bindingPlot.addLegend(offset=[1, 10])
+    self._bindingPlotViewbox = self.bindingPlot.vb
+    self._bindingPlotViewbox.mouseClickEvent = self._bindingViewboxMouseClickEvent
+    self.bindingVLine =  pg.InfiniteLine(angle=90, pos=0, pen=OriginAxes, movable=False, )
+    self.bindingHLine = pg.InfiniteLine(angle=0, pos=0, pen=OriginAxes, movable=False, )
+    self.bindingPlot.setLabel('bottom', self._kDunit)
+    self.bindingPlot.setLabel('left', DELTA+Delta)
+    self.bindingPlot.setMenuEnabled(False)
+    self._bindingPlotViewbox.addItem(self.bindingVLine)
+    self._bindingPlotViewbox.addItem(self.bindingHLine)
+    layoutParent.getLayout().addWidget(self._bindingPlotView)
+
+  def _clearBindingPlot(self):
+    self.bindingPlot.clear()
+    # self._clearLegendBindingC()
+    self.bindingLine.hide()
+
+  def _showExportDialog(self, viewBox):
+    """
+    :param viewBox: the viewBox obj for the selected plot
+    :return:
+    """
+    if self._bindingExportDialog is None:
+      self._bindingExportDialog = CustomExportDialog(viewBox.scene(), titleName='Exporting')
+    self._bindingExportDialog.show(viewBox)
+
+  def _raiseBindingCPlotContextMenu(self, ev):
+    """ Creates all the menu items for the scatter context menu. """
+    self._bindingContextMenu = Menu('', None, isFloatWidget=True)
+    self._bindingContextMenu.addAction('Reset View', self.bindingPlot.autoRange)
+    self._bindingContextMenu.addAction('Legend', self._togleBindingCLegend)
+    self._bindingContextMenu.addSeparator()
+
+    self._bindingContextMenu.addSeparator()
+    self.exportAction = QtGui.QAction("Export...", self,
+                                      triggered=partial(self._showExportDialog, self._bindingPlotViewbox))
+    self.exporAllAction = QtGui.QAction("Export All...", self, triggered=partial(exportTableDialog,
+                                                                                 self._getAllBindingCurvesDataFrameForChain()))
+    self._bindingContextMenu.addAction(self.exportAction)
+    self._bindingContextMenu.addAction(self.exporAllAction)
+    self._bindingContextMenu.exec_(ev.screenPos().toPoint())
+
+  def _togleBindingCLegend(self):
+    if self.bindingPlot.legend.isVisible():
+      self.bindingPlot.legend.hide()
+    else:
+      self.bindingPlot.legend.show()
+
+  def _bindingViewboxMouseClickEvent(self, event):
+    """ click on scatter viewBox. The parent of scatterPlot. Opens the context menu at any point. """
+    if event.button() == QtCore.Qt.RightButton:
+      event.accept()
+      self._raiseBindingCPlotContextMenu(event)
+
+  def _plotBindingCFromCurrent(self):
+    self.bindingPlot.clear()
+    self._clearLegend(self.bindingPlot.legend)
+    # self.bindingPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=None)
+
+
+    plotData = self._getBindingCurves(self.current.nmrResidues)
+    if self.scaleBindingCCb.isChecked():
+      plotData = self._getScaledBindingCurves(plotData)
+
+    if plotData is not None:
+      plotData = plotData.replace(np.nan, 0)
+      for obj, row, in plotData.iterrows():
+        ys = list(row.values)
+        xs = list(plotData.columns)
+
+        pen = pg.functions.mkPen(hexToRgb(obj._colour), width=1)
+        brush = pg.functions.mkBrush(hexToRgb(obj._colour), width=1)
+        self.bindingPlot.plot(xs, ys, symbol='o', pen=pen, symbolBrush=brush, name=obj.pid)
+
+    self.bindingPlot.autoRange()
+    self.bindingPlot.setLabel('left', DELTA+Delta)
+    self.bindingPlot.setLabel('bottom', self._kDunit)
+    self._plotFittedCallback()
+
+
+  def _getBindingCurves(self, nmrResidues):
+    """
+
+    :param nmrResidues:
+    :return: dataframe
+    """
+
+    selectedAtomNames = [cb.text() for cb in self.nmrAtomsCheckBoxes if cb.isChecked()]
+    mode = self.modeButtons.getSelectedText()
+    if not mode in MODES:
+      return
+    weights = {}
+    for atomWSB in self.atomWeightSpinBoxes:
+      weights.update({atomWSB.objectName(): atomWSB.value()})
+    values = []
+    for nmrResidue in nmrResidues:
+      if self._isInt(nmrResidue.sequenceCode):
+        spectra = self.spectraSelectionWidget.getSelections()
+        if len(spectra)>1:
+          deltas = []
+          concentrationsValues = []
+          zeroSpectrum, otherSpectra = spectra[0], spectra[1:]
+          for i, spectrum in enumerate(otherSpectra,1):
+            if nmrResidue._includeInDeltaShift:
+              delta = getNmrResidueDeltas(nmrResidue, selectedAtomNames, mode=mode, spectra=[zeroSpectrum, spectrum],
+                                          atomWeights=weights)
+              deltas.append(delta)
+
+              concentrations, units =  self._getConcentrationsFromSpectra([spectrum])
+              if len(concentrations)>0:
+                concentration = concentrations[0]
+                if concentration is None:
+                  concentration = i
+                concentrationsValues.append(concentration)
+
+          df = pd.DataFrame([deltas], index=[nmrResidue], columns=concentrationsValues)
+          df = df.replace(np.nan, 0)
+          values.append(df)
+    if len(values)>0:
+      return pd.concat(values)
+
+  def _getScaledBindingCurves(self, bindingCurves):
+    if isinstance(bindingCurves, pd.DataFrame):
+      aMean = bindingCurves.mean(axis=1) # mean of each row
+      scaled = bindingCurves.div(aMean,axis=0) # divide each row by its mean
+      return scaled
+
+  #####################################################
+  #################   Fitting Plot     ################
+  #####################################################
+
+  def _setFittingPlot(self, layoutParent):
+    ###  Plot setup
+    self._fittingPlotView = pg.GraphicsLayoutWidget()
+    self._fittingPlotView.setBackground(BackgroundColour)
+    self.fittingPlot = self._fittingPlotView.addPlot()
+    self.fittingPlot.addLegend(offset=[1, 10])
+    self._fittingPlotViewbox = self.fittingPlot.vb
+    # self._fittingPlotViewbox.mouseClickEvent = self._fittingViewboxMouseClickEvent
+    self.fittingPlot.setLabel('left', RelativeDisplacement)
+    self.fittingPlot.setMenuEnabled(False)
+    self.fittingLine = pg.InfiniteLine(angle=90, pen='b',  movable=False, label=' ') # label needs to be defined here.
+    self.atHalfFitLine = pg.InfiniteLine(angle=0, pos=0.5, pen=OriginAxes, movable=False, label=' ') # label needs to be defined here.
+
+    self._fittingPlotViewbox.addItem(self.fittingLine)
+    self._fittingPlotViewbox.addItem(self.atHalfFitLine)
+
+    self.fittingPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=1)
+
+    layoutParent.getLayout().addWidget(self._fittingPlotView)
+
+
+
+  #####################################################
+  #################   Scatter Plot     ################
+  #####################################################
 
   def _setScatterTabWidgets(self, layoutParent):
     ### Scatter Plot setup
@@ -494,7 +725,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self._scatterViewbox.mouseDragEvent = self._scatterMouseDragEvent
     self.scatterPlot = pg.ScatterPlotItem(size=10, pen=pg.mkPen(None), brush=pg.mkBrush(255, 0, 0))
     self.scatterPlot.mouseClickEvent = self._scatterMouseClickEvent
-    self.scatterPlot.mouseDoubleClickEvent = self._scatterMouseDoubleClickEvent
+    self.scatterPlot.mouseDoubleClickEvent = self._navigateToNmrItems
     # self._scatterViewbox.mouseClickEvent = self._scatterViewboxMouseClickEvent #use this for right click Context menu
     # self._scatterViewbox.scene().sigMouseMoved.connect(self.mouseMoved) #use this if you need the mouse Posit
     self.scatterXLine = pg.InfiniteLine(angle=90, pos=0, pen=OriginAxes)
@@ -504,358 +735,6 @@ class ChemicalShiftsMapping(CcpnModule):
     self._plotItem.addItem(self.scatterXLine)
     self._plotItem.addItem(self.scatterYLine)
     layoutParent.getLayout().addWidget(self._scatterView)
-
-
-  def _setBindingPlot(self, layoutParent):
-    ###  Plot setup
-    self._bindingPlotView = pg.GraphicsLayoutWidget()
-    self._bindingPlotView.setBackground(BackgroundColour)
-    self.bindingPlot = self._bindingPlotView.addPlot()
-    self.bindingPlot.addLegend(offset=[1, 10])
-    self._bindingPlotViewbox = self.bindingPlot.vb
-    self._bindingPlotViewbox.mouseClickEvent = self._bindingViewboxMouseClickEvent
-
-    self.bindingPlot.setLabel('bottom', self._kDunit)
-    self.bindingPlot.setLabel('left', DELTA+Delta)
-    self.bindingPlot.setMenuEnabled(False)
-    layoutParent.getLayout().addWidget(self._bindingPlotView)
-  
-  def _setFittingPlot(self, layoutParent):
-    ###  Plot setup
-    self._fittingPlotView = pg.GraphicsLayoutWidget()
-    self._fittingPlotView.setBackground(BackgroundColour)
-    self.fittingPlot = self._fittingPlotView.addPlot()
-    self.fittingPlot.addLegend(offset=[1, 10])
-    self._fittingPlotViewbox = self.fittingPlot.vb
-    # self._fittingPlotViewbox.mouseClickEvent = self._fittingViewboxMouseClickEvent
-    self.fittingPlot.setLabel('left', RelativeDisplacement)
-    self.fittingPlot.setMenuEnabled(False)
-    self.fittingLine = pg.InfiniteLine(angle=90, pen='b',  movable=False, label=' ') # label needs to be defined here.
-    self.atHalfFitLine = pg.InfiniteLine(angle=0, pen='b',  movable=False, label=' ') # label needs to be defined here.
-
-    self._fittingPlotViewbox.addItem(self.fittingLine)
-    self.fittingPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=1)
-
-    layoutParent.getLayout().addWidget(self._fittingPlotView)
-
-  ######   Updating widgets (plots and table) callbacks ######
-
-  def _updateBarGraph(self):
-    xs = []
-    ys = []
-    obs = []
-    self.disappearedX = []
-    self.disappearedY = []
-    self.disappereadObjects = []
-    self.aboveX = []
-    self.aboveY = []
-    self.aboveObjects = []
-    self.belowX = []
-    self.belowY = []
-    self.belowObjects = []
-    self.aboveBrush = 'g'
-    self.belowBrush = 'r'
-    self.disappearedPeakBrush = 'b'
-    # check if all values are none:
-    shifts = [nmrResidue._delta for nmrResidue in self.nmrResidueTable._dataFrameObject.objects]
-    if not any(shifts):
-      self.barGraphWidget.clear()
-      return
-
-    if self.barGraphWidget.xLine:
-      self.thresholdLinePos = self.thresholdSpinBox.value()
-
-      if self.nmrResidueTable._dataFrameObject:
-        for nmrResidue in self.nmrResidueTable._dataFrameObject.objects:
-          if nmrResidue:
-            nmrResidue.missingPeaks = False
-            if hasattr(nmrResidue, '_spectraWithMissingPeaks'):
-              if len(nmrResidue._spectraWithMissingPeaks) != 0:
-                if nmrResidue.sequenceCode:
-
-                  x = int(nmrResidue.sequenceCode)
-                  # x = self.nmrResidueTable._dataFrameObject.objects.index(nmrResidue)
-                  if nmrResidue._delta:
-                    y = nmrResidue._delta
-                  else:
-                    if nmrResidue._includeInDeltaShift:
-                      y = self.disappearedBarThresholdSpinBox.value()
-                    else:
-                      y = 0
-                  self.disappearedY.append(y)
-                  self.disappearedX.append(x)
-                  self.disappereadObjects.append(nmrResidue)
-                  nmrResidue.missingPeaks = True
-            if nmrResidue._delta:
-              if not nmrResidue.missingPeaks:
-                if nmrResidue.sequenceCode:
-
-                  x = int(nmrResidue.sequenceCode)
-                  # x = self.nmrResidueTable._dataFrameObject.objects.index(nmrResidue)
-                  y = float(nmrResidue._delta)
-
-                  xs.append(x)
-                  ys.append(y)
-                  obs.append(nmrResidue)
-                  if y > self.thresholdLinePos:
-                    self.aboveY.append(y)
-                    self.aboveX.append(x)
-                    self.aboveObjects.append(nmrResidue)
-                  else:
-                    self.belowX.append(x)
-                    self.belowY.append(y)
-                    self.belowObjects.append(nmrResidue)
-
-
-    selectedNameColourA = self.aboveThresholdColourBox.getText()
-    for code, name in spectrumColours.items():
-      if name == selectedNameColourA:
-        self.aboveBrush = code
-
-    selectedNameColourB = self.belowThresholdColourBox.getText()
-    for code, name in spectrumColours.items():
-      if name == selectedNameColourB:
-        self.belowBrush = code
-
-    selectedNameColourC = self.disappearedColourBox.getText() #disappeared peaks
-    for code, name in spectrumColours.items():
-      if name == selectedNameColourC:
-        self.disappearedPeakBrush = code
-
-    self.barGraphWidget.clear()
-    self.barGraphWidget._lineMoved(aboveX=self.aboveX,
-                                   aboveY=self.aboveY,
-                                   aboveObjects=self.aboveObjects,
-                                   belowX=self.belowX,
-                                   belowY=self.belowY,
-                                   belowObjects=self.belowObjects,
-                                   belowBrush=self.belowBrush,
-                                   aboveBrush=self.aboveBrush,
-                                   disappearedX = self.disappearedX,
-                                   disappearedY=self.disappearedY,
-                                   disappearedObjects = self.disappereadObjects,
-                                   disappearedBrush = self.disappearedPeakBrush,
-                                   )
-    if xs and ys:
-      self.barGraphWidget.setViewBoxLimits(0, max(xs)*10, 0,  max(ys)*10)
-      self.barGraphWidget.customViewBox.setRange(xRange=[min(xs) - 10, max(xs) + 10], yRange=[0, max(ys)],)
-
-
-  def _updateThresholdLineValue(self, value):
-    if self.barGraphWidget:
-      self.barGraphWidget.xLine.setPos(value)
-      self._updateBarGraph()
-
-  def _updateThreshold(self):
-    self.thresholdSpinBox.setValue(self.barGraphWidget.xLine.pos().y())
-    self._updateBarGraph()
-    # self.barGraphWidget._lineMoved()
-
-
-  def _updateTable(self, nmrChain):
-    """ Updates table based on the given nmrChain """
-    self.nmrResidueTable.ncWidget.select(nmrChain.pid)
-    self.nmrResidueTable._update(nmrChain)
-    self.nmrResidueTable._selectOnTableCurrentNmrResidues(self.current.nmrResidues)
-
-  def _updatedPeakCount(self, nmrResidue, spectra):
-    if len(nmrResidue.nmrAtoms)>0:
-      peaks = [p for p in nmrResidue.nmrAtoms[0].assignedPeaks if p.peakList.spectrum in spectra]
-
-
-      spectraWithPeaks = [peak.peakList.spectrum for peak in peaks]
-      spectraWithMissingPeaks = [spectrum for spectrum in spectra if spectrum not in spectraWithPeaks]
-      nmrResidue._spectraWithMissingPeaks = spectraWithMissingPeaks
-
-      return nmrResidue._spectraWithMissingPeaks
-
-  def _updateNmrAtomsOption(self):
-    otherAvailable = False
-    i = 0
-    availableNmrAtoms = self._availableNmrAtoms()
-    # line = HLine(self.nmrAtomsFrame,  style='DashLine',  height=1, grid=(i, 1))
-    line = HLine(self.nmrAtomsFrame, grid=(i, 1), colour=getColours()[DIVIDER], height=10)
-    i += 1
-    for name, value in DefaultAtomWeights.items():
-      atomFrame = Frame(self.nmrAtomsFrame, setLayout=True, grid=(i, 1))
-      hFrame = 0
-      vFrame = 0
-      labelRelativeContribution = Label(atomFrame, text='%s Relative Contribution' % name, grid=(vFrame, hFrame))
-      hFrame += 1
-      self.atomWeightSpinBox = DoubleSpinbox(atomFrame, value=DefaultAtomWeights[name],
-                                             prefix=str('Weight' + (' ' * 2)), grid=(vFrame, hFrame),
-                                             tipText='Relative Contribution for the selected nmrAtom')
-      self.atomWeightSpinBox.setObjectName(name)
-      self.atomWeightSpinBox.setMaximumWidth(150)
-      self.atomWeightSpinBoxes.append(self.atomWeightSpinBox)
-      self.nmrAtomsLabels.append(labelRelativeContribution)
-
-      vFrame += 1
-      self.commonAtomsFrame = Frame(atomFrame, setLayout=True, grid=(vFrame, 0))
-      # add the first three of ccpn Sorted.
-      vFrame += 1
-
-      self.scrollAreaMoreNmrAtoms = ScrollArea(atomFrame, setLayout=False, grid=(vFrame, 0))
-      self.scrollAreaMoreNmrAtoms.setWidgetResizable(True)
-      self.moreOptionFrame = Frame(self, setLayout=True, )
-      self.scrollAreaMoreNmrAtoms.setWidget(self.moreOptionFrame)
-      self.moreOptionFrame.getLayout().setAlignment(QtCore.Qt.AlignTop)
-      self.scrollAreaMoreNmrAtoms.hide()
-      self.moreButton = Button(atomFrame, 'More %s NmrAtoms' % name,
-                               callback=partial(self._toggleMoreNmrAtoms, self.scrollAreaMoreNmrAtoms),
-                               grid=(vFrame - 1, 1), hAlign='l', )
-      self.moreButton.hide()
-
-      availableNmrAtomsForType = self._availableNmrAtoms(nmrAtomType=name)
-      n = 0
-      checkFirst = False
-      maxCountRow = 3
-      if len(availableNmrAtomsForType) < maxCountRow:
-        for nmrAtomName in availableNmrAtomsForType:
-          self.atomSelection = CheckBox(self.commonAtomsFrame, text=nmrAtomName, grid=(0, n))
-          if not checkFirst:
-            self.atomSelection.setChecked(True)
-            checkFirst = True
-          self.nmrAtomsCheckBoxes.append(self.atomSelection)
-          n += 1
-      else:
-        self.moreButton.show()
-        showPreferredFirst = [nmrAtomName for nmrAtomName in availableNmrAtomsForType if
-                              nmrAtomName in PreferredNmrAtoms]
-        rest = [nmrAtomName for nmrAtomName in availableNmrAtomsForType if nmrAtomName not in showPreferredFirst]
-        if len(showPreferredFirst) > 0:
-          if len(showPreferredFirst) < maxCountRow:
-            needed = maxCountRow - len(showPreferredFirst)
-            if len(rest) > needed:
-              showPreferredFirst += rest[:needed]
-              rest = rest[needed:]
-            else:
-              showPreferredFirst += rest
-              rest = []
-              self.moreButton.hide()
-          for nmrAtomName in showPreferredFirst:
-            self.atomSelection = CheckBox(self.commonAtomsFrame, text=nmrAtomName, grid=(0, n))
-            n += 1
-            if not checkFirst:
-              self.atomSelection.setChecked(True)
-              checkFirst = True
-            self.nmrAtomsCheckBoxes.append(self.atomSelection)
-          self._addMoreNmrAtomsForAtomType(rest, self.moreOptionFrame)
-        else:
-          for nmrAtomName in availableNmrAtomsForType[:3]:
-            self.atomSelection = CheckBox(self.commonAtomsFrame, text=nmrAtomName, grid=(0, n))
-            if not checkFirst:
-              self.atomSelection.setChecked(True)
-              checkFirst = True
-            self.nmrAtomsCheckBoxes.append(self.atomSelection)
-            n += 1
-          self._addMoreNmrAtomsForAtomType(availableNmrAtomsForType[2:], self.moreOptionFrame)
-
-      vFrame += 1
-      ## Scrollable area where to add more atoms
-
-      i += 1
-      if name == OTHER:
-        if not otherAvailable:
-          otherAvailable = self._addOtherNmrAtomsAvailable(availableNmrAtoms)
-
-      if name not in availableNmrAtoms and not otherAvailable:
-        atomFrame.hide()
-
-    # line = HLine(self.nmrAtomsFrame, style='DashLine', height=1, grid=(i, 1))
-    line = HLine(self.nmrAtomsFrame, grid=(i, 1), colour=getColours()[DIVIDER], height=10)
-
-  def _clearLegend(self, legend):
-    while legend.layout.count() > 0:
-      legend.layout.removeAt(0)
-    legend.items = []
-
-  #######   Settings widgets callbacks ######
-
-  def _addCheckBoxesAttr(self, checkboxes):
-    '''For restoring layouts only '''
-    for n, w in enumerate(checkboxes):
-      setattr(self,w.text(), w )
-
-  def _availableNmrAtoms(self,source=None, nmrAtomType = None):
-    '''
-    source = ccpn object: Project or nmrChain, Default project.
-    returns sorted nmrAtoms names present in nmrResidues of the selected  source.
-    Used to init the option. The module starts with all nmr atoms available in the project and hides/shows only for the selected nmrChain in the pulldown.
-    This solutions is a bit slower on opening the first time but makes faster switching between nmrChains.
-    '''
-    if source is None:
-      source = self.project
-
-    if source is not None and isinstance(source, (NmrChain, Project)):
-      nmrAtoms = []
-      for nmrResidue in source.nmrResidues:
-        nmrAtoms += nmrResidue.nmrAtoms
-      if len(nmrAtoms)>0:
-        availableNmrAtoms =  list(set([nmrAtom.name for nmrAtom in nmrAtoms]))
-        allAvailable = sorted(availableNmrAtoms, key=CcpnSorting.stringSortKey)
-        if nmrAtomType:
-          return [na for na in allAvailable if na.startswith(nmrAtomType) ]
-        else:
-          return allAvailable
-    return []
-
-  def _addMoreNmrAtomsForAtomType(self, nmrAtomsNames, widget):
-    '''
-
-    :param widget: Widget where to add the option. EG frame
-    :return:
-    '''
-    editableOption = EditableCheckBox(widget, grid=(0, 0))
-    self.nmrAtomsCheckBoxes.append(editableOption)
-    regioncount = 0
-    totalCount = len(nmrAtomsNames)
-    valueCount = int(len(nmrAtomsNames) / 2)
-    if totalCount > 0:
-      positions = [(i + 1 + regioncount, j) for i in range(valueCount + 1)
-                   for j in range(2)]
-
-      for position, nmrAtomName in zip(positions, nmrAtomsNames):
-        self.atomSelection = CheckBox(widget, text=nmrAtomName, grid=position)
-        self.nmrAtomsCheckBoxes.append(self.atomSelection)
-
-  def _toggleMoreNmrAtoms(self, widget):
-    if self.sender():
-      name = self.sender().text()
-      if widget.isHidden():
-        self.sender().setText(name.replace(MORE, LESS))
-        widget.show()
-      else:
-        self.sender().setText(name.replace(LESS, MORE))
-        widget.hide()
-
-  def _hideNonNecessaryNmrAtomsOption(self):
-    '''
-    :return: hides nmrAtoms not needed for the selected nmrChain.
-    '''
-    neededNmrAtoms = self._availableNmrAtoms(source=self.nmrResidueTable._nmrChain)
-    for selectedWidget in self.nmrAtomsCheckBoxes:
-      if not isinstance(selectedWidget, EditableCheckBox):
-        if selectedWidget.text() in neededNmrAtoms:
-          selectedWidget.show()
-        else:
-          selectedWidget.hide()
-
-
-
-  def _addOtherNmrAtomsAvailable(self, availableNmrAtoms):
-    '''Adds more nmr atoms if not in the default atoms'''
-    addedNmrAtoms = [i.text() for i in self.nmrAtomsCheckBoxes if i is not None]
-    othersAvailable = [name for name in availableNmrAtoms if name not in addedNmrAtoms]
-    if len(othersAvailable):
-      self.moreButton.show()
-      self._addMoreNmrAtomsForAtomType(othersAvailable, self.moreOptionFrame)
-      return True
-    return False
-
-  #####################################################
-  #################   Scatter Plot     ################
-  #####################################################
 
 
   ########### Selection box for scatter Plot ############
@@ -924,7 +803,9 @@ class ChemicalShiftsMapping(CcpnModule):
                 self.current.strip = self.project.strips[0]
                 self._scatterMouseDoubleClickEvent(event)
         else:
-            getLogger().warning('Impossible to navigate to peak position. Set a current strip first')
+          if self._openSpectra():
+            self._scatterMouseDoubleClickEvent(event)
+
 
   def _scatterMouseClickEvent(self, ev):
     """
@@ -1045,6 +926,131 @@ class ChemicalShiftsMapping(CcpnModule):
         event.accept()
         self._raiseScatterContextMenu(event)
 
+
+
+
+  #############################################################
+  ############   Settings widgets callbacks    ################
+  #############################################################
+
+  def _navigateToNmrItems(self, *args):
+    """
+    _ccpnInternal. NB Called by several points within the CSM
+    navigates To current NmrResidue or its atoms if at least 1.
+    """
+    nmrResidue = self.current.nmrResidue
+    if nmrResidue is None:
+      return
+
+    self.mainWindow.clearMarks()
+    self.nmrResidueTable.scrollToSelectedIndex()
+    if self.current.strip is not None:
+        strip = self.current.strip
+
+        if len(nmrResidue.selectedNmrAtomNames) > 0:
+            nmrAtoms = [nmrResidue.getNmrAtom(str(i)) for i in nmrResidue.selectedNmrAtomNames]
+            if len(nmrAtoms) <= 1:
+                navigateToNmrResidueInDisplay(display=strip.spectrumDisplay,
+                                              nmrResidue=nmrResidue,
+                                              widths=_getCurrentZoomRatio(strip.viewBox.viewRange()),
+                                              markPositions=True
+                                              )
+            else:
+                navigateToNmrAtomsInStrip(strip,
+                                          nmrAtoms=nmrAtoms,
+                                          widths=_getCurrentZoomRatio(strip.viewBox.viewRange()),
+                                          markPositions=True
+                                          )
+    else:
+        if len(self.project.strips) > 0:
+            selectFirst = MessageDialog.showYesNo('No Strip selected.', ' Use first available?')
+            if selectFirst:
+                self.current.strip = self.project.strips[0]
+                self._navigateToNmrItems()
+        else:
+          if self._openSpectra():
+            self._navigateToNmrItems()
+
+
+  def _addCheckBoxesAttr(self, checkboxes):
+    '''For restoring layouts only '''
+    for n, w in enumerate(checkboxes):
+      setattr(self, w.text(), w)
+
+  def _availableNmrAtoms(self, source=None, nmrAtomType=None):
+    '''
+    source = ccpn object: Project or nmrChain, Default project.
+    returns sorted nmrAtoms names present in nmrResidues of the selected  source.
+    Used to init the option. The module starts with all nmr atoms available in the project and hides/shows only for the selected nmrChain in the pulldown.
+    This solutions is a bit slower on opening the first time but makes faster switching between nmrChains.
+    '''
+    if source is None:
+      source = self.project
+
+    if source is not None and isinstance(source, (NmrChain, Project)):
+      nmrAtoms = []
+      for nmrResidue in source.nmrResidues:
+        nmrAtoms += nmrResidue.nmrAtoms
+      if len(nmrAtoms) > 0:
+        availableNmrAtoms = list(set([nmrAtom.name for nmrAtom in nmrAtoms]))
+        allAvailable = sorted(availableNmrAtoms, key=CcpnSorting.stringSortKey)
+        if nmrAtomType:
+          return [na for na in allAvailable if na.startswith(nmrAtomType)]
+        else:
+          return allAvailable
+    return []
+
+  def _addMoreNmrAtomsForAtomType(self, nmrAtomsNames, widget):
+    '''
+
+    :param widget: Widget where to add the option. EG frame
+    :return:
+    '''
+    editableOption = EditableCheckBox(widget, grid=(0, 0))
+    self.nmrAtomsCheckBoxes.append(editableOption)
+    regioncount = 0
+    totalCount = len(nmrAtomsNames)
+    valueCount = int(len(nmrAtomsNames) / 2)
+    if totalCount > 0:
+      positions = [(i + 1 + regioncount, j) for i in range(valueCount + 1)
+                   for j in range(2)]
+
+      for position, nmrAtomName in zip(positions, nmrAtomsNames):
+        self.atomSelection = CheckBox(widget, text=nmrAtomName, grid=position)
+        self.nmrAtomsCheckBoxes.append(self.atomSelection)
+
+  def _toggleMoreNmrAtoms(self, widget):
+    if self.sender():
+      name = self.sender().text()
+      if widget.isHidden():
+        self.sender().setText(name.replace(MORE, LESS))
+        widget.show()
+      else:
+        self.sender().setText(name.replace(LESS, MORE))
+        widget.hide()
+
+  def _hideNonNecessaryNmrAtomsOption(self):
+    '''
+    :return: hides nmrAtoms not needed for the selected nmrChain.
+    '''
+    neededNmrAtoms = self._availableNmrAtoms(source=self.nmrResidueTable._nmrChain)
+    for selectedWidget in self.nmrAtomsCheckBoxes:
+      if not isinstance(selectedWidget, EditableCheckBox):
+        if selectedWidget.text() in neededNmrAtoms:
+          selectedWidget.show()
+        else:
+          selectedWidget.hide()
+
+  def _addOtherNmrAtomsAvailable(self, availableNmrAtoms):
+    '''Adds more nmr atoms if not in the default atoms'''
+    addedNmrAtoms = [i.text() for i in self.nmrAtomsCheckBoxes if i is not None]
+    othersAvailable = [name for name in availableNmrAtoms if name not in addedNmrAtoms]
+    if len(othersAvailable):
+      self.moreButton.show()
+      self._addMoreNmrAtomsForAtomType(othersAvailable, self.moreOptionFrame)
+      return True
+    return False
+
   def _checkSpectraWithPeakListsOnly(self):
     for cb in self.spectraSelectionWidget.allSpectraCheckBoxes:
       sp = self.project.getByPid(cb.text())
@@ -1072,7 +1078,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
 
   def _setDefaultThreshold(self):
-    self.updateModule(silent=True)
+    self._updateModule(silent=True)
     self._setThresholdLineBySTD()
 
   def _setThresholdLineBySTD(self):
@@ -1086,16 +1092,21 @@ class ChemicalShiftsMapping(CcpnModule):
             self.thresholdLinePos = std
             self.thresholdSpinBox.set(std)
 
+  def _setKdUnit(self):
+    spectra = self.spectraSelectionWidget.getSelections()
+    vs, u = self._getConcentrationsFromSpectra(spectra)
+    self._kDunit = u
+
 
   def _displayTableForNmrChain(self, nmrChain):
     """ Add custom action when selecting a chain on the table pulldown"""
     self._addNmrResidueColour(nmrChain)
-    self.updateModule()
+    self._updateModule()
     self._hideNonNecessaryNmrAtomsOption()
 
   def _peakDeletedCallBack(self, data):
     if len(self.current.peaks) == 0:
-      self.updateModule()
+      self._updateModule()
 
   def _addNmrResidueColour(self, nmrChain):
       colours = _getRandomColours(len(nmrChain.nmrResidues))
@@ -1108,7 +1119,7 @@ class ChemicalShiftsMapping(CcpnModule):
   #   peak = data[Notifier.OBJECT]
   #   if self._peakChangedNotifier.lastPeakPos != peak.position:
   #     self._peakChangedNotifier.lastPeakPos = peak.position
-  #     self.updateModule()
+  #     self._updateModule()
 
   def _checkBoxCallback(self, data):
     '''
@@ -1126,7 +1137,7 @@ class ChemicalShiftsMapping(CcpnModule):
     # #     print(obj)
     # #   obj._includeInDeltaShift = data['checked']
     #   obj._finaliseAction('change')
-    # self.updateModule()
+    # self._updateModule()
     pass
     # print(data)
 
@@ -1137,11 +1148,11 @@ class ChemicalShiftsMapping(CcpnModule):
     getLogger().Warning('Table temp disabled')
 
   def _nmrObjectChanged(self, data):
-    self.updateModule()
+    self._updateModule()
 
   def _nmrResidueDeleted(self, data):
     if len(self.current.nmrResidues) == 0:
-      self.updateModule()
+      self._updateModule()
 
   def _selectNmrResiduesAboveThreshold(self):
     if self.aboveObjects:
@@ -1153,55 +1164,6 @@ class ChemicalShiftsMapping(CcpnModule):
     self._updateBarGraph()
 
 
-
-  def _viewboxMouseClickEvent(self, event):
-
-    if event.button() == QtCore.Qt.RightButton:
-      event.accept()
-      self.barGraphWidget.customViewBox._raiseContextMenu(event)
-      self.barGraphWidget.customViewBox._resetBoxes()
-
-    elif event.button() == QtCore.Qt.LeftButton:
-      self.barGraphWidget.customViewBox._resetBoxes()
-      self.application.current.clearNmrResidues()
-      event.accept()
-
-  def _customActionCallBack(self, data):
-    from ccpn.ui.gui.lib.Strip import navigateToNmrAtomsInStrip, _getCurrentZoomRatio, navigateToNmrResidueInDisplay
-
-    nmrResidue = data[Notifier.OBJECT]
-
-    if nmrResidue:
-      xPos = int(nmrResidue.sequenceCode)
-      yPos = nmrResidue._delta
-      if xPos and yPos:
-        self.barGraphWidget.customViewBox.setRange(xRange=[xPos-10, xPos+10], yRange=[0, yPos],)
-      self.application.ui.mainWindow.clearMarks()
-
-      if self.current.strip is not None:
-        strip = self.current.strip
-        if len(nmrResidue.selectedNmrAtomNames) > 0:
-          nmrAtoms = [nmrResidue.getNmrAtom(str(i)) for i in nmrResidue.selectedNmrAtomNames]
-          if len(nmrAtoms) <= 1:
-            navigateToNmrResidueInDisplay(display=strip.spectrumDisplay,
-                                          nmrResidue=nmrResidue,
-                                          widths=_getCurrentZoomRatio(strip.viewBox.viewRange()),
-                                          markPositions=True
-                                          )
-          else:
-            navigateToNmrAtomsInStrip(strip,
-                                      nmrAtoms=nmrAtoms,
-                                      widths=_getCurrentZoomRatio(strip.viewBox.viewRange()),
-                                      markPositions=True
-                                      )
-      else:
-        if len(self.project.strips) > 0:
-          selectFirst = MessageDialog.showYesNo('No Strip selected.', ' Use first available?')
-          if selectFirst:
-            self.current.strip = self.project.strips[0]
-            self._customActionCallBack(data)
-        else:
-          getLogger().warning('Impossible to navigate to peak position. Set a current strip first')
 
   def _isInt(self, s):
     try:
@@ -1216,7 +1178,7 @@ class ChemicalShiftsMapping(CcpnModule):
       if not hasattr(nmrR, 'colour'):
         nmrR._colour = colour
 
-  def updateModule(self, silent=False):
+  def _updateModule(self, silent=False):
     '''
 
     :param silent: if silent does not update the module!
@@ -1318,76 +1280,7 @@ class ChemicalShiftsMapping(CcpnModule):
       getLogger().warning('Pymol not started. Check executable.', e)
 
 
-  def _getBindingCurves(self, nmrResidues):
-    """
 
-    :param nmrResidues:
-    :return: dataframe
-    """
-
-    selectedAtomNames = [cb.text() for cb in self.nmrAtomsCheckBoxes if cb.isChecked()]
-    mode = self.modeButtons.getSelectedText()
-    if not mode in MODES:
-      return
-    weights = {}
-    for atomWSB in self.atomWeightSpinBoxes:
-      weights.update({atomWSB.objectName(): atomWSB.value()})
-    values = []
-    for nmrResidue in nmrResidues:
-      if self._isInt(nmrResidue.sequenceCode):
-        spectra = self.spectraSelectionWidget.getSelections()
-        if len(spectra)>1:
-          deltas = []
-          concentrationsValues = []
-          zeroSpectrum, otherSpectra = spectra[0], spectra[1:]
-          for i, spectrum in enumerate(otherSpectra,1):
-            if nmrResidue._includeInDeltaShift:
-              delta = getNmrResidueDeltas(nmrResidue, selectedAtomNames, mode=mode, spectra=[zeroSpectrum, spectrum],
-                                          atomWeights=weights)
-              deltas.append(delta)
-
-              concentrations, units =  self._getConcentrationsFromSpectra([spectrum])
-              if len(concentrations)>0:
-                concentration = concentrations[0]
-                if concentration is None:
-                  concentration = i
-                concentrationsValues.append(concentration)
-
-          df = pd.DataFrame([deltas], index=[nmrResidue], columns=concentrationsValues)
-          df = df.replace(np.nan, 0)
-          values.append(df)
-    if len(values)>0:
-      return pd.concat(values)
-
-  def _getScaledBindingCurves(self, bindingCurves):
-    if isinstance(bindingCurves, pd.DataFrame):
-      aMean = bindingCurves.mean(axis=1) # mean of each row
-      scaled = bindingCurves.div(aMean,axis=0) # divide each row by its mean
-      return scaled
-
-  def _plotBindingCFromCurrent(self):
-    self.bindingPlot.clear()
-    self._clearLegend(self.bindingPlot.legend)
-    # self.bindingPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=None)
-
-
-    plotData = self._getBindingCurves(self.current.nmrResidues)
-    if self.scaleBindingCCb.isChecked():
-      plotData = self._getScaledBindingCurves(plotData)
-
-    if plotData is not None:
-      plotData = plotData.replace(np.nan, 0)
-      for obj, row, in plotData.iterrows():
-        ys = list(row.values)
-        xs = list(plotData.columns)
-
-        pen = pg.functions.mkPen(hexToRgb(obj._colour), width=1)
-        brush = pg.functions.mkBrush(hexToRgb(obj._colour), width=1)
-        self.bindingPlot.plot(xs, ys, symbol='o', pen=pen, symbolBrush=brush, name=obj.pid)
-
-    self.bindingPlot.autoRange()
-    self.bindingPlot.setLabel('left', DELTA+Delta)
-    self._plotFittedCallback()
 
   def _toggleUserFncBox(self):
     if self.fittingModeRB.get() == OTHER:
@@ -1458,7 +1351,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self.fittingPlot.plot(xs, yScaled, symbol='o', pen=None)
     self.fittingPlot.plot(xf, yf, name='Fitted')
     self.fittingLine.setValue(x_atHalf_Y)
-    self.fittingLine.label.setText(str(round(x_atHalf_Y,3)))
+    self.fittingLine.label.setText('kd '+str(round(x_atHalf_Y,3)))
     self.fittingLine.show()
     self.fittingPlot.setLabel('left', RelativeDisplacement)
     self.fittingPlot.setLabel('bottom', self._kDunit)
@@ -1467,100 +1360,21 @@ class ChemicalShiftsMapping(CcpnModule):
 
 
 
-  def _clearBindingPlot(self):
-    self.bindingPlot.clear()
-    # self._clearLegendBindingC()
-    self.bindingLine.hide()
 
-  def _showExportDialog(self, viewBox):
-    """
-    :param viewBox: the viewBox obj for the selected plot
-    :return:
-    """
-    if self._bindingExportDialog is None:
-      self._bindingExportDialog = CustomExportDialog(viewBox.scene(), titleName='Exporting')
-    self._bindingExportDialog.show(viewBox)
-  
-  def _raiseBindingCPlotContextMenu(self, ev):
-    """ Creates all the menu items for the scatter context menu. """
 
-    self._bindingContextMenu = Menu('', None, isFloatWidget=True)
-    self._bindingContextMenu.addAction('Reset View', self.bindingPlot.autoRange)
-    self._bindingContextMenu.addAction('Legend', self._togleBindingCLegend)
-    self._bindingContextMenu.addSeparator()
+  def _openSpectra(self):
+    openSpectra = MessageDialog.showYesNo('No Spectra displayed.', 'Impossible to navigate to peak position.'
+                                                                   'Open a new SpectrumDisplay?')
+    if openSpectra:
+      try:
+        from ccpn.ui.gui.widgets.SideBar import _openItemObject
 
-    self._bindingContextMenu.addSeparator()
-    self.exportAction = QtGui.QAction("Export...", self, triggered=partial(self._showExportDialog, self._bindingPlotViewbox))
-    self.exporAllAction = QtGui.QAction("Export All...", self, triggered=partial(exportTableDialog, self._getAllBindingCurvesDataFrameForChain()))
-
-    self._bindingContextMenu.addAction(self.exportAction)
-    self._bindingContextMenu.addAction(self.exporAllAction)
-
-    self._bindingContextMenu.exec_(ev.screenPos().toPoint())
-
-  def _togleBindingCLegend(self):
-    if self.bindingPlot.legend.isVisible():
-      self.bindingPlot.legend.hide()
-    else:
-      self.bindingPlot.legend.show()
-
-  def _bindingViewboxMouseClickEvent(self, event):
-    """ click on scatter viewBox. The parent of scatterPlot. Opens the context menu at any point. """
-    if event.button() == QtCore.Qt.RightButton:
-      event.accept()
-      self._raiseBindingCPlotContextMenu(event)
-
-  def _mouseClickEvent(self, event):
-
-    position = event.pos().x()
-    self.clicked = int(position)
-    if event.button() == QtCore.Qt.LeftButton:
-      for bar in self.barGraphWidget.barGraphs:
-        for label in bar.labels:
-          if label.text() == str(self.clicked):
-            self.current.nmrResidue = label.data(self.clicked)
-            label.setSelected(True)
-      event.accept()
-
-  def _mouseDoubleClickEvent(self, event):
-    from ccpn.ui.gui.lib.Strip import navigateToNmrAtomsInStrip, _getCurrentZoomRatio, navigateToNmrResidueInDisplay
-
-    self.nmrResidueTable.scrollToSelectedIndex()
-
-    self.application.ui.mainWindow.clearMarks()
-    position = event.pos().x()
-    self.doubleclicked = int(position)
-    if event.button() == QtCore.Qt.LeftButton:
-      for bar in self.barGraphWidget.barGraphs:
-        for label in bar.labels:
-          if label.text() == str(self.doubleclicked):
-           nmrResidue = label.data(self.doubleclicked)
-           if nmrResidue:
-             if self.current.strip is not None:
-               strip = self.current.strip
-               if len(nmrResidue.selectedNmrAtomNames) >0:
-                 nmrAtoms = [ nmrResidue.getNmrAtom(str(i)) for i  in nmrResidue.selectedNmrAtomNames]
-                 if len(nmrAtoms) <= 1:
-                   navigateToNmrResidueInDisplay(display=strip.spectrumDisplay,
-                                                 nmrResidue=nmrResidue,
-                                                 widths=_getCurrentZoomRatio(strip.viewBox.viewRange()),
-                                                 markPositions=True
-                                             )
-                 else:
-                   navigateToNmrAtomsInStrip(strip,
-                                             nmrAtoms=nmrAtoms,
-                                             widths=_getCurrentZoomRatio(strip.viewBox.viewRange()),
-                                             markPositions=True
-                                             )
-             else:
-               if len(self.project.strips)>0:
-                 selectFirst = MessageDialog.showYesNo('No Strip selected.',' Use first available?')
-                 if selectFirst:
-                   self.current.strip = self.project.strips[0]
-                   self._mouseDoubleClickEvent(event)
-               else:
-                 getLogger().warning('Impossible to navigate to peak position. Set a current strip first')
-
+        spectra = self.spectraSelectionWidget.getSelections()
+        _openItemObject(self.mainWindow, spectra)
+        return True
+      except:
+        getLogger().warn('Failed to open selected objects')
+    return False
 
   def _setupConcentrationsPopup(self):
     popup = CcpnDialog(windowTitle='Setup Concentrations', setLayout=True)
@@ -1633,8 +1447,239 @@ class ChemicalShiftsMapping(CcpnModule):
         newSampleComponent.concentration = value
         newSampleComponent.concentrationUnit = concentrationUnit
 
+  #############################################################
+  ######   Updating widgets (plots and table) callbacks #######
+  #############################################################
+
+  def _updateBarGraph(self):
+    xs = []
+    ys = []
+    obs = []
+    self.disappearedX = []
+    self.disappearedY = []
+    self.disappereadObjects = []
+    self.aboveX = []
+    self.aboveY = []
+    self.aboveObjects = []
+    self.belowX = []
+    self.belowY = []
+    self.belowObjects = []
+    self.aboveBrush = 'g'
+    self.belowBrush = 'r'
+    self.disappearedPeakBrush = 'b'
+    # check if all values are none:
+    shifts = [nmrResidue._delta for nmrResidue in self.nmrResidueTable._dataFrameObject.objects]
+    if not any(shifts):
+      self.barGraphWidget.clear()
+      return
+
+    if self.barGraphWidget.xLine:
+      self.thresholdLinePos = self.thresholdSpinBox.value()
+
+      if self.nmrResidueTable._dataFrameObject:
+        for nmrResidue in self.nmrResidueTable._dataFrameObject.objects:
+          if nmrResidue:
+            nmrResidue.missingPeaks = False
+            if hasattr(nmrResidue, '_spectraWithMissingPeaks'):
+              if len(nmrResidue._spectraWithMissingPeaks) != 0:
+                if nmrResidue.sequenceCode:
+
+                  x = int(nmrResidue.sequenceCode)
+                  # x = self.nmrResidueTable._dataFrameObject.objects.index(nmrResidue)
+                  if nmrResidue._delta:
+                    y = nmrResidue._delta
+                  else:
+                    if nmrResidue._includeInDeltaShift:
+                      y = self.disappearedBarThresholdSpinBox.value()
+                    else:
+                      y = 0
+                  self.disappearedY.append(y)
+                  self.disappearedX.append(x)
+                  self.disappereadObjects.append(nmrResidue)
+                  nmrResidue.missingPeaks = True
+            if nmrResidue._delta:
+              if not nmrResidue.missingPeaks:
+                if nmrResidue.sequenceCode:
+
+                  x = int(nmrResidue.sequenceCode)
+                  # x = self.nmrResidueTable._dataFrameObject.objects.index(nmrResidue)
+                  y = float(nmrResidue._delta)
+
+                  xs.append(x)
+                  ys.append(y)
+                  obs.append(nmrResidue)
+                  if y > self.thresholdLinePos:
+                    self.aboveY.append(y)
+                    self.aboveX.append(x)
+                    self.aboveObjects.append(nmrResidue)
+                  else:
+                    self.belowX.append(x)
+                    self.belowY.append(y)
+                    self.belowObjects.append(nmrResidue)
+
+    selectedNameColourA = self.aboveThresholdColourBox.getText()
+    for code, name in spectrumColours.items():
+      if name == selectedNameColourA:
+        self.aboveBrush = code
+
+    selectedNameColourB = self.belowThresholdColourBox.getText()
+    for code, name in spectrumColours.items():
+      if name == selectedNameColourB:
+        self.belowBrush = code
+
+    selectedNameColourC = self.disappearedColourBox.getText()  #disappeared peaks
+    for code, name in spectrumColours.items():
+      if name == selectedNameColourC:
+        self.disappearedPeakBrush = code
+
+    self.barGraphWidget.clear()
+    self.barGraphWidget._lineMoved(aboveX=self.aboveX,
+                                   aboveY=self.aboveY,
+                                   aboveObjects=self.aboveObjects,
+                                   belowX=self.belowX,
+                                   belowY=self.belowY,
+                                   belowObjects=self.belowObjects,
+                                   belowBrush=self.belowBrush,
+                                   aboveBrush=self.aboveBrush,
+                                   disappearedX=self.disappearedX,
+                                   disappearedY=self.disappearedY,
+                                   disappearedObjects=self.disappereadObjects,
+                                   disappearedBrush=self.disappearedPeakBrush,
+                                   )
+    if xs and ys:
+      self.barGraphWidget.setViewBoxLimits(0, max(xs) * 10, 0, max(ys) * 10)
+      if self._zoomOnInit:
+        self.barGraphWidget.customViewBox.setRange(xRange=[min(xs) - 10, max(xs) + 10], yRange=[0, max(ys)], )
+      self._zoomOnInit = False # do only at startup
 
 
+
+  def _updateThresholdLineValue(self, value):
+    if self.barGraphWidget:
+      self.barGraphWidget.xLine.setPos(value)
+      self._updateBarGraph()
+
+  def _updateThreshold(self):
+    self.thresholdSpinBox.setValue(self.barGraphWidget.xLine.pos().y())
+    self._updateBarGraph()
+    # self.barGraphWidget._lineMoved()
+
+  def _updateTable(self, nmrChain):
+    """ Updates table based on the given nmrChain """
+    self.nmrResidueTable.ncWidget.select(nmrChain.pid)
+    self.nmrResidueTable._update(nmrChain)
+    self.nmrResidueTable._selectOnTableCurrentNmrResidues(self.current.nmrResidues)
+
+  def _updatedPeakCount(self, nmrResidue, spectra):
+    if len(nmrResidue.nmrAtoms) > 0:
+      peaks = [p for p in nmrResidue.nmrAtoms[0].assignedPeaks if p.peakList.spectrum in spectra]
+
+      spectraWithPeaks = [peak.peakList.spectrum for peak in peaks]
+      spectraWithMissingPeaks = [spectrum for spectrum in spectra if spectrum not in spectraWithPeaks]
+      nmrResidue._spectraWithMissingPeaks = spectraWithMissingPeaks
+
+      return nmrResidue._spectraWithMissingPeaks
+
+  def _updateNmrAtomsOption(self):
+    otherAvailable = False
+    i = 0
+    availableNmrAtoms = self._availableNmrAtoms()
+    # line = HLine(self.nmrAtomsFrame,  style='DashLine',  height=1, grid=(i, 1))
+    line = HLine(self.nmrAtomsFrame, grid=(i, 1), colour=getColours()[DIVIDER], height=10)
+    i += 1
+    for name, value in DefaultAtomWeights.items():
+      atomFrame = Frame(self.nmrAtomsFrame, setLayout=True, grid=(i, 1))
+      hFrame = 0
+      vFrame = 0
+      labelRelativeContribution = Label(atomFrame, text='%s Relative Contribution' % name, grid=(vFrame, hFrame))
+      hFrame += 1
+      self.atomWeightSpinBox = DoubleSpinbox(atomFrame, value=DefaultAtomWeights[name],
+                                             prefix=str('Weight' + (' ' * 2)), grid=(vFrame, hFrame),
+                                             tipText='Relative Contribution for the selected nmrAtom')
+      self.atomWeightSpinBox.setObjectName(name)
+      self.atomWeightSpinBox.setMaximumWidth(150)
+      self.atomWeightSpinBoxes.append(self.atomWeightSpinBox)
+      self.nmrAtomsLabels.append(labelRelativeContribution)
+
+      vFrame += 1
+      self.commonAtomsFrame = Frame(atomFrame, setLayout=True, grid=(vFrame, 0))
+      # add the first three of ccpn Sorted.
+      vFrame += 1
+
+      self.scrollAreaMoreNmrAtoms = ScrollArea(atomFrame, setLayout=False, grid=(vFrame, 0))
+      self.scrollAreaMoreNmrAtoms.setWidgetResizable(True)
+      self.moreOptionFrame = Frame(self, setLayout=True, )
+      self.scrollAreaMoreNmrAtoms.setWidget(self.moreOptionFrame)
+      self.moreOptionFrame.getLayout().setAlignment(QtCore.Qt.AlignTop)
+      self.scrollAreaMoreNmrAtoms.hide()
+      self.moreButton = Button(atomFrame, 'More %s NmrAtoms' % name,
+                               callback=partial(self._toggleMoreNmrAtoms, self.scrollAreaMoreNmrAtoms),
+                               grid=(vFrame - 1, 1), hAlign='l', )
+      self.moreButton.hide()
+
+      availableNmrAtomsForType = self._availableNmrAtoms(nmrAtomType=name)
+      n = 0
+      checkFirst = False
+      maxCountRow = 3
+      if len(availableNmrAtomsForType) < maxCountRow:
+        for nmrAtomName in availableNmrAtomsForType:
+          self.atomSelection = CheckBox(self.commonAtomsFrame, text=nmrAtomName, grid=(0, n))
+          if not checkFirst:
+            self.atomSelection.setChecked(True)
+            checkFirst = True
+          self.nmrAtomsCheckBoxes.append(self.atomSelection)
+          n += 1
+      else:
+        self.moreButton.show()
+        showPreferredFirst = [nmrAtomName for nmrAtomName in availableNmrAtomsForType if
+                              nmrAtomName in PreferredNmrAtoms]
+        rest = [nmrAtomName for nmrAtomName in availableNmrAtomsForType if nmrAtomName not in showPreferredFirst]
+        if len(showPreferredFirst) > 0:
+          if len(showPreferredFirst) < maxCountRow:
+            needed = maxCountRow - len(showPreferredFirst)
+            if len(rest) > needed:
+              showPreferredFirst += rest[:needed]
+              rest = rest[needed:]
+            else:
+              showPreferredFirst += rest
+              rest = []
+              self.moreButton.hide()
+          for nmrAtomName in showPreferredFirst:
+            self.atomSelection = CheckBox(self.commonAtomsFrame, text=nmrAtomName, grid=(0, n))
+            n += 1
+            if not checkFirst:
+              self.atomSelection.setChecked(True)
+              checkFirst = True
+            self.nmrAtomsCheckBoxes.append(self.atomSelection)
+          self._addMoreNmrAtomsForAtomType(rest, self.moreOptionFrame)
+        else:
+          for nmrAtomName in availableNmrAtomsForType[:3]:
+            self.atomSelection = CheckBox(self.commonAtomsFrame, text=nmrAtomName, grid=(0, n))
+            if not checkFirst:
+              self.atomSelection.setChecked(True)
+              checkFirst = True
+            self.nmrAtomsCheckBoxes.append(self.atomSelection)
+            n += 1
+          self._addMoreNmrAtomsForAtomType(availableNmrAtomsForType[2:], self.moreOptionFrame)
+
+      vFrame += 1
+      ## Scrollable area where to add more atoms
+
+      i += 1
+      if name == OTHER:
+        if not otherAvailable:
+          otherAvailable = self._addOtherNmrAtomsAvailable(availableNmrAtoms)
+
+      if name not in availableNmrAtoms and not otherAvailable:
+        atomFrame.hide()
+
+    # line = HLine(self.nmrAtomsFrame, style='DashLine', height=1, grid=(i, 1))
+    line = HLine(self.nmrAtomsFrame, grid=(i, 1), colour=getColours()[DIVIDER], height=10)
+
+  def _clearLegend(self, legend):
+    while legend.layout.count() > 0:
+      legend.layout.removeAt(0)
+    legend.items = []
 
   def _closeModule(self):
     """

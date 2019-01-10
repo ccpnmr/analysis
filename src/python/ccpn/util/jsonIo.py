@@ -144,15 +144,27 @@ def _ccpnObjectPairHook(pairs):
                     # NBNB HACK:
                     # We want the pandas read_json to instantiate EnsembleData, which is a subclass
                     # of DataFrame. Hence this temporary monkeypatching
-                    from pandas.io import json as pandasJson
+                    # from pandas.io import json as pandasJson
+                    #
+                    # backup = pandasJson.DataFrame
+                    # pandasJson.DataFrame = EnsembleData
+                    # result = None
+                    # try:
+                    #     result = pandas.read_json(data, orient='split')
+                    # finally:
+                    #     pandasJson.DataFrame = backup
+                    # return result
 
-                    backup = pandasJson.DataFrame
-                    pandasJson.DataFrame = EnsembleData
+                    # TODO:ED create a structureEnsemble here
+                    # backup = pandas.DataFrame
+                    # pandas.DataFrame = EnsembleData
                     result = None
                     try:
                         result = pandas.read_json(data, orient='split')
+                        result = EnsembleData(result)
                     finally:
-                        pandasJson.DataFrame = backup
+                        # pandas.DataFrame = backup
+                        pass
                     return result
 
             elif typ == 'pandas.DataFrame':

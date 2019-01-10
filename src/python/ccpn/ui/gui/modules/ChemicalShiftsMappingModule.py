@@ -1,10 +1,14 @@
 """
-Module Documentation:
-  This module has three sections:
-    - bar chart
-    - scatter plots
-    - table
-
+Module Documentation
+"""
+""" 
+  This module has three sections plus settings:
+  
+  ------------------------------- 
+ |          |    TABLE | PLOTS   |
+ | Settings |    -------------   |
+ |          |      BAR CHART     |
+  -------------------------------
 
   This module plots a bar chart of NmrResidue number as function of delta shift for its (nmrAtoms) assigned peaks.
 
@@ -12,7 +16,7 @@ Module Documentation:
     E.G.: OK  -->  sequenceCode = 44;
           NO  -->  sequenceCode = '44i-1';
 
-  There are four modes of delta calculation: POSITIONS, HEIGHT, VOLUME, LINEWIDTHS
+  There are four modes of Deltadelta calculation (Settings): POSITIONS, HEIGHT, VOLUME, LINEWIDTHS
     The delta shift for POSITIONS and LINEWIDTHS is calculated from the peak properties as following,
     assuming the NmrAtoms of interest H and N:
 
@@ -22,14 +26,35 @@ Module Documentation:
       CSPi = √((Δδ )^2
 
   The peaks used are as default taken from the last peak list for the selected spectra (settings tab).
-  Any sensible combination of NmrAtoms is allowed,
-
-
-
-# TODO : when update module, keep focus on selected item in the table, keep same zoom on the plot
-
-
+  Any sensible combination of NmrAtoms is allowed.
+  See tutorials for more information.
+  
+  Macros:
+  >>> # Example 1, open the TStar project. 
+    from ccpn.util.Common import splitDataFrameWithinRange
+    import numpy as np
+    from ccpn.ui.gui.widgets.PandasPlot import PandasPlot
+    
+    moduleName = 'Chemical Shift Mapping:1' # 1 or any other displayed you want to get information from.
+    csm = mainWindow.moduleArea.modules[moduleName]
+    tableData = csm.tableData # dataframe as the displayed table. See ttps://pandas.pydata.org for documentation.
+    tableData.index = tableData['_object']
+    deltasColumn = tableData['Deltas'] # Deltas or the exact name in the table column 
+    deltasROI = [np.std(deltasColumn), np.max(deltasColumn)] # Deltas Region of Interest 
+    kdsROI = [0.01, 0.2]  # Kds Region of Interest 
+    inner, outer =  splitDataFrameWithinRange(tableData, 'Deltas', 'kd', *deltasROI, *kdsROI)
+    inner.index = [nr.sequenceCode+" "+nr.residueType for nr in inner.index] # labels 
+    widget = PandasPlot()
+    widget.plotDataFrame(dataFrame=inner, kind='bar')
+    widget.show(windowTitle='Macro CSM', size=(500, 500))
+  >>>      
+    
+    
+  
 """
+
+
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -54,6 +79,9 @@ __date__ = "$Date: 2017-04-07 10:28:43 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+# TODOs :
+# when update module, keep focus on selected item in the table, keep same zoom on the plot
+
 import os
 import numpy as np
 import pyqtgraph as pg
@@ -68,9 +96,11 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.SpectraSelectionWidget import SpectraSelectionWidget
 from ccpn.ui.gui.widgets.CheckBox import CheckBox, EditableCheckBox
+from ccpn.ui.gui.widgets.CheckBoxes import CheckBoxes
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.QuickTable import exportTableDialog
 from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
@@ -85,7 +115,7 @@ from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
-from ccpn.ui.gui.modules.NmrResidueTable import _CSMNmrResidueTable
+from ccpn.ui.gui.modules.NmrResidueTable import _CSMNmrResidueTable, KD, Deltas
 from ccpn.ui.gui.widgets.ConcentrationsWidget import ConcentrationWidget
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
@@ -95,25 +125,34 @@ from ccpn.util.Constants import concentrationUnits
 from ccpn.util.Common import splitDataFrameWithinRange
 from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRandomColours
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.core.lib.peakUtils import getNmrResidueDeltas, getKd,bindingCurve, MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME, DefaultAtomWeights, H, N, OTHER, C
+from ccpn.core.lib.peakUtils import getNmrResidueDeltas,_getKd, oneSiteBindingCurve, OneSiteBindingCurve,_fit1SiteBindCurve,\
+                                    MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME, DefaultAtomWeights, H, N, OTHER, C
 from ccpn.core.lib import CcpnSorting
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.Project import Project
 
-
+# Default values on init
 DefaultConcentration = 0.0
-DefaultConcentrationUnit = concentrationUnits[0]
 DefaultThreshould = 0.1
+DefaultConcentrationUnit = concentrationUnits[0]
+
+# General Labels
+DefaultKDunit = ''
+RelativeDisplacement = 'Relative Displacement'
 PymolScriptName = 'chemicalShiftMapping_Pymol_Template.py'
-BackgroundColour = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
+DELTA = '\u0394'
+Delta = '\u03B4'
+MORE, LESS = 'More', 'Fewer'
+PreferredNmrAtoms = ['H', 'HA', 'HB', 'C', 'CA', 'CB', 'N', 'NE', 'ND']
+ONESITE = 'One Site binding'
+DECAY = 'Exponential Decay'
+NIY = "This option has not been implemented yet"
+
 # colours
+BackgroundColour = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
 OriginAxes = pg.functions.mkPen(hexToRgb(getColours()[GUISTRIP_PIVOT]), width=1, style=QtCore.Qt.DashLine)
 SelectedPoint = pg.functions.mkPen(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
 
-MORE, LESS = 'More', 'Fewer'
-PreferredNmrAtoms = ['H', 'HA', 'HB', 'C', 'CA', 'CB', 'N', 'NE', 'ND']
-DELTAS = "Deltas"
-eKD =  "Estimated Kd"
 
 
 class ChemicalShiftsMapping(CcpnModule):
@@ -130,7 +169,6 @@ class ChemicalShiftsMapping(CcpnModule):
     BarGraph.mouseDoubleClickEvent = self._mouseDoubleClickEvent
 
     self.mainWindow = mainWindow
-    self.application = None
     self.OtherAtoms = set()
     self.Natoms = set()
     self.Hatoms = set()
@@ -139,31 +177,31 @@ class ChemicalShiftsMapping(CcpnModule):
     self.nmrAtomsCheckBoxes = []
     self.nmrAtomsLabels = []
     self.atomNames = []
-    if self.mainWindow is not None:
-      self.project = self.mainWindow.project
-      self.application = self.mainWindow.application
-      self.current = self.application.current
+    self.project = self.mainWindow.project
+    self.application = self.mainWindow.application
+    self.current = self.application.current
 
     self.thresholdLinePos = DefaultThreshould
     self._bindingExportDialog = None
+    self._fittingMode = None
 
     self.showStructureIcon = Icon('icons/showStructure')
     self.updateIcon = Icon('icons/update')
+    self._kDunit = DefaultKDunit
 
-    self._setWidgets()
-    if self.mainWindow:
-      self._setSettingsWidgets()
-      self._selectCurrentNRNotifier = Notifier(self.current, [Notifier.CURRENT], targetName='nmrResidues',
-                                               callback=self._selectCurrentNmrResiduesNotifierCallback,onceOnly=True)
-      self._peakDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'Peak', self._peakDeletedCallBack)
-      self._nrChangedNotifier = Notifier(self.project, [Notifier.CHANGE], 'NmrResidue',self._nmrObjectChanged)
-      self._nrDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'NmrResidue',self._nmrResidueDeleted)
+    self._initMainWidgets()
+    self._initSettingsWidgets()
+    self._selectCurrentNRNotifier = Notifier(self.current, [Notifier.CURRENT], targetName='nmrResidues',
+                                             callback=self._selectCurrentNmrResiduesNotifierCallback,onceOnly=True)
+    self._peakDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'Peak', self._peakDeletedCallBack)
+    self._nrChangedNotifier = Notifier(self.project, [Notifier.CHANGE], 'NmrResidue',self._nmrObjectChanged)
+    self._nrDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'NmrResidue',self._nmrResidueDeleted)
 
-      if self.project:
-        if len(self.project.nmrChains) > 0:
-          self.nmrResidueTable.ncWidget.select(self.project.nmrChains[-1].pid)
-          self._setThresholdLineBySTD()
-      self._addCheckBoxesAttr(self.nmrAtomsCheckBoxes)
+    if self.project:
+      if len(self.project.nmrChains) > 0:
+        self.nmrResidueTable.ncWidget.select(self.project.nmrChains[-1].pid)
+        self._setThresholdLineBySTD()
+    self._addCheckBoxesAttr(self.nmrAtomsCheckBoxes)
 
 
   #########################################
@@ -176,7 +214,14 @@ class ChemicalShiftsMapping(CcpnModule):
   @property
   def tableData(self):
       """
-      :return: dataFrame containg all data on the Chemical Shift Mapping Module table
+      :return: dataFrame containing all data on the Chemical Shift Mapping Module table
+
+                       |     Columns    | "as the displayed table"
+      | index          |    #   | Index | Pid, _object, Sequence, Deltas, Kd ...
+      |----------------+--------|-------|
+      | 1              |    1   |   1   |
+      | 2              |    2   |   2   |
+
       """
       try:
          return self.nmrResidueTable._dataFrameObject.dataFrame
@@ -186,15 +231,23 @@ class ChemicalShiftsMapping(CcpnModule):
 
       return
 
-  def updateTable(self, nmrChain):
-    """ Updates all widgets based on the nmrChain """
-    self.nmrResidueTable.ncWidget.select(nmrChain.pid)
-    self.nmrResidueTable._update(nmrChain)
-    self.nmrResidueTable._selectOnTableCurrentNmrResidues(self.current.nmrResidues)
-
   def getBindingCurves(self, nmrResidues):
-    """ Gets binding curve as dataFrame. Index nmrResidue Object, columns: value units, raw values: floats  """
+    """ Gets binding curve as dataFrame for specific NmrResidues.
+      Returns a DataFrame as: Index -> nmrResidue Object, columns: int or float, raw values: int or float
+
+                       |     Columns    |as the concentration/time/etc value
+      | index          |    1   |   2   |
+      |----------------+--------|-------|
+      | nmrResidue1    |    1.0 |   1.1 |
+      | nmrResidue2    |    2.0 |   1.2 |
+
+     """
     return self._getBindingCurves(nmrResidues)
+
+
+  ########### GUI Public Functions ############
+
+
 
   def close(self):
     """
@@ -203,123 +256,222 @@ class ChemicalShiftsMapping(CcpnModule):
     self._closeModule()
 
 
-  ##############################################
-  ########### Private GUI Functions ############
-  ##############################################
+  ##################################################
+  #############   Private GUI Functions ############
+  ##################################################
+
+  #####################################################
+  #############   Main widgets creation    ############
+  #####################################################
+
+  def _initMainWidgets(self):
+    """ All the main widgets are created in this function
+    Current Splitters Layout:
+
+    # TABLE | PLOTS  # vertical   splitter
+    # -------------  # horizontal splitter
+    #     BARS
+
+    Splitters are nested. Children Widgets don't follow the normal base grid rule: grid = (0,0).
+    Plots are inside a Tab Widget
+
+    """
+
+    self.hPlotsTableSplitter = Splitter() # Horizontal
+    self.vBarTableSplitter = Splitter(horizontal=False)  # Vertical
+
+    self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application)
+    self._setBarGraphWidget()
+
+    self.nmrResidueTable = _CSMNmrResidueTable(parent=self.mainWidget, mainWindow=self.mainWindow,
+                                               # selectionCallback=self._nmrTableSelectionCallback,
+                                               actionCallback= self._customActionCallBack,
+                                               checkBoxCallback=self._checkBoxCallback,
+                                               setLayout=True, grid = (0, 0))
+    self.nmrResidueTable.chemicalShiftsMappingModule = self
+    self.nmrResidueTable.displayTableForNmrChain = self._displayTableForNmrChain
+
+    self.tabWidget = Tabs(self.mainWidget, setLayout=True)
+
+    ## 1 Tab Scatter
+    self.bindingPlotFrame = Frame(self.mainWidget, setLayout=True)
+    # self.bindingPlotFrame.setContentsMargins(1, 10, 1, 10)
+    self._setBindingPlot(layoutParent=self.bindingPlotFrame)
+    self.tabWidget.addTab(self.bindingPlotFrame, 'Binding Curve')
+
+    ## 2 Tab fitting
+    self.fittingFrame = Frame(self.mainWidget, setLayout=True)
+    self._setFittingPlot(layoutParent=self.fittingFrame)
+    self.tabWidget.addTab(self.fittingFrame, 'Fitting')
+
+    ## 3 Tab scatter Kd-deltas
+    self.scatterFrame = Frame(self.mainWidget, setLayout=True)
+    self.scatterFrame.setContentsMargins(1, 10, 1, 10)
+    self._setScatterTabWidgets(layoutParent=self.scatterFrame)
+    self.tabWidget.addTab(self.scatterFrame, 'Scatter')
+
+    ## These buttons have to be inside the Table layout. Ugly solution but the only way to get them aligned to the rest.
+    self.showOnViewerButton = Button(self.nmrResidueTable._widget, tipText='Show on Molecular Viewer',
+                                     icon=self.showStructureIcon, callback=self._showOnMolecularViewer,
+                                     grid = (1, 1), hAlign='l')
+    self.showOnViewerButton.setFixedHeight(25)
+    self.updateButton1 = Button(self.nmrResidueTable._widget, text='', icon=self.updateIcon, tipText='Update all',
+                                callback=self.updateModule, grid=(1, 2), hAlign='r' )
+    self.updateButton1.setFixedHeight(25)
+
+    self.hPlotsTableSplitter.addWidget(self.nmrResidueTable)
+    self.hPlotsTableSplitter.addWidget(self.tabWidget)
+    self.hPlotsTableSplitter.setStretchFactor(0, 1)
 
 
+    self.vBarTableSplitter.addWidget(self.hPlotsTableSplitter) # Foundamental! The horizontal splitter MUST be added
+                                                               # to the vertical as a widget before adding any other widgets to it ( to the vertical).
+                                                               # Then, only the vertical splitter is added to the main widget Layout.
+                                                               # Nested and nasty Qt.
+    self.vBarTableSplitter.addWidget(self.barGraphWidget)
+    self.vBarTableSplitter.setStretchFactor(0, 1)
+    self.mainWidget.getLayout().addWidget(self.vBarTableSplitter)
+    self.mainWidget.setContentsMargins(5, 5, 5, 5)  # l,t,r,b
 
-  #######   Settings widgets callbacks ######
-  #######   Main widgets callbacks ######
+  #####################################################
+  ##########   Settings widgets creation  #############
+  #####################################################
 
-  def _addCheckBoxesAttr(self, checkboxes):
-    '''For restoring layouts only '''
-    for n, w in enumerate(checkboxes):
-      setattr(self,w.text(), w )
+  def _initSettingsWidgets(self):
 
-  def _availableNmrAtoms(self,source=None, nmrAtomType = None):
-    '''
-    source = ccpn object: Project or nmrChain, Default project.
-    returns sorted nmrAtoms names present in nmrResidues of the selected  source.
-    Used to init the option. The module starts with all nmr atoms available in the project and hides/shows only for the selected nmrChain in the pulldown.
-    This solutions is a bit slower on opening the first time but makes faster switching between nmrChains.
-    '''
-    if source is None:
-      source = self.project
+    self.scrollArea = ScrollArea(self, setLayout=False, )
+    self.scrollArea.setWidgetResizable(True)
+    self.scrollAreaWidgetContents = Frame(self, setLayout=True, )
+    self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+    # self.scrollAreaWidgetContents.getLayout().setAlignment(QtCore.Qt.AlignTop)
+    self.settingsWidget.getLayout().addWidget(self.scrollArea)
+    self.scrollArea.setContentsMargins(10, 10, 10, 15)  #l,t,r,b
+    self.scrollAreaWidgetContents.setContentsMargins(10, 10, 10, 15)  #l,t,r,b
+    # self.scrollAreaWidgetContents.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+    self.scrollAreaWidgetContents.getLayout().setSpacing(10)
+    self._splitter.setStretchFactor(1, 1)  #makes the setting space fully visible when opening
 
-    if source is not None and isinstance(source, (NmrChain, Project)):
-      nmrAtoms = []
-      for nmrResidue in source.nmrResidues:
-        nmrAtoms += nmrResidue.nmrAtoms
-      if len(nmrAtoms)>0:
-        availableNmrAtoms =  list(set([nmrAtom.name for nmrAtom in nmrAtoms]))
-        allAvailable = sorted(availableNmrAtoms, key=CcpnSorting.stringSortKey)
-        if nmrAtomType:
-          return [na for na in allAvailable if na.startswith(nmrAtomType) ]
-        else:
-          return allAvailable
-    return []
+    i = 0
+    self.inputLabel = Label(self.scrollAreaWidgetContents, text='Select Data Input', grid=(i, 0), vAlign='t')
+    self.spectraSelectionWidget = SpectraSelectionWidget(self.scrollAreaWidgetContents, mainWindow=self.mainWindow,
+                                                         grid=(i, 1), gridSpan=(1, 2))
+    self._checkSpectraWithPeakListsOnly()
+    self._addCheckBoxesAttr(self.spectraSelectionWidget.allSpectraCheckBoxes)
+    self._addCheckBoxesAttr(self.spectraSelectionWidget.allSG_CheckBoxes)
 
-  #######
-  #######   Main widgets creation     ######
-  #######
+    i += 1
+    self.concentrationLabel = Label(self.scrollAreaWidgetContents, text='Concentrations', grid=(i, 0), vAlign='t')
+    self.concentrationButton = Button(self.scrollAreaWidgetContents, text='Setup...',
+                                      callback=self._setupConcentrationsPopup,
+                                      grid=(i, 1))
+    # self.spectraSelectionWidget.setMaximumHeight(150)
+    i += 1
+    self.modeLabel = Label(self.scrollAreaWidgetContents, text='Calculation mode ', grid=(i, 0))
+    self.modeButtons = RadioButtons(self.scrollAreaWidgetContents, selectedInd=0, texts=MODES,
+                                    callback=self._toggleRelativeContribuitions, grid=(i, 1))
+    i += 1
+    self.atomsLabel = Label(self.scrollAreaWidgetContents, text='Select Nmr Atoms', grid=(i, 0))
+    self.nmrAtomsFrame = Frame(self.scrollAreaWidgetContents, setLayout=True, grid=(i, 1))
+    self._updateNmrAtomsOption()
+    self._hideNonNecessaryNmrAtomsOption()
+    i += 1
+    self.thresholdLAbel = Label(self.scrollAreaWidgetContents, text='Threshold value', grid=(i, 0))
+    self.thresholdFrame = Frame(self.scrollAreaWidgetContents, setLayout=True, grid=(i, 1))
 
-  def _setWidgets(self):
-    self.nmrResidueTable = None
-    self.barGraphWidget = None
+    self.thresholdSpinBox = DoubleSpinbox(self.thresholdFrame, value=None, step=0.01,
+                                          decimals=3, callback=self._updateThresholdLineValue,
+                                          tipText='Threshold value for deltas',
+                                          grid=(0, 0))
+    self.thresholdButton = Button(self.thresholdFrame, text='Default', callback=self._setDefaultThreshold,
+                                  tipText='Default: STD of deltas',
+                                  grid=(0, 1))
+    self.thresholdButton.setMaximumWidth(50)
+    i += 1
+    self.aboveThresholdColourLabel = Label(self.scrollAreaWidgetContents, text='Above Threshold Colour', grid=(i, 0))
+    self.aboveThresholdColourBox = PulldownList(self.scrollAreaWidgetContents, grid=(i, 1))
+    for item in spectrumColours.items():
+      pix = QtGui.QPixmap(QtCore.QSize(20, 20))
+      pix.fill(QtGui.QColor(item[0]))
+      self.aboveThresholdColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
+    try:
+      self.aboveThresholdColourBox.select('light green')
+    except:
+      self.aboveThresholdColourBox.select(random.choice(self.aboveThresholdColourBox.texts))
 
-    if self.application:
-      self.plotsTableSplitter = Splitter() # TABLE | PLOTS
-      self.barsTableSplitter = Splitter() # -------------
-                                          #     BARS
+    i += 1
+    self.belowThresholdColourLabel = Label(self.scrollAreaWidgetContents, text='Below Threshold Colour', grid=(i, 0))
+    self.belowThresholdColourBox = PulldownList(self.scrollAreaWidgetContents, grid=(i, 1))
 
-      self.plotsTableSplitter.setOrientation(QtCore.Qt.Horizontal)
-      self.barsTableSplitter.setOrientation(QtCore.Qt.Vertical)
+    for item in spectrumColours.items():
+      pix = QtGui.QPixmap(QtCore.QSize(20, 20))
+      pix.fill(QtGui.QColor(item[0]))
+      self.belowThresholdColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
+    try:
+      self.belowThresholdColourBox.select('red')
+    except:
+      self.belowThresholdColourBox.select(random.choice(self.belowThresholdColourBox.texts))
 
-      self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application, grid = (1, 0))
-      self.barGraphWidget.setViewBoxLimits(0,None,0,None)
-      self.barGraphWidget.xLine.setPos(DefaultThreshould)
-      self.barGraphWidget.xLine.sigPositionChangeFinished.connect(self._threshouldLineMoved)
-      self.barGraphWidget.customViewBox.mouseClickEvent = self._viewboxMouseClickEvent
+    i += 1
+    disappearedTipText = 'Mark NmrResidue bar with selected colour where assigned peaks have disapperead from the spectra'
+    self.disappearedColourLabel = Label(self.scrollAreaWidgetContents, text='Disappeared Peaks Colour', grid=(i, 0))
+    self.disappearedColourBox = PulldownList(self.scrollAreaWidgetContents, grid=(i, 1))
+    for item in spectrumColours.items():
+      pix = QtGui.QPixmap(QtCore.QSize(20, 20))
+      pix.fill(QtGui.QColor(item[0]))
+      self.disappearedColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
+    try:
+      self.disappearedColourBox.select('dark grey')
+    except:
+      self.disappearedColourBox.select(random.choice(self.disappearedColourBox.texts))
 
-      self.tableFrame = Frame(self.mainWidget, setLayout=True, grid=(0, 0))
-      self.nmrResidueTable = _CSMNmrResidueTable(parent=self.tableFrame, mainWindow=self.mainWindow,
-                                                 # selectionCallback=self._nmrTableSelectionCallback,
-                                                 actionCallback= self._customActionCallBack,
-                                                 checkBoxCallback=self._checkBoxCallback,
-                                                 setLayout=True, grid = (0, 0))
-      self.nmrResidueTable.chemicalShiftsMappingModule = self
+    i += 1
+    self.disappearedBarThreshold = Label(self.scrollAreaWidgetContents, text='Disappeared value', grid=(i, 0))
+    self.disappearedBarThresholdSpinBox = DoubleSpinbox(self.scrollAreaWidgetContents, value=1, step=0.01,
+                                                        decimals=3, callback=None, grid=(i, 1))
+    i += 1
+    # molecular Structure
+    self.molecularStructure = Label(self.scrollAreaWidgetContents, text='Molecular Structure', grid=(i, 0))
+    texts = ['PDB', 'CCPN Ensembles', 'Fetch From Server']
+    self.molecularStructureRadioButton = RadioButtons(self.scrollAreaWidgetContents, texts=texts, direction='h',
+                                                      grid=(i, 1))
+    self.molecularStructureRadioButton.set(texts[0])
+    self.molecularStructureRadioButton.setEnabled(False)
+    self.molecularStructureRadioButton.setToolTip('Not implemented yet')
+    i += 1
+    self.mvWidgetContents = Frame(self.scrollAreaWidgetContents, setLayout=True, grid=(i, 1))
+    self.pdbLabel = Label(self.mvWidgetContents, text='PDB File Path', grid=(0, 0))
+    scriptPath = None
+    if self.mainWindow:
+      # scriptPath = os.path.join(getScriptsDirectoryPath(self.project),'pymol')
+      scriptPath = self.application.pymolScriptsPath
+    self.pathPDB = LineEditButtonDialog(self.mvWidgetContents, textDialog='Select PDB File',
+                                        filter="PDB files (*.pdb)", directory=scriptPath, grid=(0, 1))
+    i += 1
+    self.scaleBindingC = Label(self.scrollAreaWidgetContents, text='Scale Binding Curves', grid=(i, 0))
+    self.scaleBindingCCb = CheckBox(self.scrollAreaWidgetContents, checked=True,
+                                    callback=self._plotBindingCFromCurrent, grid=(i, 1))
+    i += 1
+    self.fittingModeL = Label(self.scrollAreaWidgetContents, text='Fitting Curve mode', grid=(i, 0))
+    self.fittingModeRB = RadioButtons(self.scrollAreaWidgetContents, texts=[ONESITE], grid=(i, 1))
+    #
+    # i += 1 ####  # Text editor to allow user curve fitting. N.B. Not implemented yet the mechanism to do this
+    # self.fittingModeTextL = Label(self.scrollAreaWidgetContents, text='', grid=(i, 0))
+    # self.fittingModeEditor = TextEditor(self.scrollAreaWidgetContents,    grid=(i, 1))
+    # self.fittingModeEditor.hide()
+    i += 1
+    self.updateButton = Button(self.scrollAreaWidgetContents, text='Update All', callback=self.updateModule,
+                               grid=(i, 1))
+    i += 1
 
+  #######   set main widgets  ######
 
-
-      self.tabWidget = Tabs(self.nmrResidueTable._parent, setLayout=True, grid=(3, 6))
-      ## 1 Tab Scatter
-      self.bindingPlotFrame = Frame(self.mainWidget, setLayout=True)
-      # self.bindingPlotFrame.setContentsMargins(1, 10, 1, 10)
-      self._setBindingPlot(layoutParent=self.bindingPlotFrame)
-      self.tabWidget.addTab(self.bindingPlotFrame, 'Binding Curve')
-
-      ## 2 Tab fitting
-      self.fittingFrame = Frame(self.mainWidget, setLayout=True)
-      # self.fittingFrame.setContentsMargins(1, 10, 1, 10)
-      self._setFittingPlot(layoutParent=self.fittingFrame)
-      self.tabWidget.addTab(self.fittingFrame, 'Fitting')
-
-      ## 3 Tab scatter Kd-deltas
-      self.scatterFrame = Frame(self.mainWidget, setLayout=True)
-      self.scatterFrame.setContentsMargins(1, 10, 1, 10)
-      self._setScatterTabWidgets(layoutParent=self.scatterFrame)
-      self.tabWidget.addTab(self.scatterFrame, 'Scatter')
-      
-
-      self.showOnViewerButton = Button(self.nmrResidueTable._widget, tipText='Show on Molecular Viewer',
-                                       icon=self.showStructureIcon,
-                                       callback=self._showOnMolecularViewer,
-                                       grid = (1, 1), hAlign='l')
-      self.showOnViewerButton.setFixedHeight(25)
-
-      self.updateButton1 = Button(self.nmrResidueTable._widget, text='', icon=self.updateIcon,
-                                  tipText='Update all', callback=self.updateModule,
-                                 grid=(1, 2), hAlign='r' )
-      self.updateButton1.setFixedHeight(25)
-      # self.showOnViewerButton.setFixedWidth(150)
-      self.nmrResidueTable.displayTableForNmrChain = self._displayTableForNmrChain
-      self.barGraphWidget.customViewBox.selectAboveThreshold = self._selectNmrResiduesAboveThreshold
-
-      self.plotsTableSplitter.addWidget(self.tableFrame)
-      self.plotsTableSplitter.addWidget(self.tabWidget)
-
-      self.plotsTableSplitter.setStretchFactor(0, 1)
-      self.mainWidget.setContentsMargins(5, 5, 5, 5)  # l,t,r,b
-
-      self.barsTableSplitter.addWidget(self.plotsTableSplitter)
-      self.barsTableSplitter.addWidget(self.barGraphWidget)
-      # self.barsTableSplitter.setStretchFactor(0, 1)
-      self.mainWidget.getLayout().addWidget(self.barsTableSplitter)
-
-
-
-
+  def _setBarGraphWidget(self):
+    ### barGraph Widget Plot setup
+    self.barGraphWidget.setViewBoxLimits(0, None, 0, None)
+    self.barGraphWidget.xLine.setPos(DefaultThreshould)
+    self.barGraphWidget.xLine.sigPositionChangeFinished.connect(self._threshouldLineMoved)
+    self.barGraphWidget.customViewBox.mouseClickEvent = self._viewboxMouseClickEvent
+    self.barGraphWidget.customViewBox.selectAboveThreshold = self._selectNmrResiduesAboveThreshold
 
 
   def _setScatterTabWidgets(self, layoutParent):
@@ -354,8 +506,8 @@ class ChemicalShiftsMapping(CcpnModule):
     self._bindingPlotViewbox = self.bindingPlot.vb
     self._bindingPlotViewbox.mouseClickEvent = self._bindingViewboxMouseClickEvent
 
-    self.bindingPlot.setLabel('bottom', 'Series')
-    self.bindingPlot.setLabel('left', 'Deltas')
+    self.bindingPlot.setLabel('bottom', self._kDunit)
+    self.bindingPlot.setLabel('left', DELTA+Delta)
     self.bindingPlot.setMenuEnabled(False)
     layoutParent.getLayout().addWidget(self._bindingPlotView)
   
@@ -367,25 +519,340 @@ class ChemicalShiftsMapping(CcpnModule):
     self.fittingPlot.addLegend(offset=[1, 10])
     self._fittingPlotViewbox = self.fittingPlot.vb
     # self._fittingPlotViewbox.mouseClickEvent = self._fittingViewboxMouseClickEvent
-
-    # self.fittingPlot.setLabel('bottom', 'Series')
-    self.fittingPlot.setLabel('left', '%')
+    self.fittingPlot.setLabel('left', RelativeDisplacement)
     self.fittingPlot.setMenuEnabled(False)
     self.fittingLine = pg.InfiniteLine(angle=90, pen='b',  movable=False, label=' ') # label needs to be defined here.
+    self.atHalfFitLine = pg.InfiniteLine(angle=0, pen='b',  movable=False, label=' ') # label needs to be defined here.
+
     self._fittingPlotViewbox.addItem(self.fittingLine)
     self.fittingPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=1)
 
     layoutParent.getLayout().addWidget(self._fittingPlotView)
 
+  ######   Updating widgets (plots and table) callbacks ######
+
+  def _updateBarGraph(self):
+    xs = []
+    ys = []
+    obs = []
+    self.disappearedX = []
+    self.disappearedY = []
+    self.disappereadObjects = []
+    self.aboveX = []
+    self.aboveY = []
+    self.aboveObjects = []
+    self.belowX = []
+    self.belowY = []
+    self.belowObjects = []
+    self.aboveBrush = 'g'
+    self.belowBrush = 'r'
+    self.disappearedPeakBrush = 'b'
+    # check if all values are none:
+    shifts = [nmrResidue._delta for nmrResidue in self.nmrResidueTable._dataFrameObject.objects]
+    if not any(shifts):
+      self.barGraphWidget.clear()
+      return
+
+    if self.barGraphWidget.xLine:
+      self.thresholdLinePos = self.thresholdSpinBox.value()
+
+      if self.nmrResidueTable._dataFrameObject:
+        for nmrResidue in self.nmrResidueTable._dataFrameObject.objects:
+          if nmrResidue:
+            nmrResidue.missingPeaks = False
+            if hasattr(nmrResidue, '_spectraWithMissingPeaks'):
+              if len(nmrResidue._spectraWithMissingPeaks) != 0:
+                if nmrResidue.sequenceCode:
+
+                  x = int(nmrResidue.sequenceCode)
+                  # x = self.nmrResidueTable._dataFrameObject.objects.index(nmrResidue)
+                  if nmrResidue._delta:
+                    y = nmrResidue._delta
+                  else:
+                    if nmrResidue._includeInDeltaShift:
+                      y = self.disappearedBarThresholdSpinBox.value()
+                    else:
+                      y = 0
+                  self.disappearedY.append(y)
+                  self.disappearedX.append(x)
+                  self.disappereadObjects.append(nmrResidue)
+                  nmrResidue.missingPeaks = True
+            if nmrResidue._delta:
+              if not nmrResidue.missingPeaks:
+                if nmrResidue.sequenceCode:
+
+                  x = int(nmrResidue.sequenceCode)
+                  # x = self.nmrResidueTable._dataFrameObject.objects.index(nmrResidue)
+                  y = float(nmrResidue._delta)
+
+                  xs.append(x)
+                  ys.append(y)
+                  obs.append(nmrResidue)
+                  if y > self.thresholdLinePos:
+                    self.aboveY.append(y)
+                    self.aboveX.append(x)
+                    self.aboveObjects.append(nmrResidue)
+                  else:
+                    self.belowX.append(x)
+                    self.belowY.append(y)
+                    self.belowObjects.append(nmrResidue)
+
+
+    selectedNameColourA = self.aboveThresholdColourBox.getText()
+    for code, name in spectrumColours.items():
+      if name == selectedNameColourA:
+        self.aboveBrush = code
+
+    selectedNameColourB = self.belowThresholdColourBox.getText()
+    for code, name in spectrumColours.items():
+      if name == selectedNameColourB:
+        self.belowBrush = code
+
+    selectedNameColourC = self.disappearedColourBox.getText() #disappeared peaks
+    for code, name in spectrumColours.items():
+      if name == selectedNameColourC:
+        self.disappearedPeakBrush = code
+
+    self.barGraphWidget.clear()
+    self.barGraphWidget._lineMoved(aboveX=self.aboveX,
+                                   aboveY=self.aboveY,
+                                   aboveObjects=self.aboveObjects,
+                                   belowX=self.belowX,
+                                   belowY=self.belowY,
+                                   belowObjects=self.belowObjects,
+                                   belowBrush=self.belowBrush,
+                                   aboveBrush=self.aboveBrush,
+                                   disappearedX = self.disappearedX,
+                                   disappearedY=self.disappearedY,
+                                   disappearedObjects = self.disappereadObjects,
+                                   disappearedBrush = self.disappearedPeakBrush,
+                                   )
+    if xs and ys:
+      self.barGraphWidget.setViewBoxLimits(0, max(xs)*10, 0,  max(ys)*10)
+      self.barGraphWidget.customViewBox.setRange(xRange=[min(xs) - 10, max(xs) + 10], yRange=[0, max(ys)],)
+
+
+  def _updateThresholdLineValue(self, value):
+    if self.barGraphWidget:
+      self.barGraphWidget.xLine.setPos(value)
+      self._updateBarGraph()
+
+  def _updateThreshold(self):
+    self.thresholdSpinBox.setValue(self.barGraphWidget.xLine.pos().y())
+    self._updateBarGraph()
+    # self.barGraphWidget._lineMoved()
+
+
+  def _updateTable(self, nmrChain):
+    """ Updates table based on the given nmrChain """
+    self.nmrResidueTable.ncWidget.select(nmrChain.pid)
+    self.nmrResidueTable._update(nmrChain)
+    self.nmrResidueTable._selectOnTableCurrentNmrResidues(self.current.nmrResidues)
+
+  def _updatedPeakCount(self, nmrResidue, spectra):
+    if len(nmrResidue.nmrAtoms)>0:
+      peaks = [p for p in nmrResidue.nmrAtoms[0].assignedPeaks if p.peakList.spectrum in spectra]
+
+
+      spectraWithPeaks = [peak.peakList.spectrum for peak in peaks]
+      spectraWithMissingPeaks = [spectrum for spectrum in spectra if spectrum not in spectraWithPeaks]
+      nmrResidue._spectraWithMissingPeaks = spectraWithMissingPeaks
+
+      return nmrResidue._spectraWithMissingPeaks
+
+  def _updateNmrAtomsOption(self):
+    otherAvailable = False
+    i = 0
+    availableNmrAtoms = self._availableNmrAtoms()
+    # line = HLine(self.nmrAtomsFrame,  style='DashLine',  height=1, grid=(i, 1))
+    line = HLine(self.nmrAtomsFrame, grid=(i, 1), colour=getColours()[DIVIDER], height=10)
+    i += 1
+    for name, value in DefaultAtomWeights.items():
+      atomFrame = Frame(self.nmrAtomsFrame, setLayout=True, grid=(i, 1))
+      hFrame = 0
+      vFrame = 0
+      labelRelativeContribution = Label(atomFrame, text='%s Relative Contribution' % name, grid=(vFrame, hFrame))
+      hFrame += 1
+      self.atomWeightSpinBox = DoubleSpinbox(atomFrame, value=DefaultAtomWeights[name],
+                                             prefix=str('Weight' + (' ' * 2)), grid=(vFrame, hFrame),
+                                             tipText='Relative Contribution for the selected nmrAtom')
+      self.atomWeightSpinBox.setObjectName(name)
+      self.atomWeightSpinBox.setMaximumWidth(150)
+      self.atomWeightSpinBoxes.append(self.atomWeightSpinBox)
+      self.nmrAtomsLabels.append(labelRelativeContribution)
+
+      vFrame += 1
+      self.commonAtomsFrame = Frame(atomFrame, setLayout=True, grid=(vFrame, 0))
+      # add the first three of ccpn Sorted.
+      vFrame += 1
+
+      self.scrollAreaMoreNmrAtoms = ScrollArea(atomFrame, setLayout=False, grid=(vFrame, 0))
+      self.scrollAreaMoreNmrAtoms.setWidgetResizable(True)
+      self.moreOptionFrame = Frame(self, setLayout=True, )
+      self.scrollAreaMoreNmrAtoms.setWidget(self.moreOptionFrame)
+      self.moreOptionFrame.getLayout().setAlignment(QtCore.Qt.AlignTop)
+      self.scrollAreaMoreNmrAtoms.hide()
+      self.moreButton = Button(atomFrame, 'More %s NmrAtoms' % name,
+                               callback=partial(self._toggleMoreNmrAtoms, self.scrollAreaMoreNmrAtoms),
+                               grid=(vFrame - 1, 1), hAlign='l', )
+      self.moreButton.hide()
+
+      availableNmrAtomsForType = self._availableNmrAtoms(nmrAtomType=name)
+      n = 0
+      checkFirst = False
+      maxCountRow = 3
+      if len(availableNmrAtomsForType) < maxCountRow:
+        for nmrAtomName in availableNmrAtomsForType:
+          self.atomSelection = CheckBox(self.commonAtomsFrame, text=nmrAtomName, grid=(0, n))
+          if not checkFirst:
+            self.atomSelection.setChecked(True)
+            checkFirst = True
+          self.nmrAtomsCheckBoxes.append(self.atomSelection)
+          n += 1
+      else:
+        self.moreButton.show()
+        showPreferredFirst = [nmrAtomName for nmrAtomName in availableNmrAtomsForType if
+                              nmrAtomName in PreferredNmrAtoms]
+        rest = [nmrAtomName for nmrAtomName in availableNmrAtomsForType if nmrAtomName not in showPreferredFirst]
+        if len(showPreferredFirst) > 0:
+          if len(showPreferredFirst) < maxCountRow:
+            needed = maxCountRow - len(showPreferredFirst)
+            if len(rest) > needed:
+              showPreferredFirst += rest[:needed]
+              rest = rest[needed:]
+            else:
+              showPreferredFirst += rest
+              rest = []
+              self.moreButton.hide()
+          for nmrAtomName in showPreferredFirst:
+            self.atomSelection = CheckBox(self.commonAtomsFrame, text=nmrAtomName, grid=(0, n))
+            n += 1
+            if not checkFirst:
+              self.atomSelection.setChecked(True)
+              checkFirst = True
+            self.nmrAtomsCheckBoxes.append(self.atomSelection)
+          self._addMoreNmrAtomsForAtomType(rest, self.moreOptionFrame)
+        else:
+          for nmrAtomName in availableNmrAtomsForType[:3]:
+            self.atomSelection = CheckBox(self.commonAtomsFrame, text=nmrAtomName, grid=(0, n))
+            if not checkFirst:
+              self.atomSelection.setChecked(True)
+              checkFirst = True
+            self.nmrAtomsCheckBoxes.append(self.atomSelection)
+            n += 1
+          self._addMoreNmrAtomsForAtomType(availableNmrAtomsForType[2:], self.moreOptionFrame)
+
+      vFrame += 1
+      ## Scrollable area where to add more atoms
+
+      i += 1
+      if name == OTHER:
+        if not otherAvailable:
+          otherAvailable = self._addOtherNmrAtomsAvailable(availableNmrAtoms)
+
+      if name not in availableNmrAtoms and not otherAvailable:
+        atomFrame.hide()
+
+    # line = HLine(self.nmrAtomsFrame, style='DashLine', height=1, grid=(i, 1))
+    line = HLine(self.nmrAtomsFrame, grid=(i, 1), colour=getColours()[DIVIDER], height=10)
 
   def _clearLegend(self, legend):
     while legend.layout.count() > 0:
       legend.layout.removeAt(0)
     legend.items = []
 
+  #######   Settings widgets callbacks ######
+
+  def _addCheckBoxesAttr(self, checkboxes):
+    '''For restoring layouts only '''
+    for n, w in enumerate(checkboxes):
+      setattr(self,w.text(), w )
+
+  def _availableNmrAtoms(self,source=None, nmrAtomType = None):
+    '''
+    source = ccpn object: Project or nmrChain, Default project.
+    returns sorted nmrAtoms names present in nmrResidues of the selected  source.
+    Used to init the option. The module starts with all nmr atoms available in the project and hides/shows only for the selected nmrChain in the pulldown.
+    This solutions is a bit slower on opening the first time but makes faster switching between nmrChains.
+    '''
+    if source is None:
+      source = self.project
+
+    if source is not None and isinstance(source, (NmrChain, Project)):
+      nmrAtoms = []
+      for nmrResidue in source.nmrResidues:
+        nmrAtoms += nmrResidue.nmrAtoms
+      if len(nmrAtoms)>0:
+        availableNmrAtoms =  list(set([nmrAtom.name for nmrAtom in nmrAtoms]))
+        allAvailable = sorted(availableNmrAtoms, key=CcpnSorting.stringSortKey)
+        if nmrAtomType:
+          return [na for na in allAvailable if na.startswith(nmrAtomType) ]
+        else:
+          return allAvailable
+    return []
+
+  def _addMoreNmrAtomsForAtomType(self, nmrAtomsNames, widget):
+    '''
+
+    :param widget: Widget where to add the option. EG frame
+    :return:
+    '''
+    editableOption = EditableCheckBox(widget, grid=(0, 0))
+    self.nmrAtomsCheckBoxes.append(editableOption)
+    regioncount = 0
+    totalCount = len(nmrAtomsNames)
+    valueCount = int(len(nmrAtomsNames) / 2)
+    if totalCount > 0:
+      positions = [(i + 1 + regioncount, j) for i in range(valueCount + 1)
+                   for j in range(2)]
+
+      for position, nmrAtomName in zip(positions, nmrAtomsNames):
+        self.atomSelection = CheckBox(widget, text=nmrAtomName, grid=position)
+        self.nmrAtomsCheckBoxes.append(self.atomSelection)
+
+  def _toggleMoreNmrAtoms(self, widget):
+    if self.sender():
+      name = self.sender().text()
+      if widget.isHidden():
+        self.sender().setText(name.replace(MORE, LESS))
+        widget.show()
+      else:
+        self.sender().setText(name.replace(LESS, MORE))
+        widget.hide()
+
+  def _hideNonNecessaryNmrAtomsOption(self):
+    '''
+    :return: hides nmrAtoms not needed for the selected nmrChain.
+    '''
+    neededNmrAtoms = self._availableNmrAtoms(source=self.nmrResidueTable._nmrChain)
+    for selectedWidget in self.nmrAtomsCheckBoxes:
+      if not isinstance(selectedWidget, EditableCheckBox):
+        if selectedWidget.text() in neededNmrAtoms:
+          selectedWidget.show()
+        else:
+          selectedWidget.hide()
+
+
+
+  def _addOtherNmrAtomsAvailable(self, availableNmrAtoms):
+    '''Adds more nmr atoms if not in the default atoms'''
+    addedNmrAtoms = [i.text() for i in self.nmrAtomsCheckBoxes if i is not None]
+    othersAvailable = [name for name in availableNmrAtoms if name not in addedNmrAtoms]
+    if len(othersAvailable):
+      self.moreButton.show()
+      self._addMoreNmrAtomsForAtomType(othersAvailable, self.moreOptionFrame)
+      return True
+    return False
+
+  #####################################################
+  #################   Scatter Plot     ################
+  #####################################################
+
+
   ########### Selection box for scatter Plot ############
 
   def _addScatterSelectionBox(self):
+    """ Create the red box for selection on the scatter plot """
     self._scatterSelectionBox = QtWidgets.QGraphicsRectItem(0, 0, 1, 1)
     self._scatterSelectionBox.setPen(pg.functions.mkPen((255, 0, 255), width=1))
     self._scatterSelectionBox.setBrush(pg.functions.mkBrush(255, 100, 255, 100))
@@ -503,22 +970,21 @@ class ChemicalShiftsMapping(CcpnModule):
             pts = self._updateScatterSelectionBox(event.buttonDownPos(), event.pos())
 
             i, o = splitDataFrameWithinRange(self._getScatterData(),
-                                                           DELTAS,eKD, *pts)
+                                             Deltas, KD, *pts)
             # self._selectedObjs.extend(i.index)
             self.current.nmrResidues = i.index
             self._resetSelectionBox()
-
     else:
         self._resetSelectionBox()
         event.ignore()
 
   def _getScatterData(self):
-      df = self.tableData[[DELTAS, eKD]]
+      df = self.tableData[[Deltas, KD]]
       df.index = self.tableData["_object"]
       return df
 
 
-  def _plotScatters(self, dataFrame, xAxisLabel=DELTAS, yAxisLabel=eKD, selectedObjs=None):
+  def _plotScatters(self, dataFrame, selectedObjs=None, *args):
     """
 
     :param dataFrame: in the format from the PCA Class
@@ -536,7 +1002,7 @@ class ChemicalShiftsMapping(CcpnModule):
     spots = []
     for obj, row in dataFrame.iterrows():
       dd = {'pos': [0, 0], 'data': 'obj', 'brush': pg.mkBrush(255, 0, 0), 'symbol': 'o', 'size': 10, 'pen':None} #red default
-      dd['pos'] = [row[xAxisLabel], row[yAxisLabel]]
+      dd['pos'] = [row[Deltas], row[KD]] # from table columns
       dd['data'] = obj
       if obj._colour:
         dd['brush'] = pg.functions.mkBrush(hexToRgb(obj._colour))
@@ -544,8 +1010,8 @@ class ChemicalShiftsMapping(CcpnModule):
         dd['pen'] = SelectedPoint
       spots.append(dd)
     self._plotSpots(spots)
-    self._plotItem.setLabel('bottom', xAxisLabel)
-    self._plotItem.setLabel('left', yAxisLabel)
+    self._plotItem.setLabel('bottom', DELTA+Delta)
+    self._plotItem.setLabel('left', KD)
 
   def _plotSpots(self, spots):
     """
@@ -581,269 +1047,6 @@ class ChemicalShiftsMapping(CcpnModule):
       if not any(lsts):
         cb.setChecked(False)
 
-  def _addMoreNmrAtomsForAtomType(self, nmrAtomsNames, widget):
-    '''
-
-    :param widget: Widget where to add the option. EG frame
-    :return:
-    '''
-    editableOption = EditableCheckBox(widget, grid=(0,0))
-    self.nmrAtomsCheckBoxes.append(editableOption)
-    regioncount = 0
-    totalCount  = len(nmrAtomsNames)
-    valueCount = int(len(nmrAtomsNames) / 2)
-    if totalCount>0:
-      positions = [(i+1 + regioncount, j) for i in range(valueCount+1)
-                        for j in range(2)]
-
-      for position, nmrAtomName in zip(positions, nmrAtomsNames):
-        self.atomSelection = CheckBox(widget, text=nmrAtomName, grid=position)
-        self.nmrAtomsCheckBoxes.append(self.atomSelection)
-
-  def _toggleMoreNmrAtoms(self, widget):
-    if self.sender():
-      name = self.sender().text()
-      if widget.isHidden():
-        self.sender().setText(name.replace(MORE,LESS))
-        widget.show()
-      else:
-        self.sender().setText(name.replace(LESS,MORE))
-        widget.hide()
-  
-  def _hideNonNecessaryNmrAtomsOption(self):
-    '''
-    :return: hides nmrAtoms not needed for the selected nmrChain.
-    '''
-    neededNmrAtoms = self._availableNmrAtoms(source=self.nmrResidueTable._nmrChain)
-    for selectedWidget in self.nmrAtomsCheckBoxes:
-      if not isinstance(selectedWidget, EditableCheckBox):
-        if selectedWidget.text() in neededNmrAtoms:
-          selectedWidget.show()
-        else:
-          selectedWidget.hide()
-
-  def _updateNmrAtomsOption(self):
-    otherAvailable = False
-    i = 0
-    availableNmrAtoms = self._availableNmrAtoms()
-    # line = HLine(self.nmrAtomsFrame,  style='DashLine',  height=1, grid=(i, 1))
-    line = HLine(self.nmrAtomsFrame, grid=(i, 1), colour=getColours()[DIVIDER], height=10)
-    i += 1
-    for name, value in DefaultAtomWeights.items():
-      atomFrame = Frame(self.nmrAtomsFrame, setLayout=True, grid=(i, 1))
-      hFrame = 0
-      vFrame = 0
-      labelRelativeContribution = Label(atomFrame, text='%s Relative Contribution' % name,  grid=(vFrame, hFrame))
-      hFrame +=1
-      self.atomWeightSpinBox = DoubleSpinbox(atomFrame, value=DefaultAtomWeights[name],
-                                             prefix=str('Weight' + (' ' * 2)), grid=(vFrame, hFrame),
-                                             tipText='Relative Contribution for the selected nmrAtom')
-      self.atomWeightSpinBox.setObjectName(name)
-      self.atomWeightSpinBox.setMaximumWidth(150)
-      self.atomWeightSpinBoxes.append(self.atomWeightSpinBox)
-      self.nmrAtomsLabels.append(labelRelativeContribution)
-
-      vFrame += 1
-      self.commonAtomsFrame = Frame(atomFrame, setLayout=True, grid=(vFrame, 0))
-      # add the first three of ccpn Sorted.
-      vFrame += 1
-
-      self.scrollAreaMoreNmrAtoms = ScrollArea(atomFrame, setLayout=False, grid=(vFrame, 0))
-      self.scrollAreaMoreNmrAtoms.setWidgetResizable(True)
-      self.moreOptionFrame = Frame(self, setLayout=True,  )
-      self.scrollAreaMoreNmrAtoms.setWidget(self.moreOptionFrame)
-      self.moreOptionFrame.getLayout().setAlignment(QtCore.Qt.AlignTop)
-      self.scrollAreaMoreNmrAtoms.hide()
-      self.moreButton = Button(atomFrame, 'More %s NmrAtoms' % name,
-                               callback=partial(self._toggleMoreNmrAtoms,self.scrollAreaMoreNmrAtoms),  grid=(vFrame-1, 1), hAlign='l', )
-      self.moreButton.hide()
-
-      availableNmrAtomsForType = self._availableNmrAtoms(nmrAtomType=name)
-      n = 0
-      checkFirst = False
-      maxCountRow = 3
-      if len(availableNmrAtomsForType)<maxCountRow:
-        for nmrAtomName in availableNmrAtomsForType:
-          self.atomSelection = CheckBox(self.commonAtomsFrame, text=nmrAtomName, grid=(0, n))
-          if not checkFirst:
-            self.atomSelection.setChecked(True)
-            checkFirst = True
-          self.nmrAtomsCheckBoxes.append(self.atomSelection)
-          n += 1
-      else:
-        self.moreButton.show()
-        showPreferredFirst = [nmrAtomName for nmrAtomName in availableNmrAtomsForType if nmrAtomName in PreferredNmrAtoms]
-        rest = [nmrAtomName for nmrAtomName in availableNmrAtomsForType if nmrAtomName not in showPreferredFirst]
-        if len(showPreferredFirst)>0:
-          if len(showPreferredFirst) < maxCountRow:
-            needed = maxCountRow - len(showPreferredFirst)
-            if len(rest) > needed:
-              showPreferredFirst += rest[:needed]
-              rest = rest[needed:]
-            else:
-              showPreferredFirst += rest
-              rest = []
-              self.moreButton.hide()
-          for nmrAtomName in showPreferredFirst:
-            self.atomSelection = CheckBox(self.commonAtomsFrame, text=nmrAtomName, grid=(0, n))
-            n += 1
-            if not checkFirst:
-              self.atomSelection.setChecked(True)
-              checkFirst = True
-            self.nmrAtomsCheckBoxes.append(self.atomSelection)
-          self._addMoreNmrAtomsForAtomType(rest, self.moreOptionFrame)
-        else:
-          for nmrAtomName in availableNmrAtomsForType[:3]:
-            self.atomSelection = CheckBox(self.commonAtomsFrame, text=nmrAtomName, grid=(0, n))
-            if not checkFirst:
-              self.atomSelection.setChecked(True)
-              checkFirst = True
-            self.nmrAtomsCheckBoxes.append(self.atomSelection)
-            n += 1
-          self._addMoreNmrAtomsForAtomType(availableNmrAtomsForType[2:], self.moreOptionFrame)
-
-      vFrame += 1
-      ## Scrollable area where to add more atoms
-
-      i +=1
-      if name == OTHER:
-        if not otherAvailable:
-          otherAvailable  = self._addOtherNmrAtomsAvailable(availableNmrAtoms)
-
-
-      if name not in availableNmrAtoms and not otherAvailable:
-
-        atomFrame.hide()
-
-    # line = HLine(self.nmrAtomsFrame, style='DashLine', height=1, grid=(i, 1))
-    line = HLine(self.nmrAtomsFrame, grid=(i, 1), colour=getColours()[DIVIDER], height=10)
-
-  def _addOtherNmrAtomsAvailable(self, availableNmrAtoms):
-    '''Adds more nmr atoms if not in the default atoms'''
-    addedNmrAtoms = [i.text() for i in self.nmrAtomsCheckBoxes if i is not None]
-    othersAvailable = [name for name in availableNmrAtoms if name not in addedNmrAtoms]
-    if len(othersAvailable):
-      self.moreButton.show()
-      self._addMoreNmrAtomsForAtomType(othersAvailable, self.moreOptionFrame)
-      return True
-    return False
-
-  ####################################################
-  #######   Settings widgets creation  ###############
-  ####################################################
-
-  def _setSettingsWidgets(self):
-
-    self.scrollArea = ScrollArea(self, setLayout=False, )
-    self.scrollArea.setWidgetResizable(True)
-    self.scrollAreaWidgetContents = Frame(self, setLayout=True, )
-    self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-    # self.scrollAreaWidgetContents.getLayout().setAlignment(QtCore.Qt.AlignTop)
-    self.settingsWidget.getLayout().addWidget(self.scrollArea)
-    self.scrollArea.setContentsMargins(10, 10, 10, 15) #l,t,r,b
-    self.scrollAreaWidgetContents.setContentsMargins(10, 10, 10, 15) #l,t,r,b
-    # self.scrollAreaWidgetContents.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-    self.scrollAreaWidgetContents.getLayout().setSpacing(10)
-    self._splitter.setStretchFactor(1,1) #makes the setting space fully visible when opening
-
-    i = 0
-    self.inputLabel = Label(self.scrollAreaWidgetContents, text='Select Data Input', grid=(i, 0), vAlign='t')
-    self.spectraSelectionWidget = SpectraSelectionWidget(self.scrollAreaWidgetContents, mainWindow=self.mainWindow, grid=(i,1), gridSpan=(1,2))
-    self._checkSpectraWithPeakListsOnly()
-    self._addCheckBoxesAttr(self.spectraSelectionWidget.allSpectraCheckBoxes)
-    self._addCheckBoxesAttr(self.spectraSelectionWidget.allSG_CheckBoxes)
-
-    i += 1
-    self.concentrationLabel = Label(self.scrollAreaWidgetContents, text='Concentrations', grid=(i, 0), vAlign='t')
-    self.concentrationButton = Button(self.scrollAreaWidgetContents, text='Setup...', callback=self._setupConcentrationsPopup,
-                                      grid=(i, 1))
-    # self.spectraSelectionWidget.setMaximumHeight(150)
-    i += 1
-    self.modeLabel = Label(self.scrollAreaWidgetContents, text='Calculation mode ', grid=(i, 0))
-    self.modeButtons = RadioButtons(self.scrollAreaWidgetContents, selectedInd=0, texts=MODES, callback=self._toggleRelativeContribuitions, grid=(i, 1))
-    i += 1
-    self.atomsLabel = Label(self.scrollAreaWidgetContents, text='Select Nmr Atoms', grid=(i, 0))
-    self.nmrAtomsFrame = Frame(self.scrollAreaWidgetContents,setLayout=True, grid=(i, 1))
-    self._updateNmrAtomsOption()
-    self._hideNonNecessaryNmrAtomsOption()
-    i += 1
-    self.thresholdLAbel = Label(self.scrollAreaWidgetContents, text='Threshold value', grid=(i, 0))
-    self.thresholdFrame = Frame(self.scrollAreaWidgetContents, setLayout=True, grid=(i, 1))
-
-    self.thresholdSpinBox = DoubleSpinbox(self.thresholdFrame, value=None, step=0.01,
-                                          decimals=3, callback=self.updateThresholdLineValue, tipText = 'Threshold value for deltas',
-                                          grid=(0, 0))
-    self.thresholdButton = Button(self.thresholdFrame, text='Default', callback=self._setDefaultThreshold, tipText = 'Default: STD of deltas',
-                                          grid=(0, 1))
-    self.thresholdButton.setMaximumWidth(50)
-    i += 1
-    self.aboveThresholdColourLabel =  Label(self.scrollAreaWidgetContents,text='Above Threshold Colour', grid=(i,0))
-    self.aboveThresholdColourBox = PulldownList(self.scrollAreaWidgetContents,  grid=(i, 1))
-    for item in spectrumColours.items():
-      pix = QtGui.QPixmap(QtCore.QSize(20, 20))
-      pix.fill(QtGui.QColor(item[0]))
-      self.aboveThresholdColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
-    try:
-      self.aboveThresholdColourBox.select('light green')
-    except:
-      self.aboveThresholdColourBox.select(random.choice(self.aboveThresholdColourBox.texts))
-
-    i += 1
-    self.belowThresholdColourLabel = Label(self.scrollAreaWidgetContents, text='Below Threshold Colour', grid=(i, 0))
-    self.belowThresholdColourBox = PulldownList(self.scrollAreaWidgetContents, grid=(i, 1))
-
-    for item in spectrumColours.items():
-      pix = QtGui.QPixmap(QtCore.QSize(20, 20))
-      pix.fill(QtGui.QColor(item[0]))
-      self.belowThresholdColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
-    try:
-      self.belowThresholdColourBox.select('red')
-    except:
-      self.belowThresholdColourBox.select(random.choice(self.belowThresholdColourBox.texts))
-
-    i += 1
-    disappearedTipText = 'Mark NmrResidue bar with selected colour where assigned peaks have disapperead from the spectra'
-    self.disappearedColourLabel = Label(self.scrollAreaWidgetContents, text='Disappeared Peaks Colour', grid=(i, 0))
-    self.disappearedColourBox = PulldownList(self.scrollAreaWidgetContents, grid=(i, 1))
-    for item in spectrumColours.items():
-      pix = QtGui.QPixmap(QtCore.QSize(20, 20))
-      pix.fill(QtGui.QColor(item[0]))
-      self.disappearedColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
-    try:
-      self.disappearedColourBox.select('dark grey')
-    except:
-      self.disappearedColourBox.select(random.choice(self.disappearedColourBox.texts))
-
-    i += 1
-    self.disappearedBarThreshold = Label(self.scrollAreaWidgetContents, text='Disappeared value', grid=(i, 0))
-    self.disappearedBarThresholdSpinBox = DoubleSpinbox(self.scrollAreaWidgetContents, value=1, step=0.01,
-                                          decimals=3, callback=None, grid=(i, 1))
-    i += 1
-    # molecular Structure
-    self.molecularStructure= Label(self.scrollAreaWidgetContents, text='Molecular Structure', grid=(i, 0))
-    texts = ['PDB','CCPN Ensembles','Fetch From Server']
-    self.molecularStructureRadioButton = RadioButtons(self.scrollAreaWidgetContents, texts=texts, direction='h',
-                                        grid=(i, 1))
-    self.molecularStructureRadioButton.set(texts[0])
-    self.molecularStructureRadioButton.setEnabled(False)
-    self.molecularStructureRadioButton.setToolTip('Not implemented yet')
-    i += 1
-    self.mvWidgetContents = Frame(self.scrollAreaWidgetContents, setLayout=True, grid=(i, 1))
-    self.pdbLabel = Label(self.mvWidgetContents, text='PDB File Path', grid=(0, 0))
-    scriptPath = None
-    if self.mainWindow:
-      # scriptPath = os.path.join(getScriptsDirectoryPath(self.project),'pymol')
-      scriptPath = self.application.pymolScriptsPath
-    self.pathPDB = LineEditButtonDialog(self.mvWidgetContents, textDialog='Select PDB File',
-                                        filter="PDB files (*.pdb)", directory=scriptPath, grid=(0,1))
-    i += 1
-    self.scaleBindingC = Label(self.scrollAreaWidgetContents, text='Scale Binding Curves', grid=(i, 0))
-    self.scaleBindingCCb = CheckBox(self.scrollAreaWidgetContents, checked=True, callback=self._plotBindingCFromCurrent, grid=(i, 1))
-    i += 1
-    self.updateButton = Button(self.scrollAreaWidgetContents, text='Update All', callback=self.updateModule,
-                               grid=(i, 1))
-    i += 1
-
   def _toggleRelativeContribuitions(self):
     value = self.modeButtons.getSelectedText()
     if value == HEIGHT or value ==  VOLUME:
@@ -875,9 +1078,8 @@ class ChemicalShiftsMapping(CcpnModule):
             self.thresholdSpinBox.set(std)
 
 
-
-
   def _displayTableForNmrChain(self, nmrChain):
+    """ Add custom action when selecting a chain on the table pulldown"""
     self._addNmrResidueColour(nmrChain)
     self.updateModule()
     self._hideNonNecessaryNmrAtomsOption()
@@ -893,7 +1095,7 @@ class ChemicalShiftsMapping(CcpnModule):
               nmrR._colour = colour
 
   # def _peakChangedCallBack(self, data):
-  #
+  #   """ Update a module on a single peak move. Bad idea. What if you move 100 peaks together!"""
   #   peak = data[Notifier.OBJECT]
   #   if self._peakChangedNotifier.lastPeakPos != peak.position:
   #     self._peakChangedNotifier.lastPeakPos = peak.position
@@ -939,118 +1141,9 @@ class ChemicalShiftsMapping(CcpnModule):
   def _threshouldLineMoved(self):
     pos = self.barGraphWidget.xLine.pos().y()
     self.thresholdSpinBox.setValue(pos)
-    self.updateBarGraph()
-
-  def updateBarGraph(self):
-    xs = []
-    ys = []
-    obs = []
-    self.disappearedX = []
-    self.disappearedY = []
-    self.disappereadObjects = []
-    self.aboveX = []
-    self.aboveY = []
-    self.aboveObjects = []
-    self.belowX = []
-    self.belowY = []
-    self.belowObjects = []
-    self.aboveBrush = 'g'
-    self.belowBrush = 'r'
-    self.disappearedPeakBrush = 'b'
-    # check if all values are none:
-    shifts = [nmrResidue._delta for nmrResidue in self.nmrResidueTable._dataFrameObject.objects]
-    if not any(shifts):
-      self.barGraphWidget.clear()
-      return
-
-    if self.barGraphWidget.xLine:
-      self.thresholdLinePos = self.thresholdSpinBox.value()
-
-      if self.nmrResidueTable._dataFrameObject:
-        for nmrResidue in self.nmrResidueTable._dataFrameObject.objects:
-          if nmrResidue:
-            nmrResidue.missingPeaks = False
-            if hasattr(nmrResidue, '_spectraWithMissingPeaks'):
-              if len(nmrResidue._spectraWithMissingPeaks) != 0:
-                if nmrResidue.sequenceCode:
-
-                  x = int(nmrResidue.sequenceCode)
-                  # x = self.nmrResidueTable._dataFrameObject.objects.index(nmrResidue)
-                  if nmrResidue._delta:
-                    y = nmrResidue._delta
-                  else:
-                    if nmrResidue._includeInDeltaShift:
-                      y = self.disappearedBarThresholdSpinBox.value()
-                    else:
-                      y = 0
-                  self.disappearedY.append(y)
-                  self.disappearedX.append(x)
-                  self.disappereadObjects.append(nmrResidue)
-                  nmrResidue.missingPeaks = True
-            if nmrResidue._delta:
-              if not nmrResidue.missingPeaks:
-                if nmrResidue.sequenceCode:
-
-                  x = int(nmrResidue.sequenceCode)
-                  # x = self.nmrResidueTable._dataFrameObject.objects.index(nmrResidue)
-                  y = float(nmrResidue._delta)
-
-                  xs.append(x)
-                  ys.append(y)
-                  obs.append(nmrResidue)
-                  if y > self.thresholdLinePos:
-                    self.aboveY.append(y)
-                    self.aboveX.append(x)
-                    self.aboveObjects.append(nmrResidue)
-                  else:
-                    self.belowX.append(x)
-                    self.belowY.append(y)
-                    self.belowObjects.append(nmrResidue)
+    self._updateBarGraph()
 
 
-    selectedNameColourA = self.aboveThresholdColourBox.getText()
-    for code, name in spectrumColours.items():
-      if name == selectedNameColourA:
-        self.aboveBrush = code
-
-    selectedNameColourB = self.belowThresholdColourBox.getText()
-    for code, name in spectrumColours.items():
-      if name == selectedNameColourB:
-        self.belowBrush = code
-
-    selectedNameColourC = self.disappearedColourBox.getText() #disappeared peaks
-    for code, name in spectrumColours.items():
-      if name == selectedNameColourC:
-        self.disappearedPeakBrush = code
-
-    self.barGraphWidget.clear()
-    self.barGraphWidget._lineMoved(aboveX=self.aboveX,
-                                   aboveY=self.aboveY,
-                                   aboveObjects=self.aboveObjects,
-                                   belowX=self.belowX,
-                                   belowY=self.belowY,
-                                   belowObjects=self.belowObjects,
-                                   belowBrush=self.belowBrush,
-                                   aboveBrush=self.aboveBrush,
-                                   disappearedX = self.disappearedX,
-                                   disappearedY=self.disappearedY,
-                                   disappearedObjects = self.disappereadObjects,
-                                   disappearedBrush = self.disappearedPeakBrush,
-                                   )
-    if xs and ys:
-      self.barGraphWidget.setViewBoxLimits(0, max(xs)*10, 0,  max(ys)*10)
-      self.barGraphWidget.customViewBox.setRange(xRange=[min(xs) - 10, max(xs) + 10], yRange=[0, max(ys)],)
-
-
-  def updateThresholdLineValue(self, value):
-    if self.barGraphWidget:
-      self.barGraphWidget.xLine.setPos(value)
-      self.updateBarGraph()
-
-  def _updateThreshold(self):
-    self.thresholdSpinBox.setValue(self.barGraphWidget.xLine.pos().y())
-    self.updateBarGraph()
-    # self.barGraphWidget._lineMoved()
 
   def _viewboxMouseClickEvent(self, event):
 
@@ -1149,25 +1242,16 @@ class ChemicalShiftsMapping(CcpnModule):
                 y = plotData.values.flatten(order='F')
                 xss = np.array([plotData.columns] * plotData.shape[0])
                 x = xss.flatten(order='F')
-                nmrResidue._estimatedKd = getKd(bindingCurve, x,y)
+                nmrResidue._estimatedKd = _getKd(oneSiteBindingCurve, x, y)
             else:
               nmrResidue._delta = None
         if not silent:
-          self.updateTable(self.nmrResidueTable._nmrChain)
-          self.updateBarGraph()
+          self._updateTable(self.nmrResidueTable._nmrChain)
+          self._updateBarGraph()
           self._plotScatters(self._getScatterData(), selectedObjs=self.current.nmrResidues)
           self._plotBindingCFromCurrent()
 
-  def _updatedPeakCount(self, nmrResidue, spectra):
-    if len(nmrResidue.nmrAtoms)>0:
-      peaks = [p for p in nmrResidue.nmrAtoms[0].assignedPeaks if p.peakList.spectrum in spectra]
 
-
-      spectraWithPeaks = [peak.peakList.spectrum for peak in peaks]
-      spectraWithMissingPeaks = [spectrum for spectrum in spectra if spectrum not in spectraWithPeaks]
-      nmrResidue._spectraWithMissingPeaks = spectraWithMissingPeaks
-
-      return nmrResidue._spectraWithMissingPeaks
 
 
   def _showOnMolecularViewer(self):
@@ -1226,6 +1310,11 @@ class ChemicalShiftsMapping(CcpnModule):
 
 
   def _getBindingCurves(self, nmrResidues):
+    """
+
+    :param nmrResidues:
+    :return: dataframe
+    """
 
     selectedAtomNames = [cb.text() for cb in self.nmrAtomsCheckBoxes if cb.isChecked()]
     mode = self.modeButtons.getSelectedText()
@@ -1288,8 +1377,14 @@ class ChemicalShiftsMapping(CcpnModule):
         self.bindingPlot.plot(xs, ys, symbol='o', pen=pen, symbolBrush=brush, name=obj.pid)
 
     self.bindingPlot.autoRange()
-    self.bindingPlot.setLabel('left', 'Deltas')
+    self.bindingPlot.setLabel('left', DELTA+Delta)
     self._plotFittedCallback()
+
+  def _toggleUserFncBox(self):
+    if self.fittingModeRB.get() == OTHER:
+      self.fittingModeEditor.show()
+    else:
+      self.fittingModeEditor.hide()
 
   def _selectCurrentNmrResiduesNotifierCallback(self, data):
     # TODO replace colour
@@ -1325,40 +1420,43 @@ class ChemicalShiftsMapping(CcpnModule):
       return dataFrame
 
   def _plotFittedCallback(self):
+    self.fittingPlot.clear()
+    self._clearLegend(self.fittingPlot.legend)
+
     plotData = self._getBindingCurves(self.current.nmrResidues)
     plotData = self._getScaledBindingCurves(plotData)
-    self._plotFittedBindingCurves(plotData)
+
+    if plotData is not None:
+      if self.fittingModeRB.get() == ONESITE:
+        self._plotFittedBindingCurves(plotData)
+      else:
+        getLogger().warning(NIY)
+
+
 
 
   def _plotFittedBindingCurves(self, bindingCurves):
-    from scipy.optimize import curve_fit
+    """ """
+    if bindingCurves is None:
+      return
 
-    self.fittingPlot.clear()
-    self._clearLegend(self.fittingPlot.legend)
     self.fittingLine.hide()
-
-    if bindingCurves is not None:
-      plotData = bindingCurves.replace(np.nan, 0)
-      ys = plotData.values.flatten(order='F')
-      xss = np.array([plotData.columns]*plotData.shape[0])
-      xs = xss.flatten(order='F')
-      param = curve_fit(bindingCurve, xs, ys)
-      bindingUnscaled, bmax = param[0]
-      yScaled = ys / bmax
-      paramScaled = curve_fit(bindingCurve, xs, yScaled)
-      xMax = max(xs)
-      xStep = 0.01
-      xf = np.arange(0, xMax+xStep, step=xStep)
-      yf = bindingCurve(xf, *paramScaled[0])
-      binding = paramScaled[0][0]
-      self.fittingPlot.plot(xs, yScaled, symbol='o', pen=None)
-      self.fittingPlot.plot(xf, yf, name='Fitted')
-      self.fittingLine.setValue(binding)
-      self.fittingLine.label.setText(str(round(binding,3)))
-      self.fittingLine.show()
-      self.fittingPlot.setLabel('left', '%')
-      self.fittingPlot.setRange(xRange=[0, max(xf)], yRange=[0, 1])
-      self.bindingPlot.autoRange()
+    ### the actual fitting call
+    x_atHalf_Y, bmax, xs, yScaled, xf, yf = _fit1SiteBindCurve(bindingCurves)
+    ## setting the plot
+    if not np.any(yScaled) or not np.any(yf):
+      return # just zeros
+    if x_atHalf_Y <= 0:
+      return
+    self.fittingPlot.plot(xs, yScaled, symbol='o', pen=None)
+    self.fittingPlot.plot(xf, yf, name='Fitted')
+    self.fittingLine.setValue(x_atHalf_Y)
+    self.fittingLine.label.setText(str(round(x_atHalf_Y,3)))
+    self.fittingLine.show()
+    self.fittingPlot.setLabel('left', RelativeDisplacement)
+    self.fittingPlot.setLabel('bottom', self._kDunit)
+    self.fittingPlot.setRange(xRange=[0, max(xf)], yRange=[0, 1])
+    self.bindingPlot.autoRange()
 
 
 
@@ -1466,6 +1564,7 @@ class ChemicalShiftsMapping(CcpnModule):
     vs, u = self._getConcentrationsFromSpectra(spectra)
     w.setValues(vs)
     w.setUnit(u)
+    self._kDunit = u
     buttons = ButtonList(popup, texts=['Cancel', 'Apply', 'Ok'],
                          callbacks=[popup.reject, partial(self._applyConcentrations,w),
                                                                             partial(self._closeConcentrationsPopup,popup,w)],
@@ -1557,13 +1656,13 @@ if __name__ == '__main__':
   win = QtWidgets.QMainWindow()
 
   moduleArea = CcpnModuleArea(mainWindow=None)
-  module = ChemicalShiftsMapping(mainWindow=None, name='My Module')
-  moduleArea.addModule(module)
+  # module = ChemicalShiftsMapping(mainWindow=None, name='My Module')
+  # moduleArea.addModule(module)
 
 
   win.setCentralWidget(moduleArea)
   win.resize(1000, 500)
-  win.setWindowTitle('Testing %s' % module.moduleName)
+  # win.setWindowTitle('Testing %s' % module.moduleName)
   win.show()
 
 

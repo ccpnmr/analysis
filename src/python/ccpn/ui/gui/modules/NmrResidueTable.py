@@ -764,7 +764,8 @@ class NmrResidueTable(QuickTable):
     def _selectPullDown(self, value):
         self.ncWidget.select(value)
 
-
+KD = 'kd'
+Deltas = 'Deltas'
 
 class _CSMNmrResidueTable(NmrResidueTable):
   """
@@ -792,8 +793,8 @@ class _CSMNmrResidueTable(NmrResidueTable):
         ('Selected', lambda nmrResidue: _CSMNmrResidueTable._getSelectedNmrAtomNames(nmrResidue), 'NmrAtoms selected in NmrResidue', None),
         ('Spectra', lambda nmrResidue: _CSMNmrResidueTable._getNmrResidueSpectraCount(nmrResidue)
          , 'Number of spectra selected for calculating the deltas', None),
-        ('Deltas', lambda nmrResidue: nmrResidue._delta, '', None),
-        ('Estimated Kd', lambda nmrResidue: nmrResidue._estimatedKd, '', None),
+        (Deltas, lambda nmrResidue: nmrResidue._delta, '', None),
+        (KD, lambda nmrResidue: nmrResidue._estimatedKd, '', None),
         ('Include', lambda nmrResidue: nmrResidue._includeInDeltaShift, 'Include this residue in the Mapping calculation', lambda nmr, value: _CSMNmrResidueTable._setChecked(nmr, value)),
         # ('Flag', lambda nmrResidue: nmrResidue._flag,  '',  None),
         ('Comment', lambda nmr: NmrResidueTable._getCommentText(nmr), 'Notes', lambda nmr, value: NmrResidueTable._setComment(nmr, value))

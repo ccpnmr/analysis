@@ -229,6 +229,9 @@ class Gui(Ui):
         # mainWindow = self.application.mainWindow
         mainWindow.sideBar.setProject(project)
         mainWindow.sideBar.fillSideBar(project)
+
+        mainWindow._newSideBar.buildTree(project)
+
         mainWindow.raise_()
         mainWindow.namespace['current'] = self.application.current
         return mainWindow

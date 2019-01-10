@@ -324,8 +324,8 @@ class SideBar(QtWidgets.QTreeWidget, Base, NotifierBase):
         self.setDragDropMode(self.DragDrop)
         self.setAcceptDrops(True)
 
-        self.eventFilter = self._eventFilter  # ejb - doesn't work
-        self.installEventFilter(self)  # ejb
+        # self.eventFilter = self._eventFilter  # ejb - doesn't work
+        # self.installEventFilter(self)  # ejb
 
         self.droppedNotifier = GuiNotifier(self,
                                            [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
@@ -356,7 +356,7 @@ class SideBar(QtWidgets.QTreeWidget, Base, NotifierBase):
 
         self._typeToItem = dd = {}
 
-        self.projectItem = dd['PR'] = QtGui.QTreeWidgetItem(self)
+        self.projectItem = dd['PR'] = QtWidgets.QTreeWidgetItem(self)
         self.projectItem.setFlags(self.projectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
         self.projectItem.setText(0, "Project")
         self.projectItem.setExpanded(True)
@@ -995,8 +995,8 @@ class SideBar(QtWidgets.QTreeWidget, Base, NotifierBase):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # mouse events
 
-    def _eventFilter(self, obj, event):
-        return super(SideBar, self).eventFilter(obj, event)
+    # def _eventFilter(self, obj, event):
+    #     return super(SideBar, self).eventFilter(obj, event)
 
     def _dragEnterEvent(self, event, enter=True):
         # if event.mimeData().hasFormat(ccpnmrJsonData):
@@ -1217,7 +1217,7 @@ class SideBar(QtWidgets.QTreeWidget, Base, NotifierBase):
             popup.exec_()
             popup.raise_()
         elif obj.shortClassName == 'SE':
-            popup = StructurePopup(parent=self.mainWindow, mainWindow=self.mainWindow, structure=obj)
+            popup = StructurePopup(parent=self.mainWindow, mainWindow=self.mainWindow, structureEnsemble=obj)
             popup.exec_()
             popup.raise_()
 
@@ -1386,3 +1386,74 @@ class SideBar(QtWidgets.QTreeWidget, Base, NotifierBase):
             else:
                 info = showInfo('Not implemented yet!',
                                 'This function has not been implemented in the current version')
+
+from sandbox.Geerten.Refactored.SideBar import SideBar as sideBarManager
+
+
+class NewSideBar(QtWidgets.QTreeWidget, sideBarManager, Base, NotifierBase):
+    def __init__(self, parent=None, mainWindow=None, multiSelect=True):
+
+        super().__init__(parent)
+        Base._init(self, acceptDrops=True)
+
+        self.multiSelect = multiSelect
+        if self.multiSelect:
+            self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+
+        self.mainWindow = parent  # ejb - needed for moduleArea
+        self.application = self.mainWindow.application
+
+        self.setFont(sidebarFont)
+        self.header().hide()
+        self.setDragEnabled(True)
+        self.setExpandsOnDoubleClick(False)
+        self.setDragDropMode(self.InternalMove)
+        self.setMinimumWidth(200)
+
+        self.setDragDropMode(self.DragDrop)
+        self.setAcceptDrops(True)
+
+        # self.droppedNotifier = GuiNotifier(self,
+        #                                    [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
+        #                                    self._processDroppedItems)
+
+        self.itemDoubleClicked.connect(self._raiseObjectProperties)
+
+    def buildTree(self, project):
+        """build the new tree structure from the project
+        """
+        super().buildTree(project)
+        pass
+
+    def _raiseObjectProperties(self, item):
+        """get object from Pid and dispatch call depending on type
+
+        NBNB TBD How about refactoring so that we have a shortClassName:Popup dictionary?"""
+        dataPid = item.data(0, QtCore.Qt.DisplayRole)
+        sideBarObject = item.data(1, QtCore.Qt.UserRole)
+        callback = sideBarObject.callback
+
+        if callback:
+            callback(dataPid, sideBarObject)
+
+        pass
+
+        # # trap creation of new items form sideBar
+        # obj = project.getByPid(dataPid) if Pid.Pid.isValid(dataPid) else None
+        #
+        # if obj is not None:
+        #     self.raisePopup(obj, item)
+        # elif dataPid.startswith('<New'):
+        #     self._createNewObject(item)
+        #
+        # else:
+        #     project._logger.error("Double-click activation not implemented for Pid %s, object %s"
+        #                           % (dataPid, obj))
+
+    # def _createNewObject(self):
+    #     itemParent = self.project.getByPid(item.parent().text(0)) if Pid.Pid.isValid(item.parent().text(0)) else None
+    #
+    #     funcName = NEW_ITEM_DICT.get(itemParent.shortClassName)
+    #
+    #     if funcName is not None:
+    #         newItem = getattr(itemParent, funcName)()

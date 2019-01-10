@@ -313,7 +313,7 @@ class Notifier(NotifierABC):
                 self._isRegistered = True
 
         if not self.isRegistered():
-            raise RuntimeWarning('Notifier.__init__: no notifiers intialised for theObject=%s, targetName=%r, triggers=%s ' % \
+            raise RuntimeWarning('Notifier.__init__: no notifiers initialised for theObject=%s, targetName=%r, triggers=%s ' % \
                                  (theObject, targetName, triggers))
         if self._debug:
             sys.stderr.write('>>> registered %s\n' % self)

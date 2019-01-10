@@ -61,7 +61,7 @@ class _PulldownABC(PulldownListCompoundWidget):
                  setCurrent=False, followCurrent=False,
                  **kwds):
         """
-        Create  a PulldownListCompoundWidget with callbacks responding to changes in the objects
+        Create a PulldownListCompoundWidget with callbacks responding to changes in the objects
         in project; not to be used directly, used as a base class for the specific classes for 
         the different V3 objects, as defined below.
 
@@ -136,11 +136,13 @@ class _PulldownABC(PulldownListCompoundWidget):
 
     @property
     def textList(self):
-        "Compatibility with previous implementation"
+        """Compatibility with previous implementation
+        """
         return self.pulldownList.texts
 
     def getSelectedObject(self):
-        "Return the selected object"
+        """Return the selected object
+        """
         obj = None
         value = self.getText()
         if value != SELECT and len(value) > 0:
@@ -148,7 +150,8 @@ class _PulldownABC(PulldownListCompoundWidget):
         return obj
 
     def getObjects(self):
-        "Return a list of objects from the pulldown list"
+        """Return a list of objects from the pulldown list
+        """
         return [self.value2object(val) for val in self.textList if val != SELECT]
 
     def getCurrentObject(self):
@@ -164,7 +167,8 @@ class _PulldownABC(PulldownListCompoundWidget):
         return obj
 
     def object2value(self, obj):
-        "Convert object to a value (pid or id), to be displayed"
+        """Convert object to a value (pid or id), to be displayed
+        """
         if obj is None:
             return str(None)
         value = obj.id if self._useIds else obj.pid
@@ -182,14 +186,16 @@ class _PulldownABC(PulldownListCompoundWidget):
         return obj
 
     def update(self):
-        "Public function to update"
+        """Public function to update
+        """
         if self._followCurrent:
             self._updateFromCurrent()
         else:
             self._updatePulldownList()
 
     def unRegister(self):
-        "Unregister the notifiers; needs to be called when disgarding a instance"
+        """Unregister the notifiers; needs to be called when disgarding a instance
+        """
         try:
             if self._notifier1 is not None:
                 self._notifier1.unRegister()
@@ -225,14 +231,23 @@ class _PulldownABC(PulldownListCompoundWidget):
         return pids
 
     def _updatePulldownList(self, callbackDict=None):
-        "Callback to update the pulldown list; triggered by object creation, deletion or renaming"
+        """Callback to update the pulldown list; triggered by object creation, deletion or renaming
+        """
         if DEBUG: sys.stderr.write('>>> %s._updatePulldownList()\n' % self)
         pids = self._getPids()
+
+        if callbackDict[Notifier.TRIGGER] in [Notifier.DELETE]:
+            # the object has been notified for delete but still exists so needs to be removed from the list
+            obj = callbackDict[Notifier.OBJECT]
+            if obj.pid in pids:
+                pids.remove(obj.pid)
+
         self.modifyTexts(pids)
         if DEBUG: sys.stderr.write('  < %s._updatePulldownList()\n' % self)
 
     def _updateFromCurrent(self, callbackDict=None):
-        "Callback to update the selection from current change"
+        """Callback to update the selection from current change
+        """
         obj = self.getCurrentObject()
         if DEBUG: sys.stderr.write('>>> %s._updateFromCurrent() "%s": %s\n' %
                                    (self, self._currentAttributeName, obj))
@@ -245,7 +260,8 @@ class _PulldownABC(PulldownListCompoundWidget):
         if DEBUG: sys.stderr.write('  < %s._updateFromCurrent()\n' % self)
 
     def _callback(self, value):
-        "Callback when selecting the pulldown"
+        """Callback when selecting the pulldown
+        """
         if DEBUG: sys.stderr.write('>>> %s._callback() selecting pulldown: %s\n' % (self, value))
         if self._userCallback:
             value = self._userCallback(value)
@@ -269,12 +285,14 @@ class _PulldownABC(PulldownListCompoundWidget):
 #==========================================================================================================
 
 def _definedBy(klass):
-    "Return relevant attributes from klass"
+    """Return relevant attributes from klass
+    """
     return (klass, klass.className, klass.shortClassName, klass._pluralLinkName)
 
 
 class AtomPulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for Atom's"
+    """"A PulldownListCompoundWidget class for Atom's
+    """
     from ccpn.core.Atom import Atom
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(Atom)
@@ -282,7 +300,8 @@ class AtomPulldown(_PulldownABC):
 
 
 class CalculationStepPulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for CalculationStep's"
+    """A PulldownListCompoundWidget class for CalculationStep's
+    """
     from ccpn.core.CalculationStep import CalculationStep
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(CalculationStep)
@@ -290,7 +309,8 @@ class CalculationStepPulldown(_PulldownABC):
 
 
 class ChainPulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for Chain's"
+    """A PulldownListCompoundWidget class for Chain's
+    """
     from ccpn.core.Chain import Chain
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(Chain)
@@ -298,7 +318,8 @@ class ChainPulldown(_PulldownABC):
 
 
 class ChemicalShiftPulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for ChemicalShift's"
+    """A PulldownListCompoundWidget class for ChemicalShift's
+    """
     from ccpn.core.ChemicalShift import ChemicalShift
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(ChemicalShift)
@@ -306,7 +327,8 @@ class ChemicalShiftPulldown(_PulldownABC):
 
 
 class ChemicalShiftListPulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for ChemicalShiftList's"
+    """A PulldownListCompoundWidget class for ChemicalShiftList's
+    """
     from ccpn.core.ChemicalShiftList import ChemicalShiftList
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(ChemicalShiftList)
@@ -314,7 +336,8 @@ class ChemicalShiftListPulldown(_PulldownABC):
 
 
 class ComplexPulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for Complex's"
+    """A PulldownListCompoundWidget class for Complex's
+    """
     from ccpn.core.Complex import Complex
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(Complex)
@@ -322,7 +345,8 @@ class ComplexPulldown(_PulldownABC):
 
 
 class DataPulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for Data's"
+    """A PulldownListCompoundWidget class for Data's
+    """
     from ccpn.core.Data import Data
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(Data)
@@ -330,7 +354,8 @@ class DataPulldown(_PulldownABC):
 
 
 class DataSetPulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for DataSet's"
+    """A PulldownListCompoundWidget class for DataSet's
+    """
     from ccpn.core.DataSet import DataSet
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(DataSet)
@@ -338,7 +363,8 @@ class DataSetPulldown(_PulldownABC):
 
 
 class IntegralPulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for Integral's"
+    """A PulldownListCompoundWidget class for Integral's
+    """
     from ccpn.core.Integral import Integral
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(Integral)
@@ -346,7 +372,8 @@ class IntegralPulldown(_PulldownABC):
 
 
 class IntegralListPulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for IntegralList's"
+    """A PulldownListCompoundWidget class for IntegralList's
+    """
     from ccpn.core.IntegralList import IntegralList
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(IntegralList)
@@ -354,7 +381,8 @@ class IntegralListPulldown(_PulldownABC):
 
 
 class ModelPulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for Model's"
+    """A PulldownListCompoundWidget class for Model's
+    """
     from ccpn.core.Model import Model
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(Model)
@@ -362,7 +390,8 @@ class ModelPulldown(_PulldownABC):
 
 
 class MultipletPulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for Multiplet's"
+    """A PulldownListCompoundWidget class for Multiplet's
+    """
     from ccpn.core.Multiplet import Multiplet
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(Multiplet)
@@ -370,7 +399,8 @@ class MultipletPulldown(_PulldownABC):
 
 
 class MultipletListPulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for MultipletList's"
+    """A PulldownListCompoundWidget class for MultipletList's
+    """
     from ccpn.core.MultipletList import MultipletList
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(MultipletList)
@@ -378,7 +408,8 @@ class MultipletListPulldown(_PulldownABC):
 
 
 class NmrAtomPulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for NmrAtom's"
+    """A PulldownListCompoundWidget class for NmrAtom's
+    """
     from ccpn.core.NmrAtom import NmrAtom
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(NmrAtom)
@@ -386,7 +417,8 @@ class NmrAtomPulldown(_PulldownABC):
 
 
 class NmrChainPulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for NmrChain's"
+    """A PulldownListCompoundWidget class for NmrChain's
+    """
     from ccpn.core.NmrChain import NmrChain
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(NmrChain)
@@ -394,7 +426,8 @@ class NmrChainPulldown(_PulldownABC):
 
 
 class NmrResiduePulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for NmrResidue's"
+    """A PulldownListCompoundWidget class for NmrResidue's
+    """
     from ccpn.core.NmrResidue import NmrResidue
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(NmrResidue)
@@ -402,7 +435,8 @@ class NmrResiduePulldown(_PulldownABC):
 
 
 class NotePulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for Note's"
+    """A PulldownListCompoundWidget class for Note's
+    """
     from ccpn.core.Note import Note
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(Note)
@@ -410,7 +444,8 @@ class NotePulldown(_PulldownABC):
 
 
 class PeakPulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for Peak's"
+    """A PulldownListCompoundWidget class for Peak's
+    """
     from ccpn.core.Peak import Peak
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(Peak)
@@ -418,7 +453,8 @@ class PeakPulldown(_PulldownABC):
 
 
 class PeakClusterPulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for PeakCluster's"
+    """A PulldownListCompoundWidget class for PeakCluster's
+    """
     from ccpn.core.PeakCluster import PeakCluster
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(PeakCluster)
@@ -426,7 +462,8 @@ class PeakClusterPulldown(_PulldownABC):
 
 
 class PeakListPulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for PeakList's"
+    """A PulldownListCompoundWidget class for PeakList's
+    """
     from ccpn.core.PeakList import PeakList
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(PeakList)
@@ -434,7 +471,8 @@ class PeakListPulldown(_PulldownABC):
 
 
 class PseudoDimensionPulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for PseudoDimension's"
+    """A PulldownListCompoundWidget class for PseudoDimension's
+    """
     from ccpn.core.PseudoDimension import PseudoDimension
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(PseudoDimension)
@@ -442,7 +480,8 @@ class PseudoDimensionPulldown(_PulldownABC):
 
 
 class ResiduePulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for Residue's"
+    """A PulldownListCompoundWidget class for Residue's
+    """
     from ccpn.core.Residue import Residue
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(Residue)
@@ -450,7 +489,8 @@ class ResiduePulldown(_PulldownABC):
 
 
 class RestraintPulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for Restraint's"
+    """A PulldownListCompoundWidget class for Restraint's
+    """
     from ccpn.core.Restraint import Restraint
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(Restraint)
@@ -458,7 +498,8 @@ class RestraintPulldown(_PulldownABC):
 
 
 class RestraintContributionPulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for RestraintContribution's"
+    """A PulldownListCompoundWidget class for RestraintContribution's
+    """
     from ccpn.core.RestraintContribution import RestraintContribution
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(RestraintContribution)
@@ -466,7 +507,8 @@ class RestraintContributionPulldown(_PulldownABC):
 
 
 class RestraintListPulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for RestraintList's"
+    """A PulldownListCompoundWidget class for RestraintList's
+    """
     from ccpn.core.RestraintList import RestraintList
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(RestraintList)
@@ -474,7 +516,8 @@ class RestraintListPulldown(_PulldownABC):
 
 
 class SamplePulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for Sample's"
+    """A PulldownListCompoundWidget class for Sample's
+    """
     from ccpn.core.Sample import Sample
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(Sample)
@@ -482,7 +525,8 @@ class SamplePulldown(_PulldownABC):
 
 
 class SampleComponentPulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for SampleComponent's"
+    """A PulldownListCompoundWidget class for SampleComponent's
+    """
     from ccpn.core.SampleComponent import SampleComponent
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(SampleComponent)
@@ -490,7 +534,8 @@ class SampleComponentPulldown(_PulldownABC):
 
 
 class SpectrumPulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for Spectrum's"
+    """A PulldownListCompoundWidget class for Spectrum's
+    """
     from ccpn.core.Spectrum import Spectrum
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(Spectrum)
@@ -498,7 +543,8 @@ class SpectrumPulldown(_PulldownABC):
 
 
 class SpectrumGroupPulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for SpectrumGroup's"
+    """A PulldownListCompoundWidget class for SpectrumGroup's
+    """
     from ccpn.core.SpectrumGroup import SpectrumGroup
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(SpectrumGroup)
@@ -506,7 +552,8 @@ class SpectrumGroupPulldown(_PulldownABC):
 
 
 class SpectrumHitPulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for SpectrumHit's"
+    """A PulldownListCompoundWidget class for SpectrumHit's
+    """
     from ccpn.core.SpectrumHit import SpectrumHit
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(SpectrumHit)
@@ -514,7 +561,8 @@ class SpectrumHitPulldown(_PulldownABC):
 
 
 class SpectrumReferencePulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for SpectrumReference's"
+    """A PulldownListCompoundWidget class for SpectrumReference's
+    """
     from ccpn.core.SpectrumReference import SpectrumReference
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(SpectrumReference)
@@ -522,7 +570,8 @@ class SpectrumReferencePulldown(_PulldownABC):
 
 
 class StructureEnsemblePulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for StructureEnsemble's"
+    """A PulldownListCompoundWidget class for StructureEnsemble's
+    """
     from ccpn.core.StructureEnsemble import StructureEnsemble
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(StructureEnsemble)
@@ -530,7 +579,8 @@ class StructureEnsemblePulldown(_PulldownABC):
 
 
 class SubstancePulldown(_PulldownABC):
-    "A PulldownListCompoundWidget class for Substance's"
+    """A PulldownListCompoundWidget class for Substance's
+    """
     from ccpn.core.Substance import Substance
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(Substance)

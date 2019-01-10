@@ -156,6 +156,7 @@ NIY = "This option has not been implemented yet"
 BackgroundColour = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
 OriginAxes = pg.functions.mkPen(hexToRgb(getColours()[GUISTRIP_PIVOT]), width=1, style=QtCore.Qt.DashLine)
 SelectedPoint = pg.functions.mkPen(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
+SelectedLabel = pg.functions.mkBrush(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
 
 
 class ChemicalShiftsMapping(CcpnModule):
@@ -506,11 +507,19 @@ class ChemicalShiftsMapping(CcpnModule):
       self.application.current.clearNmrResidues()
       event.accept()
 
-  def _selectBarLabel(self, value):
+  def _selectBarLabels(self, values):
     for bar in self.barGraphWidget.barGraphs:
       for label in bar.labels:
-        if label.text() == value:
+        if label.text() in values:
           label.setSelected(True)
+          label.setBrush(SelectedLabel)
+          label.setVisible(True)
+        else:
+          label.setSelected(False)
+          label.setBrush(QtGui.QColor(bar.brush))
+          if label.isBelowThreshold and not self.barGraphWidget.customViewBox.allLabelsShown:
+            label.setVisible(False)
+
 
   def _barGraphClickEvent(self, event):
 
@@ -523,7 +532,6 @@ class ChemicalShiftsMapping(CcpnModule):
       selected = set(self.current.nmrResidues)
       if leftMouse(event):
         self.current.nmrResidue = obj
-        self._selectBarLabel(position)
         event.accept()
 
       elif controlLeftMouse(event):
@@ -1289,28 +1297,9 @@ class ChemicalShiftsMapping(CcpnModule):
       self.fittingModeEditor.hide()
 
   def _selectCurrentNmrResiduesNotifierCallback(self, data):
-    # TODO replace colour
-    for bar in self.barGraphWidget.barGraphs:
-      for label in bar.labels:
-        if label.data(int(label.text())) is not None:
-          if self.application is not None:
-
-            if label.data(int(label.text())) in self.current.nmrResidues:
-
-              if self.application.colourScheme == 'light':
-                highlightColour = '#3333ff'
-              else:
-                highlightColour = '#00ff00'
-              label.setBrush(QtGui.QColor(highlightColour))
-              label.setVisible(True)
-              label.setSelected(True)
-
-
-            else:
-              label.setSelected(False)
-              label.setBrush(QtGui.QColor(bar.brush))
-              if label.isBelowThreshold and not self.barGraphWidget.customViewBox.allLabelsShown:
-                label.setVisible(False)
+    nmrResidues = self.current.nmrResidues
+    pss = [str(nmrResidue.sequenceCode)  for nmrResidue in nmrResidues]
+    self._selectBarLabels(pss)
     self._plotBindingCFromCurrent()
     self._plotScatters(self._getScatterData(), selectedObjs=self.current.nmrResidues)
 

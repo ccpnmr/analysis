@@ -86,7 +86,6 @@ class ConcentrationWidget(Widget):
     def setValues(self, values):
         for value, editor, in zip(values, self.concentrationEditors, ):
             if value is not None:
-                print(value)
                 editor.setValue(value)
 
     def setUnit(self, unit):

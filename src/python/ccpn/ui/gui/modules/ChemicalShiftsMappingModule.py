@@ -1377,7 +1377,7 @@ class ChemicalShiftsMapping(CcpnModule):
     vs, u = self._getConcentrationsFromSpectra(spectra)
     w.setValues(vs)
     w.setUnit(u)
-    self._kDunit = u
+
     buttons = ButtonList(popup, texts=['Cancel', 'Apply', 'Ok'],
                          callbacks=[popup.reject, partial(self._applyConcentrations,w),
                                                                             partial(self._closeConcentrationsPopup,popup,w)],
@@ -1389,6 +1389,9 @@ class ChemicalShiftsMapping(CcpnModule):
     spectra = self.spectraSelectionWidget.getSelections()
     vs, u = w.getValues() , w.getUnit()
     self._addConcentrationsFromSpectra(spectra, vs, u)
+    self._kDunit = u
+    self.bindingPlot.setLabel('bottom', self._kDunit)
+    self.fittingPlot.setLabel('bottom', self._kDunit)
 
   def _closeConcentrationsPopup(self,popup, w):
     self._applyConcentrations(w)

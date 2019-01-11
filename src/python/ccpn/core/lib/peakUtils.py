@@ -25,6 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import numpy as np
 from ccpn.util.Logging import getLogger
 from collections import OrderedDict
+from scipy.optimize import curve_fit
 
 
 POSITIONS = 'positions'
@@ -374,3 +375,104 @@ def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atom
     if deltas and not None in deltas:
         return round(float(np.mean(deltas)), 3)
     return
+
+def _getKd(func, x, y):
+    param = curve_fit(func, x, y)
+    bindingUnscaled, bmax = param[0]
+    yScaled = y / bmax
+    paramScaled = curve_fit(func, x, yScaled)
+    kd, bmax =  paramScaled[0]
+    return kd
+
+def oneSiteBindingCurve(x, kd, bmax):
+    return (bmax*x)/(x+kd)
+
+def exponentialDecayCurve(t, a, tau, c):
+    return a * np.exp(-t / tau) + c
+
+
+def _fit1SiteBindCurve(bindingCurves, aFunc=oneSiteBindingCurve, xfStep=0.01, xfPercent=30):
+    """
+    :param bindingCurves: DataFrame as: Columns -> float or int.
+                                                  Used as xs points (e.g. concentration/time/etc value)
+                                        rows    -> float or int.
+                                                  Used as ys points (e.g. Deltadelta in ppm)
+                                                  the actual curve points
+                                        index   -> obj. E.g. nmrResidue obj. used as identifier for the curve origin
+
+                                        | index          |    1   |   2   |
+                                        |----------------+--------|-------|
+                                        | obj1           |    1.0 |   1.1 |
+                                        | obj2           |    2.0 |   1.2 |
+
+    :param aFunc:  Default: oneSiteBindingCurve.
+    :param xfStep: number of x points for generating the fitted curve.
+    :param xfPercent: percent to add to max X value of the fitted curve, so to have a longer curve after the last
+                    experimental value.
+
+    :return: tuple of parameters for plotting fitted curves.
+             x_atHalf_Y: the x value for half of Y. Used as estimated  kd
+             xs: array of xs. Original xs points from the dataFrame columns
+             yScaled: array of yScaled. Scaled to have values 0 to 1
+             xf: array of x point for the new fitted curve. A range from 0 to max of xs.
+             yf: array the fitted curve
+    """
+    from scipy.optimize import curve_fit
+    from ccpn.util.Common import percentage
+
+    if aFunc is None or not callable(aFunc):
+        getLogger().warning("Error. Fitting curve %s is not callable" % aFunc)
+        return ()
+    if bindingCurves is None:
+        getLogger().warning("Error. Binding curves not fund")
+        return ()
+
+    data = bindingCurves.replace(np.nan, 0)
+    ys = data.values.flatten(order='F')  #puts all y values in a single 1d array.
+    xss = np.array([data.columns] * data.shape[0])
+    xs = xss.flatten(order='F')  # #puts all x values in a 1d array preserving the original y positions (order='F').
+    param = curve_fit(aFunc, xs, ys)
+    xhalfUnscaled, bMaxUnscaled = param[0]
+    yScaled = ys / bMaxUnscaled  #scales y to have values 0-1
+    paramScaled = curve_fit(aFunc, xs, yScaled)
+
+    xfRange = np.max(xs) - np.min(xs)
+    xfPerc = percentage(xfPercent, xfRange)
+    xfMax = np.max(xs) + xfPerc
+    xf = np.arange(0, xfMax, step=xfStep)
+    yf = aFunc(xf, *paramScaled[0])
+    x_atHalf_Y, bmax = paramScaled[0]
+    return (x_atHalf_Y, bmax, xs, yScaled, xf, yf)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

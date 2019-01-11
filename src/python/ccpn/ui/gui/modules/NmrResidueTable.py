@@ -668,3 +668,85 @@ class NmrResidueTable(QuickTable):
 
     def _selectPullDown(self, value):
         self.ncWidget.select(value)
+
+KD = 'kd'
+Deltas = 'Deltas'
+
+class _CSMNmrResidueTable(NmrResidueTable):
+  """
+  Custom nmrResidue Table with extra columns used in the ChemicalShiftsMapping Module
+  """
+  def __init__(self, parent=None, mainWindow=None, moduleParent=None, actionCallback=None, selectionCallback=None,
+               checkBoxCallback=None, nmrChain=None, **kwds):
+
+    NmrResidueTable.__init__(self, parent=parent, mainWindow=mainWindow,
+                             moduleParent=moduleParent,
+                             actionCallback=actionCallback,
+                             selectionCallback=selectionCallback,
+                             checkBoxCallback = checkBoxCallback,
+                             nmrChain=nmrChain,
+                             multiSelect=True,
+                             **kwds)
+
+    self.NMRcolumns = ColumnClass([
+        ('#', lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None),
+        ('Pid', lambda nmrResidue:nmrResidue.pid, 'Pid of NmrResidue', None),
+        ('_object', lambda nmrResidue:nmrResidue, 'Object', None),
+        ('Index', lambda nmrResidue: NmrResidueTable._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
+        ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None),
+        ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None),
+        ('Selected', lambda nmrResidue: _CSMNmrResidueTable._getSelectedNmrAtomNames(nmrResidue), 'NmrAtoms selected in NmrResidue', None),
+        ('Spectra', lambda nmrResidue: _CSMNmrResidueTable._getNmrResidueSpectraCount(nmrResidue)
+         , 'Number of spectra selected for calculating the deltas', None),
+        (Deltas, lambda nmrResidue: nmrResidue._delta, '', None),
+        (KD, lambda nmrResidue: nmrResidue._estimatedKd, '', None),
+        ('Include', lambda nmrResidue: nmrResidue._includeInDeltaShift, 'Include this residue in the Mapping calculation', lambda nmr, value: _CSMNmrResidueTable._setChecked(nmr, value)),
+        # ('Flag', lambda nmrResidue: nmrResidue._flag,  '',  None),
+        ('Comment', lambda nmr: NmrResidueTable._getCommentText(nmr), 'Notes', lambda nmr, value: NmrResidueTable._setComment(nmr, value))
+      ])        #[Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
+
+    self._widget.setFixedHeight(45)
+    self.chemicalShiftsMappingModule = None
+
+
+  @staticmethod
+  def _setChecked(obj, value):
+    """
+    CCPN-INTERNAL: Insert a comment into QuickTable
+    """
+
+    obj._includeInDeltaShift = value
+    obj._finaliseAction('change')
+
+  @staticmethod
+  def _getNmrResidueSpectraCount(nmrResidue):
+
+    """
+    CCPN-INTERNAL: Insert an index into ObjectTable
+    """
+    try:
+      return nmrResidue.spectraCount
+    except:
+      return None
+
+  @staticmethod
+  def _getSelectedNmrAtomNames(nmrResidue):
+
+    """
+    CCPN-INTERNAL: Insert an index into ObjectTable
+    """
+    try:
+      return ', '.join(nmrResidue.selectedNmrAtomNames)
+    except:
+      return None
+
+  def _selectPullDown(self, value):
+    ''' Used for automatic restoring of widgets '''
+    self.ncWidget.select(value)
+    try:
+      if self.chemicalShiftsMappingModule is not None:
+        self.chemicalShiftsMappingModule._updateModule()
+    except Exception as e:
+      getLogger().warn('Impossible update chemicalShiftsMappingModule from restoring %s' %e)
+
+

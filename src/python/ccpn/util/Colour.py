@@ -169,6 +169,9 @@ def invertRGB(r, g, b):
     rgbprimeOut = np.clip(rgbprimeOut, [0, 0, 0], [255, 255, 255])
     return tuple([float(col) for col in rgbprimeOut])
 
+def _getRandomColours(numberOfColors):
+  import random
+  return  ["#" + ''.join([random.choice('0123456789ABCDEF') for j in range(6)]) for i in range(numberOfColors)]
 
 colourNameToHexDict = {
     'red'    : '#ff0000',

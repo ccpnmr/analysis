@@ -97,6 +97,8 @@ class NmrResidue(AbstractWrapperObject):
     # used in chemical shift mapping
     _delta = None
     _includeInDeltaShift = True  # default included in the calculation
+    _estimatedKd = None
+    _colour = None
 
     # Number of fields that comprise the object's pid; Used to get parent id's
     _numberOfIdFields = 2

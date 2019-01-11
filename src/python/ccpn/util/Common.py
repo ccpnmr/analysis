@@ -644,6 +644,30 @@ def _getChildren(obj, path=None):
     return children
 
 
+def percentage(percent, whole):
+  return (percent * whole) / 100.0
+
+def splitDataFrameWithinRange(dataframe, column1, column2, minX, maxX, minY, maxY):
+  """
+  :param dataframe: dataframe with index a pid type, columns str, values floats or ints  
+  :param column1: label1 , eg PC1
+  :param column2: label1 , eg PC2
+  :param minX:  min value for Y
+  :param maxX:  Max value for X
+  :param minY: min value for Y
+  :param maxY: max value for Y
+  :return:  inners  a dataframe like the unput  but containing only the values within the ranges  and
+            outers (rest) not included in inners
+  """
+
+  bools = dataframe[column1].between(minX, maxX, inclusive=True) & dataframe[column2].between(minY, maxY, inclusive=True)
+  inners = dataframe[bools]
+  outers = dataframe[-bools]
+  filteredInners = inners.filter(items=[column1, column2])
+  filteredOuters = outers.filter(items=[column1, column2])
+
+  return  filteredInners, filteredOuters
+
 class LocalFormatter(string.Formatter):
     """Overrides the string formatter to change the float formatting"""
 

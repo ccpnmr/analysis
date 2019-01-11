@@ -377,6 +377,8 @@ def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atom
     return
 
 def _getKd(func, x, y):
+    if len(x)<=1:
+        return
     param = curve_fit(func, x, y)
     bindingUnscaled, bmax = param[0]
     yScaled = y / bmax
@@ -431,6 +433,8 @@ def _fit1SiteBindCurve(bindingCurves, aFunc=oneSiteBindingCurve, xfStep=0.01, xf
     ys = data.values.flatten(order='F')  #puts all y values in a single 1d array.
     xss = np.array([data.columns] * data.shape[0])
     xs = xss.flatten(order='F')  # #puts all x values in a 1d array preserving the original y positions (order='F').
+    if len(xs)<=1:
+        return () #not enough datapoints
     param = curve_fit(aFunc, xs, ys)
     xhalfUnscaled, bMaxUnscaled = param[0]
     yScaled = ys / bMaxUnscaled  #scales y to have values 0-1

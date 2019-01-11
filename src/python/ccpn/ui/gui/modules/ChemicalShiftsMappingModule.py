@@ -110,7 +110,7 @@ from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
 from ccpn.ui.gui.lib.mouseEvents import leftMouse, controlLeftMouse
-from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND, GUISTRIP_PIVOT, CCPNGLWIDGET_HIGHLIGHT
+from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND,MEDIUM_BLUE, GUISTRIP_PIVOT, CCPNGLWIDGET_HIGHLIGHT
 from ccpn.ui.gui.widgets.BarGraphWidget import BarGraphWidget
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Splitter import Splitter
@@ -155,6 +155,7 @@ NIY = "This option has not been implemented yet"
 # colours
 BackgroundColour = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
 OriginAxes = pg.functions.mkPen(hexToRgb(getColours()[GUISTRIP_PIVOT]), width=1, style=QtCore.Qt.DashLine)
+FittingLine = pg.functions.mkPen(hexToRgb(getColours()[DIVIDER]), width=0.5, style=QtCore.Qt.DashLine)
 SelectedPoint = pg.functions.mkPen(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
 SelectedLabel = pg.functions.mkBrush(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
 
@@ -298,7 +299,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self.hPlotsTableSplitter = Splitter() # Horizontal
     self.vBarTableSplitter = Splitter(horizontal=False)  # Vertical
 
-    self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application)
+    self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application, backgroundColour=BackgroundColour)
     self._setBarGraphWidget()
 
     self.nmrResidueTable = _CSMNmrResidueTable(parent=self.mainWidget, mainWindow=self.mainWindow,
@@ -311,7 +312,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
     self.tabWidget = Tabs(self.mainWidget, setLayout=True)
 
-    ## 1 Tab Scatter
+    ## 1 Tab binding Plot
     self.bindingPlotFrame = Frame(self.mainWidget, setLayout=True)
     # self.bindingPlotFrame.setContentsMargins(1, 10, 1, 10)
     self._setBindingPlot(layoutParent=self.bindingPlotFrame)
@@ -642,7 +643,6 @@ class ChemicalShiftsMapping(CcpnModule):
     self.bindingPlot.autoRange()
     self.bindingPlot.setLabel('left', DELTA+Delta)
     self.bindingPlot.setLabel('bottom', self._kDunit)
-    self._plotFittedCallback()
 
 
   def _getBindingCurves(self, nmrResidues):
@@ -706,8 +706,8 @@ class ChemicalShiftsMapping(CcpnModule):
     # self._fittingPlotViewbox.mouseClickEvent = self._fittingViewboxMouseClickEvent
     self.fittingPlot.setLabel('left', RelativeDisplacement)
     self.fittingPlot.setMenuEnabled(False)
-    self.fittingLine = pg.InfiniteLine(angle=90, pen='b',  movable=False, label=' ') # label needs to be defined here.
-    self.atHalfFitLine = pg.InfiniteLine(angle=0, pos=0.5, pen=OriginAxes, movable=False, label=' ') # label needs to be defined here.
+    self.fittingLine = pg.InfiniteLine(angle=90, pen=FittingLine,  movable=False, label=' ') # label needs to be defined here.
+    self.atHalfFitLine = pg.InfiniteLine(angle=0, pos=0.5, pen=FittingLine, movable=False, label=' ') # label needs to be defined here.
 
     self._fittingPlotViewbox.addItem(self.fittingLine)
     self._fittingPlotViewbox.addItem(self.atHalfFitLine)
@@ -1302,6 +1302,7 @@ class ChemicalShiftsMapping(CcpnModule):
     pss = [str(nmrResidue.sequenceCode) for nmrResidue in nmrResidues]
     self._selectBarLabels(pss)
     self._plotBindingCFromCurrent()
+    self._plotFittedCallback()
     self._plotScatters(self._getScatterData(), selectedObjs=self.current.nmrResidues)
 
   def _getAllBindingCurvesDataFrameForChain(self):

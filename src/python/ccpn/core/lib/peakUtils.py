@@ -424,17 +424,17 @@ def _fit1SiteBindCurve(bindingCurves, aFunc=oneSiteBindingCurve, xfStep=0.01, xf
 
     if aFunc is None or not callable(aFunc):
         getLogger().warning("Error. Fitting curve %s is not callable" % aFunc)
-        return ()
+        return (None,)*6
     if bindingCurves is None:
         getLogger().warning("Error. Binding curves not fund")
-        return ()
+        return (None,)*6
 
     data = bindingCurves.replace(np.nan, 0)
     ys = data.values.flatten(order='F')  #puts all y values in a single 1d array.
     xss = np.array([data.columns] * data.shape[0])
     xs = xss.flatten(order='F')  # #puts all x values in a 1d array preserving the original y positions (order='F').
     if len(xs)<=1:
-        return () #not enough datapoints
+        return (None,)*6 #not enough datapoints
     param = curve_fit(aFunc, xs, ys)
     xhalfUnscaled, bMaxUnscaled = param[0]
     yScaled = ys / bMaxUnscaled  #scales y to have values 0-1

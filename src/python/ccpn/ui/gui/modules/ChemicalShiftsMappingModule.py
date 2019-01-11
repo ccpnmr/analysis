@@ -277,6 +277,7 @@ class ChemicalShiftsMapping(CcpnModule):
         self._setThresholdLineBySTD()
         self._setKdUnit()
     self._addCheckBoxesAttr(self.nmrAtomsCheckBoxes)
+    self._selectCurrentNmrResiduesNotifierCallback()
 
 
   #####################################################
@@ -1297,7 +1298,7 @@ class ChemicalShiftsMapping(CcpnModule):
       self.fittingModeEditor.hide()
 
 
-  def _selectCurrentNmrResiduesNotifierCallback(self, data):
+  def _selectCurrentNmrResiduesNotifierCallback(self, *args):
     nmrResidues = self.current.nmrResidues
     pss = [str(nmrResidue.sequenceCode) for nmrResidue in nmrResidues]
     self._selectBarLabels(pss)
@@ -1542,7 +1543,7 @@ class ChemicalShiftsMapping(CcpnModule):
       if self._zoomOnInit:
         self.barGraphWidget.customViewBox.setRange(xRange=[min(xs) - 10, max(xs) + 10], yRange=[0, max(ys)], )
       self._zoomOnInit = False # do only at startup
-      self._selectBarLabels([str(nmrResidue.sequenceCode) for nmrResidue in self.current.nmrResidues])
+      # self._selectBarLabels([str(nmrResidue.sequenceCode) for nmrResidue in self.current.nmrResidues])
 
 
 

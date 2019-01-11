@@ -79,6 +79,9 @@ from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpn.core.lib.Notifiers import Notifier, NotifierBase
 from ccpn.core.lib.ContextManagers import catchExceptions
 
+from ccpn.ui.gui.widgets.Menu import Menu
+from functools import partial
+
 
 # NB the order matters!
 # NB 'SG' must be before 'SP', as SpectrumGroups must be ready before Spectra
@@ -177,7 +180,7 @@ def _openSpectrumDisplay(mainWindow, spectrum, position=None, relativeTo=None):
         mainWindow.current.strip = spectrumDisplay.strips[0]
         # if spectrum.dimensionCount == 1:
         spectrumDisplay._maximiseRegions()
-            # mainWindow.current.strip.plotWidget.autoRange()
+        # mainWindow.current.strip.plotWidget.autoRange()
 
     mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
 
@@ -1387,48 +1390,71 @@ class SideBar(QtWidgets.QTreeWidget, Base, NotifierBase):
                 info = showInfo('Not implemented yet!',
                                 'This function has not been implemented in the current version')
 
-from sandbox.Geerten.Refactored.SideBar import SideBar as sideBarManager
+
+#===========================================================================================================
+# New sideBar to handle new notifiers
+#===========================================================================================================
+
+from sandbox.Geerten.Refactored.SideBar import SideBar as SideBarHandler
 
 
-class NewSideBar(QtWidgets.QTreeWidget, sideBarManager, Base, NotifierBase):
+class NewSideBar(QtWidgets.QTreeWidget, SideBarHandler, Base, NotifierBase):
     def __init__(self, parent=None, mainWindow=None, multiSelect=True):
 
         super().__init__(parent)
         Base._init(self, acceptDrops=True)
+        SideBarHandler._init(self)
 
         self.multiSelect = multiSelect
         if self.multiSelect:
             self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
 
-        self.mainWindow = parent  # ejb - needed for moduleArea
+        self.mainWindow = parent
         self.application = self.mainWindow.application
 
         self.setFont(sidebarFont)
         self.header().hide()
         self.setDragEnabled(True)
         self.setExpandsOnDoubleClick(False)
-        self.setDragDropMode(self.InternalMove)
+        # self.setDragDropMode(self.InternalMove)
         self.setMinimumWidth(200)
+
+        # self.mousePressEvent = self._mousePressEvent
+        # self.mouseReleaseEvent = self._mouseReleaseEvent
+        # self.dragMoveEvent = self._dragMoveEvent
+        # self.dragEnterEvent = self._dragEnterEvent
 
         self.setDragDropMode(self.DragDrop)
         self.setAcceptDrops(True)
 
-        # self.droppedNotifier = GuiNotifier(self,
-        #                                    [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
-        #                                    self._processDroppedItems)
+        self.setGuiNotifier(self,
+                            [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
+                            self._processDroppedItems)
 
         self.itemDoubleClicked.connect(self._raiseObjectProperties)
 
-    def buildTree(self, project):
-        """build the new tree structure from the project
+    def _clearQTreeWidget(self, tree):
+        """Clear contents of the sidebar.
         """
-        super().buildTree(project)
-        pass
+        iterator = QtWidgets.QTreeWidgetItemIterator(tree, QtWidgets.QTreeWidgetItemIterator.All)
+        while iterator.value():
+            iterator.value().takeChildren()
+            iterator += 1
+        i = tree.topLevelItemCount()
+        while i > -1:
+            tree.takeTopLevelItem(i)
+            i -= 1
+
+    def buildTree(self, project):
+        """Build the new tree structure from the project.
+        """
+        self._clearQTreeWidget(self)
+        super().buildTree(project, sidebar=self)
+        self.project = project
 
     def _raiseObjectProperties(self, item):
-        """get object from Pid and dispatch call depending on type
-
-        NBNB TBD How about refactoring so that we have a shortClassName:Popup dictionary?"""
+        """Get object from Pid and dispatch call depending on type.
+        """
         dataPid = item.data(0, QtCore.Qt.DisplayRole)
         sideBarObject = item.data(1, QtCore.Qt.UserRole)
         callback = sideBarObject.callback
@@ -1436,24 +1462,159 @@ class NewSideBar(QtWidgets.QTreeWidget, sideBarManager, Base, NotifierBase):
         if callback:
             callback(dataPid, sideBarObject)
 
-        pass
+    def mousePressEvent(self, event):
+        """Re-implementation of the mouse press event so right click can be used to delete items from the
+        sidebar.
+        """
+        event.accept()
+        super().mousePressEvent(event)
 
-        # # trap creation of new items form sideBar
-        # obj = project.getByPid(dataPid) if Pid.Pid.isValid(dataPid) else None
-        #
-        # if obj is not None:
-        #     self.raisePopup(obj, item)
-        # elif dataPid.startswith('<New'):
-        #     self._createNewObject(item)
-        #
-        # else:
-        #     project._logger.error("Double-click activation not implemented for Pid %s, object %s"
-        #                           % (dataPid, obj))
+    def mouseReleaseEvent(self, event):
+        """Re-implementation of the mouse press event so right click can be used to delete items from the
+        sidebar.
+        """
+        if event.button() == QtCore.Qt.RightButton:
+            self._raiseContextMenu(event)  # ejb - moved the context menu to button release
+            event.accept()
+        else:
+            super().mouseReleaseEvent(event)
 
-    # def _createNewObject(self):
-    #     itemParent = self.project.getByPid(item.parent().text(0)) if Pid.Pid.isValid(item.parent().text(0)) else None
-    #
-    #     funcName = NEW_ITEM_DICT.get(itemParent.shortClassName)
-    #
-    #     if funcName is not None:
-    #         newItem = getattr(itemParent, funcName)()
+    def dragEnterEvent(self, event):
+        """Handle drag enter event to create a new drag/drag item.
+        """
+        print('>>>dragEnter')
+        if event.mimeData().hasUrls():
+            event.accept()
+        else:
+            pids = []
+            for item in self.selectedItems():
+                if item is not None:
+
+                    dataPid = item.data(0, QtCore.Qt.DisplayRole)
+                    sideBarObject = item.data(1, QtCore.Qt.UserRole)
+
+                    objFromPid = self.project.getByPid(dataPid)
+                    if objFromPid is not None:
+                        pids.append(objFromPid.pid)
+
+            itemData = json.dumps({'pids': pids})
+
+            tempData = QtCore.QByteArray()
+            stream = QtCore.QDataStream(tempData, QtCore.QIODevice.WriteOnly)
+            stream.writeQString(itemData)
+            event.mimeData().setData(ccpnmrJsonData, tempData)
+            event.mimeData().setText(itemData)
+            event.accept()
+
+    def dragMoveEvent(self, event):
+        """Required function to enable dragging and dropping within the sidebar.
+        """
+        print('>>>dragMove')
+        if event.mimeData().hasUrls():
+            event.setDropAction(QtCore.Qt.CopyAction)
+            event.accept()
+        else:
+            super().dragMoveEvent(event)
+
+    def _raiseContextMenu(self, event: QtGui.QMouseEvent):
+        """Creates and raises a context menu enabling items to be deleted from the sidebar.
+        """
+        # from ccpn.ui.gui.widgets.Menu import Menu
+        # from functools import partial
+
+        contextMenu = Menu('', self, isFloatWidget=True)
+
+        # contextMenu.addAction('Delete', partial(self.removeItem, item))
+        objs = []
+        for item in self.selectedItems():
+            if item is not None:
+
+                dataPid = item.data(0, QtCore.Qt.DisplayRole)
+                sideBarObject = item.data(1, QtCore.Qt.UserRole)
+
+                objFromPid = self.project.getByPid(dataPid)
+                if objFromPid is not None:
+                    objs.append(objFromPid)
+
+        if len(objs) > 0:
+            openableObjs = [obj for obj in objs if isinstance(obj, tuple(OpenObjAction.keys()))]
+            if len(openableObjs) > 0:
+                contextMenu.addAction('Open as a module', partial(_openItemObject, self.mainWindow, openableObjs))
+                spectra = [o for o in openableObjs if isinstance(o, Spectrum)]
+                if len(spectra) > 0:
+                    contextMenu.addAction('Make SpectrumGroup From Selected', partial(self._createSpectrumGroup, spectra))
+
+            contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
+            canBeCloned = True
+            for obj in objs:
+                if not hasattr(obj, 'clone'):  # TODO: possibly should check that is a method...
+                    canBeCloned = False
+                    break
+            if canBeCloned:
+                contextMenu.addAction('Clone', partial(self._cloneObject, objs))
+            contextMenu.move(event.globalPos().x(), event.globalPos().y() + 10)
+            contextMenu.exec()
+
+    def _deleteItemObject(self, objs):
+        """Removes the specified item from the sidebar and deletes it from the project.
+        NB, the clean-up of the side bar is done through notifiers
+        """
+        from ccpn.core.lib.ContextManagers import undoBlockManager
+
+        try:
+            with undoBlockManager():
+                for obj in objs:
+                    if obj:
+                        # just delete the object
+                        obj.delete()
+
+        except Exception as es:
+            showWarning('Delete', str(es))
+
+        #  Force repaint if GL windows
+        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
+        GLSignals = GLNotifier(parent=self)
+        GLSignals.emitEvent(triggers=[GLNotifier.GLALLPEAKS, GLNotifier.GLALLINTEGRALS, GLNotifier.GLALLMULTIPLETS])
+
+    def _processDroppedItems(self, data):
+        """Handle the dropped urls
+        """
+        # CCPN INTERNAL. Called also from module area and GuiStrip. They should have same behaviours
+
+        print('>>>DROP')
+        objs = []
+        for url in data.get('urls', []):
+            getLogger().debug('>>> dropped: ' + str(url))
+
+            dataType, subType, usePath = ioFormats.analyseUrl(url)
+            if dataType == 'Project' and subType in (ioFormats.CCPN,
+                                                     ioFormats.NEF,
+                                                     ioFormats.NMRSTAR,
+                                                     ioFormats.SPARKY):
+
+                okToContinue = self.mainWindow._queryCloseProject(title='Load %s project' % subType,
+                                                                  phrase='create a new')
+                if okToContinue:
+                    with progressManager(self.mainWindow, 'Loading project... ' + url):
+                        with catchExceptions():
+                            obj = self.application.loadProject(url)
+
+                        if isinstance(obj, Project):
+                            try:
+                                obj._mainWindow.sideBar.fillSideBar(obj)
+                                obj._mainWindow.show()
+                                QtWidgets.QApplication.setActiveWindow(obj._mainWindow)
+
+                            except Exception as es:
+                                getLogger().warning('Error: %s' % str(es))
+
+            else:
+                # with progressManager(self.mainWindow, 'Loading data... ' + url):
+                try:  #  Why do we need this try?
+                    data = self.project.loadData(url)
+                    if data:
+                        objs.extend(data)
+                except Exception as es:
+                    getLogger().warning('loadData Error: %s' % str(es))
+        return objs

@@ -1002,7 +1002,7 @@ class AbstractWrapperObject(NotifierBase):
                         pendingNotifications.append((notifier, onceOnly, self, oldPid))
             else:
                 for dd in iterator:
-                    for notifier in dd:
+                    for notifier in tuple(dd):
                         notifier(self, oldPid)
 
             for obj in self._getDirectChildren():
@@ -1017,7 +1017,7 @@ class AbstractWrapperObject(NotifierBase):
                         pendingNotifications.append((notifier, onceOnly, self))
             else:
                 for dd in iterator:
-                    for notifier in dd:
+                    for notifier in tuple(dd):
                         notifier(self)
 
     def _validateName(self, value: str, allowWhitespace: bool = False, allowEmpty: bool = False):

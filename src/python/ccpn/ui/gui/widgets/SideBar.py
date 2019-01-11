@@ -1419,10 +1419,10 @@ class NewSideBar(QtWidgets.QTreeWidget, SideBarHandler, Base, NotifierBase):
         # self.setDragDropMode(self.InternalMove)
         self.setMinimumWidth(200)
 
-        # self.mousePressEvent = self._mousePressEvent
-        # self.mouseReleaseEvent = self._mouseReleaseEvent
-        # self.dragMoveEvent = self._dragMoveEvent
-        # self.dragEnterEvent = self._dragEnterEvent
+        self.mousePressEvent = self._mousePressEvent
+        self.mouseReleaseEvent = self._mouseReleaseEvent
+        self.dragMoveEvent = self._dragMoveEvent
+        self.dragEnterEvent = self._dragEnterEvent
 
         self.setDragDropMode(self.DragDrop)
         self.setAcceptDrops(True)
@@ -1462,14 +1462,14 @@ class NewSideBar(QtWidgets.QTreeWidget, SideBarHandler, Base, NotifierBase):
         if callback:
             callback(dataPid, sideBarObject)
 
-    def mousePressEvent(self, event):
+    def _mousePressEvent(self, event):
         """Re-implementation of the mouse press event so right click can be used to delete items from the
         sidebar.
         """
         event.accept()
         super().mousePressEvent(event)
 
-    def mouseReleaseEvent(self, event):
+    def _mouseReleaseEvent(self, event):
         """Re-implementation of the mouse press event so right click can be used to delete items from the
         sidebar.
         """
@@ -1479,7 +1479,7 @@ class NewSideBar(QtWidgets.QTreeWidget, SideBarHandler, Base, NotifierBase):
         else:
             super().mouseReleaseEvent(event)
 
-    def dragEnterEvent(self, event):
+    def _dragEnterEvent(self, event):
         """Handle drag enter event to create a new drag/drag item.
         """
         print('>>>dragEnter')
@@ -1506,7 +1506,7 @@ class NewSideBar(QtWidgets.QTreeWidget, SideBarHandler, Base, NotifierBase):
             event.mimeData().setText(itemData)
             event.accept()
 
-    def dragMoveEvent(self, event):
+    def _dragMoveEvent(self, event):
         """Required function to enable dragging and dropping within the sidebar.
         """
         print('>>>dragMove')

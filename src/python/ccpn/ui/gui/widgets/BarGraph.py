@@ -345,6 +345,8 @@ class CustomViewBox(pg.ViewBox):
 
     if len(selected) > 0:
       try:
+        currentSelected = getattr(self.application.current, selected[0]._pluralLinkName)
+        selected.extend(currentSelected)
         currentObjs = setattr(self.application.current, selected[0]._pluralLinkName, selected)
         self.updateSelectionFromCurrent()
       except Exception as e:

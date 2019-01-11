@@ -1296,9 +1296,10 @@ class ChemicalShiftsMapping(CcpnModule):
     else:
       self.fittingModeEditor.hide()
 
+
   def _selectCurrentNmrResiduesNotifierCallback(self, data):
     nmrResidues = self.current.nmrResidues
-    pss = [str(nmrResidue.sequenceCode)  for nmrResidue in nmrResidues]
+    pss = [str(nmrResidue.sequenceCode) for nmrResidue in nmrResidues]
     self._selectBarLabels(pss)
     self._plotBindingCFromCurrent()
     self._plotScatters(self._getScatterData(), selectedObjs=self.current.nmrResidues)
@@ -1540,6 +1541,7 @@ class ChemicalShiftsMapping(CcpnModule):
       if self._zoomOnInit:
         self.barGraphWidget.customViewBox.setRange(xRange=[min(xs) - 10, max(xs) + 10], yRange=[0, max(ys)], )
       self._zoomOnInit = False # do only at startup
+      self._selectBarLabels([str(nmrResidue.sequenceCode) for nmrResidue in self.current.nmrResidues])
 
 
 

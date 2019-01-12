@@ -1530,7 +1530,10 @@ class NewSideBar(QtWidgets.QTreeWidget, SideBarHandler, Base, NotifierBase):
             event.setDropAction(QtCore.Qt.CopyAction)
             event.accept()
         else:
-            super().dragMoveEvent(event)
+            if isinstance(event.source(), (SideBar, NewSideBar)):
+                event.ignore()
+            else:
+                super().dragMoveEvent(event)
 
     def _raiseContextMenu(self, event: QtGui.QMouseEvent):
         """Creates and raises a context menu enabling items to be deleted from the sidebar.

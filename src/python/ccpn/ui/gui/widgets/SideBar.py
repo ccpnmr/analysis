@@ -1527,10 +1527,12 @@ class NewSideBar(QtWidgets.QTreeWidget, SideBarHandler, Base, NotifierBase):
         """Required function to enable dragging and dropping within the sidebar.
         """
         if event.mimeData().hasUrls():
+            # accept external events
             event.setDropAction(QtCore.Qt.CopyAction)
             event.accept()
         else:
             if isinstance(event.source(), (SideBar, NewSideBar)):
+                # disable/ignore internal move events
                 event.ignore()
             else:
                 super().dragMoveEvent(event)

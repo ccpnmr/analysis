@@ -322,7 +322,7 @@ class SideBar(QtWidgets.QTreeWidget, Base, NotifierBase):
         self.mouseReleaseEvent = self._mouseReleaseEvent
         # self.mouseMoveEvent = self._mouseMoveEvent
         self.dragMoveEvent = self._dragMoveEvent
-        self.dragEnterEvent = self._dragEnterEvent
+        # self.dragEnterEvent = self._dragEnterEvent
 
         self.setDragDropMode(self.DragDrop)
         self.setAcceptDrops(True)
@@ -1001,7 +1001,7 @@ class SideBar(QtWidgets.QTreeWidget, Base, NotifierBase):
     # def _eventFilter(self, obj, event):
     #     return super(SideBar, self).eventFilter(obj, event)
 
-    def _dragEnterEvent(self, event, enter=True):
+    def dragEnterEvent(self, event, enter=True):
         # if event.mimeData().hasFormat(ccpnmrJsonData):
         #   data = event.mimeData().data(ccpnmrJsonData)
         #   if 'test' in data:
@@ -1419,10 +1419,10 @@ class NewSideBar(QtWidgets.QTreeWidget, SideBarHandler, Base, NotifierBase):
         # self.setDragDropMode(self.InternalMove)
         self.setMinimumWidth(200)
 
-        self.mousePressEvent = self._mousePressEvent
-        self.mouseReleaseEvent = self._mouseReleaseEvent
-        self.dragMoveEvent = self._dragMoveEvent
-        self.dragEnterEvent = self._dragEnterEvent
+        # self.mousePressEvent = self._mousePressEvent
+        # self.mouseReleaseEvent = self._mouseReleaseEvent
+        # self.dragMoveEvent = self._dragMoveEvent
+        # self.dragEnterEvent = self._dragEnterEvent
 
         self.setDragDropMode(self.DragDrop)
         self.setAcceptDrops(True)
@@ -1448,9 +1448,18 @@ class NewSideBar(QtWidgets.QTreeWidget, SideBarHandler, Base, NotifierBase):
     def buildTree(self, project):
         """Build the new tree structure from the project.
         """
-        self._clearQTreeWidget(self)
-        super().buildTree(project, sidebar=self)
+        # self._clearQTreeWidget(self)
         self.project = project
+        super().buildTree(project, sidebar=self)
+
+        # item = self
+        # newItem = QtWidgets.QTreeWidgetItem(item)
+        # newItem.setFlags(newItem.flags() & ~(QtCore.Qt.ItemIsDropEnabled))
+        # newItem.setData(0, QtCore.Qt.DisplayRole, str('PROJECT'))
+
+        self.setDragEnabled(True)
+
+        # self._traverseStructure(project)  # try to set dragEnabled on all nodes
 
     def _raiseObjectProperties(self, item):
         """Get object from Pid and dispatch call depending on type.
@@ -1462,14 +1471,20 @@ class NewSideBar(QtWidgets.QTreeWidget, SideBarHandler, Base, NotifierBase):
         if callback:
             callback(dataPid, sideBarObject)
 
-    def _mousePressEvent(self, event):
-        """Re-implementation of the mouse press event so right click can be used to delete items from the
-        sidebar.
-        """
-        event.accept()
-        super().mousePressEvent(event)
+    # def mousePressEvent(self, event):
+    #     """Re-implementation of the mouse press event so right click can be used to delete items from the
+    #     sidebar.
+    #     """
+    #     # event.accept()
+    #     super().mousePressEvent(event)
+    #
+    # def mouseMoveEvent(self, event):
+    #     """Re-implementation of the mouse press event so right click can be used to delete items from the
+    #     sidebar.
+    #     """
+    #     super().mouseMoveEvent(event)
 
-    def _mouseReleaseEvent(self, event):
+    def mouseReleaseEvent(self, event):
         """Re-implementation of the mouse press event so right click can be used to delete items from the
         sidebar.
         """
@@ -1479,10 +1494,9 @@ class NewSideBar(QtWidgets.QTreeWidget, SideBarHandler, Base, NotifierBase):
         else:
             super().mouseReleaseEvent(event)
 
-    def _dragEnterEvent(self, event):
+    def dragEnterEvent(self, event):
         """Handle drag enter event to create a new drag/drag item.
         """
-        print('>>>dragEnter')
         if event.mimeData().hasUrls():
             event.accept()
         else:
@@ -1493,9 +1507,12 @@ class NewSideBar(QtWidgets.QTreeWidget, SideBarHandler, Base, NotifierBase):
                     dataPid = item.data(0, QtCore.Qt.DisplayRole)
                     sideBarObject = item.data(1, QtCore.Qt.UserRole)
 
-                    objFromPid = self.project.getByPid(dataPid)
-                    if objFromPid is not None:
-                        pids.append(objFromPid.pid)
+                    # objFromPid = self.project.getByPid(dataPid)
+                    # if objFromPid is not None:
+                    #     pids.append(objFromPid.pid)
+
+                    if sideBarObject.obj:
+                        pids.append(sideBarObject.obj.pid)
 
             itemData = json.dumps({'pids': pids})
 
@@ -1506,10 +1523,9 @@ class NewSideBar(QtWidgets.QTreeWidget, SideBarHandler, Base, NotifierBase):
             event.mimeData().setText(itemData)
             event.accept()
 
-    def _dragMoveEvent(self, event):
+    def dragMoveEvent(self, event):
         """Required function to enable dragging and dropping within the sidebar.
         """
-        print('>>>dragMove')
         if event.mimeData().hasUrls():
             event.setDropAction(QtCore.Qt.CopyAction)
             event.accept()

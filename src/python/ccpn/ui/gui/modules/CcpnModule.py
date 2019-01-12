@@ -65,7 +65,7 @@ from ccpn.ui.gui.widgets.ToolButton import ToolButton
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import moduleLabelFont
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.SideBar import SideBar
+from ccpn.ui.gui.widgets.SideBar import SideBar, NewSideBar
 from ccpn.ui.gui.widgets.PythonEditor import QCodeEditor
 
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame, Frame
@@ -535,7 +535,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         # if isinstance(source, CcpnModule) or isinstance(source, SideBar):
         #     if event.type() == QtCore.QEvent.DragEnter:
         #         data = self.parseEvent(event)
-        #         if DropBase.PIDS in data and not isinstance(data['event'].source(), SideBar):
+        #         if DropBase.PIDS in data and not isinstance(data['event'].source(), (SideBar, NewSideBar)):
         #             self.setWidgetTransparency(False)
         #         else:
         #
@@ -731,7 +731,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
             ev = args[0]
             # print ('>>>', ev.source())
             data = self.parseEvent(ev)
-            if DropBase.PIDS in data and isinstance(data['event'].source(), SideBar):
+            if DropBase.PIDS in data and isinstance(data['event'].source(), (SideBar, NewSideBar)):
                 if self.widgetArea:
 
                     ld = ev.pos().x()

@@ -1018,7 +1018,9 @@ class AbstractWrapperObject(NotifierBase):
             else:
                 for dd in iterator:
                     for notifier in tuple(dd):
+                        print('>>>notifier', notifier)
                         notifier(self)
+                        print('>>>postnotifier', notifier)
 
     def _validateName(self, value: str, allowWhitespace: bool = False, allowEmpty: bool = False):
         attrib = self.className

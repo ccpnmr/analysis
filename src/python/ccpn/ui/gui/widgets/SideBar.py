@@ -1450,16 +1450,8 @@ class NewSideBar(QtWidgets.QTreeWidget, SideBarHandler, Base, NotifierBase):
         """
         # self._clearQTreeWidget(self)
         self.project = project
-        super().buildTree(project, sidebar=self)
-
-        # item = self
-        # newItem = QtWidgets.QTreeWidgetItem(item)
-        # newItem.setFlags(newItem.flags() & ~(QtCore.Qt.ItemIsDropEnabled))
-        # newItem.setData(0, QtCore.Qt.DisplayRole, str('PROJECT'))
-
-        self.setDragEnabled(True)
-
-        # self._traverseStructure(project)  # try to set dragEnabled on all nodes
+        self.setSidebar(sidebar=self)
+        super().buildTree(project)
 
     def _raiseObjectProperties(self, item):
         """Get object from Pid and dispatch call depending on type.
@@ -1603,7 +1595,6 @@ class NewSideBar(QtWidgets.QTreeWidget, SideBarHandler, Base, NotifierBase):
         """
         # CCPN INTERNAL. Called also from module area and GuiStrip. They should have same behaviours
 
-        print('>>>DROP')
         objs = []
         for url in data.get('urls', []):
             getLogger().debug('>>> dropped: ' + str(url))

@@ -32,7 +32,8 @@ from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.SideBar import SideBar, NewSideBar, _openItemObject
+from ccpn.ui.gui.widgets.SideBar import SideBar, NewSideBar
+from ccpn.ui.gui.lib.MenuActions import _openItemObject
 from ccpn.ui.gui.widgets.Font import Font
 from ccpn.ui.gui.widgets.MainWindow import MainWindow
 from ccpn.ui.gui.lib.GuiWindow import GuiWindow

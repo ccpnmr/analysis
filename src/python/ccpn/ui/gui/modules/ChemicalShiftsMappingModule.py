@@ -1359,7 +1359,7 @@ class ChemicalShiftsMapping(CcpnModule):
                                                                    'Open a new SpectrumDisplay?')
     if openSpectra:
       try:
-        from ccpn.ui.gui.widgets.SideBar import _openItemObject
+        from ccpn.ui.gui.lib.MenuActions import _openItemObject
 
         spectra = self.spectraSelectionWidget.getSelections()
         _openItemObject(self.mainWindow, spectra)

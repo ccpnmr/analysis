@@ -31,7 +31,6 @@ from collections import OrderedDict
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ccpn.core import _coreClassMap
-from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
@@ -65,11 +64,10 @@ from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 from ccpn.ui.gui.popups.StructurePopup import StructurePopup
 from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
-from ccpn.ui.gui.popups.EditMultipletPopup import EditMultipletPopup
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.DropBase import DropBase
-from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning, progressManager, showNotImplementedMessage
+from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning, progressManager
 from ccpn.util.Constants import ccpnmrJsonData
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
@@ -78,6 +76,8 @@ from ccpn.ui.gui.popups.CreateNmrChainPopup import CreateNmrChainPopup
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpn.core.lib.Notifiers import Notifier, NotifierBase
 from ccpn.core.lib.ContextManagers import catchExceptions
+from ccpn.ui.gui.lib.MenuActions import _openNote, _openIntegralList, _openPeakList, _openMultipletList, _openChemicalShiftList, _openRestraintList, \
+    _openStructureTable, _openNmrResidueTable, _openResidueTable, _openItemObject, _openSpectrumDisplay, _openSpectrumGroup, _openSampleSpectra
 
 from ccpn.ui.gui.widgets.Menu import Menu
 from functools import partial
@@ -137,144 +137,6 @@ NEW_ITEM_DICT = {
     'SpectrumGroups'    : 'newSpectrumGroup',
     'Complexes'         : 'newComplex',
     }
-
-
-def _openItemObject(mainWindow, objs, **kwds):
-    """
-    Abstract routine to activate a module to display objs
-    Builds on OpenObjAction dict, generated below, which defines the handling for the various
-    obj classes
-    """
-    spectrumDisplay = None
-
-    for obj in objs:
-        if obj:
-            try:
-                if obj.__class__ in OpenObjAction:
-
-                    # if a spectrum object has already been opened then attach to that spectrumDisplay
-                    if isinstance(obj, Spectrum) and spectrumDisplay:
-                        spectrumDisplay.displaySpectrum(obj)
-
-                    else:
-
-                        # process objects to open
-                        returnObj = OpenObjAction[obj.__class__](mainWindow, obj, **kwds)
-
-                        # if the first spectrum then set the spectrumDisplay
-                        if isinstance(obj, Spectrum):
-                            spectrumDisplay = returnObj
-
-                else:
-                    info = showInfo('Not implemented yet!',
-                                    'This function has not been implemented in the current version')
-            except Exception as e:
-                getLogger().warning('Error: %s' % e)
-                # raise e
-
-
-def _openSpectrumDisplay(mainWindow, spectrum, position=None, relativeTo=None):
-    spectrumDisplay = mainWindow.createSpectrumDisplay(spectrum)
-
-    if len(spectrumDisplay.strips) > 0:
-        mainWindow.current.strip = spectrumDisplay.strips[0]
-        # if spectrum.dimensionCount == 1:
-        spectrumDisplay._maximiseRegions()
-        # mainWindow.current.strip.plotWidget.autoRange()
-
-    mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
-
-    # TODO:LUCA: the mainWindow.createSpectrumDisplay should do the reporting to console and log
-    # This routine can then be ommitted and the call above replaced by the one remaining line
-    mainWindow.pythonConsole.writeConsoleCommand(
-            "application.createSpectrumDisplay(spectrum)", spectrum=spectrum)
-    getLogger().info('spectrum = project.getByPid(%r)' % spectrum.id)
-    getLogger().info('application.createSpectrumDisplay(spectrum)')
-
-    return spectrumDisplay
-
-
-def _openSpectrumGroup(mainWindow, spectrumGroup, position=None, relativeTo=None):
-    '''displays spectrumGroup on spectrumDisplay. It creates the display based on the first spectrum of the group.
-    Also hides the spectrumToolBar and shows spectrumGroupToolBar '''
-
-    if len(spectrumGroup.spectra) > 0:
-        spectrumDisplay = mainWindow.createSpectrumDisplay(spectrumGroup.spectra[0])
-        mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
-        for spectrum in spectrumGroup.spectra:  # Add the other spectra
-            spectrumDisplay.displaySpectrum(spectrum)
-
-        spectrumDisplay.isGrouped = True
-        spectrumDisplay.spectrumToolBar.hide()
-        spectrumDisplay.spectrumGroupToolBar.show()
-        spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
-        mainWindow.application.current.strip = spectrumDisplay.strips[0]
-        # if any([sp.dimensionCount for sp in spectrumGroup.spectra]) == 1:
-        spectrumDisplay._maximiseRegions()
-
-
-def _openSampleSpectra(mainWindow, sample, position=None, relativeTo=None):
-    """
-    Add spectra linked to sample and sampleComponent. Particularly used for screening
-    """
-    if len(sample.spectra) > 0:
-        spectrumDisplay = mainWindow.createSpectrumDisplay(sample.spectra[0])
-        mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
-        for spectrum in sample.spectra:
-            spectrumDisplay.displaySpectrum(spectrum)
-        for sampleComponent in sample.sampleComponents:
-            if sampleComponent.substance is not None:
-                for spectrum in sampleComponent.substance.referenceSpectra:
-                    spectrumDisplay.displaySpectrum(spectrum)
-        mainWindow.application.current.strip = spectrumDisplay.strips[0]
-        if all(sample.spectra[0].dimensionCount) == 1:
-            mainWindow.application.current.strip.autoRange()
-
-
-def _openPeakList(mainWindow, peakList, position=None, relativeTo=None):
-    application = mainWindow.application
-    application.showPeakTable(peakList=peakList, position=position, relativeTo=relativeTo)
-
-
-def _openMultipletList(mainWindow, multipletList, position=None, relativeTo=None):
-    application = mainWindow.application
-    application.showMultipletTable(multipletList=multipletList, position=position, relativeTo=relativeTo)
-
-
-def _openChemicalShiftList(mainWindow, chemicalShiftList, position=None, relativeTo=None):
-    application = mainWindow.application
-    application.showChemicalShiftTable(chemicalShiftList=chemicalShiftList, position=position, relativeTo=relativeTo)
-
-
-def _openNote(mainWindow, note, position=None, relativeTo=None):
-    application = mainWindow.application
-    application.showNotesEditor(note=note, position=position, relativeTo=relativeTo)
-
-
-def _openRestraintList(mainWindow, restraintList, position=None, relativeTo=None):
-    application = mainWindow.application
-    application.showRestraintTable(restraintList=restraintList, position=position, relativeTo=relativeTo)
-
-
-def _openStructureTable(mainWindow, structureEnsemble, position=None, relativeTo=None):
-    application = mainWindow.application
-    application.showStructureTable(structureEnsemble=structureEnsemble, position=position, relativeTo=relativeTo)
-
-
-def _openNmrResidueTable(mainWindow, nmrChain, position=None, relativeTo=None):
-    application = mainWindow.application
-    application.showNmrResidueTable(nmrChain=nmrChain, position=position, relativeTo=relativeTo)
-
-
-def _openResidueTable(mainWindow, chain, position=None, relativeTo=None):
-    application = mainWindow.application
-    application.showResidueTable(chain=chain, position=position, relativeTo=relativeTo)
-
-
-def _openIntegralList(mainWindow, integralList, position=None, relativeTo=None):
-    application = mainWindow.application
-    application.showIntegralTable(integralList=integralList, position=position, relativeTo=relativeTo)
-
 
 # OPEN_ITEM_DICT = {
 #     Spectrum.className         : _openSpectrumDisplay,

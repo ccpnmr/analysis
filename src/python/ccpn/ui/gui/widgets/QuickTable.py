@@ -467,7 +467,7 @@ QuickTable::item::selected {
         :return: Actions: Select the dropped item on the table or/and open a new modules if multiple drops.
         If multiple different obj instances, then asks first.
         """
-        from ccpn.ui.gui.widgets.SideBar import _openItemObject
+        from ccpn.ui.gui.lib.MenuActions import _openItemObject
 
         objs = [self.project.getByPid(pid) for pid in pids]
 

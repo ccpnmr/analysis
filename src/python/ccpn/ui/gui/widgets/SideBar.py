@@ -1504,7 +1504,7 @@ class NewSideBar(QtWidgets.QTreeWidget, SideBarHandler, Base, NotifierBase):
                     #     pids.append(objFromPid.pid)
 
                     if sideBarObject.obj:
-                        pids.append(sideBarObject.obj.pid)
+                        pids.append(str(sideBarObject.obj.pid))
 
             itemData = json.dumps({'pids': pids})
 
@@ -1513,6 +1513,7 @@ class NewSideBar(QtWidgets.QTreeWidget, SideBarHandler, Base, NotifierBase):
             stream.writeQString(itemData)
             event.mimeData().setData(ccpnmrJsonData, tempData)
             event.mimeData().setText(itemData)
+
             event.accept()
 
     def dragMoveEvent(self, event):
@@ -1532,12 +1533,8 @@ class NewSideBar(QtWidgets.QTreeWidget, SideBarHandler, Base, NotifierBase):
     def _raiseContextMenu(self, event: QtGui.QMouseEvent):
         """Creates and raises a context menu enabling items to be deleted from the sidebar.
         """
-        # from ccpn.ui.gui.widgets.Menu import Menu
-        # from functools import partial
-
         contextMenu = Menu('', self, isFloatWidget=True)
 
-        # contextMenu.addAction('Delete', partial(self.removeItem, item))
         objs = []
         for item in self.selectedItems():
             if item is not None:
@@ -1593,7 +1590,7 @@ class NewSideBar(QtWidgets.QTreeWidget, SideBarHandler, Base, NotifierBase):
     def _processDroppedItems(self, data):
         """Handle the dropped urls
         """
-        # CCPN INTERNAL. Called also from module area and GuiStrip. They should have same behaviours
+        # CCPN INTERNAL. Called also from module area and GuiStrip. They should have same behaviour
 
         objs = []
         for url in data.get('urls', []):

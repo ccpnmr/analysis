@@ -182,7 +182,7 @@ class GuiNotifier(NotifierABC):
         wrapper, accommodating the different triggers before firing the callback
         """
         if not self.isRegistered():
-            logger.warning('Trigering unregistered notifier %s' % self)
+            logger.warning('Triggering unregistered notifier %s' % self)
             return
 
         if self._isBlanked:

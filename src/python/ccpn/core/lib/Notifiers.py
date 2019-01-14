@@ -339,7 +339,7 @@ class Notifier(NotifierABC):
         """
 
         if not self.isRegistered():
-            logger.warning('Trigering unregistered notifier %s' % self)
+            logger.warning('Triggering unregistered notifier %s' % self)
             return
 
         if self._isBlanked:

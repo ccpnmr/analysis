@@ -68,6 +68,14 @@ class SpectrumGroup(AbstractWrapperObject):
         """ CCPN Project SpectrumGroup"""
         return self._wrappedData
 
+    def _getSpectrumGroupChildrenByClass(self, klass):
+        """Return the list of spectra attached to the spectrumGroup.
+        """
+        if klass is Spectrum:
+            return tuple(spectrum for spectrum in self.spectra)
+        else:
+            return []
+
     @property
     def _key(self) -> str:
         """Residue local ID"""

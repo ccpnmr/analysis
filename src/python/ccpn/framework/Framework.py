@@ -471,6 +471,7 @@ class Framework(NotifierBase):
         mainWindow = self.ui.mainWindow
         if mainWindow is not None:
             mainWindow.sideBar.setProjectName(self.project)
+            mainWindow._newSideBar.setProjectName(self.project)
 
     def _getUI(self):
         if self.args.interface == 'Gui':
@@ -2001,6 +2002,7 @@ class Framework(NotifierBase):
             # ui/gui cleanup
             self._closeMainWindows()
             self._closeExtraWindows()
+            self.ui.mainWindow._newSideBar.clearSideBar()
             self.ui.mainWindow.deleteLater()
             self.ui.mainWindow = None
 

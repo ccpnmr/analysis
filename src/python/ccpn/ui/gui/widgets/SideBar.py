@@ -1463,6 +1463,12 @@ class NewSideBar(QtWidgets.QTreeWidget, SideBarHandler, Base, NotifierBase):
         if callback:
             callback(dataPid, sideBarObject)
 
+    def clearSideBar(self):
+        """Completely clear and reset the sidebar of widgets and notifiers.
+        """
+        super().clearSideBar()
+        self._clearQTreeWidget(self)
+
     # def mousePressEvent(self, event):
     #     """Re-implementation of the mouse press event so right click can be used to delete items from the
     #     sidebar.
@@ -1529,6 +1535,13 @@ class NewSideBar(QtWidgets.QTreeWidget, SideBarHandler, Base, NotifierBase):
                 event.ignore()
             else:
                 super().dragMoveEvent(event)
+
+    def _createSpectrumGroup(self, spectra=None or []):
+        """This needs to be put into a more generic place.
+        """
+        popup = SpectrumGroupEditor(parent=self.mainWindow, mainWindow=self.mainWindow, addNew=True, spectra=spectra)
+        popup.exec_()
+        popup.raise_()
 
     def _raiseContextMenu(self, event: QtGui.QMouseEvent):
         """Creates and raises a context menu enabling items to be deleted from the sidebar.

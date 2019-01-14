@@ -1421,6 +1421,12 @@ class NewSideBar(QtWidgets.QTreeWidget, SideBarHandler, Base, NotifierBase):
         popup.exec_()
         popup.raise_()
 
+    def _cloneObject(self, objs):
+        """Clones the specified objects.
+        """
+        for obj in objs:
+            obj.clone()
+
     def _raiseContextMenu(self, event: QtGui.QMouseEvent):
         """Creates and raises a context menu enabling items to be deleted from the sidebar.
         """

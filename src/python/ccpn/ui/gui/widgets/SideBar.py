@@ -276,6 +276,22 @@ def _openIntegralList(mainWindow, integralList, position=None, relativeTo=None):
     application.showIntegralTable(integralList=integralList, position=position, relativeTo=relativeTo)
 
 
+# OPEN_ITEM_DICT = {
+#     Spectrum.className         : _openSpectrumDisplay,
+#     PeakList.className         : showPeakTable,
+#     IntegralList.className     : showIntegralTable,
+#     MultipletList.className    : showMultipletTable,
+#     NmrChain.className         : showNmrResidueTable,
+#     Chain.className            : showResidueTable,
+#     SpectrumGroup.className    : _openSpectrumGroup,
+#     Sample.className           : _openSampleSpectra,
+#     ChemicalShiftList.className: showChemicalShiftTable,
+#     RestraintList.className    : showRestraintTable,
+#     Note.lastModified          : showNotesEditor,
+#     StructureEnsemble.className: showStructureTable
+#     }
+
+
 OpenObjAction = {
     Spectrum         : _openSpectrumDisplay,
     PeakList         : _openPeakList,

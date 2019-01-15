@@ -315,7 +315,9 @@ class SpectrumGroupEditor(CcpnDialog):
 
     def _changeLeftSpectrumGroupName(self):
         if self.leftSpectrumGroupLineEdit.isModified():
-            self.spectrumGroup.rename(self.leftSpectrumGroupLineEdit.text())
+            newName = self.leftSpectrumGroupLineEdit.text()
+            if self.spectrumGroup.name != newName:
+                self.spectrumGroup.rename(newName)
 
     def _getItemListWidgets(self):
         leftWidgets = []

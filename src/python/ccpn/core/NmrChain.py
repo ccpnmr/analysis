@@ -281,7 +281,7 @@ class NmrChain(AbstractWrapperObject):
 
             for nmrResidue in changedNmrResidues:
                 nmrResidue._finaliseAction('rename')
-                nmrResidue._finaliseAction('change')
+                # nmrResidue._finaliseAction('change')
 
         if start is not None and stop is not None:
             if len(changedNmrResidues) != stop + 1 - start:

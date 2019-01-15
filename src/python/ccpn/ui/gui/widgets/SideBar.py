@@ -1502,11 +1502,19 @@ class NewSideBar(QtWidgets.QTreeWidget, SideBarHandler, Base, NotifierBase):
         """
         self.setUpdatesEnabled(False)
         self.blockSignals(True)
-        self.setBlankingAllNotifiers(True)
+        print('>>>_blockSideBarEvents')
+        # self.setBlankingAllNotifiers(True)
 
     def _unblockSideBarEvents(self):
         """Unblock all updates/signals/notifiers on the sidebar
         """
-        self.setBlankingAllNotifiers(False)
+        print('>>>_unblockSideBarEvents')
+        # self.setBlankingAllNotifiers(False)
         self.blockSignals(False)
         self.setUpdatesEnabled(True)
+
+    def selectPid(self, pid):
+
+        ws = self._findItems(pid)  #not sure why this returns a list!
+        for i in ws:
+            self.setCurrentItem(i)

@@ -243,6 +243,8 @@ class _PulldownABC(PulldownListCompoundWidget):
                 pids.remove(obj.pid)
 
         self.modifyTexts(pids)
+
+        print('>>>>>>>>>>>>>_updatePulldownList', pids)
         if DEBUG: sys.stderr.write('  < %s._updatePulldownList()\n' % self)
 
     def _updateFromCurrent(self, callbackDict=None):

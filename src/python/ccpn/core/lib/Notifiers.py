@@ -51,7 +51,7 @@ from ccpn.util.Logging import getLogger
 
 logger = getLogger()
 
-DEBUG = True
+DEBUG = False
 
 
 def skip(*args, **kwargs):
@@ -335,7 +335,7 @@ class Notifier(NotifierABC):
 
     def __call__(self, obj: Any, parameter2: Any = None, notifier: tuple = None):
         """
-        wrapper, accomodating the different triggers before firing the callback
+        wrapper, accommodating the different triggers before firing the callback
         """
 
         if not self.isRegistered():

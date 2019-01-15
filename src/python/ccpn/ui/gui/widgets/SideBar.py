@@ -1502,13 +1502,11 @@ class NewSideBar(QtWidgets.QTreeWidget, SideBarHandler, Base, NotifierBase):
         """
         self.setUpdatesEnabled(False)
         self.blockSignals(True)
-        print('>>>_blockSideBarEvents')
         # self.setBlankingAllNotifiers(True)
 
     def _unblockSideBarEvents(self):
         """Unblock all updates/signals/notifiers on the sidebar
         """
-        print('>>>_unblockSideBarEvents')
         # self.setBlankingAllNotifiers(False)
         self.blockSignals(False)
         self.setUpdatesEnabled(True)

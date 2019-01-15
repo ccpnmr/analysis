@@ -116,8 +116,9 @@ def undoBlock(application=None):
         undo.increaseWaypointBlocking()
 
         if not application.project._blockSideBar and not undo._blocked:
-            if undo._waypointBlockingLevel < 1 and application.ui and application.ui.mainWindow:
-                application.ui.mainWindow.sideBar._saveExpandedState()
+            if application.ui and application.ui.mainWindow:
+                sidebar = application.ui.mainWindow._newSideBar
+                sidebar.increaseSidebarBlocking()
 
     if not application._echoBlocking:
         application.project.suspendNotification()
@@ -136,8 +137,9 @@ def undoBlock(application=None):
 
         if undo is not None:
             if not application.project._blockSideBar and not undo._blocked:
-                if undo._waypointBlockingLevel < 1 and application.ui and application.ui.mainWindow:
-                    application.ui.mainWindow.sideBar._restoreExpandedState()
+                if application.ui and application.ui.mainWindow:
+                    sidebar = application.ui.mainWindow._newSideBar
+                    sidebar.decreaseSidebarBlocking()
 
             undo.decreaseWaypointBlocking()
 

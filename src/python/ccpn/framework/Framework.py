@@ -470,7 +470,7 @@ class Framework(NotifierBase):
 
         mainWindow = self.ui.mainWindow
         if mainWindow is not None:
-            mainWindow.sideBar.setProjectName(self.project)
+            # mainWindow.sideBar.setProjectName(self.project)
             mainWindow._newSideBar.setProjectName(self.project)
 
     def _getUI(self):

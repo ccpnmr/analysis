@@ -808,7 +808,7 @@ class Framework(NotifierBase):
             # _blockedSideBar is a project override
             if not self.project._blockSideBar and not undo._blocked:
                 if undo._waypointBlockingLevel < 1 and self.ui and self.ui.mainWindow:
-                    self.ui.mainWindow.sideBar._saveExpandedState()
+                    self.ui.mainWindow._newSideBar._saveExpandedState()
 
             undo.increaseWaypointBlocking()
 
@@ -855,7 +855,7 @@ class Framework(NotifierBase):
 
             if not self.project._blockSideBar and not undo._blocked:
                 if undo._waypointBlockingLevel < 1 and self.ui and self.ui.mainWindow:
-                    self.ui.mainWindow.sideBar._restoreExpandedState()
+                    self.ui.mainWindow._newSideBar._restoreExpandedState()
 
         # if self._echoBlocking > 0:
         #   # If statement should always be True, but to avoid weird behaviour in error situations we check

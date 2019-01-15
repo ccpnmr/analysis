@@ -94,10 +94,10 @@ if __name__ == '__main__':
 
             self.setDockNestingEnabled(True)
 
-            self.sideBar = Frame(self, showBorder=True)
-            self.sideBar.setMinimumWidth(200)
-            self.sideBar.setMinimumHeight(300)
-            self.sideBarDock = DockWidget(self, title='SideBar', widget=self.sideBar, allowedAreas=['left'])
+            self._newSideBar = Frame(self, showBorder=True)
+            self._newSideBar.setMinimumWidth(200)
+            self._newSideBar.setMinimumHeight(300)
+            self.sideBarDock = DockWidget(self, title='SideBar', widget=self._newSideBar, allowedAreas=['left'])
             self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.sideBarDock)
 
             button1 = Button(self, text='hit me', callback=self.callback)

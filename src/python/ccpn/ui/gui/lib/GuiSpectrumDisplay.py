@@ -404,7 +404,7 @@ class GuiSpectrumDisplay(CcpnModule):
         theObject = data.get('theObject')
 
         if DropBase.URLS in data:
-            self.mainWindow.sideBar._processDroppedItems(data)
+            self.mainWindow._newSideBar._processDroppedItems(data)
 
         # for url in data.get('urls',[]):
         #   getLogger().debug('dropped: %s' % url)

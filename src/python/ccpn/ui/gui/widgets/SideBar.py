@@ -1480,7 +1480,7 @@ class NewSideBar(QtWidgets.QTreeWidget, SideBarHandler, Base, NotifierBase):
 
                         if isinstance(obj, Project):
                             try:
-                                obj._mainWindow.sideBar.fillSideBar(obj)
+                                obj._mainWindow._newSideBar.fillSideBar(obj)
                                 obj._mainWindow.show()
                                 QtWidgets.QApplication.setActiveWindow(obj._mainWindow)
 

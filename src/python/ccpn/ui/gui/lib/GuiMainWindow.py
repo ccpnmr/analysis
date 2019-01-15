@@ -499,11 +499,11 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         modulesMenu = self.searchMenuAction('Show/hide Modules')
         modulesMenu.clear()
 
-        moduleSize = self.sideBar.size()
+        moduleSize = self._newSideBar.size()
         visible = moduleSize.width() != 0 and moduleSize.height() != 0
         modulesMenu.addAction(Action(modulesMenu, text='Sidebar',
                                      checkable=True, checked=visible,
-                                     callback=partial(self._showSideBarModule, self.sideBar, self)))
+                                     callback=partial(self._showSideBarModule, self._newSideBar, self)))
 
         for module in self.moduleArea.ccpnModules:
             moduleSize = module.size()

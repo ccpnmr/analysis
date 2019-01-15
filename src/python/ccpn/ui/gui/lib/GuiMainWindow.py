@@ -50,7 +50,7 @@ from ccpn.ui.gui.widgets.Action import Action
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
 from ccpn.ui.gui.widgets.Menu import Menu, MenuBar
-from ccpn.ui.gui.widgets.SideBar import SideBar, NewSideBar
+from ccpn.ui.gui.widgets.SideBar import NewSideBar      #,SideBar
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 from ccpn.ui.gui.widgets.Splitter import Splitter
@@ -284,19 +284,21 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self.pythonConsole = IpythonConsole(self)
 
         # create the sidebar
-        self.sideBar = SideBar(parent=self)
         self._newSideBar = NewSideBar(parent=self)
 
-        # create temporary new sidebar for testing
-
-        self._sidebarSplitter = Splitter(horizontal=False)
-        self._sidebarSplitter.addWidget(self.sideBar)
-        self._sidebarSplitter.addWidget(self._newSideBar)
+        # self.sideBar = SideBar(parent=self)
+        #
+        # # create temporary new sidebar for testing
+        # self._sidebarSplitter = Splitter(horizontal=False)
+        # self._sidebarSplitter.addWidget(self.sideBar)
+        # self._sidebarSplitter.addWidget(self._newSideBar)
 
 
         # create a splitter to put the sidebar on the left
         self._horizontalSplitter = Splitter(horizontal=True)
-        self._horizontalSplitter.addWidget(self._sidebarSplitter)
+        # self._horizontalSplitter.addWidget(self._sidebarSplitter)
+
+        self._horizontalSplitter.addWidget(self._newSideBar)
         self._horizontalSplitter.addWidget(self.moduleArea)
         self.setCentralWidget(self._horizontalSplitter)
 

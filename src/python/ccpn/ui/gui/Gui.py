@@ -227,8 +227,8 @@ class Gui(Ui):
         project = self.application.project
 
         # mainWindow = self.application.mainWindow
-        mainWindow.sideBar.setProject(project)
-        mainWindow.sideBar.fillSideBar(project)
+        # mainWindow.sideBar.setProject(project)
+        # mainWindow.sideBar.fillSideBar(project)
 
         mainWindow._newSideBar.buildTree(project)
 

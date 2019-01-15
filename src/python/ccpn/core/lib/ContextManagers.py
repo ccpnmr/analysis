@@ -488,8 +488,8 @@ def sidebarBlocking(application=None, blockSidebarOnly=False):
         raise RuntimeError('Error getting application')
 
     if application.ui and application.ui.mainWindow:
-        sidebar = application.ui.mainWindow.sideBar
-        sidebar._saveExpandedState()
+        sidebar = application.ui.mainWindow._newSideBar
+        sidebar.increaseSidebarBlocking()
 
     try:
         # transfer control to the calling function
@@ -506,8 +506,8 @@ def sidebarBlocking(application=None, blockSidebarOnly=False):
     finally:
         # clean up after suspending sidebar updates
         if application.ui and application.ui.mainWindow:
-            sidebar = application.ui.mainWindow.sideBar
-            sidebar._restoreExpandedState()
+            sidebar = application.ui.mainWindow._newSideBar
+            sidebar.decreaseSidebarBlocking()
 
 
 @contextmanager

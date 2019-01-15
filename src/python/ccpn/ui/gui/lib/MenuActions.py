@@ -37,6 +37,9 @@ from ccpn.core.NmrChain import NmrChain
 from ccpn.core.Chain import Chain
 from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.RestraintList import RestraintList
+from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
+
+
 
 # OPEN_ITEM_DICT = {
 #     Spectrum.className         : _openSpectrumDisplay,
@@ -204,3 +207,11 @@ OpenObjAction = {
     IntegralList     : _openIntegralList,
     StructureEnsemble: _openStructureTable
     }
+
+
+def _createSpectrumGroup(mainWindow, spectra=None or []):
+    """This needs to be put into a more generic place.
+    """
+    popup = SpectrumGroupEditor(parent=mainWindow, mainWindow=mainWindow, addNew=True, spectra=spectra)
+    popup.exec_()
+    popup.raise_()

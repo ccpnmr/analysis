@@ -66,7 +66,7 @@ from ccpn.ui.gui.widgets.ToolButton import ToolButton
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import moduleLabelFont
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.SideBar import SideBar, NewSideBar
+from ccpn.ui.gui.widgets.SideBar import NewSideBar      #,SideBar
 from ccpn.ui.gui.widgets.PythonEditor import QCodeEditor
 
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame, Frame
@@ -732,7 +732,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
             ev = args[0]
             # print ('>>>', ev.source())
             data = self.parseEvent(ev)
-            if DropBase.PIDS in data and isinstance(data['event'].source(), (SideBar, NewSideBar)):
+            if DropBase.PIDS in data and isinstance(data['event'].source(), NewSideBar):      #(SideBar, NewSideBar)):
                 if self.widgetArea:
 
                     ld = ev.pos().x()

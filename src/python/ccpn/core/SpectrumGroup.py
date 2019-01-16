@@ -117,7 +117,7 @@ class SpectrumGroup(AbstractWrapperObject):
         data2Obj = self._project._data2Obj
         data = [data2Obj[x] for x in self._wrappedData.dataSources]
 
-        pids = self.getParameter(CCPNMR_PREFIX, self.SPECTRUM_ORDER)
+        pids = self._getInternalParameter(self.SPECTRUM_ORDER)
         spectra = data
         # see if we can use the pids dict to reconstruct the order
         if pids is not None:
@@ -134,7 +134,7 @@ class SpectrumGroup(AbstractWrapperObject):
         value = [getDataObj(x) if isinstance(x, str) else x for x in value]
         # store pids in order
         pids = [v.pid for v in value]
-        self.setParameter(CCPNMR_PREFIX, self.SPECTRUM_ORDER, pids)
+        self._setInternalParameter(self.SPECTRUM_ORDER, pids)
         self._wrappedData.dataSources = [x._wrappedData for x in value]
 
     #=========================================================================================

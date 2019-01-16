@@ -3,6 +3,8 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+from ccpn.framework.constants import CCPNMR_PREFIX
+
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -294,11 +296,25 @@ class AbstractWrapperObject(NotifierBase):
                 result = self._wrappedData.ccpnInternalData = {}
         return result
 
+    CCPNMR_NAMESPACE = '_ccpNmrV3internal'
+
     @_ccpnInternalData.setter
     def _ccpnInternalData(self, value):
         if not (isinstance(value, dict)):
             raise ValueError("_ccpnInternalData must be a dictionary, was %s" % value)
         self._wrappedData.ccpnInternalData = value
+
+    def _setInternalParameter(self, parameterName:str, value):
+        """Sets parameterName for CCPNINTERNAL namespace to value; value must be json seriliasable"""
+        self.setParameter(self.CCPNMR_NAMESPACE, parameterName, value)
+
+    def _getInternalParameter(self, parameterName:str):
+        """Gets parameterName for CCPNINTERNAL namespace"""
+        return self.getParameter(self.CCPNMR_NAMESPACE, parameterName)
+
+    def _hasInternalParameter(self, parameterName:str):
+        """Returns true if parameterName for CCPNINTERNAl namespace exists"""
+        return self.hasParameter(self.CCPNMR_NAMESPACE, parameterName)
 
     def setParameter(self, namespace:str, parameterName:str, value):
         """Sets parameterName for namespace to value; value must be json seriliasable"""

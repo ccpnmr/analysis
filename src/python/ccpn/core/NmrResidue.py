@@ -328,11 +328,17 @@ class NmrResidue(AbstractWrapperObject):
             log('connectNext', nmrResidue=repr(nmrResidue.pid))
 
             if apiNmrChain.isConnected:
+
                 # At this point, self must be the last NmrResidue in a connected chain
                 if apiValueNmrChain.isConnected:
                     for rg in apiValueNmrChain.mainResonanceGroups:
                         rg.moveDirectNmrChain(apiNmrChain, 'tail')
-                    apiValueNmrChain.delete()
+
+                    # apiValueNmrChain.delete()
+
+                    # need the V3 operator here for the undo/redo to fire correctly
+                    V3nmrChain = self.project._data2Obj[apiValueNmrChain]
+                    V3nmrChain.delete()
 
                 else:
                     # [connected:NmrChain] -> [Value]
@@ -349,7 +355,12 @@ class NmrResidue(AbstractWrapperObject):
                 else:
                     # [NmrChain] -> [Value]
 
-                    newApiNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
+                    # newApiNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
+                    
+                    # need the V3 operator here for the undo/redo to fire correctly
+                    newV3nmrChain = self.project.newNmrChain(isConnected=True)
+                    newApiNmrChain = newV3nmrChain._apiNmrChain
+
                     apiResonanceGroup.directNmrChain = newApiNmrChain
                     nmrResidue._wrappedData.directNmrChain = newApiNmrChain
 
@@ -468,7 +479,13 @@ class NmrResidue(AbstractWrapperObject):
                     for resonanceGroup in reversed(stretch):
                         resonanceGroup.directNmrChain = defaultChain
                     # delete empty chain
-                    apiNmrChain.delete()
+                    
+                    # apiNmrChain.delete()
+                    
+                    # need the V3 operator here for the undo/redo to fire correctly
+                    V3nmrChain = self.project._data2Obj[apiNmrChain]
+                    V3nmrChain.delete()
+
                 else:
 
                     apiResonanceGroup.moveDirectNmrChain(defaultChain, 'head')
@@ -488,7 +505,11 @@ class NmrResidue(AbstractWrapperObject):
 
             else:
                 # make new connected NmrChain with rightmost ResonanceGroups
-                newNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
+                # newNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
+
+                # need the V3 operator here for the undo/redo to fire correctly
+                newV3nmrChain = self.project.newNmrChain(isConnected=True)
+                newNmrChain = newV3nmrChain._apiNmrChain
 
                 for rg in reversed(stretch):
                     if rg is apiResonanceGroup:
@@ -586,7 +607,12 @@ class NmrResidue(AbstractWrapperObject):
                         for rg in reversed(apiValueNmrChain.mainResonanceGroups):
                             rg.moveDirectNmrChain(apiNmrChain, 'head')
 
-                        apiValueNmrChain.delete()
+                        # apiValueNmrChain.delete()
+
+                        # need the V3 operator here for the undo/redo to fire correctly
+                        V3nmrChain = self.project._data2Obj[apiValueNmrChain]
+                        V3nmrChain.delete()
+
                     else:
                         nmrResidue._wrappedData.moveDirectNmrChain(apiNmrChain, 'head')
 
@@ -603,7 +629,12 @@ class NmrResidue(AbstractWrapperObject):
                 else:
 
                     # [Value] <- [NmrChain]
-                    newApiNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
+                    # newApiNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
+
+                    # need the V3 operator here for the undo/redo to fire correctly
+                    newV3nmrChain = self.project.newNmrChain(isConnected=True)
+                    newApiNmrChain = newV3nmrChain._apiNmrChain
+
                     nmrResidue._wrappedData.directNmrChain = newApiNmrChain
                     # newApiNmrChain.__dict__['mainResonanceGroups'].reverse()
                     apiResonanceGroup.directNmrChain = newApiNmrChain
@@ -613,11 +644,11 @@ class NmrResidue(AbstractWrapperObject):
 
         return result
 
-    def _bubbleHead(self, ll):
-        ll.insert(0, ll.pop())
+    # def _bubbleHead(self, ll):
+    #     ll.insert(0, ll.pop())
 
-    def _bubbleTail(self, ll):
-        ll.append(ll.pop(0))
+    # def _bubbleTail(self, ll):
+    #     ll.append(ll.pop(0))
 
     def unlinkPreviousNmrResidue(self):
         with logCommandBlock(get='self') as log:
@@ -661,7 +692,8 @@ class NmrResidue(AbstractWrapperObject):
     def _disconnectPrevious(self):
         """Cut connected NmrChain before NmrResidue, creating new connected NmrChain if necessary
         Does nothing if previousNmrResidue is empty;
-        Raises ValueError for assigned NmrResidues"""
+        Raises ValueError for assigned NmrResidues
+        """
 
         apiResonanceGroup = self._wrappedData
         apiNmrChain = apiResonanceGroup.directNmrChain
@@ -696,6 +728,7 @@ class NmrResidue(AbstractWrapperObject):
                     # need the V3 operator here for the undo/redo to fire correctly
                     V3nmrChain = self.project._data2Obj[apiNmrChain]
                     V3nmrChain.delete()
+                    
                 else:
 
                     apiResonanceGroup.moveDirectNmrChain(defaultChain, 'tail')
@@ -718,8 +751,8 @@ class NmrResidue(AbstractWrapperObject):
                 # newNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
 
                 # need the V3 operator here for the undo/redo to fire correctly
-                newV3Chain = self.project.newNmrChain(isConnected=True)
-                newNmrChain = newV3Chain._apiNmrChain
+                newV3nmrChain = self.project.newNmrChain(isConnected=True)
+                newNmrChain = newV3nmrChain._apiNmrChain
 
                 for rg in stretch:
                     if rg is apiResonanceGroup:
@@ -810,7 +843,12 @@ class NmrResidue(AbstractWrapperObject):
                 for rg in reversed(stretch):
                     # reversed to add residues back in proper order (they are added to end)
                     rg.directNmrChain = defaultChain
-                apiNmrChain.delete()
+                    
+                # apiNmrChain.delete()
+
+                # need the V3 operator here for the undo/redo to fire correctly
+                V3nmrChain = self.project._data2Obj[apiNmrChain]
+                V3nmrChain.delete()
 
             else:
                 index = stretch.index(apiResonanceGroup)

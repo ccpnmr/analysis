@@ -45,7 +45,7 @@ import sys
 from functools import partial
 from collections import OrderedDict
 from typing import Callable, Any
-
+from itertools import permutations
 from ccpn.util.Logging import getLogger
 
 
@@ -556,6 +556,32 @@ class NotifierBase(object):
             return True
 
         return False
+
+    def searchNotifiers(self, theObject=None, triggers=None, targetName=None):
+        """Search whether a notifier with the given parameters is already in the list.
+        The triggers CREATE, DELETE, RENAME and CHANGE can be combined in the call signature
+
+        :param theObject: valid V3 core object or current object to watch
+        :param triggers: list of trigger keywords
+        :param targetName: valid className, attributeName or ANY
+        :return: None or list of existing notifiers
+        """
+        if not hasattr(self, self.NOTIFIERSDICT):
+            return None
+
+        objNotifiers = self._getObjectNotifiersDict()
+        if len(objNotifiers) == 0:
+            return None
+
+        foundNotifiers = ()
+        for notifier in objNotifiers.values():
+            if theObject is notifier._theObject and targetName == notifier._targetName:
+
+                # check if the notifier permutations match
+                if tuple(triggers) in permutations(notifier._triggers):
+                    foundNotifiers += (notifier,)
+
+        return foundNotifiers if foundNotifiers else None
 
     def deleteAllNotifiers(self):
         """Unregister all the notifiers"""

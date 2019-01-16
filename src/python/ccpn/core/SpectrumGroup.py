@@ -101,16 +101,24 @@ class SpectrumGroup(AbstractWrapperObject):
         """Parent (containing) object."""
         return self._project
 
+    #-------------------------------------------------------------------------------------------------------
+    # GWV hack to alleviate (temporarily) the loass of order on spectra
+    #-------------------------------------------------------------------------------------------------------
+
+    SPECTRUM_ORDER ='spectrum_order'
+
     @property
     def spectra(self) -> Tuple[Spectrum, ...]:
         """Spectra that make up SpectrumGroup."""
         data2Obj = self._project._data2Obj
-        return tuple(data2Obj[x] for x in self._wrappedData.dataSources)
+        return tuple(data2Obj[x] for x in self._wrappedData.getDataSources())
 
     @spectra.setter
     def spectra(self, value):
         getDataObj = self._project._data2Obj.get
         value = [getDataObj(x) if isinstance(x, str) else x for x in value]
+        pids = [v.pid for v in value]
+
         # self._wrappedData.dataSources = [x._wrappedData for x in value]
         apiSpectra = [x._wrappedData for x in value]
         self._wrappedData.setDataSources(apiSpectra)
@@ -118,6 +126,9 @@ class SpectrumGroup(AbstractWrapperObject):
     #=========================================================================================
     # Implementation functions
     #=========================================================================================
+
+    def __init__(self, project, wrappedData):
+        super().__init__(project=project, wrappedData=wrappedData)
 
     @classmethod
     def _getAllWrappedData(cls, parent: Project) -> list:
@@ -224,119 +235,128 @@ Project._apiNotifiers.extend(
          )
         )
 
-#-------------------------------------------------------------------------------------------------------
-# GWV hack to alleviate (temporarily) the loass of order on spectra
-# Hotfix api routines; UGLY!!!
-#-------------------------------------------------------------------------------------------------------
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import SpectrumGroup as _ApiSpectrumGroup
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import DataSource
-from ccpnmodel.ccpncore.memops.ApiError import ApiError
-
-
-def _setDataSources(self, values):
-    """
-    Set for ccp.nmr.Nmr.SpectrumGroup.dataSources
-    """
-    dataDict = self.__dict__
-    # xx = values
-    # values = set(values)
-    if (len(values) != len(set(values))):
-        raise ApiError("""%s.setDataSources:
-     values may not contain duplicates""" % self.qualifiedName
-                       + ": %s" % (self,)
-                       )
-
-    for value in values:
-        if (not isinstance(value, DataSource)):
-            raise ApiError("""%s.setDataSources:
-       value is not of class ccp.nmr.Nmr.DataSource""" % self.qualifiedName
-                           + ": %s" % (value,)
-                           )
-
-    topObject = dataDict.get('topObject')
-    currentValues = dataDict.get('dataSources')
-    notInConstructor = not (dataDict.get('inConstructor'))
-
-    root = topObject.__dict__.get('memopsRoot')
-    notOverride = not (root.__dict__.get('override'))
-    notIsReading = not (topObject.__dict__.get('isReading'))
-    notOverride = (notOverride and notIsReading)
-    if (notIsReading):
-        if (notInConstructor):
-            if (not (topObject.__dict__.get('isModifiable'))):
-                raise ApiError("""%s.setDataSources:
-         Storage not modifiable""" % self.qualifiedName
-                               + ": %s" % (topObject,)
-                               )
-
-    if (dataDict.get('isDeleted')):
-        raise ApiError("""%s.setDataSources:
-     called on deleted object""" % self.qualifiedName
-                       )
-
-    for obj in values:
-        if (obj.__dict__.get('isDeleted')):
-            raise ApiError("""%s.setDataSources:
-       an object in values is deleted""" % self.qualifiedName
-                           )
-
-    try:
-        if (values == currentValues):
-            return
-
-    except ValueError as ex:
-        pass
-    except TypeError as ex:
-        pass
-    if (notOverride):
-        xx1 = dataDict.get('topObject')
-        for value in values:
-            yy1 = value.__dict__.get('topObject')
-            if (not (xx1 is yy1)):
-                raise ApiError("""%s.setDataSources:
-         Link dataSources between objects from separate partitions
-          - memops.Implementation.TopObject does not match""" % self.qualifiedName
-                               + ": %s:%s" % (self, value)
-                               )
-
-    for cv in currentValues:
-        if (not (cv in values)):
-            oldSelves = cv.__dict__.get('spectrumGroups')
-            oldSelves.remove(self)
-
-    for cv in values:
-        if (not (cv in currentValues)):
-            oldSelves = cv.__dict__.get('spectrumGroups')
-            oldSelves.add(self)
-
-    dataDict['dataSources'] = values
-    if (notIsReading):
-        if (notInConstructor):
-            topObject.__dict__['isModified'] = True
-
-    # doNotifies
-
-    if ((notInConstructor and notOverride)):
-
-        _notifies = self.__class__._notifies
-
-        ll1 = _notifies['']
-        for notify in ll1:
-            notify(self)
-
-        ll = _notifies.get('setDataSources')
-        if ll:
-            for notify in ll:
-                if notify not in ll1:
-                    notify(self)
-
-    if ((notInConstructor and notIsReading)):
-        # register Undo functions
-
-        _undo = root._undo
-        if _undo is not None:
-            _undo.newItem(self.setDataSources, self.setDataSources,
-                          undoArgs=(currentValues,), redoArgs=(values,))
-
-# hotfixing
-_ApiSpectrumGroup.setDataSources = _setDataSources
+# #-------------------------------------------------------------------------------------------------------
+# # GWV hack to alleviate (temporarily) the loass of order on spectra
+# # Hotfix api routines; UGLY!!!
+# #-------------------------------------------------------------------------------------------------------
+# from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import SpectrumGroup as _ApiSpectrumGroup
+# from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import DataSource
+# from ccpnmodel.ccpncore.memops.ApiError import ApiError
+#
+#
+# def _getDataSources(self):
+#     """
+#     Get for ccp.nmr.Nmr.SpectrumGroup.dataSources
+#     """
+#     dataDict = self.__dict__
+#     return dataDict.get('dataSources')
+#
+#
+# def _setDataSources(self, values):
+#     """
+#     Set for ccp.nmr.Nmr.SpectrumGroup.dataSources
+#     """
+#     dataDict = self.__dict__
+#     # xx = values
+#     # values = set(values)
+#     if (len(values) != len(set(values))):
+#         raise ApiError("""%s.setDataSources:
+#      values may not contain duplicates""" % self.qualifiedName
+#                        + ": %s" % (self,)
+#                        )
+#
+#     for value in values:
+#         if (not isinstance(value, DataSource)):
+#             raise ApiError("""%s.setDataSources:
+#        value is not of class ccp.nmr.Nmr.DataSource""" % self.qualifiedName
+#                            + ": %s" % (value,)
+#                            )
+#
+#     topObject = dataDict.get('topObject')
+#     currentValues = dataDict.get('dataSources')
+#     notInConstructor = not (dataDict.get('inConstructor'))
+#
+#     root = topObject.__dict__.get('memopsRoot')
+#     notOverride = not (root.__dict__.get('override'))
+#     notIsReading = not (topObject.__dict__.get('isReading'))
+#     notOverride = (notOverride and notIsReading)
+#     if (notIsReading):
+#         if (notInConstructor):
+#             if (not (topObject.__dict__.get('isModifiable'))):
+#                 raise ApiError("""%s.setDataSources:
+#          Storage not modifiable""" % self.qualifiedName
+#                                + ": %s" % (topObject,)
+#                                )
+#
+#     if (dataDict.get('isDeleted')):
+#         raise ApiError("""%s.setDataSources:
+#      called on deleted object""" % self.qualifiedName
+#                        )
+#
+#     for obj in values:
+#         if (obj.__dict__.get('isDeleted')):
+#             raise ApiError("""%s.setDataSources:
+#        an object in values is deleted""" % self.qualifiedName
+#                            )
+#
+#     try:
+#         if (values == currentValues):
+#             return
+#
+#     except ValueError as ex:
+#         pass
+#     except TypeError as ex:
+#         pass
+#     if (notOverride):
+#         xx1 = dataDict.get('topObject')
+#         for value in values:
+#             yy1 = value.__dict__.get('topObject')
+#             if (not (xx1 is yy1)):
+#                 raise ApiError("""%s.setDataSources:
+#          Link dataSources between objects from separate partitions
+#           - memops.Implementation.TopObject does not match""" % self.qualifiedName
+#                                + ": %s:%s" % (self, value)
+#                                )
+#
+#     for cv in currentValues:
+#         if (not (cv in values)):
+#             oldSelves = cv.__dict__.get('spectrumGroups')
+#             oldSelves.remove(self)
+#
+#     for cv in values:
+#         if (not (cv in currentValues)):
+#             oldSelves = cv.__dict__.get('spectrumGroups')
+#             oldSelves.add(self)
+#
+#     dataDict['dataSources'] = values
+#     if (notIsReading):
+#         if (notInConstructor):
+#             topObject.__dict__['isModified'] = True
+#
+#     # doNotifies
+#
+#     if ((notInConstructor and notOverride)):
+#
+#         _notifies = self.__class__._notifies
+#
+#         ll1 = _notifies['']
+#         for notify in ll1:
+#             notify(self)
+#
+#         ll = _notifies.get('setDataSources')
+#         if ll:
+#             for notify in ll:
+#                 if notify not in ll1:
+#                     notify(self)
+#
+#     if ((notInConstructor and notIsReading)):
+#         # register Undo functions
+#
+#         _undo = root._undo
+#         if _undo is not None:
+#             _undo.newItem(self.setDataSources, self.setDataSources,
+#                           undoArgs=(currentValues,), redoArgs=(values,))
+#
+# # hotfixing
+# _ApiSpectrumGroup.getDataSources = _getDataSources
+# _ApiSpectrumGroup.setDataSources = _setDataSources

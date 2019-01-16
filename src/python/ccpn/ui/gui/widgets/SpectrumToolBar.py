@@ -39,6 +39,7 @@ from ccpn.ui._implementation.MultipletListView import MultipletListView
 from ccpn.core.PeakList import PeakList
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.MultipletList import MultipletList
+from ccpn.ui.gui.lib.GuiSpectrumView import _spectrumViewHasChanged
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 
 
@@ -459,7 +460,7 @@ class SpectrumToolBar(ToolBar):
 
             spectrumDisplay.spectrumActionDict[apiDataSource] = action
             # The following call sets the icon colours:
-            spectrumView._spectrumViewHasChanged()
+            _spectrumViewHasChanged({Notifier.OBJECT:spectrumView})
 
         # if spectrumDisplay.is1D:
         #     action.toggled.connect(spectrumView.plot.setVisible)

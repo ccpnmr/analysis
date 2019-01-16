@@ -30,7 +30,7 @@ import collections
 from ccpn.util import Colour
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.util.Logging import getLogger
-
+from ccpn.core.lib.Notifiers import Notifier
 
 #import pyqtgraph as pg
 
@@ -186,46 +186,51 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
 
         return colour
 
-    def _spectrumViewHasChanged(self):
-        """Change action icon colour and other changes when spectrumView changes
+    def refreshData(self):
 
-        NB SpectrumView change notifiers are triggered when either DataSource or ApiSpectrumView change"""
+        raise Exception('Needs to be implemented in subclass')
 
-        if self.isDeleted:
-            return
+def _spectrumViewHasChanged(data):
+    """Change action icon colour and other changes when spectrumView changes.
 
-        spectrumDisplay = self.strip.spectrumDisplay
-        apiDataSource = self.spectrum._wrappedData
+    NB SpectrumView change notifiers are triggered when either DataSource or ApiSpectrumView change.
+    """
+    self = data[Notifier.OBJECT]
 
-        # Update action icol colour
-        action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
-        if action:
-            pix = QtGui.QPixmap(QtCore.QSize(60, 10))
-            if spectrumDisplay.is1D:
-                pix.fill(QtGui.QColor(self.sliceColour))
-            else:
-                pix.fill(QtGui.QColor(self.positiveContourColour))
-            action.setIcon(QtGui.QIcon(pix))
+    if self.isDeleted:
+        return
 
-        # Update strip
-        self.strip.update()
+    spectrumDisplay = self.strip.spectrumDisplay
+    apiDataSource = self.spectrum._wrappedData
 
-    def _createdSpectrumView(self, index=None):
-        """Set up SpectrumDisplay when new StripSpectrumView is created - for notifiers.
-        This function adds the spectra buttons to the spectrumToolBar."""
+    # Update action icol colour
+    action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
+    if action:
+        pix = QtGui.QPixmap(QtCore.QSize(60, 10))
+        if spectrumDisplay.is1D:
+            pix.fill(QtGui.QColor(self.sliceColour))
+        else:
+            pix.fill(QtGui.QColor(self.positiveContourColour))
+        action.setIcon(QtGui.QIcon(pix))
 
-        # NBNB TBD FIXME get rid of API objects
+    # Update strip
+    self.strip.update()
 
-        spectrumDisplay = self.strip.spectrumDisplay
-        spectrum = self.spectrum
+def _createdSpectrumView(data):
+    """Set up SpectrumDisplay when new StripSpectrumView is created - for notifiers.
+    This function adds the spectra buttons to the spectrumToolBar.
+    """
+    self = data[Notifier.OBJECT]
 
-        # Set Z widgets for nD strips
-        strip = self.strip
-        if not spectrumDisplay.is1D:
-            if not strip.haveSetupZWidgets:
-                strip._setZWidgets()
+    spectrumDisplay = self.strip.spectrumDisplay
 
-        spectrumDisplay.spectrumToolBar._addSpectrumViewToolButtons(self)
+    # Set Z widgets for nD strips
+    strip = self.strip
+    if not spectrumDisplay.is1D:
+        if not strip.haveSetupZWidgets:
+            strip._setZWidgets()
+
+    spectrumDisplay.spectrumToolBar._addSpectrumViewToolButtons(self)
 
         # # TODO:ED check here - used to catch undelete of spectrumView
         # if self.strip.plotWidget:
@@ -245,6 +250,3 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
     #         if hasattr(self, 'plot'):  # 1d
     #             scene.removeItem(self.plot)
 
-    def refreshData(self):
-
-        raise Exception('Needs to be implemented in subclass')

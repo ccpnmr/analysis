@@ -1496,7 +1496,10 @@ class GuiSpectrumDisplay(CcpnModule):
 #         spectrumView.strip.spectrumDisplay._deletedPeak(peak)
 
 
-def _spectrumHasChanged(spectrum: Spectrum):
+def _spectrumHasChanged(data):
+
+    spectrum = data[Notifier.OBJECT]
+
     project = spectrum.project
     apiDataSource = spectrum._wrappedData
     for spectrumDisplay in project.spectrumDisplays:

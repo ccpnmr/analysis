@@ -131,7 +131,7 @@ class NmrResidue(AbstractWrapperObject):
         """Attibute used to sort objects.
 
         Normally this is set on __init__  (for speed) and reset by self._resetIds
-        (which is caleld by teh rename finlaiser and by resetSerial).
+        (which is called by the rename finaliser and by resetSerial).
          But NmrResidue sorting order changes cynamically depending on
          what other NmrResidues are iN the same NmrChain. So for this class
          we need to set it dynamically, as a property"""
@@ -852,7 +852,6 @@ class NmrResidue(AbstractWrapperObject):
 
             else:
                 index = stretch.index(apiResonanceGroup)
-                print('>>DISCONNECT', index)
                 data2Obj = self._project._data2Obj
 
                 # NB operations are carefully selected to make sure they undo correctly

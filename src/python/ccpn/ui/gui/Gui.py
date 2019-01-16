@@ -108,16 +108,21 @@ class Gui(Ui):
         # self._currentIntegralNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'integrals', GuiStrip._updateSelectedIntegrals)
         # self._currentMultipletNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'multiplets', GuiStrip._updateSelectedMultiplets)
 
-        from ccpn.ui.gui.lib import GuiSpectrumDisplay
+        from ccpn.ui.gui.lib.GuiSpectrumDisplay import _spectrumHasChanged, _deletedSpectrumView
 
         # project.registerNotifier('Peak', 'delete', GuiSpectrumDisplay._deletedPeak)
-        project.registerNotifier('Spectrum', 'change', GuiSpectrumDisplay._spectrumHasChanged)
 
-        from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
+        # project.registerNotifier('Spectrum', 'change', GuiSpectrumDisplay._spectrumHasChanged)
+        self.setNotifier(project, [Notifier.CHANGE], 'Spectrum', _spectrumHasChanged)
+
+        from ccpn.ui.gui.lib.GuiSpectrumView import _createdSpectrumView, _spectrumViewHasChanged
 
         # project.registerNotifier('SpectrumView', 'delete', GuiSpectrumView._deletedSpectrumView)
-        project.registerNotifier('SpectrumView', 'create', GuiSpectrumView._createdSpectrumView)
-        project.registerNotifier('SpectrumView', 'change', GuiSpectrumView._spectrumViewHasChanged)
+
+        # project.registerNotifier('SpectrumView', 'create', GuiSpectrumView._createdSpectrumView)
+        # project.registerNotifier('SpectrumView', 'change', GuiSpectrumView._spectrumViewHasChanged)
+        self.setNotifier(project, [Notifier.CREATE], 'SpectrumView', _createdSpectrumView)
+        self.setNotifier(project, [Notifier.CHANGE], 'SpectrumView', _spectrumViewHasChanged)
 
         from ccpn.ui.gui.lib import GuiPeakListView
 
@@ -183,7 +188,7 @@ class Gui(Ui):
         # project._registerApiNotifier(GuiStrip._rulerDeleted, 'ccpnmr.gui.Task.Ruler', 'preDelete')
         project._registerApiNotifier(GuiStrip._setupGuiStrip, 'ccpnmr.gui.Task.Strip', 'postInit')
 
-        project._registerApiNotifier(GuiSpectrumDisplay._deletedSpectrumView,
+        project._registerApiNotifier(_deletedSpectrumView,
                                      'ccpnmr.gui.Task.SpectrumView', 'preDelete')
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

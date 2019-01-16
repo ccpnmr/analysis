@@ -39,7 +39,7 @@ from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Project import Project
 from ccpn.core._implementation import Io as coreIo
 from ccpn.core.lib import CcpnNefIo, CcpnSparkyIo
-from ccpn.core.lib.Notifiers import NotifierBase
+from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.framework import Version
 from ccpn.framework.Current import Current
@@ -53,6 +53,7 @@ from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
+from ccpn.ui.gui.lib.GuiSpectrumView import _createdSpectrumView, _spectrumViewHasChanged
 from ccpn.util import Logging
 from ccpn.util import Path
 from ccpn.util import Register
@@ -736,7 +737,7 @@ class Framework(NotifierBase):
                 # for iSV, spectrumView in enumerate(strip.orderedSpectrumViews(includeDeleted=False)):
 
                 for iSV, spectrumView in enumerate(spectrumDisplay.orderedSpectrumViews(specViews)):
-                    spectrumView._createdSpectrumView(iSV)
+                    _createdSpectrumView({Notifier.OBJECT:spectrumView})
                     # for peakList in spectrumView.spectrum.peakLists:
                     #     strip.showPeaks(peakList)
 

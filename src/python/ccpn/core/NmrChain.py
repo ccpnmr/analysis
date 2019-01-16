@@ -229,7 +229,12 @@ class NmrChain(AbstractWrapperObject):
             tempChain = self.project.fetchNmrChain(firstResidue.chain.shortName)
             for ii, res in enumerate(residues):
                 apiStretch[ii].assignedResidue = res._wrappedData
-            apiNmrChain.delete()
+
+            # apiNmrChain.delete()
+
+            # need the V3 operator here for the undo/redo to fire correctly
+            V3nmrChain = self.project._data2Obj[apiNmrChain]
+            V3nmrChain.delete()
 
     def reverse(self, _force=False):
         """Reverse order of NmrResidues within NmrChain

@@ -1322,7 +1322,8 @@ class NewSideBar(QtWidgets.QTreeWidget, SideBarHandler, Base, NotifierBase):
     def buildTree(self, project):
         """Build the new tree structure from the project.
         """
-        self._clearQTreeWidget(self)
+        # self._clearQTreeWidget(self)
+        self.clearSideBar()
         self.project = project
         self.setSidebar(sidebar=self)
         super().buildTree(project)
@@ -1480,7 +1481,8 @@ class NewSideBar(QtWidgets.QTreeWidget, SideBarHandler, Base, NotifierBase):
 
                         if isinstance(obj, Project):
                             try:
-                                obj._mainWindow._newSideBar.fillSideBar(obj)
+                                # obj._mainWindow._newSideBar.fillSideBar(obj)
+                                obj._mainWindow._newSideBar.buildTree(obj)
                                 obj._mainWindow.show()
                                 QtWidgets.QApplication.setActiveWindow(obj._mainWindow)
 

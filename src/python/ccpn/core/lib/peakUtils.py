@@ -26,7 +26,7 @@ import numpy as np
 from ccpn.util.Logging import getLogger
 from collections import OrderedDict
 from scipy.optimize import curve_fit
-
+from collections import OrderedDict
 
 POSITIONS = 'positions'
 HEIGHT = 'height'
@@ -308,7 +308,29 @@ def __filterPeaksBySelectedNmrAtomOption(nmrResidue, nmrAtomsNames, spectra):
                 if len(nmrAtomsNames) == 1:
                     if nmrAtomsNames[0] in assignedNmrAtoms:
                         peaks += [peak]
-    return peaks
+    return list(OrderedDict.fromkeys(peaks))
+
+
+def getNmrResiduePeakHeight(nmrResidue, nmrAtomsNames, spectra):
+    '''
+
+    :param nmrResidue:
+    :param nmrAtomsNames: nmr Atoms to compare. str 'H', 'N', 'CA' etc
+    :param spectra: compare peaks only from given spectra
+    :return:
+    '''
+
+    heights = []
+
+    if len(spectra) <= 1:
+        return
+    peaks = __filterPeaksBySelectedNmrAtomOption(nmrResidue, nmrAtomsNames, spectra)
+    if len(peaks) > 0:
+        for peak in peaks:
+            if peak.peakList.spectrum in spectra:
+                heights.append(peak.height)
+    return heights
+
 
 
 def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atomWeights=None):
@@ -347,11 +369,11 @@ def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atom
                             deltas += [delta]
 
                     if mode == VOLUME:
-                        delta1Atoms = (peak.volume - list(peaks)[0].volume)
+                        delta1Atoms = (peak.volume / list(peaks)[0].volume)
                         deltas += [((delta1Atoms) ** 2) ** 0.5, ]
 
                     if mode == HEIGHT:
-                        delta1Atoms = (peak.height - list(peaks)[0].height)
+                        delta1Atoms = (peak.height / list(peaks)[0].height)
                         deltas += [((delta1Atoms) ** 2) ** 0.5, ]
 
                     if mode == LINEWIDTHS:

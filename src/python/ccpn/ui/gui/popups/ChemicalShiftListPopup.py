@@ -103,8 +103,11 @@ class ChemicalShiftListPopup(CcpnDialog):
                     self.chemicalShiftList.rename(newName)
                 self._addSpectraToCSList()
             self.accept()
+
         except Exception as es:
             showWarning(self.windowTitle(), str(es))
+            if self.application._isInDebugMode:
+                raise es
 
 
 if __name__ == '__main__':

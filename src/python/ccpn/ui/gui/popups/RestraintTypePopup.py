@@ -93,8 +93,11 @@ class RestraintTypePopup(CcpnDialog):
                 self._setRestraintType()
 
                 applyAccept = True
+
             except Exception as es:
                 showWarning(str(self.windowTitle()), str(es))
+                if self.application._isInDebugMode:
+                    raise es
 
         if applyAccept is False:
             # should only undo if something new has been added to the undo deque

@@ -26,16 +26,21 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from typing import Tuple
 from functools import partial
+
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
+from ccpn.framework.constants import CCPNMR_PREFIX
+
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import SpectrumGroup as ApiSpectrumGroup
+
 from ccpnmodel.ccpncore.lib import Util as coreUtil
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
     logCommandBlock, undoStackBlocking, renameObject
+
 from ccpn.util.Logging import getLogger
 
 
@@ -105,23 +110,32 @@ class SpectrumGroup(AbstractWrapperObject):
     # GWV hack to alleviate (temporarily) the loass of order on spectra
     #-------------------------------------------------------------------------------------------------------
 
-    SPECTRUM_ORDER ='spectrum_order'
-
+    SPECTRUM_ORDER = 'spectrum_order'
     @property
     def spectra(self) -> Tuple[Spectrum, ...]:
         """Spectra that make up SpectrumGroup."""
         data2Obj = self._project._data2Obj
-        return tuple(data2Obj[x] for x in self._wrappedData.getDataSources())
+        data = [data2Obj[x] for x in self._wrappedData.dataSources]
+
+        pids = self.getParameter(CCPNMR_PREFIX, self.SPECTRUM_ORDER)
+        spectra = data
+        # see if we can use the pids dict to reconstruct the order
+        if pids is not None:
+            dataDict = dict([(s.pid, s) for s in data])
+            spectra = [dataDict[p] for p in pids if p in dataDict]
+            if len(spectra) != len(data):
+                # we failed
+                spectra = data
+        return tuple(spectra)
 
     @spectra.setter
     def spectra(self, value):
         getDataObj = self._project._data2Obj.get
         value = [getDataObj(x) if isinstance(x, str) else x for x in value]
+        # store pids in order
         pids = [v.pid for v in value]
-
-        # self._wrappedData.dataSources = [x._wrappedData for x in value]
-        apiSpectra = [x._wrappedData for x in value]
-        self._wrappedData.setDataSources(apiSpectra)
+        self.setParameter(CCPNMR_PREFIX, self.SPECTRUM_ORDER, pids)
+        self._wrappedData.dataSources = [x._wrappedData for x in value]
 
     #=========================================================================================
     # Implementation functions

@@ -37,7 +37,7 @@ from ccpn.util import Common as commonUtil
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.memops import Implementation as ApiImplementation
 from ccpn.util.Logging import getLogger
-from ccpn.core.lib.ContextManagers import deleteObject
+from ccpn.core.lib.ContextManagers import deleteObject, notificationBlanking
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 
 
@@ -290,7 +290,8 @@ class AbstractWrapperObject(NotifierBase):
         trampling by other code"""
         result = self._wrappedData.ccpnInternalData
         if result is None:
-            result = self._wrappedData.ccpnInternalData = {}
+            with notificationBlanking():
+                result = self._wrappedData.ccpnInternalData = {}
         return result
 
     @_ccpnInternalData.setter
@@ -302,7 +303,7 @@ class AbstractWrapperObject(NotifierBase):
     def setParameter(self, namespace:str, parameterName:str, value):
         """Sets parameterName for namespace to value; value must be json seriliasable"""
         data = self._ccpnInternalData
-        space = data.getdefault(namespace, {})
+        space = data.setdefault(namespace, {})
         space[parameterName] = value
 
     def getParameter(self, namespace:str, parameterName:str):

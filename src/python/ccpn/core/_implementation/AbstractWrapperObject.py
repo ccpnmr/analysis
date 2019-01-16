@@ -299,6 +299,28 @@ class AbstractWrapperObject(NotifierBase):
             raise ValueError("_ccpnInternalData must be a dictionary, was %s" % value)
         self._wrappedData.ccpnInternalData = value
 
+    def setParameter(self, namespace:str, parameterName:str, value):
+        """Sets parameterName for namespace to value; value must be json seriliasable"""
+        data = self._ccpnInternalData
+        space = data.getdefault(namespace, {})
+        space[parameterName] = value
+
+    def getParameter(self, namespace:str, parameterName:str):
+        """Returns value of parameterName for namespace; returns None if not present"""
+        data = self._ccpnInternalData
+        space = data.get(namespace)
+        if space is None:
+            return None
+        return space.get(parameterName)
+
+    def hasParameter(self, namespace:str, parameterName:str):
+        """Returns true if parameterName for namespace exists"""
+        data = self._ccpnInternalData
+        space = data.get(namespace)
+        if space is None:
+            return False
+        return parameterName in space
+
     #=========================================================================================
     # CCPN abstract properties
     #=========================================================================================

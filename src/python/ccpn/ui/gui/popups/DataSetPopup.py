@@ -58,8 +58,11 @@ class DataSetPopup(CcpnDialog):
             if str(newName) != self.dataSet.title:
                 self.dataSet.title = newName
             self.accept()
+
         except Exception as es:
             showWarning(self.windowTitle(), str(es))
+            if self.application._isInDebugMode:
+                raise es
 
     def _repopulate(self):
         self.dataSetText.setText(self.dataSet.title)
@@ -86,8 +89,11 @@ class DataSetPopup(CcpnDialog):
                     self.dataSet.title = newName
 
                 applyAccept = True
+
             except Exception as es:
                 showWarning(str(self.windowTitle()), str(es))
+                if self.application._isInDebugMode:
+                    raise es
 
         if applyAccept is False:
             # should only undo if something new has been added to the undo deque

@@ -86,7 +86,7 @@ class SpectrumGroupEditor(CcpnDialog):
 
     def _setLeftWidgets(self):
         self.selectInitialRadioButtons = RadioButtons(self, texts=['New', 'From Current SGs'],
-                                                      selectedInd=1,
+                                                      selectedInd=0,
                                                       callback=self._initialOptionsCallBack,
                                                       direction='h',
                                                       tipTexts=None, gridSpan=(1, 2))
@@ -104,6 +104,8 @@ class SpectrumGroupEditor(CcpnDialog):
 
         self.spectrumGroupListWidgetLeft = ListWidget(self)
         self.spectrumGroupListWidgetLeft.setAcceptDrops(True)
+
+        # self._initialOptionsCallBack()
 
     def _setRightWidgets(self):
         self.rightSelectionLabel = Label(self, 'Select Spectra from')
@@ -392,8 +394,11 @@ class SpectrumGroupEditor(CcpnDialog):
                     self._updateRightSGspectra(rightWidgetSpectra)
 
                 applyAccept = True
+
             except Exception as es:
                 showWarning(str(self.windowTitle()), str(es))
+                if self.application._isInDebugMode:
+                    raise es
 
         if applyAccept is False:
             # should only undo if something new has been added to the undo deque
@@ -428,8 +433,7 @@ class SpectrumGroupEditor(CcpnDialog):
     def _applyToNewSG(self, leftWidgetSpectra):
         name = str(self.leftSpectrumGroupLineEdit.text())
         if name:
-            self.spectrumGroup = self.project.newSpectrumGroup(name)
-            self.spectrumGroup.spectra = list(set(leftWidgetSpectra))
+            self.spectrumGroup = self.project.newSpectrumGroup(name, list(leftWidgetSpectra))
             self.addNewSpectrumGroup = False
             self.selectInitialRadioButtons.hide()
             self.leftSpectrumGroupsLabel.setText('Current')

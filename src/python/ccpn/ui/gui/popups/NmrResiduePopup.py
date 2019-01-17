@@ -123,6 +123,9 @@ class NmrResiduePopup(CcpnDialog):
 
         except Exception as es:
             showWarning(str(self.windowTitle()), str(es))
+            if self.application._isInDebugMode:
+                raise es
+
             error = True
 
         finally:

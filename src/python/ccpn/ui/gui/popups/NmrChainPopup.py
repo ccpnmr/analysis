@@ -60,3 +60,5 @@ class NmrChainPopup(CcpnDialog):
             self.accept()
         except Exception as es:
             showWarning(self.windowTitle(), str(es))
+            if self.application._isInDebugMode:
+                raise es

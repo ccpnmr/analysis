@@ -62,5 +62,8 @@ class StructurePopup(CcpnDialog):
             if str(newName) != self.structure.name:
                 self.structure.rename(newName)
             self.accept()
+
         except Exception as es:
             showWarning(self.windowTitle(), str(es))
+            if self.application._isInDebugMode:
+                raise es

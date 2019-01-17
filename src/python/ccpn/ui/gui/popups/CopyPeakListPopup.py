@@ -87,9 +87,13 @@ class CopyPeakListPopup(CcpnDialog):
             try:
                 if self.targetSpectrum is not None:
                     self.sourcePeakList.copyTo(self.targetSpectrum)
+
             except Exception as es:
                 getLogger().warning('Error copying peakList: %s' % str(es))
                 showWarning(str(self.windowTitle()), str(es))
+                if self.application._isInDebugMode:
+                    raise es
+
 
     def _populateSourcePeakListPullDown(self):
         sourcePullDownData = []

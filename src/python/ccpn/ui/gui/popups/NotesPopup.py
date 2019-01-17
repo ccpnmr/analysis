@@ -64,7 +64,10 @@ class NotesPopup(CcpnDialog):
             try:
                 self.note.rename(newName)  # rename covers the undo event
                 self.accept()
-            except Exception as e:
-                showWarning('Notes', str(e))
+
+            except Exception as es:
+                showWarning('Notes', str(es))
+                if self.application._isInDebugMode:
+                    raise es
         else:
             self.accept()  # no change so accept and exit

@@ -384,12 +384,15 @@ class EditSampleComponentPopup(CcpnDialog):
                 self.labellingPulldownList.setEnabled(False)
 
                 applyAccept = True
+
             except Exception as es:
                 if 'pre-existing object' in str(es):
                     # this catches api trying to duplicate object
                     applyAccept = True
                 else:
                     showWarning(str(self.windowTitle()), str(es))
+                    if self.application._isInDebugMode:
+                        raise es
 
         if applyAccept is False:
             # should only undo if something new has been added to the undo deque

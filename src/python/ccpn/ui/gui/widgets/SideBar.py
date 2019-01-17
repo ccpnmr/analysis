@@ -1293,7 +1293,7 @@ class SideBarStructure(object):
 #===========================================================================================================
 
 
-class NewSideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
+class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
     """
     New sideBar class with new sidebar tree handling
     """
@@ -1406,7 +1406,7 @@ class NewSideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
             event.setDropAction(QtCore.Qt.CopyAction)
             event.accept()
         else:
-            if isinstance(event.source(), NewSideBar):  #(SideBar, NewSideBar)):
+            if isinstance(event.source(), SideBar):  #(SideBar, SideBar)):
                 # disable/ignore internal move events
                 event.ignore()
             else:

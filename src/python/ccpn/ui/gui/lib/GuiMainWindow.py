@@ -50,7 +50,7 @@ from ccpn.ui.gui.widgets.Action import Action
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
 from ccpn.ui.gui.widgets.Menu import Menu, MenuBar
-from ccpn.ui.gui.widgets.SideBar import NewSideBar      #,SideBar
+from ccpn.ui.gui.widgets.SideBar import SideBar      #,SideBar
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 from ccpn.ui.gui.widgets.Splitter import Splitter
@@ -284,7 +284,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self.pythonConsole = IpythonConsole(self)
 
         # create the sidebar
-        self._newSideBar = NewSideBar(parent=self)
+        self._newSideBar = SideBar(parent=self)
 
         # self.sideBar = SideBar(parent=self)
         #

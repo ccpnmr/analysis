@@ -51,7 +51,7 @@ from ccpn.util.Logging import getLogger
 
 logger = getLogger()
 
-DEBUG = False
+DEBUG = True
 
 
 def skip(*args, **kwargs):

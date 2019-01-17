@@ -213,25 +213,9 @@ class Gui(Ui):
 
         self.qtApp.start()
 
-    def _trialCounter(self, apath=userPreferencesPath, days=1):
-        """
-
-        :param path: a file which was created when the program was downloaded or started for the first time
-        :param days: days of trial
-        :return: days left
-        """
-        import datetime
-        import os
-
-        today = datetime.datetime.today()
-        modified_date = datetime.datetime.fromtimestamp(os.path.getmtime(apath))
-        duration = today - modified_date
-        return days - duration.days
-
-
     def _registerDetails(self):
         """Display registration popup"""
-        days = self._trialCounter()
+        days = Register._trialCounter()
         # check valid internet connection first
         if not Register.checkInternetConnection():
             msg = 'Could not connect to the registration server, please check your internet connection. ' \

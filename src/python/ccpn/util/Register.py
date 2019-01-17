@@ -30,11 +30,11 @@ import hashlib
 import os
 import sys
 import uuid
-
+import datetime
 from ccpn.util import Logging
 from ccpn.util import Url
 
-from ccpn.framework.PathsAndUrls import ccpn2Url
+from ccpn.framework.PathsAndUrls import ccpn2Url, userPreferencesDirectory
 
 
 userAttributes = ('name', 'organisation', 'email')
@@ -155,3 +155,16 @@ def checkInternetConnection():
 
     except:
         return False
+
+def _trialCounter(apath=userPreferencesDirectory, days=0):
+    """
+
+    :param path: a file which was created when the program was downloaded or started for the first time
+    :param days: days of trial
+    :return: days left
+    """
+
+    today = datetime.datetime.today()
+    modified_date = datetime.datetime.fromtimestamp(os.path.getmtime(apath))
+    duration = today - modified_date
+    return days - duration.days

@@ -94,7 +94,7 @@ class Ui(NotifierBase):
 
 
             if not self._isRegistered:
-                days = self._trialCounter()
+                days = Register._trialCounter()
                 if days > 0:
                     sys.stderr.write('\n### Please register within %s day(s)\n' %days)
                     return True

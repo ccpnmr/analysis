@@ -744,7 +744,7 @@ class Framework(NotifierBase):
             # some of the strips may not be instantiated at this point
             # resize the stripFrame to the spectrumDisplay - ready for first resize event
             spectrumDisplay.stripFrame.resize(spectrumDisplay.width() - 2, spectrumDisplay.stripFrame.height())
-            spectrumDisplay.showAxes()
+            spectrumDisplay.showAxes(widths=False)
 
         #~~~~~~~~~~~~~~~~
         #

@@ -53,10 +53,11 @@ validEmailRegex = re.compile(r'^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-_]+\.)+[A-Za-z]{
 
 # class RegisterPopup(QtWidgets.QDialog):
 class RegisterPopup(CcpnDialog):
-    def __init__(self, parent=None, version='3', title='Register with CCPN', modal=False, **kwds):
+    def __init__(self, parent=None, trial=None,  version='3', title='Register with CCPN', modal=False, **kwds):
         CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
         self.version = version
+        self.trial = trial or 0
 
         if modal:  # Set before visible
             modality = QtCore.Qt.ApplicationModal
@@ -99,8 +100,12 @@ This needs to be done once on every computer you use the programme on.
 
         buttonFrame = Frame(frame, setLayout=True, grid=(row, 0), gridSpan=(1, 2))
         ##self.licenseButton = Button(buttonFrame, 'Show License', callback=self.toggleLicense, grid=(0,0))
+        txt = 'Later (%s day(s) left)'%self.trial
+        self.laterButton = Button(buttonFrame, txt, callback=self.reject, grid=(0,0))
         self.registerButton = Button(buttonFrame, 'Register', callback=self._register, grid=(0, 1))
         self.registerButton.setEnabled(False)
+        if self.trial < 1:
+            self.laterButton.setEnabled(False)
         row += 1
 
         ##self.licensePanel = WebViewPanel(frame, url=licenseUrl, grid=(row,0), gridSpan=(1,2))
@@ -135,6 +140,7 @@ This needs to be done once on every computer you use the programme on.
     #     self.licensePanel.show()
     #     self.resize(700,700)
     #     self.licenseButton.setText('Hide License')
+
 
     def _register(self):
 

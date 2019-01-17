@@ -92,9 +92,15 @@ class Ui(NotifierBase):
             # call the subclassed register method
             self._registerDetails()
 
+
             if not self._isRegistered:
-                sys.stderr.write('\n### INVALID REGISTRATION, terminating\n')
-                return False
+                days = self._trialCounter()
+                if days > 0:
+                    sys.stderr.write('\n### Please register within %s day(s)\n' %days)
+                    return True
+                else:
+                    sys.stderr.write('\n### INVALID REGISTRATION, terminating\n')
+                    return False
 
         #     # sys.stderr.write('==> Registered to: %s (%s)\n' %
         #     #                  (self.application._registrationDict.get('name'),

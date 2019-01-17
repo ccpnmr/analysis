@@ -40,6 +40,7 @@ from ccpn.ui.gui.widgets.Application import Application
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.MessageDialog import showError
 # This import initializes relative paths for QT style-sheets.  Do not remove!
+from ccpn.framework.PathsAndUrls import userPreferencesPath
 
 from ccpn.util import Logging
 from ccpn.util import Register
@@ -212,16 +213,33 @@ class Gui(Ui):
 
         self.qtApp.start()
 
+    def _trialCounter(self, apath=userPreferencesPath, days=1):
+        """
+
+        :param path: a file which was created when the program was downloaded or started for the first time
+        :param days: days of trial
+        :return: days left
+        """
+        import datetime
+        import os
+
+        today = datetime.datetime.today()
+        modified_date = datetime.datetime.fromtimestamp(os.path.getmtime(apath))
+        duration = today - modified_date
+        return days - duration.days
+
+
     def _registerDetails(self):
         """Display registration popup"""
-
+        days = self._trialCounter()
         # check valid internet connection first
         if not Register.checkInternetConnection():
-            showError('Registration', 'Could not connect to the registration server, please check your internet connection.')
-            sys.exit(0)
+            msg = 'Could not connect to the registration server, please check your internet connection. ' \
+                  'Register within %s day(s) to continue using the software' %str(days)
+            showError('Registration', msg )
 
         else:
-            popup = RegisterPopup(self.mainWindow, version=self.application.applicationVersion, modal=True)
+            popup = RegisterPopup(self.mainWindow,trial=days, version=self.application.applicationVersion, modal=True)
             self.mainWindow.show()
             popup.exec_()
             self.qtApp.processEvents()

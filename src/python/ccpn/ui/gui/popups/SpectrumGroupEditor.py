@@ -49,10 +49,7 @@ class _LeftListWidget(ListWidget):
     def dropEvent(self, event):
         data = self.parseEvent(event)
         super().dropEvent(event=event)
-
         self.parent()._removeFromRight()
-
-        pass
 
 class _RightListWidget(ListWidget):
     """Subclassed for dropEvent"""
@@ -63,10 +60,7 @@ class _RightListWidget(ListWidget):
     def dropEvent(self, event):
         data = self.parseEvent(event)
         super().dropEvent(event=event)
-
         self.parent()._removeFromLeft()
-
-        pass
 
 
 class SpectrumGroupEditor(CcpnDialog):

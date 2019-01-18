@@ -33,6 +33,7 @@ import uuid
 import datetime
 from ccpn.util import Logging
 from ccpn.util import Url
+import json
 
 from ccpn.framework.PathsAndUrls import ccpn2Url, userPreferencesDirectory
 
@@ -156,15 +157,33 @@ def checkInternetConnection():
     except:
         return False
 
-def _trialCounter(apath=userPreferencesDirectory, days=0):
+def _fetchGraceFile(application):
+    """
+    :return: grace filepath used as time stamp
+    """
+    msg = 'If you are modifying this file means you are a computer savvy! Please register and contribute to the project.'
+    v = application.applicationVersion
+    f = 'grace.json'
+    path = os.path.join(userPreferencesDirectory,v+f)
+    if not os.path.exists(path):
+        file = open(path, "w")
+        json.dump(msg, file)
+        file.close()
+        return path
+    else:
+        return path
+
+
+
+def _graceCounter(apath, d=5):
     """
 
-    :param path: a file which was created when the program was downloaded or started for the first time
-    :param days: days of trial
+    :param path: a file which was created when the program (version) was started for the first time
+    :param d: days of grace
     :return: days left
     """
 
     today = datetime.datetime.today()
     modified_date = datetime.datetime.fromtimestamp(os.path.getmtime(apath))
     duration = today - modified_date
-    return days - duration.days
+    return d - duration.days

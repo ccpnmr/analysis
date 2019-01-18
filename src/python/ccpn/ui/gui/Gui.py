@@ -215,7 +215,7 @@ class Gui(Ui):
 
     def _registerDetails(self):
         """Display registration popup"""
-        days = Register._trialCounter()
+        days = Register._graceCounter(Register._fetchGraceFile(self.application))
         # check valid internet connection first
         if not Register.checkInternetConnection():
             msg = 'Could not connect to the registration server, please check your internet connection. ' \

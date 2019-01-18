@@ -88,13 +88,10 @@ class Ui(NotifierBase):
         # sys.stderr.write('==> Checking registration ... \n')
         sys.stderr.flush()  # It seems to be necessary as without the output comes after the registration screen
         if not self._isRegistered:
-
             # call the subclassed register method
             self._registerDetails()
-
-
             if not self._isRegistered:
-                days = Register._trialCounter()
+                days = Register._graceCounter(Register._fetchGraceFile(self.application))
                 if days > 0:
                     sys.stderr.write('\n### Please register within %s day(s)\n' %days)
                     return True

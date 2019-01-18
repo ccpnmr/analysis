@@ -53,11 +53,11 @@ validEmailRegex = re.compile(r'^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-_]+\.)+[A-Za-z]{
 
 # class RegisterPopup(QtWidgets.QDialog):
 class RegisterPopup(CcpnDialog):
-    def __init__(self, parent=None, trial=None,  version='3', title='Register with CCPN', modal=False, **kwds):
+    def __init__(self, parent=None, trial:int=0,  version='3', title='Register with CCPN', modal=False, **kwds):
         CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
         self.version = version
-        self.trial = trial or 0
+        self.trial = trial
 
         if modal:  # Set before visible
             modality = QtCore.Qt.ApplicationModal

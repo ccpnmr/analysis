@@ -82,12 +82,16 @@ class SpectrumGroupEditor(CcpnDialog):
                  **kwds):
         """
         Initialise the widget
-        Use in three situations:
+
+        Used in three situations:
         - For creating new SpectrumGroup (mode = 0); optionally uses passed in spectra list
+          i.e. New SpectrumGroup of SideBar and Context menu of SideBar
         - For editing existing SpectrumGroup (mode = 1); requires spectrumGroup argument
+          i.e. Edit of SpectrumGroup of SideBar
         - For selecting and editing SpectrumGroup (mode = 2)
+          i.e. Menu Spectrum->Edit SpectrumGroup...
         """
-        CcpnDialog.__init__(self, parent=parent, setLayout=False, **kwds)
+        CcpnDialog.__init__(self, parent=parent, setLayout=False, margins=(10,10,10,10), **kwds)
 
         if (spectrumGroup is None or addNew == True) and editorMode == False:
             self.mode = self.MODE_NEW
@@ -115,7 +119,7 @@ class SpectrumGroupEditor(CcpnDialog):
         # self.editorMode = editorMode
         self._spectra = spectra  #open popup with these spectra already selected. Ready to create the group.
 
-        self._setMainLayout()
+        self._setMainLayout()  # GWV: Passing directly into init constructor does not give the same result??
         self._setLeftWidgets()
         self._setRightWidgets()
         self._setApplyButtons()
@@ -132,11 +136,8 @@ class SpectrumGroupEditor(CcpnDialog):
     def _updateLeft(self):
         """Update Left
         """
-        # Left side
         if self.mode == self.MODE_NEW or self.mode == self.MODE_SELECT_EDIT:
             self.leftTopLabel.setText('Target')
-
-
 
             # radio buttons and pulldown
             self.leftRadioButtons.show()
@@ -174,7 +175,6 @@ class SpectrumGroupEditor(CcpnDialog):
     def _updateRight(self):
         """Update Right
         """
-        # right side
         selected = self.rightRadioButtons.get()
         if selected == self.BUTTON_ALL:
             self.rightPullDown.hide()
@@ -187,9 +187,9 @@ class SpectrumGroupEditor(CcpnDialog):
                 self._setSpectra(spectrumGroup.spectra, False)
 
     def _setMainLayout(self):
-        self.mainLayout = QtWidgets.QGridLayout()
-        self.setLayout(self.mainLayout)
-        self.mainLayout.setContentsMargins(10, 10, 10, 10)  # L,T,R,B
+        layout = QtWidgets.QGridLayout(self)
+        self.setLayout(layout)
+        layout.setContentsMargins(10, 20, 10, 20)  # L,T,R,B
 
     def _setLeftWidgets(self):
 
@@ -214,8 +214,7 @@ class SpectrumGroupEditor(CcpnDialog):
                                                   fixedWidths=[0, self.FIXEDWIDTH]
                                                   )
 
-        self.leftListWidget = _LeftListWidget(self)
-        self.leftListWidget.setAcceptDrops(True)
+        self.leftListWidget = _LeftListWidget(self, acceptDrops=True)
         self.leftListWidget.setFixedWidth(2*self.FIXEDWIDTH)
         # appears not to work
         # self.leftListWidget.setDropEventCallback(self._removeFromRight) # _dropEventCallBack is already taken by DropBase!
@@ -235,8 +234,7 @@ class SpectrumGroupEditor(CcpnDialog):
                                                    fixedWidths=[0, self.FIXEDWIDTH]
                                                    )
 
-        self.rightListWidget = _RightListWidget(self)
-        self.rightListWidget.setAcceptDrops(True)
+        self.rightListWidget = _RightListWidget(self, acceptDrops=True)
         self.rightListWidget.setFixedWidth(2*self.FIXEDWIDTH)
 
     def _setApplyButtons(self):
@@ -246,41 +244,40 @@ class SpectrumGroupEditor(CcpnDialog):
                                              direction='h', hAlign='r')
 
     def _addWidgetsToLayout(self):
-        ###### Add left Widgets on Main layout ######
-        self.mainLayout.addWidget(self.leftTopLabel, 0, 0)
-        self.mainLayout.addWidget(self.leftRadioButtons, 1, 0)
-        self.mainLayout.addWidget(self.leftPullDown, 1, 1)
-        self.mainLayout.addWidget(self.nameLabel, 2, 0)
-        self.mainLayout.addWidget(self.nameEdit, 2, 1)
-        self.mainLayout.addWidget(self.leftListWidget, 3, 0, 1, 2)
+        # Add left Widgets on Main layout
+        layout = self.getLayout()
+        # layout.setContentsMargins(10, 10, 10, 10)  # L,T,R,B
 
-        ###### Add Right Widgets on Main layout ######
-        self.mainLayout.addWidget(self.rightTopLabel, 0, 2)
-        self.mainLayout.addWidget(self.rightRadioButtons, 2, 2)
-        self.mainLayout.addWidget(self.rightPullDown, 2, 3)
-        self.mainLayout.addWidget(self.rightListWidget, 3, 2, 1, 2)
+        layout.addWidget(self.leftTopLabel, 0, 0)
+        layout.addWidget(self.leftRadioButtons, 1, 0)
+        layout.addWidget(self.leftPullDown, 1, 1)
+        layout.addWidget(self.nameLabel, 2, 0)
+        layout.addWidget(self.nameEdit, 2, 1)
+        layout.addWidget(self.leftListWidget, 3, 0, 1, 2)
 
-        ###### Add Buttons Widgets on Main layout ######
-        # self.mainLayout.addWidget(self.restoreButton, 4, 0)
-        self.mainLayout.addWidget(self.applyButtons, 4, 2, 1, 2)
+        # Add Right Widgets on Main layout
+        layout.addWidget(self.rightTopLabel, 0, 2)
+        layout.addWidget(self.rightRadioButtons, 2, 2)
+        layout.addWidget(self.rightPullDown, 2, 3)
+        layout.addWidget(self.rightListWidget, 3, 2, 1, 2)
+
+        # Add Buttons Widgets on Main layout
+        layout.addWidget(self.applyButtons, 4, 2, 1, 2)
 
     def _setSpectra(self, spectra: list, leftWidget = True):
-        """Convience to set the spectra
+        """Convience to set the spectra in either left or right widget
         """
         # convert to pid's first
-        spectra = [s.pid for s in spectra]
+        pids = [s.pid for s in spectra]
         if leftWidget:
             widget = self.leftListWidget
         else:
             # right list widget; filter for those id's on the left hand side
             widget = self.rightListWidget
             leftItems = self.leftListWidget.getTexts()
-            spectra = [s for s in spectra if s not in leftItems]
-            pass
+            pids = [s for s in pids if s not in leftItems]
 
-        widget.clear()
-        for spectrum in spectra:
-            widget.addItem(spectrum)
+        widget.setTexts(pids, clear=True)
 
     def _leftPullDownCallback(self, value=None):
         """Callback when selecting the left spectrumGroup pulldown item"""

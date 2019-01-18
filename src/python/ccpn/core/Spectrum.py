@@ -1203,6 +1203,7 @@ class Spectrum(AbstractWrapperObject):
     def getHeight(self, ppmPositions):
         """returns the interpolated height at the ppm position
         """
+        #TODO: Urgently needs fixing
         return 10
 
     def getPositionValue(self, position):

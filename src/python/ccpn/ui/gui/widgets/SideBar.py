@@ -820,7 +820,7 @@ class SidebarClassNmrResidueTreeItems(SidebarClassABC):
         """
         if classObjs:
             nmrChain = classObjs[0].nmrChain
-            return nmrChain.nmrResidues
+            return tuple(nmrChain.nmrResidues)
 
         return classObjs
 

@@ -1138,6 +1138,9 @@ class NmrResidue(AbstractWrapperObject):
             # fetching the api tree will raise api errors for those objects that cannot be deleted/modified
             # and skip the actual delete
             self._getApiObjectTree()
+
+            # need to do a special delete here as the api always reinserts the nmrResidue at the end of the chain
+
             super().delete()
 
         except Exception as es:

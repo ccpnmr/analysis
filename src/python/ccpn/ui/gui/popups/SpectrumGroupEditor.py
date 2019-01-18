@@ -42,22 +42,30 @@ from ccpn.core.lib.ContextManagers import undoBlockManager
 
 class _LeftListWidget(ListWidget):
     """Subclassed for dropEvent"""
+
+    def __init__(self, *args, **kwds):
+        super().__init__(*args, **kwds)
+
     def dropEvent(self, event):
         data = self.parseEvent(event)
         super().dropEvent(event=event)
-        # self.parent()._removeFromRight()
-        left = self.parent().leftListWidget.getTexts()
-        right = self.parent().rightListWidget.getTexts()
+
+        self.parent()._removeFromRight()
+
         pass
 
 class _RightListWidget(ListWidget):
     """Subclassed for dropEvent"""
+
+    def __init__(self, *args, **kwds):
+        super().__init__(*args, **kwds)
+
     def dropEvent(self, event):
         data = self.parseEvent(event)
         super().dropEvent(event=event)
-        # self.parent()._removeFromLeft()
-        left = self.parent().leftListWidget.getTexts()
-        right = self.parent().rightListWidget.getTexts()
+
+        self.parent()._removeFromLeft()
+
         pass
 
 
@@ -158,7 +166,7 @@ class SpectrumGroupEditor(CcpnDialog):
                                                   fixedWidths=[0, self.FIXEDWIDTH]
                                                   )
 
-        self.leftListWidget = _LeftListWidget(self, acceptDrops=True, sortOnDrop=False)
+        self.leftListWidget = _LeftListWidget(self, acceptDrops=True, sortOnDrop=False, copyDrop=False)
         # self.leftListWidget = ListWidget(self, acceptDrops=True, sortOnDrop=False)
         self.leftListWidget.setFixedWidth(2*self.FIXEDWIDTH)
         # appears not to work
@@ -179,7 +187,7 @@ class SpectrumGroupEditor(CcpnDialog):
                                                    fixedWidths=[0, self.FIXEDWIDTH]
                                                    )
 
-        self.rightListWidget = _RightListWidget(self, acceptDrops=True, sortOnDrop=False)
+        self.rightListWidget = _RightListWidget(self, acceptDrops=True, sortOnDrop=False, copyDrop=False)
         # self.rightListWidget = ListWidget(self, acceptDrops=True, sortOnDrop=False)
         self.rightListWidget.setFixedWidth(2*self.FIXEDWIDTH)
 
@@ -320,27 +328,54 @@ class SpectrumGroupEditor(CcpnDialog):
 
     def _removeFromLeft(self):
         "Remove item from left list widget; called when dropped onto right widget"
-        leftPids = self.leftListWidget.getTexts()
-        if self.LEFT_EMPTY_TEXT in leftPids: leftPids.remove(self.LEFT_EMPTY_TEXT)
-        rightPids = self.rightListWidget.getTexts()
-        if self.RIGHT_EMPTY_TEXT in rightPids: rightPids.remove(self.RIGHT_EMPTY_TEXT)
 
-        leftPids = [p for p in leftPids if p not in rightPids]
-        self.rightListWidget.setTexts(rightPids, clear=True)
-        self.leftListWidget.setTexts(leftPids, clear=True)
-        self._addEmptyDescriptions()
+        # remove empty text
+        items = self.rightListWidget.findItems(self.RIGHT_EMPTY_TEXT, QtCore.Qt.MatchExactly)
+        for item in items:
+            self.rightListWidget.takeItem(self.rightListWidget.row(item))
+
+        # add empty text message to the other group
+        leftPids = self.leftListWidget.count() - len(self.leftListWidget.selectedItems())
+        if not leftPids:
+            # item about to be removed
+            self._addDescription(self.leftListWidget, self.LEFT_EMPTY_TEXT)
+
+        # "Remove item from left list widget; called when dropped onto right widget"
+        # leftPids = self.leftListWidget.getTexts()
+        # if self.LEFT_EMPTY_TEXT in leftPids: leftPids.remove(self.LEFT_EMPTY_TEXT)
+        # rightPids = self.rightListWidget.getTexts()
+        # if self.RIGHT_EMPTY_TEXT in rightPids: rightPids.remove(self.RIGHT_EMPTY_TEXT)
+        #
+        # leftPids = [p for p in leftPids if p not in rightPids]
+        # self.rightListWidget.setTexts(rightPids, clear=True)
+        # self.leftListWidget.setTexts(leftPids, clear=True)
+        # # self._addEmptyDescriptions()
 
     def _removeFromRight(self):
         "Remove item from right list widget; called when dropped onto left widget"
-        leftPids = self.leftListWidget.getTexts()
-        if self.LEFT_EMPTY_TEXT in leftPids: leftPids.remove(self.LEFT_EMPTY_TEXT)
-        rightPids = self.rightListWidget.getTexts()
-        if self.RIGHT_EMPTY_TEXT in rightPids: rightPids.remove(self.RIGHT_EMPTY_TEXT)
 
-        rightPids = [p for p in rightPids if p not in leftPids]
-        self.rightListWidget.setTexts(rightPids, clear=True)
-        self.leftListWidget.setTexts(leftPids, clear=True)
-        self._addEmptyDescriptions()
+        # remove empty text
+        items = self.leftListWidget.findItems(self.LEFT_EMPTY_TEXT, QtCore.Qt.MatchExactly)
+        for item in items:
+            self.leftListWidget.takeItem(self.leftListWidget.row(item))
+
+        # add empty text message to the other group
+        rightPids = self.rightListWidget.count() - len(self.rightListWidget.selectedItems())
+        if not rightPids:
+            # item about to be removed
+            self._addDescription(self.rightListWidget, self.RIGHT_EMPTY_TEXT)
+
+        # return
+        #
+        # leftPids = self.leftListWidget.getTexts()
+        # if self.LEFT_EMPTY_TEXT in leftPids: leftPids.remove(self.LEFT_EMPTY_TEXT)
+        # rightPids = self.rightListWidget.getTexts()
+        # if self.RIGHT_EMPTY_TEXT in rightPids: rightPids.remove(self.RIGHT_EMPTY_TEXT)
+        #
+        # rightPids = [p for p in rightPids if p not in leftPids]
+        # self.rightListWidget.setTexts(rightPids, clear=True)
+        # self.leftListWidget.setTexts(leftPids, clear=True)
+        # # self._addEmptyDescriptions()
 
     # def _populateLeftPullDownList(self):
     #     leftPullDownData = ['Select an Option']

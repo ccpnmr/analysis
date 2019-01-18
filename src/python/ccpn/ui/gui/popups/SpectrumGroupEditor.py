@@ -337,7 +337,6 @@ class SpectrumGroupEditor(CcpnDialog):
         # add empty text message to the other group
         leftPids = self.leftListWidget.count() - len(self.leftListWidget.selectedItems())
         if not leftPids:
-            # item about to be removed
             self._addDescription(self.leftListWidget, self.LEFT_EMPTY_TEXT)
 
         # "Remove item from left list widget; called when dropped onto right widget"
@@ -362,7 +361,6 @@ class SpectrumGroupEditor(CcpnDialog):
         # add empty text message to the other group
         rightPids = self.rightListWidget.count() - len(self.rightListWidget.selectedItems())
         if not rightPids:
-            # item about to be removed
             self._addDescription(self.rightListWidget, self.RIGHT_EMPTY_TEXT)
 
         # return

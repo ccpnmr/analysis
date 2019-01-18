@@ -45,17 +45,20 @@ class _LeftListWidget(ListWidget):
     def dropEvent(self, event):
         data = self.parseEvent(event)
         super().dropEvent(event=event)
-        # self.parent()._updateRight()
-        self.parent()._removeFromRight()
-
+        # self.parent()._removeFromRight()
+        left = self.parent().leftListWidget.getTexts()
+        right = self.parent().rightListWidget.getTexts()
+        pass
 
 class _RightListWidget(ListWidget):
     """Subclassed for dropEvent"""
     def dropEvent(self, event):
         data = self.parseEvent(event)
         super().dropEvent(event=event)
-        # self.parent()._updateRight()
-        self.parent()._removeFromLeft()
+        # self.parent()._removeFromLeft()
+        left = self.parent().leftListWidget.getTexts()
+        right = self.parent().rightListWidget.getTexts()
+        pass
 
 
 class SpectrumGroupEditor(CcpnDialog):
@@ -156,6 +159,7 @@ class SpectrumGroupEditor(CcpnDialog):
                                                   )
 
         self.leftListWidget = _LeftListWidget(self, acceptDrops=True, sortOnDrop=False)
+        # self.leftListWidget = ListWidget(self, acceptDrops=True, sortOnDrop=False)
         self.leftListWidget.setFixedWidth(2*self.FIXEDWIDTH)
         # appears not to work
         # self.leftListWidget.setDropEventCallback(self._removeFromRight) # _dropEventCallBack is already taken by DropBase!
@@ -176,6 +180,7 @@ class SpectrumGroupEditor(CcpnDialog):
                                                    )
 
         self.rightListWidget = _RightListWidget(self, acceptDrops=True, sortOnDrop=False)
+        # self.rightListWidget = ListWidget(self, acceptDrops=True, sortOnDrop=False)
         self.rightListWidget.setFixedWidth(2*self.FIXEDWIDTH)
 
     def _setApplyButtons(self):

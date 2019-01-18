@@ -141,7 +141,7 @@ class _PulldownABC(PulldownListCompoundWidget):
         return self.pulldownList.texts
 
     def getSelectedObject(self):
-        """Return the selected object
+        """Return the selected object, or None if not selected or empty
         """
         obj = None
         value = self.getText()

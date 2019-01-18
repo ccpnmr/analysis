@@ -1422,7 +1422,7 @@ class NewSideBar(QtWidgets.QTreeWidget, SideBarHandler, Base, NotifierBase):
                 contextMenu.addAction('Open as a module', partial(_openItemObject, self.mainWindow, openableObjs))
                 spectra = [o for o in openableObjs if isinstance(o, Spectrum)]
                 if len(spectra) > 0:
-                    contextMenu.addAction('Make SpectrumGroup From Selected', partial(_createSpectrumGroup, spectra))
+                    contextMenu.addAction('Make SpectrumGroup From Selected', partial(_createSpectrumGroup, self.mainWindow, spectra))
 
             contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
             canBeCloned = True

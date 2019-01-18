@@ -348,6 +348,8 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
         self.pulldownList = PulldownList(parent=self, texts=texts, callback=callback, index=index, editable=editable)
         self._addWidget(self.pulldownList)
         self.pulldownList.setObjectName(labelText)
+        if default is not None:
+            self.pulldownList.select(default)
 
         if minimumWidths is not None:
             self.setMinimumWidths(minimumWidths)

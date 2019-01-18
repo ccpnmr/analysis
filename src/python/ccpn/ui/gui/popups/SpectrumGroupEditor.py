@@ -73,23 +73,25 @@ class SpectrumGroupEditor(CcpnDialog):
     """
     A popup to create and manage SpectrumGroups
     """
-    TITLE = 'SpectrumGroup'
-    FIXEDWIDTH = 170
+    KLASS = 'SpectrumGroup'
+    KLASS_ITEM_ATTRIBUTE = 'spectra'
 
     MODE_NEW = 0
     MODE_EDIT = 1
     MODE_SELECT_EDIT = 2
 
-    BUTTON_NEW = 'New'
-    BUTTON_EXISTING = 'From existing:'
-    RADIOBUTTONS = [BUTTON_NEW, BUTTON_EXISTING]
+    # BUTTON_NEW = 'New'
+    # BUTTON_EXISTING = 'From existing:'
+    # LEFT_RADIOBUTTONS = [BUTTON_NEW, BUTTON_EXISTING]
 
     BUTTON_ALL = 'All'
     BUTTON_FILTER = 'Filter by:'
-    RADIOBUTTONS2 = [BUTTON_ALL, BUTTON_FILTER]
+    RIGHT_RADIOBUTTONS = [BUTTON_ALL, BUTTON_FILTER]
+
+    FIXEDWIDTH = 170
 
     def __init__(self, parent=None, mainWindow=None,
-                 spectrumGroup=None, addNew=False, editorMode=False, spectra=None or [],
+                 spectrumGroup=None, addNew=False, editorMode=False, spectra=None,
                  **kwds):
         """
         Initialise the widget
@@ -106,18 +108,18 @@ class SpectrumGroupEditor(CcpnDialog):
 
         if (spectrumGroup is None or addNew == True) and editorMode == False:
             self.mode = self.MODE_NEW
-            self.intialRadioButton = self.BUTTON_NEW
-        elif spectrumGroup is not None:
+            # self.intialRadioButton = self.BUTTON_NEW
+        elif spectrumGroup is not None or editorMode:
             self.mode = self.MODE_EDIT
-            self.intialRadioButton = self.BUTTON_EXISTING  # essentially ignored
-        elif editorMode:
-            self.mode = self.MODE_SELECT_EDIT
-            self.intialRadioButton = self.BUTTON_EXISTING
+            # self.intialRadioButton = self.BUTTON_EXISTING  # essentially ignored
+        # elif editorMode:
+        #     self.mode = self.MODE_SELECT_EDIT
+        #     # self.intialRadioButton = self.BUTTON_EXISTING
         else:
             raise RuntimeError('Undefined SpectrumGroupEditor mode')
 
         # window title
-        title = 'New ' + SpectrumGroupEditor.TITLE if self.mode == self.MODE_NEW else 'Edit ' + SpectrumGroupEditor.TITLE
+        title = 'New ' + SpectrumGroupEditor.KLASS if self.mode == self.MODE_NEW else 'Edit ' + SpectrumGroupEditor.KLASS
         self.setWindowTitle(title)
 
         self.mainWindow = mainWindow
@@ -147,17 +149,18 @@ class SpectrumGroupEditor(CcpnDialog):
 
         self.leftTopLabel = Label(self, '', bold=True)
 
-        selection = self.RADIOBUTTONS.index(self.intialRadioButton)
-        self.leftRadioButtons = RadioButtons(self, texts=self.RADIOBUTTONS,
-                                                      selectedInd=selection,
-                                                      callback=self._updateState,
-                                                      direction='h',
-                                                      tipTexts=None, gridSpan=(1, 2))
+        # selection = self.LEFT_RADIOBUTTONS.index(self.intialRadioButton)
+        # self.leftRadioButtons = RadioButtons(self, texts=self.LEFT_RADIOBUTTONS,
+        #                                               selectedInd=selection,
+        #                                               callback=self._updateState,
+        #                                               direction='h',
+        #                                               tipTexts=None, gridSpan=(1, 2))
         self.nameLabel = Label(self, 'Name', )
         self.nameEdit = LineEdit(self, )
         self.nameEdit.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         self.nameEdit.setFixedWidth(self.FIXEDWIDTH)
 
+        self.leftPullDownLabel = Label(self, self.KLASS)
         self.leftPullDown = SpectrumGroupPulldown(parent=self.mainWindow,
                                                   project = self.project,
                                                   showSelectName=True,
@@ -175,7 +178,7 @@ class SpectrumGroupEditor(CcpnDialog):
     def _setRightWidgets(self):
         self.rightTopLabel = Label(self, 'Sources', bold=True)
 
-        self.rightRadioButtons = RadioButtons(self, texts=self.RADIOBUTTONS2,
+        self.rightRadioButtons = RadioButtons(self, texts=self.RIGHT_RADIOBUTTONS,
                                                       selectedInd=0,
                                                       callback=self._updateRight,
                                                       direction='h',
@@ -203,7 +206,8 @@ class SpectrumGroupEditor(CcpnDialog):
         # layout.setContentsMargins(10, 10, 10, 10)  # L,T,R,B
 
         layout.addWidget(self.leftTopLabel, 0, 0)
-        layout.addWidget(self.leftRadioButtons, 1, 0)
+        # layout.addWidget(self.leftRadioButtons, 1, 0)
+        layout.addWidget(self.leftPullDownLabel, 1, 0)
         layout.addWidget(self.leftPullDown, 1, 1)
         layout.addWidget(self.nameLabel, 2, 0)
         layout.addWidget(self.nameEdit, 2, 1)
@@ -218,6 +222,26 @@ class SpectrumGroupEditor(CcpnDialog):
         # Add Buttons Widgets on Main layout
         layout.addWidget(self.applyButtons, 4, 2, 1, 2)
 
+    @property
+    def _editedObject(self):
+        "Convenience to get the edited object"
+        result = None
+        if self.mode == self.MODE_EDIT:
+            result = self.leftPullDown.getSelectedObject()
+        return result
+
+    @property
+    def _editedObjectItems(self) -> list:
+        """Convenience to get the list of items we are editing for object (e.g. spectra for SpectrumGroup)
+        Returns list or None on error
+        """
+        obj = self._editedObject
+        if obj is None:
+            return None
+        if not hasattr(obj, self.KLASS_ITEM_ATTRIBUTE):
+            return None
+        return getattr(obj, self.KLASS_ITEM_ATTRIBUTE)
+
     def _updateState(self):
         """Update state
         """
@@ -227,43 +251,75 @@ class SpectrumGroupEditor(CcpnDialog):
     def _updateLeft(self):
         """Update Left
         """
-        if self.mode == self.MODE_NEW or self.mode == self.MODE_SELECT_EDIT:
-            self.leftTopLabel.setText('Target')
+        # self.leftRadioButtons.hide()
 
-            # radio buttons and pulldown
-            self.leftRadioButtons.show()
-            selected = self.leftRadioButtons.get()
-            if selected == self.BUTTON_NEW:
-                self.leftPullDown.hide()
-                self.leftListWidget.clear()
-                if self._spectra is not None:
-                    self._setLeftListWidgetItems(self._spectra)
-                self.nameEdit.setText('')
-            else:
-                # we are creating a new SG and select from existing
-                self.leftPullDown.show()
-                # self.leftPullDown.setIndex(0)
-                spectrumGroup = self.leftPullDown.getSelectedObject()
-                self.leftListWidget.clear()
-                if spectrumGroup is not None:
-                    self._setLeftListWidgetItems(spectrumGroup.spectra)
-                    self.nameEdit.setText(spectrumGroup.name + '_copy')
-                else:
-                    self.nameEdit.setText('')
-
-        elif self.mode == self.MODE_EDIT:
-            self.leftTopLabel.setText('Editing ' + str(self.spectrumGroup))
-
-            self.leftRadioButtons.hide()
+        if self.mode == self.MODE_NEW:
+            self.leftTopLabel.setText('New SpectrumGroup')
+            self.leftPullDownLabel.hide()
             self.leftPullDown.hide()
+            self.leftListWidget.clear()
+            if self._spectra is not None:
+                self._setLeftListWidgetItems(self._spectra)
+            self.nameEdit.setText('')
 
-            self.nameEdit.setText(self.spectrumGroup.name)
-            self._setLeftListWidgetItems(self.spectrumGroup.spectra)
+        elif self.mode == self.MODE_EDIT or self.mode == self.MODE_SELECT_EDIT:
+            self.leftTopLabel.setText('Edit ')
+            self.leftPullDownLabel.show()
+            self.leftPullDown.show()
+            sg = self._editedObject
+            if sg is not None:
+                self.nameEdit.setText(sg.name)
+                self._setLeftListWidgetItems(sg.spectra)
+            else:
+                self.nameEdit.setText('')
+                self.leftListWidget.clear()
 
         else:
             raise RuntimeError('Invalid SpectrumGroupEditor mode "%s"' % self.mode)
 
         self._addEmptyDescriptions()
+
+    # def _updateLeft(self):
+    #     """Update Left
+    #     """
+    #
+    #     if self.mode == self.MODE_NEW or self.mode == self.MODE_SELECT_EDIT:
+    #         self.leftTopLabel.setText('Target')
+    #
+    #         # radio buttons and pulldown
+    #         self.leftRadioButtons.show()
+    #         selected = self.leftRadioButtons.get()
+    #         if selected == self.BUTTON_NEW:
+    #             self.leftPullDown.hide()
+    #             self.leftListWidget.clear()
+    #             if self._spectra is not None:
+    #                 self._setLeftListWidgetItems(self._spectra)
+    #             self.nameEdit.setText('')
+    #         else:
+    #             # we are creating a new SG and select from existing
+    #             self.leftPullDown.show()
+    #             # self.leftPullDown.setIndex(0)
+    #             spectrumGroup = self.leftPullDown.getSelectedObject()
+    #             self.leftListWidget.clear()
+    #             if spectrumGroup is not None:
+    #                 self._setLeftListWidgetItems(spectrumGroup.spectra)
+    #                 self.nameEdit.setText(spectrumGroup.name + '_copy')
+    #             else:
+    #                 self.nameEdit.setText('')
+    #
+    #     elif self.mode == self.MODE_EDIT:
+    #         self.leftTopLabel.setText('Editing ' + str(self.spectrumGroup))
+    #
+    #         self.leftRadioButtons.hide()
+    #         self.leftPullDown.hide()
+    #
+    #         self.nameEdit.setText(self.spectrumGroup.name)
+    #         self._setLeftListWidgetItems(self.spectrumGroup.spectra)
+    #
+    #     else:
+    #         raise RuntimeError('Invalid SpectrumGroupEditor mode "%s"' % self.mode)
+    #
+    #     self._addEmptyDescriptions()
 
     def _updateRight(self):
         """Update Right
@@ -571,61 +627,101 @@ class SpectrumGroupEditor(CcpnDialog):
     #         self.addNewSpectrumGroup = True
     #         self._populateLeftPullDownList()
 
+    # def _applyChanges(self):
+    #     """
+    #     The apply button has been clicked
+    #     Define an undo block for setting the properties of the object
+    #     If there is an error setting any values then generate an error message
+    #       If anything has been added to the undo queue then remove it with application.undo()
+    #       repopulate the popup widgets
+    #     """
+    #     leftWidgetSpectra = self._getItemListWidgets()['leftWidgetSpectra']
+    #     rightWidgetSpectra = self._getItemListWidgets()['rightWidgetSpectra']
+    #
+    #     applyAccept = False
+    #     oldUndo = self.project._undo.numItems()
+    #
+    #     with undoBlockManager():
+    #         try:
+    #             if self.addNewSpectrumGroup:
+    #                 self._applyToNewSG(leftWidgetSpectra)
+    #
+    #             if self.editorMode:
+    #                 if self.leftPullDown.text != 'Select an Option':
+    #                     self.spectrumGroup = self.project.getByPid('SG:' + self.leftPullDown.getText())
+    #
+    #             if self.spectrumGroup:
+    #                 self._applyToCurrentSG(leftWidgetSpectra)
+    #
+    #             if self.rightPullDown.getText() == ' ' or self.rightPullDown.getText() == 'Available Spectra':
+    #                 # return # don't do changes to spectra
+    #                 pass
+    #             else:
+    #                 self._updateRightSGspectra(rightWidgetSpectra)
+    #
+    #             applyAccept = True
+    #
+    #         except Exception as es:
+    #             showWarning(str(self.windowTitle()), str(es))
+    #             if self.application._isInDebugMode:
+    #                 raise es
+    #
+    #     if applyAccept is False:
+    #         # should only undo if something new has been added to the undo deque
+    #         # may cause a problem as some things may be set with the same values
+    #         # and still be added to the change list, so only undo if length has changed
+    #         errorName = str(self.__class__.__name__)
+    #         if oldUndo != self.project._undo.numItems():
+    #             self.project._undo.undo()
+    #             getLogger().debug('>>>Undo.%s._applychanges' % errorName)
+    #         else:
+    #             getLogger().debug('>>>Undo.%s._applychanges nothing to remove' % errorName)
+    #
+    #         # repopulate popup
+    #         self._repopulate()
+    #         return False
+    #     else:
+    #         return True
+
     def _applyChanges(self):
         """
         The apply button has been clicked
-        Define an undo block for setting the properties of the object
-        If there is an error setting any values then generate an error message
-          If anything has been added to the undo queue then remove it with application.undo()
-          repopulate the popup widgets
+        Return True on success; False on failure
         """
-        leftWidgetSpectra = self._getItemListWidgets()['leftWidgetSpectra']
-        rightWidgetSpectra = self._getItemListWidgets()['rightWidgetSpectra']
+        name = self.nameEdit.get()
+        if len(name) == 0:
+            msg = 'Undefined name'
+            getLogger().warning(msg)
+            showWarning(str(self.windowTitle()), msg)
+            return False
 
-        applyAccept = False
-        oldUndo = self.project._undo.numItems()
+        items = [self.project.getByPid(itm) for itm in self.leftListWidget.getTexts()]
+        if None in items:
+            msg = 'Could not convert all pids to objects'
+            getLogger().warning(msg)
+            showWarning(str(self.windowTitle()), msg)
+            return False
 
         with undoBlockManager():
             try:
-                if self.addNewSpectrumGroup:
-                    self._applyToNewSG(leftWidgetSpectra)
-
-                if self.editorMode:
-                    if self.leftPullDown.text != 'Select an Option':
-                        self.spectrumGroup = self.project.getByPid('SG:' + self.leftPullDown.getText())
-
-                if self.spectrumGroup:
-                    self._applyToCurrentSG(leftWidgetSpectra)
-
-                if self.rightPullDown.getText() == ' ' or self.rightPullDown.getText() == 'Available Spectra':
-                    # return # don't do changes to spectra
-                    pass
+                if self.mode == self.MODE_NEW:
+                    obj = self.project.newSpectrumGroup(name, items)
+                    setattr(obj, self.KLASS_ITEM_ATTRIBUTE, items)
                 else:
-                    self._updateRightSGspectra(rightWidgetSpectra)
-
-                applyAccept = True
+                    # edit mode
+                    obj = self._editedObject
+                    if obj.name != name:
+                        obj.rename(name)
+                    setattr(obj, self.KLASS_ITEM_ATTRIBUTE, items)
 
             except Exception as es:
                 showWarning(str(self.windowTitle()), str(es))
                 if self.application._isInDebugMode:
                     raise es
+                return False
 
-        if applyAccept is False:
-            # should only undo if something new has been added to the undo deque
-            # may cause a problem as some things may be set with the same values
-            # and still be added to the change list, so only undo if length has changed
-            errorName = str(self.__class__.__name__)
-            if oldUndo != self.project._undo.numItems():
-                self.project._undo.undo()
-                getLogger().debug('>>>Undo.%s._applychanges' % errorName)
-            else:
-                getLogger().debug('>>>Undo.%s._applychanges nothing to remove' % errorName)
+        return True
 
-            # repopulate popup
-            self._repopulate()
-            return False
-        else:
-            return True
 
     def _cancel(self):
         self.leftPullDown.unRegister()
@@ -638,56 +734,56 @@ class SpectrumGroupEditor(CcpnDialog):
             self.rightPullDown.unRegister()
             self.accept()
 
-    def _repopulate(self):
-        self._restoreButton()
-
-    def _restoreButton(self):
-        if not self.addNewSpectrumGroup:
-            self._populateLeftPullDownList()
-            self._populateListWidgetLeft()
-            self._selectAnOptionState()
-
-    def _applyToNewSG(self, leftWidgetSpectra):
-        name = str(self.nameEdit.text())
-        if name:
-            self.spectrumGroup = self.project.newSpectrumGroup(name, list(leftWidgetSpectra))
-            self.addNewSpectrumGroup = False
-            self.leftRadioButtons.hide()
-            # self.leftSpectrumGroupsLabel.setText('Current')
-            self.leftPullDown.setEnabled(False)
-            self.leftPullDown.setData([str(self.spectrumGroup.name)])
-            self.applyButtons.buttons[1].setEnabled(True)
-        else:
-            self.nameEdit.setText('Unnamed')
-            self._applyToNewSG(leftWidgetSpectra)
-
-    def _applyToCurrentSG(self, leftWidgetSpectra):
-        self._changeLeftSpectrumGroupName()
-        self.spectrumGroup.spectra = list(set(leftWidgetSpectra))
-        self.leftTopLabel.setText(str(self.spectrumGroup.name))
-        self.leftTopLabel.show()
-        self._populateLeftPullDownList()
-
-    def _updateRightSGspectra(self, rightWidgetSpectra):
-        if self._getRightPullDownSpectrumGroup():
-            self._getRightPullDownSpectrumGroup().spectra = []
-            self._getRightPullDownSpectrumGroup().spectra = list(set(rightWidgetSpectra))
-            self._selectAnOptionState()
-
-    def _updateLeftPullDown(self):
-        self.leftPullDown.setData([sg.name for sg in self.project.spectrumGroups])
-
-    def _selectAnOptionState(self):
-        self.rightPullDown.select(' ')
-        self.rightListWidget.clear()
-        self.rightListWidget.setAcceptDrops(False)
-        self._initialLabelListWidgetRight()
-
-    def _getRightPullDownSpectrumGroup(self):
-        pullDownSelection = self.rightPullDown.getText()
-        rightSpectrumGroup = self.project.getByPid(pullDownSelection)
-        if rightSpectrumGroup is not None:
-            return rightSpectrumGroup
+    # def _repopulate(self):
+    #     self._restoreButton()
+    #
+    # def _restoreButton(self):
+    #     if not self.addNewSpectrumGroup:
+    #         self._populateLeftPullDownList()
+    #         self._populateListWidgetLeft()
+    #         self._selectAnOptionState()
+    #
+    # def _applyToNewSG(self, leftWidgetSpectra):
+    #     name = str(self.nameEdit.text())
+    #     if name:
+    #         self.spectrumGroup = self.project.newSpectrumGroup(name, list(leftWidgetSpectra))
+    #         self.addNewSpectrumGroup = False
+    #         self.leftRadioButtons.hide()
+    #         # self.leftSpectrumGroupsLabel.setText('Current')
+    #         self.leftPullDown.setEnabled(False)
+    #         self.leftPullDown.setData([str(self.spectrumGroup.name)])
+    #         self.applyButtons.buttons[1].setEnabled(True)
+    #     else:
+    #         self.nameEdit.setText('Unnamed')
+    #         self._applyToNewSG(leftWidgetSpectra)
+    #
+    # def _applyToCurrentSG(self, leftWidgetSpectra):
+    #     self._changeLeftSpectrumGroupName()
+    #     self.spectrumGroup.spectra = list(set(leftWidgetSpectra))
+    #     self.leftTopLabel.setText(str(self.spectrumGroup.name))
+    #     self.leftTopLabel.show()
+    #     self._populateLeftPullDownList()
+    #
+    # def _updateRightSGspectra(self, rightWidgetSpectra):
+    #     if self._getRightPullDownSpectrumGroup():
+    #         self._getRightPullDownSpectrumGroup().spectra = []
+    #         self._getRightPullDownSpectrumGroup().spectra = list(set(rightWidgetSpectra))
+    #         self._selectAnOptionState()
+    #
+    # def _updateLeftPullDown(self):
+    #     self.leftPullDown.setData([sg.name for sg in self.project.spectrumGroups])
+    #
+    # def _selectAnOptionState(self):
+    #     self.rightPullDown.select(' ')
+    #     self.rightListWidget.clear()
+    #     self.rightListWidget.setAcceptDrops(False)
+    #     self._initialLabelListWidgetRight()
+    #
+    # def _getRightPullDownSpectrumGroup(self):
+    #     pullDownSelection = self.rightPullDown.getText()
+    #     rightSpectrumGroup = self.project.getByPid(pullDownSelection)
+    #     if rightSpectrumGroup is not None:
+    #         return rightSpectrumGroup
 
     # def _checkCurrentSpectrumGroups(self):
     #     if len(self.project.spectrumGroups) > 0:
@@ -703,17 +799,17 @@ class SpectrumGroupEditor(CcpnDialog):
     #             self.rightPullDown.select('Available Spectra')
     #             self._populateListWidgetRight(self.project.spectra)
 
-    def _cancelNewSpectrumGroup(self):
-        self._populateListWidgetLeft()
-        self._selectAnOptionState()
-        # self._disableButtons()
-
-    def _disableButtons(self):
-        for button in self.applyButtons.buttons[1:]:
-            button.setEnabled(False)
-        # self.restoreButton.setEnabled(False)
-
-    def _changeButtonStatus(self):
-        for button in self.applyButtons.buttons[1:]:
-            button.setEnabled(True)
-        # self.restoreButton.setEnabled(True)
+    # def _cancelNewSpectrumGroup(self):
+    #     self._populateListWidgetLeft()
+    #     self._selectAnOptionState()
+    #     # self._disableButtons()
+    #
+    # def _disableButtons(self):
+    #     for button in self.applyButtons.buttons[1:]:
+    #         button.setEnabled(False)
+    #     # self.restoreButton.setEnabled(False)
+    #
+    # def _changeButtonStatus(self):
+    #     for button in self.applyButtons.buttons[1:]:
+    #         button.setEnabled(True)
+    #     # self.restoreButton.setEnabled(True)

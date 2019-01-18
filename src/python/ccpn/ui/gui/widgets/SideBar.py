@@ -38,50 +38,14 @@ __date__ = "$Date: 2017-03-23 16:50:22 +0000 (Thu, March 23, 2017) $"
 #=========================================================================================
 
 import json
-from collections import OrderedDict
+from contextlib import contextmanager
+from PyQt5 import QtGui, QtWidgets, QtCore
+from typing import Callable
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-
-from ccpn.core import _coreClassMap
-from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
-from ccpn.core.MultipletList import MultipletList
-from ccpn.core.Spectrum import Spectrum
-from ccpn.core.PeakList import PeakList
-from ccpn.core.ChemicalShiftList import ChemicalShiftList
-from ccpn.core.SpectrumGroup import SpectrumGroup
-from ccpn.core.Note import Note
-from ccpn.core.Sample import Sample
-from ccpn.core.IntegralList import IntegralList
-from ccpn.core.NmrChain import NmrChain
-from ccpn.core.Chain import Chain
-from ccpn.core.StructureEnsemble import StructureEnsemble
-from ccpn.core.RestraintList import RestraintList
 from ccpn.ui.gui.guiSettings import sidebarFont
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
-from ccpn.ui.gui.popups.ChemicalShiftListPopup import ChemicalShiftListPopup
-from ccpn.ui.gui.popups.DataSetPopup import DataSetPopup
-from ccpn.ui.gui.popups.NmrAtomPopup import NmrAtomPopup
-from ccpn.ui.gui.popups.NmrChainPopup import NmrChainPopup
-from ccpn.ui.gui.popups.NmrResiduePopup import NmrResiduePopup
-from ccpn.ui.gui.popups.NotesPopup import NotesPopup
-from ccpn.ui.gui.popups.PeakListPropertiesPopup import PeakListPropertiesPopup
-from ccpn.ui.gui.popups.IntegralListPropertiesPopup import IntegralListPropertiesPopup
-from ccpn.ui.gui.popups.MultipletListPropertiesPopup import MultipletListPropertiesPopup
-from ccpn.ui.gui.popups.RestraintTypePopup import RestraintTypePopup
-from ccpn.ui.gui.popups.SampleComponentPropertiesPopup import EditSampleComponentPopup
-from ccpn.ui.gui.popups.SamplePropertiesPopup import SamplePropertiesPopup
-from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
-from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
-from ccpn.ui.gui.popups.StructurePopup import StructurePopup
-from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
-
-from PyQt5 import QtWidgets, QtCore
-from collections import OrderedDict
-from functools import partial
-from typing import Callable, Any
-
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.PeakList import PeakList
@@ -120,21 +84,6 @@ from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 from ccpn.ui.gui.popups.StructurePopup import StructurePopup
 from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
-from ccpn.ui.gui.popups.EditMultipletPopup import EditMultipletPopup
-
-from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.DropBase import DropBase
-from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning, progressManager, showNotImplementedMessage
-from ccpn.util.Constants import ccpnmrJsonData
-from ccpn.util.Logging import getLogger
-from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
-from ccpn.ui.gui.popups.CreateNmrChainPopup import CreateNmrChainPopup
-# from ccpn.ui.gui.modules.NotesEditor import NotesEditorModule
-from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
-from ccpn.core.lib.Notifiers import Notifier, NotifierBase
-from ccpn.core.lib.ContextManagers import catchExceptions, notificationBlanking
-
-from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 from ccpn.core.lib.Pid import Pid
 
 from ccpn.ui.gui.widgets.Base import Base
@@ -144,7 +93,6 @@ from ccpn.util.Constants import ccpnmrJsonData
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
 from ccpn.ui.gui.popups.CreateNmrChainPopup import CreateNmrChainPopup
-# from ccpn.ui.gui.modules.NotesEditor import NotesEditorModule
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpn.core.lib.Notifiers import Notifier, NotifierBase
 from ccpn.core.lib.ContextManagers import catchExceptions
@@ -154,77 +102,6 @@ from ccpn.ui.gui.lib.MenuActions import _openNote, _openIntegralList, _openPeakL
 
 from ccpn.ui.gui.widgets.Menu import Menu
 from functools import partial
-
-
-# NB the order matters!
-# NB 'SG' must be before 'SP', as SpectrumGroups must be ready before Spectra
-# Also parents must appear before their children
-
-# _classNamesInSidebar = ['SpectrumGroup', 'Spectrum', 'PeakList', 'IntegralList', 'MultipletList',
-#                         'Sample', 'SampleComponent', 'Substance', 'Complex', 'Chain',
-#                         'Residue', 'NmrChain', 'NmrResidue', 'NmrAtom', 'ChemicalShiftList',
-#                         'StructureEnsemble', 'Model', 'DataSet', 'RestraintList', 'Note', ]
-#
-# Pids = 'pids'
-#
-# # TODO Add Residue
-#
-#
-# # ll = [_coreClassMap[x] for x in _classNamesInSidebar]
-# # classesInSideBar = OrderedDict(((x.shortClassName, x) for x in ll))
-# classesInSideBar = OrderedDict(((x.shortClassName, x) for x in _coreClassMap.values()
-#                                 if x.className in _classNamesInSidebar))
-# # classesInSideBar = ('SG', 'SP', 'PL', 'SA', 'SC', 'SU', 'MC', 'NC', 'NR', 'NA',
-# #                     'CL', 'SE', 'MO', 'DS',
-# #                     'RL', 'NO')
-#
-# classesInTopLevel = ('SG', 'SP', 'SA', 'SU', 'MC', 'MX', 'NC', 'CL', 'SE', 'DS', 'NO')
-
-# NBNB TBD FIXME
-# 1)This function (and the NEW_ITEM_DICT) it uses gets the create_new
-# function from the shortClassName of the PARENT!!!
-# This is the only way to do it if the create_new functions are attributes of the PARENT!!!
-#
-# 2) <New> in makes a new SampleComponent. This is counterintuitive!
-# Anyway, how do you make a new Sample?
-# You use the <New> under sample, this comment is completely inaccurate!
-#
-# Try putting in e.g. <New PeakList>, <New SampleComponent> etc. Done in version 9855.
-
-# NEW_ITEM_DICT = {
-#
-#     'SP'                : 'newPeakList',
-#     'NC'                : 'newNmrResidue',
-#     'NR'                : 'newNmrAtom',
-#     'DS'                : 'newRestraintList',
-#     'RL'                : 'newRestraint',
-#     'SE'                : 'newModel',
-#     'Notes'             : 'newNote',
-#     'StructureEnsembles': 'newStructureEnsemble',
-#     'Samples'           : 'newSample',
-#     'NmrChains'         : 'newNmrChain',
-#     'Chains'            : 'newChain',
-#     'Substances'        : 'newSubstance',
-#     'ChemicalShiftLists': 'newChemicalShiftList',
-#     'DataSets'          : 'newDataSet',
-#     'SpectrumGroups'    : 'newSpectrumGroup',
-#     'Complexes'         : 'newComplex',
-#     }
-
-# OPEN_ITEM_DICT = {
-#     Spectrum.className         : _openSpectrumDisplay,
-#     PeakList.className         : showPeakTable,
-#     IntegralList.className     : showIntegralTable,
-#     MultipletList.className    : showMultipletTable,
-#     NmrChain.className         : showNmrResidueTable,
-#     Chain.className            : showResidueTable,
-#     SpectrumGroup.className    : _openSpectrumGroup,
-#     Sample.className           : _openSampleSpectra,
-#     ChemicalShiftList.className: showChemicalShiftTable,
-#     RestraintList.className    : showRestraintTable,
-#     Note.lastModified          : showNotesEditor,
-#     StructureEnsemble.className: showStructureTable
-#     }
 
 
 OpenObjAction = {
@@ -680,19 +557,6 @@ class SidebarABC(NotifierBase):
             for itm in self.children:
                 itm.reset()
 
-            # thisItem = self
-            #
-            # # if no widget then traverse up the tree until widget is found or no more parents
-            # while thisItem and not thisItem.widget:
-            #     thisItem = thisItem._parent
-            #
-            # children = self._getChildren([])
-            # for itm in children:
-            #     if thisItem and thisItem.widget:
-            #         thisItem.widget.removeChild(itm.widget)
-
-        if self.hasNotifier():
-            getLogger().info('>>>reset deleteAllNotifiers %s' % str(self))
         self.deleteAllNotifiers()
 
         # remove the widgets associated with the sidebar items
@@ -745,19 +609,13 @@ class SidebarABC(NotifierBase):
 
         elif rebuildOrRename == self.REBUILD:
             # rebuild the tree starting from node
-
-            # store tree open/closed structure, process and restore
-            node._storeExpandedStates()
-            node.rebuildTree()
-            node._restoreExpandedStates()
+            with self.sidebar.sideBarBlocking(node):
+                node.rebuildTree()
 
         elif rebuildOrRename == self.RENAME:
             # rename node
-
-            # store tree open/closed structure, process and restore
-            node._storeExpandedStates()
-            node.rename()
-            node._restoreExpandedStates()
+            with self.sidebar.sideBarBlocking(node):
+                node.rename()
 
     def _postBlockingUpdate(self):
         """Do the required action post-blocking; uses self._postBlockingAction
@@ -1252,15 +1110,32 @@ class SideBarStructure(object):
         """
         return self._sidebarBlockingLevel > 0
 
-    def increaseSidebarBlocking(self):
+    @contextmanager
+    def sideBarBlocking(self, node):
+        """Context manager to handle blocking of the sidebar events.
+        """
+        self.increaseSidebarBlocking(node)
+        try:
+            # pass control to the calling function
+            yield
+
+        except Exception as es:
+            raise es
+        finally:
+            self.decreaseSidebarBlocking(node)
+
+    def increaseSidebarBlocking(self, node=None):
         """increase level of blocking
         """
         if self._sidebarBlockingLevel == 0:
             self._blockSideBarEvents()
-            self._sidebarData._storeExpandedStates()
+            if node:
+                node._storeExpandedStates()
+            else:
+                self._sidebarData._storeExpandedStates()
         self._sidebarBlockingLevel += 1
 
-    def decreaseSidebarBlocking(self):
+    def decreaseSidebarBlocking(self, node=None):
         """Reduce level of blocking - when level reaches zero, Sidebar is unblocked
         """
         if self._sidebarBlockingLevel > 0:
@@ -1268,7 +1143,10 @@ class SideBarStructure(object):
             # check if we arrived at level zero; if so call post-blocking update
             if self._sidebarBlockingLevel == 0:
                 self._sidebarData._postBlockingUpdate()
-                self._sidebarData._restoreExpandedStates()
+                if node:
+                    node._restoreExpandedStates()
+                else:
+                    self._sidebarData._restoreExpandedStates()
                 self._unblockSideBarEvents()
         else:
             raise RuntimeError('Error: cannot decrease sidebar blocking below 0')

@@ -79,9 +79,7 @@ class SpectrumGroupEditor(CcpnDialog):
 
     FIXEDWIDTH = 170
 
-    def __init__(self, parent=None, mainWindow=None,
-                 spectrumGroup=None, addNew=False, editorMode=False, spectra=None,
-                 **kwds):
+    def __init__(self, parent=None, mainWindow=None, spectrumGroup=None, editMode=True, spectra=None, **kwds):
         """
         Initialise the widget
 
@@ -97,12 +95,10 @@ class SpectrumGroupEditor(CcpnDialog):
         """
         CcpnDialog.__init__(self, parent=parent, setLayout=False, margins=(10,10,10,10), **kwds)
 
-        if (spectrumGroup is None or addNew == True) and editorMode == False:
-            self.mode = self.MODE_NEW
-        elif spectrumGroup is not None or editorMode:
+        if editMode:
             self.mode = self.MODE_EDIT
         else:
-            raise RuntimeError('Undefined SpectrumGroupEditor mode')
+            self.mode = self.MODE_NEW
 
         # window title
         title = 'New ' + SpectrumGroupEditor.KLASS if self.mode == self.MODE_NEW else 'Edit ' + SpectrumGroupEditor.KLASS
@@ -394,3 +390,4 @@ class SpectrumGroupEditor(CcpnDialog):
             self.leftPullDown.unRegister()
             self.rightPullDown.unRegister()
             self.accept()
+

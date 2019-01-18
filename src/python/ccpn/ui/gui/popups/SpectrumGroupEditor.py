@@ -127,65 +127,6 @@ class SpectrumGroupEditor(CcpnDialog):
 
         self._updateState()
 
-    def _updateState(self):
-        """Update state
-        """
-        self._updateLeft()
-        self._updateRight()
-
-    def _updateLeft(self):
-        """Update Left
-        """
-        if self.mode == self.MODE_NEW or self.mode == self.MODE_SELECT_EDIT:
-            self.leftTopLabel.setText('Target')
-
-            # radio buttons and pulldown
-            self.leftRadioButtons.show()
-            selected = self.leftRadioButtons.get()
-            if selected == self.BUTTON_NEW:
-                self.leftPullDown.hide()
-                self.leftListWidget.clear()
-                if self._spectra is not None:
-                    self._setSpectra(self._spectra)
-                self.nameEdit.setText('')
-            else:
-                # we are creating a new SG and select from existing
-                self.leftPullDown.show()
-                # self.leftPullDown.setIndex(0)
-                spectrumGroup = self.leftPullDown.getSelectedObject()
-                self.leftListWidget.clear()
-                if spectrumGroup is not None:
-                    self._setSpectra(spectrumGroup.spectra)
-                    self.nameEdit.setText(spectrumGroup.name + '_copy')
-                else:
-                    self.nameEdit.setText('')
-
-        elif self.mode == self.MODE_EDIT:
-            self.leftTopLabel.setText('Editing ' + str(self.spectrumGroup))
-
-            self.leftRadioButtons.hide()
-            self.leftPullDown.hide()
-
-            self.nameEdit.setText(self.spectrumGroup.name)
-            self._setSpectra(self.spectrumGroup.spectra)
-
-        else:
-            raise RuntimeError('Invalid SpectrumGroupEditor mode "%s"' % self.mode)
-
-    def _updateRight(self):
-        """Update Right
-        """
-        selected = self.rightRadioButtons.get()
-        if selected == self.BUTTON_ALL:
-            self.rightPullDown.hide()
-            self._setSpectra(self.project.spectra, False)
-        else:
-            self.rightPullDown.show()
-            self.rightListWidget.clear()
-            spectrumGroup = self.rightPullDown.getSelectedObject()
-            if spectrumGroup is not None:
-                self._setSpectra(spectrumGroup.spectra, False)
-
     def _setMainLayout(self):
         layout = QtWidgets.QGridLayout(self)
         self.setLayout(layout)
@@ -214,7 +155,7 @@ class SpectrumGroupEditor(CcpnDialog):
                                                   fixedWidths=[0, self.FIXEDWIDTH]
                                                   )
 
-        self.leftListWidget = _LeftListWidget(self, acceptDrops=True)
+        self.leftListWidget = _LeftListWidget(self, acceptDrops=True, sortOnDrop=False)
         self.leftListWidget.setFixedWidth(2*self.FIXEDWIDTH)
         # appears not to work
         # self.leftListWidget.setDropEventCallback(self._removeFromRight) # _dropEventCallBack is already taken by DropBase!
@@ -234,7 +175,7 @@ class SpectrumGroupEditor(CcpnDialog):
                                                    fixedWidths=[0, self.FIXEDWIDTH]
                                                    )
 
-        self.rightListWidget = _RightListWidget(self, acceptDrops=True)
+        self.rightListWidget = _RightListWidget(self, acceptDrops=True, sortOnDrop=False)
         self.rightListWidget.setFixedWidth(2*self.FIXEDWIDTH)
 
     def _setApplyButtons(self):
@@ -264,20 +205,105 @@ class SpectrumGroupEditor(CcpnDialog):
         # Add Buttons Widgets on Main layout
         layout.addWidget(self.applyButtons, 4, 2, 1, 2)
 
-    def _setSpectra(self, spectra: list, leftWidget = True):
-        """Convience to set the spectra in either left or right widget
+    def _updateState(self):
+        """Update state
         """
-        # convert to pid's first
-        pids = [s.pid for s in spectra]
-        if leftWidget:
-            widget = self.leftListWidget
-        else:
-            # right list widget; filter for those id's on the left hand side
-            widget = self.rightListWidget
-            leftItems = self.leftListWidget.getTexts()
-            pids = [s for s in pids if s not in leftItems]
+        self._updateLeft()
+        self._updateRight()
 
-        widget.setTexts(pids, clear=True)
+    def _updateLeft(self):
+        """Update Left
+        """
+        if self.mode == self.MODE_NEW or self.mode == self.MODE_SELECT_EDIT:
+            self.leftTopLabel.setText('Target')
+
+            # radio buttons and pulldown
+            self.leftRadioButtons.show()
+            selected = self.leftRadioButtons.get()
+            if selected == self.BUTTON_NEW:
+                self.leftPullDown.hide()
+                self.leftListWidget.clear()
+                if self._spectra is not None:
+                    self._setLeftListWidgetItems(self._spectra)
+                self.nameEdit.setText('')
+            else:
+                # we are creating a new SG and select from existing
+                self.leftPullDown.show()
+                # self.leftPullDown.setIndex(0)
+                spectrumGroup = self.leftPullDown.getSelectedObject()
+                self.leftListWidget.clear()
+                if spectrumGroup is not None:
+                    self._setLeftListWidgetItems(spectrumGroup.spectra)
+                    self.nameEdit.setText(spectrumGroup.name + '_copy')
+                else:
+                    self.nameEdit.setText('')
+
+        elif self.mode == self.MODE_EDIT:
+            self.leftTopLabel.setText('Editing ' + str(self.spectrumGroup))
+
+            self.leftRadioButtons.hide()
+            self.leftPullDown.hide()
+
+            self.nameEdit.setText(self.spectrumGroup.name)
+            self._setLeftListWidgetItems(self.spectrumGroup.spectra)
+
+        else:
+            raise RuntimeError('Invalid SpectrumGroupEditor mode "%s"' % self.mode)
+
+        self._addEmptyDescriptions()
+
+    def _updateRight(self):
+        """Update Right
+        """
+        selected = self.rightRadioButtons.get()
+        if selected == self.BUTTON_ALL:
+            self.rightPullDown.hide()
+            self._setRightListWidgetItems(self.project.spectra)
+        else:
+            self.rightPullDown.show()
+            self.rightListWidget.clear()
+            spectrumGroup = self.rightPullDown.getSelectedObject()
+            if spectrumGroup is not None:
+                self._setRightListWidgetItems(spectrumGroup.spectra)
+        self._addEmptyDescriptions()
+
+    def _addDescription(self, widget, text):
+        item = QtWidgets.QListWidgetItem(text)
+        item.setFlags(QtCore.Qt.NoItemFlags)
+        widget.addItem(item)
+
+    LEFT_EMPTY_TEXT = 'Drag item(s) from Sources to here'
+    RIGHT_EMPTY_TEXT = "No (more) Sources; Change 'All' or 'Filter' settings"
+
+    def _addEmptyDescriptions(self):
+        "Add descriptions to empty ListWidgets"
+        leftPids = self.leftListWidget.getTexts()
+        rightPids = self.rightListWidget.getTexts()
+
+        if len(leftPids) == 0:
+            self._addDescription(self.leftListWidget, self.LEFT_EMPTY_TEXT)
+
+        if len(rightPids) == 0:
+            self._addDescription(self.rightListWidget, self.RIGHT_EMPTY_TEXT)
+
+    def _setLeftListWidgetItems(self, items: list):
+        """Convenience to set the items in the left ListWidget
+        """
+        # convert items to pid's
+        pids = [s.pid for s in items]
+        self.leftListWidget.setTexts(pids, clear=True)
+        self._addEmptyDescriptions()
+
+    def _setRightListWidgetItems(self, items: list):
+        """Convenience to set the items in the right ListWidget
+        """
+        # convert items to pid's
+        pids = [s.pid for s in items]
+        # filter for those pid's already on the left hand side
+        leftPids = self.leftListWidget.getTexts()
+        pids = [s for s in pids if s not in leftPids]
+        self.rightListWidget.setTexts(pids, clear=True)
+        self._addEmptyDescriptions()
 
     def _leftPullDownCallback(self, value=None):
         """Callback when selecting the left spectrumGroup pulldown item"""
@@ -288,18 +314,28 @@ class SpectrumGroupEditor(CcpnDialog):
         self._updateRight()
 
     def _removeFromLeft(self):
-        "Remove item from left list widget"
+        "Remove item from left list widget; called when dropped onto right widget"
         leftPids = self.leftListWidget.getTexts()
+        if self.LEFT_EMPTY_TEXT in leftPids: leftPids.remove(self.LEFT_EMPTY_TEXT)
         rightPids = self.rightListWidget.getTexts()
-        pids = [p for p in leftPids if p not in rightPids]
-        self.leftListWidget.setTexts(pids, clear=True)
+        if self.RIGHT_EMPTY_TEXT in rightPids: rightPids.remove(self.RIGHT_EMPTY_TEXT)
+
+        leftPids = [p for p in leftPids if p not in rightPids]
+        self.rightListWidget.setTexts(rightPids, clear=True)
+        self.leftListWidget.setTexts(leftPids, clear=True)
+        self._addEmptyDescriptions()
 
     def _removeFromRight(self):
-        "Remove item from left list widget"
+        "Remove item from right list widget; called when dropped onto left widget"
         leftPids = self.leftListWidget.getTexts()
+        if self.LEFT_EMPTY_TEXT in leftPids: leftPids.remove(self.LEFT_EMPTY_TEXT)
         rightPids = self.rightListWidget.getTexts()
-        pids = [p for p in rightPids if p not in leftPids]
-        self.rightListWidget.setTexts(pids, clear=True)
+        if self.RIGHT_EMPTY_TEXT in rightPids: rightPids.remove(self.RIGHT_EMPTY_TEXT)
+
+        rightPids = [p for p in rightPids if p not in leftPids]
+        self.rightListWidget.setTexts(rightPids, clear=True)
+        self.leftListWidget.setTexts(leftPids, clear=True)
+        self._addEmptyDescriptions()
 
     # def _populateLeftPullDownList(self):
     #     leftPullDownData = ['Select an Option']
@@ -437,51 +473,51 @@ class SpectrumGroupEditor(CcpnDialog):
     #             item = QtWidgets.QListWidgetItem(str(spectrum.id))
     #             self.leftListWidget.addItem(item)
 
-    def _getAllSpectra(self):
-        if self.spectrumGroup:
-            allSpectra = [sp for sp in self.project.spectra]
-            spectrumGroupSpectra = self.spectrumGroup.spectra
-            for spectrumSG in spectrumGroupSpectra:
-                if spectrumSG in allSpectra:
-                    allSpectra.remove(spectrumSG)
-            return allSpectra
-        else:
-            leftWidgetSpectra = self._getItemListWidgets()['leftWidgetSpectra']
-            availableSpectra = [sp for sp in self.project.spectra if
-                                sp not in leftWidgetSpectra]  # make sure to don't have spectra on left and right at the same time
-            return availableSpectra
-
-    def _changeLeftSpectrumGroupName(self):
-        if self.nameEdit.isModified():
-            newName = self.nameEdit.text()
-            if self.spectrumGroup.name != newName:
-                self.spectrumGroup.rename(newName)
-
-    def _getItemListWidgets(self):
-        leftWidgets = []
-        leftWidgetSpectra = []
-
-        for index in range(self.leftListWidget.count()):
-            leftWidgets.append(self.leftListWidget.item(index))
-        for item in leftWidgets:
-            spectrum = self.project.getByPid('SP:' + item.text())
-            leftWidgetSpectra.append(spectrum)
-
-        rightWidgets = []
-        rightWidgetSpectra = []
-        for index in range(self.rightListWidget.count()):
-            rightWidgets.append(self.rightListWidget.item(index))
-        for item in rightWidgets:
-            spectrum = self.project.getByPid('SP:' + item.text())
-            rightWidgetSpectra.append(spectrum)
-
-        return {'leftWidgetSpectra': leftWidgetSpectra, 'rightWidgetSpectra': rightWidgetSpectra}
-
-    def _checkForDuplicatedNames(self):
-        newName = str(self.nameEdit.text())
-        for sg in self.project.spectrumGroups:
-            if sg.name == newName:
-                self.nameEdit.setText(str(sg.name) + '-1')
+    # def _getAllSpectra(self):
+    #     if self.spectrumGroup:
+    #         allSpectra = [sp for sp in self.project.spectra]
+    #         spectrumGroupSpectra = self.spectrumGroup.spectra
+    #         for spectrumSG in spectrumGroupSpectra:
+    #             if spectrumSG in allSpectra:
+    #                 allSpectra.remove(spectrumSG)
+    #         return allSpectra
+    #     else:
+    #         leftWidgetSpectra = self._getItemListWidgets()['leftWidgetSpectra']
+    #         availableSpectra = [sp for sp in self.project.spectra if
+    #                             sp not in leftWidgetSpectra]  # make sure to don't have spectra on left and right at the same time
+    #         return availableSpectra
+    #
+    # def _changeLeftSpectrumGroupName(self):
+    #     if self.nameEdit.isModified():
+    #         newName = self.nameEdit.text()
+    #         if self.spectrumGroup.name != newName:
+    #             self.spectrumGroup.rename(newName)
+    #
+    # def _getItemListWidgets(self):
+    #     leftWidgets = []
+    #     leftWidgetSpectra = []
+    #
+    #     for index in range(self.leftListWidget.count()):
+    #         leftWidgets.append(self.leftListWidget.item(index))
+    #     for item in leftWidgets:
+    #         spectrum = self.project.getByPid('SP:' + item.text())
+    #         leftWidgetSpectra.append(spectrum)
+    #
+    #     rightWidgets = []
+    #     rightWidgetSpectra = []
+    #     for index in range(self.rightListWidget.count()):
+    #         rightWidgets.append(self.rightListWidget.item(index))
+    #     for item in rightWidgets:
+    #         spectrum = self.project.getByPid('SP:' + item.text())
+    #         rightWidgetSpectra.append(spectrum)
+    #
+    #     return {'leftWidgetSpectra': leftWidgetSpectra, 'rightWidgetSpectra': rightWidgetSpectra}
+    #
+    # def _checkForDuplicatedNames(self):
+    #     newName = str(self.nameEdit.text())
+    #     for sg in self.project.spectrumGroups:
+    #         if sg.name == newName:
+    #             self.nameEdit.setText(str(sg.name) + '-1')
 
     # def _setEditorMode(self):
     #

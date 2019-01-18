@@ -1131,6 +1131,19 @@ class NmrResidue(AbstractWrapperObject):
         """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""
         return parent._wrappedData.sortedResonanceGroups()
 
+    def delete(self):
+        """Delete routine to check whether the item can be deleted otherwise raise api error.
+        """
+        try:
+            # fetching the api tree will raise api errors for those objects that cannot be deleted/modified
+            # and skip the actual delete
+            self._getApiObjectTree()
+            super().delete()
+
+        except Exception as es:
+            raise es
+
+
     @logCommand(get='self')
     def rename(self, value: str = None):
         """Rename NmrResidue. changing its sequenceCode, residueType, or both.

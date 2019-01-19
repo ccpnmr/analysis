@@ -1114,7 +1114,7 @@ class SideBarStructure(object):
         SidebarTree('Project', usePidForName=False, klass=Project, closed=False, children=[
 
             #------ Spectra, PeakLists, MultipletLists, IntegralLists ------
-            SidebarTree('Spectra', closed=True, children=[
+            SidebarTree('Spectra', closed=False, children=[
                 SidebarClassTreeItems(klass=Spectrum, callback=_raiseSpectrumPopup(), children=[
                     SidebarTree('PeakLists', closed=False, children=[
                         SidebarItem('<New PeakList>', callback=_createNewPeakList()),
@@ -1137,6 +1137,27 @@ class SideBarStructure(object):
                 SidebarClassTreeItems(klass=SpectrumGroup, triggers=[Notifier.DELETE, Notifier.CREATE, Notifier.RENAME, Notifier.CHANGE],
                                       callback=_raiseSpectrumGroupPopup(editMode=True), children=[
                     SidebarClassSpectrumTreeItems(klass=Spectrum, callback=_raiseSpectrumPopup()),
+                    ]),
+                ]),
+
+            #------ ChemicalShiftLists ------
+            SidebarTree('ChemicalShiftLists', closed=True, children=[
+                SidebarItem('<New ChemicalShiftList>', callback=partial(_createNewObject, ChemicalShiftList.className)),
+                SidebarClassTreeItems(klass=ChemicalShiftList, callback=_raisePopup),
+                ]),
+
+            #------ NmrChains, NmrResidues, NmrAtoms ------
+            SidebarTree('NmrChains', closed=True, children=[
+                SidebarItem('<New NmrChain>', callback=_raiseCreateNmrChainPopup()),
+                SidebarClassTreeItems(klass=NmrChain, rebuildOnRename='NmrChain-ClassTreeItems',
+                                      callback=_raiseEditNmrChainPopup(), children=[
+                    SidebarItem('<New NmrResidue>', callback=_createNewNmrResidue()),
+                    SidebarClassNmrResidueTreeItems(klass=NmrResidue, rebuildOnRename='NmrChain-ClassTreeItems',
+                                                    callback=_raiseNmrResiduePopup(), children=[
+                        SidebarItem('<New NmrAtom>', callback=_createNewNmrAtom()),
+                        SidebarClassItems(klass=NmrAtom, rebuildOnRename='NmrChain-ClassTreeItems',
+                                          callback=_raiseNmrAtomPopup()),
+                        ]),
                     ]),
                 ]),
 
@@ -1169,27 +1190,6 @@ class SideBarStructure(object):
             SidebarTree('Complexes', closed=True, children=[
                 SidebarItem('<New Complex>', callback=NYI),
                 SidebarClassTreeItems(klass=Complex, rebuildOnRename='Complex-ClassTreeItems', callback=NYI),
-                ]),
-
-            #------ NmrChains, NmrResidues, NmrAtoms ------
-            SidebarTree('NmrChains', closed=True, children=[
-                SidebarItem('<New NmrChain>', callback=_raiseCreateNmrChainPopup()),
-                SidebarClassTreeItems(klass=NmrChain, rebuildOnRename='NmrChain-ClassTreeItems',
-                                      callback=_raiseEditNmrChainPopup(), children=[
-                    SidebarItem('<New NmrResidue>', callback=_createNewNmrResidue()),
-                    SidebarClassNmrResidueTreeItems(klass=NmrResidue, rebuildOnRename='NmrChain-ClassTreeItems',
-                                                    callback=_raiseNmrResiduePopup(), children=[
-                        SidebarItem('<New NmrAtom>', callback=_createNewNmrAtom()),
-                        SidebarClassItems(klass=NmrAtom, rebuildOnRename='NmrChain-ClassTreeItems',
-                                          callback=_raiseNmrAtomPopup()),
-                        ]),
-                    ]),
-                ]),
-
-            #------ ChemicalShiftLists ------
-            SidebarTree('ChemicalShiftLists', closed=True, children=[
-                SidebarItem('<New ChemicalShiftList>', callback=partial(_createNewObject, ChemicalShiftList.className)),
-                SidebarClassTreeItems(klass=ChemicalShiftList, callback=_raisePopup),
                 ]),
 
             #------ StructureEnsembles ------

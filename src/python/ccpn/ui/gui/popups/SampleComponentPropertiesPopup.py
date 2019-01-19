@@ -58,10 +58,13 @@ class EditSampleComponentPopup(CcpnDialog):
         self.project = mainWindow.application.project
         self.current = mainWindow.application.current
 
+        if sample is None and sampleComponent is not None:
+            sample = sampleComponent.sample
         self.sample = sample
         self.newSampleComponentToCreate = newSampleComponent
 
         self.sampleComponent = sampleComponent
+
         self._setMainLayout()
         self._setWidgets()
         self._addWidgetsToLayout(widgets=self._getAllWidgets(), layout=self.mainLayout)

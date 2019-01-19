@@ -149,8 +149,8 @@ NEW_ITEM_DICT = {
     RestraintList.className    : RestraintTypePopup,
     Restraint.className        : NEWRESTRAINT,
     StructureEnsemble.className: NEWSTRUCTUREENSEMBLE,
-    Sample.className           : NEWSAMPLE,
-    SampleComponent.className  : EditSampleComponentPopup,
+    # Sample.className           : NEWSAMPLE,
+    # SampleComponent.className  : EditSampleComponentPopup,
     Chain.className            : CreateChainPopup,
     Substance.className        : SubstancePropertiesPopup,
     ChemicalShiftList.className: NEWCHEMICALSHIFTLIST,
@@ -165,11 +165,11 @@ EDIT_ITEM_DICT = {
 
     # Spectrum.className         : SpectrumPropertiesPopup,
     # PeakList.className         : PeakListPropertiesPopup,
-    IntegralList.className     : IntegralListPropertiesPopup,
-    MultipletList.className    : MultipletListPropertiesPopup,
+    # IntegralList.className     : IntegralListPropertiesPopup,
+    # MultipletList.className    : MultipletListPropertiesPopup,
     # SpectrumGroup.className    : SpectrumGroupEditor,
-    Sample.className           : SamplePropertiesPopup,
-    SampleComponent.className  : EditSampleComponentPopup,
+    # Sample.className           : SamplePropertiesPopup,
+    # SampleComponent.className  : EditSampleComponentPopup,
     Substance.className        : SubstancePropertiesPopup,
     NmrChain.className         : NmrChainPopup,
     NmrResidue.className       : NmrResiduePopup,
@@ -898,22 +898,22 @@ def _createNewRestraintListPopup(className, dataPid, sideBarItem):
                     showWarning('Restraints', 'Error modifying restraint type')
 
 
-def _createNewSampleComponentPopup(className, dataPid, sideBarItem):
-    """Create a new object of instance className from a popup
-    """
-    if className is not None:
-        popupFunc = NEW_ITEM_DICT.get(className)
-        if popupFunc:
-            project = sideBarItem.sidebar._project
-            application = project.application
-
-            itemParent = sideBarItem.obj
-            popup = popupFunc(parent=application.ui.mainWindow, mainWindow=application.ui.mainWindow,
-                              sample=itemParent, newSampleComponent=True)
-
-            # make the popup appear in the middle of mainWindow
-            popup.exec_()
-            popup.raise_()
+# def _createNewSampleComponentPopup(className, dataPid, sideBarItem):
+#     """Create a new object of instance className from a popup
+#     """
+#     if className is not None:
+#         popupFunc = NEW_ITEM_DICT.get(className)
+#         if popupFunc:
+#             project = sideBarItem.sidebar._project
+#             application = project.application
+#
+#             itemParent = sideBarItem.obj
+#             popup = popupFunc(parent=application.ui.mainWindow, mainWindow=application.ui.mainWindow,
+#                               sample=itemParent, newSampleComponent=True)
+#
+#             # make the popup appear in the middle of mainWindow
+#             popup.exec_()
+#             popup.raise_()
 
 
 def _raisePopup(dataPid, sideBarItem):
@@ -989,6 +989,9 @@ class _createNewMultipletList(createNewObjectABC):
 class _createNewIntegralList(createNewObjectABC):
     parentMethodName = 'newIntegralList'
 
+class _createNewSample(createNewObjectABC):
+    parentMethodName = 'newSample'
+
 
 class raisePopupABC():
     """
@@ -997,18 +1000,21 @@ class raisePopupABC():
     """
 
     # These should be subclassed
-    popupClass = None
-    objectArgumentName = None
+    popupClass = None  # a sub-class of CcpNmrDialog; used to generate a popup
+    objectArgumentName = None  # argument name set to obj passed to popupClass instantiation
+    parentObjectArgumentName = None  # parent argument name set to obj passed to popupClass instantiation when useParent==True
 
     # This can be subclassed
     def getObj(self):
-        """returns obj from node or None"""
+        """returns obj from node or None
+        """
         return self.node.obj
 
-    def __init__(self, **kwds):
-        # store kewyword as attributes and as dict; acts as partial to popupClass
-        for key, value in kwds.items():
-            setattr(self, key, value)
+    def __init__(self, useParent=False, **kwds):
+        # store kwds; acts as partial to popupClass
+        self.useParent = useParent  # Use parent of object
+        if useParent and self.parentObjectArgumentName == None:
+            raise RuntimeError('useParent==True requires definition of parentObjectArgumentName (%s)' % self)
         self.kwds = kwds
         # these get set upon callback
         self.node = None
@@ -1018,16 +1024,15 @@ class raisePopupABC():
         self.node = node
         self.dataPid = dataPid
         obj = self.getObj()
-        self.kwds[self.objectArgumentName] = obj
+        if self.useParent:
+            self.kwds[self.parentObjectArgumentName] = obj
+        else:
+            self.kwds[self.objectArgumentName] = obj
 
         popup = self.popupClass(parent=node.sidebar, mainWindow=node.sidebar.mainWindow,
                                 **self.kwds)
         popup.exec()
         popup.raise_()
-
-class _raiseSpectrumPopup(raisePopupABC):
-    popupClass = SpectrumPropertiesPopup
-    objectArgumentName = 'spectrum'
 
 class _raisePeakListPopup(raisePopupABC):
     popupClass = PeakListPropertiesPopup
@@ -1040,6 +1045,20 @@ class _raiseMultipletListPopup(raisePopupABC):
 class _raiseIntegralListPopup(raisePopupABC):
     popupClass = IntegralListPropertiesPopup
     objectArgumentName = 'integralList'
+
+class _raiseSamplePopup(raisePopupABC):
+    popupClass = SamplePropertiesPopup
+    objectArgumentName = 'sample'
+
+class _raiseSampleComponentPopup(raisePopupABC):
+    popupClass = EditSampleComponentPopup
+    # NB This popup is structured slightly different, passing in different arguments
+    objectArgumentName = 'sampleComponent'
+    parentObjectArgumentName = 'sample'
+
+class _raiseSpectrumPopup(raisePopupABC):
+    popupClass = SpectrumPropertiesPopup
+    objectArgumentName = 'spectrum'
 
 class _raiseSpectrumGroupPopup(raisePopupABC):
     popupClass = SpectrumGroupEditor
@@ -1088,11 +1107,13 @@ class SideBarStructure(object):
 
             #------ Samples, SampleComponents ------
             SidebarTree('Samples', closed=True, children=[
-                SidebarItem('<New Sample>', callback=partial(_createNewObject, Sample.className)),
-                SidebarClassTreeItems(klass=Sample, rebuildOnRename='Sample-ClassTreeItems', children=[
-                    SidebarItem('<New SampleComponent>', callback=partial(_createNewSampleComponentPopup, SampleComponent.className)),
-                    SidebarClassItems(klass=SampleComponent, rebuildOnRename='Sample-ClassTreeItems', callback=_raisePopup),
-                    ], callback=_raisePopup),
+                SidebarItem('<New Sample>', callback=_createNewSample()),
+                SidebarClassTreeItems(klass=Sample, rebuildOnRename='Sample-ClassTreeItems',
+                                      callback=_raiseSamplePopup(), children=[
+                    SidebarItem('<New SampleComponent>', callback=_raiseSampleComponentPopup(useParent=True, newSampleComponent=True)),
+                    SidebarClassItems(klass=SampleComponent, rebuildOnRename='Sample-ClassTreeItems',
+                                      callback=_raiseSampleComponentPopup(newSampleComponent=False)),
+                    ]),
                 ]),
 
             #------ Substances ------

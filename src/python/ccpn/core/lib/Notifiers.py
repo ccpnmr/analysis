@@ -557,7 +557,7 @@ class NotifierBase(object):
 
         return False
 
-    def searchNotifiers(self, theObject=None, triggers=None, targetName=None):
+    def searchNotifiers(self, objects=[], triggers=None, targetName=None):
         """Search whether a notifier with the given parameters is already in the list.
         The triggers CREATE, DELETE, RENAME and CHANGE can be combined in the call signature
 
@@ -567,21 +567,21 @@ class NotifierBase(object):
         :return: None or list of existing notifiers
         """
         if not hasattr(self, self.NOTIFIERSDICT):
-            return None
+            return ()
 
         objNotifiers = self._getObjectNotifiersDict()
         if len(objNotifiers) == 0:
-            return None
+            return ()
 
         foundNotifiers = ()
         for notifier in objNotifiers.values():
-            if theObject is notifier._theObject and targetName == notifier._targetName:
+            if notifier._theObject in objects and targetName == notifier._targetName:
 
                 # check if the notifier permutations match
                 if tuple(triggers) in permutations(notifier._triggers):
                     foundNotifiers += (notifier,)
 
-        return foundNotifiers if foundNotifiers else None
+        return foundNotifiers
 
     def deleteAllNotifiers(self):
         """Unregister all the notifiers"""

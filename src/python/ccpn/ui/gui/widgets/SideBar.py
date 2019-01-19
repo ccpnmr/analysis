@@ -357,7 +357,7 @@ class SidebarABC(NotifierBase):
             triggers = self.kwds['triggers'] if 'triggers' in self.kwds else [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME]
 
             # quick integrity test to make the tree is building correctly
-            if not self.searchNotifiers(theObject=parent.obj, triggers=triggers, targetName=self.klass.className):
+            if not self.searchNotifiers(objects=[parent.obj], triggers=triggers, targetName=self.klass.className):
                 self.setNotifier(parent.obj, triggers, targetName=self.klass.className, callback=self._update)
 
         # code like this needs to be in the sub-classes:

@@ -122,30 +122,30 @@ OpenObjAction = {
 # NEWPEAKLIST = 'newPeakList'
 # NEWINTEGRALLIST = 'newIntegralList'
 # NEWMULTIPLETLIST = 'newMultipletList'
-NEWNMRRESIDUE = 'newNmrResidue'
-NEWNMRATOM = 'newNmrAtom'
+# NEWNMRRESIDUE = 'newNmrResidue'
+# NEWNMRATOM = 'newNmrAtom'
 NEWRESTRAINTLIST = 'newRestraintList'
 NEWRESTRAINT = 'newRestraint'
 NEWMODEL = 'newModel'
 NEWNOTE = 'newNote'
 NEWSTRUCTUREENSEMBLE = 'newStructureEnsemble'
 # NEWSAMPLE = 'newSample'
-NEWNMRCHAIN = 'newNmrChain'
+# NEWNMRCHAIN = 'newNmrChain'
 # NEWCHAIN = 'newChain'
 # NEWSUBSTANCE = 'newSubstance'
 NEWCHEMICALSHIFTLIST = 'newChemicalShiftList'
 NEWDATASET = 'newDataSet'
 # NEWSPECTRUMGROUP = 'newSpectrumGroup'
-NEWCOMPLEX = 'newComplex'
+# NEWCOMPLEX = 'newComplex'
 
 NEW_ITEM_DICT = {
 
     # PeakList.className         : NEWPEAKLIST,
     # IntegralList.className     : NEWINTEGRALLIST,
     # MultipletList.className    : NEWMULTIPLETLIST,
-    NmrChain.className         : CreateNmrChainPopup,
-    NmrResidue.className       : NEWNMRRESIDUE,
-    NmrAtom.className          : NEWNMRATOM,
+    # NmrChain.className         : CreateNmrChainPopup,
+    # NmrResidue.className       : NEWNMRRESIDUE,
+    # NmrAtom.className          : NEWNMRATOM,
     RestraintList.className    : RestraintTypePopup,
     Restraint.className        : NEWRESTRAINT,
     StructureEnsemble.className: NEWSTRUCTUREENSEMBLE,
@@ -156,7 +156,7 @@ NEW_ITEM_DICT = {
     ChemicalShiftList.className: NEWCHEMICALSHIFTLIST,
     DataSet.className          : NEWDATASET,
     # SpectrumGroup.className    : SpectrumGroupEditor,
-    Complex.className          : NEWCOMPLEX,
+    # Complex.className          : NEWCOMPLEX,
     Model.className            : NEWMODEL,
     Note.className             : NEWNOTE,
     }
@@ -171,9 +171,9 @@ EDIT_ITEM_DICT = {
     # Sample.className           : SamplePropertiesPopup,
     # SampleComponent.className  : EditSampleComponentPopup,
     # Substance.className        : SubstancePropertiesPopup,
-    NmrChain.className         : NmrChainPopup,
-    NmrResidue.className       : NmrResiduePopup,
-    NmrAtom.className          : NmrAtomPopup,
+    # NmrChain.className         : NmrChainPopup,
+    # NmrResidue.className       : NmrResiduePopup,
+    # NmrAtom.className          : NmrAtomPopup,
     ChemicalShiftList.className: ChemicalShiftListPopup,
     StructureEnsemble.className: StructurePopup,
     DataSet.className          : DataSetPopup,
@@ -987,6 +987,12 @@ class _createNewPeakList(createNewObjectABC):
 class _createNewMultipletList(createNewObjectABC):
     parentMethodName = 'newMultipletList'
 
+class _createNewNmrResidue(createNewObjectABC):
+    parentMethodName = 'newNmrResidue'
+
+class _createNewNmrAtom(createNewObjectABC):
+    parentMethodName = 'newNmrAtom'
+
 class _createNewIntegralList(createNewObjectABC):
     parentMethodName = 'newIntegralList'
 
@@ -1051,6 +1057,22 @@ class _raisePeakListPopup(raisePopupABC):
 class _raiseMultipletListPopup(raisePopupABC):
     popupClass = MultipletListPropertiesPopup
     objectArgumentName = 'multipletList'
+
+class _raiseCreateNmrChainPopup(raisePopupABC):
+    popupClass = CreateNmrChainPopup
+    objectArgumentName = 'project'
+
+class _raiseEditNmrChainPopup(raisePopupABC):
+    popupClass = NmrChainPopup
+    objectArgumentName = 'nmrChain'
+
+class _raiseNmrResiduePopup(raisePopupABC):
+    popupClass = NmrResiduePopup
+    objectArgumentName = 'nmrResidue'
+
+class _raiseNmrAtomPopup(raisePopupABC):
+    popupClass = NmrAtomPopup
+    objectArgumentName = 'nmrAtom'
 
 class _raiseIntegralListPopup(raisePopupABC):
     popupClass = IntegralListPropertiesPopup
@@ -1145,20 +1167,23 @@ class SideBarStructure(object):
 
             #------ Complexes ------
             SidebarTree('Complexes', closed=True, children=[
-                SidebarItem('<New Complex>', callback=partial(_createNewObjectPopup, Complex.className)),
-                SidebarClassTreeItems(klass=Complex, rebuildOnRename='Complex-ClassTreeItems', callback=_raisePopup),
+                SidebarItem('<New Complex>', callback=NYI),
+                SidebarClassTreeItems(klass=Complex, rebuildOnRename='Complex-ClassTreeItems', callback=NYI),
                 ]),
 
             #------ NmrChains, NmrResidues, NmrAtoms ------
             SidebarTree('NmrChains', closed=True, children=[
-                SidebarItem('<New NmrChain>', callback=partial(_createNewObjectPopup, NmrChain.className)),
-                SidebarClassTreeItems(klass=NmrChain, rebuildOnRename='NmrChain-ClassTreeItems', children=[
-                    SidebarItem('<New NmrResidue>', callback=partial(_createNewObject, NmrResidue.className)),
-                    SidebarClassNmrResidueTreeItems(klass=NmrResidue, rebuildOnRename='NmrChain-ClassTreeItems', children=[
-                        SidebarItem('<New NmrAtom>', callback=partial(_createNewObject, NmrAtom.className)),
-                        SidebarClassItems(klass=NmrAtom, rebuildOnRename='NmrChain-ClassTreeItems', callback=_raisePopup),
-                        ], callback=_raisePopup),
-                    ], callback=_raisePopup),
+                SidebarItem('<New NmrChain>', callback=_raiseCreateNmrChainPopup()),
+                SidebarClassTreeItems(klass=NmrChain, rebuildOnRename='NmrChain-ClassTreeItems',
+                                      callback=_raiseEditNmrChainPopup(), children=[
+                    SidebarItem('<New NmrResidue>', callback=_createNewNmrResidue()),
+                    SidebarClassNmrResidueTreeItems(klass=NmrResidue, rebuildOnRename='NmrChain-ClassTreeItems',
+                                                    callback=_raiseNmrResiduePopup(), children=[
+                        SidebarItem('<New NmrAtom>', callback=_createNewNmrAtom()),
+                        SidebarClassItems(klass=NmrAtom, rebuildOnRename='NmrChain-ClassTreeItems',
+                                          callback=_raiseNmrAtomPopup()),
+                        ]),
+                    ]),
                 ]),
 
             #------ ChemicalShiftLists ------

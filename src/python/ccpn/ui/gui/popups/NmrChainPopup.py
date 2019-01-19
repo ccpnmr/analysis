@@ -36,11 +36,12 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 
 class NmrChainPopup(CcpnDialog):
-    def __init__(self, parent=None, mainWindow=None, nmrChain=None, title='Nmr Chains', **kwds):
+
+    def __init__(self, parent=None, mainWindow=None, nmrChain=None, **kwds):
         """
         Initialise the widget
         """
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='Edit NmrChain', **kwds)
 
         self.mainWindow = mainWindow
         self.application = mainWindow.application
@@ -48,7 +49,7 @@ class NmrChainPopup(CcpnDialog):
         self.current = mainWindow.application.current
 
         self.nmrChain = nmrChain
-        self.nmrChainLabel = Label(self, "NmrChain Name ", grid=(0, 0))
+        self.nmrChainLabel = Label(self, "Name ", grid=(0, 0))
         self.nmrChainText = LineEdit(self, nmrChain.shortName, grid=(0, 1))
         buttonList = ButtonList(self, ['Cancel', 'OK'], [self.reject, self._okButton], grid=(1, 1))
 
@@ -58,6 +59,7 @@ class NmrChainPopup(CcpnDialog):
             if str(newName) != self.nmrChain.shortName:
                 self.nmrChain.rename(newName)  # currently okay for undo as only does one thing
             self.accept()
+
         except Exception as es:
             showWarning(self.windowTitle(), str(es))
             if self.application._isInDebugMode:

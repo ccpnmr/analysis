@@ -43,11 +43,11 @@ import sys
 
 
 class NmrResiduePopup(CcpnDialog):
-    def __init__(self, parent=None, mainWindow=None, nmrResidue=None, nmrAtom=None, title='NmrResidue', **kwds):
+    def __init__(self, parent=None, mainWindow=None, nmrResidue=None, **kwds):
         """
         Initialise the widget
         """
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='Edit NmrResidue', **kwds)
 
         self.mainWindow = mainWindow
         self.application = mainWindow.application
@@ -55,7 +55,8 @@ class NmrResiduePopup(CcpnDialog):
         self.current = mainWindow.application.current
 
         self._parent = parent
-        self.nmrAtom = nmrAtom
+        self.nmrResidue = nmrResidue  # Also set in updatePopup
+        # self.nmrAtom = nmrAtom
 
         row = 0
         hspan = 3
@@ -85,7 +86,7 @@ class NmrResiduePopup(CcpnDialog):
 
     def _updatePopup(self, nmrResidue):
         if nmrResidue is not None:
-            self.setWindowTitle(nmrResidue.pid)
+            self.setWindowTitle('Edit ' + str(nmrResidue.pid))
             self.nmrResidue = nmrResidue
 
             chain = nmrResidue.nmrChain

@@ -129,10 +129,10 @@ NEWRESTRAINT = 'newRestraint'
 NEWMODEL = 'newModel'
 NEWNOTE = 'newNote'
 NEWSTRUCTUREENSEMBLE = 'newStructureEnsemble'
-NEWSAMPLE = 'newSample'
+# NEWSAMPLE = 'newSample'
 NEWNMRCHAIN = 'newNmrChain'
 NEWCHAIN = 'newChain'
-NEWSUBSTANCE = 'newSubstance'
+# NEWSUBSTANCE = 'newSubstance'
 NEWCHEMICALSHIFTLIST = 'newChemicalShiftList'
 NEWDATASET = 'newDataSet'
 # NEWSPECTRUMGROUP = 'newSpectrumGroup'
@@ -152,7 +152,7 @@ NEW_ITEM_DICT = {
     # Sample.className           : NEWSAMPLE,
     # SampleComponent.className  : EditSampleComponentPopup,
     Chain.className            : CreateChainPopup,
-    Substance.className        : SubstancePropertiesPopup,
+    # Substance.className        : SubstancePropertiesPopup,
     ChemicalShiftList.className: NEWCHEMICALSHIFTLIST,
     DataSet.className          : NEWDATASET,
     # SpectrumGroup.className    : SpectrumGroupEditor,
@@ -170,7 +170,7 @@ EDIT_ITEM_DICT = {
     # SpectrumGroup.className    : SpectrumGroupEditor,
     # Sample.className           : SamplePropertiesPopup,
     # SampleComponent.className  : EditSampleComponentPopup,
-    Substance.className        : SubstancePropertiesPopup,
+    # Substance.className        : SubstancePropertiesPopup,
     NmrChain.className         : NmrChainPopup,
     NmrResidue.className       : NmrResiduePopup,
     NmrAtom.className          : NmrAtomPopup,
@@ -1008,13 +1008,18 @@ class raisePopupABC():
     def getObj(self):
         """returns obj from node or None
         """
-        return self.node.obj
+        obj = None if self.useNone else self.node.obj
+        return obj
 
-    def __init__(self, useParent=False, **kwds):
-        # store kwds; acts as partial to popupClass
+    def __init__(self, useParent=False, useNone=False, **kwds):
+        """store kwds; acts as partial to popupClass
+        useParent: use parentObjectArgumentName for passing obj to popupClass
+        useNone: set obj to None
+        """
         self.useParent = useParent  # Use parent of object
         if useParent and self.parentObjectArgumentName == None:
             raise RuntimeError('useParent==True requires definition of parentObjectArgumentName (%s)' % self)
+        self.useNone = useNone
         self.kwds = kwds
         # these get set upon callback
         self.node = None
@@ -1064,6 +1069,9 @@ class _raiseSpectrumGroupPopup(raisePopupABC):
     popupClass = SpectrumGroupEditor
     objectArgumentName = 'spectrumGroup'
 
+class _raiseSubstancePopup(raisePopupABC):
+    popupClass = SubstancePropertiesPopup
+    objectArgumentName = 'substance'
 
 #===========================================================================================================
 # SideBar tree structure
@@ -1098,7 +1106,7 @@ class SideBarStructure(object):
 
             #------ SpectrumGroups ------
             SidebarTree('SpectrumGroups', closed=True, children=[
-                SidebarItem('<New SpectrumGroup>', callback=_raiseSpectrumGroupPopup(editMode=False)),
+                SidebarItem('<New SpectrumGroup>', callback=_raiseSpectrumGroupPopup(useNone=True, editMode=False)),
                 SidebarClassTreeItems(klass=SpectrumGroup, triggers=[Notifier.DELETE, Notifier.CREATE, Notifier.RENAME, Notifier.CHANGE],
                                       callback=_raiseSpectrumGroupPopup(editMode=True), children=[
                     SidebarClassSpectrumTreeItems(klass=Spectrum, callback=_raiseSpectrumPopup()),
@@ -1118,8 +1126,8 @@ class SideBarStructure(object):
 
             #------ Substances ------
             SidebarTree('Substances', closed=True, children=[
-                SidebarItem('<New Substance>', callback=partial(_createNewObjectPopup, Substance.className, newSubstance=True)),
-                SidebarClassItems(klass=Substance, callback=_raisePopup),
+                SidebarItem('<New Substance>', callback=_raiseSubstancePopup(useNone=True, newSubstance=True)),
+                SidebarClassItems(klass=Substance, callback=_raiseSubstancePopup(newSubstance=False)),
                 ]),
 
             #------ Chains, Residues ------

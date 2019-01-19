@@ -64,11 +64,11 @@ class SubstancePropertiesPopup(CcpnDialog):
         self.application = mainWindow.application
         self.project = mainWindow.application.project
         self.current = mainWindow.application.current
+        self.preferences = self.application.preferences
 
-        self.sample = parent
+        # self.sample = parent # GWV: this cannot be correct
         self.sampleComponent = sampleComponent
         self.substance = substance
-        self.preferences = self.application.preferences
 
         self.createNewSubstance = newSubstance
 

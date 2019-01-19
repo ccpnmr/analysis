@@ -2030,7 +2030,7 @@ class Framework(NotifierBase):
         else:
             from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 
-            SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editorMode=True).exec_()
+            SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editMode=True).exec_()
 
     def showProjectionPopup(self):
         if not self.project.spectra:

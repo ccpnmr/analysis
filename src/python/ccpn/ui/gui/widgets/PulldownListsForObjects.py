@@ -108,6 +108,9 @@ class _PulldownABC(PulldownListCompoundWidget):
             raise ValueError('followCurrent option only valid if _currentAttributeName is defined for class')
         self._followCurrent = followCurrent
 
+        if default is not None:
+            default = self.object2value(default)
+
         super().__init__(parent=parent, showBorder=showBorder,
                          orientation=orientation,
                          minimumWidths=minimumWidths, maximumWidths=maximumWidths, fixedWidths=fixedWidths,

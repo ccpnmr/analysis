@@ -51,9 +51,6 @@ class CcpnDialog(QtWidgets.QDialog, Base):
         self.setContentsMargins(15, 15, 15, 15)
         self.resize(*size)
 
-        # self.mainLayout = QtWidgets.QGridLayout()   # ejb - handled inside Base
-        # self.setLayout(self.mainLayout)
-
     def fixedSize(self):
         self.sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         self.sizePolicy.setHorizontalStretch(0)

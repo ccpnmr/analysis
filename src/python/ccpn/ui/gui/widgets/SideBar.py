@@ -119,9 +119,9 @@ OpenObjAction = {
     StructureEnsemble: _openStructureTable
     }
 
-NEWPEAKLIST = 'newPeakList'
-NEWINTEGRALLIST = 'newIntegralList'
-NEWMULTIPLETLIST = 'newMultipletList'
+# NEWPEAKLIST = 'newPeakList'
+# NEWINTEGRALLIST = 'newIntegralList'
+# NEWMULTIPLETLIST = 'newMultipletList'
 NEWNMRRESIDUE = 'newNmrResidue'
 NEWNMRATOM = 'newNmrAtom'
 NEWRESTRAINTLIST = 'newRestraintList'
@@ -135,27 +135,27 @@ NEWCHAIN = 'newChain'
 NEWSUBSTANCE = 'newSubstance'
 NEWCHEMICALSHIFTLIST = 'newChemicalShiftList'
 NEWDATASET = 'newDataSet'
-NEWSPECTRUMGROUP = 'newSpectrumGroup'
+# NEWSPECTRUMGROUP = 'newSpectrumGroup'
 NEWCOMPLEX = 'newComplex'
 
 NEW_ITEM_DICT = {
 
-    PeakList.className         : NEWPEAKLIST,
-    IntegralList.className     : NEWINTEGRALLIST,
-    MultipletList.className    : NEWMULTIPLETLIST,
+    # PeakList.className         : NEWPEAKLIST,
+    # IntegralList.className     : NEWINTEGRALLIST,
+    # MultipletList.className    : NEWMULTIPLETLIST,
     NmrChain.className         : CreateNmrChainPopup,
     NmrResidue.className       : NEWNMRRESIDUE,
     NmrAtom.className          : NEWNMRATOM,
     RestraintList.className    : RestraintTypePopup,
     Restraint.className        : NEWRESTRAINT,
     StructureEnsemble.className: NEWSTRUCTUREENSEMBLE,
-    Sample.className           : NEWSAMPLE,
-    SampleComponent.className  : EditSampleComponentPopup,
+    # Sample.className           : NEWSAMPLE,
+    # SampleComponent.className  : EditSampleComponentPopup,
     Chain.className            : CreateChainPopup,
     Substance.className        : SubstancePropertiesPopup,
     ChemicalShiftList.className: NEWCHEMICALSHIFTLIST,
     DataSet.className          : NEWDATASET,
-    SpectrumGroup.className    : SpectrumGroupEditor,
+    # SpectrumGroup.className    : SpectrumGroupEditor,
     Complex.className          : NEWCOMPLEX,
     Model.className            : NEWMODEL,
     Note.className             : NEWNOTE,
@@ -163,13 +163,13 @@ NEW_ITEM_DICT = {
 
 EDIT_ITEM_DICT = {
 
-    Spectrum.className         : SpectrumPropertiesPopup,
-    PeakList.className         : PeakListPropertiesPopup,
-    IntegralList.className     : IntegralListPropertiesPopup,
-    MultipletList.className    : MultipletListPropertiesPopup,
-    SpectrumGroup.className    : SpectrumGroupEditor,
-    Sample.className           : SamplePropertiesPopup,
-    SampleComponent.className  : EditSampleComponentPopup,
+    # Spectrum.className         : SpectrumPropertiesPopup,
+    # PeakList.className         : PeakListPropertiesPopup,
+    # IntegralList.className     : IntegralListPropertiesPopup,
+    # MultipletList.className    : MultipletListPropertiesPopup,
+    # SpectrumGroup.className    : SpectrumGroupEditor,
+    # Sample.className           : SamplePropertiesPopup,
+    # SampleComponent.className  : EditSampleComponentPopup,
     Substance.className        : SubstancePropertiesPopup,
     NmrChain.className         : NmrChainPopup,
     NmrResidue.className       : NmrResiduePopup,
@@ -825,6 +825,10 @@ class SidebarClassNmrResidueTreeItems(SidebarClassABC):
         return classObjs
 
 
+#===========================================================================================================
+# Callback routines
+#===========================================================================================================
+
 def NYI(*args, **kwds):
     print('>>>NYI: Not implemented yet', *args, **kwds)
 
@@ -894,22 +898,22 @@ def _createNewRestraintListPopup(className, dataPid, sideBarItem):
                     showWarning('Restraints', 'Error modifying restraint type')
 
 
-def _createNewSampleComponentPopup(className, dataPid, sideBarItem):
-    """Create a new object of instance className from a popup
-    """
-    if className is not None:
-        popupFunc = NEW_ITEM_DICT.get(className)
-        if popupFunc:
-            project = sideBarItem.sidebar._project
-            application = project.application
-
-            itemParent = sideBarItem.obj
-            popup = popupFunc(parent=application.ui.mainWindow, mainWindow=application.ui.mainWindow,
-                              sample=itemParent, newSampleComponent=True)
-
-            # make the popup appear in the middle of mainWindow
-            popup.exec_()
-            popup.raise_()
+# def _createNewSampleComponentPopup(className, dataPid, sideBarItem):
+#     """Create a new object of instance className from a popup
+#     """
+#     if className is not None:
+#         popupFunc = NEW_ITEM_DICT.get(className)
+#         if popupFunc:
+#             project = sideBarItem.sidebar._project
+#             application = project.application
+#
+#             itemParent = sideBarItem.obj
+#             popup = popupFunc(parent=application.ui.mainWindow, mainWindow=application.ui.mainWindow,
+#                               sample=itemParent, newSampleComponent=True)
+#
+#             # make the popup appear in the middle of mainWindow
+#             popup.exec_()
+#             popup.raise_()
 
 
 def _raisePopup(dataPid, sideBarItem):
@@ -938,6 +942,132 @@ def _raisePopup(dataPid, sideBarItem):
             info = showInfo('Not implemented yet!',
                             'This function has not been implemented in the current version')
 
+#===========================================================================================================
+# ABC's + specific callback classes
+#===========================================================================================================
+
+class createNewObjectABC():
+    """
+    An ABC to implement an abstract callback function to create new object
+    The __call__(self, dataPid, node) method acts as the callback function
+    """
+
+    # These should be subclassed
+    parentMethodName = None  # The name of the method in the parent class
+
+    # This can be subclassed
+    def getObj(self):
+        """returns obj from node or None"""
+        return self.node.obj
+
+    def __init__(self, **kwds):
+        # store kewyword as attributes and as dict; acts as partial to popupClass
+        for key, value in kwds.items():
+            setattr(self, key, value)
+        self.kwds = kwds
+        # these get set upon callback
+        self.node = None
+        self.dataPid = None
+
+    def __call__(self, dataPid, node):
+        self.node = node
+        self.dataPid = dataPid
+        obj = self.getObj()
+        # generate the new object
+        func = getattr(obj, self.parentMethodName)
+        if func is None:
+            raise RuntimeError('Undefined function; cannot create new object (%s)' % dataPid)
+        newObj = func(**self.kwds)
+        return newObj
+
+class _createNewPeakList(createNewObjectABC):
+    parentMethodName = 'newPeakList'
+
+class _createNewMultipletList(createNewObjectABC):
+    parentMethodName = 'newMultipletList'
+
+class _createNewIntegralList(createNewObjectABC):
+    parentMethodName = 'newIntegralList'
+
+class _createNewSample(createNewObjectABC):
+    parentMethodName = 'newSample'
+
+
+class raisePopupABC():
+    """
+    An ABC to implement an abstract popup class
+    The __call__(self, dataPid, node) method acts as the callback function
+    """
+
+    # These should be subclassed
+    popupClass = None  # a sub-class of CcpNmrDialog; used to generate a popup
+    objectArgumentName = None  # argument name set to obj passed to popupClass instantiation
+    parentObjectArgumentName = None  # parent argument name set to obj passed to popupClass instantiation when useParent==True
+
+    # This can be subclassed
+    def getObj(self):
+        """returns obj from node or None
+        """
+        return self.node.obj
+
+    def __init__(self, useParent=False, **kwds):
+        # store kwds; acts as partial to popupClass
+        self.useParent = useParent  # Use parent of object
+        if useParent and self.parentObjectArgumentName == None:
+            raise RuntimeError('useParent==True requires definition of parentObjectArgumentName (%s)' % self)
+        self.kwds = kwds
+        # these get set upon callback
+        self.node = None
+        self.dataPid = None
+
+    def __call__(self, dataPid, node):
+        self.node = node
+        self.dataPid = dataPid
+        obj = self.getObj()
+        if self.useParent:
+            self.kwds[self.parentObjectArgumentName] = obj
+        else:
+            self.kwds[self.objectArgumentName] = obj
+
+        popup = self.popupClass(parent=node.sidebar, mainWindow=node.sidebar.mainWindow,
+                                **self.kwds)
+        popup.exec()
+        popup.raise_()
+
+class _raisePeakListPopup(raisePopupABC):
+    popupClass = PeakListPropertiesPopup
+    objectArgumentName = 'peakList'
+
+class _raiseMultipletListPopup(raisePopupABC):
+    popupClass = MultipletListPropertiesPopup
+    objectArgumentName = 'multipletList'
+
+class _raiseIntegralListPopup(raisePopupABC):
+    popupClass = IntegralListPropertiesPopup
+    objectArgumentName = 'integralList'
+
+class _raiseSamplePopup(raisePopupABC):
+    popupClass = SamplePropertiesPopup
+    objectArgumentName = 'sample'
+
+class _raiseSampleComponentPopup(raisePopupABC):
+    popupClass = EditSampleComponentPopup
+    # NB This popup is structured slightly different, passing in different arguments
+    objectArgumentName = 'sampleComponent'
+    parentObjectArgumentName = 'sample'
+
+class _raiseSpectrumPopup(raisePopupABC):
+    popupClass = SpectrumPropertiesPopup
+    objectArgumentName = 'spectrum'
+
+class _raiseSpectrumGroupPopup(raisePopupABC):
+    popupClass = SpectrumGroupEditor
+    objectArgumentName = 'spectrumGroup'
+
+
+#===========================================================================================================
+# SideBar tree structure
+#===========================================================================================================
 
 class SideBarStructure(object):
     """
@@ -950,52 +1080,40 @@ class SideBarStructure(object):
 
             #------ Spectra, PeakLists, MultipletLists, IntegralLists ------
             SidebarTree('Spectra', closed=True, children=[
-                SidebarClassTreeItems(klass=Spectrum, children=[
-                    SidebarTree('PeakLists', closed=True, children=[
-                        SidebarItem('<New PeakList>', callback=partial(_createNewObject, PeakList.className)),
-                        SidebarClassItems(klass=PeakList, callback=_raisePopup),
+                SidebarClassTreeItems(klass=Spectrum, callback=_raiseSpectrumPopup(), children=[
+                    SidebarTree('PeakLists', closed=False, children=[
+                        SidebarItem('<New PeakList>', callback=_createNewPeakList()),
+                        SidebarClassItems(klass=PeakList, callback=_raisePeakListPopup()),
                         ]),
                     SidebarTree('MultipletLists', children=[
-                        SidebarItem('<New MultipletList>', callback=partial(_createNewObject, MultipletList.className)),
-                        SidebarClassItems(klass=MultipletList, callback=_raisePopup),
+                        SidebarItem('<New MultipletList>', callback=_createNewMultipletList()),
+                        SidebarClassItems(klass=MultipletList, callback=_raiseMultipletListPopup()),
                         ]),
                     SidebarTree('IntegralLists', children=[
-                        SidebarItem('<New IntegralList>', callback=partial(_createNewObject, IntegralList.className)),
-                        SidebarClassItems(klass=IntegralList, callback=_raisePopup),
+                        SidebarItem('<New IntegralList>', callback=_createNewIntegralList()),
+                        SidebarClassItems(klass=IntegralList, callback=_raiseIntegralListPopup()),
                         ]),
-                    ], callback=_raisePopup),
+                    ]),
                 ]),
 
             #------ SpectrumGroups ------
             SidebarTree('SpectrumGroups', closed=True, children=[
-                SidebarItem('<New SpectrumGroup>', callback=partial(_createNewObjectPopup, SpectrumGroup.className, addNew=True)),
-                SidebarClassTreeItems(klass=SpectrumGroup, triggers=[Notifier.DELETE, Notifier.CREATE, Notifier.RENAME, Notifier.CHANGE], children=[
-                    # SidebarClassItems(klass=Spectrum, rebuildOnRename='SpectrumGroup-ClassTreeItems', addNotifier=False, callback=_raisePopup),
-                    # ], callback=_raisePopup),
-                    SidebarClassSpectrumTreeItems(klass=Spectrum, children=[
-                        SidebarTree('PeakLists', closed=True, children=[
-                            SidebarItem('<New PeakList>', callback=partial(_createNewObject, PeakList.className)),
-                            SidebarClassItems(klass=PeakList, callback=_raisePopup),
-                            ]),
-                        SidebarTree('MultipletLists', children=[
-                            SidebarItem('<New MultipletList>', callback=partial(_createNewObject, MultipletList.className)),
-                            SidebarClassItems(klass=MultipletList, callback=_raisePopup),
-                            ]),
-                        SidebarTree('IntegralLists', children=[
-                            SidebarItem('<New IntegralList>', callback=partial(_createNewObject, IntegralList.className)),
-                            SidebarClassItems(klass=IntegralList, callback=_raisePopup),
-                            ]),
-                        ], callback=_raisePopup),
-                    ], callback=_raisePopup),
+                SidebarItem('<New SpectrumGroup>', callback=_raiseSpectrumGroupPopup(editMode=False)),
+                SidebarClassTreeItems(klass=SpectrumGroup, triggers=[Notifier.DELETE, Notifier.CREATE, Notifier.RENAME, Notifier.CHANGE],
+                                      callback=_raiseSpectrumGroupPopup(editMode=True), children=[
+                    SidebarClassSpectrumTreeItems(klass=Spectrum, callback=_raiseSpectrumPopup()),
+                    ]),
                 ]),
 
             #------ Samples, SampleComponents ------
             SidebarTree('Samples', closed=True, children=[
-                SidebarItem('<New Sample>', callback=partial(_createNewObject, Sample.className)),
-                SidebarClassTreeItems(klass=Sample, rebuildOnRename='Sample-ClassTreeItems', children=[
-                    SidebarItem('<New SampleComponent>', callback=partial(_createNewSampleComponentPopup, SampleComponent.className)),
-                    SidebarClassItems(klass=SampleComponent, rebuildOnRename='Sample-ClassTreeItems', callback=_raisePopup),
-                    ], callback=_raisePopup),
+                SidebarItem('<New Sample>', callback=_createNewSample()),
+                SidebarClassTreeItems(klass=Sample, rebuildOnRename='Sample-ClassTreeItems',
+                                      callback=_raiseSamplePopup(), children=[
+                    SidebarItem('<New SampleComponent>', callback=_raiseSampleComponentPopup(useParent=True, newSampleComponent=True)),
+                    SidebarClassItems(klass=SampleComponent, rebuildOnRename='Sample-ClassTreeItems',
+                                      callback=_raiseSampleComponentPopup(newSampleComponent=False)),
+                    ]),
                 ]),
 
             #------ Substances ------
@@ -1007,13 +1125,16 @@ class SideBarStructure(object):
             #------ Chains, Residues ------
             SidebarTree('Chains', closed=True, children=[
                 SidebarItem('<New Chain>', callback=partial(_createNewObjectPopup, Chain.className)),
-                SidebarClassTreeItems(klass=Chain, rebuildOnRename='Chain-ClassTreeItems', children=[
+                SidebarClassTreeItems(klass=Chain, rebuildOnRename='Chain-ClassTreeItems', callback=_raisePopup, children=[
                     SidebarClassTreeItems(klass=Residue, rebuildOnRename='Chain-ClassTreeItems', callback=_raisePopup),
-                    ], callback=_raisePopup),
+                    ]),
                 ]),
 
             #------ Complexes ------
-            SidebarTree('Complexes', closed=True),
+            SidebarTree('Complexes', closed=True, children=[
+                SidebarItem('<New Complex>', callback=partial(_createNewObjectPopup, Complex.className)),
+                SidebarClassTreeItems(klass=Complex, rebuildOnRename='Complex-ClassTreeItems', callback=_raisePopup),
+                ]),
 
             #------ NmrChains, NmrResidues, NmrAtoms ------
             SidebarTree('NmrChains', closed=True, children=[

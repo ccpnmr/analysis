@@ -131,7 +131,7 @@ NEWNOTE = 'newNote'
 NEWSTRUCTUREENSEMBLE = 'newStructureEnsemble'
 # NEWSAMPLE = 'newSample'
 NEWNMRCHAIN = 'newNmrChain'
-NEWCHAIN = 'newChain'
+# NEWCHAIN = 'newChain'
 # NEWSUBSTANCE = 'newSubstance'
 NEWCHEMICALSHIFTLIST = 'newChemicalShiftList'
 NEWDATASET = 'newDataSet'
@@ -151,7 +151,7 @@ NEW_ITEM_DICT = {
     StructureEnsemble.className: NEWSTRUCTUREENSEMBLE,
     # Sample.className           : NEWSAMPLE,
     # SampleComponent.className  : EditSampleComponentPopup,
-    Chain.className            : CreateChainPopup,
+    # Chain.className            : CreateChainPopup,
     # Substance.className        : SubstancePropertiesPopup,
     ChemicalShiftList.className: NEWCHEMICALSHIFTLIST,
     DataSet.className          : NEWDATASET,
@@ -830,7 +830,8 @@ class SidebarClassNmrResidueTreeItems(SidebarClassABC):
 #===========================================================================================================
 
 def NYI(*args, **kwds):
-    print('>>>NYI: Not implemented yet', *args, **kwds)
+    info = showInfo('Not implemented yet!',
+                    'This function has not been implemented in the current version')
 
 
 def _rightMousePopup(className, dataPid, sideBarItem, *args, **kwds):
@@ -1039,6 +1040,10 @@ class raisePopupABC():
         popup.exec()
         popup.raise_()
 
+class _raiseChainPopup(raisePopupABC):
+    popupClass = CreateChainPopup
+    parentObjectArgumentName = 'project'
+
 class _raisePeakListPopup(raisePopupABC):
     popupClass = PeakListPropertiesPopup
     objectArgumentName = 'peakList'
@@ -1132,9 +1137,9 @@ class SideBarStructure(object):
 
             #------ Chains, Residues ------
             SidebarTree('Chains', closed=True, children=[
-                SidebarItem('<New Chain>', callback=partial(_createNewObjectPopup, Chain.className)),
-                SidebarClassTreeItems(klass=Chain, rebuildOnRename='Chain-ClassTreeItems', callback=_raisePopup, children=[
-                    SidebarClassTreeItems(klass=Residue, rebuildOnRename='Chain-ClassTreeItems', callback=_raisePopup),
+                SidebarItem('<New Chain>', callback=_raiseChainPopup(useParent=True)),
+                SidebarClassTreeItems(klass=Chain, rebuildOnRename='Chain-ClassTreeItems', callback=NYI, children=[
+                    SidebarClassTreeItems(klass=Residue, rebuildOnRename='Chain-ClassTreeItems', callback=NYI),
                     ]),
                 ]),
 

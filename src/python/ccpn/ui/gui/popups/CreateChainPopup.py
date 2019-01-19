@@ -68,15 +68,15 @@ def _nextChainCode(project):
 
 
 class CreateChainPopup(CcpnDialog):
-    def __init__(self, parent=None, mainWindow=None, title='Generate Chain', **kwds):
+    def __init__(self, parent=None, mainWindow=None, project=None, **kwds):
         """
         Initialise the widget
         """
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='Create Chain', **kwds)
 
         self.mainWindow = mainWindow
         self.application = mainWindow.application
-        self.project = mainWindow.application.project
+        self.project = project if project is not None else mainWindow.application.project
         self.current = mainWindow.application.current
 
         label2a = Label(self, text="Molecule Name", grid=(2, 0))

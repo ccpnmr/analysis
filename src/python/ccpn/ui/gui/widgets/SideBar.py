@@ -1020,7 +1020,7 @@ class RaisePopupABC():
 
     # These should be subclassed
     popupClass = None  # a sub-class of CcpNmrDialog; used to generate a popup
-    objectArgumentName = None  # argument name set to obj passed to popupClass instantiation
+    objectArgumentName = 'obj'  # argument name set to obj passed to popupClass instantiation
     parentObjectArgumentName = None  # parent argument name set to obj passed to popupClass instantiation when useParent==True
 
     # This can be subclassed
@@ -1064,7 +1064,7 @@ class _raiseChainPopup(RaisePopupABC):
 
 class _raiseDataSetPopup(RaisePopupABC):
     popupClass = DataSetPopup
-    objectArgumentName = 'obj'
+    # objectArgumentName = 'obj'
 
 class _raiseChemicalShifListPopup(RaisePopupABC):
     popupClass = ChemicalShiftListPopup
@@ -1096,7 +1096,7 @@ class _raiseNmrAtomPopup(RaisePopupABC):
 
 class _raiseNotePopup(RaisePopupABC):
     popupClass = NotesPopup
-    objectArgumentName = 'note'
+    # objectArgumentName = 'obj'
 
 class _raiseIntegralListPopup(RaisePopupABC):
     popupClass = IntegralListPropertiesPopup
@@ -1127,7 +1127,7 @@ class _raiseSpectrumGroupPopup(RaisePopupABC):
 
 class _raiseStructureEnsemblePopup(RaisePopupABC):
     popupClass = StructureEnsemblePopup
-    objectArgumentName = 'obj'
+    # objectArgumentName = 'obj'
 
 class _raiseSubstancePopup(RaisePopupABC):
     popupClass = SubstancePropertiesPopup

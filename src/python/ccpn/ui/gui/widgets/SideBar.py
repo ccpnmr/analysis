@@ -133,7 +133,7 @@ NEWSTRUCTUREENSEMBLE = 'newStructureEnsemble'
 # NEWNMRCHAIN = 'newNmrChain'
 # NEWCHAIN = 'newChain'
 # NEWSUBSTANCE = 'newSubstance'
-NEWCHEMICALSHIFTLIST = 'newChemicalShiftList'
+# NEWCHEMICALSHIFTLIST = 'newChemicalShiftList'
 NEWDATASET = 'newDataSet'
 # NEWSPECTRUMGROUP = 'newSpectrumGroup'
 # NEWCOMPLEX = 'newComplex'
@@ -153,7 +153,7 @@ NEW_ITEM_DICT = {
     # SampleComponent.className  : EditSampleComponentPopup,
     # Chain.className            : CreateChainPopup,
     # Substance.className        : SubstancePropertiesPopup,
-    ChemicalShiftList.className: NEWCHEMICALSHIFTLIST,
+    # ChemicalShiftList.className: NEWCHEMICALSHIFTLIST,
     DataSet.className          : NEWDATASET,
     # SpectrumGroup.className    : SpectrumGroupEditor,
     # Complex.className          : NEWCOMPLEX,
@@ -174,7 +174,7 @@ EDIT_ITEM_DICT = {
     # NmrChain.className         : NmrChainPopup,
     # NmrResidue.className       : NmrResiduePopup,
     # NmrAtom.className          : NmrAtomPopup,
-    ChemicalShiftList.className: ChemicalShiftListPopup,
+    # ChemicalShiftList.className: ChemicalShiftListPopup,
     StructureEnsemble.className: StructurePopup,
     DataSet.className          : DataSetPopup,
     Note.className             : NotesPopup,
@@ -947,7 +947,7 @@ def _raisePopup(dataPid, sideBarItem):
 # ABC's + specific callback classes
 #===========================================================================================================
 
-class createNewObjectABC():
+class CreateNewObjectABC():
     """
     An ABC to implement an abstract callback function to create new object
     The __call__(self, dataPid, node) method acts as the callback function
@@ -981,26 +981,29 @@ class createNewObjectABC():
         newObj = func(**self.kwds)
         return newObj
 
-class _createNewPeakList(createNewObjectABC):
+class _createNewPeakList(CreateNewObjectABC):
     parentMethodName = 'newPeakList'
 
-class _createNewMultipletList(createNewObjectABC):
+class _createNewChemicalShiftList(CreateNewObjectABC):
+    parentMethodName = 'newChemicalShiftList'
+
+class _createNewMultipletList(CreateNewObjectABC):
     parentMethodName = 'newMultipletList'
 
-class _createNewNmrResidue(createNewObjectABC):
+class _createNewNmrResidue(CreateNewObjectABC):
     parentMethodName = 'newNmrResidue'
 
-class _createNewNmrAtom(createNewObjectABC):
+class _createNewNmrAtom(CreateNewObjectABC):
     parentMethodName = 'newNmrAtom'
 
-class _createNewIntegralList(createNewObjectABC):
+class _createNewIntegralList(CreateNewObjectABC):
     parentMethodName = 'newIntegralList'
 
-class _createNewSample(createNewObjectABC):
+class _createNewSample(CreateNewObjectABC):
     parentMethodName = 'newSample'
 
 
-class raisePopupABC():
+class RaisePopupABC():
     """
     An ABC to implement an abstract popup class
     The __call__(self, dataPid, node) method acts as the callback function
@@ -1046,57 +1049,61 @@ class raisePopupABC():
         popup.exec()
         popup.raise_()
 
-class _raiseChainPopup(raisePopupABC):
+class _raiseChainPopup(RaisePopupABC):
     popupClass = CreateChainPopup
     parentObjectArgumentName = 'project'
 
-class _raisePeakListPopup(raisePopupABC):
+class _raiseChemicalShifListPopup(RaisePopupABC):
+    popupClass = ChemicalShiftListPopup
+    objectArgumentName = 'chemicalShiftList'
+
+class _raisePeakListPopup(RaisePopupABC):
     popupClass = PeakListPropertiesPopup
     objectArgumentName = 'peakList'
 
-class _raiseMultipletListPopup(raisePopupABC):
+class _raiseMultipletListPopup(RaisePopupABC):
     popupClass = MultipletListPropertiesPopup
     objectArgumentName = 'multipletList'
 
-class _raiseCreateNmrChainPopup(raisePopupABC):
+class _raiseCreateNmrChainPopup(RaisePopupABC):
     popupClass = CreateNmrChainPopup
     objectArgumentName = 'project'
 
-class _raiseEditNmrChainPopup(raisePopupABC):
+class _raiseEditNmrChainPopup(RaisePopupABC):
     popupClass = NmrChainPopup
     objectArgumentName = 'nmrChain'
 
-class _raiseNmrResiduePopup(raisePopupABC):
+class _raiseNmrResiduePopup(RaisePopupABC):
     popupClass = NmrResiduePopup
     objectArgumentName = 'nmrResidue'
 
-class _raiseNmrAtomPopup(raisePopupABC):
+class _raiseNmrAtomPopup(RaisePopupABC):
     popupClass = NmrAtomPopup
     objectArgumentName = 'nmrAtom'
 
-class _raiseIntegralListPopup(raisePopupABC):
+class _raiseIntegralListPopup(RaisePopupABC):
     popupClass = IntegralListPropertiesPopup
     objectArgumentName = 'integralList'
 
-class _raiseSamplePopup(raisePopupABC):
+class _raiseSamplePopup(RaisePopupABC):
     popupClass = SamplePropertiesPopup
     objectArgumentName = 'sample'
 
-class _raiseSampleComponentPopup(raisePopupABC):
+class _raiseSampleComponentPopup(RaisePopupABC):
     popupClass = EditSampleComponentPopup
     # NB This popup is structured slightly different, passing in different arguments
     objectArgumentName = 'sampleComponent'
     parentObjectArgumentName = 'sample'
 
-class _raiseSpectrumPopup(raisePopupABC):
+class _raiseSpectrumPopup(RaisePopupABC):
     popupClass = SpectrumPropertiesPopup
     objectArgumentName = 'spectrum'
 
-class _raiseSpectrumGroupPopup(raisePopupABC):
+class _raiseSpectrumGroupPopup(RaisePopupABC):
     popupClass = SpectrumGroupEditor
     objectArgumentName = 'spectrumGroup'
 
-class _raiseSubstancePopup(raisePopupABC):
+class _raiseSubstancePopup(RaisePopupABC):
     popupClass = SubstancePropertiesPopup
     objectArgumentName = 'substance'
 
@@ -1142,8 +1149,8 @@ class SideBarStructure(object):
 
             #------ ChemicalShiftLists ------
             SidebarTree('ChemicalShiftLists', closed=True, children=[
-                SidebarItem('<New ChemicalShiftList>', callback=partial(_createNewObject, ChemicalShiftList.className)),
-                SidebarClassTreeItems(klass=ChemicalShiftList, callback=_raisePopup),
+                SidebarItem('<New ChemicalShiftList>', callback=_createNewChemicalShiftList()),
+                SidebarClassTreeItems(klass=ChemicalShiftList, callback=_raiseChemicalShifListPopup()),
                 ]),
 
             #------ NmrChains, NmrResidues, NmrAtoms ------

@@ -34,7 +34,11 @@ from ccpn.framework.Translation import translator
 TextAlignment = {
     'c': QtCore.Qt.AlignHCenter,
     'l': QtCore.Qt.AlignLeft,
-    'r': QtCore.Qt.AlignRight
+    'r': QtCore.Qt.AlignRight,
+    'center': QtCore.Qt.AlignHCenter,
+    'centre': QtCore.Qt.AlignHCenter,
+    'left': QtCore.Qt.AlignLeft,
+    'right': QtCore.Qt.AlignRight
     }
 
 

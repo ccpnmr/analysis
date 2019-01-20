@@ -1151,19 +1151,26 @@ class NmrResidue(AbstractWrapperObject):
             atHeadOfChain = True if len(stretch) > 1 and stretch[0] is self._wrappedData else False
 
         if not atHeadOfChain:
+            # do normal nmrResidue delete
             super().delete()
 
         else:
             with undoBlock():
-                with undoStackBlocking() as addUndoItem:
-                    addUndoItem(undo=partial(self._reverseChainForDelete, apiNmrChain))
+                # disconnect and then delete
 
-                # this is nearly okay
-                # except that the chain is reversed during the delete notifier phase
-                # needs to be moved into the model
-                super().delete()
-                with undoStackBlocking() as addUndoItem:
-                    addUndoItem(undo=partial(self._reverseChainForDelete, apiNmrChain))
+                nextNmrResidue = self.project._data2Obj[stretch[1]]
+                removeNmrChain = nextNmrResidue.disconnectPrevious()
+                # super().delete()
+
+                # with undoStackBlocking() as addUndoItem:
+                #     addUndoItem(undo=partial(self._reverseChainForDelete, apiNmrChain))
+                #
+                # # this is nearly okay
+                # # except that the chain is reversed during the delete notifier phase
+                # # needs to be moved into the model
+                # super().delete()
+                # with undoStackBlocking() as addUndoItem:
+                #     addUndoItem(undo=partial(self._reverseChainForDelete, apiNmrChain))
 
     def delete(self):
         """Delete routine to check whether the item can be deleted otherwise raise api error.
@@ -1175,8 +1182,8 @@ class NmrResidue(AbstractWrapperObject):
 
             # need to do a special delete here as the api always reinserts the nmrResidue at the end of the chain
 
-            # super().delete()
-            self._delete()
+            super().delete()
+            # self._delete()
 
         except Exception as es:
             raise es

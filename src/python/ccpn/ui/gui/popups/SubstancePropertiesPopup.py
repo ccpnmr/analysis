@@ -48,6 +48,8 @@ SUBSTANCE_TYPE = ['Molecule', 'Cell', 'Material', 'Composite ', 'Other']
 
 SEP = ', '
 
+SELECT = '> Select <'
+
 
 class SubstancePropertiesPopup(CcpnDialog):
 
@@ -56,9 +58,9 @@ class SubstancePropertiesPopup(CcpnDialog):
         """
         Initialise the widget
         """
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='Substance Properties', **kwds)
-
-        # self.setModal(True)         # ejb - WHY????
+        title = 'New Substance' if newSubstance else 'Edit Substance'
+        CcpnDialog.__init__(self, parent, setLayout=True, margins=(10,10,10,10),
+                            windowTitle=title, **kwds)
 
         self.mainWindow = mainWindow  # ejb - should always be done like this
         self.application = mainWindow.application
@@ -73,35 +75,34 @@ class SubstancePropertiesPopup(CcpnDialog):
         self.createNewSubstance = newSubstance
 
         self.contentsFrame = Frame(self, setLayout=True, grid=(1, 1), spacing=(5, 5))
+        self.contentsFrame.setFixedWidth(400)
         # self.moreWidgetsFrame = Frame(self, setLayout=True, grid=(1,1), gridSpan=(3,1), spacing=(5,5))
 
-        self._setMainLayout()
         self._setWidgets()
-        self._addWidgetsToLayout(self._allWidgets(), self.mainLayout)
+        self._addWidgetsToLayout()
 
         if self.createNewSubstance:
             self._checkCurrentSubstances()
         else:
             self._hideSubstanceCreator()
 
-    def _setMainLayout(self):
-        self.mainLayout = self.contentsFrame.layout()  # QtWidgets.QGridLayout()
-        # self.contentsFrame.setLayout(self.mainLayout)
-
-        # self.setWindowTitle("Substance Properties")
-        # self.setFixedHeight(300)
-        self.mainLayout.setContentsMargins(15, 20, 25, 10)  # L,T,R,B
-
     def _setWidgets(self):
         for setWidget in self._getWidgetsToSet():
             setWidget()
 
-    def _addWidgetsToLayout(self, widgets, frame):
+    def _addWidgetsToLayout(self):
+
+        widgets = self._allWidgets()
+        layout = self.contentsFrame.getLayout()
+
         count = int(len(widgets) / 2)
         self.positions = [[i + 1, j] for i in range(count) for j in range(2)]
         for position, widget in zip(self.positions, widgets):
             i, j = position
-            frame.layout().addWidget(widget, i, j)
+            layout.addWidget(widget, i, j)
+
+        self.addSpacer(0, 10, count+1, 0)
+        layout.addWidget(self.buttonBox, count + 2, 0, 1 , 2)
 
     def _getWidgetsToSet(self):
         widgetsToSet = (self._initialOptionWidgets, self._setCurrentSubstanceWidgets,
@@ -122,6 +123,7 @@ class SubstancePropertiesPopup(CcpnDialog):
             self.spacerLabel, self.selectInitialRadioButtons,
             self.currentSubstanceLabel, self.substancePulldownList,
             self.substanceLabel, self.nameSubstance,
+            self.labelcomment, self.comment,
             self._substanceLabellingLabel, self.labelling,
             self.chemicalNameLabel, self.chemicalName,
             self.referenceSpectraLabel, self.referenceSpectra,
@@ -138,8 +140,7 @@ class SubstancePropertiesPopup(CcpnDialog):
             self.labelpolarSurfaceArea, self.polarSurfaceArea,
             self.labelLogP, self.logP,
             self.moleculeViewLabel, self.compoundView,
-            self.labelcomment, self.comment,
-            self.spacerLabel, self.buttonBox
+            # self.spacerLabel, self.buttonBox
             )
 
     def _initialOptionWidgets(self):
@@ -163,14 +164,14 @@ class SubstancePropertiesPopup(CcpnDialog):
         self.type = Label(self, text="Molecule")
 
     def _substanceNameWidget(self):
-        self.substanceLabel = Label(self, text="Substance Name")
-        self.nameSubstance = LineEdit(self, 'New')
+        self.substanceLabel = Label(self, text="Name")
+        self.nameSubstance = LineEdit(self, 'newSubstance', textAlignment='left')
         if self.substance:
             self.nameSubstance.setText(self.substance.name)
 
     def labellingWidget(self):
         self._substanceLabellingLabel = Label(self, text="Labelling")
-        self.labelling = LineEdit(self, 'None')
+        self.labelling = LineEdit(self, 'None', textAlignment='left')
         if self.substance:
             self.labelling.setText(self.substance.labelling)
 
@@ -188,85 +189,85 @@ class SubstancePropertiesPopup(CcpnDialog):
 
     def _chemicalNameWidget(self):
         self.chemicalNameLabel = Label(self, text="Chemical Names")
-        self.chemicalName = LineEdit(self)
+        self.chemicalName = LineEdit(self, textAlignment='left')
         if self.substance:
             self.chemicalName.setText(SEP.join(self.substance.synonyms))
 
     def _smilesWidget(self):
         self.smilesLabel = Label(self, text="Smiles")
-        self.smilesLineEdit = LineEdit(self)
+        self.smilesLineEdit = LineEdit(self, textAlignment='left')
         if self.substance:
             self.smilesLineEdit.setText(self.substance.smiles)
 
     def _empiricalFormulaWidget(self):
         self.empiricalFormulaLabel = Label(self, text="Empirical Formula")
-        self.empiricalFormula = LineEdit(self)
+        self.empiricalFormula = LineEdit(self, textAlignment='left')
         if self.substance:
             self.empiricalFormula.setText(str(self.substance.empiricalFormula))
 
     def _molecularMassWidget(self):
         self.molecularMassLabel = Label(self, text="Molecular Mass")
-        self.molecularMass = LineEdit(self)
+        self.molecularMass = LineEdit(self, textAlignment='left')
         if self.substance:
             self.molecularMass.setText(str(self.substance.molecularMass))
 
     def _commentWidget(self):
         self.labelcomment = Label(self, text="Comment")
-        self.comment = LineEdit(self)
+        self.comment = LineEdit(self, textAlignment='left')
         if self.substance:
             self.comment.setText(self.substance.comment)
 
     def _labelUserCodeWidget(self):
         self.labelUserCode = Label(self, text="User Code")
-        self.userCode = LineEdit(self)
+        self.userCode = LineEdit(self, textAlignment='left')
         if self.substance:
             self.userCode.setText(str(self.substance.userCode))
 
     def _casNumberWidget(self):
         self.labelCasNumber = Label(self, text="Cas Number")
-        self.casNumber = LineEdit(self)
+        self.casNumber = LineEdit(self, textAlignment='left')
         if self.substance:
             self.casNumber.setText(str(self.substance.casNumber))
 
     def _atomWidget(self):
         self.labelAtomCount = Label(self, text="Atom Count")
-        self.atomCount = LineEdit(self)
+        self.atomCount = LineEdit(self, textAlignment='left')
         if self.substance:
             self.atomCount.setText(str(self.substance.atomCount))
 
     def _bondCountWidget(self):
         self.labelBondCount = Label(self, text="Bond Count")
-        self.bondCount = LineEdit(self)
+        self.bondCount = LineEdit(self, textAlignment='left')
         if self.substance:
             self.bondCount.setText(str(self.substance.bondCount))
 
     def _ringCountWidget(self):
         self.labelRingCount = Label(self, text="Ring Count")
-        self.ringCount = LineEdit(self)
+        self.ringCount = LineEdit(self, textAlignment='left')
         if self.substance:
             self.ringCount.setText(str(self.substance.ringCount))
 
     def _bondDonorCountWidget(self):
         self.labelHBondDonorCount = Label(self, text="H Bond Donor Count")
-        self.hBondDonorCount = LineEdit(self)
+        self.hBondDonorCount = LineEdit(self, textAlignment='left')
         if self.substance:
             self.hBondDonorCount.setText(str(self.substance.hBondDonorCount))
 
     def _bondAcceptorCountWidget(self):
         self.labelHBondAcceptorCount = Label(self, text="H Bond Acceptor Count")
-        self.hBondAcceptorCount = LineEdit(self)
+        self.hBondAcceptorCount = LineEdit(self, textAlignment='left')
         if self.substance:
             self.hBondAcceptorCount.setText(str(self.substance.hBondAcceptorCount))
 
     def _polarSurfaceAreaWidget(self):
         self.labelpolarSurfaceArea = Label(self, text="Polar Surface Area")
-        self.polarSurfaceArea = LineEdit(self)
+        self.polarSurfaceArea = LineEdit(self, textAlignment='left')
         if self.substance:
             self.polarSurfaceArea.setText(str(self.substance.polarSurfaceArea))
 
     def _logPWidget(self):
         self.labelLogP = Label(self, text="LogP")
-        self.logP = LineEdit(self)
+        self.logP = LineEdit(self, textAlignment='left')
         if self.substance:
             self.logP.setText(str(self.substance.logPartitionCoefficient))
 
@@ -291,7 +292,7 @@ class SubstancePropertiesPopup(CcpnDialog):
     def _setPerformButtonWidgets(self):
         self.spacerLabel = Label(self, text="")
         callbacks = [self._hideExtraSettings, self._showMoreSettings, self.reject, self._applyChanges, self._okButton]
-        texts = ['Less', 'More', 'Cancel', 'Apply', 'Ok']
+        texts = ['Show less', 'Show more', 'Cancel', 'Apply', 'Ok']
 
         # if not self.createNewSubstance:
         # Apply doesn't really work when creating new substance
@@ -340,13 +341,13 @@ class SubstancePropertiesPopup(CcpnDialog):
 
     def _fillsubstancePulldownList(self):
         if len(self.project.substances) > 0:
-            substancePulldownData = ['Select an option']
+            substancePulldownData = [SELECT]
             for substance in self.project.substances:
                 substancePulldownData.append(str(substance.id))
             self.substancePulldownList.setData(substancePulldownData)
 
     def _fillInfoFromSubstance(self, selected):
-        if selected != 'Select an option':
+        if selected != SELECT:
             substance = self.project.getByPid('SU:' + selected)
             self.nameSubstance.setText(str(substance.name) + '-Copy')
             self.labelling.setText(str(substance.labelling))
@@ -483,21 +484,21 @@ class SubstancePropertiesPopup(CcpnDialog):
             return substance
 
     def _hideExtraSettings(self):
-        self.contentsFrame.hide()
-        for w in self._allWidgets()[12:-1]:
+        # self.contentsFrame.hide()
+        for w in self._allWidgets()[12:]:
             w.hide()
         self.buttonBox.setButtonVisible('Less', False)
         self.buttonBox.setButtonVisible('More', True)
-        self.contentsFrame.show()
+        # self.contentsFrame.show()
         self.setFixedHeight(250)
 
     def _showMoreSettings(self):
-        self.contentsFrame.hide()
-        for w in self._allWidgets()[12:-1]:
+        # self.contentsFrame.hide()
+        for w in self._allWidgets()[12:]:
             w.show()
         self.buttonBox.setButtonVisible('More', False)
         self.buttonBox.setButtonVisible('Less', True)
-        self.contentsFrame.show()
+        # self.contentsFrame.show()
         self.setFixedHeight(800)
 
     def _checkCurrentSubstances(self):

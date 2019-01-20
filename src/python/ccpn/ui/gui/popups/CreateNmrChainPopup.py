@@ -69,22 +69,28 @@ CloneOptionsTipTexts = [CHAINTipText, NMRCHAINTipText, SUBSTANCETipText, COMPLEX
 class CreateNmrChainPopup(CcpnDialog):
 
     def __init__(self, parent=None, mainWindow=None, project=None, **kwds):
+        # project is a 'dummy' argument to be compatible with the sideBar callback's
 
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='Create NmrChain', size=(200, 300), **kwds)
+        CcpnDialog.__init__(self, parent, setLayout=True, margins=(10,10,10,10),
+                            windowTitle='Create NmrChain', size=(300, 200), **kwds)
 
         self._parent = parent
         self.mainWindow = mainWindow
         self.project = project if project is not None else self.mainWindow.project
 
         # GUI
-        self.getLayout().setContentsMargins(15, 20, 25, 10)  # L,T,R,B
         vGrid = 0
+
         self.createNewLabel = Label(self, text="Create New", grid=(vGrid, 0))
         self.createNewWidget = RadioButton(self,
                                            callback=self._selectCreateEmpty,
                                            grid=(vGrid, 1),
                                            )
         vGrid += 1
+
+        self.addSpacer(0, 10, vGrid, 0)
+        vGrid += 1
+
         self.cloneFromLabel = Label(self, text="Clone from", grid=(vGrid, 0))
         self.cloneOptionsWidget = RadioButtons(self, texts=CloneOptions,
                                                callback=self._cloneOptionCallback,
@@ -100,16 +106,19 @@ class CreateNmrChainPopup(CcpnDialog):
         self.availableChainsPD.label.hide()
         self.availableChainsPD.hide()
         vGrid += 1
+
         self.availableNmrChainsPD = NmrChainPulldown(self, self.project, showSelectName=True, callback=self._populateWidgets, labelText='',
                                                      tipText=NMRCHAINTipText, grid=(vGrid, 1))
         self.availableNmrChainsPD.label.hide()
         self.availableNmrChainsPD.hide()
         vGrid += 1
+
         self.availableComplexesPD = ComplexPulldown(self, self.project, showSelectName=True,
                                                     callback=self._populateWidgets, labelText='', tipText=COMPLEXTipText, grid=(vGrid, 1))
         self.availableComplexesPD.label.hide()
         self.availableComplexesPD.hide()
         vGrid += 1
+
         tipText = SUBSTANCETipText
         self.availableSubstancesPD = SubstancePulldown(self, self.project, showSelectName=True,
                                                        callback=self._populateWidgets, labelText='', tipText=tipText, grid=(vGrid, 1))
@@ -120,13 +129,21 @@ class CreateNmrChainPopup(CcpnDialog):
                                  SUBSTANCE: self.availableSubstancesPD, COMPLEX: self.availableComplexesPD}
 
         vGrid += 1
-        self.labelName = Label(self, text="Name", grid=(vGrid, 0), )
-        self.nameLineEdit = LineEdit(self, grid=(vGrid, 1), )
 
+        self.addSpacer(0, 10, vGrid, 0)
         vGrid += 1
 
-        self.spacerLabel = Label(self, text="", grid=(vGrid, 0))
-        self.buttonBox = ButtonList(self, texts=[Cancel, Create], callbacks=[self.reject, self._createNmrChain], grid=(vGrid, 1))
+        self.labelName = Label(self, text="Name", grid=(vGrid, 0), )
+        self.nameLineEdit = LineEdit(self, grid=(vGrid, 1), textAlignment='left')
+        vGrid += 1
+
+        # self.spacerLabel = Label(self, text="", grid=(vGrid, 0))
+        self.addSpacer(0, 10, vGrid, 0)
+        vGrid += 1
+
+        self.buttonBox = ButtonList(self, texts=[Cancel, Create], callbacks=[self.reject, self._createNmrChain],
+                                    grid=(vGrid, 0), gridSpan=(1,2), vAlign='bottom')
+        vGrid += 1
 
         self._resetObjectSelections()
         self._setCreateButtonEnabled(False)

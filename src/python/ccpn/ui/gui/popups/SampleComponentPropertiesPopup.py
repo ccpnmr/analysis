@@ -38,20 +38,25 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import concentrationUnits
 
+SELECT = '> Select <'
 
-TYPECOMPONENT = ['Select', 'Compound', 'Solvent', 'Buffer', 'Target', 'Inhibitor ', 'Other']
+TYPECOMPONENT = [SELECT, 'Compound', 'Solvent', 'Buffer', 'Target', 'Inhibitor ', 'Other']
 C_COMPONENT_UNIT = concentrationUnits  #['Select', 'Molar', 'g/L', 'L/L', 'mol/mol', 'g/g']
 Labelling = ['None', 'Type_New', '15N', '15N,13C', '15N,13C,2H', 'ILV', 'ILVA', 'ILVAT', 'SAIL', '1,3-13C- and 2-13C-Glycerol']
 
+WIDTH = 150
 
-class EditSampleComponentPopup(CcpnDialog):
+
+class SampleComponentPopup(CcpnDialog):
+
     def __init__(self, parent=None, mainWindow=None,
-                 sample=None, sampleComponent=None, newSampleComponent=False,
-                 title='Edit Sample Component', **kwds):
+                 sample=None, sampleComponent=None, newSampleComponent=False, **kwds):
         """
         Initialise the widget
         """
-        CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kwds)
+        title = 'New SampleComponent' if newSampleComponent else 'Edit SampleComponent'
+        CcpnDialog.__init__(self, parent, setLayout=True, margins=(10,10,10,10),
+                            windowTitle=title, **kwds)
 
         self.mainWindow = mainWindow
         self.application = mainWindow.application
@@ -65,23 +70,15 @@ class EditSampleComponentPopup(CcpnDialog):
 
         self.sampleComponent = sampleComponent
 
-        self._setMainLayout()
+        # self._setMainLayout()
         self._setWidgets()
-        self._addWidgetsToLayout(widgets=self._getAllWidgets(), layout=self.mainLayout)
+        self._addWidgetsToLayout()
         if self.newSampleComponentToCreate:
             self._updateButtons()
             self._checkCurrentSubstances()
         else:
             # self._hideSubstanceCreator()
             pass
-
-    def _setMainLayout(self):
-        self.mainLayout = QtWidgets.QGridLayout()
-        self.setLayout(self.mainLayout)
-        self.setWindowTitle("Sample Component Properties")
-        self.mainLayout.setContentsMargins(15, 20, 25, 10)  #L,T,R,B
-        self.setFixedWidth(400)
-        self.setFixedHeight(300)
 
     def _getWidgetsToSet(self):
 
@@ -103,13 +100,20 @@ class EditSampleComponentPopup(CcpnDialog):
         for setWidget in self._getWidgetsToSet():
             setWidget()
 
-    def _addWidgetsToLayout(self, widgets, layout):
+    def _addWidgetsToLayout(self):
+
+        layout = self.getLayout()
+        widgets = self._getAllWidgets()
+
         count = int(len(widgets) / 2)
         self.positions = [[i + 1, j] for i in range(count) for j in range(2)]
         for position, widget in zip(self.positions, widgets):
             i, j = position
             layout.addWidget(widget, i, j)
-        layout.addWidget(self.buttons, count + 1, 1)
+
+        self.addSpacer(0, 10, count+1, 0)
+        layout.addWidget(self.buttons, count + 2, 0, 1 , 2)
+
         self.nameLabellingOptions()
 
     def nameLabellingOptions(self):
@@ -149,7 +153,7 @@ class EditSampleComponentPopup(CcpnDialog):
     def _setSubstanceWidgets(self):
         self.substanceLabel = Label(self, text="Current Substances")
         self.substancePulldownList = PulldownList(self)
-        self.substancePulldownList.setMinimumWidth(210)
+        self.substancePulldownList.setMinimumWidth(WIDTH)
         if self.newSampleComponentToCreate:
             self._fillsubstancePulldownList()
             self.substancePulldownList.activated[str].connect(self._fillInfoFromSubstance)
@@ -171,7 +175,7 @@ class EditSampleComponentPopup(CcpnDialog):
     def setLabellingWidget(self):
         self.sampleComponentLabellingLabel = Label(self, text="Labelling")
         self.labellingPulldownList = PulldownList(self)
-        self.labellingPulldownList.setMinimumWidth(210)
+        self.labellingPulldownList.setMinimumWidth(WIDTH)
         self.labellingPulldownList.setData(Labelling)
         self.labellingPulldownList.setEnabled(True)  # ejb - was False
         self.labellingPulldownList.activated[str].connect(self._labellingSpecialCases)
@@ -185,7 +189,7 @@ class EditSampleComponentPopup(CcpnDialog):
     def componentRoleWidget(self):
         self.typeLabel = Label(self, text="Role")
         self.typePulldownList = PulldownList(self)
-        self.typePulldownList.setMinimumWidth(210)
+        self.typePulldownList.setMinimumWidth(WIDTH)
         self.typePulldownList.setData(TYPECOMPONENT)
         if self.sampleComponent:
             self.typePulldownList.set(str(self.sampleComponent.role))
@@ -193,7 +197,7 @@ class EditSampleComponentPopup(CcpnDialog):
     def concentrationUnitWidget(self):
         self.concentrationUnitLabel = Label(self, text="Concentration Unit")
         self.concentrationUnitPulldownList = PulldownList(self)
-        self.concentrationUnitPulldownList.setMinimumWidth(210)
+        self.concentrationUnitPulldownList.setMinimumWidth(WIDTH)
         self.concentrationUnitPulldownList.setData(C_COMPONENT_UNIT)
         if self.sampleComponent:
             self.concentrationUnitPulldownList.set(str(self.sampleComponent.concentrationUnit))
@@ -205,17 +209,20 @@ class EditSampleComponentPopup(CcpnDialog):
         self.concentrationLineEdit.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         if self.sampleComponent:
             self.concentrationLineEdit.setText(str(self.sampleComponent.concentration))
+        else:
+            self.concentrationLineEdit.setText('1.0')
 
     def _commentWidget(self):
         self.labelcomment = Label(self, text="Comment")
-        self.commentLineEdit = LineEdit(self)
-        self.commentLineEdit.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        self.commentLineEdit = LineEdit(self, hAlign='left', textAlignment='left')
+        # self.commentLineEdit.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         if self.sampleComponent:
             self.commentLineEdit.setText(self.sampleComponent.comment)
 
     def _setPerformButtonWidgets(self):
         tipTexts = ['', 'Click to apply changes. Name and Labelling cannot be changed once a new sample component is created', 'Click to apply and close']
-        self.buttons = ButtonList(self, callbacks=[self.reject, self._applyChanges, self._okButton], texts=['Cancel', 'Apply', 'Ok'], tipTexts=tipTexts)
+        self.buttons = ButtonList(self, callbacks=[self.reject, self._applyChanges, self._okButton],
+                                  texts=['Cancel', 'Apply', 'Ok'], tipTexts=tipTexts, gridSpan=(1,2))
 
     def _checkCurrentSubstances(self):
         if len(self.project.substances) > 0:
@@ -259,7 +266,7 @@ class EditSampleComponentPopup(CcpnDialog):
             self.nameComponentLineEdit.setReadOnly(False)
             self.labellingPulldownList.setEnabled(True)
             self.labellingPulldownList.set('None')
-            self.substancePulldownList.set('Select an option')
+            self.substancePulldownList.set(SELECT)
 
     def _editorOptionWidgets(self):
         self.spacerLabel.hide()
@@ -273,13 +280,13 @@ class EditSampleComponentPopup(CcpnDialog):
 
     def _fillsubstancePulldownList(self):
         if len(self.project.substances) > 0:
-            substancePulldownData = ['Select an option']
+            substancePulldownData = [SELECT]
             for substance in self.project.substances:
                 substancePulldownData.append(str(substance.id))
             self.substancePulldownList.setData(substancePulldownData)
 
     def _fillInfoFromSubstance(self, selected):
-        if selected != 'Select an option':
+        if selected != SELECT:
             substance = self.project.getByPid('SU:' + selected)
             if substance:
                 self.nameComponentLineEdit.setText(str(substance.name))

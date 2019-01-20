@@ -80,7 +80,7 @@ from ccpn.ui.gui.popups.PeakListPropertiesPopup import PeakListPropertiesPopup
 from ccpn.ui.gui.popups.IntegralListPropertiesPopup import IntegralListPropertiesPopup
 from ccpn.ui.gui.popups.MultipletListPropertiesPopup import MultipletListPropertiesPopup
 from ccpn.ui.gui.popups.RestraintListPopup import RestraintListPopup
-from ccpn.ui.gui.popups.SampleComponentPropertiesPopup import EditSampleComponentPopup
+from ccpn.ui.gui.popups.SampleComponentPropertiesPopup import SampleComponentPopup
 from ccpn.ui.gui.popups.SamplePropertiesPopup import SamplePropertiesPopup
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
@@ -839,118 +839,16 @@ def NYI(*args, **kwds):
                     'This function has not been implemented in the current version')
 
 
-def _rightMousePopup(className, dataPid, sideBarItem, *args, **kwds):
-    """Perform action from the rightMouse menu for the specified class type.
-    """
-    if className is not None:
-        popupFunc = NEW_ITEM_DICT.get(className)
-        if popupFunc:
-            project = sideBarItem.sidebar._project
-            application = project.application
-            application.popupFunc(position=None, relativeTo=None,  # put into a dict above
-                                  *args, **kwds)
-
-
-# def _createNewObject(className, dataPid, sideBarItem):
-#     """Create a new object of instance className
-#     """
-#     itemParent = sideBarItem.obj
-#     if className is not None:
-#         funcName = NEW_ITEM_DICT.get(className)
-#         if funcName:
-#             newObject = getattr(itemParent, funcName)()
-#             return newObject
-
-
-# def _createNewObjectPopup(className, dataPid, sideBarItem, *args, **kwds):
-#     """Create a new object of instance className from a popup
+# def _rightMousePopup(className, dataPid, sideBarItem, *args, **kwds):
+#     """Perform action from the rightMouse menu for the specified class type.
 #     """
 #     if className is not None:
 #         popupFunc = NEW_ITEM_DICT.get(className)
 #         if popupFunc:
 #             project = sideBarItem.sidebar._project
 #             application = project.application
-#             popup = popupFunc(parent=application.ui.mainWindow, mainWindow=application.ui.mainWindow,
-#                               *args, **kwds)
-#
-#             # make the popup appear in the middle of mainWindow
-#             popup.exec_()
-#             popup.raise_()
-
-
-# def _createNewRestraintListPopup(className, dataPid, sideBarItem):
-#     """Create a new object of instance className from a popup
-#     """
-#     if className is not None:
-#         popupFunc = NEW_ITEM_DICT.get(className)
-#         if popupFunc:
-#             project = sideBarItem.sidebar._project
-#             application = project.application
-#             popup = popupFunc(parent=application.ui.mainWindow, mainWindow=application.ui.mainWindow)
-#
-#             # make the popup appear in the middle of mainWindow
-#             popup.exec_()
-#             popup.raise_()
-#
-#             # specific to restraintList
-#             restraintType = popup.restraintType
-#             if restraintType:
-#
-#                 # ejb - added here because not sure whether to put it in the popup yet
-#                 try:
-#                     itemParent = sideBarItem.obj
-#                     getattr(itemParent, NEWRESTRAINTLIST)(restraintType)
-#                 except Exception as es:
-#                     showWarning('Restraints', 'Error modifying restraint type')
-
-
-# def _createNewSampleComponentPopup(className, dataPid, sideBarItem):
-#     """Create a new object of instance className from a popup
-#     """
-#     if className is not None:
-#         popupFunc = NEW_ITEM_DICT.get(className)
-#         if popupFunc:
-#             project = sideBarItem.sidebar._project
-#             application = project.application
-#
-#             itemParent = sideBarItem.obj
-#             popup = popupFunc(parent=application.ui.mainWindow, mainWindow=application.ui.mainWindow,
-#                               sample=itemParent, newSampleComponent=True)
-#
-#             # make the popup appear in the middle of mainWindow
-#             popup.exec_()
-#             popup.raise_()
-
-
-# def _raisePopup(dataPid, sideBarItem):
-#     """Raise an editor popup for the sideBar item
-#     """
-#     lowerCase = lambda s: s[:1].lower() + s[1:] if s else None
-#
-#     obj = sideBarItem.obj
-#     className = obj.className
-#     if className is not None:
-#         popupFunc = EDIT_ITEM_DICT.get(className)
-#         if popupFunc:
-#             project = sideBarItem.sidebar._project
-#             application = project.application
-#
-#             # make first letter a lowerCase and use for the popup
-#             objectDict = {lowerCase(className): obj}
-#             popup = popupFunc(parent=application.ui.mainWindow, mainWindow=application.ui.mainWindow,
-#                               **objectDict)
-#
-#             # make the popup appear in the middle of mainWindow
-#             popup.exec_()
-#             popup.raise_()
-#
-#         else:
-#             info = showInfo('Not implemented yet!',
-#                             'This function has not been implemented in the current version')
-
-#===========================================================================================================
-# ABC's + specific callback classes
-#===========================================================================================================
+#             application.popupFunc(position=None, relativeTo=None,  # put into a dict above
+#                                   *args, **kwds)
 
 class CreateNewObjectABC():
     """
@@ -1090,7 +988,7 @@ class _raiseCreateNmrChainPopup(RaisePopupABC):
     popupClass = CreateNmrChainPopup
     objectArgumentName = 'project'
 
-class _raiseEditNmrChainPopup(RaisePopupABC):
+class _raiseNmrChainPopup(RaisePopupABC):
     popupClass = NmrChainPopup
     # objectArgumentName = 'nmrChain'
 
@@ -1120,7 +1018,7 @@ class _raiseSamplePopup(RaisePopupABC):
     objectArgumentName = 'sample'
 
 class _raiseSampleComponentPopup(RaisePopupABC):
-    popupClass = EditSampleComponentPopup
+    popupClass = SampleComponentPopup
     # NB This popup is structured slightly different, passing in different arguments
     objectArgumentName = 'sampleComponent'
     parentObjectArgumentName = 'sample'
@@ -1191,7 +1089,7 @@ class SideBarStructure(object):
             SidebarTree('NmrChains', closed=True, children=[
                 SidebarItem('<New NmrChain>', callback=_raiseCreateNmrChainPopup()),
                 SidebarClassTreeItems(klass=NmrChain, rebuildOnRename='NmrChain-ClassTreeItems',
-                                      callback=_raiseEditNmrChainPopup(), children=[
+                                      callback=_raiseNmrChainPopup(), children=[
                     SidebarItem('<New NmrResidue>', callback=_createNewNmrResidue()),
                     SidebarClassNmrResidueTreeItems(klass=NmrResidue, rebuildOnRename='NmrChain-ClassTreeItems',
                                                     callback=_raiseNmrResiduePopup(), children=[

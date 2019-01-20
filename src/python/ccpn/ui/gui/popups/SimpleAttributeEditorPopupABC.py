@@ -70,7 +70,8 @@ class SimpleAttributeEditorPopupABC(CcpnDialog):
                                               vAlign = 't', grid=(row, 1), **kwds)
             row += 1
 
-        self.getLayout().addItem(QtWidgets.QSpacerItem(0, 10), row, 0)
+        # self.getLayout().addItem(QtWidgets.QSpacerItem(0, 10), row, 0)
+        self.addSpacer(0, 10, row, 0)
         row += 1
 
         ButtonList(self, ['Cancel', 'OK'], [self.reject, self._okButton], grid=(row, 0), gridSpan=(1,2))

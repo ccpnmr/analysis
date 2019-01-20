@@ -127,7 +127,7 @@ OpenObjAction = {
 NEWRESTRAINTLIST = 'newRestraintList'
 NEWRESTRAINT = 'newRestraint'
 NEWMODEL = 'newModel'
-NEWNOTE = 'newNote'
+# NEWNOTE = 'newNote'
 # NEWSTRUCTUREENSEMBLE = 'newStructureEnsemble'
 # NEWSAMPLE = 'newSample'
 # NEWNMRCHAIN = 'newNmrChain'
@@ -158,7 +158,7 @@ NEW_ITEM_DICT = {
     # SpectrumGroup.className    : SpectrumGroupEditor,
     # Complex.className          : NEWCOMPLEX,
     Model.className            : NEWMODEL,
-    Note.className             : NEWNOTE,
+    # Note.className             : NEWNOTE,
     }
 
 EDIT_ITEM_DICT = {
@@ -996,6 +996,9 @@ class _createNewNmrResidue(CreateNewObjectABC):
 class _createNewNmrAtom(CreateNewObjectABC):
     parentMethodName = 'newNmrAtom'
 
+class _createNewNote(CreateNewObjectABC):
+    parentMethodName = 'newNote'
+
 class _createNewIntegralList(CreateNewObjectABC):
     parentMethodName = 'newIntegralList'
 
@@ -1083,6 +1086,10 @@ class _raiseNmrResiduePopup(RaisePopupABC):
 class _raiseNmrAtomPopup(RaisePopupABC):
     popupClass = NmrAtomPopup
     objectArgumentName = 'nmrAtom'
+
+class _raiseNotePopup(RaisePopupABC):
+    popupClass = NotesPopup
+    objectArgumentName = 'note'
 
 class _raiseIntegralListPopup(RaisePopupABC):
     popupClass = IntegralListPropertiesPopup
@@ -1223,11 +1230,11 @@ class SideBarStructure(object):
 
             #------ Notes ------
             SidebarTree('Notes', closed=True, children=[
-                SidebarItem('<New Note>', callback=partial(_createNewObject, Note.className)),
-                SidebarClassItems(klass=Note, callback=_raisePopup),
+                SidebarItem('<New Note>', callback=_createNewNote()),
+                SidebarClassItems(klass=Note, callback=_raiseNotePopup()),
                 ]),
-
             ])
+
     )  # end _sidebarData
 
     def _init(self):

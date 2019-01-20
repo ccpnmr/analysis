@@ -38,11 +38,11 @@ class NotesPopup(CcpnDialog):
     Open a small popup to allow changing the name of a Note
     """
 
-    def __init__(self, parent=None, mainWindow=None, title='Notes', note=None, **kwds):
+    def __init__(self, parent=None, mainWindow=None, note=None, **kwds):
         """
         Initialise the widget
         """
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='Edit Note', **kwds)
 
         self.mainWindow = mainWindow
         self.application = mainWindow.application
@@ -50,7 +50,7 @@ class NotesPopup(CcpnDialog):
         self.current = mainWindow.application.current
         self.note = note
 
-        self.noteLabel = Label(self, "Note Name: " + self.note.pid, grid=(0, 0))
+        self.noteLabel = Label(self, "Name ", grid=(0, 0))
         self.noteText = LineEdit(self, self.note.name, grid=(0, 1))
         ButtonList(self, ['Cancel', 'OK'], [self.reject, self._okButton], grid=(1, 1))
 

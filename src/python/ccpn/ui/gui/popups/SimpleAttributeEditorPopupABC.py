@@ -37,13 +37,13 @@ from ccpn.util.Logging import getLogger
 
 
 class SimpleAttributeEditorPopupABC(CcpnDialog):
-    """Abstract base class to implement a popup for editing the name property
+    """Abstract base class to implement a popup for editing simple properties
     """
-    klass = None  # The class whose name property is edited
+    klass = None  # The class whose properties are edited/displayed
     attributes = []  # A list of (attributeName, getFunction, setFunction, kwds) tuples;
                      # get/set-Function have getattr, setattr profile
-                     # if setFunction is None: display value without editing options
-                     # kwds: optional kwds passed to LineEdit
+                     # if setFunction is None: display attribute value without option to change value
+                     # kwds: optional kwds passed to LineEdit constructor
 
     def __init__(self, parent=None, mainWindow=None, obj=None, **kwds):
         """

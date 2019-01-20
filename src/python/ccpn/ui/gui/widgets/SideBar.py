@@ -134,7 +134,7 @@ NEWMODEL = 'newModel'
 # NEWCHAIN = 'newChain'
 # NEWSUBSTANCE = 'newSubstance'
 # NEWCHEMICALSHIFTLIST = 'newChemicalShiftList'
-NEWDATASET = 'newDataSet'
+# NEWDATASET = 'newDataSet'
 # NEWSPECTRUMGROUP = 'newSpectrumGroup'
 # NEWCOMPLEX = 'newComplex'
 
@@ -146,7 +146,7 @@ NEW_ITEM_DICT = {
     # NmrChain.className         : CreateNmrChainPopup,
     # NmrResidue.className       : NEWNMRRESIDUE,
     # NmrAtom.className          : NEWNMRATOM,
-    RestraintList.className    : RestraintTypePopup,
+    # RestraintList.className    : RestraintTypePopup,
     Restraint.className        : NEWRESTRAINT,
     # StructureEnsemble.className: NEWSTRUCTUREENSEMBLE,
     # Sample.className           : NEWSAMPLE,
@@ -154,7 +154,7 @@ NEW_ITEM_DICT = {
     # Chain.className            : CreateChainPopup,
     # Substance.className        : SubstancePropertiesPopup,
     # ChemicalShiftList.className: NEWCHEMICALSHIFTLIST,
-    DataSet.className          : NEWDATASET,
+    # DataSet.className          : NEWDATASET,
     # SpectrumGroup.className    : SpectrumGroupEditor,
     # Complex.className          : NEWCOMPLEX,
     Model.className            : NEWMODEL,
@@ -176,8 +176,8 @@ EDIT_ITEM_DICT = {
     # NmrAtom.className          : NmrAtomPopup,
     # ChemicalShiftList.className: ChemicalShiftListPopup,
     # StructureEnsemble.className: StructurePopup,
-    DataSet.className          : DataSetPopup,
-    Note.className             : NotesPopup,
+    # DataSet.className          : DataSetPopup,
+    # Note.className             : NotesPopup,
     }
 
 OPEN_ITEM_DICT = {
@@ -873,30 +873,30 @@ def _createNewObjectPopup(className, dataPid, sideBarItem, *args, **kwds):
             popup.raise_()
 
 
-def _createNewRestraintListPopup(className, dataPid, sideBarItem):
-    """Create a new object of instance className from a popup
-    """
-    if className is not None:
-        popupFunc = NEW_ITEM_DICT.get(className)
-        if popupFunc:
-            project = sideBarItem.sidebar._project
-            application = project.application
-            popup = popupFunc(parent=application.ui.mainWindow, mainWindow=application.ui.mainWindow)
-
-            # make the popup appear in the middle of mainWindow
-            popup.exec_()
-            popup.raise_()
-
-            # specific to restraintList
-            restraintType = popup.restraintType
-            if restraintType:
-
-                # ejb - added here because not sure whether to put it in the popup yet
-                try:
-                    itemParent = sideBarItem.obj
-                    getattr(itemParent, NEWRESTRAINTLIST)(restraintType)
-                except Exception as es:
-                    showWarning('Restraints', 'Error modifying restraint type')
+# def _createNewRestraintListPopup(className, dataPid, sideBarItem):
+#     """Create a new object of instance className from a popup
+#     """
+#     if className is not None:
+#         popupFunc = NEW_ITEM_DICT.get(className)
+#         if popupFunc:
+#             project = sideBarItem.sidebar._project
+#             application = project.application
+#             popup = popupFunc(parent=application.ui.mainWindow, mainWindow=application.ui.mainWindow)
+#
+#             # make the popup appear in the middle of mainWindow
+#             popup.exec_()
+#             popup.raise_()
+#
+#             # specific to restraintList
+#             restraintType = popup.restraintType
+#             if restraintType:
+#
+#                 # ejb - added here because not sure whether to put it in the popup yet
+#                 try:
+#                     itemParent = sideBarItem.obj
+#                     getattr(itemParent, NEWRESTRAINTLIST)(restraintType)
+#                 except Exception as es:
+#                     showWarning('Restraints', 'Error modifying restraint type')
 
 
 # def _createNewSampleComponentPopup(className, dataPid, sideBarItem):
@@ -981,6 +981,9 @@ class CreateNewObjectABC():
         newObj = func(**self.kwds)
         return newObj
 
+class _createNewDataSet(CreateNewObjectABC):
+    parentMethodName = 'newDataSet'
+
 class _createNewPeakList(CreateNewObjectABC):
     parentMethodName = 'newPeakList'
 
@@ -1059,6 +1062,10 @@ class _raiseChainPopup(RaisePopupABC):
     popupClass = CreateChainPopup
     parentObjectArgumentName = 'project'
 
+class _raiseDataSetPopup(RaisePopupABC):
+    popupClass = DataSetPopup
+    objectArgumentName = 'dataSet'
+
 class _raiseChemicalShifListPopup(RaisePopupABC):
     popupClass = ChemicalShiftListPopup
     objectArgumentName = 'chemicalShiftList'
@@ -1094,6 +1101,11 @@ class _raiseNotePopup(RaisePopupABC):
 class _raiseIntegralListPopup(RaisePopupABC):
     popupClass = IntegralListPropertiesPopup
     objectArgumentName = 'integralList'
+
+class _raiseRestraintListPopup(RaisePopupABC):
+    popupClass = RestraintTypePopup
+    objectArgumentName = 'restraintList'
+    parentObjectArgumentName = 'dataSet'
 
 class _raiseSamplePopup(RaisePopupABC):
     popupClass = SamplePropertiesPopup
@@ -1221,11 +1233,13 @@ class SideBarStructure(object):
 
             #------ DataSets ------
             SidebarTree('DataSets', closed=True, children=[
-                SidebarItem('<New DataSet>', callback=partial(_createNewObject, DataSet.className)),
-                SidebarClassTreeItems(klass=DataSet, rebuildOnRename='DataSet-ClassTreeItems', children=[
-                    SidebarItem('<New ResidueList>', callback=partial(_createNewRestraintListPopup, RestraintList.className)),
-                    SidebarClassTreeItems(klass=RestraintList, rebuildOnRename='DataSet-ClassTreeItems', callback=_raisePopup),
-                    ], callback=_raisePopup),
+                SidebarItem('<New DataSet>', callback=_createNewDataSet()),
+                SidebarClassTreeItems(klass=DataSet, rebuildOnRename='DataSet-ClassTreeItems',
+                                      callback=_raiseDataSetPopup(), children=[
+                    SidebarItem('<New RestraintList>', callback=_raiseRestraintListPopup(editMode=False, useParent=True)),
+                    SidebarClassTreeItems(klass=RestraintList, rebuildOnRename='DataSet-ClassTreeItems',
+                                          callback=_raiseRestraintListPopup(editMode=True)),
+                    ]),
                 ]),
 
             #------ Notes ------

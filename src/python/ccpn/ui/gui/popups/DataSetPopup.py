@@ -34,11 +34,11 @@ from ccpn.util.Logging import getLogger
 
 
 class DataSetPopup(CcpnDialog):
-    def __init__(self, parent=None, mainWindow=None, dataSet=None, title='DataSet', **kwds):
+    def __init__(self, parent=None, mainWindow=None, dataSet=None, **kwds):
         """
         Initialise the widget
         """
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='Edit DataSet', **kwds)
 
         self.mainWindow = mainWindow
         self.application = mainWindow.application
@@ -46,8 +46,8 @@ class DataSetPopup(CcpnDialog):
         self.current = mainWindow.application.current
 
         self.dataSet = dataSet
-        self.dataSetLabel = Label(self, "DataSet Name ", grid=(0, 0))
-        self.dataSetText = LineEdit(self, dataSet.title, grid=(0, 1))
+        self.dataSetLabel = Label(self, "Name ", grid=(0, 0))
+        self.dataSetText = LineEdit(self, dataSet.name, grid=(0, 1))
         ButtonList(self, ['Cancel', 'OK'], [self.reject, self._okButton], grid=(1, 1))
 
     def _setDataSetName(self):

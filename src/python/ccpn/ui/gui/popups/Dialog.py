@@ -42,7 +42,7 @@ def _updateGl(self, spectrumList):
 
 
 class CcpnDialog(QtWidgets.QDialog, Base):
-    def __init__(self, parent=None, windowTitle='', setLayout=False, size=(200, 100), **kwds):
+    def __init__(self, parent=None, windowTitle='', setLayout=False, size=(300, 100), **kwds):
 
         super().__init__(parent)
         Base._init(self, setLayout=setLayout, **kwds)

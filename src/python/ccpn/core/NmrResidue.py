@@ -1140,10 +1140,6 @@ class NmrResidue(AbstractWrapperObject):
     def _delete(self):
         """Delete object, with all contained objects and underlying data.
         """
-
-        # NBNB clean-up of wrapper structure is done via notifiers.
-        # NBNB some child classes must override this function
-
         atHeadOfChain = False
         apiNmrChain = self._wrappedData.directNmrChain
         if apiNmrChain and apiNmrChain.isConnected:
@@ -1151,26 +1147,14 @@ class NmrResidue(AbstractWrapperObject):
             atHeadOfChain = True if len(stretch) > 1 and stretch[0] is self._wrappedData else False
 
         if not atHeadOfChain:
-            # do normal nmrResidue delete
             super().delete()
 
         else:
-            with undoBlock():
-                # disconnect and then delete
-
-                nextNmrResidue = self.project._data2Obj[stretch[1]]
-                removeNmrChain = nextNmrResidue.disconnectPrevious()
-                # super().delete()
-
-                # with undoStackBlocking() as addUndoItem:
-                #     addUndoItem(undo=partial(self._reverseChainForDelete, apiNmrChain))
-                #
-                # # this is nearly okay
-                # # except that the chain is reversed during the delete notifier phase
-                # # needs to be moved into the model
-                # super().delete()
-                # with undoStackBlocking() as addUndoItem:
-                #     addUndoItem(undo=partial(self._reverseChainForDelete, apiNmrChain))
+            raise ValueError('Cannot delete nmrResidues from the head of a connected chain.')
+            # # disconnect and then delete
+            # nextNmrResidue = self.project._data2Obj[stretch[1]]
+            # removeNmrChain = nextNmrResidue.disconnectPrevious()
+            # super().delete()
 
     def delete(self):
         """Delete routine to check whether the item can be deleted otherwise raise api error.
@@ -1182,8 +1166,8 @@ class NmrResidue(AbstractWrapperObject):
 
             # need to do a special delete here as the api always reinserts the nmrResidue at the end of the chain
 
-            super().delete()
-            # self._delete()
+            # super().delete()
+            self._delete()
 
         except Exception as es:
             raise es

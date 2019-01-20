@@ -372,14 +372,14 @@ class Substance(AbstractWrapperObject):
             raise TypeError("%s type Substance has no attribute 'logPartitionCoefficient'"
                             % _apiClassNameMap.get(ss, ss))
 
-    @property
-    def comment(self) -> str:
-        """Free-form text comment"""
-        return self._wrappedData.details
-
-    @comment.setter
-    def comment(self, value: str):
-        self._wrappedData.details = value
+    # @property
+    # def comment(self) -> str:
+    #     """Free-form text comment"""
+    #     return self._wrappedData.details
+    #
+    # @comment.setter
+    # def comment(self, value: str):
+    #     self._wrappedData.details = value
 
     @property
     def specificAtomLabelling(self) -> typing.Dict[str, typing.Dict[str, float]]:

@@ -125,14 +125,14 @@ class NmrAtom(AbstractWrapperObject):
         """NmrAtom serial number - set at creation and unchangeable"""
         return self._wrappedData.serial
 
-    @property
-    def comment(self) -> str:
-        """Free-form text comment"""
-        return self._wrappedData.details
-
-    @comment.setter
-    def comment(self, value: str):
-        self._wrappedData.details = value
+    # @property
+    # def comment(self) -> str:
+    #     """Free-form text comment"""
+    #     return self._wrappedData.details
+    #
+    # @comment.setter
+    # def comment(self, value: str):
+    #     self._wrappedData.details = value
 
     #from ccpn.core.Atom import Atom: This will break the import sequence
     @property

@@ -153,14 +153,14 @@ class DataSet(AbstractWrapperObject):
     def uuid(self, value: str):
         self._wrappedData.uuid = self._str2none(value)
 
-    @property
-    def comment(self) -> str:
-        """Free-form text comment"""
-        return self._none2str(self._wrappedData.details)
-
-    @comment.setter
-    def comment(self, value: str):
-        self._wrappedData.details = self._str2none(value)
+    # @property
+    # def comment(self) -> str:
+    #     """Free-form text comment"""
+    #     return self._none2str(self._wrappedData.details)
+    #
+    # @comment.setter
+    # def comment(self, value: str):
+    #     self._wrappedData.details = self._str2none(value)
 
     def _fetchFixedResonance(self, assignment: str, checkUniqueness: bool = True) -> ApiFixedResonance:
         """Fetch FixedResonance matching assignment string, creating anew if needed.

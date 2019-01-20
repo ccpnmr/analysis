@@ -308,6 +308,15 @@ class AbstractWrapperObject(NotifierBase):
                 result = self._wrappedData.ccpnInternalData = {}
         return result
 
+    @property
+    def comment(self) -> str:
+        """Free-form text comment"""
+        return self._none2str(self._wrappedData.details)
+
+    @comment.setter
+    def comment(self, value: str):
+        self._wrappedData.details = self._str2none(value)
+
     CCPNMR_NAMESPACE = '_ccpNmrV3internal'
 
     @_ccpnInternalData.setter

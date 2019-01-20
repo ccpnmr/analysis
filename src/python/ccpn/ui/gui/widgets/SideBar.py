@@ -82,7 +82,7 @@ from ccpn.ui.gui.popups.SampleComponentPropertiesPopup import EditSampleComponen
 from ccpn.ui.gui.popups.SamplePropertiesPopup import SamplePropertiesPopup
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
-from ccpn.ui.gui.popups.StructurePopup import StructurePopup
+from ccpn.ui.gui.popups.StructurePopup import StructureEnsemblePopup
 from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
 from ccpn.core.lib.Pid import Pid
 
@@ -128,7 +128,7 @@ NEWRESTRAINTLIST = 'newRestraintList'
 NEWRESTRAINT = 'newRestraint'
 NEWMODEL = 'newModel'
 NEWNOTE = 'newNote'
-NEWSTRUCTUREENSEMBLE = 'newStructureEnsemble'
+# NEWSTRUCTUREENSEMBLE = 'newStructureEnsemble'
 # NEWSAMPLE = 'newSample'
 # NEWNMRCHAIN = 'newNmrChain'
 # NEWCHAIN = 'newChain'
@@ -148,7 +148,7 @@ NEW_ITEM_DICT = {
     # NmrAtom.className          : NEWNMRATOM,
     RestraintList.className    : RestraintTypePopup,
     Restraint.className        : NEWRESTRAINT,
-    StructureEnsemble.className: NEWSTRUCTUREENSEMBLE,
+    # StructureEnsemble.className: NEWSTRUCTUREENSEMBLE,
     # Sample.className           : NEWSAMPLE,
     # SampleComponent.className  : EditSampleComponentPopup,
     # Chain.className            : CreateChainPopup,
@@ -175,7 +175,7 @@ EDIT_ITEM_DICT = {
     # NmrResidue.className       : NmrResiduePopup,
     # NmrAtom.className          : NmrAtomPopup,
     # ChemicalShiftList.className: ChemicalShiftListPopup,
-    StructureEnsemble.className: StructurePopup,
+    # StructureEnsemble.className: StructurePopup,
     DataSet.className          : DataSetPopup,
     Note.className             : NotesPopup,
     }
@@ -1002,6 +1002,9 @@ class _createNewIntegralList(CreateNewObjectABC):
 class _createNewSample(CreateNewObjectABC):
     parentMethodName = 'newSample'
 
+class _createNewStructureEnsemble(CreateNewObjectABC):
+    parentMethodName = 'newStructureEnsemble'
+
 
 class RaisePopupABC():
     """
@@ -1103,6 +1106,10 @@ class _raiseSpectrumGroupPopup(RaisePopupABC):
     popupClass = SpectrumGroupEditor
     objectArgumentName = 'spectrumGroup'
 
+class _raiseStructureEnsemblePopup(RaisePopupABC):
+    popupClass = StructureEnsemblePopup
+    objectArgumentName = 'structureEnsemble'
+
 class _raiseSubstancePopup(RaisePopupABC):
     popupClass = SubstancePropertiesPopup
     objectArgumentName = 'substance'
@@ -1201,8 +1208,8 @@ class SideBarStructure(object):
 
             #------ StructureEnsembles ------
             SidebarTree('StructureEnsembles', closed=True, children=[
-                SidebarItem('<New StructureEnsemble>', callback=partial(_createNewObject, StructureEnsemble.className)),
-                SidebarClassItems(klass=StructureEnsemble, callback=_raisePopup),
+                SidebarItem('<New StructureEnsemble>', callback=_createNewStructureEnsemble()),
+                SidebarClassItems(klass=StructureEnsemble, callback=_raiseStructureEnsemblePopup()),
                 ]),
 
             #------ DataSets ------

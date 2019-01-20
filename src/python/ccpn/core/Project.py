@@ -1436,8 +1436,7 @@ class Project(AbstractWrapperObject):
         return _newWindow(self, title=title, position=position, size=size, **kwds)
 
     @logCommand(get='self')
-    def newStructureEnsemble(self, name: str = None, data=None,
-                             comment: str = None, **kwds):
+    def newStructureEnsemble(self, name: str = None, data=None, comment: str = None, **kwds):
         """Create new StructureEnsemble.
 
         See the StructureEnsemble class for details.

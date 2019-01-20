@@ -32,16 +32,16 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 
-class StructurePopup(CcpnDialog):
+class StructureEnsemblePopup(CcpnDialog):
     """
     Open a small popup to allow changing the label of a StructureEnsemble
     """
 
-    def __init__(self, parent=None, mainWindow=None, title='StructureEnsembles', structureEnsemble=None, **kwds):
+    def __init__(self, parent=None, mainWindow=None, structureEnsemble=None, **kwds):
         """
         Initialise the widget
         """
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='Edit StructureEnsemble', **kwds)
 
         self.mainWindow = mainWindow
         self.application = mainWindow.application
@@ -49,7 +49,7 @@ class StructurePopup(CcpnDialog):
         self.current = mainWindow.application.current
 
         self.structure = structureEnsemble
-        self.structureLabel = Label(self, "Structure Name: " + self.structure.pid, grid=(0, 0))
+        self.structureLabel = Label(self, "Name ", grid=(0, 0))
         self.structureText = LineEdit(self, self.structure.name, grid=(0, 1))
         ButtonList(self, ['Cancel', 'OK'], [self.reject, self._okButton], grid=(1, 1))
 

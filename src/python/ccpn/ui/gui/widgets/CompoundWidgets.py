@@ -234,7 +234,7 @@ class EntryCompoundWidget(CompoundBaseWidget):
 
     def __init__(self, parent=None, showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
-                 labelText='', callback=None, default=None,
+                 labelText='', callback=None, default=None, readOnly=False,
                  sizeAdjustPolicy=None, **kwds):
         """
         :param parent: parent widget
@@ -246,6 +246,7 @@ class EntryCompoundWidget(CompoundBaseWidget):
         :param labelText: Text for the Label
         :param callback: (optional) callback for the Entry
         :param default: (optional) initial text of the Entry
+        :param readOnly: (optional) set Entry to readOnly
         :param kwds: (optional) keyword, value pairs for the gridding of Frame
         """
 
@@ -255,7 +256,7 @@ class EntryCompoundWidget(CompoundBaseWidget):
         self.label = Label(parent=self, text=labelText, vAlign='center')
         self._addWidget(self.label)
 
-        self.entry = Entry(parent=self, callback=callback)
+        self.entry = Entry(parent=self, callback=callback, readOnly=readOnly)
         self._addWidget(self.entry)
 
         if default is not None:

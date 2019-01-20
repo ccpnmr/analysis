@@ -34,6 +34,7 @@ class StructureEnsemblePopup(SimpleAttributeEditorPopupABC):
     """DataSet attributes editor popup"""
 
     klass = StructureEnsemble
-    attributes = [('name',           getattr, setattr, {'backgroundText':'> Enter name <'}),
-                  ('comment',        getattr, setattr, {'backgroundText':'> Optional <'}),
-                 ]
+    attributes = [('name',     getattr, setattr, {'backgroundText':'> Enter name <'}),
+                  ('comment',  getattr, setattr, {'backgroundText':'> Optional <'}),
+                  # ('serial',   getattr, None   , {}),
+                  ]

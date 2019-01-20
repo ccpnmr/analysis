@@ -50,6 +50,9 @@ SEP = ', '
 
 SELECT = '> Select <'
 
+LESS_BUTTON = 'Show less'
+MORE_BUTTON = 'Show more'
+
 
 class SubstancePropertiesPopup(CcpnDialog):
 
@@ -146,7 +149,7 @@ class SubstancePropertiesPopup(CcpnDialog):
     def _initialOptionWidgets(self):
         self.spacerLabel = Label(self, text="")
         self.selectInitialRadioButtons = RadioButtons(self, texts=['New', 'From Existing'],
-                                                      selectedInd=1,
+                                                      selectedInd=0,
                                                       callback=None,
                                                       direction='h',
                                                       tipTexts=None,
@@ -165,7 +168,7 @@ class SubstancePropertiesPopup(CcpnDialog):
 
     def _substanceNameWidget(self):
         self.substanceLabel = Label(self, text="Name")
-        self.nameSubstance = LineEdit(self, 'newSubstance', textAlignment='left')
+        self.nameSubstance = LineEdit(self, self._getSubstanceName(), textAlignment='left')
         if self.substance:
             self.nameSubstance.setText(self.substance.name)
 
@@ -292,7 +295,7 @@ class SubstancePropertiesPopup(CcpnDialog):
     def _setPerformButtonWidgets(self):
         self.spacerLabel = Label(self, text="")
         callbacks = [self._hideExtraSettings, self._showMoreSettings, self.reject, self._applyChanges, self._okButton]
-        texts = ['Show less', 'Show more', 'Cancel', 'Apply', 'Ok']
+        texts = [LESS_BUTTON, MORE_BUTTON, 'Cancel', 'Apply', 'Ok']
 
         # if not self.createNewSubstance:
         # Apply doesn't really work when creating new substance
@@ -475,20 +478,28 @@ class SubstancePropertiesPopup(CcpnDialog):
         if value:
             self.substance.comment = value
 
-    def _getSubstance(self):
+    # def _getSubstance(self):
+    #     "Get a new substance name"
+    #     if len(self.project.substances) > 0:
+    #         substance = self.project.newSubstance(name='newSubstance-' + str(len(self.project.substances)))
+    #         return substance
+    #     else:
+    #         substance = self.project.newSubstance(name='newSubstance-', )
+    #         return substance
+
+    def _getSubstanceName(self):
+        "Get a new substance name"
         if len(self.project.substances) > 0:
-            substance = self.project.newSubstance(name='NewSubstance-' + str(len(self.project.substances)))
-            return substance
+            return 'newSubstance-' + str(len(self.project.substances))
         else:
-            substance = self.project.newSubstance(name='NewSubstance-', )
-            return substance
+            return 'newSubstance'
 
     def _hideExtraSettings(self):
         # self.contentsFrame.hide()
         for w in self._allWidgets()[12:]:
             w.hide()
-        self.buttonBox.setButtonVisible('Less', False)
-        self.buttonBox.setButtonVisible('More', True)
+        self.buttonBox.setButtonVisible(LESS_BUTTON, False)
+        self.buttonBox.setButtonVisible(MORE_BUTTON, True)
         # self.contentsFrame.show()
         self.setFixedHeight(250)
 
@@ -496,8 +507,8 @@ class SubstancePropertiesPopup(CcpnDialog):
         # self.contentsFrame.hide()
         for w in self._allWidgets()[12:]:
             w.show()
-        self.buttonBox.setButtonVisible('More', False)
-        self.buttonBox.setButtonVisible('Less', True)
+        self.buttonBox.setButtonVisible(MORE_BUTTON, False)
+        self.buttonBox.setButtonVisible(LESS_BUTTON, True)
         # self.contentsFrame.show()
         self.setFixedHeight(800)
 

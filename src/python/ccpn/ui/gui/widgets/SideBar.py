@@ -846,31 +846,31 @@ def _rightMousePopup(className, dataPid, sideBarItem, *args, **kwds):
                                   *args, **kwds)
 
 
-def _createNewObject(className, dataPid, sideBarItem):
-    """Create a new object of instance className
-    """
-    itemParent = sideBarItem.obj
-    if className is not None:
-        funcName = NEW_ITEM_DICT.get(className)
-        if funcName:
-            newObject = getattr(itemParent, funcName)()
-            return newObject
+# def _createNewObject(className, dataPid, sideBarItem):
+#     """Create a new object of instance className
+#     """
+#     itemParent = sideBarItem.obj
+#     if className is not None:
+#         funcName = NEW_ITEM_DICT.get(className)
+#         if funcName:
+#             newObject = getattr(itemParent, funcName)()
+#             return newObject
 
 
-def _createNewObjectPopup(className, dataPid, sideBarItem, *args, **kwds):
-    """Create a new object of instance className from a popup
-    """
-    if className is not None:
-        popupFunc = NEW_ITEM_DICT.get(className)
-        if popupFunc:
-            project = sideBarItem.sidebar._project
-            application = project.application
-            popup = popupFunc(parent=application.ui.mainWindow, mainWindow=application.ui.mainWindow,
-                              *args, **kwds)
-
-            # make the popup appear in the middle of mainWindow
-            popup.exec_()
-            popup.raise_()
+# def _createNewObjectPopup(className, dataPid, sideBarItem, *args, **kwds):
+#     """Create a new object of instance className from a popup
+#     """
+#     if className is not None:
+#         popupFunc = NEW_ITEM_DICT.get(className)
+#         if popupFunc:
+#             project = sideBarItem.sidebar._project
+#             application = project.application
+#             popup = popupFunc(parent=application.ui.mainWindow, mainWindow=application.ui.mainWindow,
+#                               *args, **kwds)
+#
+#             # make the popup appear in the middle of mainWindow
+#             popup.exec_()
+#             popup.raise_()
 
 
 # def _createNewRestraintListPopup(className, dataPid, sideBarItem):
@@ -917,31 +917,31 @@ def _createNewObjectPopup(className, dataPid, sideBarItem, *args, **kwds):
 #             popup.raise_()
 
 
-def _raisePopup(dataPid, sideBarItem):
-    """Raise an editor popup for the sideBar item
-    """
-    lowerCase = lambda s: s[:1].lower() + s[1:] if s else None
-
-    obj = sideBarItem.obj
-    className = obj.className
-    if className is not None:
-        popupFunc = EDIT_ITEM_DICT.get(className)
-        if popupFunc:
-            project = sideBarItem.sidebar._project
-            application = project.application
-
-            # make first letter a lowerCase and use for the popup
-            objectDict = {lowerCase(className): obj}
-            popup = popupFunc(parent=application.ui.mainWindow, mainWindow=application.ui.mainWindow,
-                              **objectDict)
-
-            # make the popup appear in the middle of mainWindow
-            popup.exec_()
-            popup.raise_()
-
-        else:
-            info = showInfo('Not implemented yet!',
-                            'This function has not been implemented in the current version')
+# def _raisePopup(dataPid, sideBarItem):
+#     """Raise an editor popup for the sideBar item
+#     """
+#     lowerCase = lambda s: s[:1].lower() + s[1:] if s else None
+#
+#     obj = sideBarItem.obj
+#     className = obj.className
+#     if className is not None:
+#         popupFunc = EDIT_ITEM_DICT.get(className)
+#         if popupFunc:
+#             project = sideBarItem.sidebar._project
+#             application = project.application
+#
+#             # make first letter a lowerCase and use for the popup
+#             objectDict = {lowerCase(className): obj}
+#             popup = popupFunc(parent=application.ui.mainWindow, mainWindow=application.ui.mainWindow,
+#                               **objectDict)
+#
+#             # make the popup appear in the middle of mainWindow
+#             popup.exec_()
+#             popup.raise_()
+#
+#         else:
+#             info = showInfo('Not implemented yet!',
+#                             'This function has not been implemented in the current version')
 
 #===========================================================================================================
 # ABC's + specific callback classes

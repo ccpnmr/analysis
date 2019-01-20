@@ -38,7 +38,7 @@ from ccpnmodel.ccpncore.lib.Constants import defaultNmrChainCode
 from ccpn.core import _importOrder
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, renameObject, \
-    ccpNmrV3CoreSetter, logCommandBlock
+    ccpNmrV3CoreSetter, logCommandBlock, undoStackBlocking, undoBlock
 from ccpn.util.Logging import getLogger
 
 
@@ -1131,6 +1131,40 @@ class NmrResidue(AbstractWrapperObject):
         """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""
         return parent._wrappedData.sortedResonanceGroups()
 
+    def _reverseChainForDelete(self, apiNmrChain):
+        """Reverse the chain.
+        """
+        print('>>>FLIP CHAIN')
+        apiNmrChain.__dict__['mainResonanceGroups'].reverse()
+
+    def _delete(self):
+        """Delete object, with all contained objects and underlying data.
+        """
+
+        # NBNB clean-up of wrapper structure is done via notifiers.
+        # NBNB some child classes must override this function
+
+        atHeadOfChain = False
+        apiNmrChain = self._wrappedData.directNmrChain
+        if apiNmrChain and apiNmrChain.isConnected:
+            stretch = tuple(apiNmrChain.mainResonanceGroups)
+            atHeadOfChain = True if len(stretch) > 1 and stretch[0] is self._wrappedData else False
+
+        if not atHeadOfChain:
+            super().delete()
+
+        else:
+            with undoBlock():
+                with undoStackBlocking() as addUndoItem:
+                    addUndoItem(undo=partial(self._reverseChainForDelete, apiNmrChain))
+
+                # this is nearly okay
+                # except that the chain is reversed during the delete notifier phase
+                # needs to be moved into the model
+                super().delete()
+                with undoStackBlocking() as addUndoItem:
+                    addUndoItem(undo=partial(self._reverseChainForDelete, apiNmrChain))
+
     def delete(self):
         """Delete routine to check whether the item can be deleted otherwise raise api error.
         """
@@ -1141,7 +1175,8 @@ class NmrResidue(AbstractWrapperObject):
 
             # need to do a special delete here as the api always reinserts the nmrResidue at the end of the chain
 
-            super().delete()
+            # super().delete()
+            self._delete()
 
         except Exception as es:
             raise es

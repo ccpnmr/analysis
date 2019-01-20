@@ -42,6 +42,7 @@ class SimpleAttributeEditorPopupABC(CcpnDialog):
     klass = None  # The class whose name property is edited
     attributes = []  # A list of (attributeName, getFunction, setFunction, kwds) tuples;
                      # get/set-Function have getattr, setattr profile
+                     # if setFunction is None: display value without editing options
                      # kwds: optional kwds passed to LineEdit
 
     def __init__(self, parent=None, mainWindow=None, obj=None, **kwds):
@@ -62,9 +63,10 @@ class SimpleAttributeEditorPopupABC(CcpnDialog):
         self.labels = {}
         self.edits = {}
         for attr, getFunction, setFunction, kwds in self.attributes:
-            value = str(getFunction(self.obj, attr))
+            value = getFunction(self.obj, attr)
+            readOnly = setFunction is None
             self.labels[attr] = Label(self, attr, grid=(row, 0))
-            self.edits[attr] = LineEdit(self, text=value, textAlignment='left',
+            self.edits[attr] = LineEdit(self, text=str(value), textAlignment='left', readOnly=readOnly,
                                               vAlign = 't', grid=(row, 1), **kwds)
             row += 1
 
@@ -84,10 +86,12 @@ class SimpleAttributeEditorPopupABC(CcpnDialog):
         with undoBlockManager():
             try:
                 for attr, getFunction, setFunction, _tmp in self.attributes:
-                    value = str(getFunction(self.obj, attr))
-                    newValue = self.edits[attr].text()
-                    if newValue != value:
-                        setFunction(self.obj, attr, newValue)
+                    if setFunction is not None:
+                        # not a readonly attribute
+                        value = str(getFunction(self.obj, attr))
+                        newValue = self.edits[attr].text()
+                        if newValue != value:
+                            setFunction(self.obj, attr, newValue)
 
             except Exception as es:
                 showWarning(str(self.windowTitle()), str(es))

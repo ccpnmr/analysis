@@ -42,10 +42,9 @@ from contextlib import contextmanager
 from PyQt5 import QtGui, QtWidgets, QtCore
 from typing import Callable
 
+from functools import partial
+
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.core.lib import Pid
-from ccpn.ui.gui.guiSettings import sidebarFont
-from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.PeakList import PeakList
@@ -68,9 +67,12 @@ from ccpn.core.Model import Model
 from ccpn.core.Restraint import Restraint, RestraintList
 from ccpn.core.Note import Note
 
+from ccpn.ui.gui.popups.ChainPopup import ChainPopup
+from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
 from ccpn.ui.gui.popups.ChemicalShiftListPopup import ChemicalShiftListPopup
 from ccpn.ui.gui.popups.DataSetPopup import DataSetPopup
 from ccpn.ui.gui.popups.NmrAtomPopup import NmrAtomPopup
+from ccpn.ui.gui.popups.CreateNmrChainPopup import CreateNmrChainPopup
 from ccpn.ui.gui.popups.NmrChainPopup import NmrChainPopup
 from ccpn.ui.gui.popups.NmrResiduePopup import NmrResiduePopup
 from ccpn.ui.gui.popups.NotesPopup import NotesPopup
@@ -84,24 +86,27 @@ from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 from ccpn.ui.gui.popups.StructureEnsemblePopup import StructureEnsemblePopup
 from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
+
 from ccpn.core.lib.Pid import Pid
 
+from ccpn.ui.gui.guiSettings import sidebarFont
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning, progressManager
+from ccpn.ui.gui.widgets.Menu import Menu
+
 from ccpn.util.Constants import ccpnmrJsonData
-from ccpn.util.Logging import getLogger
-from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
-from ccpn.ui.gui.popups.CreateNmrChainPopup import CreateNmrChainPopup
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
+
 from ccpn.core.lib.Notifiers import Notifier, NotifierBase
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+
 from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.ui.gui.lib.MenuActions import _openNote, _openIntegralList, _openPeakList, _openMultipletList, _openChemicalShiftList, _openRestraintList, \
     _openStructureTable, _openNmrResidueTable, _openResidueTable, _openItemObject, _openSpectrumDisplay, _openSpectrumGroup, _openSampleSpectra, \
     _createSpectrumGroup
 
-from ccpn.ui.gui.widgets.Menu import Menu
-from functools import partial
+from ccpn.util.Logging import getLogger
 
 
 OpenObjAction = {
@@ -1058,9 +1063,12 @@ class RaisePopupABC():
         popup.exec()
         popup.raise_()
 
-class _raiseChainPopup(RaisePopupABC):
+class _raiseNewChainPopup(RaisePopupABC):
     popupClass = CreateChainPopup
     parentObjectArgumentName = 'project'
+
+class _raiseChainPopup(RaisePopupABC):
+    popupClass = ChainPopup
 
 class _raiseDataSetPopup(RaisePopupABC):
     popupClass = DataSetPopup
@@ -1084,7 +1092,7 @@ class _raiseCreateNmrChainPopup(RaisePopupABC):
 
 class _raiseEditNmrChainPopup(RaisePopupABC):
     popupClass = NmrChainPopup
-    objectArgumentName = 'nmrChain'
+    # objectArgumentName = 'nmrChain'
 
 class _raiseNmrResiduePopup(RaisePopupABC):
     popupClass = NmrResiduePopup
@@ -1213,8 +1221,9 @@ class SideBarStructure(object):
 
             #------ Chains, Residues ------
             SidebarTree('Chains', closed=True, children=[
-                SidebarItem('<New Chain>', callback=_raiseChainPopup(useParent=True)),
-                SidebarClassTreeItems(klass=Chain, rebuildOnRename='Chain-ClassTreeItems', callback=NYI, children=[
+                SidebarItem('<New Chain>', callback=_raiseNewChainPopup(useParent=True)),
+                SidebarClassTreeItems(klass=Chain, rebuildOnRename='Chain-ClassTreeItems',
+                                      callback=_raiseChainPopup(), children=[
                     SidebarClassTreeItems(klass=Residue, rebuildOnRename='Chain-ClassTreeItems', callback=NYI),
                     ]),
                 ]),

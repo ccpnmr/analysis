@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.guiSettings import helveticaItalic12
 from ccpn.framework.Translation import translator
 
 
@@ -44,7 +45,8 @@ TextAlignment = {
 
 class LineEdit(QtWidgets.QLineEdit, Base):
 
-    def __init__(self, parent, text='', textAlignment='c', backgroundText=None, minimumWidth=100, textColor=None, **kwds):
+    def __init__(self, parent, text='', textAlignment='c', backgroundText=None,
+                 minimumWidth=100, textColor=None, readOnly=False, **kwds):
         """
 
         :param parent:
@@ -64,6 +66,7 @@ class LineEdit(QtWidgets.QLineEdit, Base):
 
         if textColor:
             self.setStyleSheet('QLabel {color: %s;}' % textColor)
+
         self.backgroundText = backgroundText
         if self.backgroundText:
             self.setPlaceholderText(str(self.backgroundText))
@@ -71,9 +74,12 @@ class LineEdit(QtWidgets.QLineEdit, Base):
         self.setAlignment(TextAlignment[textAlignment])
         self.setMinimumWidth(minimumWidth)
         self.setFixedHeight(25)
+        if readOnly:
+            self.setReadOnly(True)
+            self.setEnabled(False)
+            self.setFont(helveticaItalic12)
 
     def get(self):
-
         return self.text()
 
     def set(self, text=''):

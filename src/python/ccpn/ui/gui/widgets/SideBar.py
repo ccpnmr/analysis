@@ -77,12 +77,12 @@ from ccpn.ui.gui.popups.NotesPopup import NotesPopup
 from ccpn.ui.gui.popups.PeakListPropertiesPopup import PeakListPropertiesPopup
 from ccpn.ui.gui.popups.IntegralListPropertiesPopup import IntegralListPropertiesPopup
 from ccpn.ui.gui.popups.MultipletListPropertiesPopup import MultipletListPropertiesPopup
-from ccpn.ui.gui.popups.RestraintTypePopup import RestraintTypePopup
+from ccpn.ui.gui.popups.RestraintListPopup import RestraintListPopup
 from ccpn.ui.gui.popups.SampleComponentPropertiesPopup import EditSampleComponentPopup
 from ccpn.ui.gui.popups.SamplePropertiesPopup import SamplePropertiesPopup
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
-from ccpn.ui.gui.popups.StructurePopup import StructureEnsemblePopup
+from ccpn.ui.gui.popups.StructureEnsemblePopup import StructureEnsemblePopup
 from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
 from ccpn.core.lib.Pid import Pid
 
@@ -1064,7 +1064,7 @@ class _raiseChainPopup(RaisePopupABC):
 
 class _raiseDataSetPopup(RaisePopupABC):
     popupClass = DataSetPopup
-    objectArgumentName = 'dataSet'
+    objectArgumentName = 'obj'
 
 class _raiseChemicalShifListPopup(RaisePopupABC):
     popupClass = ChemicalShiftListPopup
@@ -1103,7 +1103,7 @@ class _raiseIntegralListPopup(RaisePopupABC):
     objectArgumentName = 'integralList'
 
 class _raiseRestraintListPopup(RaisePopupABC):
-    popupClass = RestraintTypePopup
+    popupClass = RestraintListPopup
     objectArgumentName = 'restraintList'
     parentObjectArgumentName = 'dataSet'
 
@@ -1127,7 +1127,7 @@ class _raiseSpectrumGroupPopup(RaisePopupABC):
 
 class _raiseStructureEnsemblePopup(RaisePopupABC):
     popupClass = StructureEnsemblePopup
-    objectArgumentName = 'structureEnsemble'
+    objectArgumentName = 'obj'
 
 class _raiseSubstancePopup(RaisePopupABC):
     popupClass = SubstancePropertiesPopup

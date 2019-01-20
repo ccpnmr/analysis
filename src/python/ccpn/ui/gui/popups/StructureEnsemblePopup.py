@@ -25,45 +25,15 @@ __date__ = "$Date: 2017-07-04 09:28:16 +0000 (Tue, July 04, 2017) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.popups.Dialog import CcpnDialog
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.core.StructureEnsemble import StructureEnsemble
+from ccpn.ui.gui.popups.SimpleAttributeEditorPopupABC import SimpleAttributeEditorPopupABC
+from ccpn.util.Logging import getLogger
 
 
-class StructureEnsemblePopup(CcpnDialog):
-    """
-    Open a small popup to allow changing the label of a StructureEnsemble
-    """
+class StructureEnsemblePopup(SimpleAttributeEditorPopupABC):
+    """DataSet attributes editor popup"""
 
-    def __init__(self, parent=None, mainWindow=None, structureEnsemble=None, **kwds):
-        """
-        Initialise the widget
-        """
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='Edit StructureEnsemble', **kwds)
-
-        self.mainWindow = mainWindow
-        self.application = mainWindow.application
-        self.project = mainWindow.application.project
-        self.current = mainWindow.application.current
-
-        self.structure = structureEnsemble
-        self.structureLabel = Label(self, "Name ", grid=(0, 0))
-        self.structureText = LineEdit(self, self.structure.name, grid=(0, 1))
-        ButtonList(self, ['Cancel', 'OK'], [self.reject, self._okButton], grid=(1, 1))
-
-    def _okButton(self):
-        """
-        When ok button pressed: update StructureEnsemble and exit
-        """
-        newName = self.structureText.text()
-        try:
-            if str(newName) != self.structure.name:
-                self.structure.rename(newName)
-            self.accept()
-
-        except Exception as es:
-            showWarning(self.windowTitle(), str(es))
-            if self.application._isInDebugMode:
-                raise es
+    klass = StructureEnsemble
+    attributes = [('name',           getattr, setattr, {'backgroundText':'> Enter name <'}),
+                  ('comment',        getattr, setattr, {'backgroundText':'> Optional <'}),
+                 ]

@@ -77,9 +77,11 @@ class SubstancePropertiesPopup(CcpnDialog):
 
         self.createNewSubstance = newSubstance
 
-        self.contentsFrame = Frame(self, setLayout=True, grid=(1, 1), spacing=(5, 5))
-        self.contentsFrame.setFixedWidth(400)
+        # GWV: frame is never used
+        # self.contentsFrame = Frame(self, setLayout=True, grid=(1, 1), spacing=(5, 5))
+        # self.contentsFrame.setFixedWidth(400)
         # self.moreWidgetsFrame = Frame(self, setLayout=True, grid=(1,1), gridSpan=(3,1), spacing=(5,5))
+        self.setFixedWidth(400)
 
         self._setWidgets()
         self._addWidgetsToLayout()
@@ -96,7 +98,8 @@ class SubstancePropertiesPopup(CcpnDialog):
     def _addWidgetsToLayout(self):
 
         widgets = self._allWidgets()
-        layout = self.contentsFrame.getLayout()
+        # layout = self.contentsFrame.getLayout()
+        layout = self.getLayout()
 
         count = int(len(widgets) / 2)
         self.positions = [[i + 1, j] for i in range(count) for j in range(2)]

@@ -70,6 +70,7 @@ from ccpn.core.Note import Note
 from ccpn.ui.gui.popups.ChainPopup import ChainPopup
 from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
 from ccpn.ui.gui.popups.ChemicalShiftListPopup import ChemicalShiftListPopup
+from ccpn.ui.gui.popups.ComplexEditorPopup import ComplexEditorPopup
 from ccpn.ui.gui.popups.DataSetPopup import DataSetPopup
 from ccpn.ui.gui.popups.NmrAtomPopup import NmrAtomPopup
 from ccpn.ui.gui.popups.CreateNmrChainPopup import CreateNmrChainPopup
@@ -968,6 +969,9 @@ class _raiseNewChainPopup(RaisePopupABC):
 class _raiseChainPopup(RaisePopupABC):
     popupClass = ChainPopup
 
+class _raiseComplexPopup(RaisePopupABC):
+    popupClass = ComplexEditorPopup
+
 class _raiseDataSetPopup(RaisePopupABC):
     popupClass = DataSetPopup
     # objectArgumentName = 'obj'
@@ -1128,8 +1132,9 @@ class SideBarStructure(object):
 
             #------ Complexes ------
             SidebarTree('Complexes', closed=True, children=[
-                SidebarItem('<New Complex>', callback=NYI),
-                SidebarClassTreeItems(klass=Complex, rebuildOnRename='Complex-ClassTreeItems', callback=NYI),
+                SidebarItem('<New Complex>', callback=_raiseComplexPopup(editMode=False, useNone=True)),
+                SidebarClassTreeItems(klass=Complex, rebuildOnRename='Complex-ClassTreeItems',
+                                      callback=_raiseComplexPopup(editMode=True)),
                 ]),
 
             #------ StructureEnsembles ------

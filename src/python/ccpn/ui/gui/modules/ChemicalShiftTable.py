@@ -246,7 +246,7 @@ class ChemicalShiftTable(QuickTable):
                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
                              grid=(0, 0), gridSpan=(1, 1))
         self._chemicalShiftListPulldown = ChemicalShiftListPulldown(parent=self._widget,
-                                                                    project=self.project, default=0,
+                                                                    project=self.project, default=None,
                                                                     # first NmrChain in project (if present)
                                                                     grid=(1, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
                                                                     showSelectName=True,

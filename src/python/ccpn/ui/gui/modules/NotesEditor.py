@@ -85,7 +85,7 @@ class NotesEditorModule(CcpnModule):
 
         row += 1
         self.noWidget = NotePulldown(parent=self._widget,
-                                     project=self.project, default=0,
+                                     project=self.project, default=None,
                                      grid=(row, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
                                      showSelectName=True,
                                      sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,

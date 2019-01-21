@@ -203,7 +203,7 @@ class RestraintTable(QuickTable):
         row += 1
         gridHPos = 0
         self.rtWidget = RestraintPulldown(parent=self._widget,
-                                          project=self.project, default=0,
+                                          project=self.project, default=None,
                                           grid=(row, gridHPos), gridSpan=(1, 1), minimumWidths=(0, 100),
                                           showSelectName=True,
                                           sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,

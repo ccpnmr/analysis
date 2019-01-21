@@ -699,7 +699,7 @@ if __name__ == '__main__':
     pulldownListwidget = PulldownListCompoundWidget(parent=popup, orientation='left', showBorder=True,
                                                     minimumWidths=(150, 100),
                                                     labelText='PulldownListCompoundWidget', texts=texts,
-                                                    callback=callback1, grid=(row, 0), default=0,
+                                                    callback=callback1, grid=(row, 0), default=None,
                                                     **policyDict)
 
     pulldownListwidget2 = PulldownListCompoundWidget(parent=popup, orientation='top', showBorder=True,

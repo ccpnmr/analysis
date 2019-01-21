@@ -927,7 +927,7 @@ class NmrResidue(AbstractWrapperObject):
             apiResonanceGroup.sequenceCode = None
             apiResonanceGroup.resetResidueType(None)
 
-    def moveToNmrChain(self, newNmrChain: typing.Union['NmrChain', str] = '@-', sequenceCode: str = None, residueType: str = None):
+    def moveToNmrChain(self, newNmrChain: typing.Union['NmrChain', str] = 'NC:@-', sequenceCode: str = None, residueType: str = None):
         """Move residue to newNmrChain, breaking connected NmrChain if necessary.
         Optionally rename residue using sequenceCode and residueType
 

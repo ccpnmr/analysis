@@ -26,6 +26,9 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+
+from ccpn.core.SpectrumGroup import SpectrumGroup
+
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
@@ -67,11 +70,12 @@ class SpectrumGroupEditor(CcpnDialog):
     """
     A popup to create and manage SpectrumGroups
     """
-    KLASS = 'SpectrumGroup'
-    KLASS_ITEM_ATTRIBUTE = 'spectra'
+    KLASS = SpectrumGroup
+    KLASS_ITEM_ATTRIBUTE = 'spectra' # Attribute in KLASS containing items
+    KLASS_PULLDOWN = SpectrumGroupPulldown
 
-    MODE_NEW = 0
-    MODE_EDIT = 1
+    PROJECT_NEW_METHOD = 'newSpectrumGroup'  # Method of Project to create new KLASS instance
+    PROJECT_ITEM_ATTRIBUTE = 'spectra'  # Attribute of Project containing items
 
     BUTTON_ALL = 'All'
     BUTTON_FILTER = 'Filter by:'
@@ -79,40 +83,33 @@ class SpectrumGroupEditor(CcpnDialog):
 
     FIXEDWIDTH = 120
 
-    def __init__(self, parent=None, mainWindow=None, spectrumGroup=None, editMode=True, spectra=None, **kwds):
+    def __init__(self, parent=None, mainWindow=None, editMode=True, spectrumGroup=None, spectra=None, **kwds):
         """
         Initialise the widget
 
         Used in 'New' or 'Edit' mode:
-        - For creating new SpectrumGroup (MODE_NEW); optionally uses passed in spectra list
+        - For creating new SpectrumGroup (editMode==False); optionally uses passed in spectra list
           i.e. NewSpectrumGroup of SideBar and Context menu of SideBar
 
-        - For editing existing SpectrumGroup (MODE_EDIT); requires spectrumGroup argument
+        - For editing existing SpectrumGroup (editMode==True); requires spectrumGroup argument
           i.e. Edit of SpectrumGroup of SideBar
         or
-          For selecting and editing SpectrumGroup (MODE_EDIT)
+          For selecting and editing SpectrumGroup (editMode==True)
           i.e. Menu Spectrum->Edit SpectrumGroup...
         """
-        CcpnDialog.__init__(self, parent=parent, setLayout=False, margins=(10,10,10,10), **kwds)
-
-        if editMode:
-            self.mode = self.MODE_EDIT
-        else:
-            self.mode = self.MODE_NEW
-
-        # window title
-        title = 'New ' + SpectrumGroupEditor.KLASS if self.mode == self.MODE_NEW else 'Edit ' + SpectrumGroupEditor.KLASS
-        self.setWindowTitle(title)
+        title = 'Edit ' + SpectrumGroupEditor.KLASS.className if editMode else 'New ' + SpectrumGroupEditor.KLASS.className
+        CcpnDialog.__init__(self, parent=parent, windowTitle=title, setLayout=True, margins=(10,10,10,10),
+                            spacing=(5,5), **kwds)
 
         self.mainWindow = mainWindow
         self.application = mainWindow.application
         self.project = mainWindow.application.project
         self.current = mainWindow.application.current
 
-        self.spectrumGroup = spectrumGroup
-        self._spectra = spectra  #open popup with these spectra already selected. Ready to create the group.
+        self.obj = spectrumGroup
+        self.editMode = editMode
+        self.defaultItems = spectra  #open popup with these items already added to left ListWidget. Ready to create the group.
 
-        self._setMainLayout()  # GWV: Passing directly into init constructor does not give the same result??
         self._setLeftWidgets()
         self._setRightWidgets()
         self._setApplyButtons()
@@ -120,25 +117,20 @@ class SpectrumGroupEditor(CcpnDialog):
 
         self._updateState()
 
-    def _setMainLayout(self):
-        layout = QtWidgets.QGridLayout(self)
-        self.setLayout(layout)
-        layout.setContentsMargins(10, 20, 10, 20)  # L,T,R,B
-
     def _setLeftWidgets(self):
 
         self.leftTopLabel = Label(self, '', bold=True)
 
         self.nameLabel = Label(self, 'Name')
-        self.nameEdit = LineEdit(self, backgroundText='Enter name', textAlignment='left')
+        self.nameEdit = LineEdit(self, backgroundText='> Enter name <', textAlignment='left')
         # self.nameEdit.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         self.nameEdit.setFixedWidth(self.FIXEDWIDTH)
 
-        self.leftPullDownLabel = Label(self, self.KLASS)
-        self.leftPullDown = SpectrumGroupPulldown(parent=self.mainWindow,
+        self.leftPullDownLabel = Label(self, self.KLASS.className)
+        self.leftPullDown = self.KLASS_PULLDOWN(parent=self.mainWindow,
                                                   project = self.project,
                                                   showSelectName=True,
-                                                  default=self.spectrumGroup,
+                                                  default=self.obj,
                                                   callback=self._leftPullDownCallback,
                                                   fixedWidths=[0, self.FIXEDWIDTH]
                                                   )
@@ -175,7 +167,6 @@ class SpectrumGroupEditor(CcpnDialog):
     def _addWidgetsToLayout(self):
         # Add left Widgets on Main layout
         layout = self.getLayout()
-        # layout.setContentsMargins(10, 10, 10, 10)  # L,T,R,B
 
         layout.addWidget(self.leftTopLabel, 0, 0)
         layout.addWidget(self.leftPullDownLabel, 1, 0)
@@ -192,13 +183,14 @@ class SpectrumGroupEditor(CcpnDialog):
         layout.addWidget(self.rightListWidget, 3, 2, 1, 2)
 
         # Add Buttons Widgets on Main layout
-        layout.addWidget(self.applyButtons, 4, 2, 1, 2)
+        self.addSpacer(0,10, grid=(4,0), gridSpan=(1,4))
+        layout.addWidget(self.applyButtons, 4, 0, 1, 4)
 
     @property
     def _editedObject(self):
         "Convenience to get the edited object"
         result = None
-        if self.mode == self.MODE_EDIT:
+        if self.editMode:
             result = self.leftPullDown.getSelectedObject()
         return result
 
@@ -214,6 +206,16 @@ class SpectrumGroupEditor(CcpnDialog):
             return None
         return getattr(obj, self.KLASS_ITEM_ATTRIBUTE)
 
+    @property
+    def _projectObjectItems(self) -> list:
+        """Convenience to get the list from project of items we are editing for object (e.g. spectra
+        in case of SpectrumGroup)
+        Returns list or None on error
+        """
+        if not hasattr(self.project, self.PROJECT_ITEM_ATTRIBUTE):
+            return None
+        return getattr(self.project, self.PROJECT_ITEM_ATTRIBUTE)
+
     def _updateState(self):
         """Update state
         """
@@ -225,29 +227,26 @@ class SpectrumGroupEditor(CcpnDialog):
         """
         # self.leftRadioButtons.hide()
 
-        if self.mode == self.MODE_NEW:
-            self.leftTopLabel.setText('New SpectrumGroup')
-            self.leftPullDownLabel.hide()
-            self.leftPullDown.hide()
-            self.leftListWidget.clear()
-            if self._spectra is not None:
-                self._setLeftListWidgetItems(self._spectra)
-            self.nameEdit.setText('')
-
-        elif self.mode == self.MODE_EDIT or self.mode == self.MODE_SELECT_EDIT:
+        if self.editMode:
             self.leftTopLabel.setText('Edit ')
             self.leftPullDownLabel.show()
             self.leftPullDown.show()
-            sg = self._editedObject
-            if sg is not None:
-                self.nameEdit.setText(sg.name)
-                self._setLeftListWidgetItems(sg.spectra)
+            obj = self._editedObject
+            if obj is not None:
+                self.nameEdit.setText(obj.name)
+                self._setLeftListWidgetItems(self._editedObjectItems)
             else:
                 self.nameEdit.setText('')
                 self.leftListWidget.clear()
 
         else:
-            raise RuntimeError('Invalid SpectrumGroupEditor mode "%s"' % self.mode)
+            self.leftTopLabel.setText('New ' + self.KLASS.className)
+            self.leftPullDownLabel.hide()
+            self.leftPullDown.hide()
+            self.leftListWidget.clear()
+            if self.defaultItems is not None:
+                self._setLeftListWidgetItems(self.defaultItems)
+            self.nameEdit.setText('')
 
         self._addEmptyDescriptions()
 
@@ -257,7 +256,7 @@ class SpectrumGroupEditor(CcpnDialog):
         selected = self.rightRadioButtons.get()
         if selected == self.BUTTON_ALL:
             self.rightPullDown.hide()
-            self._setRightListWidgetItems(self.project.spectra)
+            self._setRightListWidgetItems(self._projectObjectItems)
         else:
             self.rightPullDown.show()
             self.rightListWidget.clear()
@@ -364,14 +363,16 @@ class SpectrumGroupEditor(CcpnDialog):
 
         with undoBlockManager():
             try:
-                if self.mode == self.MODE_NEW:
-                    obj = self.project.newSpectrumGroup(name, items)
-                    setattr(obj, self.KLASS_ITEM_ATTRIBUTE, items)
-                else:
+                if self.editMode:
                     # edit mode
                     obj = self._editedObject
                     if obj.name != name:
                         obj.rename(name)
+                    setattr(obj, self.KLASS_ITEM_ATTRIBUTE, items)
+                else:
+                    # new mode
+                    func = getattr(self.project, self.PROJECT_NEW_METHOD)
+                    obj = func(name=name)
                     setattr(obj, self.KLASS_ITEM_ATTRIBUTE, items)
 
             except Exception as es:

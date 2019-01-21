@@ -133,6 +133,7 @@ from ccpn.core.lib.peakUtils import getNmrResidueDeltas,_getKd, oneSiteBindingCu
 from ccpn.core.lib import CcpnSorting
 from ccpn.core.lib.DataFrameObject import  DATAFRAME_OBJECT
 from ccpn.core.NmrChain import NmrChain
+from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Project import Project
 
 # Default values on init
@@ -258,6 +259,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self.showStructureIcon = Icon('icons/showStructure')
     self.updateIcon = Icon('icons/update')
     self._zoomOnInit = True
+    self._bindingItemClicked = None #used for the bindingPlot callback
     self._kDunit = DefaultKDunit
     self._availableFittingPlots  = {
                           ONESITE: self._plot1SiteBindFitting, # Only this implemented
@@ -567,6 +569,8 @@ class ChemicalShiftsMapping(CcpnModule):
     self._bindingPlotView = pg.GraphicsLayoutWidget()
     self._bindingPlotView.setBackground(BackgroundColour)
     self.bindingPlot = self._bindingPlotView.addPlot()
+    self.bindingPlot.mouseDoubleClickEvent = self._bindingPlotDoubleClick
+
     self.bindingPlot.addLegend(offset=[1, 10])
     self._bindingPlotViewbox = self.bindingPlot.vb
     self._bindingPlotViewbox.mouseClickEvent = self._bindingViewboxMouseClickEvent
@@ -639,11 +643,22 @@ class ChemicalShiftsMapping(CcpnModule):
 
         pen = pg.functions.mkPen(hexToRgb(obj._colour), width=1)
         brush = pg.functions.mkBrush(hexToRgb(obj._colour), width=1)
-        self.bindingPlot.plot(xs, ys, symbol='o', pen=pen, symbolBrush=brush, name=obj.pid)
+        plot = self.bindingPlot.plot(xs, ys, symbol='o', pen=pen, symbolBrush=brush, name=obj.pid)
+        plot.sigPointsClicked.connect(self._bindingPlotSingleClick)
 
     self.bindingPlot.autoRange()
     self.bindingPlot.setLabel('left', DELTA+Delta)
     self.bindingPlot.setLabel('bottom', self._kDunit)
+
+  def _bindingPlotSingleClick(self, item, points):
+    """sig callback from the binding plot. Gets the obj from the curve name."""
+    obj = self.project.getByPid(item.name())
+    self._bindingItemClicked = obj
+
+  def _bindingPlotDoubleClick(self, event):
+    if self._bindingItemClicked is not  None:
+      print(self._bindingItemClicked)
+      self._navigateToNmrItems(self._bindingItemClicked)
 
 
   def _getBindingCurves(self, nmrResidues):
@@ -780,40 +795,6 @@ class ChemicalShiftsMapping(CcpnModule):
     self._scatterSelectionBox.hide()
     self._scatterViewbox.rbScaleBox.hide()
 
-  ###########  scatter Mouse Events ############
-
-  def _scatterMouseDoubleClickEvent(self, event):
-    """
-    re-implementation of scatter double click event
-    """
-    from ccpn.ui.gui.lib.Strip import navigateToNmrAtomsInStrip, _getCurrentZoomRatio, navigateToNmrResidueInDisplay
-
-    if self.current.strip is not None:
-        strip = self.current.strip
-        nmrResidue = self.current.nmrResidue
-        if len(nmrResidue.selectedNmrAtomNames) > 0:
-            nmrAtoms = [nmrResidue.getNmrAtom(str(i)) for i in nmrResidue.selectedNmrAtomNames]
-            if len(nmrAtoms) <= 1:
-                navigateToNmrResidueInDisplay(display=strip.spectrumDisplay,
-                                              nmrResidue=nmrResidue,
-                                              widths=_getCurrentZoomRatio(strip.viewRange()),
-                                              markPositions=True
-                                              )
-            else:
-                navigateToNmrAtomsInStrip(strip,
-                                          nmrAtoms=nmrAtoms,
-                                          widths=_getCurrentZoomRatio(strip.viewRange()),
-                                          markPositions=True
-                                          )
-    else:
-        if len(self.project.strips) > 0:
-            selectFirst = MessageDialog.showYesNo('No Strip selected.', ' Use first available?')
-            if selectFirst:
-                self.current.strip = self.project.strips[0]
-                self._scatterMouseDoubleClickEvent(event)
-        else:
-          if self._openSpectra():
-            self._scatterMouseDoubleClickEvent(event)
 
 
   def _scatterMouseClickEvent(self, ev):
@@ -942,15 +923,15 @@ class ChemicalShiftsMapping(CcpnModule):
   ############   Settings widgets callbacks    ################
   #############################################################
 
-  def _navigateToNmrItems(self, *args):
+  def _navigateToNmrItems(self, nmrResidue = None, *args):
     """
     _ccpnInternal. NB Called by several points within the CSM
     navigates To current NmrResidue or its atoms if at least 1.
     """
-    nmrResidue = self.current.nmrResidue
+    if not isinstance(nmrResidue, NmrResidue) :
+      nmrResidue = self.current.nmrResidue
     if nmrResidue is None:
       return
-
     self.mainWindow.clearMarks()
     self.nmrResidueTable.scrollToSelectedIndex()
     if self.current.strip is not None:

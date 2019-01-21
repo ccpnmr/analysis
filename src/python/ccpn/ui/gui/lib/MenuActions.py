@@ -414,9 +414,9 @@ class OpenItemABC():
     openItemDirectMethod = None  # parent argument name set to obj passed to openItemClass instantiation when useParent==True
     useApplication = True
 
-    validActionTargets = (Spectrum, PeakList, MultipletList,
+    validActionTargets = (Spectrum, PeakList, MultipletList, IntegralList,
                           NmrChain, Chain, SpectrumGroup, Sample, ChemicalShiftList,
-                          RestraintList, Note, IntegralList, StructureEnsemble
+                          RestraintList, Note, StructureEnsemble
                           )
 
     # This can be subclassed
@@ -439,30 +439,41 @@ class OpenItemABC():
         # these get set upon callback
         self.node = None
         self.dataPid = None
+        self.mainWindow = None
         self.openAction = None
 
-    def __call__(self, dataPid, node, position, objs):
+    def __call__(self, mainWindow, dataPid, node, position, objs):
         """Call acts is the execute entry point for the callback.
-        """
-        self._initialise(dataPid, node, objs)
-        self._openContextMenu(node.sidebar, position, objs)
-
-    def _execOpenItem(self, dataPid, objs):
-        """Exec the openItem.
-        """
-        pass
-
-    def _initialise(self, dataPid, node, objs):
-        """Initialise settings for the object.
         """
         self.node = node
         self.dataPid = dataPid
         obj = self.getObj()
         self.kwds[self.objectArgumentName] = obj
+        self.mainWindow = mainWindow
 
-        self.mainWindow = node.sidebar.mainWindow
+        self._initialise(dataPid, objs)
+        self._openContextMenu(node.sidebar, position, objs)
+
+    def _execOpenItem(self, mainWindow, obj):
+        """Exec the openItem.
+        """
+        self.node = None
+        self.dataPid = obj.pid
+        self.kwds[self.objectArgumentName] = obj
+        self.mainWindow = mainWindow
+
+        self._initialise(obj.pid, [obj])
+        return self.openAction()
+
+    def _initialise(self, dataPid, objs):
+        """Initialise settings for the object.
+        """
+        # self.node = node
+        # self.dataPid = dataPid
+        # obj = self.getObj()
+        # self.kwds[self.objectArgumentName] = obj
+
         self.application = self.mainWindow.application
-
         openableObjs = [obj for obj in objs if isinstance(obj, self.validActionTargets)]
 
         if len(openableObjs) > 0:
@@ -477,33 +488,27 @@ class OpenItemABC():
 
             self.openAction = partial(func, **self.kwds)
 
-
     def _openContextMenu(self, parentWidget, position, objs):
         """Open a context menu.
         """
         contextMenu = Menu('', parentWidget, isFloatWidget=True)
         contextMenu.addAction('Open as a module', self.openAction)
 
-        # spectra = [o for o in openableObjs if isinstance(o, Spectrum)]
+        # spectra = [obj for obj in objs if isinstance(obj, Spectrum)]
         # if len(spectra) > 0:
-        #     contextMenu.addAction('Make SpectrumGroup From Selected', partial(_createSpectrumGroup, self.mainWindow, spectra))
-        #
-        # contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
-        # canBeCloned = True
-        # for obj in objs:
-        #     if not hasattr(obj, 'clone'):  # TODO: possibly should check that is a method...
-        #         canBeCloned = False
-        #         break
-        # if canBeCloned:
-        #     contextMenu.addAction('Clone', partial(self._cloneObject, objs))
+        #     contextMenu.addAction('Make SpectrumGroup From Selected', partial(self._createSpectrumGroup, self.mainWindow, spectra))
+
+        contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
+        canBeCloned = True
+        for obj in objs:
+            if not hasattr(obj, 'clone'):  # TODO: possibly should check that is a method...
+                canBeCloned = False
+                break
+        if canBeCloned:
+            contextMenu.addAction('Clone', partial(self._cloneObject, objs))
 
         contextMenu.move(position)
         contextMenu.exec()
-
-    def _openItemObject(self, objs):
-        """Open the object.
-        """
-        pass
 
     def _cloneObject(self, objs):
         """Clones the specified objects.
@@ -732,8 +737,8 @@ def _openItemObject(mainWindow, objs, **kwds):
                     else:
 
                         # process objects to open
-                        func = OpenObjAction[obj.__class__](**kwds)
-                        returnObj = func.OpenItem(obj, None)
+                        func = OpenObjAction[obj.__class__](useNone=True, **kwds)
+                        returnObj = func._execOpenItem(mainWindow, obj)
 
                         # if the first spectrum then set the spectrumDisplay
                         if isinstance(obj, Spectrum):

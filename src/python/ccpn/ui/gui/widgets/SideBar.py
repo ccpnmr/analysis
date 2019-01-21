@@ -1156,7 +1156,7 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         callback = sideBarObject.callback
 
         if callback:
-            callback(dataPid, sideBarObject)
+            callback(self.mainWindow, dataPid, sideBarObject)
 
     def clearSideBar(self):
         """Completely clear and reset the sidebar of widgets and notifiers.
@@ -1242,7 +1242,7 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
 
             menuAction = sideBarObject.menuAction
             if menuAction:
-                menuAction(dataPid, sideBarObject,
+                menuAction(self.mainWindow, dataPid, sideBarObject,
                            QtCore.QPoint(event.globalPos().x(), event.globalPos().y() + 10),
                            objs)
 

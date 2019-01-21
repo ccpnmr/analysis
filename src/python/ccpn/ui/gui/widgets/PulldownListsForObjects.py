@@ -109,6 +109,9 @@ class _PulldownABC(PulldownListCompoundWidget):
         self._followCurrent = followCurrent
 
         if default is not None:
+            if not isinstance(default, self._klass):
+                raise ValueError('default parameter: expected "%s" object, got "%s"'
+                                 % (self._klass.className, type(default)))
             default = self.object2value(default)
 
         super().__init__(parent=parent, showBorder=showBorder,
@@ -254,7 +257,7 @@ class _PulldownABC(PulldownListCompoundWidget):
         obj = self.getCurrentObject()
         if DEBUG: sys.stderr.write('>>> %s._updateFromCurrent() "%s": %s\n' %
                                    (self, self._currentAttributeName, obj))
-        self._updatePulldownList()
+        self._updatePulldownList(callbackDict=callbackDict)
         if obj is not None:
             value = self.object2value(obj)
             self.select(value, blockSignals=True)

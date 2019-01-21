@@ -669,8 +669,8 @@ class NmrResidueTable(QuickTable):
     def _selectPullDown(self, value):
         self.ncWidget.select(value)
 
-KD = 'kd'
-Deltas = 'Deltas'
+KD = 'Kd'
+Deltas = 'Ddelta'
 
 class _CSMNmrResidueTable(NmrResidueTable):
   """

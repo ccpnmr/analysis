@@ -36,6 +36,17 @@ from ccpn.util.Logging import getLogger
 class SpectrumGroupEditor(_GroupEditorPopupABC):
     """
     A popup to create and manage SpectrumGroups
+
+    Used in 'New' or 'Edit' mode:
+    - For creating new SpectrumGroup (editMode==False); optionally uses passed in spectra list
+      i.e. NewSpectrumGroup of SideBar and Context menu of SideBar
+
+    - For editing existing SpectrumGroup (editMode==True); requires spectrumGroup argument
+      i.e. Edit of SpectrumGroup of SideBar
+    or
+      For selecting and editing SpectrumGroup (editMode==True)
+      i.e. Menu Spectrum->Edit SpectrumGroup...
+
     """
     KLASS = SpectrumGroup
     KLASS_ITEM_ATTRIBUTE = 'spectra' # Attribute in KLASS containing items
@@ -43,20 +54,3 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
 
     PROJECT_NEW_METHOD = 'newSpectrumGroup'  # Method of Project to create new KLASS instance
     PROJECT_ITEM_ATTRIBUTE = 'spectra'  # Attribute of Project containing items
-
-    def __init__(self, parent=None, mainWindow=None, editMode=True, spectrumGroup=None, spectra=None, **kwds):
-        """
-        Initialise the widget
-
-        Used in 'New' or 'Edit' mode:
-        - For creating new SpectrumGroup (editMode==False); optionally uses passed in spectra list
-          i.e. NewSpectrumGroup of SideBar and Context menu of SideBar
-
-        - For editing existing SpectrumGroup (editMode==True); requires spectrumGroup argument
-          i.e. Edit of SpectrumGroup of SideBar
-        or
-          For selecting and editing SpectrumGroup (editMode==True)
-          i.e. Menu Spectrum->Edit SpectrumGroup...
-        """
-        super().__init__(parent=parent, mainWindow=mainWindow, editMode=editMode, obj=spectrumGroup,
-                         defaultItems=spectra, **kwds)

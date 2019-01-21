@@ -212,6 +212,6 @@ OpenObjAction = {
 def _createSpectrumGroup(mainWindow, spectra=None or []):
     """This needs to be put into a more generic place.
     """
-    popup = SpectrumGroupEditor(parent=mainWindow, mainWindow=mainWindow, editMode=False, spectra=spectra)
+    popup = SpectrumGroupEditor(parent=mainWindow, mainWindow=mainWindow, editMode=False, defaultItems=spectra)
     popup.exec_()
     popup.raise_()

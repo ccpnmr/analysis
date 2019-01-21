@@ -160,11 +160,15 @@ def findExportFormats(path, dataFrame, sheet_name='Table', filterType=None, colu
             getLogger().warning('Format file not supported')
 
 
-def exportTableDialog(dataFrame, columns=None):
+def exportTableDialog(dataFrame, columns=None, path='~/table.xlsx'):
     """Open the ExportDialog to export any dataFrame to different formats """
     if dataFrame is None:
         return
-    saveDialog = FileDialog(directory='ccpn_Table.xlsx',  # default saving name
+
+    from ccpn.util.Path import aPath
+    path = aPath(path)
+
+    saveDialog = FileDialog(directory=str(path.parent),  selectFile=str(path), # default saving name
                             fileMode=FileDialog.AnyFile,
                             filter=".xlsx;; .csv;; .tsv;; .json ",
                             text='Save as ',

@@ -458,14 +458,12 @@ class SidebarABC(NotifierBase):
         # Creation of QTreeWidgetItems, needs to be commented out if testing from the __main__ function
         newItem = _sidebarWidgetItem(parentWidgetItem, self)
 
-        # klass = self._parent.klass if self._parent else None
-        # _children = self._parent._children if self._parent else None
         _isDraggable = self._parent.isDraggable if self._parent else None
-
         if _isDraggable:
             newItem.setFlags(newItem.flags() & ~QtCore.Qt.ItemIsDropEnabled)
         else:
             newItem.setFlags(newItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+
         newItem.setData(0, QtCore.Qt.DisplayRole, str(givenName))
         newItem.setData(1, QtCore.Qt.UserRole, self)
         newItem.setExpanded(not self.closed)

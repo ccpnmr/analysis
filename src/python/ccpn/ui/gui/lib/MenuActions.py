@@ -39,6 +39,25 @@ from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.RestraintList import RestraintList
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 
+from ccpn.ui.gui.popups.ChainPopup import ChainPopup
+from ccpn.ui.gui.popups.ChemicalShiftListPopup import ChemicalShiftListPopup
+from ccpn.ui.gui.popups.ComplexEditorPopup import ComplexEditorPopup
+from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
+from ccpn.ui.gui.popups.CreateNmrChainPopup import CreateNmrChainPopup
+from ccpn.ui.gui.popups.DataSetPopup import DataSetPopup
+from ccpn.ui.gui.popups.IntegralListPropertiesPopup import IntegralListPropertiesPopup
+from ccpn.ui.gui.popups.MultipletListPropertiesPopup import MultipletListPropertiesPopup
+from ccpn.ui.gui.popups.NmrAtomPopup import NmrAtomPopup
+from ccpn.ui.gui.popups.NmrChainPopup import NmrChainPopup
+from ccpn.ui.gui.popups.NmrResiduePopup import NmrResiduePopup
+from ccpn.ui.gui.popups.NotesPopup import NotesPopup
+from ccpn.ui.gui.popups.PeakListPropertiesPopup import PeakListPropertiesPopup
+from ccpn.ui.gui.popups.RestraintListPopup import RestraintListPopup
+from ccpn.ui.gui.popups.SampleComponentPropertiesPopup import SampleComponentPopup
+from ccpn.ui.gui.popups.SamplePropertiesPopup import SamplePropertiesPopup
+from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
+from ccpn.ui.gui.popups.StructureEnsemblePopup import StructureEnsemblePopup
+from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
 
 
 # OPEN_ITEM_DICT = {
@@ -215,3 +234,225 @@ def _createSpectrumGroup(mainWindow, spectra=None or []):
     popup = SpectrumGroupEditor(parent=mainWindow, mainWindow=mainWindow, editMode=False, defaultItems=spectra)
     popup.exec_()
     popup.raise_()
+
+
+class CreateNewObjectABC():
+    """
+    An ABC to implement an abstract callback function to create new object
+    The __call__(self, dataPid, node) method acts as the callback function
+    """
+
+    # These should be subclassed
+    parentMethodName = None  # The name of the method in the parent class
+
+    # This can be subclassed
+    def getObj(self):
+        """returns obj from node or None"""
+        return self.node.obj
+
+    def __init__(self, **kwds):
+        # store kewyword as attributes and as dict; acts as partial to popupClass
+        for key, value in kwds.items():
+            setattr(self, key, value)
+        self.kwds = kwds
+        # these get set upon callback
+        self.node = None
+        self.dataPid = None
+
+    def __call__(self, dataPid, node):
+        self.node = node
+        self.dataPid = dataPid
+        obj = self.getObj()
+        # generate the new object
+        func = getattr(obj, self.parentMethodName)
+        if func is None:
+            raise RuntimeError('Undefined function; cannot create new object (%s)' % dataPid)
+        newObj = func(**self.kwds)
+        return newObj
+
+
+class _createNewDataSet(CreateNewObjectABC):
+    parentMethodName = 'newDataSet'
+
+
+class _createNewPeakList(CreateNewObjectABC):
+    parentMethodName = 'newPeakList'
+
+
+class _createNewChemicalShiftList(CreateNewObjectABC):
+    parentMethodName = 'newChemicalShiftList'
+
+
+class _createNewMultipletList(CreateNewObjectABC):
+    parentMethodName = 'newMultipletList'
+
+
+class _createNewNmrResidue(CreateNewObjectABC):
+    parentMethodName = 'newNmrResidue'
+
+
+class _createNewNmrAtom(CreateNewObjectABC):
+    parentMethodName = 'newNmrAtom'
+
+
+class _createNewNote(CreateNewObjectABC):
+    parentMethodName = 'newNote'
+
+
+class _createNewIntegralList(CreateNewObjectABC):
+    parentMethodName = 'newIntegralList'
+
+
+class _createNewSample(CreateNewObjectABC):
+    parentMethodName = 'newSample'
+
+
+class _createNewStructureEnsemble(CreateNewObjectABC):
+    parentMethodName = 'newStructureEnsemble'
+
+
+class RaisePopupABC():
+    """
+    An ABC to implement an abstract popup class
+    The __call__(self, dataPid, node) method acts as the callback function
+    """
+
+    # These should be subclassed
+    popupClass = None  # a sub-class of CcpNmrDialog; used to generate a popup
+    objectArgumentName = 'obj'  # argument name set to obj passed to popupClass instantiation
+    parentObjectArgumentName = None  # parent argument name set to obj passed to popupClass instantiation when useParent==True
+
+    # This can be subclassed
+    def getObj(self):
+        """returns obj from node or None
+        """
+        obj = None if self.useNone else self.node.obj
+        return obj
+
+    def __init__(self, useParent=False, useNone=False, **kwds):
+        """store kwds; acts as partial to popupClass
+        useParent: use parentObjectArgumentName for passing obj to popupClass
+        useNone: set obj to None
+        """
+        self.useParent = useParent  # Use parent of object
+        if useParent and self.parentObjectArgumentName == None:
+            raise RuntimeError('useParent==True requires definition of parentObjectArgumentName (%s)' % self)
+        self.useNone = useNone
+        self.kwds = kwds
+        # these get set upon callback
+        self.node = None
+        self.dataPid = None
+
+    def __call__(self, dataPid, node):
+        self.node = node
+        self.dataPid = dataPid
+        obj = self.getObj()
+        if self.useParent:
+            self.kwds[self.parentObjectArgumentName] = obj
+        else:
+            self.kwds[self.objectArgumentName] = obj
+
+        popup = self.popupClass(parent=node.sidebar, mainWindow=node.sidebar.mainWindow,
+                                **self.kwds)
+        popup.exec()
+        popup.raise_()
+
+
+class _raiseNewChainPopup(RaisePopupABC):
+    popupClass = CreateChainPopup
+    parentObjectArgumentName = 'project'
+
+
+class _raiseChainPopup(RaisePopupABC):
+    popupClass = ChainPopup
+
+
+class _raiseComplexEditorPopup(RaisePopupABC):
+    popupClass = ComplexEditorPopup
+
+
+class _raiseDataSetPopup(RaisePopupABC):
+    popupClass = DataSetPopup
+    # objectArgumentName = 'obj'
+
+
+class _raiseChemicalShifListPopup(RaisePopupABC):
+    popupClass = ChemicalShiftListPopup
+    objectArgumentName = 'chemicalShiftList'
+
+
+class _raisePeakListPopup(RaisePopupABC):
+    popupClass = PeakListPropertiesPopup
+    objectArgumentName = 'peakList'
+
+
+class _raiseMultipletListPopup(RaisePopupABC):
+    popupClass = MultipletListPropertiesPopup
+    objectArgumentName = 'multipletList'
+
+
+class _raiseCreateNmrChainPopup(RaisePopupABC):
+    popupClass = CreateNmrChainPopup
+    objectArgumentName = 'project'
+
+
+class _raiseNmrChainPopup(RaisePopupABC):
+    popupClass = NmrChainPopup
+    # objectArgumentName = 'nmrChain'
+
+
+class _raiseNmrResiduePopup(RaisePopupABC):
+    popupClass = NmrResiduePopup
+    objectArgumentName = 'nmrResidue'
+
+
+class _raiseNmrAtomPopup(RaisePopupABC):
+    popupClass = NmrAtomPopup
+    objectArgumentName = 'nmrAtom'
+
+
+class _raiseNotePopup(RaisePopupABC):
+    popupClass = NotesPopup
+    # objectArgumentName = 'obj'
+
+
+class _raiseIntegralListPopup(RaisePopupABC):
+    popupClass = IntegralListPropertiesPopup
+    objectArgumentName = 'integralList'
+
+
+class _raiseRestraintListPopup(RaisePopupABC):
+    popupClass = RestraintListPopup
+    objectArgumentName = 'restraintList'
+    parentObjectArgumentName = 'dataSet'
+
+
+class _raiseSamplePopup(RaisePopupABC):
+    popupClass = SamplePropertiesPopup
+    objectArgumentName = 'sample'
+
+
+class _raiseSampleComponentPopup(RaisePopupABC):
+    popupClass = SampleComponentPopup
+    # NB This popup is structured slightly different, passing in different arguments
+    objectArgumentName = 'sampleComponent'
+    parentObjectArgumentName = 'sample'
+
+
+class _raiseSpectrumPopup(RaisePopupABC):
+    popupClass = SpectrumPropertiesPopup
+    objectArgumentName = 'spectrum'
+
+
+class _raiseSpectrumGroupEditorPopup(RaisePopupABC):
+    popupClass = SpectrumGroupEditor
+
+
+class _raiseStructureEnsemblePopup(RaisePopupABC):
+    popupClass = StructureEnsemblePopup
+    # objectArgumentName = 'obj'
+
+
+class _raiseSubstancePopup(RaisePopupABC):
+    popupClass = SubstancePropertiesPopup
+    objectArgumentName = 'substance'

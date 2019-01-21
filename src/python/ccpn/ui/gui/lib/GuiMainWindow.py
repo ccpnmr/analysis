@@ -35,6 +35,11 @@ from functools import partial
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtGui import QKeySequence
+from ccpn.core.Project import Project
+from ccpn.core.lib.ContextManagers import catchExceptions
+from ccpn.ui.gui.widgets.MessageDialog import progressManager
+from ccpn.util.Logging import getLogger
+from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 
 from ccpn.util.Svg import Svg
 from ccpn.ui.gui.lib.mouseEvents import SELECT, setCurrentMouseMode, getCurrentMouseMode
@@ -59,7 +64,6 @@ from ccpn.util import Logging
 
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 from ccpn.core.Peak import Peak
-
 
 #from ccpn.util.Logging import getLogger
 #from collections import OrderedDict
@@ -841,3 +845,49 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         #   self._mouseMovedSignal.emit(mouseMovedDict)
         # except Exception as es:
         #   Logging.warning(str(es))
+
+
+    # def _processDroppedItems(self, application, project, data):
+    def _processDroppedItems(self, data):
+        """Handle the dropped urls
+        """
+        # CCPN INTERNAL. Called also from module area and GuiStrip. They should have same behaviour
+
+        objs = []
+        for url in data.get('urls', []):
+            getLogger().debug('>>> dropped: ' + str(url))
+
+            dataType, subType, usePath = ioFormats.analyseUrl(url)
+            if dataType == 'Project' and subType in (ioFormats.CCPN,
+                                                     ioFormats.NEF,
+                                                     ioFormats.NMRSTAR,
+                                                     ioFormats.SPARKY):
+
+                okToContinue = self._queryCloseProject(title='Load %s project' % subType,
+                                                             phrase='create a new')
+                if okToContinue:
+                    with progressManager(self, 'Loading project... ' + url):
+                        with catchExceptions():
+                            obj = self.application.loadProject(url)
+
+                        if isinstance(obj, Project):
+                            try:
+                                # obj._mainWindow._newSideBar.fillSideBar(obj)
+
+                                # set the sidebar and open the new object's mainWindow
+                                obj._mainWindow._newSideBar.buildTree(obj)
+                                obj._mainWindow.show()
+                                QtWidgets.QApplication.setActiveWindow(self)
+
+                            except Exception as es:
+                                getLogger().warning('Error: %s' % str(es))
+
+            else:
+                # with progressManager(self.mainWindow, 'Loading data... ' + url):
+                try:  #  Why do we need this try?
+                    data = self.project.loadData(url)
+                    if data:
+                        objs.extend(data)
+                except Exception as es:
+                    getLogger().warning('loadData Error: %s' % str(es))
+        return objs

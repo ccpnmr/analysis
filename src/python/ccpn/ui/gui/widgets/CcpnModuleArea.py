@@ -139,7 +139,7 @@ class CcpnModuleArea(ModuleArea, DropBase):  #, DropBase):
             # self.overlay.setDropArea(self.dropArea)
 
         elif DropBase.URLS in data:
-            objs = self.mainWindow._newSideBar._processDroppedItems(data)
+            objs = self.mainWindow._processDroppedItems(data)
             spectra = [obj for obj in objs if isinstance(obj, Spectrum)]
             _openItemObject(self.mainWindow, spectra, position=self.dropArea)
 

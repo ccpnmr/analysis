@@ -123,58 +123,6 @@ from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
 #     application.showResidueTable(chain=chain, position=position, relativeTo=relativeTo)
 
 
-# TODO:ED FIX THIS FOR THE OTHER CALLS
-OpenObjAction = {
-    # Spectrum         : _openSpectrumDisplay,
-    # PeakList         : _openPeakList,
-    # MultipletList    : _openMultipletList,
-    # NmrChain         : _openNmrResidueTable,
-    # Chain            : _openResidueTable,
-    # SpectrumGroup    : _openSpectrumGroup,
-    # Sample           : _openSampleSpectra,
-    # ChemicalShiftList: _openChemicalShiftList,
-    # RestraintList    : _openRestraintList,
-    # Note             : _openNote,
-    # IntegralList     : _openIntegralList,
-    # StructureEnsemble: _openStructureTable
-    }
-
-
-# TODO:ED NEED TO IMPLEMENT THE ABOVE AGAIN!!!!
-def _openItemObject(mainWindow, objs, **kwds):
-    """
-    Abstract routine to activate a module to display objs
-    Builds on OpenObjAction dict, generated below, which defines the handling for the various
-    obj classes
-    """
-    spectrumDisplay = None
-
-    for obj in objs:
-        if obj:
-            try:
-                if obj.__class__ in OpenObjAction:
-
-                    # if a spectrum object has already been opened then attach to that spectrumDisplay
-                    if isinstance(obj, Spectrum) and spectrumDisplay:
-                        spectrumDisplay.displaySpectrum(obj)
-
-                    else:
-
-                        # process objects to open
-                        returnObj = OpenObjAction[obj.__class__](mainWindow, obj, **kwds)
-
-                        # if the first spectrum then set the spectrumDisplay
-                        if isinstance(obj, Spectrum):
-                            spectrumDisplay = returnObj
-
-                else:
-                    info = showInfo('Not implemented yet!',
-                                    'This function has not been implemented in the current version')
-            except Exception as e:
-                getLogger().warning('Error: %s' % e)
-                # raise e
-
-
 def _openSpectrumDisplay(mainWindow, spectrum, position=None, relativeTo=None):
     spectrumDisplay = mainWindow.createSpectrumDisplay(spectrum)
 
@@ -197,9 +145,9 @@ def _openSpectrumDisplay(mainWindow, spectrum, position=None, relativeTo=None):
 
 
 def _openSpectrumGroup(mainWindow, spectrumGroup, position=None, relativeTo=None):
-    '''displays spectrumGroup on spectrumDisplay. It creates the display based on the first spectrum of the group.
-    Also hides the spectrumToolBar and shows spectrumGroupToolBar '''
-
+    """Displays spectrumGroup on spectrumDisplay. It creates the display based on the first spectrum of the group.
+    Also hides the spectrumToolBar and shows spectrumGroupToolBar.
+    """
     if len(spectrumGroup.spectra) > 0:
         spectrumDisplay = mainWindow.createSpectrumDisplay(spectrumGroup.spectra[0])
         mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
@@ -215,30 +163,21 @@ def _openSpectrumGroup(mainWindow, spectrumGroup, position=None, relativeTo=None
         spectrumDisplay._maximiseRegions()
 
 
-def _openSampleSpectra(mainWindow, sample, position=None, relativeTo=None):
-    """
-    Add spectra linked to sample and sampleComponent. Particularly used for screening
-    """
-    if len(sample.spectra) > 0:
-        spectrumDisplay = mainWindow.createSpectrumDisplay(sample.spectra[0])
-        mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
-        for spectrum in sample.spectra:
-            spectrumDisplay.displaySpectrum(spectrum)
-        for sampleComponent in sample.sampleComponents:
-            if sampleComponent.substance is not None:
-                for spectrum in sampleComponent.substance.referenceSpectra:
-                    spectrumDisplay.displaySpectrum(spectrum)
-        mainWindow.application.current.strip = spectrumDisplay.strips[0]
-        if all(sample.spectra[0].dimensionCount) == 1:
-            mainWindow.application.current.strip.autoRange()
-
-
-def _createSpectrumGroup(mainWindow, spectra=None or []):
-    """This needs to be put into a more generic place.
-    """
-    popup = SpectrumGroupEditor(parent=mainWindow, mainWindow=mainWindow, editMode=False, defaultItems=spectra)
-    popup.exec_()
-    popup.raise_()
+# def _openSampleSpectra(mainWindow, sample, position=None, relativeTo=None):
+#     """Add spectra linked to sample and sampleComponent. Particularly used for screening
+#     """
+#     if len(sample.spectra) > 0:
+#         spectrumDisplay = mainWindow.createSpectrumDisplay(sample.spectra[0])
+#         mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
+#         for spectrum in sample.spectra:
+#             spectrumDisplay.displaySpectrum(spectrum)
+#         for sampleComponent in sample.sampleComponents:
+#             if sampleComponent.substance is not None:
+#                 for spectrum in sampleComponent.substance.referenceSpectra:
+#                     spectrumDisplay.displaySpectrum(spectrum)
+#         mainWindow.application.current.strip = spectrumDisplay.strips[0]
+#         if all(sample.spectra[0].dimensionCount) == 1:
+#             mainWindow.application.current.strip.autoRange()
 
 
 class CreateNewObjectABC():
@@ -473,6 +412,7 @@ class OpenItemABC():
     openItemMethod = None  # a method to open the item in ccpnModuleArea
     objectArgumentName = 'obj'  # argument name set to obj passed to openItemClass instantiation
     openItemDirectMethod = None  # parent argument name set to obj passed to openItemClass instantiation when useParent==True
+    useApplication = True
 
     validActionTargets = (Spectrum, PeakList, MultipletList,
                           NmrChain, Chain, SpectrumGroup, Sample, ChemicalShiftList,
@@ -486,23 +426,34 @@ class OpenItemABC():
         obj = None if self.useNone else self.node.obj
         return obj
 
-    def __init__(self, useApplication=True, useNone=False, **kwds):
+    def __init__(self, useNone=False, **kwds):
         """store kwds; acts as partial to openItemClass
         useApplication: if true, use the method attached to application
                      : if false, use openItemDirectMethod for opening object in ccpnModuleArea
         useNone: set obj to None
         """
-        self.useApplication = useApplication  # Use parent of object
-        if useApplication is False and self.openItemDirectMethod is None:
+        if self.useApplication is False and self.openItemDirectMethod is None:
             raise RuntimeError('useApplication==False requires definition of openItemDirectMethod (%s)' % self)
         self.useNone = useNone
         self.kwds = kwds
         # these get set upon callback
         self.node = None
         self.dataPid = None
+        self.openAction = None
 
     def __call__(self, dataPid, node, position, objs):
         """Call acts is the execute entry point for the callback.
+        """
+        self._initialise(dataPid, node, objs)
+        self._openContextMenu(node.sidebar, position, objs)
+
+    def _execOpenItem(self, dataPid, objs):
+        """Exec the openItem.
+        """
+        pass
+
+    def _initialise(self, dataPid, node, objs):
+        """Initialise settings for the object.
         """
         self.node = node
         self.dataPid = dataPid
@@ -515,34 +466,39 @@ class OpenItemABC():
         openableObjs = [obj for obj in objs if isinstance(obj, self.validActionTargets)]
 
         if len(openableObjs) > 0:
-            contextMenu = Menu('', node.sidebar, isFloatWidget=True)
-
             if self.useApplication:
                 func = getattr(self.application, self.openItemMethod)
             else:
+                self.kwds['mainWindow'] = self.mainWindow
                 func = self.openItemDirectMethod
 
             if func is None:
                 raise RuntimeError('Undefined function; cannot open object (%s)' % dataPid)
 
-            openAction = partial(func, **self.kwds)
-            contextMenu.addAction('Open as a module', openAction)
+            self.openAction = partial(func, **self.kwds)
 
-            # spectra = [o for o in openableObjs if isinstance(o, Spectrum)]
-            # if len(spectra) > 0:
-            #     contextMenu.addAction('Make SpectrumGroup From Selected', partial(_createSpectrumGroup, self.mainWindow, spectra))
-            #
-            # contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
-            # canBeCloned = True
-            # for obj in objs:
-            #     if not hasattr(obj, 'clone'):  # TODO: possibly should check that is a method...
-            #         canBeCloned = False
-            #         break
-            # if canBeCloned:
-            #     contextMenu.addAction('Clone', partial(self._cloneObject, objs))
 
-            contextMenu.move(position)
-            contextMenu.exec()
+    def _openContextMenu(self, parentWidget, position, objs):
+        """Open a context menu.
+        """
+        contextMenu = Menu('', parentWidget, isFloatWidget=True)
+        contextMenu.addAction('Open as a module', self.openAction)
+
+        # spectra = [o for o in openableObjs if isinstance(o, Spectrum)]
+        # if len(spectra) > 0:
+        #     contextMenu.addAction('Make SpectrumGroup From Selected', partial(_createSpectrumGroup, self.mainWindow, spectra))
+        #
+        # contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
+        # canBeCloned = True
+        # for obj in objs:
+        #     if not hasattr(obj, 'clone'):  # TODO: possibly should check that is a method...
+        #         canBeCloned = False
+        #         break
+        # if canBeCloned:
+        #     contextMenu.addAction('Clone', partial(self._cloneObject, objs))
+
+        contextMenu.move(position)
+        contextMenu.exec()
 
     def _openItemObject(self, objs):
         """Open the object.
@@ -581,7 +537,7 @@ class OpenItemABC():
 #     objectArgumentName = 'note'
 
 
-class _openItemChemicalShifListTable(OpenItemABC):
+class _openItemChemicalShiftListTable(OpenItemABC):
     openItemMethod = 'showChemicalShiftTable'
     objectArgumentName = 'chemicalShiftList'
 
@@ -626,36 +582,166 @@ class _openItemNoteTable(OpenItemABC):
     objectArgumentName = 'note'
 
 
-class _openItemRestraintListItem(OpenItemABC):
+class _openItemRestraintListTable(OpenItemABC):
     openItemMethod = 'showRestraintTable'
     objectArgumentName = 'restraintList'
 
 
-# class _openItemSampleItem(OpenItemABC):
-#     openItemMethod = SamplePropertiesItem
-#     objectArgumentName = 'sample'
-#
-#
+class _openItemSampleDisplay(OpenItemABC):
+    openItemMethod = None
+    useApplication = False
+    objectArgumentName = 'sample'
+
+    @staticmethod
+    def _openSampleSpectra(mainWindow, sample, position=None, relativeTo=None):
+        """Add spectra linked to sample and sampleComponent. Particularly used for screening
+        """
+        if len(sample.spectra) > 0:
+            spectrumDisplay = mainWindow.createSpectrumDisplay(sample.spectra[0])
+            mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
+            for spectrum in sample.spectra:
+                spectrumDisplay.displaySpectrum(spectrum)
+            for sampleComponent in sample.sampleComponents:
+                if sampleComponent.substance is not None:
+                    for spectrum in sampleComponent.substance.referenceSpectra:
+                        spectrumDisplay.displaySpectrum(spectrum)
+            mainWindow.application.current.strip = spectrumDisplay.strips[0]
+            if all(sample.spectra[0].dimensionCount) == 1:
+                mainWindow.application.current.strip.autoRange()
+
+    openItemDirectMethod = _openSampleSpectra
+
+
 # class _openItemSampleComponentItem(OpenItemABC):
 #     openItemMethod = SampleComponentItem
 #     # NB This popup is structured slightly different, passing in different arguments
 #     objectArgumentName = 'sampleComponent'
 #     parentObjectArgumentName = 'sample'
-#
-#
-# class _openItemSpectrumItem(OpenItemABC):
-#     openItemMethod = SpectrumPropertiesItem
-#     objectArgumentName = 'spectrum'
-#
-#
-# class _openItemSpectrumGroupEditorItem(OpenItemABC):
-#     openItemMethod = SpectrumGroupEditor
-#
-#
-class _openItemStructureEnsembleItem(OpenItemABC):
+
+
+class _openItemSpectrumDisplay(OpenItemABC):
+    openItemMethod = None
+    useApplication = False
+    objectArgumentName = 'spectrum'
+
+    @staticmethod
+    def _openSpectrumDisplay(mainWindow=None, spectrum=None, position=None, relativeTo=None):
+        spectrumDisplay = mainWindow.createSpectrumDisplay(spectrum)
+
+        if len(spectrumDisplay.strips) > 0:
+            mainWindow.current.strip = spectrumDisplay.strips[0]
+            # if spectrum.dimensionCount == 1:
+            spectrumDisplay._maximiseRegions()
+            # mainWindow.current.strip.plotWidget.autoRange()
+
+        mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
+
+        # TODO:LUCA: the mainWindow.createSpectrumDisplay should do the reporting to console and log
+        # This routine can then be ommitted and the call above replaced by the one remaining line
+        mainWindow.pythonConsole.writeConsoleCommand(
+                "application.createSpectrumDisplay(spectrum)", spectrum=spectrum)
+        getLogger().info('spectrum = project.getByPid(%r)' % spectrum.id)
+        getLogger().info('application.createSpectrumDisplay(spectrum)')
+
+        return spectrumDisplay
+
+    openItemDirectMethod = _openSpectrumDisplay
+
+
+class _openItemSpectrumGroupDisplay(OpenItemABC):
+    openItemMethod = None
+    useApplication = False
+    objectArgumentName = 'spectrumGroup'
+
+    @staticmethod
+    def _openSpectrumGroup(mainWindow, spectrumGroup, position=None, relativeTo=None):
+        """Displays spectrumGroup on spectrumDisplay. It creates the display based on the first spectrum of the group.
+        Also hides the spectrumToolBar and shows spectrumGroupToolBar.
+        """
+        if len(spectrumGroup.spectra) > 0:
+            spectrumDisplay = mainWindow.createSpectrumDisplay(spectrumGroup.spectra[0])
+            mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
+            for spectrum in spectrumGroup.spectra:  # Add the other spectra
+                spectrumDisplay.displaySpectrum(spectrum)
+
+            spectrumDisplay.isGrouped = True
+            spectrumDisplay.spectrumToolBar.hide()
+            spectrumDisplay.spectrumGroupToolBar.show()
+            spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
+            mainWindow.application.current.strip = spectrumDisplay.strips[0]
+            # if any([sp.dimensionCount for sp in spectrumGroup.spectra]) == 1:
+            spectrumDisplay._maximiseRegions()
+
+    openItemDirectMethod = _openSpectrumGroup
+
+
+class _openItemStructureEnsembleTable(OpenItemABC):
     openItemMethod = 'showStructureTable'
     objectArgumentName = 'structureEnsemble'
 
 # class _openItemSubstanceItem(OpenItemABC):
 #     openItemMethod = SubstancePropertiesItem
 #     objectArgumentName = 'substance'
+
+OpenObjAction = {
+    # Spectrum         : _openSpectrumDisplay,
+    # PeakList         : _openPeakList,
+    # MultipletList    : _openMultipletList,
+    # NmrChain         : _openNmrResidueTable,
+    # Chain            : _openResidueTable,
+    # SpectrumGroup    : _openSpectrumGroup,
+    # Sample           : _openSampleSpectra,
+    # ChemicalShiftList: _openChemicalShiftList,
+    # RestraintList    : _openRestraintList,
+    # Note             : _openNote,
+    # IntegralList     : _openIntegralList,
+    # StructureEnsemble: _openStructureTable
+
+    Spectrum         : _openItemSpectrumDisplay,
+    PeakList         : _openItemPeakListTable,
+    MultipletList    : _openItemMultipletListTable,
+    NmrChain         : _openItemNmrResidueTable,
+    Chain            : _openItemResidueTable,
+    SpectrumGroup    : _openItemSpectrumGroupDisplay,
+    Sample           : _openItemSampleDisplay,
+    ChemicalShiftList: _openItemChemicalShiftListTable,
+    RestraintList    : _openItemRestraintListTable,
+    Note             : _openItemNoteTable,
+    IntegralList     : _openItemIntegralListTable,
+    StructureEnsemble: _openItemStructureEnsembleTable
+    }
+
+
+def _openItemObject(mainWindow, objs, **kwds):
+    """
+    Abstract routine to activate a module to display objs
+    Builds on OpenObjAction dict, generated below, which defines the handling for the various
+    obj classes
+    """
+    spectrumDisplay = None
+
+    for obj in objs:
+        if obj:
+            try:
+                if obj.__class__ in OpenObjAction:
+
+                    # if a spectrum object has already been opened then attach to that spectrumDisplay
+                    if isinstance(obj, Spectrum) and spectrumDisplay:
+                        spectrumDisplay.displaySpectrum(obj)
+
+                    else:
+
+                        # process objects to open
+                        func = OpenObjAction[obj.__class__](**kwds)
+                        returnObj = func.OpenItem(obj, None)
+
+                        # if the first spectrum then set the spectrumDisplay
+                        if isinstance(obj, Spectrum):
+                            spectrumDisplay = returnObj
+
+                else:
+                    info = showInfo('Not implemented yet!',
+                                    'This function has not been implemented in the current version')
+            except Exception as e:
+                getLogger().warning('Error: %s' % e)
+                # raise e

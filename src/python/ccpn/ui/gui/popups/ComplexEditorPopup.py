@@ -26,37 +26,20 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 #=========================================================================================
 
 
-from ccpn.core.SpectrumGroup import SpectrumGroup
-from ccpn.ui.gui.widgets.PulldownListsForObjects import SpectrumGroupPulldown
+from ccpn.core.Complex import Complex
+from ccpn.ui.gui.widgets.PulldownListsForObjects import ComplexPulldown
 from ccpn.ui.gui.popups._GroupEditorPopupABC import _GroupEditorPopupABC
 
 from ccpn.util.Logging import getLogger
 
 
-class SpectrumGroupEditor(_GroupEditorPopupABC):
+class ComplexEditorPopup(_GroupEditorPopupABC):
     """
-    A popup to create and manage SpectrumGroups
+    A popup to create and manage Complex
     """
-    KLASS = SpectrumGroup
-    KLASS_ITEM_ATTRIBUTE = 'spectra' # Attribute in KLASS containing items
-    KLASS_PULLDOWN = SpectrumGroupPulldown
+    KLASS = Complex
+    KLASS_ITEM_ATTRIBUTE = 'chains' # Attribute in KLASS containing items
+    KLASS_PULLDOWN = ComplexPulldown
 
-    PROJECT_NEW_METHOD = 'newSpectrumGroup'  # Method of Project to create new KLASS instance
-    PROJECT_ITEM_ATTRIBUTE = 'spectra'  # Attribute of Project containing items
-
-    def __init__(self, parent=None, mainWindow=None, editMode=True, spectrumGroup=None, spectra=None, **kwds):
-        """
-        Initialise the widget
-
-        Used in 'New' or 'Edit' mode:
-        - For creating new SpectrumGroup (editMode==False); optionally uses passed in spectra list
-          i.e. NewSpectrumGroup of SideBar and Context menu of SideBar
-
-        - For editing existing SpectrumGroup (editMode==True); requires spectrumGroup argument
-          i.e. Edit of SpectrumGroup of SideBar
-        or
-          For selecting and editing SpectrumGroup (editMode==True)
-          i.e. Menu Spectrum->Edit SpectrumGroup...
-        """
-        super().__init__(parent=parent, mainWindow=mainWindow, editMode=editMode, obj=spectrumGroup,
-                         defaultItems=spectra, **kwds)
+    PROJECT_NEW_METHOD = 'newComplex'  # Method of Project to create new KLASS instance
+    PROJECT_ITEM_ATTRIBUTE = 'chains'  # Attribute of Project containing items

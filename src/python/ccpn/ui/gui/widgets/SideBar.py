@@ -969,7 +969,7 @@ class _raiseNewChainPopup(RaisePopupABC):
 class _raiseChainPopup(RaisePopupABC):
     popupClass = ChainPopup
 
-class _raiseComplexPopup(RaisePopupABC):
+class _raiseComplexEditorPopup(RaisePopupABC):
     popupClass = ComplexEditorPopup
 
 class _raiseDataSetPopup(RaisePopupABC):
@@ -1031,9 +1031,8 @@ class _raiseSpectrumPopup(RaisePopupABC):
     popupClass = SpectrumPropertiesPopup
     objectArgumentName = 'spectrum'
 
-class _raiseSpectrumGroupPopup(RaisePopupABC):
+class _raiseSpectrumGroupEditorPopup(RaisePopupABC):
     popupClass = SpectrumGroupEditor
-    objectArgumentName = 'spectrumGroup'
 
 class _raiseStructureEnsemblePopup(RaisePopupABC):
     popupClass = StructureEnsemblePopup
@@ -1076,9 +1075,8 @@ class SideBarStructure(object):
 
             #------ SpectrumGroups ------
             SidebarTree('SpectrumGroups', closed=True, children=[
-                SidebarItem('<New SpectrumGroup>', callback=_raiseSpectrumGroupPopup(useNone=True, editMode=False)),
-                SidebarClassTreeItems(klass=SpectrumGroup, triggers=[Notifier.DELETE, Notifier.CREATE, Notifier.RENAME, Notifier.CHANGE],
-                                      callback=_raiseSpectrumGroupPopup(editMode=True), children=[
+                SidebarItem('<New SpectrumGroup>', callback=_raiseSpectrumGroupEditorPopup(useNone=True, editMode=False)),
+                SidebarClassTreeItems(klass=SpectrumGroup, callback=_raiseSpectrumGroupEditorPopup(editMode=True), children=[
                     SidebarClassSpectrumTreeItems(klass=Spectrum, callback=_raiseSpectrumPopup()),
                     ]),
                 ]),
@@ -1132,9 +1130,9 @@ class SideBarStructure(object):
 
             #------ Complexes ------
             SidebarTree('Complexes', closed=True, children=[
-                SidebarItem('<New Complex>', callback=_raiseComplexPopup(editMode=False, useNone=True)),
+                SidebarItem('<New Complex>', callback=_raiseComplexEditorPopup(editMode=False, useNone=True)),
                 SidebarClassTreeItems(klass=Complex, rebuildOnRename='Complex-ClassTreeItems',
-                                      callback=_raiseComplexPopup(editMode=True)),
+                                      callback=_raiseComplexEditorPopup(editMode=True)),
                 ]),
 
             #------ StructureEnsembles ------

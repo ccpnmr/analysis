@@ -201,6 +201,7 @@ OPEN_ITEM_DICT = {
     StructureEnsemble.className: 'showStructureTable'
     }
 
+ALL_NOTIFIER_TRIGGERS = [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME, Notifier.CHANGE]
 
 #===========================================================================================================
 # SideBar handling class for handling tree structure
@@ -1076,7 +1077,8 @@ class SideBarStructure(object):
             #------ SpectrumGroups ------
             SidebarTree('SpectrumGroups', closed=True, children=[
                 SidebarItem('<New SpectrumGroup>', callback=_raiseSpectrumGroupEditorPopup(useNone=True, editMode=False)),
-                SidebarClassTreeItems(klass=SpectrumGroup, callback=_raiseSpectrumGroupEditorPopup(editMode=True), children=[
+                SidebarClassTreeItems(klass=SpectrumGroup, callback=_raiseSpectrumGroupEditorPopup(editMode=True),
+                                      addNotifier=True, triggers=ALL_NOTIFIER_TRIGGERS, children=[
                     SidebarClassSpectrumTreeItems(klass=Spectrum, callback=_raiseSpectrumPopup()),
                     ]),
                 ]),

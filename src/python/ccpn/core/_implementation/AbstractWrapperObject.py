@@ -308,22 +308,13 @@ class AbstractWrapperObject(NotifierBase):
                 result = self._wrappedData.ccpnInternalData = {}
         return result
 
-    @property
-    def comment(self) -> str:
-        """Free-form text comment"""
-        return self._none2str(self._wrappedData.details)
-
-    @comment.setter
-    def comment(self, value: str):
-        self._wrappedData.details = self._str2none(value)
-
-    CCPNMR_NAMESPACE = '_ccpNmrV3internal'
-
     @_ccpnInternalData.setter
     def _ccpnInternalData(self, value):
         if not (isinstance(value, dict)):
             raise ValueError("_ccpnInternalData must be a dictionary, was %s" % value)
         self._wrappedData.ccpnInternalData = value
+
+    CCPNMR_NAMESPACE = '_ccpNmrV3internal'
 
     def _setInternalParameter(self, parameterName:str, value):
         """Sets parameterName for CCPNINTERNAL namespace to value; value must be json seriliasable"""
@@ -342,6 +333,8 @@ class AbstractWrapperObject(NotifierBase):
         data = self._ccpnInternalData
         space = data.setdefault(namespace, {})
         space[parameterName] = value
+        # Ugly trick to force saving
+        self._wrappedData.__dict__['isModfied'] = True
 
     def getParameter(self, namespace:str, parameterName:str):
         """Returns value of parameterName for namespace; returns None if not present"""
@@ -358,6 +351,15 @@ class AbstractWrapperObject(NotifierBase):
         if space is None:
             return False
         return parameterName in space
+
+    @property
+    def comment(self) -> str:
+        """Free-form text comment"""
+        return self._none2str(self._wrappedData.details)
+
+    @comment.setter
+    def comment(self, value: str):
+        self._wrappedData.details = self._str2none(value)
 
     #=========================================================================================
     # CCPN abstract properties

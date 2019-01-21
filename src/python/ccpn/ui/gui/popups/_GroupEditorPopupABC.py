@@ -345,7 +345,8 @@ class _GroupEditorPopupABC(CcpnDialog):
             showWarning(str(self.windowTitle()), msg)
             return False
 
-        items = [self.project.getByPid(itm) for itm in self.leftListWidget.getTexts()]
+        pids = self.leftListWidget.getTexts()
+        items = [self.project.getByPid(pid) for pid in pids]
         if None in items:
             msg = 'Could not convert all pids to objects'
             getLogger().warning(msg)

@@ -213,7 +213,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
         items = []
         for index in range(self.count()):
             items.append(self.item(index))
-        return list(set([i.text() for i in items]))
+        return [i.text() for i in items]
 
     def getSelectedTexts(self):
         return [i.text() for i in self.selectedItems()]

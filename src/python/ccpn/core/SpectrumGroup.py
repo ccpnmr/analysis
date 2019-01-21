@@ -129,6 +129,7 @@ class SpectrumGroup(AbstractWrapperObject):
         return tuple(spectra)
 
     @spectra.setter
+    @ccpNmrV3CoreSetter()
     def spectra(self, value):
         getDataObj = self._project._data2Obj.get
         value = [getDataObj(x) if isinstance(x, str) else x for x in value]

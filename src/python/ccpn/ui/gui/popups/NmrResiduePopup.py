@@ -84,7 +84,7 @@ class NmrResiduePopup(CcpnDialog):
         self.comment = EntryCompoundWidget(self, labelText="comment",
                                            fixedWidths=(hWidth, hWidth), grid=(row, 0), gridSpan=(1, hspan))
         row += 1
-        self.addSpacer(0, 10, row, 0)
+        self.addSpacer(0, 10, grid=(row, 0))
 
         row += 1
         self.buttons = ButtonList(self, texts=('Close', 'Apply', 'Ok'),

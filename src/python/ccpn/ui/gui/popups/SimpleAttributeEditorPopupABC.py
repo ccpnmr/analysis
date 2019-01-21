@@ -60,8 +60,9 @@ class SimpleAttributeEditorPopupABC(CcpnDialog):
         self.obj = obj
 
         row = 0
-        self.labels = {}
-        self.edits = {}
+        self.labels = {}  # An (attributeName, Label-widget) dict
+        self.edits = {}  # An (attributeName, LineEdit-widget) dict
+
         for attr, getFunction, setFunction, kwds in self.attributes:
             value = getFunction(self.obj, attr)
             readOnly = setFunction is None
@@ -70,8 +71,7 @@ class SimpleAttributeEditorPopupABC(CcpnDialog):
                                               vAlign = 't', grid=(row, 1), **kwds)
             row += 1
 
-        # self.getLayout().addItem(QtWidgets.QSpacerItem(0, 10), row, 0)
-        self.addSpacer(0, 10, row, 0)
+        self.addSpacer(0, 10, grid=(row, 0))
         row += 1
 
         ButtonList(self, ['Cancel', 'OK'], [self.reject, self._okButton], grid=(row, 0), gridSpan=(1,2))

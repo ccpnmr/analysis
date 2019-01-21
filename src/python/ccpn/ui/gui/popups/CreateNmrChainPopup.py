@@ -88,7 +88,7 @@ class CreateNmrChainPopup(CcpnDialog):
                                            )
         vGrid += 1
 
-        self.addSpacer(0, 10, vGrid, 0)
+        self.addSpacer(0, 10, grid=(vGrid, 0))
         vGrid += 1
 
         self.cloneFromLabel = Label(self, text="Clone from", grid=(vGrid, 0))
@@ -130,7 +130,7 @@ class CreateNmrChainPopup(CcpnDialog):
 
         vGrid += 1
 
-        self.addSpacer(0, 10, vGrid, 0)
+        self.addSpacer(0, 10, grid=(vGrid, 0))
         vGrid += 1
 
         self.labelName = Label(self, text="Name", grid=(vGrid, 0), )
@@ -138,7 +138,7 @@ class CreateNmrChainPopup(CcpnDialog):
         vGrid += 1
 
         # self.spacerLabel = Label(self, text="", grid=(vGrid, 0))
-        self.addSpacer(0, 10, vGrid, 0)
+        self.addSpacer(0, 10, grid=(vGrid, 0))
         vGrid += 1
 
         self.buttonBox = ButtonList(self, texts=[Cancel, Create], callbacks=[self.reject, self._createNmrChain],

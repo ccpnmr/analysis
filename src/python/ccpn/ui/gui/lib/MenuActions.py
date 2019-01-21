@@ -23,6 +23,7 @@ __date__ = "$Date$"
 # Start of code
 #=========================================================================================
 
+from functools import partial
 from ccpn.ui.gui.widgets.MessageDialog import showInfo
 from ccpn.util.Logging import getLogger
 from ccpn.core.MultipletList import MultipletList
@@ -38,6 +39,7 @@ from ccpn.core.Chain import Chain
 from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.RestraintList import RestraintList
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
+from ccpn.ui.gui.widgets.Menu import Menu
 
 from ccpn.ui.gui.popups.ChainPopup import ChainPopup
 from ccpn.ui.gui.popups.ChemicalShiftListPopup import ChemicalShiftListPopup
@@ -76,49 +78,65 @@ from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
 #     }
 
 
-def _openNote(mainWindow, note, position=None, relativeTo=None):
-    application = mainWindow.application
-    application.showNotesEditor(note=note, position=position, relativeTo=relativeTo)
+# def _openNote(mainWindow, note, position=None, relativeTo=None):
+#     application = mainWindow.application
+#     application.showNotesEditor(note=note, position=position, relativeTo=relativeTo)
 
 
-def _openIntegralList(mainWindow, integralList, position=None, relativeTo=None):
-    application = mainWindow.application
-    application.showIntegralTable(integralList=integralList, position=position, relativeTo=relativeTo)
+# def _openIntegralList(mainWindow, integralList, position=None, relativeTo=None):
+#     application = mainWindow.application
+#     application.showIntegralTable(integralList=integralList, position=position, relativeTo=relativeTo)
 
 
-def _openPeakList(mainWindow, peakList, position=None, relativeTo=None):
-    application = mainWindow.application
-    application.showPeakTable(peakList=peakList, position=position, relativeTo=relativeTo)
+# def _openPeakList(mainWindow, peakList, position=None, relativeTo=None):
+#     application = mainWindow.application
+#     application.showPeakTable(peakList=peakList, position=position, relativeTo=relativeTo)
 
 
-def _openMultipletList(mainWindow, multipletList, position=None, relativeTo=None):
-    application = mainWindow.application
-    application.showMultipletTable(multipletList=multipletList, position=position, relativeTo=relativeTo)
+# def _openMultipletList(mainWindow, multipletList, position=None, relativeTo=None):
+#     application = mainWindow.application
+#     application.showMultipletTable(multipletList=multipletList, position=position, relativeTo=relativeTo)
 
 
-def _openChemicalShiftList(mainWindow, chemicalShiftList, position=None, relativeTo=None):
-    application = mainWindow.application
-    application.showChemicalShiftTable(chemicalShiftList=chemicalShiftList, position=position, relativeTo=relativeTo)
+# def _openChemicalShiftList(mainWindow, chemicalShiftList, position=None, relativeTo=None):
+#     application = mainWindow.application
+#     application.showChemicalShiftTable(chemicalShiftList=chemicalShiftList, position=position, relativeTo=relativeTo)
 
 
-def _openRestraintList(mainWindow, restraintList, position=None, relativeTo=None):
-    application = mainWindow.application
-    application.showRestraintTable(restraintList=restraintList, position=position, relativeTo=relativeTo)
+# def _openRestraintList(mainWindow, restraintList, position=None, relativeTo=None):
+#     application = mainWindow.application
+#     application.showRestraintTable(restraintList=restraintList, position=position, relativeTo=relativeTo)
 
 
-def _openStructureTable(mainWindow, structureEnsemble, position=None, relativeTo=None):
-    application = mainWindow.application
-    application.showStructureTable(structureEnsemble=structureEnsemble, position=position, relativeTo=relativeTo)
+# def _openStructureTable(mainWindow, structureEnsemble, position=None, relativeTo=None):
+#     application = mainWindow.application
+#     application.showStructureTable(structureEnsemble=structureEnsemble, position=position, relativeTo=relativeTo)
 
 
-def _openNmrResidueTable(mainWindow, nmrChain, position=None, relativeTo=None):
-    application = mainWindow.application
-    application.showNmrResidueTable(nmrChain=nmrChain, position=position, relativeTo=relativeTo)
+# def _openNmrResidueTable(mainWindow, nmrChain, position=None, relativeTo=None):
+#     application = mainWindow.application
+#     application.showNmrResidueTable(nmrChain=nmrChain, position=position, relativeTo=relativeTo)
 
 
-def _openResidueTable(mainWindow, chain, position=None, relativeTo=None):
-    application = mainWindow.application
-    application.showResidueTable(chain=chain, position=position, relativeTo=relativeTo)
+# def _openResidueTable(mainWindow, chain, position=None, relativeTo=None):
+#     application = mainWindow.application
+#     application.showResidueTable(chain=chain, position=position, relativeTo=relativeTo)
+
+
+OpenObjAction = {
+    Spectrum         : _openSpectrumDisplay,
+    PeakList         : _openPeakList,
+    MultipletList    : _openMultipletList,
+    NmrChain         : _openNmrResidueTable,
+    Chain            : _openResidueTable,
+    SpectrumGroup    : _openSpectrumGroup,
+    Sample           : _openSampleSpectra,
+    ChemicalShiftList: _openChemicalShiftList,
+    RestraintList    : _openRestraintList,
+    Note             : _openNote,
+    IntegralList     : _openIntegralList,
+    StructureEnsemble: _openStructureTable
+    }
 
 
 def _openItemObject(mainWindow, objs, **kwds):
@@ -211,21 +229,6 @@ def _openSampleSpectra(mainWindow, sample, position=None, relativeTo=None):
         mainWindow.application.current.strip = spectrumDisplay.strips[0]
         if all(sample.spectra[0].dimensionCount) == 1:
             mainWindow.application.current.strip.autoRange()
-
-OpenObjAction = {
-    Spectrum         : _openSpectrumDisplay,
-    PeakList         : _openPeakList,
-    MultipletList    : _openMultipletList,
-    NmrChain         : _openNmrResidueTable,
-    Chain            : _openResidueTable,
-    SpectrumGroup    : _openSpectrumGroup,
-    Sample           : _openSampleSpectra,
-    ChemicalShiftList: _openChemicalShiftList,
-    RestraintList    : _openRestraintList,
-    Note             : _openNote,
-    IntegralList     : _openIntegralList,
-    StructureEnsemble: _openStructureTable
-    }
 
 
 def _createSpectrumGroup(mainWindow, spectra=None or []):
@@ -456,3 +459,201 @@ class _raiseStructureEnsemblePopup(RaisePopupABC):
 class _raiseSubstancePopup(RaisePopupABC):
     popupClass = SubstancePropertiesPopup
     objectArgumentName = 'substance'
+
+
+class OpenItemABC():
+    """
+    An ABC to implement an abstract openItem in moduleArea class
+    The __call__(self, dataPid, node) method acts as the callback function
+    """
+
+    # These should be subclassed
+    openItemMethod = None  # a method to open the item in ccpnModuleArea
+    objectArgumentName = 'obj'  # argument name set to obj passed to openItemClass instantiation
+    openItemDirectMethod = None  # parent argument name set to obj passed to openItemClass instantiation when useParent==True
+
+    validActionTargets = (Spectrum, PeakList, MultipletList,
+                          NmrChain, Chain, SpectrumGroup, Sample, ChemicalShiftList,
+                          RestraintList, Note, IntegralList, StructureEnsemble
+                          )
+
+    # This can be subclassed
+    def getObj(self):
+        """returns obj from node or None
+        """
+        obj = None if self.useNone else self.node.obj
+        return obj
+
+    def __init__(self, useApplication=True, useNone=False, **kwds):
+        """store kwds; acts as partial to openItemClass
+        useApplication: if true, use the method attached to application
+                     : if false, use openItemDirectMethod for opening object in ccpnModuleArea
+        useNone: set obj to None
+        """
+        self.useApplication = useApplication  # Use parent of object
+        if useApplication is False and self.openItemDirectMethod is None:
+            raise RuntimeError('useApplication==False requires definition of openItemDirectMethod (%s)' % self)
+        self.useNone = useNone
+        self.kwds = kwds
+        # these get set upon callback
+        self.node = None
+        self.dataPid = None
+
+    def __call__(self, dataPid, node, position, objs):
+        """Call acts is the execute entry point for the callback.
+        """
+        self.node = node
+        self.dataPid = dataPid
+        obj = self.getObj()
+        self.kwds[self.objectArgumentName] = obj
+
+        self.mainWindow = node.sidebar.mainWindow
+        self.application = self.mainWindow.application
+
+        openableObjs = [obj for obj in objs if isinstance(obj, self.validActionTargets)]
+
+        if len(openableObjs) > 0:
+            contextMenu = Menu('', node.sidebar, isFloatWidget=True)
+
+            if self.useApplication:
+                func = getattr(self.application, self.openItemMethod)
+            else:
+                func = self.openItemDirectMethod
+
+            if func is None:
+                raise RuntimeError('Undefined function; cannot open object (%s)' % dataPid)
+
+            openAction = partial(func, **self.kwds)
+            contextMenu.addAction('Open as a module', openAction)
+
+            # spectra = [o for o in openableObjs if isinstance(o, Spectrum)]
+            # if len(spectra) > 0:
+            #     contextMenu.addAction('Make SpectrumGroup From Selected', partial(_createSpectrumGroup, self.mainWindow, spectra))
+            #
+            # contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
+            # canBeCloned = True
+            # for obj in objs:
+            #     if not hasattr(obj, 'clone'):  # TODO: possibly should check that is a method...
+            #         canBeCloned = False
+            #         break
+            # if canBeCloned:
+            #     contextMenu.addAction('Clone', partial(self._cloneObject, objs))
+
+            contextMenu.move(position)
+            contextMenu.exec()
+
+    def _openItemObject(self, objs):
+        """Open the object.
+        """
+        pass
+
+    def _cloneObject(self, objs):
+        """Clones the specified objects.
+        """
+        for obj in objs:
+            obj.clone()
+
+    def _deleteItemObject(self, objs):
+        """Delete items from the project.
+        """
+        pass
+
+
+# class _openItemNewChainItem(OpenItemABC):
+#     openItemMethod = 'showNotesEditor'
+#     parentObjectArgumentName = 'project'
+#
+#
+# class _openItemChainItem(OpenItemABC):
+#     openItemMethod = 'showNotesEditor'
+#     objectArgumentName = 'note'
+#
+#
+# class _openItemComplexEditorItem(OpenItemABC):
+#     openItemMethod = 'showNotesEditor'
+#     objectArgumentName = 'note'
+#
+#
+# class _openItemDataSetItem(OpenItemABC):
+#     openItemMethod = 'showNotesEditor'
+#     objectArgumentName = 'note'
+
+
+class _openItemChemicalShifListTable(OpenItemABC):
+    openItemMethod = 'showChemicalShiftTable'
+    objectArgumentName = 'chemicalShiftList'
+
+
+class _openItemPeakListTable(OpenItemABC):
+    openItemMethod = 'showPeakTable'
+    objectArgumentName = 'peakList'
+
+
+class _openItemIntegralListTable(OpenItemABC):
+    openItemMethod = 'showIntegralTable'
+    objectArgumentName = 'integralList'
+
+
+class _openItemMultipletListTable(OpenItemABC):
+    openItemMethod = 'showMultipletTable'
+    objectArgumentName = 'multipletList'
+
+
+# class _openItemCreateNmrChainTable(OpenItemABC):
+#     openItemMethod = 'showNotesEditor'
+#     objectArgumentName = 'project'
+
+
+class _openItemNmrResidueTable(OpenItemABC):
+    openItemMethod = 'showNmrResidueTable'
+    objectArgumentName = 'nmrChain'
+
+
+class _openItemResidueTable(OpenItemABC):
+    openItemMethod = 'showResidueTable'
+    objectArgumentName = 'chain'
+
+
+# class _openItemNmrAtomItem(OpenItemABC):
+#     openItemMethod = NmrAtomItem
+#     objectArgumentName = 'nmrAtom'
+
+
+class _openItemNoteTable(OpenItemABC):
+    openItemMethod = 'showNotesEditor'
+    objectArgumentName = 'note'
+
+
+class _openItemRestraintListItem(OpenItemABC):
+    openItemMethod = 'showRestraintTable'
+    objectArgumentName = 'restraintList'
+
+
+# class _openItemSampleItem(OpenItemABC):
+#     openItemMethod = SamplePropertiesItem
+#     objectArgumentName = 'sample'
+#
+#
+# class _openItemSampleComponentItem(OpenItemABC):
+#     openItemMethod = SampleComponentItem
+#     # NB This popup is structured slightly different, passing in different arguments
+#     objectArgumentName = 'sampleComponent'
+#     parentObjectArgumentName = 'sample'
+#
+#
+# class _openItemSpectrumItem(OpenItemABC):
+#     openItemMethod = SpectrumPropertiesItem
+#     objectArgumentName = 'spectrum'
+#
+#
+# class _openItemSpectrumGroupEditorItem(OpenItemABC):
+#     openItemMethod = SpectrumGroupEditor
+#
+#
+class _openItemStructureEnsembleItem(OpenItemABC):
+    openItemMethod = 'showStructureTable'
+    objectArgumentName = 'structureEnsemble'
+
+# class _openItemSubstanceItem(OpenItemABC):
+#     openItemMethod = SubstancePropertiesItem
+#     objectArgumentName = 'substance'

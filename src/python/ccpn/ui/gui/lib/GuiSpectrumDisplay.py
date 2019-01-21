@@ -47,7 +47,8 @@ from ccpn.ui.gui.widgets.SpectrumToolBar import SpectrumToolBar
 from ccpn.ui.gui.widgets.SpectrumGroupToolBar import SpectrumGroupToolBar
 #from ccpn.ui.gui.widgets.Widget import ScrollableWidget, Widget
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
-
+from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 #from ccpn.ui.gui.widgets.BasePopup import BasePopup
 #from ccpn.ui.gui.widgets.CheckBox import CheckBox
@@ -195,8 +196,22 @@ class GuiSpectrumDisplay(CcpnModule):
         stripRow = 2
         phasingRow = 3
 
-        self.spectrumToolBar = SpectrumToolBar(parent=self.qtParent, widget=self,
-                                               grid=(spectrumRow, 0), gridSpan=(1, 6))
+        self._spectrumFrame = Frame(parent=self.qtParent, setLayout=True,
+                                    grid=(spectrumRow, 0), gridSpan=(1, 6))
+
+        self._leftButton = Button(parent=self._spectrumFrame, vAlign='c', hAlign='l', grid=(0, 0),
+                                 icon='icons/yellow-arrow-left')
+
+        self.spectrumToolBar = SpectrumToolBar(parent=self._spectrumFrame, widget=self,
+                                               grid=(0, 1))
+
+        self._rightButton = Button(parent=self._spectrumFrame, vAlign='c', hAlign='l', grid=(0, 2), hPolicy='expanding',
+                                 icon='icons/yellow-arrow-right')
+        self._spacer = Spacer(self._spectrumFrame, 2, 2,
+                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed, grid=(0, 3), gridSpan=(1,1))
+
+        # self.spectrumToolBar = SpectrumToolBar(parent=self.qtParent, widget=self,
+        #                                        grid=(spectrumRow, 1), gridSpan=(1, 5))
         self.spectrumToolBar.setFixedHeight(30)
 
         # spectrumGroupsToolBar
@@ -1360,7 +1375,6 @@ class GuiSpectrumDisplay(CcpnModule):
 
             oldIndex = self.getOrderedSpectrumViewsIndex()
 
-
             newSpectrum = self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
             if newSpectrum:
                 newInd = self.spectrumViews.index(newSpectrum)
@@ -1497,7 +1511,6 @@ class GuiSpectrumDisplay(CcpnModule):
 
 
 def _spectrumHasChanged(data):
-
     spectrum = data[Notifier.OBJECT]
 
     project = spectrum.project

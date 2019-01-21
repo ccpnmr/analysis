@@ -80,13 +80,15 @@ from ccpn.util.Constants import ccpnmrJsonData
 from ccpn.core.lib.Notifiers import Notifier, NotifierBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
-from ccpn.ui.gui.lib.MenuActions import _openNote, _openIntegralList, _openPeakList, _openMultipletList, _openChemicalShiftList, _openRestraintList, \
-    _openStructureTable, _openNmrResidueTable, _openResidueTable, _openItemObject, _openSpectrumDisplay, _openSpectrumGroup, _openSampleSpectra, \
-    _createSpectrumGroup, _createNewDataSet, _createNewPeakList, _createNewChemicalShiftList, _createNewMultipletList, _createNewNmrResidue, _createNewNmrAtom, \
+# from ccpn.ui.gui.lib.MenuActions import _openNote, _openIntegralList, _openPeakList, _openMultipletList, _openChemicalShiftList, _openRestraintList, \
+#     _openStructureTable, _openNmrResidueTable, _openResidueTable, _openItemObject, _openSpectrumDisplay, _openSpectrumGroup, _openSampleSpectra, \
+#     _createSpectrumGroup, _createNewDataSet, _createNewPeakList, _createNewChemicalShiftList, _createNewMultipletList, _createNewNmrResidue, _createNewNmrAtom, \
+from ccpn.ui.gui.lib.MenuActions import _createNewDataSet, _createNewPeakList, _createNewChemicalShiftList, _createNewMultipletList, _createNewNmrResidue, _createNewNmrAtom, \
     _createNewNote, _createNewIntegralList, _createNewSample, _createNewStructureEnsemble, _raiseNewChainPopup, _raiseChainPopup, _raiseComplexEditorPopup, \
     _raiseDataSetPopup, _raiseChemicalShifListPopup, _raisePeakListPopup, _raiseMultipletListPopup, _raiseCreateNmrChainPopup, _raiseNmrChainPopup, \
     _raiseNmrResiduePopup, _raiseNmrAtomPopup, _raiseNotePopup, _raiseIntegralListPopup, _raiseRestraintListPopup, _raiseSamplePopup, \
     _raiseSampleComponentPopup, _raiseSpectrumPopup, _raiseSpectrumGroupEditorPopup, _raiseStructureEnsemblePopup, _raiseSubstancePopup
+
 from ccpn.ui.gui.lib.MenuActions import _openItemNoteTable
 
 

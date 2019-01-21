@@ -807,6 +807,8 @@ class GuiSpectrumDisplay(CcpnModule):
         Closes spectrum display and deletes it from the project.
         """
         try:
+            if self.current.strip in self.strips:
+                self.current.strip = None
             for strip in self.strips:
                 getLogger().debug2('unregistering strip: %s' % strip)
                 strip.close()

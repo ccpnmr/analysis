@@ -242,7 +242,7 @@ class _PulldownABC(PulldownListCompoundWidget):
         if DEBUG: sys.stderr.write('>>> %s._updatePulldownList()\n' % self)
         pids = self._getPids()
 
-        if callbackDict[Notifier.TRIGGER] in [Notifier.DELETE]:
+        if callbackDict and callbackDict[Notifier.TRIGGER] in [Notifier.DELETE]:
             # the object has been notified for delete but still exists so needs to be removed from the list
             obj = callbackDict[Notifier.OBJECT]
             if obj.pid in pids:

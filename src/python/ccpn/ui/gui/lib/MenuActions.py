@@ -123,22 +123,24 @@ from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
 #     application.showResidueTable(chain=chain, position=position, relativeTo=relativeTo)
 
 
+# TODO:ED FIX THIS FOR THE OTHER CALLS
 OpenObjAction = {
-    Spectrum         : _openSpectrumDisplay,
-    PeakList         : _openPeakList,
-    MultipletList    : _openMultipletList,
-    NmrChain         : _openNmrResidueTable,
-    Chain            : _openResidueTable,
-    SpectrumGroup    : _openSpectrumGroup,
-    Sample           : _openSampleSpectra,
-    ChemicalShiftList: _openChemicalShiftList,
-    RestraintList    : _openRestraintList,
-    Note             : _openNote,
-    IntegralList     : _openIntegralList,
-    StructureEnsemble: _openStructureTable
+    # Spectrum         : _openSpectrumDisplay,
+    # PeakList         : _openPeakList,
+    # MultipletList    : _openMultipletList,
+    # NmrChain         : _openNmrResidueTable,
+    # Chain            : _openResidueTable,
+    # SpectrumGroup    : _openSpectrumGroup,
+    # Sample           : _openSampleSpectra,
+    # ChemicalShiftList: _openChemicalShiftList,
+    # RestraintList    : _openRestraintList,
+    # Note             : _openNote,
+    # IntegralList     : _openIntegralList,
+    # StructureEnsemble: _openStructureTable
     }
 
 
+# TODO:ED NEED TO IMPLEMENT THE ABOVE AGAIN!!!!
 def _openItemObject(mainWindow, objs, **kwds):
     """
     Abstract routine to activate a module to display objs

@@ -87,22 +87,24 @@ from ccpn.ui.gui.lib.MenuActions import _openNote, _openIntegralList, _openPeakL
     _raiseDataSetPopup, _raiseChemicalShifListPopup, _raisePeakListPopup, _raiseMultipletListPopup, _raiseCreateNmrChainPopup, _raiseNmrChainPopup, \
     _raiseNmrResiduePopup, _raiseNmrAtomPopup, _raiseNotePopup, _raiseIntegralListPopup, _raiseRestraintListPopup, _raiseSamplePopup, \
     _raiseSampleComponentPopup, _raiseSpectrumPopup, _raiseSpectrumGroupEditorPopup, _raiseStructureEnsemblePopup, _raiseSubstancePopup
+from ccpn.ui.gui.lib.MenuActions import _openItemNoteTable
 
 
-OpenObjAction = {
-    Spectrum         : _openSpectrumDisplay,
-    PeakList         : _openPeakList,
-    MultipletList    : _openMultipletList,
-    NmrChain         : _openNmrResidueTable,
-    Chain            : _openResidueTable,
-    SpectrumGroup    : _openSpectrumGroup,
-    Sample           : _openSampleSpectra,
-    ChemicalShiftList: _openChemicalShiftList,
-    RestraintList    : _openRestraintList,
-    Note             : _openNote,
-    IntegralList     : _openIntegralList,
-    StructureEnsemble: _openStructureTable
-    }
+# # list of objects that can opened
+# OpenObjAction = {
+#     Spectrum         : _openSpectrumDisplay,
+#     PeakList         : _openPeakList,
+#     MultipletList    : _openMultipletList,
+#     NmrChain         : _openNmrResidueTable,
+#     Chain            : _openResidueTable,
+#     SpectrumGroup    : _openSpectrumGroup,
+#     Sample           : _openSampleSpectra,
+#     ChemicalShiftList: _openChemicalShiftList,
+#     RestraintList    : _openRestraintList,
+#     Note             : _openNote,
+#     IntegralList     : _openIntegralList,
+#     StructureEnsemble: _openStructureTable
+#     }
 
 # NEWPEAKLIST = 'newPeakList'
 # NEWINTEGRALLIST = 'newIntegralList'
@@ -123,30 +125,30 @@ NEWMODEL = 'newModel'
 # NEWSPECTRUMGROUP = 'newSpectrumGroup'
 # NEWCOMPLEX = 'newComplex'
 
-NEW_ITEM_DICT = {
+# NEW_ITEM_DICT = {
+#
+#     # PeakList.className         : NEWPEAKLIST,
+#     # IntegralList.className     : NEWINTEGRALLIST,
+#     # MultipletList.className    : NEWMULTIPLETLIST,
+#     # NmrChain.className         : CreateNmrChainPopup,
+#     # NmrResidue.className       : NEWNMRRESIDUE,
+#     # NmrAtom.className          : NEWNMRATOM,
+#     # RestraintList.className    : RestraintTypePopup,
+#     Restraint.className: NEWRESTRAINT,
+#     # StructureEnsemble.className: NEWSTRUCTUREENSEMBLE,
+#     # Sample.className           : NEWSAMPLE,
+#     # SampleComponent.className  : EditSampleComponentPopup,
+#     # Chain.className            : CreateChainPopup,
+#     # Substance.className        : SubstancePropertiesPopup,
+#     # ChemicalShiftList.className: NEWCHEMICALSHIFTLIST,
+#     # DataSet.className          : NEWDATASET,
+#     # SpectrumGroup.className    : SpectrumGroupEditor,
+#     # Complex.className          : NEWCOMPLEX,
+#     Model.className    : NEWMODEL,
+#     # Note.className             : NEWNOTE,
+#     }
 
-    # PeakList.className         : NEWPEAKLIST,
-    # IntegralList.className     : NEWINTEGRALLIST,
-    # MultipletList.className    : NEWMULTIPLETLIST,
-    # NmrChain.className         : CreateNmrChainPopup,
-    # NmrResidue.className       : NEWNMRRESIDUE,
-    # NmrAtom.className          : NEWNMRATOM,
-    # RestraintList.className    : RestraintTypePopup,
-    Restraint.className: NEWRESTRAINT,
-    # StructureEnsemble.className: NEWSTRUCTUREENSEMBLE,
-    # Sample.className           : NEWSAMPLE,
-    # SampleComponent.className  : EditSampleComponentPopup,
-    # Chain.className            : CreateChainPopup,
-    # Substance.className        : SubstancePropertiesPopup,
-    # ChemicalShiftList.className: NEWCHEMICALSHIFTLIST,
-    # DataSet.className          : NEWDATASET,
-    # SpectrumGroup.className    : SpectrumGroupEditor,
-    # Complex.className          : NEWCOMPLEX,
-    Model.className    : NEWMODEL,
-    # Note.className             : NEWNOTE,
-    }
-
-EDIT_ITEM_DICT = {
+# EDIT_ITEM_DICT = {
 
     # Spectrum.className         : SpectrumPropertiesPopup,
     # PeakList.className         : PeakListPropertiesPopup,
@@ -163,22 +165,22 @@ EDIT_ITEM_DICT = {
     # StructureEnsemble.className: StructurePopup,
     # DataSet.className          : DataSetPopup,
     # Note.className             : NotesPopup,
-    }
+    # }
 
-OPEN_ITEM_DICT = {
-    Spectrum.className         : '_openSpectrumDisplay',
-    PeakList.className         : 'showPeakTable',
-    IntegralList.className     : 'showIntegralTable',
-    MultipletList.className    : 'showMultipletTable',
-    NmrChain.className         : 'showNmrResidueTable',
-    Chain.className            : 'showResidueTable',
-    SpectrumGroup.className    : '_openSpectrumGroup',
-    Sample.className           : '_openSampleSpectra',
-    ChemicalShiftList.className: 'showChemicalShiftTable',
-    RestraintList.className    : 'showRestraintTable',
-    Note.lastModified          : 'showNotesEditor',
-    StructureEnsemble.className: 'showStructureTable'
-    }
+# OPEN_ITEM_DICT = {
+#     Spectrum.className         : '_openSpectrumDisplay',
+#     PeakList.className         : 'showPeakTable',
+#     IntegralList.className     : 'showIntegralTable',
+#     MultipletList.className    : 'showMultipletTable',
+#     NmrChain.className         : 'showNmrResidueTable',
+#     Chain.className            : 'showResidueTable',
+#     SpectrumGroup.className    : '_openSpectrumGroup',
+#     Sample.className           : '_openSampleSpectra',
+#     ChemicalShiftList.className: 'showChemicalShiftTable',
+#     RestraintList.className    : 'showRestraintTable',
+#     Note.lastModified          : 'showNotesEditor',
+#     StructureEnsemble.className: 'showStructureTable'
+#     }
 
 
 #===========================================================================================================
@@ -215,7 +217,7 @@ class SidebarABC(NotifierBase):
     _postBlockingActions = [None, REBUILD, RENAME]
 
     def __init__(self, name=None, usePidForName=False, klass=None, addNotifier=False, closed=True, add2NodesUp=False,
-                 rebuildOnRename=None, callback=None, children=[], isDraggable=False, **kwds):
+                 rebuildOnRename=None, callback=None, menuAction=None, children=[], isDraggable=False, **kwds):
         super().__init__()
 
         self._indx = SidebarABC._nextIndx
@@ -229,6 +231,7 @@ class SidebarABC(NotifierBase):
         self.klass = klass
         self.addNotifier = addNotifier  # add notifier for rename, delete, create of klass
         self.callback = callback  # callback for double click
+        self.menuAction = menuAction    # action for raising rightClickMenu
         self.kwds = kwds  # kwd arguments passed to callback
 
         self.widget = None  # widget object
@@ -476,7 +479,7 @@ class SidebarABC(NotifierBase):
         # Cannot use copy.copy() or deepcopy as it overwrites the indx
         result = self.__class__(name=self.name, usePidForName=self.usePidForName, klass=self.klass)
 
-        for attr in 'addNotifier closed add2NodesUp callback sidebar obj _parent _postBlockingAction rebuildOnRename isDraggable'.split():
+        for attr in 'addNotifier closed add2NodesUp callback menuAction sidebar obj _parent _postBlockingAction rebuildOnRename isDraggable'.split():
             value = getattr(self, attr)
             setattr(result, attr, value)
 
@@ -683,13 +686,13 @@ class SidebarClassABC(SidebarABC):
                 children = [child.duplicate() for child in self._children]
                 itm = SidebarTree(
                         name=classObj.pid, usePidForName=True, addNotifier=False,
-                        callback=self.callback, add2NodesUp=True, children=children
+                        callback=self.callback, menuAction=self.menuAction, add2NodesUp=True, children=children
                         )
 
             else:
                 itm = SidebarItem(
                         name=classObj.pid, usePidForName=True, addNotifier=False,
-                        callback=self.callback, add2NodesUp=True, children=[]
+                        callback=self.callback, menuAction=self.menuAction, add2NodesUp=True, children=[]
                         )
             self.children.append(itm)
 
@@ -709,7 +712,7 @@ class SidebarClassItems(SidebarClassABC):
     itemType = 'ClassItems'
 
     def __init__(self, name=None, klass=None, addNotifier=True, closed=True,
-                 rebuildOnRename='self', callback=None, children=[], isDraggable=False, **kwds):
+                 rebuildOnRename='self', callback=None, menuAction=None, children=[], isDraggable=False, **kwds):
         if klass is None:
             raise ValueError('Undefined klass; definition is required for %s to function' % self.__class__.__name__)
         if len(children) > 0:
@@ -717,7 +720,7 @@ class SidebarClassItems(SidebarClassABC):
 
         name = '%s-ClassItems' % klass.className
         super().__init__(name=name, klass=klass, addNotifier=addNotifier, closed=closed, rebuildOnRename=rebuildOnRename,
-                         callback=callback, children=children, isDraggable=isDraggable, **kwds)
+                         callback=callback, menuAction=menuAction, children=children, isDraggable=isDraggable, **kwds)
 
     def reset(self):
         super().reset()
@@ -729,13 +732,13 @@ class SidebarClassTreeItems(SidebarClassABC):
     itemType = 'ClassTreeItems'
 
     def __init__(self, name=None, klass=None, addNotifier=True, closed=True,
-                 rebuildOnRename='self', callback=None, children=[], isDraggable=False, **kwds):
+                 rebuildOnRename='self', callback=None, menuAction=None, children=[], isDraggable=False, **kwds):
         if klass is None:
             raise ValueError('Undefined klass; is required for %s item' % self.__class__.__name__)
 
         name = '%s-ClassTreeItems' % klass.className
         super().__init__(name=name, klass=klass, addNotifier=addNotifier, closed=closed, rebuildOnRename=rebuildOnRename,
-                         callback=callback, children=children, isDraggable=isDraggable, **kwds)
+                         callback=callback, menuAction=menuAction, children=children, isDraggable=isDraggable, **kwds)
         self._children = self.children  # Save them for reset/create, as we will dynamically change the tree on building
 
 
@@ -753,13 +756,13 @@ class SidebarClassSpectrumTreeItems(SidebarClassABC):
     itemType = 'SpectrumClassTreeItems'
 
     def __init__(self, name=None, klass=None, addNotifier=True, closed=True,
-                 rebuildOnRename='self', callback=None, children=[], isDraggable=False, **kwds):
+                 rebuildOnRename='self', callback=None, menuAction=None, children=[], isDraggable=False, **kwds):
         if klass is None:
             raise ValueError('Undefined klass; is required for %s item' % self.__class__.__name__)
 
         name = '%s-%s' % (self.itemType, klass.className)
         super().__init__(name=name, klass=klass, addNotifier=addNotifier, closed=closed, rebuildOnRename=rebuildOnRename,
-                         callback=callback, children=children, isDraggable=isDraggable, **kwds)
+                         callback=callback, menuAction=menuAction, children=children, isDraggable=isDraggable, **kwds)
         self._children = self.children  # Save them for reset/create, as we will dynamically change the tree on building
 
     def setNotifier(self, theObject: 'AbstractWrapperObject', triggers: list, targetName: str, callback: Callable[..., str], **kwds) -> Notifier:
@@ -788,13 +791,13 @@ class SidebarClassNmrResidueTreeItems(SidebarClassABC):
     itemType = 'NmrResidueClassTreeItems'
 
     def __init__(self, name=None, klass=None, addNotifier=True, closed=True,
-                 rebuildOnRename='self', callback=None, children=[], isDraggable=False, **kwds):
+                 rebuildOnRename='self', callback=None, menuAction=None, children=[], isDraggable=False, **kwds):
         if klass is None:
             raise ValueError('Undefined klass; is required for %s item' % self.__class__.__name__)
 
         name = '%s-%s' % (self.itemType, klass.className)
         super().__init__(name=name, klass=klass, addNotifier=addNotifier, closed=closed, rebuildOnRename=rebuildOnRename,
-                         callback=callback, children=children, isDraggable=isDraggable, **kwds)
+                         callback=callback, menuAction=menuAction, children=children, isDraggable=isDraggable, **kwds)
         self._children = self.children  # Save them for reset/create, as we will dynamically change the tree on building
 
     def _getKlassChildren(self, obj, klass):
@@ -950,7 +953,8 @@ class SideBarStructure(object):
             #------ Notes ------
             SidebarTree('Notes', closed=True, children=[
                 SidebarItem('<New Note>', callback=_createNewNote()),
-                SidebarClassItems(klass=Note, callback=_raiseNotePopup(), isDraggable=True),
+                SidebarClassItems(klass=Note, callback=_raiseNotePopup(),
+                                  menuAction=_openItemNoteTable(position='bottom', relativeTo=None), isDraggable=True),
                 ]),
             ])
 
@@ -1144,7 +1148,7 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         sidebar.
         """
         if event.button() == QtCore.Qt.RightButton:
-            self._raiseContextMenu(event)  # ejb - moved the context menu to button release
+            self._raiseContextMenu(event)
             event.accept()
         else:
             super().mouseReleaseEvent(event)
@@ -1201,34 +1205,45 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         contextMenu = Menu('', self, isFloatWidget=True)
 
         objs = []
+        # get the list of items selected
         for item in self.selectedItems():
             if item is not None:
-
                 dataPid = item.data(0, QtCore.Qt.DisplayRole)
-                sideBarObject = item.data(1, QtCore.Qt.UserRole)
-
                 objFromPid = self.project.getByPid(dataPid)
                 if objFromPid is not None:
                     objs.append(objFromPid)
 
         if len(objs) > 0:
-            openableObjs = [obj for obj in objs if isinstance(obj, tuple(OpenObjAction.keys()))]
-            if len(openableObjs) > 0:
-                contextMenu.addAction('Open as a module', partial(_openItemObject, self.mainWindow, openableObjs))
-                spectra = [o for o in openableObjs if isinstance(o, Spectrum)]
-                if len(spectra) > 0:
-                    contextMenu.addAction('Make SpectrumGroup From Selected', partial(_createSpectrumGroup, self.mainWindow, spectra))
+            # get the item clicked
+            _itemPressed = self.itemAt(event.pos())
+            dataPid = _itemPressed.data(0, QtCore.Qt.DisplayRole)
+            sideBarObject = _itemPressed.data(1, QtCore.Qt.UserRole)
 
-            contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
-            canBeCloned = True
-            for obj in objs:
-                if not hasattr(obj, 'clone'):  # TODO: possibly should check that is a method...
-                    canBeCloned = False
-                    break
-            if canBeCloned:
-                contextMenu.addAction('Clone', partial(self._cloneObject, objs))
-            contextMenu.move(event.globalPos().x(), event.globalPos().y() + 10)
-            contextMenu.exec()
+            menuAction = sideBarObject.menuAction
+            if menuAction:
+                menuAction(dataPid, sideBarObject,
+                                         QtCore.QPoint(event.globalPos().x(), event.globalPos().y() + 10),
+                                         objs)
+
+            # # keep the objects that are defined in the class list
+            # openableObjs = [obj for obj in objs if isinstance(obj, tuple(OpenObjAction.keys()))]
+            #
+            # if len(openableObjs) > 0:
+            #     contextMenu.addAction('Open as a module', partial(_openItemObject, self.mainWindow, openableObjs))
+            #     spectra = [o for o in openableObjs if isinstance(o, Spectrum)]
+            #     if len(spectra) > 0:
+            #         contextMenu.addAction('Make SpectrumGroup From Selected', partial(_createSpectrumGroup, self.mainWindow, spectra))
+            #
+            # contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
+            # canBeCloned = True
+            # for obj in objs:
+            #     if not hasattr(obj, 'clone'):  # TODO: possibly should check that is a method...
+            #         canBeCloned = False
+            #         break
+            # if canBeCloned:
+            #     contextMenu.addAction('Clone', partial(self._cloneObject, objs))
+            # contextMenu.move(event.globalPos().x(), event.globalPos().y() + 10)
+            # contextMenu.exec()
 
     def _deleteItemObject(self, objs):
         """Removes the specified item from the sidebar and deletes it from the project.

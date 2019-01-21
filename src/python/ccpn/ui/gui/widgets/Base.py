@@ -73,7 +73,7 @@ class Base(DropBase):
 
     # Base._init(**kwds) should be called from every widget
     # We don't use __init__ as it messes up the super() methods resolution and the
-    # destroy signal when closing  the windows
+    # destroy signal when closing the windows
     def _init(self, isFloatWidget=False,
               tipText=None,
               bgColor=None, fgColor=None,
@@ -98,10 +98,10 @@ class Base(DropBase):
         :param grid:     insert widget at (row,col) of parent layout (if available)
         :param gridSpan: extend widget over (rows,cols); default (1,1)
         :param stretch:  stretch factor (row,col) of widget; default (0, 0)
-        :param hAlign:   horizontal alignment: left, right, centre (center, l, r, c)
-        :param vAlign:   vertical alignment: top, bottom, centre (center, t, b. c)
-        :param hPolicy:  horizontal policy of widget: fixed, minimum, maximum, preferred, expanding, minimumExpanding, ignored
-        :param vPolicy:  vertical policy of widget: fixed, minimum, maximum, preferred, expanding, minimumExpanding, ignored
+        :param hAlign:   horizontal alignment: (l, left, r, right, c, center, centre)
+        :param vAlign:   vertical alignment: (t, top, b, bottom, c, center, centre)
+        :param hPolicy:  horizontal policy of widget: (fixed, minimum, maximum, preferred, expanding, minimumExpanding, ignored)
+        :param vPolicy:  vertical policy of widget: ( fixed, minimum, maximum, preferred, expanding, minimumExpanding, ignored)
         :param bgColor:  background RGB colour tuple; depreciated: use styleSheet routines instead
         :param fgColor:  foreground RGB colour tuple; depreciated: use styleSheet routines instead
         :param isFloatWidget: indicates widget to be floating
@@ -241,10 +241,13 @@ class Base(DropBase):
         """
         return self.parent()
 
-    def addSpacer(self, width, height, row, collumn):
+    def addSpacer(self, width, height, grid, gridSpan=(1,1)):
         """Convience to insert spacer
+        width, height: in pixels
+        grid=(row,col): tuple or list defining row, column
+        gridSpan: tuple or list defining grid-span along row, column
+
+        :returns: Spacer widget
         """
-        layout = self.getLayout()
-        if layout is None:
-            raise RuntimeError('Unable to insert spacer; no layout')
-        layout.addItem(QtWidgets.QSpacerItem(width, height), row, collumn)
+        from ccpn.ui.gui.widgets.Spacer import Spacer
+        return Spacer(self, width=width, height=height, grid=grid, gridSpan=gridSpan)

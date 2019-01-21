@@ -111,7 +111,7 @@ class SampleComponentPopup(CcpnDialog):
             i, j = position
             layout.addWidget(widget, i, j)
 
-        self.addSpacer(0, 10, count+1, 0)
+        self.addSpacer(0, 10, grid=(count+1, 0))
         layout.addWidget(self.buttons, count + 2, 0, 1 , 2)
 
         self.nameLabellingOptions()

@@ -33,13 +33,24 @@ class Spacer(QtWidgets.QSpacerItem):
     Widget used to put spaces into modules and popups.
     """
 
-    def __init__(self, parent=None, *args, **kwds):
+    def __init__(self, parent, width, height, *args, **kwds):
         """
-
-        :param parent:
-        :param args:
-        :param kwds:
+        Add a spacer item to the layout of parent
+        :param parent: parent widget (required)
+        :param args: passed to SpacerItem
+        :param kwds: grid
         """
-        QtWidgets.QSpacerItem.__init__(self, *args)
+        QtWidgets.QSpacerItem.__init__(self, width, height, *args)
 
-        parent.layout().addItem(self, kwds['grid'][0], kwds['grid'][1], kwds['gridSpan'][0], kwds['gridSpan'][1])
+        if parent is None:
+            raise ValueError('Spacer: parent parameter cannot be None')
+
+        grid = kwds.get('grid')
+        if not isinstance(grid, (list,tuple)) or len(grid) != 2:
+            raise ValueError('grid parameter is required and should be a tuple or list with two elements (row, column)')
+
+        gridSpan = kwds.setdefault('gridSpan', (1,1))
+        if not isinstance(gridSpan, (list,tuple)) or len(grid) != 2:
+            raise ValueError('gridSpan parameter should be a tuple or list with two elements (rowSpan, columnSpan)')
+
+        parent.getLayout().addItem(self, grid[0], grid[1], gridSpan[0], gridSpan[1])

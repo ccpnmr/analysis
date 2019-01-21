@@ -1052,7 +1052,7 @@ class SideBarStructure(object):
     A class to manage the sidebar
     """
 
-    _sidebarData = (  # "(" just to be able to continue on a new line; \ seems not to work
+    _sidebarData = (
 
         SidebarTree('Project', usePidForName=False, klass=Project, closed=False, children=[
 
@@ -1062,17 +1062,17 @@ class SideBarStructure(object):
                     SidebarTree('PeakLists', closed=False, children=[
                         SidebarItem('<New PeakList>', callback=_createNewPeakList()),
                         SidebarClassItems(klass=PeakList, callback=_raisePeakListPopup()),
-                        ]),
+                    ]),
                     SidebarTree('MultipletLists', children=[
                         SidebarItem('<New MultipletList>', callback=_createNewMultipletList()),
                         SidebarClassItems(klass=MultipletList, callback=_raiseMultipletListPopup()),
-                        ]),
+                    ]),
                     SidebarTree('IntegralLists', children=[
                         SidebarItem('<New IntegralList>', callback=_createNewIntegralList()),
                         SidebarClassItems(klass=IntegralList, callback=_raiseIntegralListPopup()),
-                        ]),
                     ]),
                 ]),
+            ]),
 
             #------ SpectrumGroups ------
             SidebarTree('SpectrumGroups', closed=True, children=[
@@ -1080,14 +1080,14 @@ class SideBarStructure(object):
                 SidebarClassTreeItems(klass=SpectrumGroup, callback=_raiseSpectrumGroupEditorPopup(editMode=True),
                                       addNotifier=True, triggers=ALL_NOTIFIER_TRIGGERS, children=[
                     SidebarClassSpectrumTreeItems(klass=Spectrum, callback=_raiseSpectrumPopup()),
-                    ]),
                 ]),
+            ]),
 
             #------ ChemicalShiftLists ------
             SidebarTree('ChemicalShiftLists', closed=True, children=[
                 SidebarItem('<New ChemicalShiftList>', callback=_createNewChemicalShiftList()),
                 SidebarClassTreeItems(klass=ChemicalShiftList, callback=_raiseChemicalShifListPopup()),
-                ]),
+            ]),
 
             #------ NmrChains, NmrResidues, NmrAtoms ------
             SidebarTree('NmrChains', closed=True, children=[
@@ -1100,9 +1100,9 @@ class SideBarStructure(object):
                         SidebarItem('<New NmrAtom>', callback=_createNewNmrAtom()),
                         SidebarClassItems(klass=NmrAtom, rebuildOnRename='NmrChain-ClassTreeItems',
                                           callback=_raiseNmrAtomPopup()),
-                        ]),
                     ]),
                 ]),
+            ]),
 
             #------ Samples, SampleComponents ------
             SidebarTree('Samples', closed=True, children=[
@@ -1112,14 +1112,14 @@ class SideBarStructure(object):
                     SidebarItem('<New SampleComponent>', callback=_raiseSampleComponentPopup(useParent=True, newSampleComponent=True)),
                     SidebarClassItems(klass=SampleComponent, rebuildOnRename='Sample-ClassTreeItems',
                                       callback=_raiseSampleComponentPopup(newSampleComponent=False)),
-                    ]),
                 ]),
+            ]),
 
             #------ Substances ------
             SidebarTree('Substances', closed=True, children=[
                 SidebarItem('<New Substance>', callback=_raiseSubstancePopup(useNone=True, newSubstance=True)),
                 SidebarClassItems(klass=Substance, callback=_raiseSubstancePopup(newSubstance=False)),
-                ]),
+            ]),
 
             #------ Chains, Residues ------
             SidebarTree('Chains', closed=True, children=[
@@ -1127,21 +1127,25 @@ class SideBarStructure(object):
                 SidebarClassTreeItems(klass=Chain, rebuildOnRename='Chain-ClassTreeItems',
                                       callback=_raiseChainPopup(), children=[
                     SidebarClassTreeItems(klass=Residue, rebuildOnRename='Chain-ClassTreeItems', callback=NYI),
-                    ]),
                 ]),
+            ]),
 
             #------ Complexes ------
             SidebarTree('Complexes', closed=True, children=[
                 SidebarItem('<New Complex>', callback=_raiseComplexEditorPopup(editMode=False, useNone=True)),
-                SidebarClassTreeItems(klass=Complex, rebuildOnRename='Complex-ClassTreeItems',
-                                      callback=_raiseComplexEditorPopup(editMode=True)),
-                ]),
+                SidebarClassTreeItems(klass=Complex, callback=_raiseComplexEditorPopup(editMode=True),
+                                      addNotifier=True, triggers=ALL_NOTIFIER_TRIGGERS,
+                #                       children=[
+                #     SidebarClassTreeItems(klass=Chain, rebuildOnRename='Complex-ClassTreeItems', callback=NYI),
+                # ]),
+                ),
+            ]),
 
             #------ StructureEnsembles ------
             SidebarTree('StructureEnsembles', closed=True, children=[
                 SidebarItem('<New StructureEnsemble>', callback=_createNewStructureEnsemble()),
                 SidebarClassItems(klass=StructureEnsemble, callback=_raiseStructureEnsemblePopup()),
-                ]),
+            ]),
 
             #------ DataSets ------
             SidebarTree('DataSets', closed=True, children=[
@@ -1151,16 +1155,15 @@ class SideBarStructure(object):
                     SidebarItem('<New RestraintList>', callback=_raiseRestraintListPopup(editMode=False, useParent=True)),
                     SidebarClassTreeItems(klass=RestraintList, rebuildOnRename='DataSet-ClassTreeItems',
                                           callback=_raiseRestraintListPopup(editMode=True)),
-                    ]),
                 ]),
+            ]),
 
             #------ Notes ------
             SidebarTree('Notes', closed=True, children=[
                 SidebarItem('<New Note>', callback=_createNewNote()),
                 SidebarClassItems(klass=Note, callback=_raiseNotePopup()),
-                ]),
-            ])
-
+            ]),
+        ])
     )  # end _sidebarData
 
     def _init(self):

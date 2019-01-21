@@ -82,14 +82,23 @@ class Chain(AbstractWrapperObject):
         """short form of name"""
         return self._wrappedData.code
 
+    @shortName.setter
+    def shortName(self, value: str):
+        self.rename(value)
+
+    # GWV: more logical attribute!
+    name = shortName
+
     @property
     def compoundName(self) -> str:
         """Short name of chemical compound (e.g. 'Lysozyme') making up Chain"""
         return self._wrappedData.molecule.name
 
-    # GWV: more logical attribute!
-    name = compoundName
-
+    # Api does not allow setting of compoundName
+    # @compoundName.setter
+    # def compoundName(self, value: str):
+    #     self._wrappedData.molecule.name = value
+    #
     @property
     def _parent(self) -> Project:
         """Parent (containing) object."""
@@ -110,14 +119,14 @@ class Chain(AbstractWrapperObject):
         """True if this is a cyclic polymer."""
         return self._wrappedData.molecule.isStdCyclic
 
-    @property
-    def comment(self) -> str:
-        """Free-form text comment."""
-        return self._wrappedData.details
-
-    @comment.setter
-    def comment(self, value: str):
-        self._wrappedData.details = value
+    # @property
+    # def comment(self) -> str:
+    #     """Free-form text comment"""
+    #     return self._none2str(self._wrappedData.details)
+    #
+    # @comment.setter
+    # def comment(self, value: str):
+    #     self._wrappedData.details = self._str2none(value)
 
     @property
     def substances(self) -> Tuple[Substance, ...]:

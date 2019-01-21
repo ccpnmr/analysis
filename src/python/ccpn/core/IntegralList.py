@@ -164,14 +164,14 @@ class IntegralList(AbstractWrapperObject):
     def textColour(self, value: str):
         self._wrappedData.textColour = value
 
-    @property
-    def comment(self) -> str:
-        """Free-form text comment."""
-        return self._wrappedData.details
-
-    @comment.setter
-    def comment(self, value: str):
-        self._wrappedData.details = value
+    # @property
+    # def comment(self) -> str:
+    #     """Free-form text comment."""
+    #     return self._wrappedData.details
+    #
+    # @comment.setter
+    # def comment(self, value: str):
+    #     self._wrappedData.details = value
 
     #=========================================================================================
     # Implementation functions

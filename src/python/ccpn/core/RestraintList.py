@@ -36,6 +36,7 @@ from ccpnmodel.ccpncore.lib import Constants as coreConstants
 from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import AbstractConstraintList as ApiAbstractConstraintList
 from ccpn.util.Tensor import Tensor
+
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
     logCommandBlock, renameObject
@@ -67,16 +68,8 @@ class RestraintList(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiAbstractConstraintList._metaclass.qualifiedName()
 
-    # # Number of atoms in a Restraint item, by restraint type
-    # _restraintType2Length = {
-    #   'Distance':2,
-    #   'Dihedral':4,
-    #   'Rdc':2,
-    #   'HBond':2,
-    #   'JCoupling':2,
-    #   'Csa':1,
-    #   'ChemicalShift':1,
-    # }
+    #TODO: this needs to be explicit here
+    restraintTypes = tuple(coreConstants.constraintListType2ItemLength.keys())
 
     def __init__(self, project, wrappedData):
 
@@ -150,14 +143,14 @@ class RestraintList(AbstractWrapperObject):
         """Set name of RestraintList."""
         self.rename(value)
 
-    @property
-    def comment(self) -> str:
-        """Free-form text comment"""
-        return self._wrappedData.details
-
-    @comment.setter
-    def comment(self, value: str):
-        self._wrappedData.details = value
+    # @property
+    # def comment(self) -> str:
+    #     """Free-form text comment"""
+    #     return self._wrappedData.details
+    #
+    # @comment.setter
+    # def comment(self, value: str):
+    #     self._wrappedData.details = value
 
     @property
     def unit(self) -> str:
@@ -392,7 +385,7 @@ def _newRestraintList(self: DataSet, restraintType, name: str = None, origin: st
     if restraintItemLength is None:
         restraintItemLength = coreConstants.constraintListType2ItemLength.get(restraintType)
     if restraintItemLength is None:
-        raise ValueError("restraintType %s not recognised" % restraintType)
+        raise ValueError('restraintType "%s" not recognised' % restraintType)
 
     obj = self._wrappedData.newGenericConstraintList(name=name, details=comment, unit=unit,
                                                      origin=origin,

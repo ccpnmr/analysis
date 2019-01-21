@@ -121,14 +121,14 @@ class StructureEnsemble(AbstractWrapperObject):
         #
         value._containingObject = self
 
-    @property
-    def comment(self) -> str:
-        """Free-form text comment"""
-        return self._wrappedData.details
-
-    @comment.setter
-    def comment(self, value: str):
-        self._wrappedData.details = value
+    # @property
+    # def comment(self) -> str:
+    #     """Free-form text comment"""
+    #     return self._none2str(self._wrappedData.details)
+    #
+    # @comment.setter
+    # def comment(self, value: str):
+    #     self._wrappedData.details = self._str2none(value)
 
     def resetModels(self):
         """Remove models without data, add models to reflect modelNumbers present"""

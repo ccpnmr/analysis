@@ -111,29 +111,29 @@ class DataSet(AbstractWrapperObject):
     @property
     def programName(self) -> str:
         """Name of program performing the calculation"""
-        return self._wrappedData.programName
+        return self._none2str(self._wrappedData.programName)
 
     @programName.setter
     def programName(self, value: str):
-        self._wrappedData.programName = value
+        self._wrappedData.programName = self._str2none(value)
 
     @property
     def programVersion(self) -> Optional[str]:
         """Version of program performing the calculation"""
-        return self._wrappedData.programVersion
+        return self._none2str(self._wrappedData.programVersion)
 
     @programVersion.setter
     def programVersion(self, value: str):
-        self._wrappedData.programVersion = value
+        self._wrappedData.programVersion = self._str2none(value)
 
     @property
     def dataPath(self) -> Optional[str]:
         """File path where dataSet is stored"""
-        return self._wrappedData.dataPath
+        return self._none2str(self._wrappedData.dataPath)
 
     @dataPath.setter
     def dataPath(self, value: str):
-        self._wrappedData.dataPath = value
+        self._wrappedData.dataPath = self._str2none(value)
 
     @property
     def creationDate(self) -> Optional[datetime.datetime]:
@@ -142,25 +142,25 @@ class DataSet(AbstractWrapperObject):
 
     @creationDate.setter
     def creationDate(self, value: datetime.datetime):
-        self._wrappedData.creationDate = value
+        self._wrappedData.creationDate = self._str2none(value)
 
     @property
     def uuid(self) -> Optional[str]:
         """Universal identifier for dataSet"""
-        return self._wrappedData.uuid
+        return self._none2str(self._wrappedData.uuid)
 
     @uuid.setter
     def uuid(self, value: str):
-        self._wrappedData.uuid = value
+        self._wrappedData.uuid = self._str2none(value)
 
-    @property
-    def comment(self) -> str:
-        """Free-form text comment"""
-        return self._wrappedData.details
-
-    @comment.setter
-    def comment(self, value: str):
-        self._wrappedData.details = value
+    # @property
+    # def comment(self) -> str:
+    #     """Free-form text comment"""
+    #     return self._none2str(self._wrappedData.details)
+    #
+    # @comment.setter
+    # def comment(self, value: str):
+    #     self._wrappedData.details = self._str2none(value)
 
     def _fetchFixedResonance(self, assignment: str, checkUniqueness: bool = True) -> ApiFixedResonance:
         """Fetch FixedResonance matching assignment string, creating anew if needed.

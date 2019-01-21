@@ -242,7 +242,8 @@ class GeneralTab(Widget):
 
         from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
 
-        super().__init__(parent, setLayout=True)  # ejb
+        super().__init__(parent, setLayout=True, spacing=(5,5))  # ejb
+        self.setWindowTitle("Spectrum Properties")
 
         self._parent = parent
         self.mainWindow = mainWindow
@@ -255,21 +256,29 @@ class GeneralTab(Widget):
         self.atomCodes = ()
 
         self.experimentTypes = spectrum._project._experimentTypeMap
-        Label(self, text="Spectrum name ", grid=(1, 0))
-        self.nameData = LineEdit(self, vAlign='t', grid=(1, 1))
-        self.nameData.setText(spectrum.name)
-        self.layout().addItem(QtWidgets.QSpacerItem(0, 10), 0, 0)
-        self.nameData.textChanged.connect(self._queueSpectrumNameChange)  # ejb - was editingFinished
 
-        Label(self, text="Path", vAlign='t', hAlign='l', grid=(2, 0))
-        self.pathData = LineEdit(self, vAlign='t', grid=(2, 1))
+        self.layout().addItem(QtWidgets.QSpacerItem(0, 5), 0, 0)
+        row = 1
+
+        Label(self, text="PID ", vAlign='t', hAlign='l', grid=(row, 0))
+        # self.layout().addItem(QtWidgets.QSpacerItem(0, 5), 0, 0)
+        Label(self, text=spectrum.pid, vAlign='t', grid=(row, 1))
+        row += 1
+
+        Label(self, text="Name ", grid=(row, 0))
+        self.nameData = LineEdit(self, textAlignment = 'left', vAlign='t', grid=(row, 1))
+        self.nameData.setText(spectrum.name)
+        self.nameData.textChanged.connect(self._queueSpectrumNameChange)  # ejb - was editingFinished
+        row += 1
+
+        Label(self, text="Path", vAlign='t', hAlign='l', grid=(row, 0))
+        self.pathData = LineEdit(self, textAlignment = 'left', vAlign='t', grid=(row, 1))
         self.pathData.setValidator(FilePathValidator(parent=self.pathData, spectrum=self.spectrum))
-        self.pathButton = Button(self, grid=(2, 2), callback=self._getSpectrumFile, icon='icons/applications-system')
+        self.pathButton = Button(self, grid=(row, 2), callback=self._getSpectrumFile, icon='icons/applications-system')
+        row += 1
 
         self.pythonConsole = mainWindow.pythonConsole
         self.logger = getLogger()  # self.spectrum.project._logger
-
-        self.setWindowTitle("Spectrum Properties")
 
         apiDataStore = spectrum._apiDataSource.dataStore
         if not apiDataStore:
@@ -287,19 +296,19 @@ class GeneralTab(Widget):
         else:
             self.pathData.setText(apiDataStore.fullPath)
         self.pathData.editingFinished.connect(self._queueSetSpectrumPath)
+
         try:
             index = spectrum.project.chemicalShiftLists.index(spectrum.chemicalShiftList)
         except:
             index = 0
-        Label(self, text="Chemical Shift List ", vAlign='t', hAlign='l', grid=(3, 0))
-        self.chemicalShiftListPulldown = PulldownList(self, vAlign='t', grid=(3, 1), index=index,
+        Label(self, text="ChemicalShiftList ", vAlign='t', hAlign='l', grid=(row, 0))
+        self.chemicalShiftListPulldown = PulldownList(self, vAlign='t', grid=(row, 1), index=index,
                                                       texts=[csList.pid for csList in spectrum.project.chemicalShiftLists] + ['<New>'],
                                                       callback=self._queueChemicalShiftListChange)
-        Label(self, text="PID ", vAlign='t', hAlign='l', grid=(5, 0))
-        Label(self, text=spectrum.pid, vAlign='t', grid=(5, 1))
+        row += 1
 
-        Label(self, text="Sample", vAlign='t', hAlign='l', grid=(6, 0))
-        self.samplesPulldownList = PulldownList(self, texts=['None'], objects=[None], vAlign='t', grid=(6, 1))
+        Label(self, text="Sample", vAlign='t', hAlign='l', grid=(row, 0))
+        self.samplesPulldownList = PulldownList(self, texts=['None'], objects=[None], vAlign='t', grid=(row, 1))
         for sample in spectrum.project.samples:
             self.samplesPulldownList.addItem(sample.name, sample)
         if spectrum.sample is not None:

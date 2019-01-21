@@ -43,11 +43,12 @@ import sys
 
 
 class NmrResiduePopup(CcpnDialog):
-    def __init__(self, parent=None, mainWindow=None, nmrResidue=None, nmrAtom=None, title='NmrResidue', **kwds):
+
+    def __init__(self, parent=None, mainWindow=None, nmrResidue=None, **kwds):
         """
         Initialise the widget
         """
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='Edit NmrResidue', **kwds)
 
         self.mainWindow = mainWindow
         self.application = mainWindow.application
@@ -55,27 +56,36 @@ class NmrResiduePopup(CcpnDialog):
         self.current = mainWindow.application.current
 
         self._parent = parent
-        self.nmrAtom = nmrAtom
+        self.nmrResidue = nmrResidue  # Also set in updatePopup
+        # self.nmrAtom = nmrAtom
 
         row = 0
-        hspan = 3
-        hWidth = 100
+        hspan = 2
+        hWidth = 140
+
+        self.pid = EntryCompoundWidget(self, labelText="pid",
+                                             fixedWidths=(hWidth, hWidth), grid=(row, 0), gridSpan=(1, hspan),
+                                             readOnly = True
+                                       )
+        row += 1
 
         row += 1
-        self.chainPulldown = NmrChainPulldown(self, project=self.project,
-                                              minimumWidths=(hWidth, hWidth), maximumWidths=(hWidth, hWidth),
+        self.chainPulldown = NmrChainPulldown(self, project=self.project, labelText='nmrChain',
+                                              fixedWidths=(hWidth, hWidth),
                                               grid=(row, 0), gridSpan=(1, hspan))
         row += 1
-        self.sequenceCode = EntryCompoundWidget(self, labelText="Sequence Code", grid=(row, 0), gridSpan=(1, hspan))
+        self.sequenceCode = EntryCompoundWidget(self, labelText="sequenceCode",
+                                                fixedWidths=(hWidth, hWidth), grid=(row, 0), gridSpan=(1, hspan))
 
         row += 1
-        self.residueType = PulldownListCompoundWidget(self, labelText="Residue Type", editable=True,
-                                                      minimumWidths=(hWidth, hWidth), maximumWidths=(hWidth, hWidth),
-                                                      grid=(row, 0), gridSpan=(1, hspan))
+        self.residueType = PulldownListCompoundWidget(self, labelText="residueType", editable=True,
+                                                      fixedWidths=(hWidth, hWidth), grid=(row, 0), gridSpan=(1, hspan))
         row += 1
-        self.comment = EntryCompoundWidget(self, labelText="Comment",
-                                           minimumWidths=(hWidth, hWidth), maximumWidths=(hWidth, hWidth),
-                                           grid=(row, 0), gridSpan=(1, hspan))
+        self.comment = EntryCompoundWidget(self, labelText="comment",
+                                           fixedWidths=(hWidth, hWidth), grid=(row, 0), gridSpan=(1, hspan))
+        row += 1
+        self.addSpacer(0, 10, row, 0)
+
         row += 1
         self.buttons = ButtonList(self, texts=('Close', 'Apply', 'Ok'),
                                   callbacks=(self.reject, self._applyChanges, self._okButton),
@@ -85,9 +95,8 @@ class NmrResiduePopup(CcpnDialog):
 
     def _updatePopup(self, nmrResidue):
         if nmrResidue is not None:
-            self.setWindowTitle(nmrResidue.pid)
             self.nmrResidue = nmrResidue
-
+            self.pid.setText(self.nmrResidue.pid)
             chain = nmrResidue.nmrChain
             self.chainPulldown.select(chain.pid)
             self.sequenceCode.setText(nmrResidue.sequenceCode)

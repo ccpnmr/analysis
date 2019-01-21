@@ -25,49 +25,14 @@ __date__ = "$Date: 9/05/2017 $"
 # Start of code
 #=========================================================================================
 
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.popups.Dialog import CcpnDialog
-from ccpn.core.lib import Undo
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.core.Note import Note
+from ccpn.ui.gui.popups.SimpleAttributeEditorPopupABC import SimpleAttributeEditorPopupABC
+from ccpn.util.Logging import getLogger
 
 
-class NotesPopup(CcpnDialog):
-    """
-    Open a small popup to allow changing the name of a Note
-    """
+class NotesPopup(SimpleAttributeEditorPopupABC):
+    """Notes attributes editor popup"""
 
-    def __init__(self, parent=None, mainWindow=None, title='Notes', note=None, **kwds):
-        """
-        Initialise the widget
-        """
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
-
-        self.mainWindow = mainWindow
-        self.application = mainWindow.application
-        self.project = mainWindow.application.project
-        self.current = mainWindow.application.current
-        self.note = note
-
-        self.noteLabel = Label(self, "Note Name: " + self.note.pid, grid=(0, 0))
-        self.noteText = LineEdit(self, self.note.name, grid=(0, 1))
-        ButtonList(self, ['Cancel', 'OK'], [self.reject, self._okButton], grid=(1, 1))
-
-    def _okButton(self):
-        """
-        When ok button pressed: update Note and exit
-        """
-        #TODO:ED doesn't need _startCommandEchoBlock yet
-        newName = self.noteText.text()
-        if str(newName) != self.note.name:
-            try:
-                self.note.rename(newName)  # rename covers the undo event
-                self.accept()
-
-            except Exception as es:
-                showWarning('Notes', str(es))
-                if self.application._isInDebugMode:
-                    raise es
-        else:
-            self.accept()  # no change so accept and exit
+    klass = Note
+    attributes = [('name',           getattr, setattr, {'backgroundText':'> Enter name <'}),
+                 ]

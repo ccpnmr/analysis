@@ -226,6 +226,18 @@ class AbstractWrapperObject(NotifierBase):
 
     __hash__ = object.__hash__
 
+    @staticmethod
+    def _str2none(value):
+        "Covenience to convert an empty string to None; V2 requirement for some attributes"
+        if not isinstance(value, str):
+            raise ValueError('Non-string type for value argument')
+        return None if len(value) == 0 else value
+
+    @staticmethod
+    def _none2str(value):
+        "Covenience to None return to an empty string; V2 requirement for some attributes"
+        return '' if value is None else value
+
     #=========================================================================================
     # CCPN Properties
     #=========================================================================================
@@ -295,6 +307,15 @@ class AbstractWrapperObject(NotifierBase):
             with notificationBlanking():
                 result = self._wrappedData.ccpnInternalData = {}
         return result
+
+    @property
+    def comment(self) -> str:
+        """Free-form text comment"""
+        return self._none2str(self._wrappedData.details)
+
+    @comment.setter
+    def comment(self, value: str):
+        self._wrappedData.details = self._str2none(value)
 
     CCPNMR_NAMESPACE = '_ccpNmrV3internal'
 

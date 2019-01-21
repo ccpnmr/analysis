@@ -106,14 +106,14 @@ class SpectrumDisplay(AbstractWrapperObject):
         """Number of strips"""
         return self._wrappedData.stripCount
 
-    @property
-    def comment(self) -> str:
-        """Free-form text comment"""
-        return self._wrappedData.details
-
-    @comment.setter
-    def comment(self, value: str):
-        self._wrappedData.details = value
+    # @property
+    # def comment(self) -> str:
+    #     """Free-form text comment"""
+    #     return self._wrappedData.details
+    #
+    # @comment.setter
+    # def comment(self, value: str):
+    #     self._wrappedData.details = value
 
     @property
     def axisCodes(self) -> Tuple[str, ...]:

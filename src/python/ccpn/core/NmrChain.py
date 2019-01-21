@@ -101,6 +101,8 @@ class NmrChain(AbstractWrapperObject):
         Connected NmrChains (isConnected == True) always have canonical names of the form '#ijk'"""
         return self._wrappedData.code
 
+    name = shortName
+
     @property
     def label(self) -> str:
         """Identifying label of NmrChain. Defaults to '?'"""
@@ -127,14 +129,14 @@ class NmrChain(AbstractWrapperObject):
         (in which case the mainNmrResidues are sequentially connected)."""
         return self._wrappedData.isConnected
 
-    @property
-    def comment(self) -> str:
-        """Free-form text comment"""
-        return self._wrappedData.details
-
-    @comment.setter
-    def comment(self, value: str):
-        self._wrappedData.details = value
+    # @property
+    # def comment(self) -> str:
+    #     """Free-form text comment"""
+    #     return self._none2str(self._wrappedData.details)
+    #
+    # @comment.setter
+    # def comment(self, value: str):
+    #     self._wrappedData.details = self._str2none(value)
 
     @property
     def chain(self) -> Chain:

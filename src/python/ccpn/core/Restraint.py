@@ -84,14 +84,14 @@ class Restraint(AbstractWrapperObject):
         """serial number of Restraint, used in Pid and to identify the Restraint. """
         return self._wrappedData.serial
 
-    @property
-    def comment(self) -> str:
-        """Free-form text comment"""
-        return self._wrappedData.details
-
-    @comment.setter
-    def comment(self, value: str):
-        self._wrappedData.details = value
+    # @property
+    # def comment(self) -> str:
+    #     """Free-form text comment"""
+    #     return self._wrappedData.details
+    #
+    # @comment.setter
+    # def comment(self, value: str):
+    #     self._wrappedData.details = value
 
     @property
     def peaks(self) -> Tuple[Peak, ...]:

@@ -14,47 +14,30 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:47 +0100 (Fri, July 07, 2017) $"
+__dateModified__ = "$dateModified: 2017-07-07 16:32:48 +0100 (Fri, July 07, 2017) $"
 __version__ = "$Revision: 3.0.b4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
-__date__ = "$Date: 2017-07-04 15:21:16 +0000 (Tue, July 04, 2017) $"
+__date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets
-from ccpn.ui.gui.widgets.Base import Base
+from ccpn.core.NmrChain import Chain
+from ccpn.ui.gui.popups.SimpleAttributeEditorPopupABC import SimpleAttributeEditorPopupABC
+from ccpn.util.Logging import getLogger
 
 
-def _updateGl(self, spectrumList):
-    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+class ChainPopup(SimpleAttributeEditorPopupABC):
+    """Chain attributes editor popup"""
 
-    # # spawn a redraw of the contours
-    # for spec in spectrumList:
-    #     for specViews in spec.spectrumViews:
-    #         specViews.buildContours = True
+    klass = Chain
+    attributes = [('name',         getattr, setattr, {'backgroundText':'> Enter name <'}),
+                  ('comment',      getattr, setattr, {'backgroundText':'> Optional <'}),
+                  # ('compoundName', getattr, None,    {}),
+                  # ('isCyclic',     getattr, None,    {}),
+                  ('nmrChain',     getattr, None,    {}),
+                  ]
 
-    GLSignals = GLNotifier(parent=self)
-    GLSignals.emitPaintEvent()
-
-
-class CcpnDialog(QtWidgets.QDialog, Base):
-    def __init__(self, parent=None, windowTitle='', setLayout=False, size=(300, 100), **kwds):
-
-        super().__init__(parent)
-        Base._init(self, setLayout=setLayout, **kwds)
-
-        self.setWindowTitle(windowTitle)
-        self.setContentsMargins(15, 15, 15, 15)
-        self.resize(*size)
-
-    def fixedSize(self):
-        self.sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        self.sizePolicy.setHorizontalStretch(0)
-        self.sizePolicy.setVerticalStretch(0)
-        self.setSizePolicy(self.sizePolicy)
-        self.setFixedSize(self.maximumWidth(), self.maximumHeight())
-        self.setSizeGripEnabled(False)

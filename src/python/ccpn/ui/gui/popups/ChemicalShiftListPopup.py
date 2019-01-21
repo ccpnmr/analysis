@@ -35,11 +35,11 @@ from ccpn.ui.gui.widgets.ListWidget import ListWidget
 
 
 class ChemicalShiftListPopup(CcpnDialog):
-    def __init__(self, parent=None, mainWindow=None, chemicalShiftList=None, title='Chemical Shift List', **kwds):
+    def __init__(self, parent=None, mainWindow=None, chemicalShiftList=None, **kwds):
         """
         Initialise the widget
         """
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, size=(500, 100), **kwds)
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='Edit ChemicalShiftList', size=(500, 100), **kwds)
 
         self.mainWindow = mainWindow
         self.project = None
@@ -51,14 +51,13 @@ class ChemicalShiftListPopup(CcpnDialog):
         self.chemicalShiftList = chemicalShiftList
 
         row = 0
-        self.chemicalShiftListLabel = Label(self, "Chemical Shift List Name ", grid=(row, 0))
-        self.chemicalShiftListText = LineEdit(self, grid=(row, 1), gridSpan=(1, 2))
+        self.chemicalShiftListLabel = Label(self, "Name ", grid=(row, 0))
+        self.chemicalShiftListText = LineEdit(self, grid=(row, 1), gridSpan=(1, 1), textAlignment='left')
 
         row += 1
-        tip = 'Drag and drop spectra to the current spectra box to link them to the ChemicalShift List'
-        self.spectraLabel = Label(self, "Current Spectra", grid=(row, 1))
-        self.spectraLabel = Label(self, "Available Spectra", grid=(row, 2), tipText=tip,
-                                  )
+        tip = 'Drag and drop spectra to the current spectra box to link them to the ChemicalShiftList'
+        self.spectraLabel = Label(self, "Current", grid=(row, 1), hAlign='center')
+        self.spectraLabel = Label(self, "Available", grid=(row, 2), hAlign='center', tipText=tip)
 
         row += 1
         tipDragHere = 'Drag spectra here to link them to the ChemicalShift List.'

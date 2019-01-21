@@ -45,11 +45,11 @@ from ccpn.core.lib.ContextManagers import undoBlockManager
 ###from ccpn.framework.Framework import createFramework  # see note below
 
 class NmrAtomPopup(CcpnDialog):
-    def __init__(self, parent=None, mainWindow=None, nmrAtom=None, title='Nmr Atom', **kwds):
+    def __init__(self, parent=None, mainWindow=None, nmrAtom=None, **kwds):
         """
         Initialise the widget
         """
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='Edit NmrAtom', **kwds)
 
         self.mainWindow = mainWindow
         self.application = mainWindow.application

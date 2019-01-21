@@ -42,10 +42,9 @@ from contextlib import contextmanager
 from PyQt5 import QtGui, QtWidgets, QtCore
 from typing import Callable
 
+from functools import partial
+
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.core.lib import Pid
-from ccpn.ui.gui.guiSettings import sidebarFont
-from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.PeakList import PeakList
@@ -68,40 +67,46 @@ from ccpn.core.Model import Model
 from ccpn.core.Restraint import Restraint, RestraintList
 from ccpn.core.Note import Note
 
+from ccpn.ui.gui.popups.ChainPopup import ChainPopup
+from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
 from ccpn.ui.gui.popups.ChemicalShiftListPopup import ChemicalShiftListPopup
 from ccpn.ui.gui.popups.DataSetPopup import DataSetPopup
 from ccpn.ui.gui.popups.NmrAtomPopup import NmrAtomPopup
+from ccpn.ui.gui.popups.CreateNmrChainPopup import CreateNmrChainPopup
 from ccpn.ui.gui.popups.NmrChainPopup import NmrChainPopup
 from ccpn.ui.gui.popups.NmrResiduePopup import NmrResiduePopup
 from ccpn.ui.gui.popups.NotesPopup import NotesPopup
 from ccpn.ui.gui.popups.PeakListPropertiesPopup import PeakListPropertiesPopup
 from ccpn.ui.gui.popups.IntegralListPropertiesPopup import IntegralListPropertiesPopup
 from ccpn.ui.gui.popups.MultipletListPropertiesPopup import MultipletListPropertiesPopup
-from ccpn.ui.gui.popups.RestraintTypePopup import RestraintTypePopup
-from ccpn.ui.gui.popups.SampleComponentPropertiesPopup import EditSampleComponentPopup
+from ccpn.ui.gui.popups.RestraintListPopup import RestraintListPopup
+from ccpn.ui.gui.popups.SampleComponentPropertiesPopup import SampleComponentPopup
 from ccpn.ui.gui.popups.SamplePropertiesPopup import SamplePropertiesPopup
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
-from ccpn.ui.gui.popups.StructurePopup import StructurePopup
+from ccpn.ui.gui.popups.StructureEnsemblePopup import StructureEnsemblePopup
 from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
+
 from ccpn.core.lib.Pid import Pid
 
+from ccpn.ui.gui.guiSettings import sidebarFont
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning, progressManager
+from ccpn.ui.gui.widgets.Menu import Menu
+
 from ccpn.util.Constants import ccpnmrJsonData
-from ccpn.util.Logging import getLogger
-from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
-from ccpn.ui.gui.popups.CreateNmrChainPopup import CreateNmrChainPopup
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
+
 from ccpn.core.lib.Notifiers import Notifier, NotifierBase
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+
 from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.ui.gui.lib.MenuActions import _openNote, _openIntegralList, _openPeakList, _openMultipletList, _openChemicalShiftList, _openRestraintList, \
     _openStructureTable, _openNmrResidueTable, _openResidueTable, _openItemObject, _openSpectrumDisplay, _openSpectrumGroup, _openSampleSpectra, \
     _createSpectrumGroup
 
-from ccpn.ui.gui.widgets.Menu import Menu
-from functools import partial
+from ccpn.util.Logging import getLogger
 
 
 OpenObjAction = {
@@ -122,43 +127,43 @@ OpenObjAction = {
 # NEWPEAKLIST = 'newPeakList'
 # NEWINTEGRALLIST = 'newIntegralList'
 # NEWMULTIPLETLIST = 'newMultipletList'
-NEWNMRRESIDUE = 'newNmrResidue'
-NEWNMRATOM = 'newNmrAtom'
+# NEWNMRRESIDUE = 'newNmrResidue'
+# NEWNMRATOM = 'newNmrAtom'
 NEWRESTRAINTLIST = 'newRestraintList'
 NEWRESTRAINT = 'newRestraint'
 NEWMODEL = 'newModel'
-NEWNOTE = 'newNote'
-NEWSTRUCTUREENSEMBLE = 'newStructureEnsemble'
-NEWSAMPLE = 'newSample'
-NEWNMRCHAIN = 'newNmrChain'
-NEWCHAIN = 'newChain'
-NEWSUBSTANCE = 'newSubstance'
-NEWCHEMICALSHIFTLIST = 'newChemicalShiftList'
-NEWDATASET = 'newDataSet'
+# NEWNOTE = 'newNote'
+# NEWSTRUCTUREENSEMBLE = 'newStructureEnsemble'
+# NEWSAMPLE = 'newSample'
+# NEWNMRCHAIN = 'newNmrChain'
+# NEWCHAIN = 'newChain'
+# NEWSUBSTANCE = 'newSubstance'
+# NEWCHEMICALSHIFTLIST = 'newChemicalShiftList'
+# NEWDATASET = 'newDataSet'
 # NEWSPECTRUMGROUP = 'newSpectrumGroup'
-NEWCOMPLEX = 'newComplex'
+# NEWCOMPLEX = 'newComplex'
 
 NEW_ITEM_DICT = {
 
     # PeakList.className         : NEWPEAKLIST,
     # IntegralList.className     : NEWINTEGRALLIST,
     # MultipletList.className    : NEWMULTIPLETLIST,
-    NmrChain.className         : CreateNmrChainPopup,
-    NmrResidue.className       : NEWNMRRESIDUE,
-    NmrAtom.className          : NEWNMRATOM,
-    RestraintList.className    : RestraintTypePopup,
+    # NmrChain.className         : CreateNmrChainPopup,
+    # NmrResidue.className       : NEWNMRRESIDUE,
+    # NmrAtom.className          : NEWNMRATOM,
+    # RestraintList.className    : RestraintTypePopup,
     Restraint.className        : NEWRESTRAINT,
-    StructureEnsemble.className: NEWSTRUCTUREENSEMBLE,
+    # StructureEnsemble.className: NEWSTRUCTUREENSEMBLE,
     # Sample.className           : NEWSAMPLE,
     # SampleComponent.className  : EditSampleComponentPopup,
-    Chain.className            : CreateChainPopup,
-    Substance.className        : SubstancePropertiesPopup,
-    ChemicalShiftList.className: NEWCHEMICALSHIFTLIST,
-    DataSet.className          : NEWDATASET,
+    # Chain.className            : CreateChainPopup,
+    # Substance.className        : SubstancePropertiesPopup,
+    # ChemicalShiftList.className: NEWCHEMICALSHIFTLIST,
+    # DataSet.className          : NEWDATASET,
     # SpectrumGroup.className    : SpectrumGroupEditor,
-    Complex.className          : NEWCOMPLEX,
+    # Complex.className          : NEWCOMPLEX,
     Model.className            : NEWMODEL,
-    Note.className             : NEWNOTE,
+    # Note.className             : NEWNOTE,
     }
 
 EDIT_ITEM_DICT = {
@@ -170,14 +175,14 @@ EDIT_ITEM_DICT = {
     # SpectrumGroup.className    : SpectrumGroupEditor,
     # Sample.className           : SamplePropertiesPopup,
     # SampleComponent.className  : EditSampleComponentPopup,
-    Substance.className        : SubstancePropertiesPopup,
-    NmrChain.className         : NmrChainPopup,
-    NmrResidue.className       : NmrResiduePopup,
-    NmrAtom.className          : NmrAtomPopup,
-    ChemicalShiftList.className: ChemicalShiftListPopup,
-    StructureEnsemble.className: StructurePopup,
-    DataSet.className          : DataSetPopup,
-    Note.className             : NotesPopup,
+    # Substance.className        : SubstancePropertiesPopup,
+    # NmrChain.className         : NmrChainPopup,
+    # NmrResidue.className       : NmrResiduePopup,
+    # NmrAtom.className          : NmrAtomPopup,
+    # ChemicalShiftList.className: ChemicalShiftListPopup,
+    # StructureEnsemble.className: StructurePopup,
+    # DataSet.className          : DataSetPopup,
+    # Note.className             : NotesPopup,
     }
 
 OPEN_ITEM_DICT = {
@@ -830,123 +835,22 @@ class SidebarClassNmrResidueTreeItems(SidebarClassABC):
 #===========================================================================================================
 
 def NYI(*args, **kwds):
-    print('>>>NYI: Not implemented yet', *args, **kwds)
+    info = showInfo('Not implemented yet!',
+                    'This function has not been implemented in the current version')
 
 
-def _rightMousePopup(className, dataPid, sideBarItem, *args, **kwds):
-    """Perform action from the rightMouse menu for the specified class type.
-    """
-    if className is not None:
-        popupFunc = NEW_ITEM_DICT.get(className)
-        if popupFunc:
-            project = sideBarItem.sidebar._project
-            application = project.application
-            application.popupFunc(position=None, relativeTo=None,  # put into a dict above
-                                  *args, **kwds)
-
-
-def _createNewObject(className, dataPid, sideBarItem):
-    """Create a new object of instance className
-    """
-    itemParent = sideBarItem.obj
-    if className is not None:
-        funcName = NEW_ITEM_DICT.get(className)
-        if funcName:
-            newObject = getattr(itemParent, funcName)()
-            return newObject
-
-
-def _createNewObjectPopup(className, dataPid, sideBarItem, *args, **kwds):
-    """Create a new object of instance className from a popup
-    """
-    if className is not None:
-        popupFunc = NEW_ITEM_DICT.get(className)
-        if popupFunc:
-            project = sideBarItem.sidebar._project
-            application = project.application
-            popup = popupFunc(parent=application.ui.mainWindow, mainWindow=application.ui.mainWindow,
-                              *args, **kwds)
-
-            # make the popup appear in the middle of mainWindow
-            popup.exec_()
-            popup.raise_()
-
-
-def _createNewRestraintListPopup(className, dataPid, sideBarItem):
-    """Create a new object of instance className from a popup
-    """
-    if className is not None:
-        popupFunc = NEW_ITEM_DICT.get(className)
-        if popupFunc:
-            project = sideBarItem.sidebar._project
-            application = project.application
-            popup = popupFunc(parent=application.ui.mainWindow, mainWindow=application.ui.mainWindow)
-
-            # make the popup appear in the middle of mainWindow
-            popup.exec_()
-            popup.raise_()
-
-            # specific to restraintList
-            restraintType = popup.restraintType
-            if restraintType:
-
-                # ejb - added here because not sure whether to put it in the popup yet
-                try:
-                    itemParent = sideBarItem.obj
-                    getattr(itemParent, NEWRESTRAINTLIST)(restraintType)
-                except Exception as es:
-                    showWarning('Restraints', 'Error modifying restraint type')
-
-
-# def _createNewSampleComponentPopup(className, dataPid, sideBarItem):
-#     """Create a new object of instance className from a popup
+# def _rightMousePopup(className, dataPid, sideBarItem, *args, **kwds):
+#     """Perform action from the rightMouse menu for the specified class type.
 #     """
 #     if className is not None:
 #         popupFunc = NEW_ITEM_DICT.get(className)
 #         if popupFunc:
 #             project = sideBarItem.sidebar._project
 #             application = project.application
-#
-#             itemParent = sideBarItem.obj
-#             popup = popupFunc(parent=application.ui.mainWindow, mainWindow=application.ui.mainWindow,
-#                               sample=itemParent, newSampleComponent=True)
-#
-#             # make the popup appear in the middle of mainWindow
-#             popup.exec_()
-#             popup.raise_()
+#             application.popupFunc(position=None, relativeTo=None,  # put into a dict above
+#                                   *args, **kwds)
 
-
-def _raisePopup(dataPid, sideBarItem):
-    """Raise an editor popup for the sideBar item
-    """
-    lowerCase = lambda s: s[:1].lower() + s[1:] if s else None
-
-    obj = sideBarItem.obj
-    className = obj.className
-    if className is not None:
-        popupFunc = EDIT_ITEM_DICT.get(className)
-        if popupFunc:
-            project = sideBarItem.sidebar._project
-            application = project.application
-
-            # make first letter a lowerCase and use for the popup
-            objectDict = {lowerCase(className): obj}
-            popup = popupFunc(parent=application.ui.mainWindow, mainWindow=application.ui.mainWindow,
-                              **objectDict)
-
-            # make the popup appear in the middle of mainWindow
-            popup.exec_()
-            popup.raise_()
-
-        else:
-            info = showInfo('Not implemented yet!',
-                            'This function has not been implemented in the current version')
-
-#===========================================================================================================
-# ABC's + specific callback classes
-#===========================================================================================================
-
-class createNewObjectABC():
+class CreateNewObjectABC():
     """
     An ABC to implement an abstract callback function to create new object
     The __call__(self, dataPid, node) method acts as the callback function
@@ -980,20 +884,38 @@ class createNewObjectABC():
         newObj = func(**self.kwds)
         return newObj
 
-class _createNewPeakList(createNewObjectABC):
+class _createNewDataSet(CreateNewObjectABC):
+    parentMethodName = 'newDataSet'
+
+class _createNewPeakList(CreateNewObjectABC):
     parentMethodName = 'newPeakList'
 
-class _createNewMultipletList(createNewObjectABC):
+class _createNewChemicalShiftList(CreateNewObjectABC):
+    parentMethodName = 'newChemicalShiftList'
+
+class _createNewMultipletList(CreateNewObjectABC):
     parentMethodName = 'newMultipletList'
 
-class _createNewIntegralList(createNewObjectABC):
+class _createNewNmrResidue(CreateNewObjectABC):
+    parentMethodName = 'newNmrResidue'
+
+class _createNewNmrAtom(CreateNewObjectABC):
+    parentMethodName = 'newNmrAtom'
+
+class _createNewNote(CreateNewObjectABC):
+    parentMethodName = 'newNote'
+
+class _createNewIntegralList(CreateNewObjectABC):
     parentMethodName = 'newIntegralList'
 
-class _createNewSample(createNewObjectABC):
+class _createNewSample(CreateNewObjectABC):
     parentMethodName = 'newSample'
 
+class _createNewStructureEnsemble(CreateNewObjectABC):
+    parentMethodName = 'newStructureEnsemble'
 
-class raisePopupABC():
+
+class RaisePopupABC():
     """
     An ABC to implement an abstract popup class
     The __call__(self, dataPid, node) method acts as the callback function
@@ -1001,20 +923,25 @@ class raisePopupABC():
 
     # These should be subclassed
     popupClass = None  # a sub-class of CcpNmrDialog; used to generate a popup
-    objectArgumentName = None  # argument name set to obj passed to popupClass instantiation
+    objectArgumentName = 'obj'  # argument name set to obj passed to popupClass instantiation
     parentObjectArgumentName = None  # parent argument name set to obj passed to popupClass instantiation when useParent==True
 
     # This can be subclassed
     def getObj(self):
         """returns obj from node or None
         """
-        return self.node.obj
+        obj = None if self.useNone else self.node.obj
+        return obj
 
-    def __init__(self, useParent=False, **kwds):
-        # store kwds; acts as partial to popupClass
+    def __init__(self, useParent=False, useNone=False, **kwds):
+        """store kwds; acts as partial to popupClass
+        useParent: use parentObjectArgumentName for passing obj to popupClass
+        useNone: set obj to None
+        """
         self.useParent = useParent  # Use parent of object
         if useParent and self.parentObjectArgumentName == None:
             raise RuntimeError('useParent==True requires definition of parentObjectArgumentName (%s)' % self)
+        self.useNone = useNone
         self.kwds = kwds
         # these get set upon callback
         self.node = None
@@ -1034,36 +961,83 @@ class raisePopupABC():
         popup.exec()
         popup.raise_()
 
-class _raisePeakListPopup(raisePopupABC):
+class _raiseNewChainPopup(RaisePopupABC):
+    popupClass = CreateChainPopup
+    parentObjectArgumentName = 'project'
+
+class _raiseChainPopup(RaisePopupABC):
+    popupClass = ChainPopup
+
+class _raiseDataSetPopup(RaisePopupABC):
+    popupClass = DataSetPopup
+    # objectArgumentName = 'obj'
+
+class _raiseChemicalShifListPopup(RaisePopupABC):
+    popupClass = ChemicalShiftListPopup
+    objectArgumentName = 'chemicalShiftList'
+
+class _raisePeakListPopup(RaisePopupABC):
     popupClass = PeakListPropertiesPopup
     objectArgumentName = 'peakList'
 
-class _raiseMultipletListPopup(raisePopupABC):
+class _raiseMultipletListPopup(RaisePopupABC):
     popupClass = MultipletListPropertiesPopup
     objectArgumentName = 'multipletList'
 
-class _raiseIntegralListPopup(raisePopupABC):
+class _raiseCreateNmrChainPopup(RaisePopupABC):
+    popupClass = CreateNmrChainPopup
+    objectArgumentName = 'project'
+
+class _raiseNmrChainPopup(RaisePopupABC):
+    popupClass = NmrChainPopup
+    # objectArgumentName = 'nmrChain'
+
+class _raiseNmrResiduePopup(RaisePopupABC):
+    popupClass = NmrResiduePopup
+    objectArgumentName = 'nmrResidue'
+
+class _raiseNmrAtomPopup(RaisePopupABC):
+    popupClass = NmrAtomPopup
+    objectArgumentName = 'nmrAtom'
+
+class _raiseNotePopup(RaisePopupABC):
+    popupClass = NotesPopup
+    # objectArgumentName = 'obj'
+
+class _raiseIntegralListPopup(RaisePopupABC):
     popupClass = IntegralListPropertiesPopup
     objectArgumentName = 'integralList'
 
-class _raiseSamplePopup(raisePopupABC):
+class _raiseRestraintListPopup(RaisePopupABC):
+    popupClass = RestraintListPopup
+    objectArgumentName = 'restraintList'
+    parentObjectArgumentName = 'dataSet'
+
+class _raiseSamplePopup(RaisePopupABC):
     popupClass = SamplePropertiesPopup
     objectArgumentName = 'sample'
 
-class _raiseSampleComponentPopup(raisePopupABC):
-    popupClass = EditSampleComponentPopup
+class _raiseSampleComponentPopup(RaisePopupABC):
+    popupClass = SampleComponentPopup
     # NB This popup is structured slightly different, passing in different arguments
     objectArgumentName = 'sampleComponent'
     parentObjectArgumentName = 'sample'
 
-class _raiseSpectrumPopup(raisePopupABC):
+class _raiseSpectrumPopup(RaisePopupABC):
     popupClass = SpectrumPropertiesPopup
     objectArgumentName = 'spectrum'
 
-class _raiseSpectrumGroupPopup(raisePopupABC):
+class _raiseSpectrumGroupPopup(RaisePopupABC):
     popupClass = SpectrumGroupEditor
     objectArgumentName = 'spectrumGroup'
 
+class _raiseStructureEnsemblePopup(RaisePopupABC):
+    popupClass = StructureEnsemblePopup
+    # objectArgumentName = 'obj'
+
+class _raiseSubstancePopup(RaisePopupABC):
+    popupClass = SubstancePropertiesPopup
+    objectArgumentName = 'substance'
 
 #===========================================================================================================
 # SideBar tree structure
@@ -1079,7 +1053,7 @@ class SideBarStructure(object):
         SidebarTree('Project', usePidForName=False, klass=Project, closed=False, children=[
 
             #------ Spectra, PeakLists, MultipletLists, IntegralLists ------
-            SidebarTree('Spectra', closed=True, children=[
+            SidebarTree('Spectra', closed=False, children=[
                 SidebarClassTreeItems(klass=Spectrum, callback=_raiseSpectrumPopup(), children=[
                     SidebarTree('PeakLists', closed=False, children=[
                         SidebarItem('<New PeakList>', callback=_createNewPeakList()),
@@ -1098,10 +1072,31 @@ class SideBarStructure(object):
 
             #------ SpectrumGroups ------
             SidebarTree('SpectrumGroups', closed=True, children=[
-                SidebarItem('<New SpectrumGroup>', callback=_raiseSpectrumGroupPopup(editMode=False)),
+                SidebarItem('<New SpectrumGroup>', callback=_raiseSpectrumGroupPopup(useNone=True, editMode=False)),
                 SidebarClassTreeItems(klass=SpectrumGroup, triggers=[Notifier.DELETE, Notifier.CREATE, Notifier.RENAME, Notifier.CHANGE],
                                       callback=_raiseSpectrumGroupPopup(editMode=True), children=[
                     SidebarClassSpectrumTreeItems(klass=Spectrum, callback=_raiseSpectrumPopup()),
+                    ]),
+                ]),
+
+            #------ ChemicalShiftLists ------
+            SidebarTree('ChemicalShiftLists', closed=True, children=[
+                SidebarItem('<New ChemicalShiftList>', callback=_createNewChemicalShiftList()),
+                SidebarClassTreeItems(klass=ChemicalShiftList, callback=_raiseChemicalShifListPopup()),
+                ]),
+
+            #------ NmrChains, NmrResidues, NmrAtoms ------
+            SidebarTree('NmrChains', closed=True, children=[
+                SidebarItem('<New NmrChain>', callback=_raiseCreateNmrChainPopup()),
+                SidebarClassTreeItems(klass=NmrChain, rebuildOnRename='NmrChain-ClassTreeItems',
+                                      callback=_raiseNmrChainPopup(), children=[
+                    SidebarItem('<New NmrResidue>', callback=_createNewNmrResidue()),
+                    SidebarClassNmrResidueTreeItems(klass=NmrResidue, rebuildOnRename='NmrChain-ClassTreeItems',
+                                                    callback=_raiseNmrResiduePopup(), children=[
+                        SidebarItem('<New NmrAtom>', callback=_createNewNmrAtom()),
+                        SidebarClassItems(klass=NmrAtom, rebuildOnRename='NmrChain-ClassTreeItems',
+                                          callback=_raiseNmrAtomPopup()),
+                        ]),
                     ]),
                 ]),
 
@@ -1118,64 +1113,49 @@ class SideBarStructure(object):
 
             #------ Substances ------
             SidebarTree('Substances', closed=True, children=[
-                SidebarItem('<New Substance>', callback=partial(_createNewObjectPopup, Substance.className, newSubstance=True)),
-                SidebarClassItems(klass=Substance, callback=_raisePopup),
+                SidebarItem('<New Substance>', callback=_raiseSubstancePopup(useNone=True, newSubstance=True)),
+                SidebarClassItems(klass=Substance, callback=_raiseSubstancePopup(newSubstance=False)),
                 ]),
 
             #------ Chains, Residues ------
             SidebarTree('Chains', closed=True, children=[
-                SidebarItem('<New Chain>', callback=partial(_createNewObjectPopup, Chain.className)),
-                SidebarClassTreeItems(klass=Chain, rebuildOnRename='Chain-ClassTreeItems', callback=_raisePopup, children=[
-                    SidebarClassTreeItems(klass=Residue, rebuildOnRename='Chain-ClassTreeItems', callback=_raisePopup),
+                SidebarItem('<New Chain>', callback=_raiseNewChainPopup(useParent=True)),
+                SidebarClassTreeItems(klass=Chain, rebuildOnRename='Chain-ClassTreeItems',
+                                      callback=_raiseChainPopup(), children=[
+                    SidebarClassTreeItems(klass=Residue, rebuildOnRename='Chain-ClassTreeItems', callback=NYI),
                     ]),
                 ]),
 
             #------ Complexes ------
             SidebarTree('Complexes', closed=True, children=[
-                SidebarItem('<New Complex>', callback=partial(_createNewObjectPopup, Complex.className)),
-                SidebarClassTreeItems(klass=Complex, rebuildOnRename='Complex-ClassTreeItems', callback=_raisePopup),
-                ]),
-
-            #------ NmrChains, NmrResidues, NmrAtoms ------
-            SidebarTree('NmrChains', closed=True, children=[
-                SidebarItem('<New NmrChain>', callback=partial(_createNewObjectPopup, NmrChain.className)),
-                SidebarClassTreeItems(klass=NmrChain, rebuildOnRename='NmrChain-ClassTreeItems', children=[
-                    SidebarItem('<New NmrResidue>', callback=partial(_createNewObject, NmrResidue.className)),
-                    SidebarClassNmrResidueTreeItems(klass=NmrResidue, rebuildOnRename='NmrChain-ClassTreeItems', children=[
-                        SidebarItem('<New NmrAtom>', callback=partial(_createNewObject, NmrAtom.className)),
-                        SidebarClassItems(klass=NmrAtom, rebuildOnRename='NmrChain-ClassTreeItems', callback=_raisePopup),
-                        ], callback=_raisePopup),
-                    ], callback=_raisePopup),
-                ]),
-
-            #------ ChemicalShiftLists ------
-            SidebarTree('ChemicalShiftLists', closed=True, children=[
-                SidebarItem('<New ChemicalShiftList>', callback=partial(_createNewObject, ChemicalShiftList.className)),
-                SidebarClassTreeItems(klass=ChemicalShiftList, callback=_raisePopup),
+                SidebarItem('<New Complex>', callback=NYI),
+                SidebarClassTreeItems(klass=Complex, rebuildOnRename='Complex-ClassTreeItems', callback=NYI),
                 ]),
 
             #------ StructureEnsembles ------
             SidebarTree('StructureEnsembles', closed=True, children=[
-                SidebarItem('<New StructureEnsemble>', callback=partial(_createNewObject, StructureEnsemble.className)),
-                SidebarClassItems(klass=StructureEnsemble, callback=_raisePopup),
+                SidebarItem('<New StructureEnsemble>', callback=_createNewStructureEnsemble()),
+                SidebarClassItems(klass=StructureEnsemble, callback=_raiseStructureEnsemblePopup()),
                 ]),
 
             #------ DataSets ------
             SidebarTree('DataSets', closed=True, children=[
-                SidebarItem('<New DataSet>', callback=partial(_createNewObject, DataSet.className)),
-                SidebarClassTreeItems(klass=DataSet, rebuildOnRename='DataSet-ClassTreeItems', children=[
-                    SidebarItem('<New ResidueList>', callback=partial(_createNewRestraintListPopup, RestraintList.className)),
-                    SidebarClassTreeItems(klass=RestraintList, rebuildOnRename='DataSet-ClassTreeItems', callback=_raisePopup),
-                    ], callback=_raisePopup),
+                SidebarItem('<New DataSet>', callback=_createNewDataSet()),
+                SidebarClassTreeItems(klass=DataSet, rebuildOnRename='DataSet-ClassTreeItems',
+                                      callback=_raiseDataSetPopup(), children=[
+                    SidebarItem('<New RestraintList>', callback=_raiseRestraintListPopup(editMode=False, useParent=True)),
+                    SidebarClassTreeItems(klass=RestraintList, rebuildOnRename='DataSet-ClassTreeItems',
+                                          callback=_raiseRestraintListPopup(editMode=True)),
+                    ]),
                 ]),
 
             #------ Notes ------
             SidebarTree('Notes', closed=True, children=[
-                SidebarItem('<New Note>', callback=partial(_createNewObject, Note.className)),
-                SidebarClassItems(klass=Note, callback=_raisePopup),
+                SidebarItem('<New Note>', callback=_createNewNote()),
+                SidebarClassItems(klass=Note, callback=_raiseNotePopup()),
                 ]),
-
             ])
+
     )  # end _sidebarData
 
     def _init(self):

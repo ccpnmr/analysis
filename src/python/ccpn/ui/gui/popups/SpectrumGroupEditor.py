@@ -77,7 +77,7 @@ class SpectrumGroupEditor(CcpnDialog):
     BUTTON_FILTER = 'Filter by:'
     RIGHT_RADIOBUTTONS = [BUTTON_ALL, BUTTON_FILTER]
 
-    FIXEDWIDTH = 170
+    FIXEDWIDTH = 120
 
     def __init__(self, parent=None, mainWindow=None, spectrumGroup=None, editMode=True, spectra=None, **kwds):
         """
@@ -129,9 +129,9 @@ class SpectrumGroupEditor(CcpnDialog):
 
         self.leftTopLabel = Label(self, '', bold=True)
 
-        self.nameLabel = Label(self, 'Name', )
-        self.nameEdit = LineEdit(self, )
-        self.nameEdit.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        self.nameLabel = Label(self, 'Name')
+        self.nameEdit = LineEdit(self, backgroundText='Enter name', textAlignment='left')
+        # self.nameEdit.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         self.nameEdit.setFixedWidth(self.FIXEDWIDTH)
 
         self.leftPullDownLabel = Label(self, self.KLASS)
@@ -143,8 +143,9 @@ class SpectrumGroupEditor(CcpnDialog):
                                                   fixedWidths=[0, self.FIXEDWIDTH]
                                                   )
 
+        self.leftItemsLabel = Label(self, self.KLASS_ITEM_ATTRIBUTE.capitalize())
         self.leftListWidget = _LeftListWidget(self, acceptDrops=True, sortOnDrop=False, copyDrop=False)
-        self.leftListWidget.setFixedWidth(2*self.FIXEDWIDTH)
+        self.leftListWidget.setFixedWidth(self.FIXEDWIDTH)
 
     def _setRightWidgets(self):
         self.rightTopLabel = Label(self, 'Sources', bold=True)
@@ -181,7 +182,8 @@ class SpectrumGroupEditor(CcpnDialog):
         layout.addWidget(self.leftPullDown, 1, 1)
         layout.addWidget(self.nameLabel, 2, 0)
         layout.addWidget(self.nameEdit, 2, 1)
-        layout.addWidget(self.leftListWidget, 3, 0, 1, 2)
+        layout.addWidget(self.leftItemsLabel, 3, 0)
+        layout.addWidget(self.leftListWidget, 3, 1, 1, 1)
 
         # Add Right Widgets on Main layout
         layout.addWidget(self.rightTopLabel, 0, 2)

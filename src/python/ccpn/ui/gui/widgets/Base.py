@@ -240,3 +240,11 @@ class Base(DropBase):
         """A method to return the parent of a widget
         """
         return self.parent()
+
+    def addSpacer(self, width, height, row, collumn):
+        """Convience to insert spacer
+        """
+        layout = self.getLayout()
+        if layout is None:
+            raise RuntimeError('Unable to insert spacer; no layout')
+        layout.addItem(QtWidgets.QSpacerItem(width, height), row, collumn)

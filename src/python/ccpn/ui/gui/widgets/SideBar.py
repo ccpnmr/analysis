@@ -153,7 +153,7 @@ NEW_ITEM_DICT = {
     # NmrResidue.className       : NEWNMRRESIDUE,
     # NmrAtom.className          : NEWNMRATOM,
     # RestraintList.className    : RestraintTypePopup,
-    Restraint.className        : NEWRESTRAINT,
+    Restraint.className: NEWRESTRAINT,
     # StructureEnsemble.className: NEWSTRUCTUREENSEMBLE,
     # Sample.className           : NEWSAMPLE,
     # SampleComponent.className  : EditSampleComponentPopup,
@@ -163,7 +163,7 @@ NEW_ITEM_DICT = {
     # DataSet.className          : NEWDATASET,
     # SpectrumGroup.className    : SpectrumGroupEditor,
     # Complex.className          : NEWCOMPLEX,
-    Model.className            : NEWMODEL,
+    Model.className    : NEWMODEL,
     # Note.className             : NEWNOTE,
     }
 
@@ -226,6 +226,7 @@ class SidebarABC(NotifierBase):
 
     # subclassing
     itemType = None
+    triggers = [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME]
 
     # ids
     _nextIndx = 0
@@ -360,11 +361,7 @@ class SidebarABC(NotifierBase):
 
         if self.addNotifier and self.klass:
             # add the create/delete/rename notifiers to the parent
-            triggers = self.kwds['triggers'] if 'triggers' in self.kwds else [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME]
-
-            # quick integrity test to make the tree is building correctly
-            if not self.searchNotifiers(objects=[parent.obj], triggers=triggers, targetName=self.klass.className):
-                self.setNotifier(parent.obj, triggers, targetName=self.klass.className, callback=self._update)
+            self.setNotifier(parent.obj, self.triggers, targetName=self.klass.className, callback=self._update)
 
         # code like this needs to be in the sub-classes:
         # # make the widget
@@ -763,6 +760,14 @@ class SidebarClassTreeItems(SidebarClassABC):
         self._children = self.children  # Save them for reset/create, as we will dynamically change the tree on building
 
 
+class SidebarClassSpectrumGroupTreeItems(SidebarClassTreeItems):
+    """A Tree with a number of dynamically added items of type V3 core 'klass'
+    Modified to respond to changing the list of spectra in a spectrumGroup, subclassed from SidebarClassTreeItems above
+    """
+    itemType = 'SpectrumGroupClassTreeItems'
+    triggers = [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME, Notifier.CHANGE]
+
+
 class SidebarClassSpectrumTreeItems(SidebarClassABC):
     """A Tree with a number of dynamically added items of type V3 core 'klass'
     """
@@ -799,6 +804,7 @@ class SidebarClassSpectrumTreeItems(SidebarClassABC):
 
 class SidebarClassNmrResidueTreeItems(SidebarClassABC):
     """A Tree with a number of dynamically added items of type V3 core 'klass'
+    Objects in the nmrResidues sublist are sorted according to position in nmrChain
     """
     itemType = 'NmrResidueClassTreeItems'
 
@@ -885,32 +891,42 @@ class CreateNewObjectABC():
         newObj = func(**self.kwds)
         return newObj
 
+
 class _createNewDataSet(CreateNewObjectABC):
     parentMethodName = 'newDataSet'
+
 
 class _createNewPeakList(CreateNewObjectABC):
     parentMethodName = 'newPeakList'
 
+
 class _createNewChemicalShiftList(CreateNewObjectABC):
     parentMethodName = 'newChemicalShiftList'
+
 
 class _createNewMultipletList(CreateNewObjectABC):
     parentMethodName = 'newMultipletList'
 
+
 class _createNewNmrResidue(CreateNewObjectABC):
     parentMethodName = 'newNmrResidue'
+
 
 class _createNewNmrAtom(CreateNewObjectABC):
     parentMethodName = 'newNmrAtom'
 
+
 class _createNewNote(CreateNewObjectABC):
     parentMethodName = 'newNote'
+
 
 class _createNewIntegralList(CreateNewObjectABC):
     parentMethodName = 'newIntegralList'
 
+
 class _createNewSample(CreateNewObjectABC):
     parentMethodName = 'newSample'
+
 
 class _createNewStructureEnsemble(CreateNewObjectABC):
     parentMethodName = 'newStructureEnsemble'
@@ -962,64 +978,80 @@ class RaisePopupABC():
         popup.exec()
         popup.raise_()
 
+
 class _raiseNewChainPopup(RaisePopupABC):
     popupClass = CreateChainPopup
     parentObjectArgumentName = 'project'
 
+
 class _raiseChainPopup(RaisePopupABC):
     popupClass = ChainPopup
 
+
 class _raiseComplexEditorPopup(RaisePopupABC):
     popupClass = ComplexEditorPopup
+
 
 class _raiseDataSetPopup(RaisePopupABC):
     popupClass = DataSetPopup
     # objectArgumentName = 'obj'
 
+
 class _raiseChemicalShifListPopup(RaisePopupABC):
     popupClass = ChemicalShiftListPopup
     objectArgumentName = 'chemicalShiftList'
+
 
 class _raisePeakListPopup(RaisePopupABC):
     popupClass = PeakListPropertiesPopup
     objectArgumentName = 'peakList'
 
+
 class _raiseMultipletListPopup(RaisePopupABC):
     popupClass = MultipletListPropertiesPopup
     objectArgumentName = 'multipletList'
+
 
 class _raiseCreateNmrChainPopup(RaisePopupABC):
     popupClass = CreateNmrChainPopup
     objectArgumentName = 'project'
 
+
 class _raiseNmrChainPopup(RaisePopupABC):
     popupClass = NmrChainPopup
     # objectArgumentName = 'nmrChain'
+
 
 class _raiseNmrResiduePopup(RaisePopupABC):
     popupClass = NmrResiduePopup
     objectArgumentName = 'nmrResidue'
 
+
 class _raiseNmrAtomPopup(RaisePopupABC):
     popupClass = NmrAtomPopup
     objectArgumentName = 'nmrAtom'
+
 
 class _raiseNotePopup(RaisePopupABC):
     popupClass = NotesPopup
     # objectArgumentName = 'obj'
 
+
 class _raiseIntegralListPopup(RaisePopupABC):
     popupClass = IntegralListPropertiesPopup
     objectArgumentName = 'integralList'
+
 
 class _raiseRestraintListPopup(RaisePopupABC):
     popupClass = RestraintListPopup
     objectArgumentName = 'restraintList'
     parentObjectArgumentName = 'dataSet'
 
+
 class _raiseSamplePopup(RaisePopupABC):
     popupClass = SamplePropertiesPopup
     objectArgumentName = 'sample'
+
 
 class _raiseSampleComponentPopup(RaisePopupABC):
     popupClass = SampleComponentPopup
@@ -1027,20 +1059,25 @@ class _raiseSampleComponentPopup(RaisePopupABC):
     objectArgumentName = 'sampleComponent'
     parentObjectArgumentName = 'sample'
 
+
 class _raiseSpectrumPopup(RaisePopupABC):
     popupClass = SpectrumPropertiesPopup
     objectArgumentName = 'spectrum'
 
+
 class _raiseSpectrumGroupEditorPopup(RaisePopupABC):
     popupClass = SpectrumGroupEditor
+
 
 class _raiseStructureEnsemblePopup(RaisePopupABC):
     popupClass = StructureEnsemblePopup
     # objectArgumentName = 'obj'
 
+
 class _raiseSubstancePopup(RaisePopupABC):
     popupClass = SubstancePropertiesPopup
     objectArgumentName = 'substance'
+
 
 #===========================================================================================================
 # SideBar tree structure
@@ -1076,7 +1113,7 @@ class SideBarStructure(object):
             #------ SpectrumGroups ------
             SidebarTree('SpectrumGroups', closed=True, children=[
                 SidebarItem('<New SpectrumGroup>', callback=_raiseSpectrumGroupEditorPopup(useNone=True, editMode=False)),
-                SidebarClassTreeItems(klass=SpectrumGroup, callback=_raiseSpectrumGroupEditorPopup(editMode=True), children=[
+                SidebarClassSpectrumGroupTreeItems(klass=SpectrumGroup, callback=_raiseSpectrumGroupEditorPopup(editMode=True), children=[
                     SidebarClassSpectrumTreeItems(klass=Spectrum, callback=_raiseSpectrumPopup()),
                     ]),
                 ]),
@@ -1092,14 +1129,14 @@ class SideBarStructure(object):
                 SidebarItem('<New NmrChain>', callback=_raiseCreateNmrChainPopup()),
                 SidebarClassTreeItems(klass=NmrChain, rebuildOnRename='NmrChain-ClassTreeItems',
                                       callback=_raiseNmrChainPopup(), children=[
-                    SidebarItem('<New NmrResidue>', callback=_createNewNmrResidue()),
-                    SidebarClassNmrResidueTreeItems(klass=NmrResidue, rebuildOnRename='NmrChain-ClassTreeItems',
-                                                    callback=_raiseNmrResiduePopup(), children=[
-                        SidebarItem('<New NmrAtom>', callback=_createNewNmrAtom()),
-                        SidebarClassItems(klass=NmrAtom, rebuildOnRename='NmrChain-ClassTreeItems',
-                                          callback=_raiseNmrAtomPopup()),
+                        SidebarItem('<New NmrResidue>', callback=_createNewNmrResidue()),
+                        SidebarClassNmrResidueTreeItems(klass=NmrResidue, rebuildOnRename='NmrChain-ClassTreeItems',
+                                                        callback=_raiseNmrResiduePopup(), children=[
+                                SidebarItem('<New NmrAtom>', callback=_createNewNmrAtom()),
+                                SidebarClassItems(klass=NmrAtom, rebuildOnRename='NmrChain-ClassTreeItems',
+                                                  callback=_raiseNmrAtomPopup()),
+                                ]),
                         ]),
-                    ]),
                 ]),
 
             #------ Samples, SampleComponents ------
@@ -1107,10 +1144,10 @@ class SideBarStructure(object):
                 SidebarItem('<New Sample>', callback=_createNewSample()),
                 SidebarClassTreeItems(klass=Sample, rebuildOnRename='Sample-ClassTreeItems',
                                       callback=_raiseSamplePopup(), children=[
-                    SidebarItem('<New SampleComponent>', callback=_raiseSampleComponentPopup(useParent=True, newSampleComponent=True)),
-                    SidebarClassItems(klass=SampleComponent, rebuildOnRename='Sample-ClassTreeItems',
-                                      callback=_raiseSampleComponentPopup(newSampleComponent=False)),
-                    ]),
+                        SidebarItem('<New SampleComponent>', callback=_raiseSampleComponentPopup(useParent=True, newSampleComponent=True)),
+                        SidebarClassItems(klass=SampleComponent, rebuildOnRename='Sample-ClassTreeItems',
+                                          callback=_raiseSampleComponentPopup(newSampleComponent=False)),
+                        ]),
                 ]),
 
             #------ Substances ------
@@ -1124,8 +1161,8 @@ class SideBarStructure(object):
                 SidebarItem('<New Chain>', callback=_raiseNewChainPopup(useParent=True)),
                 SidebarClassTreeItems(klass=Chain, rebuildOnRename='Chain-ClassTreeItems',
                                       callback=_raiseChainPopup(), children=[
-                    SidebarClassTreeItems(klass=Residue, rebuildOnRename='Chain-ClassTreeItems', callback=NYI),
-                    ]),
+                        SidebarClassTreeItems(klass=Residue, rebuildOnRename='Chain-ClassTreeItems', callback=NYI),
+                        ]),
                 ]),
 
             #------ Complexes ------
@@ -1146,10 +1183,10 @@ class SideBarStructure(object):
                 SidebarItem('<New DataSet>', callback=_createNewDataSet()),
                 SidebarClassTreeItems(klass=DataSet, rebuildOnRename='DataSet-ClassTreeItems',
                                       callback=_raiseDataSetPopup(), children=[
-                    SidebarItem('<New RestraintList>', callback=_raiseRestraintListPopup(editMode=False, useParent=True)),
-                    SidebarClassTreeItems(klass=RestraintList, rebuildOnRename='DataSet-ClassTreeItems',
-                                          callback=_raiseRestraintListPopup(editMode=True)),
-                    ]),
+                        SidebarItem('<New RestraintList>', callback=_raiseRestraintListPopup(editMode=False, useParent=True)),
+                        SidebarClassTreeItems(klass=RestraintList, rebuildOnRename='DataSet-ClassTreeItems',
+                                              callback=_raiseRestraintListPopup(editMode=True)),
+                        ]),
                 ]),
 
             #------ Notes ------

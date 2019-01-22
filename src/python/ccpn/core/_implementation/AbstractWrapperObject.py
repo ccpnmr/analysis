@@ -226,18 +226,6 @@ class AbstractWrapperObject(NotifierBase):
 
     __hash__ = object.__hash__
 
-    @staticmethod
-    def _str2none(value):
-        "Covenience to convert an empty string to None; V2 requirement for some attributes"
-        if not isinstance(value, str):
-            raise ValueError('Non-string type for value argument')
-        return None if len(value) == 0 else value
-
-    @staticmethod
-    def _none2str(value):
-        "Covenience to None return to an empty string; V2 requirement for some attributes"
-        return '' if value is None else value
-
     #=========================================================================================
     # CCPN Properties
     #=========================================================================================
@@ -308,6 +296,12 @@ class AbstractWrapperObject(NotifierBase):
                 result = self._wrappedData.ccpnInternalData = {}
         return result
 
+    @_ccpnInternalData.setter
+    def _ccpnInternalData(self, value):
+        if not (isinstance(value, dict)):
+            raise ValueError("_ccpnInternalData must be a dictionary, was %s" % value)
+        self._wrappedData.ccpnInternalData = value
+
     @property
     def comment(self) -> str:
         """Free-form text comment"""
@@ -317,13 +311,11 @@ class AbstractWrapperObject(NotifierBase):
     def comment(self, value: str):
         self._wrappedData.details = self._str2none(value)
 
-    CCPNMR_NAMESPACE = '_ccpNmrV3internal'
+    #=========================================================================================
+    # CCPN functionalities
+    #=========================================================================================
 
-    @_ccpnInternalData.setter
-    def _ccpnInternalData(self, value):
-        if not (isinstance(value, dict)):
-            raise ValueError("_ccpnInternalData must be a dictionary, was %s" % value)
-        self._wrappedData.ccpnInternalData = value
+    CCPNMR_NAMESPACE = '_ccpNmrV3internal'
 
     def _setInternalParameter(self, parameterName:str, value):
         """Sets parameterName for CCPNINTERNAL namespace to value; value must be json seriliasable"""
@@ -342,6 +334,8 @@ class AbstractWrapperObject(NotifierBase):
         data = self._ccpnInternalData
         space = data.setdefault(namespace, {})
         space[parameterName] = value
+        # Ugly trick to force saving
+        self._wrappedData.__dict__['isModfied'] = True
 
     def getParameter(self, namespace:str, parameterName:str):
         """Returns value of parameterName for namespace; returns None if not present"""
@@ -358,6 +352,46 @@ class AbstractWrapperObject(NotifierBase):
         if space is None:
             return False
         return parameterName in space
+
+    @staticmethod
+    def _str2none(value):
+        """Covenience to convert an empty string to None; V2 requirement for some attributes
+        """
+        if not isinstance(value, str):
+            raise ValueError('Non-string type for value argument')
+        return None if len(value) == 0 else value
+
+    @staticmethod
+    def _none2str(value):
+        """Covenience to None return to an empty string; V2 requirement for some attributes
+        """
+        return '' if value is None else value
+
+    def _saveObjectOrder(self, objs, key):
+        """Convenience: save pids of objects under key in the CcpNmr internal space.
+        Order can be restored with _restoreObjectOrder
+        """
+        pids = [obj.pid for obj in objs]
+        self._setInternalParameter(key, pids)
+
+    def _restoreObjectOrder(self, objs, key) -> list:
+        """Convenience: restore order of objects from saved pids under key in the CcpNmr internal space.
+        Order needed to be stored previously with _saveObjectOrder
+        """
+        if not isinstance(objs, (list,tuple)):
+            raise ValueError('Expected a list or tuple for "objects" argument')
+
+        result = objs
+        pids = self._getInternalParameter(key)
+        # see if we can use the pids to reconstruct the order
+        if pids is not None:
+            objectsDict = dict([(s.pid, s) for s in objs])
+            result = [objectsDict[p] for p in pids if p in objectsDict]
+            if len(result) != len(objs):
+                # we failed
+                result = objs
+        return result
+
 
     #=========================================================================================
     # CCPN abstract properties
@@ -750,8 +784,8 @@ class AbstractWrapperObject(NotifierBase):
             # Project class. Start generation here
             Project = cls
             ll = Project._allLinkedWrapperClasses
-            if ll:
-                raise RuntimeError("ERROR: initialisation attempted more than once")
+            # if ll:
+            #     raise RuntimeError("ERROR: initialisation attempted more than once")
             newAncestors = [cls]
             ll.append(Project)
 

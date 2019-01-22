@@ -344,8 +344,8 @@ class Spectrum(AbstractWrapperObject):
     @sliceColour.setter
     def sliceColour(self, value):
         self._wrappedData.sliceColour = value
-        for spectrumView in self.spectrumViews:
-            spectrumView.setSliceColour()  # ejb - update colour here
+        # for spectrumView in self.spectrumViews:
+        #     spectrumView.setSliceColour()  # ejb - update colour here
 
     @property
     def scale(self) -> float:

@@ -36,12 +36,14 @@ import importlib
 import os
 import shutil
 import glob
-
+import datetime
 
 dirsep = '/'
 # note, cannot just use os.sep below because can have window file names cropping up on unix machines
 winsep = '\\'
 
+#This does not belong here and should go to PathsAndUrls;
+# However, the 'Api.py' and Implementation relies on this so it should stay
 CCPN_API_DIRECTORY = 'ccpnv3'
 CCPN_DIRECTORY_SUFFIX = '.ccpn'
 CCPN_BACKUP_SUFFIX = '_backup'
@@ -50,6 +52,147 @@ CCPN_SUMMARIES_DIRECTORY = 'summaries'
 CCPN_LOGS_DIRECTORY = 'logs'
 
 CCPN_PYTHON = 'miniconda/bin/python'
+# from ccpn.framework.PathsAndUrls import CCPN_API_DIRECTORY, CCPN_DIRECTORY_SUFFIX, \
+#     CCPN_BACKUP_SUFFIX, CCPN_ARCHIVES_DIRECTORY, CCPN_LOGS_DIRECTORY,  CCPN_SUMMARIES_DIRECTORY
+
+
+from pathlib import Path as _Path_, _windows_flavour, _posix_flavour
+
+class Path(_Path_):
+    """Subclassed for compatibility, convenience and enhancements
+    """
+
+    # sub classing is broken
+    # From: https://codereview.stackexchange.com/questions/162426/subclassing-pathlib-path
+    _flavour = _windows_flavour if os.name == 'nt' else _posix_flavour
+
+    @property
+    def basename(self):
+        """the name of self without any suffixes"""
+        return self.name.split('.')[0]
+
+    def addTimeStamp(self):
+        """Return a Path instance with path.timeStamp.suffix profile"""
+        now = datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')
+        return self.parent / (self.stem + '.' + str(now) + self.suffix)
+
+    @property
+    def version(self):
+        suffixes = self.suffixes
+        version = 0
+        if len(suffixes) > 0:
+            try:
+                version = int(suffixes[0][1:])
+            except:
+                version = 0
+        return version
+
+    def incrementVersion(self):
+        """Return a Path instance with path.version.suffix profile"""
+        suffixes = self.suffixes
+        version = 0
+        if len(suffixes) > 0:
+            try:
+                version = int(suffixes[0][1:])
+                suffixes.pop(0)
+            except:
+                version = 0
+        version += 1
+        suffixes.insert(0, '.' + str(version))
+        return self.parent / (self.basename + ''.join(suffixes))
+
+    def normalise(self):
+        return Path(os.path.normpath(self.asString()))  # python <= 3.4; strings only
+
+    def open(self, *args, **kwds):
+        """Subclassing to catch any long file name errors that allegedly can occur on windows"""
+        try:
+            fp = super().open(*args, **kwds)
+        except FileNotFoundError:
+            if len(self.asString()) > 256:
+                raise FileNotFoundError('file "%s" not found; potentially path length (%d) is too large. Consider moving the file'
+                                        % (self, len(self.asString()))
+                                        )
+            else:
+                raise FileNotFoundError('file "%s" not found' % self)
+        return fp
+
+    def removeDir(self):
+        """Recursively remove content of self and sub-directories
+        """
+        if not self.is_dir():
+            raise ValueError('%s is not a directory' % self)
+        _rmdirs(str(self))
+
+    def fetchDir(self, dirName):
+        """Return and if needed create dirName in self
+        :return: Path instance of self / dirName
+        """
+        if not self.is_dir():
+            raise ValueError('%s is not a directory' % self)
+        result = self / dirName
+        if not result.exists():
+            result.mkdir()
+        return result
+
+    def removeFile(self):
+        """Remove file represented by self.
+        """
+        if self.is_dir():
+            raise ValueError('%s is a directory' % self)
+        self.unlink()
+
+    def assureSuffix(self, suffix):
+        """Return Path instance with an assured suffix; adds suffic if not present.
+        NB: does not change suffix if there is one (like with_suffix does)
+        """
+        if self.suffix != suffix:
+            return self + suffix
+        else:
+            return self
+
+    def split3(self):
+        """Return a tuple of (.parent, .stem, .suffix) strings
+        """
+        return (str(self.parent), str(self.stem), str(self.suffix))
+
+    def split2(self):
+        """Return a tuple (.parent, .name) strings
+        """
+        return (str(self.parent), str(self.name))
+
+    def asString(self):
+        return str(self)
+
+    def __eq__(self, other):
+        return (str(self).strip() == str(other).strip())
+
+    def __ne__(self, other):
+        return not (str(self).strip() == str(other).strip())
+
+    def __add__(self, other):
+        return Path(self.asString() + other)
+
+
+def _rmdirs(path):
+    """Recursively delete path and contents; maybe not very fast
+    From: https://stackoverflow.com/questions/303200/how-do-i-remove-delete-a-folder-that-is-not-empty-with-python
+    """
+    path = Path(path)
+    # using glob(*) because interdir() created occasional 'directory not empty' crashes (OS issue; Mac hidden files
+    # or timing problems?). Maybe need to fallback on ccpn.util.LocalShutil
+    for sub in path.glob('*'):
+        if sub.is_dir():
+            _rmdirs(sub)  # sub is a directory
+        else:
+            sub.unlink()  # removes files and links
+    path.rmdir()
+
+
+def aPath(path):
+    """Return a ~-expanded, left/right spaces-stripped, normalised Path instance"""
+    return Path(str(path).strip()).expanduser().normalise()
+
 
 
 def normalisePath(path, makeAbsolute=None):

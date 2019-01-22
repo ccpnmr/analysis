@@ -30,7 +30,6 @@ import unittest
 import contextlib
 # from ccpn import core
 from ccpn.framework import Framework
-
 from ccpnmodel.ccpncore.testing.CoreTesting import TEST_PROJECTS_PATH
 
 
@@ -76,7 +75,7 @@ class WrapperTesting(unittest.TestCase):
         projectPath = self.projectPath
         if projectPath is not None:
             projectPath = os.path.join(TEST_PROJECTS_PATH, projectPath)
-        self.framework = Framework.createFramework(projectPath=projectPath)
+        self.framework = Framework.createFramework(projectPath=projectPath, nologging=False)
         self.project = self.framework.project
         if self.project is None:
             self.tearDown()

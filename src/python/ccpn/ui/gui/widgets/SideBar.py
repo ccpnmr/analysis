@@ -235,8 +235,29 @@ class SidebarABC(NotifierBase):
 
     def findChildNode(self, name):
         node = self._findChildNode(name)
-        if node is None:
-            raise RuntimeError('Failed to find child node with name "%s" starting from %s' % (name, self))
+        # if node is None:
+        #     raise RuntimeError('Failed to find child node with name "%s" starting from %s' % (name, self))
+        return node
+
+    def _findChildNodeObject(self, obj):
+        """Find the node across the tree whose self.name == name or return self if name == 'self'
+        """
+        # if name == 'self' or self.name == name:
+        #     return self
+
+        if self.obj is obj and self._parent.klass is type(obj):
+            return self
+
+        # find the node
+        for itm in self.children:
+            node = itm._findChildNodeObject(obj)
+            if node:
+                return node
+
+    def findChildNodeObject(self, obj):
+        node = self._findChildNodeObject(obj)
+        # if node is None:
+        #     raise RuntimeError('Failed to find child node with name "%s" starting from %s' % (obj.pid, self))
         return node
 
     def buildTree(self, parent, parentWidget, sidebar, obj, level=0):
@@ -250,7 +271,8 @@ class SidebarABC(NotifierBase):
 
         if self.addNotifier and self.klass:
             # add the create/delete/rename notifiers to the parent
-            self.setNotifier(parent.obj, self.triggers, targetName=self.klass.className, callback=self._update)
+            triggers = self.kwds['triggers'] if 'triggers' in self.kwds else DEFAULT_NOTIFIERS
+            self.setNotifier(parent.obj, triggers, targetName=self.klass.className, callback=self._update)
 
         # code like this needs to be in the sub-classes:
         # # make the widget
@@ -462,13 +484,16 @@ class SidebarABC(NotifierBase):
         """
 
         trigger = cDict[Notifier.TRIGGER]
+        obj = cDict[Notifier.OBJECT]
 
         # Define the actions
         if trigger == Notifier.RENAME and self.rebuildOnRename in [None, 'self']:
             # Just rename the node
             oldPid = cDict[Notifier.OLDPID]
 
-            node = self.findChildNode(oldPid)
+            node = self.findChildNodeObject(obj)
+            if not node:
+                return
             rebuildOrRename = self.RENAME
 
         elif trigger == Notifier.RENAME:
@@ -648,12 +673,12 @@ class SidebarClassTreeItems(SidebarClassABC):
         self._children = self.children  # Save them for reset/create, as we will dynamically change the tree on building
 
 
-class SidebarClassSpectrumGroupTreeItems(SidebarClassTreeItems):
-    """A Tree with a number of dynamically added items of type V3 core 'klass'
-    Modified to respond to changing the list of spectra in a spectrumGroup, subclassed from SidebarClassTreeItems above
-    """
-    itemType = 'SpectrumGroupClassTreeItems'
-    triggers = [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME, Notifier.CHANGE]
+# class SidebarClassSpectrumGroupTreeItems(SidebarClassTreeItems):
+#     """A Tree with a number of dynamically added items of type V3 core 'klass'
+#     Modified to respond to changing the list of spectra in a spectrumGroup, subclassed from SidebarClassTreeItems above
+#     """
+#     itemType = 'SpectrumGroupClassTreeItems'
+#     triggers = [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME, Notifier.CHANGE]
 
 
 class SidebarClassSpectrumTreeItems(SidebarClassABC):
@@ -720,7 +745,7 @@ class SidebarClassNmrResidueTreeItems(SidebarClassABC):
         """
         if classObjs:
             nmrChain = classObjs[0].nmrChain
-            return tuple(nmrChain.nmrResidues)
+            return nmrChain.nmrResidues
 
         return classObjs
 
@@ -772,8 +797,9 @@ class SideBarStructure(object):
             #------ SpectrumGroups ------
             SidebarTree('SpectrumGroups', closed=True, children=[
                 SidebarItem('<New SpectrumGroup>', callback=_raiseSpectrumGroupEditorPopup(useNone=True, editMode=False)),
-                SidebarClassSpectrumGroupTreeItems(klass=SpectrumGroup, callback=_raiseSpectrumGroupEditorPopup(editMode=True),
-                                                   menuAction=_openItemSpectrumGroupDisplay(position='right', relativeTo=None), isDraggable=True, children=[
+                SidebarClassTreeItems(klass=SpectrumGroup, callback=_raiseSpectrumGroupEditorPopup(editMode=True),
+                                      menuAction=_openItemSpectrumGroupDisplay(position='right', relativeTo=None),
+                                      triggers=ALL_NOTIFIERS, isDraggable=True, children=[
                         SidebarClassSpectrumTreeItems(klass=Spectrum, callback=_raiseSpectrumPopup(),
                                                       menuAction=_openItemSpectrumDisplay(position='right', relativeTo=None), isDraggable=True),
                         ]),
@@ -840,7 +866,8 @@ class SideBarStructure(object):
                 SidebarItem('<New Complex>', callback=_raiseComplexEditorPopup(editMode=False, useNone=True)),
                 SidebarClassTreeItems(klass=Complex, rebuildOnRename='Complex-ClassTreeItems',
                                       callback=_raiseComplexEditorPopup(editMode=True),
-                                      menuAction=_openItemComplexTable(position='bottom', relativeTo=None), isDraggable=True),
+                                      menuAction=_openItemComplexTable(position='bottom', relativeTo=None),
+                                      triggers=ALL_NOTIFIERS, isDraggable=True),
                 ]),
 
             #------ StructureEnsembles ------

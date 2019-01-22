@@ -201,7 +201,8 @@ OPEN_ITEM_DICT = {
     StructureEnsemble.className: 'showStructureTable'
     }
 
-ALL_NOTIFIER_TRIGGERS = [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME, Notifier.CHANGE]
+ALL_NOTIFIERS = [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME, Notifier.CHANGE]
+DEFAULT_NOTIFIERS = [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME]
 
 #===========================================================================================================
 # SideBar handling class for handling tree structure
@@ -361,7 +362,7 @@ class SidebarABC(NotifierBase):
 
         if self.addNotifier and self.klass:
             # add the create/delete/rename notifiers to the parent
-            triggers = self.kwds['triggers'] if 'triggers' in self.kwds else [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME]
+            triggers = self.kwds['triggers'] if 'triggers' in self.kwds else DEFAULT_NOTIFIERS
 
             # quick integrity test to make the tree is building correctly
             if not self.searchNotifiers(theObject=parent.obj, triggers=triggers, targetName=self.klass.className):
@@ -1078,8 +1079,8 @@ class SideBarStructure(object):
             SidebarTree('SpectrumGroups', closed=True, children=[
                 SidebarItem('<New SpectrumGroup>', callback=_raiseSpectrumGroupEditorPopup(useNone=True, editMode=False)),
                 SidebarClassTreeItems(klass=SpectrumGroup, callback=_raiseSpectrumGroupEditorPopup(editMode=True),
-                                      addNotifier=True, triggers=ALL_NOTIFIER_TRIGGERS, children=[
-                    SidebarClassSpectrumTreeItems(klass=Spectrum, callback=_raiseSpectrumPopup()),
+                                      addNotifier=True, triggers=ALL_NOTIFIERS, children=[
+                                      SidebarClassSpectrumTreeItems(klass=Spectrum, callback=_raiseSpectrumPopup()),
                 ]),
             ]),
 
@@ -1134,7 +1135,8 @@ class SideBarStructure(object):
             SidebarTree('Complexes', closed=True, children=[
                 SidebarItem('<New Complex>', callback=_raiseComplexEditorPopup(editMode=False, useNone=True)),
                 SidebarClassTreeItems(klass=Complex, callback=_raiseComplexEditorPopup(editMode=True),
-                                      addNotifier=True, triggers=ALL_NOTIFIER_TRIGGERS,
+                                      addNotifier=True, triggers=ALL_NOTIFIERS,
+                #TODO: Like SpectrumGroup: this requires a small refactor, because Chain is not a child class of Complex
                 #                       children=[
                 #     SidebarClassTreeItems(klass=Chain, rebuildOnRename='Complex-ClassTreeItems', callback=NYI),
                 # ]),

@@ -36,7 +36,7 @@ from ccpn.util import Sorting
 from ccpn.util.ListFromString import listFromString
 from json import dumps
 from functools import partial
-from ccpn.core.lib.ContextManagers import logCommandBlock, undoStackBlocking
+from ccpn.core.lib.ContextManagers import logCommandBlock, undoStackBlocking, undoBlock
 
 
 # Pid.IDSEP - but we do not want to import from ccpn.core here
@@ -988,8 +988,9 @@ class EnsembleData(pd.DataFrame):
             # NB with large objects the echo will be huge and ugly.
             # But it is almost impossible to compress the great variety of value types Pandas allow.
 
-            with logCommandBlock(get='self') as log:
-                log('__setitem__')
+            # with logCommandBlock(get='self') as log:
+            #     log('__setitem__')
+            with undoBlock():
 
                 with undoStackBlocking() as addUndoItem:
                     # WE need a copy, not a view, as this is used for undoing etc.

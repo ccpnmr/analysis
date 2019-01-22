@@ -30,7 +30,14 @@ from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 class ChemicalShiftTest(WrapperTesting):
     # Path of project to load (None for new project
-    projectPath = 'CcpnCourse2b'
+    # projectPath = 'CcpnCourse2b'
+
+    def setUp(self):
+        """
+        Test StructureEnsemble with a pre-loaded valid project
+        """
+        self.projectPath = 'CcpnCourse2b'
+        super().setUp()  # ejb - call WrapperTesting setup to load project
 
     def test_rename_list(self):
         self.project._wrappedData.root.checkAllValid(complete=True)

@@ -120,7 +120,7 @@ def undoBlock(application=None):
             sidebar = application.ui.mainWindow._newSideBar
             sidebar.increaseSidebarBlocking()
 
-    if not application._echoBlocking:
+    if not application._echoBlocking and application.project:
         application.project.suspendNotification()
     application._increaseNotificationBlocking()
 
@@ -132,7 +132,7 @@ def undoBlock(application=None):
 
     finally:
         application._decreaseNotificationBlocking()
-        if not application._echoBlocking:
+        if not application._echoBlocking and application.project:
             application.project.resumeNotification()
 
         if undo is not None:
@@ -614,8 +614,8 @@ def undoStackBlocking(application=None):
         raise RuntimeError('Error getting application')
 
     undo = application._getUndo()
-    if undo is None:
-        raise RuntimeError("Unable to get the application's undo stack")
+    # if undo is None:
+    #     raise RuntimeError("Unable to get the application's undo stack")
     _undoStack = []
 
     def addUndoItem(undo=None, redo=None):
@@ -625,9 +625,10 @@ def undoStackBlocking(application=None):
         # store the new undo/redo items for later addition to the stack
         _undoStack.append((undo, redo))
 
-    undo.newWaypoint()  # DO NOT CHANGE
-    undo.increaseWaypointBlocking()
-    undo.increaseBlocking()
+    if undo:
+        undo.newWaypoint()  # DO NOT CHANGE
+        undo.increaseWaypointBlocking()
+        undo.increaseBlocking()
 
     try:
         # transfer control to the calling function, and pass the addUndoItems function
@@ -637,13 +638,15 @@ def undoStackBlocking(application=None):
         raise es
 
     finally:
-        # clean up after blocking undo items
-        undo.decreaseBlocking()
-        undo.decreaseWaypointBlocking()
 
-        # add all undo items (collected via the addUndoItem function) to the application's undo stack
-        for item in _undoStack:
-            undo._newItem(undoPartial=item[0], redoPartial=item[1])
+        if undo:
+            # clean up after blocking undo items
+            undo.decreaseBlocking()
+            undo.decreaseWaypointBlocking()
+
+            # add all undo items (collected via the addUndoItem function) to the application's undo stack
+            for item in _undoStack:
+                undo._newItem(undoPartial=item[0], redoPartial=item[1])
 
 
 @contextmanager

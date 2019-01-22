@@ -30,14 +30,7 @@ from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 class ChemicalShiftTest(WrapperTesting):
     # Path of project to load (None for new project
-    # projectPath = 'CcpnCourse2b'
-
-    def setUp(self):
-        """
-        Test StructureEnsemble with a pre-loaded valid project
-        """
-        self.projectPath = 'CcpnCourse2b'
-        super().setUp()  # ejb - call WrapperTesting setup to load project
+    projectPath = 'CcpnCourse2b'
 
     def test_rename_list(self):
         self.project._wrappedData.root.checkAllValid(complete=True)
@@ -47,8 +40,14 @@ class ChemicalShiftTest(WrapperTesting):
         self.assertEqual(shiftList.pid, 'CL:ShiftList_2')
         self.assertEqual(sorted(shiftList.chemicalShifts)[5].pid, 'CS:ShiftList_2.A.3.GLU.CA')
         shiftList.rename('RenamedList')
+        self.assertEqual(shiftList.pid, 'CL:RenamedList')
+        self.assertEqual(sorted(shiftList.chemicalShifts)[5].pid, 'CS:RenamedList.A.3.GLU.CA')
+
         # Undo and redo all operations
         self.undo.undo()
+        self.assertEqual(shiftList.pid, 'CL:ShiftList_2')
+        self.assertEqual(sorted(shiftList.chemicalShifts)[5].pid, 'CS:ShiftList_2.A.3.GLU.CA')
+
         self.undo.redo()
         self.assertEqual(shiftList.pid, 'CL:RenamedList')
         self.assertEqual(sorted(shiftList.chemicalShifts)[5].pid, 'CS:RenamedList.A.3.GLU.CA')

@@ -24,7 +24,6 @@ __date__ = "$Date$"
 #=========================================================================================
 
 from functools import partial
-from ccpn.ui.gui.widgets.MessageDialog import showInfo
 from ccpn.util.Logging import getLogger
 from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Spectrum import Spectrum
@@ -145,23 +144,23 @@ def _openSpectrumDisplay(mainWindow, spectrum, position=None, relativeTo=None):
     return spectrumDisplay
 
 
-def _openSpectrumGroup(mainWindow, spectrumGroup, position=None, relativeTo=None):
-    """Displays spectrumGroup on spectrumDisplay. It creates the display based on the first spectrum of the group.
-    Also hides the spectrumToolBar and shows spectrumGroupToolBar.
-    """
-    if len(spectrumGroup.spectra) > 0:
-        spectrumDisplay = mainWindow.createSpectrumDisplay(spectrumGroup.spectra[0])
-        mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
-        for spectrum in spectrumGroup.spectra:  # Add the other spectra
-            spectrumDisplay.displaySpectrum(spectrum)
-
-        spectrumDisplay.isGrouped = True
-        spectrumDisplay.spectrumToolBar.hide()
-        spectrumDisplay.spectrumGroupToolBar.show()
-        spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
-        mainWindow.application.current.strip = spectrumDisplay.strips[0]
-        # if any([sp.dimensionCount for sp in spectrumGroup.spectra]) == 1:
-        spectrumDisplay._maximiseRegions()
+# def _openSpectrumGroup(mainWindow, spectrumGroup, position=None, relativeTo=None):
+#     """Displays spectrumGroup on spectrumDisplay. It creates the display based on the first spectrum of the group.
+#     Also hides the spectrumToolBar and shows spectrumGroupToolBar.
+#     """
+#     if len(spectrumGroup.spectra) > 0:
+#         spectrumDisplay = mainWindow.createSpectrumDisplay(spectrumGroup.spectra[0])
+#         mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
+#         for spectrum in spectrumGroup.spectra:  # Add the other spectra
+#             spectrumDisplay.displaySpectrum(spectrum)
+#
+#         spectrumDisplay.isGrouped = True
+#         spectrumDisplay.spectrumToolBar.hide()
+#         spectrumDisplay.spectrumGroupToolBar.show()
+#         spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
+#         mainWindow.application.current.strip = spectrumDisplay.strips[0]
+#         # if any([sp.dimensionCount for sp in spectrumGroup.spectra]) == 1:
+#         spectrumDisplay._maximiseRegions()
 
 
 # def _openSampleSpectra(mainWindow, sample, position=None, relativeTo=None):
@@ -400,6 +399,7 @@ class _raiseSpectrumGroupEditorPopup(RaisePopupABC):
         popup.exec()
         popup.raise_()
 
+
 class _raiseStructureEnsemblePopup(RaisePopupABC):
     popupClass = StructureEnsemblePopup
     # objectArgumentName = 'obj'
@@ -463,7 +463,7 @@ class OpenItemABC():
         self._openContextMenu(node.sidebar, position, objs)
 
     def _execOpenItem(self, mainWindow, obj):
-        """Acts as the entry point for opening items in ccpnModuleArea
+        """Acts as an entry point for opening items in ccpnModuleArea
         """
         self.node = None
         self.dataPid = obj.pid
@@ -483,7 +483,6 @@ class OpenItemABC():
             if self.useApplication:
                 func = getattr(self.application, self.openItemMethod)
             else:
-                self.kwds['mainWindow'] = self.mainWindow
                 func = self.openItemDirectMethod
 
             if func is None:
@@ -541,6 +540,7 @@ class OpenItemABC():
     #     popup.exec_()
     #     popup.raise_()
 
+
 # class _openItemNewChainItem(OpenItemABC):
 #     openItemMethod = 'showNotesEditor'
 #     parentObjectArgumentName = 'project'
@@ -559,6 +559,26 @@ class OpenItemABC():
 # class _openItemDataSetItem(OpenItemABC):
 #     openItemMethod = 'showNotesEditor'
 #     objectArgumentName = 'note'
+
+
+# class _openItemCreateNmrChainTable(OpenItemABC):
+#     openItemMethod = 'showNotesEditor'
+#     objectArgumentName = 'project'
+
+# class _openItemNmrAtomItem(OpenItemABC):
+#     openItemMethod = NmrAtomItem
+#     objectArgumentName = 'nmrAtom'
+
+
+# class _openItemSampleComponentItem(OpenItemABC):
+#     openItemMethod = SampleComponentItem
+#     # NB This popup is structured slightly different, passing in different arguments
+#     objectArgumentName = 'sampleComponent'
+#     parentObjectArgumentName = 'sample'
+
+# class _openItemSubstanceItem(OpenItemABC):
+#     openItemMethod = SubstancePropertiesItem
+#     objectArgumentName = 'substance'
 
 
 class _openItemChemicalShiftListTable(OpenItemABC):
@@ -581,11 +601,6 @@ class _openItemMultipletListTable(OpenItemABC):
     objectArgumentName = 'multipletList'
 
 
-# class _openItemCreateNmrChainTable(OpenItemABC):
-#     openItemMethod = 'showNotesEditor'
-#     objectArgumentName = 'project'
-
-
 class _openItemNmrResidueTable(OpenItemABC):
     openItemMethod = 'showNmrResidueTable'
     objectArgumentName = 'nmrChain'
@@ -594,11 +609,6 @@ class _openItemNmrResidueTable(OpenItemABC):
 class _openItemResidueTable(OpenItemABC):
     openItemMethod = 'showResidueTable'
     objectArgumentName = 'chain'
-
-
-# class _openItemNmrAtomItem(OpenItemABC):
-#     openItemMethod = NmrAtomItem
-#     objectArgumentName = 'nmrAtom'
 
 
 class _openItemNoteTable(OpenItemABC):
@@ -616,10 +626,11 @@ class _openItemSampleDisplay(OpenItemABC):
     useApplication = False
     objectArgumentName = 'sample'
 
-    @staticmethod
-    def _openSampleSpectra(mainWindow, sample, position=None, relativeTo=None):
+    def _openSampleSpectra(self, sample, position=None, relativeTo=None):
         """Add spectra linked to sample and sampleComponent. Particularly used for screening
         """
+        mainWindow = self.mainWindow
+
         if len(sample.spectra) > 0:
             spectrumDisplay = mainWindow.createSpectrumDisplay(sample.spectra[0])
             mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
@@ -636,20 +647,14 @@ class _openItemSampleDisplay(OpenItemABC):
     openItemDirectMethod = _openSampleSpectra
 
 
-# class _openItemSampleComponentItem(OpenItemABC):
-#     openItemMethod = SampleComponentItem
-#     # NB This popup is structured slightly different, passing in different arguments
-#     objectArgumentName = 'sampleComponent'
-#     parentObjectArgumentName = 'sample'
-
-
 class _openItemSpectrumDisplay(OpenItemABC):
     openItemMethod = None
     useApplication = False
     objectArgumentName = 'spectrum'
 
-    @staticmethod
-    def _openSpectrumDisplay(mainWindow=None, spectrum=None, position=None, relativeTo=None):
+    def _openSpectrumDisplay(self, spectrum=None, position=None, relativeTo=None):
+        mainWindow = self.mainWindow
+
         spectrumDisplay = mainWindow.createSpectrumDisplay(spectrum)
 
         if len(spectrumDisplay.strips) > 0:
@@ -677,11 +682,12 @@ class _openItemSpectrumGroupDisplay(OpenItemABC):
     useApplication = False
     objectArgumentName = 'spectrumGroup'
 
-    @staticmethod
-    def _openSpectrumGroup(mainWindow, spectrumGroup, position=None, relativeTo=None):
+    def _openSpectrumGroup(self, spectrumGroup, position=None, relativeTo=None):
         """Displays spectrumGroup on spectrumDisplay. It creates the display based on the first spectrum of the group.
         Also hides the spectrumToolBar and shows spectrumGroupToolBar.
         """
+        mainWindow = self.mainWindow
+
         if len(spectrumGroup.spectra) > 0:
             spectrumDisplay = mainWindow.createSpectrumDisplay(spectrumGroup.spectra[0])
             mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
@@ -703,24 +709,8 @@ class _openItemStructureEnsembleTable(OpenItemABC):
     openItemMethod = 'showStructureTable'
     objectArgumentName = 'structureEnsemble'
 
-# class _openItemSubstanceItem(OpenItemABC):
-#     openItemMethod = SubstancePropertiesItem
-#     objectArgumentName = 'substance'
 
 OpenObjAction = {
-    # Spectrum         : _openSpectrumDisplay,
-    # PeakList         : _openPeakList,
-    # MultipletList    : _openMultipletList,
-    # NmrChain         : _openNmrResidueTable,
-    # Chain            : _openResidueTable,
-    # SpectrumGroup    : _openSpectrumGroup,
-    # Sample           : _openSampleSpectra,
-    # ChemicalShiftList: _openChemicalShiftList,
-    # RestraintList    : _openRestraintList,
-    # Note             : _openNote,
-    # IntegralList     : _openIntegralList,
-    # StructureEnsemble: _openStructureTable
-
     Spectrum         : _openItemSpectrumDisplay,
     PeakList         : _openItemPeakListTable,
     MultipletList    : _openItemMultipletListTable,

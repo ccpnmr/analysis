@@ -116,27 +116,20 @@ class SpectrumGroup(AbstractWrapperObject):
         """Spectra that make up SpectrumGroup."""
         data2Obj = self._project._data2Obj
         data = [data2Obj[x] for x in self._wrappedData.dataSources]
-
-        pids = self._getInternalParameter(self.SPECTRUM_ORDER)
-        spectra = data
-        # see if we can use the pids dict to reconstruct the order
-        if pids is not None:
-            dataDict = dict([(s.pid, s) for s in data])
-            spectra = [dataDict[p] for p in pids if p in dataDict]
-            if len(spectra) != len(data):
-                # we failed
-                spectra = data
-        return tuple(spectra)
+        data = self._restoreObjectOrder(data, self.SPECTRUM_ORDER)
+        return tuple(data)
 
     @spectra.setter
     @ccpNmrV3CoreSetter()
     def spectra(self, value):
+        if not isinstance(value, (tuple,list)):
+            raise ValueError('Expected a tuple or list')
         getDataObj = self._project._data2Obj.get
-        value = [getDataObj(x) if isinstance(x, str) else x for x in value]
-        # store pids in order
-        pids = [v.pid for v in value]
-        self._setInternalParameter(self.SPECTRUM_ORDER, pids)
-        self._wrappedData.dataSources = [x._wrappedData for x in value]
+        data = [getDataObj(x) if isinstance(x, str) else x for x in value]
+        # Store order
+        self._saveObjectOrder(data, self.SPECTRUM_ORDER)
+        # Store the api objects
+        self._wrappedData.dataSources = [x._wrappedData for x in data]
 
     #=========================================================================================
     # Implementation functions

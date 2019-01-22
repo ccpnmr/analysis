@@ -40,6 +40,7 @@ from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.RestraintList import RestraintList
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 from ccpn.ui.gui.widgets.Menu import Menu
+from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning
 
 from ccpn.ui.gui.popups.ChainPopup import ChainPopup
 from ccpn.ui.gui.popups.ChemicalShiftListPopup import ChemicalShiftListPopup
@@ -203,7 +204,7 @@ class CreateNewObjectABC():
         self.node = None
         self.dataPid = None
 
-    def __call__(self, dataPid, node):
+    def __call__(self, mainWindow, dataPid, node):
         self.node = node
         self.dataPid = dataPid
         obj = self.getObj()
@@ -287,7 +288,7 @@ class RaisePopupABC():
         self.node = None
         self.dataPid = None
 
-    def __call__(self, dataPid, node):
+    def __call__(self, mainWindow, dataPid, node):
         self.node = node
         self.dataPid = dataPid
         obj = self.getObj()
@@ -296,7 +297,7 @@ class RaisePopupABC():
         else:
             self.kwds[self.objectArgumentName] = obj
 
-        popup = self.popupClass(parent=node.sidebar, mainWindow=node.sidebar.mainWindow,
+        popup = self.popupClass(parent=node.sidebar, mainWindow=mainWindow,
                                 **self.kwds)
         popup.exec()
         popup.raise_()
@@ -391,6 +392,13 @@ class _raiseSpectrumPopup(RaisePopupABC):
 class _raiseSpectrumGroupEditorPopup(RaisePopupABC):
     popupClass = SpectrumGroupEditor
 
+    def _execOpenItem(self, mainWindow):
+        """Acts as the entry point for opening items in ccpnModuleArea
+        """
+        popup = self.popupClass(parent=mainWindow, mainWindow=mainWindow,
+                                **self.kwds)
+        popup.exec()
+        popup.raise_()
 
 class _raiseStructureEnsemblePopup(RaisePopupABC):
     popupClass = StructureEnsemblePopup
@@ -443,7 +451,7 @@ class OpenItemABC():
         self.openAction = None
 
     def __call__(self, mainWindow, dataPid, node, position, objs):
-        """Call acts is the execute entry point for the callback.
+        """__Call__ acts is the execute entry point for the callback.
         """
         self.node = node
         self.dataPid = dataPid
@@ -455,7 +463,7 @@ class OpenItemABC():
         self._openContextMenu(node.sidebar, position, objs)
 
     def _execOpenItem(self, mainWindow, obj):
-        """Exec the openItem.
+        """Acts as the entry point for opening items in ccpnModuleArea
         """
         self.node = None
         self.dataPid = obj.pid
@@ -468,11 +476,6 @@ class OpenItemABC():
     def _initialise(self, dataPid, objs):
         """Initialise settings for the object.
         """
-        # self.node = node
-        # self.dataPid = dataPid
-        # obj = self.getObj()
-        # self.kwds[self.objectArgumentName] = obj
-
         self.application = self.mainWindow.application
         openableObjs = [obj for obj in objs if isinstance(obj, self.validActionTargets)]
 
@@ -494,9 +497,11 @@ class OpenItemABC():
         contextMenu = Menu('', parentWidget, isFloatWidget=True)
         contextMenu.addAction('Open as a module', self.openAction)
 
-        # spectra = [obj for obj in objs if isinstance(obj, Spectrum)]
-        # if len(spectra) > 0:
-        #     contextMenu.addAction('Make SpectrumGroup From Selected', partial(self._createSpectrumGroup, self.mainWindow, spectra))
+        spectra = [obj for obj in objs if isinstance(obj, Spectrum)]
+        if len(spectra) > 0:
+            contextMenu.addAction('Make SpectrumGroup From Selected',
+                                  partial(_raiseSpectrumGroupEditorPopup(useNone=True, editMode=False, defaultItems=spectra),
+                                          self.mainWindow, self.getObj(), self.node))
 
         contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
         canBeCloned = True
@@ -519,8 +524,22 @@ class OpenItemABC():
     def _deleteItemObject(self, objs):
         """Delete items from the project.
         """
-        pass
+        from ccpn.core.lib.ContextManagers import undoBlock
 
+        try:
+            with undoBlock():
+                for obj in objs:
+                    if obj:
+                        # just delete the object
+                        obj.delete()
+
+        except Exception as es:
+            showWarning('Delete', str(es))
+
+    # def _createSpectrumGroup(self, spectra=None or []):
+    #     popup = SpectrumGroupEditor(parent=self.mainWindow, mainWindow=self.mainWindow, addNew=True, spectra=spectra)
+    #     popup.exec_()
+    #     popup.raise_()
 
 # class _openItemNewChainItem(OpenItemABC):
 #     openItemMethod = 'showNotesEditor'
@@ -642,7 +661,7 @@ class _openItemSpectrumDisplay(OpenItemABC):
         mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
 
         # TODO:LUCA: the mainWindow.createSpectrumDisplay should do the reporting to console and log
-        # This routine can then be ommitted and the call above replaced by the one remaining line
+        # This routine can then be omitted and the call above replaced by the one remaining line
         mainWindow.pythonConsole.writeConsoleCommand(
                 "application.createSpectrumDisplay(spectrum)", spectrum=spectrum)
         getLogger().info('spectrum = project.getByPid(%r)' % spectrum.id)

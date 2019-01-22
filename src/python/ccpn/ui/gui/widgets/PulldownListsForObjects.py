@@ -108,21 +108,31 @@ class _PulldownABC(PulldownListCompoundWidget):
             raise ValueError('followCurrent option only valid if _currentAttributeName is defined for class')
         self._followCurrent = followCurrent
 
-        if default is not None:
-            if not isinstance(default, self._klass):
-                raise ValueError('default parameter: expected "%s" object, got "%s"'
-                                 % (self._klass.className, type(default)))
-            default = self.object2value(default)
-
         super().__init__(parent=parent, showBorder=showBorder,
                          orientation=orientation,
                          minimumWidths=minimumWidths, maximumWidths=maximumWidths, fixedWidths=fixedWidths,
                          labelText=labelText,
                          texts=self._getPids(),
                          sizeAdjustPolicy=sizeAdjustPolicy,
-                         callback=self._callback, default=default,
+                         callback=self._callback,
                          editable=editable,
                          **kwds)
+
+        if default is not None:
+            if isinstance(default, int):
+                pass
+
+            elif isinstance(default, self._klass):
+                # objs = self.getObjects()
+                # default = objs.index(default) if default in objs else None
+                default = self.object2value(default)
+
+            else:
+                raise ValueError('default parameter: expected int or "%s" object, got "%s"'
+                                 % (self._klass.className, type(default)))
+
+            if default is not None:
+                self.select(default, blockSignals=True)
 
         # add a notifier to update the pulldown list
         self._notifier1 = Notifier(project,

@@ -364,8 +364,8 @@ class _GroupEditorPopupABC(CcpnDialog):
                 else:
                     # new mode
                     func = getattr(self.project, self.PROJECT_NEW_METHOD)
-                    obj = func(name=name)
-                    setattr(obj, self.KLASS_ITEM_ATTRIBUTE, items)
+                    obj = func(name, items)
+                    # setattr(obj, self.KLASS_ITEM_ATTRIBUTE, items)
 
             except Exception as es:
                 showWarning(str(self.windowTitle()), str(es))

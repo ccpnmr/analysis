@@ -752,8 +752,8 @@ class AbstractWrapperObject(NotifierBase):
             # Project class. Start generation here
             Project = cls
             ll = Project._allLinkedWrapperClasses
-            if ll:
-                raise RuntimeError("ERROR: initialisation attempted more than once")
+            # if ll:
+            #     raise RuntimeError("ERROR: initialisation attempted more than once")
             newAncestors = [cls]
             ll.append(Project)
 

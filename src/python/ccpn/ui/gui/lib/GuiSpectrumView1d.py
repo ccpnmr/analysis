@@ -275,8 +275,8 @@ class GuiSpectrumView1d(GuiSpectrumView):
         GLSignals.emitPaintEvent()
         # self.update()
 
-    def setSliceColour(self):
-        self.plot.curve.setPen(self.spectrum.sliceColour)
+    # def setSliceColour(self):
+    #     self.plot.curve.setPen(self.spectrum.sliceColour)
 
     def _buildGLContours(self, glList):
         # build a glList for the spectrum

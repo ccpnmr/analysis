@@ -421,6 +421,8 @@ class OpenItemABC():
     objectArgumentName = 'obj'  # argument name set to obj passed to openItemClass instantiation
     openItemDirectMethod = None  # parent argument name set to obj passed to openItemClass instantiation when useParent==True
     useApplication = True
+    hasOpenMethod = True
+    contextMenuText = 'Open as a Module'
 
     validActionTargets = (Spectrum, PeakList, MultipletList, IntegralList,
                           NmrChain, Chain, SpectrumGroup, Sample, ChemicalShiftList,
@@ -479,7 +481,7 @@ class OpenItemABC():
         self.application = self.mainWindow.application
         openableObjs = [obj for obj in objs if isinstance(obj, self.validActionTargets)]
 
-        if len(openableObjs) > 0:
+        if self.hasOpenMethod and len(openableObjs) > 0:
             if self.useApplication:
                 func = getattr(self.application, self.openItemMethod)
             else:
@@ -494,7 +496,8 @@ class OpenItemABC():
         """Open a context menu.
         """
         contextMenu = Menu('', parentWidget, isFloatWidget=True)
-        contextMenu.addAction('Open as a module', self.openAction)
+        if self.openAction:
+            contextMenu.addAction(self.contextMenuText, self.openAction)
 
         spectra = [obj for obj in objs if isinstance(obj, Spectrum)]
         if len(spectra) > 0:
@@ -551,14 +554,6 @@ class OpenItemABC():
 #     objectArgumentName = 'note'
 #
 #
-# class _openItemComplexEditorItem(OpenItemABC):
-#     openItemMethod = 'showNotesEditor'
-#     objectArgumentName = 'note'
-#
-#
-# class _openItemDataSetItem(OpenItemABC):
-#     openItemMethod = 'showNotesEditor'
-#     objectArgumentName = 'note'
 
 
 # class _openItemCreateNmrChainTable(OpenItemABC):
@@ -601,15 +596,29 @@ class _openItemMultipletListTable(OpenItemABC):
     objectArgumentName = 'multipletList'
 
 
-class _openItemNmrResidueTable(OpenItemABC):
+class _openItemNmrChainTable(OpenItemABC):
     openItemMethod = 'showNmrResidueTable'
     objectArgumentName = 'nmrChain'
 
 
-class _openItemResidueTable(OpenItemABC):
+class _openItemNmrResidueItem(OpenItemABC):
+    objectArgumentName = 'nmrResidue'
+    hasOpenMethod = False
+
+
+class _openItemNmrAtomItem(OpenItemABC):
+    objectArgumentName = 'nmrAtom'
+    hasOpenMethod = False
+
+
+class _openItemChainTable(OpenItemABC):
     openItemMethod = 'showResidueTable'
     objectArgumentName = 'chain'
 
+
+class _openItemResidueTable(OpenItemABC):
+    objectArgumentName = 'residue'
+    hasOpenMethod = False
 
 class _openItemNoteTable(OpenItemABC):
     openItemMethod = 'showNotesEditor'
@@ -621,10 +630,31 @@ class _openItemRestraintListTable(OpenItemABC):
     objectArgumentName = 'restraintList'
 
 
+class _openItemDataSetTable(OpenItemABC):
+    objectArgumentName = 'dataSet'
+    hasOpenMethod = False
+
+
+class _openItemComplexTable(OpenItemABC):
+    objectArgumentName = 'complex'
+    hasOpenMethod = False
+
+
+class _openItemSubstanceTable(OpenItemABC):
+    objectArgumentName = 'substance'
+    hasOpenMethod = False
+
+
+class _openItemSampleComponentTable(OpenItemABC):
+    objectArgumentName = 'sampleComponent'
+    hasOpenMethod = False
+
+
 class _openItemSampleDisplay(OpenItemABC):
     openItemMethod = None
     useApplication = False
     objectArgumentName = 'sample'
+    contextMenuText = 'Open linked spectra'
 
     def _openSampleSpectra(self, sample, position=None, relativeTo=None):
         """Add spectra linked to sample and sampleComponent. Particularly used for screening
@@ -641,8 +671,8 @@ class _openItemSampleDisplay(OpenItemABC):
                     for spectrum in sampleComponent.substance.referenceSpectra:
                         spectrumDisplay.displaySpectrum(spectrum)
             mainWindow.application.current.strip = spectrumDisplay.strips[0]
-            if all(sample.spectra[0].dimensionCount) == 1:
-                mainWindow.application.current.strip.autoRange()
+            # if any([spec.dimensionCount for spec in sample.spectra]) == 1:
+            spectrumDisplay._maximiseRegions()
 
     openItemDirectMethod = _openSampleSpectra
 
@@ -714,8 +744,8 @@ OpenObjAction = {
     Spectrum         : _openItemSpectrumDisplay,
     PeakList         : _openItemPeakListTable,
     MultipletList    : _openItemMultipletListTable,
-    NmrChain         : _openItemNmrResidueTable,
-    Chain            : _openItemResidueTable,
+    NmrChain         : _openItemNmrChainTable,
+    Chain            : _openItemChainTable,
     SpectrumGroup    : _openItemSpectrumGroupDisplay,
     Sample           : _openItemSampleDisplay,
     ChemicalShiftList: _openItemChemicalShiftListTable,

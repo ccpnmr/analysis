@@ -100,9 +100,9 @@ class CalculationStepTest(WrapperTesting):
     def test_link_setting(self):
         undo = self.project._undo
         self.project.newUndoPoint()
-        dataSet = self.project.newDataSet()
-        dataSet2 = self.project.newDataSet()
-        dataSet3 = self.project.newDataSet()
+        dataSet = self.project.newDataSet(uuid='dataSet-1')
+        dataSet2 = self.project.newDataSet(uuid='dataSet-2')
+        dataSet3 = self.project.newDataSet(uuid='dataSet-3')
         step1 = dataSet.newCalculationStep()
         step1.inputDataSet = dataSet2
         self.assertEqual(step1.inputDataUuid, dataSet2.uuid)
@@ -180,11 +180,11 @@ class DataTest(WrapperTesting):
         data1.clearParameters()
         self.assertEqual(data1.parameters, {})
 
-        self.assertEqual(data1.pid, 'DA:1.try1')
+        self.assertEqual(data1.pid, 'DA:dataset.try1')
         data1.rename('different')
         undo.undo()
         undo.redo()
-        self.assertEqual(data1.pid, 'DA:1.different')
+        self.assertEqual(data1.pid, 'DA:dataset.different')
 
     def test_numpy_parameter(self):
         dataSet = self.project.newDataSet()

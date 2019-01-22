@@ -620,6 +620,7 @@ class _openItemResidueTable(OpenItemABC):
     objectArgumentName = 'residue'
     hasOpenMethod = False
 
+
 class _openItemNoteTable(OpenItemABC):
     openItemMethod = 'showNotesEditor'
     objectArgumentName = 'note'

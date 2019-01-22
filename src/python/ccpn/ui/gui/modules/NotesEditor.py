@@ -39,7 +39,7 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
-from ccpn.core.lib.ContextManagers import undoBlockManager
+from ccpn.core.lib.ContextManagers import undoBlock
 
 
 logger = getLogger()
@@ -59,6 +59,9 @@ class NotesEditorModule(CcpnModule):
     def __init__(self, mainWindow=None, name='Notes Editor', note=None):
         """
         Initialise the widgets for the module.
+        :param mainWindow: required
+        :param name: optional
+        :param note: leave as None to let window handle item selection
         """
         super().__init__(mainWindow=mainWindow, name=name)
 
@@ -186,23 +189,22 @@ class NotesEditorModule(CcpnModule):
         rename calls on name
         change calls on any other attribute
         """
-        self._clearNotifiers()
-        self._noteNotifier = Notifier(self.project,
+        self._noteNotifier = self.setNotifier(self.project,
                                       [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE],
                                       Note.__name__,
                                       self._updateCallback)
-        self.droppedNotifier = GuiNotifier(self.mainWidget,
+        self.droppedNotifier = self.setGuiNotifier(self.mainWidget,
                                            [GuiNotifier.DROPEVENT], [DropBase.PIDS],
                                            self._processDroppedItems)
 
-    def _clearNotifiers(self):
-        """
-        clean up the notifiers
-        """
-        if self._noteNotifier is not None:
-            self._noteNotifier.unRegister()
-        if self.droppedNotifier is not None:
-            self.droppedNotifier.unRegister()
+    # def _clearNotifiers(self):
+    #     """
+    #     clean up the notifiers
+    #     """
+    #     if self._noteNotifier is not None:
+    #         self._noteNotifier.unRegister()
+    #     if self.droppedNotifier is not None:
+    #         self.droppedNotifier.unRegister()
 
     def _applyNote(self):
         """
@@ -210,17 +212,18 @@ class NotesEditorModule(CcpnModule):
         Temporarily disable notifiers, and define commandEchoBlock so all changes
         are treated as a single undo/redo event
         """
-        self._clearNotifiers()  # disable the notifier while updating object other
+        self.setBlankingAllNotifiers(True)  # disable the notifier while updating object other
         if self.note:  # calls _updateCallBack during _applyNote
             name = self.lineEdit1.text()
             text = self.textBox.toPlainText()
 
-            with undoBlockManager():
-                self.note.rename(name)
+            with undoBlock():
+                if name != self.note.name:
+                    self.note.rename(name)
                 self.note.text = text
 
             self.noWidget.select(self.note.pid)
-        self._setNotifiers()
+        self.setBlankingAllNotifiers(False)
 
     def _reject(self):
         """
@@ -271,7 +274,6 @@ class NotesEditorModule(CcpnModule):
         """
         CCPN-INTERNAL: used to close the module
         """
-        self._clearNotifiers()
         super()._closeModule()
 
     def close(self):

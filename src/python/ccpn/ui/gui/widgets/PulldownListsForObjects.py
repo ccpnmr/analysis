@@ -140,6 +140,7 @@ class _PulldownABC(PulldownListCompoundWidget):
                                        )
             self._notifier2.setDebug(DEBUG)
 
+
     @property
     def textList(self):
         """Compatibility with previous implementation
@@ -242,6 +243,7 @@ class _PulldownABC(PulldownListCompoundWidget):
         if DEBUG: sys.stderr.write('>>> %s._updatePulldownList()\n' % self)
         pids = self._getPids()
 
+        lastPulldownItem = self.getText()
         if callbackDict and callbackDict[Notifier.TRIGGER] in [Notifier.DELETE]:
             # the object has been notified for delete but still exists so needs to be removed from the list
             obj = callbackDict[Notifier.OBJECT]
@@ -249,6 +251,13 @@ class _PulldownABC(PulldownListCompoundWidget):
                 pids.remove(obj.pid)
 
         self.modifyTexts(pids)
+
+        # if the pulldownlist has updated then emit a changed notifier; assumes that the texts are unique
+        newPulldownItem = self.getText()
+        if lastPulldownItem != newPulldownItem:
+            newItem = self.pulldownList.currentIndex()
+            self.pulldownList.currentIndexChanged.emit(newItem)
+
         if DEBUG: sys.stderr.write('  < %s._updatePulldownList()\n' % self)
 
     def _updateFromCurrent(self, callbackDict=None):

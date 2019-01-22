@@ -226,18 +226,6 @@ class AbstractWrapperObject(NotifierBase):
 
     __hash__ = object.__hash__
 
-    @staticmethod
-    def _str2none(value):
-        "Covenience to convert an empty string to None; V2 requirement for some attributes"
-        if not isinstance(value, str):
-            raise ValueError('Non-string type for value argument')
-        return None if len(value) == 0 else value
-
-    @staticmethod
-    def _none2str(value):
-        "Covenience to None return to an empty string; V2 requirement for some attributes"
-        return '' if value is None else value
-
     #=========================================================================================
     # CCPN Properties
     #=========================================================================================
@@ -314,6 +302,19 @@ class AbstractWrapperObject(NotifierBase):
             raise ValueError("_ccpnInternalData must be a dictionary, was %s" % value)
         self._wrappedData.ccpnInternalData = value
 
+    @property
+    def comment(self) -> str:
+        """Free-form text comment"""
+        return self._none2str(self._wrappedData.details)
+
+    @comment.setter
+    def comment(self, value: str):
+        self._wrappedData.details = self._str2none(value)
+
+    #=========================================================================================
+    # CCPN functionalities
+    #=========================================================================================
+
     CCPNMR_NAMESPACE = '_ccpNmrV3internal'
 
     def _setInternalParameter(self, parameterName:str, value):
@@ -352,14 +353,45 @@ class AbstractWrapperObject(NotifierBase):
             return False
         return parameterName in space
 
-    @property
-    def comment(self) -> str:
-        """Free-form text comment"""
-        return self._none2str(self._wrappedData.details)
+    @staticmethod
+    def _str2none(value):
+        """Covenience to convert an empty string to None; V2 requirement for some attributes
+        """
+        if not isinstance(value, str):
+            raise ValueError('Non-string type for value argument')
+        return None if len(value) == 0 else value
 
-    @comment.setter
-    def comment(self, value: str):
-        self._wrappedData.details = self._str2none(value)
+    @staticmethod
+    def _none2str(value):
+        """Covenience to None return to an empty string; V2 requirement for some attributes
+        """
+        return '' if value is None else value
+
+    def _saveObjectOrder(self, objs, key):
+        """Convenience: save pids of objects under key in the CcpNmr internal space.
+        Order can be restored with _restoreObjectOrder
+        """
+        pids = [obj.pid for obj in objs]
+        self._setInternalParameter(key, pids)
+
+    def _restoreObjectOrder(self, objs, key) -> list:
+        """Convenience: restore order of objects from saved pids under key in the CcpNmr internal space.
+        Order needed to be stored previously with _saveObjectOrder
+        """
+        if not isinstance(objs, (list,tuple)):
+            raise ValueError('Expected a list or tuple for "objects" argument')
+
+        result = objs
+        pids = self._getInternalParameter(key)
+        # see if we can use the pids to reconstruct the order
+        if pids is not None:
+            objectsDict = dict([(s.pid, s) for s in objs])
+            result = [objectsDict[p] for p in pids if p in objectsDict]
+            if len(result) != len(objs):
+                # we failed
+                result = objs
+        return result
+
 
     #=========================================================================================
     # CCPN abstract properties

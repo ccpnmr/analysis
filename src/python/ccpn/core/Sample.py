@@ -266,6 +266,7 @@ class Sample(AbstractWrapperObject):
         Set sampleStore to default if not set"""
         return parent._wrappedData.sampleStore.sortedSamples()
 
+    @logCommand(get='self')
     def rename(self, value: str):
         """Rename Sample, changing its name and Pid.
         """

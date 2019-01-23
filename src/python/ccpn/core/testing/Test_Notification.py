@@ -186,6 +186,7 @@ class NotificationTest(WrapperTesting):
                                         parameterDict={'value': 'createx', 'll': ll}, onceOnly=True)
         not2 = project.registerNotifier('Note', 'delete', notifyfunc,
                                         parameterDict={'value': 'deletex', 'll': ll}, onceOnly=True)
+
         registered = project._context2Notifiers
         self.assertEqual(registered.get(('Note', 'create')), {not1: True})
         self.assertEqual(registered.get(('Note', 'delete')), {not2: True})
@@ -209,8 +210,11 @@ class NotificationTest(WrapperTesting):
         project._undo.redo()
         self.assertEqual(note1.text, 'Wauuhhhw')
         self.assertEqual(note2.text, 'Howwwll!')
-        self.assertEqual(ll, ['createx', 'createx', 'deletex', 'deletex', 'createx', 'createx',
-                              'createx', 'createx', 'createx', 'createx', 'createx', 'createx'])
+
+        # change notifiers are not fired here any more
+        # self.assertEqual(ll, ['createx', 'createx', 'deletex', 'deletex', 'createx', 'createx',
+        #                       'createx', 'createx', 'createx', 'createx', 'createx', 'createx'])
+        self.assertEqual(ll, ['createx', 'createx', 'deletex', 'deletex', 'createx', 'createx'])
 
         project.removeNotifier(not1)
         self.assertEqual(registered.get(('Note', 'create')), {})
@@ -295,7 +299,7 @@ class NotificationTest(WrapperTesting):
         self.assertEqual(peak1.pid, 'PK:HF-hsqc.1.1')
         spectrum.rename('HF-copy')
         self.assertEqual(ll, ['newSpectrum', 'newSpectrum2', 'newPeakList', 'newPeak',
-                              'modSpectrum', 'renameSpectrum', 'renamePeakList', 'renamePeak'])
+                              'renameSpectrum', 'renamePeakList', 'renamePeak'])
         self.assertEqual(spectrum.pid, 'SP:HF-copy')
         self.assertEqual(peakList.pid, 'PL:HF-copy.1')
         self.assertEqual(peak1.pid, 'PK:HF-copy.1.1')
@@ -305,11 +309,14 @@ class NotificationTest(WrapperTesting):
         self.assertEqual(peak1.position, (11.0, 12.0))
         spectrum.delete()
 
-        self.assertEqual(ll[:-3], ['newSpectrum', 'newSpectrum2', 'newPeakList', 'newPeak',
-                                   'modSpectrum', 'renameSpectrum', 'renamePeakList', 'renamePeak',
-                                   'modPeak', 'modSpectrum', 'modPeak', 'modSpectrum', ])
-        # NB cascading object deletions do not happen in reproducible order
-        self.assertEqual(set(ll[-3:]), {'delSpectrum', 'delPeak', 'delPeakList'})
+        self.assertEqual(ll, ['newSpectrum', 'newSpectrum2', 'newPeakList', 'newPeak',
+                              'renameSpectrum', 'renamePeakList', 'renamePeak',
+                              'modPeak', 'modSpectrum', 'modPeak', 'modSpectrum',
+                              'delPeakList', 'delSpectrum', ])
+
+        # # NB cascading object deletions do not happen in reproducible order
+        # self.assertEqual(set(ll[-3:]), {'delSpectrum', 'delPeak', 'delPeakList'})
+
         self.assertEqual(spectrum.pid, 'SP:HF-copy-Deleted')
         self.assertEqual(peakList.pid, 'PL:HF-copy.1-Deleted')
         self.assertEqual(peak1.pid, 'PK:HF-copy.1.1-Deleted')
@@ -333,16 +340,16 @@ class NotificationTest(WrapperTesting):
         spectrumGroup = project.newSpectrumGroup(name='Groupie')
         spectrumGroup2 = project.newSpectrumGroup(name='Sloupie')
         spectrumGroup.spectra = (spectrum,)
-        self.assertEquals(ll, ['modSpectrumGroup', 'modLink'])
+        self.assertEquals(ll, ['modSpectrumGroup'])
         spectrumGroup.spectra = ()
-        self.assertEquals(ll, ['modSpectrumGroup', 'modLink', 'modSpectrumGroup', 'modLink'])
+        self.assertEquals(ll, ['modSpectrumGroup', 'modSpectrumGroup'])
         del ll[:]
         self.assertFalse(bool(spectrum.spectrumGroups))
         tt = (spectrumGroup,)
         spectrum.spectrumGroups = tt
         self.assertEquals(ll, ['modSpectrum', 'modLink'])
         spectrum.rename('HF-copy')
-        self.assertEquals(ll, ['modSpectrum', 'modLink', 'modSpectrum', 'renameSpectrum'])
+        self.assertEquals(ll, ['modSpectrum', 'modLink', 'renameSpectrum'])
         del ll[:]
         spectrum.spectrumGroups = (spectrumGroup, spectrumGroup2)
         self.assertEquals(ll, ['modSpectrum', 'modLink'])

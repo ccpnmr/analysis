@@ -1830,6 +1830,9 @@ class Spectrum(AbstractWrapperObject):
         if action in ['change']:
             for specView in self.spectrumViews:
                 specView._finaliseAction(action=action)
+        if action in ['create', 'delete']:
+            for peakList in self.peakLists:
+                peakList._finaliseAction(action=action)
 
     #=========================================================================================
     # CCPN functions

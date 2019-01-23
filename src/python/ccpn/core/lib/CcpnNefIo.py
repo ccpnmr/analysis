@@ -4262,20 +4262,22 @@ class CcpnNefReader:
             # default not set - create one
             dataSet = self.project.newDataSet()
             serial = dataSet.serial
-            dataSet.title = 'Data_%s' % serial
+            dataSet.title = 'dataset_%s' % serial
             self.defaultDataSetSerial = serial
             self._dataSet2ItemMap[dataSet] = dataSet._getTempItemMap()
 
         else:
             # take or create dataSet matching serial
-            dataSet = self.project.getDataSet(str(serial))
+            # dataSet = self.project.getDataSet(str(serial))
+            dataSet = self.project.getDataSet('dataset_%s' % serial)
             if dataSet is None:
-                dataSet = self.project.newDataSet()
-                dataSet.resetSerial(serial)
+                dataSet = self.project.newDataSet(serial=serial)
+                # dataSet.resetSerial(serial)
                 # NB former call was BROKEN!
                 # modelUtil.resetSerial(dataSet._wrappedData, serial, 'nmrConstraintStores')
-                dataSet._finaliseAction('rename')
-                dataSet.title = 'Data_%s' % serial
+
+                # dataSet._finaliseAction('rename')
+                dataSet.title = 'dataset_%s' % serial
 
                 self._dataSet2ItemMap[dataSet] = dataSet._getTempItemMap()
         #

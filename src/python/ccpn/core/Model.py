@@ -32,7 +32,8 @@ from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.util.StructureData import EnsembleData
 from ccpnmodel.ccpncore.api.ccp.molecule.MolStructure import Model as ApiModel
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
+    logCommandBlock, undoBlock
 from ccpn.util.Logging import getLogger
 
 
@@ -268,12 +269,12 @@ class Model(AbstractWrapperObject):
         #     self.clearData()
         super()._finaliseAction(action)
 
-    @deleteObject()
     def delete(self):
         """Delete should notify structureEnsemble of a delete.
         """
-        self.clearData()
-        super().delete()
+        with undoBlock():
+            self.clearData()
+            super().delete()
 
     #=========================================================================================
     # CCPN functions

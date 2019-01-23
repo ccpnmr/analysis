@@ -87,7 +87,7 @@ class TestPandasData(WrapperTesting):
                           self.undo.nextIndex,  # = 0   # points to next free slot (or first slot to redo)
                           self.undo.waypoints,  # = []  # array of last item in each waypoint
                           self.undo._blocked,  # = False # Block/unblock switch - internal use only
-                          self.undo.blocking,
+                          self.undo.undoItemBlocking,
                           len(self.undo),
                           self.undo[0])  # = 0 # Blocking level - modify with increaseBlocking/decreaseBlocking only
         print('preUNDO STATE:                          ', self.UndoState)
@@ -98,7 +98,7 @@ class TestPandasData(WrapperTesting):
                           self.undo.nextIndex,  # = 0   # points to next free slot (or first slot to redo)
                           self.undo.waypoints,  # = []  # array of last item in each waypoint
                           self.undo._blocked,  # = False # Block/unblock switch - internal use only
-                          self.undo.blocking,  # = 0 # Blocking level - modify with increaseBlocking/decreaseBlocking only
+                          self.undo.undoItemBlocking,  # = 0 # Blocking level - modify with increaseBlocking/decreaseBlocking only
                           len(self.undo),
                           self.undo[0])  # = 0 # Blocking level - modify with increaseBlocking/decreaseBlocking only
         print("preUNDO STATE, addition data['x']:      ", self.UndoState)
@@ -116,7 +116,7 @@ class TestPandasData(WrapperTesting):
                           self.undo.nextIndex,  # = 0   # points to next free slot (or first slot to redo)
                           self.undo.waypoints,  # = []  # array of last item in each waypoint
                           self.undo._blocked,  # = False # Block/unblock switch - internal use only
-                          self.undo.blocking,  # = 0 # Blocking level - modify with increaseBlocking/decreaseBlocking only
+                          self.undo.undoItemBlocking,  # = 0 # Blocking level - modify with increaseBlocking/decreaseBlocking only
                           len(self.undo),
                           self.undo[0])  # = 0 # Blocking level - modify with increaseBlocking/decreaseBlocking only
         print("postUNDO STATE, deletion data['x']:     ", self.UndoState)

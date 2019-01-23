@@ -647,6 +647,38 @@ def undoStackBlocking(application=None):
 
 
 @contextmanager
+def waypointBlocking(application=None):
+    """
+    Block addition of new waypoints
+    """
+
+    # get the current application
+    if not application:
+        application = getApplication()
+    if application is None:
+        raise RuntimeError('Error getting application')
+
+    undo = application._getUndo()
+    if undo is None:
+        raise RuntimeError("Unable to get the application's undo stack")
+    _undoStack = []
+
+    undo.newWaypoint()  # DO NOT CHANGE
+    undo.increaseWaypointBlocking()
+
+    try:
+        # transfer control to the calling function, and pass the addUndoItems function
+        yield
+
+    except AttributeError as es:
+        raise es
+
+    finally:
+        # clean up after blocking undo items
+        undo.decreaseWaypointBlocking()
+
+
+@contextmanager
 def deleteBlockManager(application=None, deleteBlockOnly=False):
     """
     Wrap all the following calls with a single undo/redo method.
@@ -803,16 +835,6 @@ def deleteObject():
             with undoStackBlocking(application=application) as addUndoItem:
 
                 _storeDeleteObjectCurrent(self, addUndoItem)
-                # if hasattr(self, CURRENT_ATTRIBUTE_NAME):
-                #     storeObj = _ObjectStore(self)
-                #
-                #     # store the current state - check because item already removed from current?
-                #     storeObj._storeCurrentSelectedObject()
-                #
-                #     # add it to the stack
-                #     addUndoItem(undo=storeObj._restoreCurrentSelectedObject,
-                #                 redo=storeObj._storeCurrentSelectedObject
-                #                 )
 
                 # retrieve list of created items from the api
                 apiObjectsCreated = self._getApiObjectTree()
@@ -830,6 +852,7 @@ def deleteObject():
         return result
 
     return theDecorator
+
 
 @contextmanager
 def renameObject(self):

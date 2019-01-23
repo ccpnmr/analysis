@@ -357,30 +357,38 @@ class SpectrumToolBar(ToolBar):
             if drag.exec_(QtCore.Qt.MoveAction) == QtCore.Qt.MoveAction:
 
                 point = QtGui.QCursor.pos()
-                droppedPoint = self.mapFromGlobal(point)
-                nextButton = self.childAt(droppedPoint)
-                x, y = droppedPoint.x(), droppedPoint.y(),
-                if not nextButton:
-                    nextButton = self.childAt(QtCore.QPoint(30 + x, y))
-                if nextButton:
+                nextButton = QtWidgets.QApplication.widgetAt(point)
+
+                if isinstance(nextButton, QtWidgets.QToolButton) \
+                        and nextButton.actions() \
+                        and nextButton.actions()[0] in self.actions():
+
+                    # don't need to move
                     if nextButton == toolButton:
                         return
-                    # allActionsTexts = [action.text() for action in self.actions()]
+
                     if allActionsTexts.index(toolButton.text()) > allActionsTexts.index(nextButton.text()):
+
+                        # move button to the left
                         self.insertAction(nextButton.actions()[0], toolButton.actions()[0])
                     else:
-                        self.insertAction(toolButton.actions()[0], nextButton.actions()[0])
+
+                        # move button to the right
+                        startInd = allActionsTexts.index(toolButton.text())
+                        endInd = allActionsTexts.index(nextButton.text())
+                        moveleftlist = [action for action in self.actions()]
+                        for act in moveleftlist[startInd + 1:endInd + 1]:
+                            self.insertAction(toolButton.actions()[0], act)
+
+                    actionIndex = [allActionsTexts.index(act.text()) for act in self.actions() if act.text() in allActionsTexts]
+                    self._updateSpectrumViews(actionIndex)
+                    for action in self.actions():
+                        self._setSizes(action)
 
                 else:
-                    # Dropping outside
-                    self.insertAction(toolButton.actions()[0], toolButton.actions()[0])
+                    event.ignore()
             else:
                 event.ignore()
-
-            actionIndex = [allActionsTexts.index(act.text()) for act in self.actions() if act.text() in allActionsTexts]
-            self._updateSpectrumViews(actionIndex)
-            for action in self.actions():
-                self._setSizes(action)
 
     def _eventFilter(self, obj, event):
         """
@@ -460,7 +468,7 @@ class SpectrumToolBar(ToolBar):
 
             spectrumDisplay.spectrumActionDict[apiDataSource] = action
             # The following call sets the icon colours:
-            _spectrumViewHasChanged({Notifier.OBJECT:spectrumView})
+            _spectrumViewHasChanged({Notifier.OBJECT: spectrumView})
 
         # if spectrumDisplay.is1D:
         #     action.toggled.connect(spectrumView.plot.setVisible)

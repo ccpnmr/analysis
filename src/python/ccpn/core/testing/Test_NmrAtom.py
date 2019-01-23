@@ -39,11 +39,11 @@ class NmrAtomTest(WrapperTesting):
         atomN = arg11.fetchNmrAtom('N')
         self.assertEqual(atomN.pid, 'NA:A.11.ARG.N')
 
-        atomNE = self.project._produceNmrAtom('NA:A.11.ARG.NE')
-        atomNE2 = self.project._produceNmrAtom(chainCode='A', sequenceCode='11', name='NE')
+        atomNE = self.project.produceNmrAtom('NA:A.11.ARG.NE')
+        atomNE2 = self.project.produceNmrAtom(chainCode='A', sequenceCode='11', name='NE')
         self.assertIs(atomNE, atomNE2)
 
-        atomCX = self.project._produceNmrAtom('NA:A.11.ARG.CX')
+        atomCX = self.project.produceNmrAtom('NA:A.11.ARG.CX')
         atomNX = arg11.newNmrAtom(name='NX')
         with self.assertRaises(ValueError):
             atomCX.rename('NX')
@@ -63,7 +63,7 @@ class NmrAtomTest(WrapperTesting):
         self.project._wrappedData.root.checkAllValid(complete=True)
 
         with self.assertRaises(ValueError):
-            atomCX = self.project._produceNmrAtom('NA:A.11.VAL.CX')
+            atomCX = self.project.produceNmrAtom('NA:A.11.VAL.CX')
 
         self.assertEqual(atomCX.pid, 'NA:A.888.ARG.C@198')
         # Undo and redo all operations
@@ -72,9 +72,9 @@ class NmrAtomTest(WrapperTesting):
         self.assertEqual(atomCX.pid, 'NA:A.888.ARG.C@198')
 
     def test_produce_reassign(self):
-        at0 = self.project._produceNmrAtom(name='HX')
+        at0 = self.project.produceNmrAtom(name='HX')
         self.assertEqual(at0.id, '@-.@89..HX')
-        at1 = self.project._produceNmrAtom('X.101.VAL.N')
+        at1 = self.project.produceNmrAtom('X.101.VAL.N')
         self.assertEqual(at1.id, 'X.101.VAL.N')
         at1 = at1.assignTo(name='NE')
         self.assertEqual(at1.id, 'X.101.VAL.NE')

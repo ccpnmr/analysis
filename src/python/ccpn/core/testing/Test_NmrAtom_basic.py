@@ -250,8 +250,8 @@ class TestNmrAtomCreation(WrapperTesting):
     def test_CreateNmrAtomByProducingFromProjectByPid(self):
         self.assertEqual(self.nmrResidue.nmrAtoms, [])
 
-        newNmrAtom1 = self.project._produceNmrAtom(name='HX')
-        newNmrAtom2 = self.project._produceNmrAtom(name='HX')
+        newNmrAtom1 = self.project.produceNmrAtom(name='HX')
+        newNmrAtom2 = self.project.produceNmrAtom(name='HX')
 
         self.assertEqual(newNmrAtom1.pid, 'NA:@-.@2..HX')
         self.assertEqual(newNmrAtom2.pid, 'NA:@-.@3..HX')
@@ -259,14 +259,14 @@ class TestNmrAtomCreation(WrapperTesting):
         self.assertEqual(self.project.nmrAtoms, [newNmrAtom1, newNmrAtom2])
 
     def test_CreateNmrAtomByProducingFromProjectWithParametersMismatchedType(self):
-        # self.assertRaises(ValueError, self.project._produceNmrAtom, '@2.@1.ARG.NE')
-        newNmrAtom1 = self.project._produceNmrAtom(atomId='@2.@1.ARG.NE')
+        # self.assertRaises(ValueError, self.project.produceNmrAtom, '@2.@1.ARG.NE')
+        newNmrAtom1 = self.project.produceNmrAtom(atomId='@2.@1.ARG.NE')
         self.assertEqual(newNmrAtom1.pid, 'NA:@2.@1..NE')
 
     def test_CreateNmrAtomByProducingFromProjectByPidWithChain(self):
         self.assertEqual(self.nmrResidue.nmrAtoms, [])
 
-        newNmrAtom = self.project._produceNmrAtom('@2.@1..NE')
+        newNmrAtom = self.project.produceNmrAtom('@2.@1..NE')
 
         self.assertEqual(newNmrAtom.pid, 'NA:@2.@1..NE')
         self.assertEqual(self.project.nmrAtoms, [newNmrAtom])
@@ -276,7 +276,7 @@ class TestNmrAtomCreation(WrapperTesting):
     def test_CreateNmrAtomByProducingFromProjectWithParameters(self):
         self.assertEqual(self.nmrResidue.nmrAtoms, [])
 
-        newNmrAtom = self.project._produceNmrAtom(chainCode='@2',
+        newNmrAtom = self.project.produceNmrAtom(chainCode='@2',
                                                   sequenceCode='@1',
                                                   name='NE')
 
@@ -289,7 +289,7 @@ class TestNmrAtomCreation(WrapperTesting):
         self.assertEqual(self.nmrResidue.nmrAtoms, [])
         self.assertEqual(len(self.project.nmrResidues), 1)
 
-        newNmrAtom = self.project._produceNmrAtom(chainCode='A',
+        newNmrAtom = self.project.produceNmrAtom(chainCode='A',
                                                   sequenceCode='11',
                                                   name='NE')
 
@@ -301,7 +301,7 @@ class TestNmrAtomCreation(WrapperTesting):
     def test_CreateNmrAtomByProducingFromProjectWithPid(self):
         self.assertEqual(self.nmrResidue.nmrAtoms, [])
 
-        newNmrAtom = self.project._produceNmrAtom('NA:A.11.ARG.NE')
+        newNmrAtom = self.project.produceNmrAtom('NA:A.11.ARG.NE')
 
         self.assertEqual(newNmrAtom.pid, 'NA:A.11.ARG.NE')
         self.assertEqual(self.project.nmrAtoms, [newNmrAtom])
@@ -375,7 +375,7 @@ class TestNmrAtomMethods(WrapperTesting):
     def test_ReassignNmrAtomSequenceCode(self):
         self.assertEqual(len(self.project.nmrResidues), 1)
 
-        atom1 = self.project._produceNmrAtom(name='HX')
+        atom1 = self.project.produceNmrAtom(name='HX')
         res1 = atom1.nmrResidue
         self.assertEqual(atom1.pid, 'NA:@-.@2..HX')
         self.assertEqual(res1.pid, 'NR:@-.@2.')
@@ -393,7 +393,7 @@ class TestNmrAtomMethods(WrapperTesting):
     def test_ReassignNmrAtomName(self):
         self.assertEqual(len(self.project.nmrResidues), 1)
 
-        atom1 = self.project._produceNmrAtom('X.101.VAL.N')
+        atom1 = self.project.produceNmrAtom('X.101.VAL.N')
         res1 = atom1.nmrResidue
         self.assertEqual(atom1.pid, 'NA:X.101.VAL.N')
         self.assertEqual(res1.pid, 'NR:X.101.VAL')

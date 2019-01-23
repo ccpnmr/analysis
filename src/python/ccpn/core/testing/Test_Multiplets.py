@@ -123,7 +123,10 @@ class MultipletTest_setUp(WrapperTesting):
         pks2 = self.peakList.newPeak()
         pks2.position = (0.05, 0.5, 0.1)
 
-        pos = (0.45, 0.95, 1.6)
+        # the average of the above points
+        pos = ((0.1 + 0.3 + 0.05) / 3,
+               (0.2 + 0.25 + 0.5) / 3,
+               (0.5 + 1.0 + 0.1) / 3)
         mtPos = mt.position
         for ii in range(len(pos)):
             self.assertAlmostEqual(pos[ii], mtPos[ii])

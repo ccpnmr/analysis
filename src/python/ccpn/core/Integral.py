@@ -240,13 +240,16 @@ class Integral(AbstractWrapperObject):
             for ii in range(spectrum.dimensionCount):
                 limits = value[ii] if value and len(value) > ii else ()
                 if len(limits) == 2:
-                    limit1, limit2 = limits
-                    x = self.integralList.spectrum.positions
-                    index01 = np.where((x <= limit2) & (x >= limit1))
-                    values = spectrum.intensities[index01]
-                    self.value = float(trapz(values))
-                    # set to the attached peak if any
+
+                    # small change, only calculate if there is a peak
                     if self.peak:
+                        limit1, limit2 = limits
+                        x = self.integralList.spectrum.positions
+                        index01 = np.where((x <= limit2) & (x >= limit1))
+                        values = spectrum.intensities[index01]
+                        self.value = float(trapz(values))
+                        # set to the attached peak if any
+                        # if self.peak:
                         self.peak.volume = self.value
 
     @property

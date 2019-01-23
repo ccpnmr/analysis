@@ -1237,6 +1237,9 @@ class Spectrum(AbstractWrapperObject):
         :param sliceDim: Dimension of the slice (1-based)
         :return: numpy data array
         """
+        if position is None:
+            position = [1] * self.dimensionCount
+
         if self.dimensionCount == 1:
             result = self._get1DSliceData(position=position, sliceDim=sliceDim)
         else:

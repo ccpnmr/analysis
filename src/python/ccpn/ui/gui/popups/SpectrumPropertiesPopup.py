@@ -1375,7 +1375,7 @@ class SpectrumDisplayPropertiesPopup1d(CcpnDialog):
                         self._applyAllChanges(changes)
 
             with undoStackBlocking() as addUndoItem:
-                undoItem(redo=partial(_updateGl, self, spectrumList))
+                addUndoItem(redo=partial(_updateGl, self, spectrumList))
 
             for spec in spectrumList:
                 for specViews in spec.spectrumViews:

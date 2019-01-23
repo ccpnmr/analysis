@@ -42,7 +42,7 @@ from ccpn.util.Logging import getLogger, _debug3
 ###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
 ########################################################################################################################
 
-PipeName = 'Peak Detector 1D'
+PipeName = 'Peak Detector 1D (experimental)'
 
 ExcludeRegions = 'Exclude_Regions'
 NoiseThreshold = 'Noise_Threshold'

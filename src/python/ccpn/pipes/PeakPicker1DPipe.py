@@ -158,4 +158,4 @@ class PeakPicker1DPipe(SpectraPipe):
 
         return spectra
 
-# PeakPicker1DPipe.register() # Registers the pipe in the pipeline
+PeakPicker1DPipe.register() # Registers the pipe in the pipeline

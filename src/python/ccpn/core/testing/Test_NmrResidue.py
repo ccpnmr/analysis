@@ -25,6 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+from unittest import skip
 from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 
@@ -649,7 +650,8 @@ class NmrStretchTest(WrapperTesting):
         # self.assertRaises(ValueError,  nmrResidues[1].assignTo, chainCode=nmrChain.shortName,
         #                   sequenceCode=nmrResidues[2])
 
-        nmrResidues[0].residue = residues[5]
+        # nmrResidues[0].residue = residues[5]
+        nmrChain.assignSingleResidue(nmrResidues[0], residues[5])
 
         self.assertRaises(ValueError, nmrChain.assignConnectedResidues, residues[3])
 
@@ -771,8 +773,13 @@ class NmrResidueTest(WrapperTesting):
         res2 = nr2.residue
         res3 = sorted(self.project.chains[0].residues)[2]
         nr3 = res3.nmrResidue
-        nr2.residue = None
-        self.assertEqual(nr2.longPid, "NmrResidue:A.@2.ARG")
+
+        # nr2.residue = None
+        nr2.deassign()
+
+        # self.assertEqual(nr2.longPid, "NmrResidue:A.@2.ARG")
+        self.assertEqual(nr2.longPid, "NmrResidue:A.@2.")
+
         target = self.project.getByPid('NR:A.2.LYS')
         target.rename('.LYS')
         self.assertEqual(target.longPid, "NmrResidue:A.@11.LYS")
@@ -780,11 +787,15 @@ class NmrResidueTest(WrapperTesting):
         self.assertEqual(newNr.longPid, "NmrResidue:@-.@89.")
         nr3.moveToNmrChain(nchain0)
         self.assertEqual(nr3.longPid, "NmrResidue:@-.3.GLU")
-        newNr.residue = res3
+
+        # newNr.residue = res3
+        nchain0.assignSingleResidue(newNr, res3)
+
         self.assertEqual(newNr.longPid, "NmrResidue:A.3.GLU")
         nchain.rename('X')
         self.assertEqual(nchain.longPid, "NmrChain:X")
-        self.assertEqual(nr2.longPid, "NmrResidue:X.@2.ARG")
+        self.assertEqual(nr2.longPid, "NmrResidue:X.@2.")
+
         newNr.rename(None)
         self.assertEqual(newNr.longPid, "NmrResidue:X.@89.")
         self.undo.undo()

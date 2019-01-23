@@ -323,7 +323,7 @@ class Test_Properties(WrapperTesting):
         """
         Test that renaming a Chain with None raises TypeError.
         """
-        with self.assertRaisesRegexp(TypeError, 'must be a string'):
+        with self.assertRaisesRegexp(ValueError, 'None not allowed in Chain name'):
             self.chain.rename(None)
 
     def test_renameChain_Int(self):

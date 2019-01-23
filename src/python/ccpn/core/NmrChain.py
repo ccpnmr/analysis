@@ -165,8 +165,8 @@ class NmrChain(AbstractWrapperObject):
 
         project = self._project
 
-        if self.isConnected:
-            raise ValueError("assignSingleResidue only allowed for single nmrResidue")
+        # if self.isConnected:
+        #     raise ValueError("assignSingleResidue only allowed for single nmrResidue")
 
         # make sure that object exists
         if isinstance(firstResidue, str):
@@ -196,8 +196,8 @@ class NmrChain(AbstractWrapperObject):
         apiNmrChain = self._wrappedData
         project = self._project
 
-        # if not self.isConnected:
-        #   raise ValueError("assignConnectedResidues only allowed for connected NmrChains")
+        if not self.isConnected:
+          raise ValueError("assignConnectedResidues only allowed for connected NmrChains")
 
         if isinstance(firstResidue, str):
             xx = project.getByPid(firstResidue)
@@ -225,6 +225,7 @@ class NmrChain(AbstractWrapperObject):
             else:
                 residues.append(next)
 
+        # check whether
         with logCommandBlock(get='self') as log:
             log('assignConnectedResidues', firstResidue=repr(firstResidue.pid))
 
@@ -236,7 +237,9 @@ class NmrChain(AbstractWrapperObject):
 
             # need the V3 operator here for the undo/redo to fire correctly
             V3nmrChain = self.project._data2Obj[apiNmrChain]
-            V3nmrChain.delete()
+            # only delete if it is not the default chain:
+            if not V3nmrChain.id.startswith('@-'):
+                V3nmrChain.delete()
 
     def reverse(self, _force=False):
         """Reverse order of NmrResidues within NmrChain

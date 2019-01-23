@@ -299,7 +299,7 @@ _coreImportOrder = (
 # This list includes ui classes (added below)
 _importOrder = list(_coreImportOrder)
 
-# {className:class} dictionary in import order for all wrapper classes
+# {className:class, shortClassName:class} dictionary in import order for all wrapper classes
 _coreClassMap = collections.OrderedDict()
 
 # Main data classes

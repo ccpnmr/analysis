@@ -334,8 +334,10 @@ class AbstractWrapperObject(NotifierBase):
         data = self._ccpnInternalData
         space = data.setdefault(namespace, {})
         space[parameterName] = value
-        # Ugly trick to force saving
-        self._wrappedData.__dict__['isModfied'] = True
+        # Explicit assignment to force saving
+        # self._wrappedData.__dict__['isModfied'] = True
+        self._ccpnInternalData = {}
+        self._ccpnInternalData.update(data)
 
     def getParameter(self, namespace:str, parameterName:str):
         """Returns value of parameterName for namespace; returns None if not present"""

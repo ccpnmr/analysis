@@ -241,7 +241,7 @@ class SpectraSelectionWidget(Widget):
             if self.selectSpectraOption.getIndex() == 0:
                 return self._getSelectedSpectra()
             else:
-                return list(set(self._getSpectrumGroupsSpectra()))
+                return self._getSpectrumGroupsSpectra()
         else:
             return []
 

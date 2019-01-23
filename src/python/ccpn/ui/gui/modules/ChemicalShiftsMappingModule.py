@@ -640,10 +640,12 @@ class ChemicalShiftsMapping(CcpnModule):
       for obj, row, in plotData.iterrows():
         ys = list(row.values)
         xs = list(plotData.columns)
-
-        pen = pg.functions.mkPen(hexToRgb(obj._colour), width=1)
-        brush = pg.functions.mkBrush(hexToRgb(obj._colour), width=1)
-        plot = self.bindingPlot.plot(xs, ys, symbol='o', pen=pen, symbolBrush=brush, name=obj.pid)
+        if obj._colour:
+          pen = pg.functions.mkPen(hexToRgb(obj._colour), width=1)
+          brush = pg.functions.mkBrush(hexToRgb(obj._colour), width=1)
+          plot = self.bindingPlot.plot(xs, ys, symbol='o', pen=pen, symbolBrush=brush, name=obj.pid) #name used for legend and retireve the obj
+        else:
+          plot = self.bindingPlot.plot(xs, ys, symbol='o', name=obj.pid)
         plot.sigPointsClicked.connect(self._bindingPlotSingleClick)
 
     self.bindingPlot.autoRange()
@@ -657,9 +659,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
   def _bindingPlotDoubleClick(self, event):
     if self._bindingItemClicked is not  None:
-      print(self._bindingItemClicked)
       self._navigateToNmrItems(self._bindingItemClicked)
-
 
   def _getBindingCurves(self, nmrResidues):
     """

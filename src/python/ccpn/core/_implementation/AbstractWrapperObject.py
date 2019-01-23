@@ -357,6 +357,8 @@ class AbstractWrapperObject(NotifierBase):
     def _str2none(value):
         """Covenience to convert an empty string to None; V2 requirement for some attributes
         """
+        if value is None:
+            return None
         if not isinstance(value, str):
             raise ValueError('Non-string type for value argument')
         return None if len(value) == 0 else value

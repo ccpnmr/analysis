@@ -595,7 +595,8 @@ class Substance(AbstractWrapperObject):
             apiLabeling = DEFAULT_LABELLING
         elif not labelling:
             apiLabeling = DEFAULT_LABELLING
-        self._validateName(value=labelling, allowWhitespace=False, allowEmpty=True)
+        self._validateName(value=labelling, attribName='Labelling',
+                           allowWhitespace=False, allowEmpty=True, allowNone=True)
 
         with renameObject(self) as addUndoItem:
             # renamedObjects = [self]

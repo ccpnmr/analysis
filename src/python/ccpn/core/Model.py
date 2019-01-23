@@ -263,12 +263,6 @@ class Model(AbstractWrapperObject):
         """get wrappedData - all Model children of parent StructureEnsemble"""
         return parent._wrappedData.sortedModels()
 
-    def _finaliseAction(self, action: str):
-        # clean up the model
-        # if action in ['delete']:
-        #     self.clearData()
-        super()._finaliseAction(action)
-
     def delete(self):
         """Delete should notify structureEnsemble of a delete.
         """

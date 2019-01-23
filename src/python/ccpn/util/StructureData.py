@@ -36,7 +36,7 @@ from ccpn.util import Sorting
 from ccpn.util.ListFromString import listFromString
 from json import dumps
 from functools import partial
-from ccpn.core.lib.ContextManagers import logCommandBlock, undoStackBlocking, undoBlock
+from ccpn.core.lib.ContextManagers import logCommandBlock, undoStackBlocking, undoBlock, notificationBlanking
 
 
 # Pid.IDSEP - but we do not want to import from ccpn.core here
@@ -292,6 +292,13 @@ class EnsembleData(pd.DataFrame):
     #   super().drop(labels, axis, level, inplace, errors)
     #   # self.reset_index(drop=True, inplace=True)
 
+    def _finaliseStructureEnsemble(self, action:str):
+        """finalise an action on the containing structureEnsemble.
+        """
+        structureEnsemble = self._structureEnsemble
+        if structureEnsemble is not None:
+            structureEnsemble._finaliseAction(action)
+
     def _finaliseAction(self, action: str):
         super()._finaliseAction(action)
 
@@ -513,7 +520,7 @@ class EnsembleData(pd.DataFrame):
         #         for rowInd in thisInsertSet:
         #             self._insertRow(int(rowInd), **thisInsertSet[rowInd])
         #
-        #     self._structureEnsemble._finaliseAction('change')  # spawn a change event in StructureEnsemble
+        #     self._finaliseStructureEnsemble('change')  # spawn a change event in StructureEnsemble
         #
         # finally:
         #     if containingObject is not None:
@@ -526,7 +533,7 @@ class EnsembleData(pd.DataFrame):
                 for rowInd in thisInsertSet:
                     self._insertRow(int(rowInd), **thisInsertSet[rowInd])
 
-            self._structureEnsemble._finaliseAction('change')  # spawn a change event in StructureEnsemble
+            self._finaliseStructureEnsemble('change')  # spawn a change event in StructureEnsemble
 
         else:
             with undoBlock():
@@ -535,7 +542,7 @@ class EnsembleData(pd.DataFrame):
                     for rowInd in thisInsertSet:
                         self._insertRow(int(rowInd), **thisInsertSet[rowInd])
 
-                self._structureEnsemble._finaliseAction('change')  # spawn a change event in StructureEnsemble
+                self._finaliseStructureEnsemble('change')  # spawn a change event in StructureEnsemble
 
     def deleteSelectedRows(self, **kwargs):
         """
@@ -573,7 +580,8 @@ class EnsembleData(pd.DataFrame):
 
             self.drop(self[rowSelector].index, inplace=True)
             self.reset_index(drop=True, inplace=True)
-            self._structureEnsemble._finaliseAction('change')
+            
+            self._finaliseStructureEnsemble('change')
 
         else:
             with logCommandBlock(get='self') as log:
@@ -591,7 +599,7 @@ class EnsembleData(pd.DataFrame):
                     addUndoItem(undo=partial(self._insertSelectedRows, iSR=colData),
                                 redo=partial(self.deleteSelectedRows, **kwargs))
 
-                self._structureEnsemble._finaliseAction('change')
+                self._finaliseStructureEnsemble('change')
 
     def _insertRow(self, *args, **kwargs):  # ejb
         """
@@ -618,7 +626,7 @@ class EnsembleData(pd.DataFrame):
         #     self.index = neworder  # set the new index
         #     self.sort_index(inplace=True)  # and re-sort the table
         #
-        #     self._structureEnsemble._finaliseAction('change')
+        #     self._finaliseStructureEnsemble('change')
         #
         # finally:
         #     if containingObject is not None:
@@ -635,7 +643,7 @@ class EnsembleData(pd.DataFrame):
             self.index = neworder  # set the new index
             self.sort_index(inplace=True)  # and re-sort the table
 
-            self._structureEnsemble._finaliseAction('change')
+            self._finaliseStructureEnsemble('change')
 
         else:
             with undoBlock():
@@ -649,7 +657,7 @@ class EnsembleData(pd.DataFrame):
                 self.index = neworder  # set the new index
                 self.sort_index(inplace=True)  # and re-sort the table
 
-                self._structureEnsemble._finaliseAction('change')
+                self._finaliseStructureEnsemble('change')
 
     def deleteRow(self, rowNumber: None):  # ejb - *args, **kwargs):
         """
@@ -670,12 +678,12 @@ class EnsembleData(pd.DataFrame):
         index = rowNumber
         if self._containingObject is None:
             # process without undoStack
-            colData = dict((x, self.loc[index].get(x)) for x in self.columns)  # grab the original values
+            # colData = dict((x, self.loc[index].get(x)) for x in self.columns)  # grab the original values
 
             self.drop(index, inplace=True)  # delete the row
             self.reset_index(drop=True, inplace=True)  # ejb - reset the index
 
-            self._structureEnsemble._finaliseAction('change')
+            self._finaliseStructureEnsemble('change')
 
         else:
             with logCommandBlock(get='self') as log:
@@ -690,7 +698,7 @@ class EnsembleData(pd.DataFrame):
                     addUndoItem(undo=partial(self._insertRow, index, **colData),
                                 redo=partial(self.deleteRow, index))
 
-                self._structureEnsemble._finaliseAction('change')
+                self._finaliseStructureEnsemble('change')
 
     def _insertCol(self, *args, **kwargs):  # ejb
         """
@@ -711,11 +719,7 @@ class EnsembleData(pd.DataFrame):
         #     for sInd in kwargs:
         #         self.loc[int(sInd), colIndex] = kwargs[sInd]
         #
-        #     structureEnsemble = self._structureEnsemble
-        #     if structureEnsemble is not None:
-        #         structureEnsemble._finaliseAction('change')
-        #
-        #     self._structureEnsemble._finaliseAction('change')
+        #     self._finaliseStructureEnsemble('change')
         #
         # finally:
         #     if containingObject is not None:
@@ -727,10 +731,7 @@ class EnsembleData(pd.DataFrame):
             for sInd in kwargs:
                 self.loc[int(sInd), colIndex] = kwargs[sInd]
 
-            structureEnsemble = self._structureEnsemble
-            if structureEnsemble is not None:
-                structureEnsemble._finaliseAction('change')
-            self._structureEnsemble._finaliseAction('change')
+            self._finaliseStructureEnsemble('change')
 
         else:
             with undoBlock():
@@ -738,10 +739,7 @@ class EnsembleData(pd.DataFrame):
                 for sInd in kwargs:
                     self.loc[int(sInd), colIndex] = kwargs[sInd]
 
-                structureEnsemble = self._structureEnsemble
-                if structureEnsemble is not None:
-                    structureEnsemble._finaliseAction('change')
-                self._structureEnsemble._finaliseAction('change')
+                self._finaliseStructureEnsemble('change')
 
     def deleteCol(self, columnName=None):  # ejb - , *args, **kwargs):
         """
@@ -765,23 +763,22 @@ class EnsembleData(pd.DataFrame):
         if self._containingObject is None:
             # process without undoStack
             colData = dict((str(sInd), self.loc[sInd].get(colIndex)) for sInd in self.index)  # grab the original values
-
             self.drop(colIndex, axis=1, inplace=True)
-            self._structureEnsemble._finaliseAction('change')
+
+            self._finaliseStructureEnsemble('change')
 
         else:
             with logCommandBlock(get='self') as log:
                 log('deleteCol')
 
                 colData = dict((str(sInd), self.loc[sInd].get(colIndex)) for sInd in self.index)  # grab the original values
-
                 self.drop(colIndex, axis=1, inplace=True)
 
                 with undoStackBlocking() as addUndoItem:
                     addUndoItem(undo=partial(self._insertCol, colIndex, **colData),
                                 redo=partial(self.deleteCol, colIndex))
 
-                self._structureEnsemble._finaliseAction('change')
+                self._finaliseStructureEnsemble('change')
 
     def setValues(self, accessor: typing.Union[int, 'EnsembleData', pd.Series], **kwargs) -> None:
         """
@@ -908,7 +905,7 @@ class EnsembleData(pd.DataFrame):
             for key, val in values.items():
                 self.loc[index, key] = val
 
-            self._structureEnsemble._finaliseAction('change')
+            self._finaliseStructureEnsemble('change')
 
         else:
             with logCommandBlock(get='self') as log:
@@ -934,7 +931,7 @@ class EnsembleData(pd.DataFrame):
                         addUndoItem(undo=partial(self.drop, index, inplace=True),
                                     redo=partial(self.setValues, index, **kwargs))
 
-                    self._structureEnsemble._finaliseAction('change')
+                    self._finaliseStructureEnsemble('change')
 
     ### PDB mapping
 
@@ -978,10 +975,7 @@ class EnsembleData(pd.DataFrame):
             self[name] = value
         else:
             super().__setattr__(name, value)
-
-            structureEnsemble = self._structureEnsemble
-            if structureEnsemble is not None:
-                structureEnsemble._finaliseAction('change')
+            self._finaliseStructureEnsemble('change')
 
     ### Property type checking
 
@@ -1021,9 +1015,9 @@ class EnsembleData(pd.DataFrame):
             # process without undoStack
             self.index = newIndex
             self.sort_index(inplace=True)
+            self.reset_index(drop=True, inplace=True)  # use the correct reset_index
 
-            structureEnsemble = self._structureEnsemble
-            structureEnsemble._finaliseAction('change')
+            self._finaliseStructureEnsemble('change')
 
         else:
             with logCommandBlock(get='self') as log:
@@ -1039,8 +1033,7 @@ class EnsembleData(pd.DataFrame):
                     addUndoItem(undo=partial(self._ccpnUnSort, reordered),
                                 redo=partial(self.ccpnSort, *columns))
 
-                structureEnsemble = self._structureEnsemble
-                structureEnsemble._finaliseAction('change')
+                self._finaliseStructureEnsemble('change')
 
     def reset_index(self, *args, inplace=False, **kwargs):
         """reset_index - overridden to generate index starting at one."""
@@ -1053,9 +1046,7 @@ class EnsembleData(pd.DataFrame):
         new_obj.index = new_obj.index + 1
 
         if inplace:
-            structureEnsemble = self._structureEnsemble
-            if structureEnsemble is not None:
-                structureEnsemble._finaliseAction('change')
+            self._finaliseStructureEnsemble('change')
         else:
             return new_obj
 
@@ -1117,7 +1108,7 @@ class EnsembleData(pd.DataFrame):
                     if firstData:
                         self.reset_index(drop=True, inplace=True)
 
-                    self._structureEnsemble._finaliseAction('change')
+                    self._finaliseStructureEnsemble('change')
 
                 except Exception as es:
                     # We set the new value before the try:, so we need to go back to the previous state
@@ -1128,59 +1119,60 @@ class EnsembleData(pd.DataFrame):
                     raise
 
             else:
-                with undoBlock():
-                    with undoStackBlocking() as addUndoItem:
-                        # WE need a copy, not a view, as this is used for undoing etc.
-                        oldValue = self.get(key)
-                        if oldValue is not None:
-                            oldValue = oldValue.copy()
-                        # NBNB copy.copy returns a VIEW!!!
+                with notificationBlanking():
+                    with undoBlock():
+                        with undoStackBlocking() as addUndoItem:
+                            # WE need a copy, not a view, as this is used for undoing etc.
+                            oldValue = self.get(key)
+                            if oldValue is not None:
+                                oldValue = oldValue.copy()
+                            # NBNB copy.copy returns a VIEW!!!
 
-                        # Set the value using normal pandas behaviour.
-                        # Anyway it is impossible to modify the input, as it could take so many forms
-                        # We clean up the type castings etc. lower down
-                        super().__setitem__(key, value)
+                            # Set the value using normal pandas behaviour.
+                            # Anyway it is impossible to modify the input, as it could take so many forms
+                            # We clean up the type castings etc. lower down
+                            super().__setitem__(key, value)
 
-                        dataType, typeConverterName = columnTypeData
-                        try:
+                            dataType, typeConverterName = columnTypeData
+                            try:
 
-                            if typeConverterName:
-                                if hasattr(self, typeConverterName):
-                                    # get typeConverter and call it. It modifies self in place.
-                                    getattr(self, typeConverterName)()
+                                if typeConverterName:
+                                    if hasattr(self, typeConverterName):
+                                        # get typeConverter and call it. It modifies self in place.
+                                        getattr(self, typeConverterName)()
+                                    else:
+                                        raise RuntimeError("Code Error. Invalid type converter name %s for column %s"
+                                                           % (typeConverterName, key))
                                 else:
-                                    raise RuntimeError("Code Error. Invalid type converter name %s for column %s"
-                                                       % (typeConverterName, key))
-                            else:
-                                # We set again to make sure of the dataType
-                                ll = fitToDataType(self[key], dataType)
-                                if dataType is int and None in ll:
-                                    super().__setitem__(key, pd.Series(ll, self.index, dtype=object))
+                                    # We set again to make sure of the dataType
+                                    ll = fitToDataType(self[key], dataType)
+                                    if dataType is int and None in ll:
+                                        super().__setitem__(key, pd.Series(ll, self.index, dtype=object))
+                                    else:
+                                        super().__setitem__(key, pd.Series(ll, self.index, dtype=dataType))
+
+                                if firstData:
+                                    self.reset_index(drop=True, inplace=True)
+
+                                # add item to the undo stack
+                                if oldValue is None:
+                                    # undo addition of new column
+                                    addUndoItem(undo=partial(self.drop, key, axis=1, inplace=True),
+                                                redo=partial(self.__setitem__, key, value))
                                 else:
-                                    super().__setitem__(key, pd.Series(ll, self.index, dtype=dataType))
+                                    # Undo overwrite of existing column
+                                    addUndoItem(undo=partial(super().__setitem__, key, oldValue),
+                                                redo=partial(self.__setitem__, key, value))
 
-                            if firstData:
-                                self.reset_index(drop=True, inplace=True)
+                                self._finaliseStructureEnsemble('change')
 
-                            # add item to the undo stack
-                            if oldValue is None:
-                                # undo addition of new column
-                                addUndoItem(undo=partial(self.drop, key, axis=1, inplace=True),
-                                            redo=partial(self.__setitem__, key, value))
-                            else:
-                                # Undo overwrite of existing column
-                                addUndoItem(undo=partial(super().__setitem__, key, oldValue),
-                                            redo=partial(self.__setitem__, key, value))
-
-                            self._structureEnsemble._finaliseAction('change')
-
-                        except Exception as es:
-                            # We set the new value before the try:, so we need to go back to the previous state
-                            if oldValue is None:
-                                self.drop(key, axis=1, inplace=True)
-                            else:
-                                super().__setitem__(key, oldValue)
-                            raise
+                            except Exception as es:
+                                # We set the new value before the try:, so we need to go back to the previous state
+                                if oldValue is None:
+                                    self.drop(key, axis=1, inplace=True)
+                                else:
+                                    super().__setitem__(key, oldValue)
+                                raise
 
     def _modelNumberConversion(self, force: bool = False):
         """Convert modelNumber series to valid data, changing value *in place*

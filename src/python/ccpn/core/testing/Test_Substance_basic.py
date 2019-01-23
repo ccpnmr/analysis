@@ -227,7 +227,8 @@ class SubstanceProperties(WrapperTesting):
         self.assertEqual(s.atomCount, 0)
         self.assertEqual(s.bondCount, 0)
         self.assertIsNone(s.casNumber)
-        self.assertIsNone(s.comment)
+        # self.assertIsNone(s.comment)
+        self.assertEqual(s.comment, '')                    # comments now use None2Str
         self.assertIsNone(s.logPartitionCoefficient)
         self.assertIsNone(s.empiricalFormula)
         self.assertEqual(s.hBondAcceptorCount, 0)
@@ -273,7 +274,8 @@ class SubstanceProperties(WrapperTesting):
         self.assertEqual(s.atomCount, 0)
         self.assertEqual(s.bondCount, 0)
         self.assertIsNone(s.casNumber)
-        self.assertIsNone(s.comment)
+        # self.assertIsNone(s.comment)
+        self.assertEqual(s.comment, '')                    # comments now use None2Str
         self.assertIsNone(s.logPartitionCoefficient)
         self.assertIsNone(s.empiricalFormula)
         self.assertEqual(s.hBondAcceptorCount, 0)
@@ -314,7 +316,8 @@ class SubstanceProperties(WrapperTesting):
         self.assertIsNone(s.atomCount)
         self.assertIsNone(s.bondCount)
         self.assertIsNone(s.casNumber)
-        self.assertIsNone(s.comment)
+        # self.assertIsNone(s.comment)
+        self.assertEqual(s.comment, '')                    # comments now use None2Str
         self.assertIsNone(s.logPartitionCoefficient)
         self.assertIsNone(s.empiricalFormula)
         self.assertIsNone(s.hBondAcceptorCount)
@@ -352,7 +355,8 @@ class SubstanceProperties(WrapperTesting):
         self.assertIsNone(s.atomCount)
         self.assertIsNone(s.bondCount)
         self.assertIsNone(s.casNumber)
-        self.assertIsNone(s.comment)
+        # self.assertIsNone(s.comment)
+        self.assertEqual(s.comment, '')                    # comments now use None2Str
         self.assertIsNone(s.logPartitionCoefficient)
         self.assertIsNone(s.empiricalFormula)
         self.assertIsNone(s.hBondAcceptorCount)
@@ -390,7 +394,8 @@ class SubstanceProperties(WrapperTesting):
         self.assertIsNone(s.atomCount)
         self.assertIsNone(s.bondCount)
         self.assertIsNone(s.casNumber)
-        self.assertIsNone(s.comment)
+        # self.assertIsNone(s.comment)
+        self.assertEqual(s.comment, '')                    # comments now use None2Str
         self.assertIsNone(s.logPartitionCoefficient)
         self.assertIsNone(s.empiricalFormula)
         self.assertIsNone(s.hBondAcceptorCount)

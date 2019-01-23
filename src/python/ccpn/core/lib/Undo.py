@@ -163,6 +163,16 @@ class Undo(deque):
         Modify with increaseBlocking/decreaseBlocking only"""
         return self._undoItemBlockingLevel > 0
 
+    @property
+    def undoItemBlockingLevel(self):
+        """Undo blocking Level. If true (non-zero) undo setting is blocked.
+        Allows multiple external functions to set blocking without trampling each other
+
+        Modify with increaseBlocking/decreaseBlocking only"""
+
+        # needed for a single occurrence in api
+        return self._undoItemBlockingLevel
+
     def increaseBlocking(self):
         """Set one more level of blocking"""
         self._undoItemBlockingLevel += 1

@@ -72,7 +72,7 @@ class GLRegion(QtWidgets.QWidget):
                  obj=None, objectView=None, lineStyle='dashed', lineWidth=1.0,
                  regionType=GLREGIONTYPE):
 
-        super(GLRegion, self).__init__(parent)
+        super().__init__(parent)
 
         self._parent = parent
         self._glList = glList
@@ -396,9 +396,6 @@ class GLExternalRegion(GLVertexArray):
                                       obj=obj,
                                       objectView=objectView)
         self._regions.append(newRegion)
-
-        # # set up the VBOs
-        newRegion._integralArea.defineVertexColorVBO(enableVBO=True)
 
         axisIndex = 0
         for ps, psCode in enumerate(self._parent.axisOrder[0:2]):

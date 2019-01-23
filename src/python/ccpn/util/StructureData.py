@@ -292,6 +292,9 @@ class EnsembleData(pd.DataFrame):
     #   super().drop(labels, axis, level, inplace, errors)
     #   # self.reset_index(drop=True, inplace=True)
 
+    def _finaliseAction(self, action: str):
+        super()._finaliseAction(action)
+
     def selector(self, index=None, chainCodes=None, residueNames=None, sequenceIds=None,
                  atomNames=None, modelNumbers=None, ids=None,
                  elements=None, func=None, inverse=False) -> pd.Series:
@@ -498,12 +501,26 @@ class EnsembleData(pd.DataFrame):
         Re-insert rows that have been deleted with deleteSelectedRows below
         This is for use by undo/redo only
         """
-        containingObject = self._containingObject
-        if containingObject is not None:
-            undo = containingObject._project._undo  # check that this is valid
-            undo.increaseBlocking()
 
-        try:
+        # containingObject = self._containingObject
+        # if containingObject is not None:
+        #     undo = containingObject._project._undo  # check that this is valid
+        #     undo.increaseBlocking()
+        #
+        # try:
+        #     insertSet = kwargs['iSR']
+        #     for thisInsertSet in insertSet:
+        #         for rowInd in thisInsertSet:
+        #             self._insertRow(int(rowInd), **thisInsertSet[rowInd])
+        #
+        #     self._structureEnsemble._finaliseAction('change')  # spawn a change event in StructureEnsemble
+        #
+        # finally:
+        #     if containingObject is not None:
+        #         undo.decreaseBlocking()
+
+        if self._containingObject is None:
+            # process without undoStack
             insertSet = kwargs['iSR']
             for thisInsertSet in insertSet:
                 for rowInd in thisInsertSet:
@@ -511,9 +528,14 @@ class EnsembleData(pd.DataFrame):
 
             self._structureEnsemble._finaliseAction('change')  # spawn a change event in StructureEnsemble
 
-        finally:
-            if containingObject is not None:
-                undo.decreaseBlocking()
+        else:
+            with undoBlock():
+                insertSet = kwargs['iSR']
+                for thisInsertSet in insertSet:
+                    for rowInd in thisInsertSet:
+                        self._insertRow(int(rowInd), **thisInsertSet[rowInd])
+
+                self._structureEnsemble._finaliseAction('change')  # spawn a change event in StructureEnsemble
 
     def deleteSelectedRows(self, **kwargs):
         """
@@ -551,6 +573,7 @@ class EnsembleData(pd.DataFrame):
 
             self.drop(self[rowSelector].index, inplace=True)
             self.reset_index(drop=True, inplace=True)
+            self._structureEnsemble._finaliseAction('change')
 
         else:
             with logCommandBlock(get='self') as log:
@@ -580,12 +603,29 @@ class EnsembleData(pd.DataFrame):
         :param *args: index in args[0]
         :param kwargs: dict of items to reinsert
         """
-        containingObject = self._containingObject
-        if containingObject is not None:
-            undo = containingObject._project._undo  # check that this is valid
-            undo.increaseBlocking()
+        # containingObject = self._containingObject
+        # if containingObject is not None:
+        #     undo = containingObject._project._undo  # check that this is valid
+        #     undo.increaseBlocking()
+        #
+        # try:
+        #     index = int(args[0])
+        #     len = self.shape[0]  # current rows
+        #     for key in kwargs:
+        #         self.loc[len + 1, key] = kwargs[key]  # force an extra row
+        #
+        #     neworder = [x for x in range(1, index)] + [x for x in range(index + 1, len + 2)] + [index]
+        #     self.index = neworder  # set the new index
+        #     self.sort_index(inplace=True)  # and re-sort the table
+        #
+        #     self._structureEnsemble._finaliseAction('change')
+        #
+        # finally:
+        #     if containingObject is not None:
+        #         undo.decreaseBlocking()
 
-        try:
+        if self._containingObject is None:
+            # process without undoStack
             index = int(args[0])
             len = self.shape[0]  # current rows
             for key in kwargs:
@@ -597,9 +637,19 @@ class EnsembleData(pd.DataFrame):
 
             self._structureEnsemble._finaliseAction('change')
 
-        finally:
-            if containingObject is not None:
-                undo.decreaseBlocking()
+        else:
+            with undoBlock():
+
+                index = int(args[0])
+                len = self.shape[0]  # current rows
+                for key in kwargs:
+                    self.loc[len + 1, key] = kwargs[key]  # force an extra row
+
+                neworder = [x for x in range(1, index)] + [x for x in range(index + 1, len + 2)] + [index]
+                self.index = neworder  # set the new index
+                self.sort_index(inplace=True)  # and re-sort the table
+
+                self._structureEnsemble._finaliseAction('change')
 
     def deleteRow(self, rowNumber: None):  # ejb - *args, **kwargs):
         """
@@ -625,6 +675,8 @@ class EnsembleData(pd.DataFrame):
             self.drop(index, inplace=True)  # delete the row
             self.reset_index(drop=True, inplace=True)  # ejb - reset the index
 
+            self._structureEnsemble._finaliseAction('change')
+
         else:
             with logCommandBlock(get='self') as log:
                 log('deleteRow')
@@ -649,12 +701,28 @@ class EnsembleData(pd.DataFrame):
         :param *args: colIndex in args[0]
         :param kwargs: items to reinsert as a Dict
         """
-        containingObject = self._containingObject
-        if containingObject is not None:
-            undo = containingObject._project._undo  # check that this is valid
-            undo.increaseBlocking()  # not sure that this is needed here
-            # I think it is all handled by undo
-        try:
+        # containingObject = self._containingObject
+        # if containingObject is not None:
+        #     undo = containingObject._project._undo  # check that this is valid
+        #     undo.increaseBlocking()  # not sure that this is needed here
+        #     # I think it is all handled by undo
+        # try:
+        #     colIndex = str(args[0])  # get the index from the first arg value
+        #     for sInd in kwargs:
+        #         self.loc[int(sInd), colIndex] = kwargs[sInd]
+        #
+        #     structureEnsemble = self._structureEnsemble
+        #     if structureEnsemble is not None:
+        #         structureEnsemble._finaliseAction('change')
+        #
+        #     self._structureEnsemble._finaliseAction('change')
+        #
+        # finally:
+        #     if containingObject is not None:
+        #         undo.decreaseBlocking()
+
+        if self._containingObject is None:
+            # process without undoStack
             colIndex = str(args[0])  # get the index from the first arg value
             for sInd in kwargs:
                 self.loc[int(sInd), colIndex] = kwargs[sInd]
@@ -662,12 +730,18 @@ class EnsembleData(pd.DataFrame):
             structureEnsemble = self._structureEnsemble
             if structureEnsemble is not None:
                 structureEnsemble._finaliseAction('change')
-
             self._structureEnsemble._finaliseAction('change')
 
-        finally:
-            if containingObject is not None:
-                undo.decreaseBlocking()
+        else:
+            with undoBlock():
+                colIndex = str(args[0])  # get the index from the first arg value
+                for sInd in kwargs:
+                    self.loc[int(sInd), colIndex] = kwargs[sInd]
+
+                structureEnsemble = self._structureEnsemble
+                if structureEnsemble is not None:
+                    structureEnsemble._finaliseAction('change')
+                self._structureEnsemble._finaliseAction('change')
 
     def deleteCol(self, columnName=None):  # ejb - , *args, **kwargs):
         """
@@ -693,6 +767,7 @@ class EnsembleData(pd.DataFrame):
             colData = dict((str(sInd), self.loc[sInd].get(colIndex)) for sInd in self.index)  # grab the original values
 
             self.drop(colIndex, axis=1, inplace=True)
+            self._structureEnsemble._finaliseAction('change')
 
         else:
             with logCommandBlock(get='self') as log:
@@ -833,6 +908,8 @@ class EnsembleData(pd.DataFrame):
             for key, val in values.items():
                 self.loc[index, key] = val
 
+            self._structureEnsemble._finaliseAction('change')
+
         else:
             with logCommandBlock(get='self') as log:
                 log('setValues')
@@ -945,6 +1022,9 @@ class EnsembleData(pd.DataFrame):
             self.index = newIndex
             self.sort_index(inplace=True)
 
+            structureEnsemble = self._structureEnsemble
+            structureEnsemble._finaliseAction('change')
+
         else:
             with logCommandBlock(get='self') as log:
                 log('ccpnSort')
@@ -1036,6 +1116,8 @@ class EnsembleData(pd.DataFrame):
 
                     if firstData:
                         self.reset_index(drop=True, inplace=True)
+
+                    self._structureEnsemble._finaliseAction('change')
 
                 except Exception as es:
                     # We set the new value before the try:, so we need to go back to the previous state

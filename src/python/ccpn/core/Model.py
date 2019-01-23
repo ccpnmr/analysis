@@ -264,9 +264,16 @@ class Model(AbstractWrapperObject):
 
     def _finaliseAction(self, action: str):
         # clean up the model
-        if action in ['delete']:
-            self.clearData()
+        # if action in ['delete']:
+        #     self.clearData()
         super()._finaliseAction(action)
+
+    @deleteObject()
+    def delete(self):
+        """Delete should notify structureEnsemble of a delete.
+        """
+        self.clearData()
+        super().delete()
 
     #=========================================================================================
     # CCPN functions

@@ -319,7 +319,7 @@ class TestPandasData(WrapperTesting):
         self.undo.redo()  # delete index='1, 2, 6-7, 9' again
         self.undo.undo()  # recover deleted rows index='1, 2, 6-7, 9' again
 
-        with self.assertRaisesRegexp(TypeError, 'required positional argument'):  # should raise ValueError
+        with self.assertRaisesRegexp(TypeError, 'deleteCol: required positional argument'):  # should raise ValueError
             self.data.deleteCol()
         with self.assertRaisesRegexp(ValueError, 'deleteCol: Column does not exist'):  # should raise ValueError
             self.data.deleteCol('notFound')

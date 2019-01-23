@@ -239,9 +239,9 @@ class Model(AbstractWrapperObject):
 
             containingObject = data._containingObject  # supresses the creation of intermediate
 
-            from ccpn.core.lib.ContextManagers import logCommandManager
+            from ccpn.core.lib.ContextManagers import logCommandBlock
 
-            with logCommandManager(get='self') as log:
+            with logCommandBlock(get='self') as log:
                 log('clearData')
 
                 if 'modelNumber' in data.columns:

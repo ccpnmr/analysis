@@ -154,7 +154,7 @@ class StructureEnsembleTesting_Properties(WrapperTesting):
         """
         # checkGetSetAttr(self, self.project.structureEnsembles[0], 'name', 'ValidName')
 
-        self.assertEquals(self.project.structureEnsembles[0].name, 'Structure')
+        self.assertEquals(self.project.structureEnsembles[0].name, 'structureensemble')
         self.project.structureEnsembles[0].rename('validName')
         self.assertEquals(self.project.structureEnsembles[0].name, 'validName')
 

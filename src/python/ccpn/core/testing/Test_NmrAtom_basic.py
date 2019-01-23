@@ -259,9 +259,9 @@ class TestNmrAtomCreation(WrapperTesting):
         self.assertEqual(self.project.nmrAtoms, [newNmrAtom1, newNmrAtom2])
 
     def test_CreateNmrAtomByProducingFromProjectWithParametersMismatchedType(self):
-        # self.assertRaises(ValueError, self.project.produceNmrAtom, '@2.@1.ARG.NE')
-        newNmrAtom1 = self.project.produceNmrAtom(atomId='@2.@1.ARG.NE')
-        self.assertEqual(newNmrAtom1.pid, 'NA:@2.@1..NE')
+        self.assertRaises(ValueError, self.project.produceNmrAtom, '@2.@1.ARG.NE')
+        # newNmrAtom1 = self.project.produceNmrAtom(atomId='@2.@1.ARG.NE')
+        # self.assertEqual(newNmrAtom1.pid, 'NA:@2.@1..NE')
 
     def test_CreateNmrAtomByProducingFromProjectByPidWithChain(self):
         self.assertEqual(self.nmrResidue.nmrAtoms, [])
@@ -469,7 +469,7 @@ class TestNmrAtomReceivedProperties(WrapperTesting):
     def test_NmrResidueName(self):
         self.assertEqual(self.nmrAtom.nmrResidue.residueType, '')
 
-    # @unittest.skip('ISSUE: Is there any way to pair Atom with NmrAtom other than by residue?')
+    @unittest.skip('ISSUE: Is there any way to pair Atom with NmrAtom other than by residue? - linking no longer allowed')
     # sort-of, move to new residue and link that
     def test_AtomAtom(self):
         self.assertIsNone(self.nmrAtom.atom)

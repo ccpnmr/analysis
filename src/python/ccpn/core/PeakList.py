@@ -652,8 +652,8 @@ class PeakList(AbstractWrapperObject):
             else:
                 raise ValueError("PeakList has no attribute %s" % key)
         newPeakList = targetSpectrum.newPeakList(**params)
-        newPeakList.symbolColour = targetSpectrum.positiveContourColour
-        newPeakList.textColour = targetSpectrum.positiveContourColour
+        # newPeakList.symbolColour = targetSpectrum.positiveContourColour
+        # newPeakList.textColour = targetSpectrum.positiveContourColour
         for peak in self.peaks:
             peak.copyTo(newPeakList)
         #

@@ -488,10 +488,11 @@ class SidebarABC(NotifierBase):
         trigger = cDict[Notifier.TRIGGER]
         obj = cDict[Notifier.OBJECT]
 
+        print('>>>>>>', trigger, obj)
+
         # Define the actions
         if trigger == Notifier.RENAME and self.rebuildOnRename in [None, 'self']:
             # Just rename the node
-            oldPid = cDict[Notifier.OLDPID]
 
             node = self.findChildNodeObject(obj)
             if not node:

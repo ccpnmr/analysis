@@ -54,6 +54,7 @@ class _LeftListWidget(ListWidget):
         super().dropEvent(event=event)
         self.parent()._removeFromRight()
 
+
 class _RightListWidget(ListWidget):
     """Subclassed for dropEvent"""
 
@@ -275,6 +276,20 @@ class _GroupEditorPopupABC(CcpnDialog):
         if len(rightPids) == 0:
             self._addDescription(self.rightListWidget, self.RIGHT_EMPTY_TEXT)
 
+    def _removeLeftDescription(self, texts):
+        """remove the empty description from the list.
+        """
+        if self.LEFT_EMPTY_TEXT in texts:
+            texts.remove(self.LEFT_EMPTY_TEXT)
+        return texts
+
+    def _removeRightDescription(self, texts):
+        """remove the empty description from the list.
+        """
+        if self.RIGHT_EMPTY_TEXT in texts:
+            texts.remove(self.RIGHT_EMPTY_TEXT)
+        return texts
+
     def _setLeftListWidgetItems(self, items: list):
         """Convenience to set the items in the left ListWidget
         """
@@ -346,6 +361,8 @@ class _GroupEditorPopupABC(CcpnDialog):
             return False
 
         pids = self.leftListWidget.getTexts()
+        pids = self._removeLeftDescription(pids)
+
         items = [self.project.getByPid(pid) for pid in pids]
         if None in items:
             msg = 'Could not convert all pids to objects'

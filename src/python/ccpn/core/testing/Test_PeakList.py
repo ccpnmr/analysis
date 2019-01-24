@@ -68,9 +68,13 @@ class PeakListTest2(WrapperTesting):
         peakList2 = peakList.copyTo(spectrum)
 
         self.assertEquals(peakList2.serial, 4)
+        # self.assertEquals(peakList2.comment,
+        #                   """Copy of PeakList:3dNOESY-182.3
+        #                   ARIA2_NOE_Peaks_run1_it8_auto1195328348.86|6|1|2"""
+        #                   )
         self.assertEquals(peakList2.comment,
-                          """Copy of PeakList:3dNOESY-182.3
-                          ARIA2_NOE_Peaks_run1_it8_auto1195328348.86|6|1|2"""
+                          "Copy of PeakList:3dNOESY-182.3\n" +
+                          "ARIA2_NOE_Peaks_run1_it8_auto1195328348.86|6|1|2"
                           )
 
         for tag in self.singleValueTags:
@@ -105,8 +109,8 @@ class PeakListTest2(WrapperTesting):
 
         self.assertEquals(peakList2.serial, 2)
         self.assertEquals(peakList2.comment,
-                          """Copy of PeakList:3dNOESY-182.3
-                          ARIA2_NOE_Peaks_run1_it8_auto1195328348.86|6|1|2"""
+                          "Copy of PeakList:3dNOESY-182.3\n" +
+                          "ARIA2_NOE_Peaks_run1_it8_auto1195328348.86|6|1|2"
                           )
 
         for tag in self.singleValueTags:

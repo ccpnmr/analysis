@@ -777,9 +777,9 @@ class GuiStrip(Frame):
         except:
             format = "%s: %.3f  %s: %.4g"
 
-    def _maximiseRegions(self):
+    def autoRange(self):
         try:
-            self._CcpnGLWidget._maximiseRegions()
+            self._CcpnGLWidget.autoRange()
         except Exception as es:
             getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
 

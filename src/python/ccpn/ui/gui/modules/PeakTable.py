@@ -78,8 +78,7 @@ class PeakTableModule(CcpnModule):
                                                  setLayout=True,
                                                  grid=(0, 0))
 
-        if peakList is not None:
-            self.selectPeakList(peakList)
+        self.selectPeakList(peakList)
 
         self.installMaximiseEventHandler(self._maximise, self._closeModule)
 
@@ -342,8 +341,9 @@ class PeakListTableWidget(QuickTable):
         # print('>>>PeakTable _selectPeakList', repr(self))
 
         if peakList is None:
-            logger.warning('select: No PeakList selected')
-            raise ValueError('select: No PeakList selected')
+            # logger.warning('select: No PeakList selected')
+            # raise ValueError('select: No PeakList selected')
+            self.pLwidget.selectFirstItem()
         else:
             if not isinstance(peakList, PeakList):
                 logger.warning('select: Object is not of type PeakList')

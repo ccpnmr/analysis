@@ -95,8 +95,7 @@ class RestraintTableModule(CcpnModule):
                                              setLayout=True,
                                              grid=(0, 0))
 
-        if restraintList is not None:
-            self.selectRestraintList(restraintList)
+        self.selectRestraintList(restraintList)
 
         # install the event filter to handle maximising from floated dock
         self.installMaximiseEventHandler(self._maximise, self._closeModule)
@@ -109,7 +108,7 @@ class RestraintTableModule(CcpnModule):
 
     def selectRestraintList(self, restraintList=None):
         """
-        Manually select a StructureEnsemble from the pullDown
+        Manually select a restraintTable from the pullDown
         """
         self.restraintTable._selectRestraintList(restraintList)
 
@@ -276,8 +275,9 @@ class RestraintTable(QuickTable):
         Manually select a restraintList from the pullDown
         """
         if restraintList is None:
-            logger.debug('select: No RestraintList selected')
-            raise ValueError('select: No RestraintList selected')
+            # logger.debug('select: No RestraintList selected')
+            # raise ValueError('select: No RestraintList selected')
+            self.rtWidget.selectFirstItem()
         else:
             if not isinstance(restraintList, RestraintList):
                 logger.debug('select: Object is not of type RestraintList')

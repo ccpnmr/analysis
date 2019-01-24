@@ -171,8 +171,7 @@ class StructureTableModule(CcpnModule):
                                              setLayout=True,
                                              grid=(0, 0))
 
-        if structureEnsemble is not None:
-            self.selectStructureEnsemble(structureEnsemble)
+        self.selectStructureEnsemble(structureEnsemble)
 
     def selectStructureEnsemble(self, structureEnsemble=None):
         """
@@ -488,8 +487,9 @@ class StructureTable(QuickTableStructure):
         Manually select a StructureEnsemble from the pullDown
         """
         if structureEnsemble is None:
-            getLogger().warning('select: No StructureEnsemble selected')
-            raise ValueError('select: No StructureEnsemble selected')
+            # getLogger().warning('select: No StructureEnsemble selected')
+            # raise ValueError('select: No StructureEnsemble selected')
+            self.stWidget.selectFirstItem()
         else:
             if not isinstance(structureEnsemble, StructureEnsemble):
                 getLogger().warning('select: Object is not of type StructureEnsemble')

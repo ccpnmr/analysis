@@ -170,6 +170,8 @@ class NotesEditorModule(CcpnModule):
         Manually select a Note from the pullDown
         """
         if note is None:
+            # logger.warning('select: No Note selected')
+            # raise ValueError('select: No Note selected')
             self.noWidget.selectFirstItem()
         else:
             if not isinstance(note, Note):

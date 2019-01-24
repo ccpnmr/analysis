@@ -82,8 +82,7 @@ class ResidueTableModule(CcpnModule):
                                                multiSelect=True,
                                                grid=(0, 0))
 
-        if chain is not None:
-            self.selectChain(chain)
+        self.selectChain(chain)
 
         self.installMaximiseEventHandler(self._maximise, self._closeModule)
 
@@ -275,8 +274,9 @@ class ResidueTable(QuickTable):
         Manually select a Chain from the pullDown
         """
         if chain is None:
-            logger.warning('select: No Chain selected')
-            raise ValueError('select: No Chain selected')
+            # logger.warning('select: No Chain selected')
+            # raise ValueError('select: No Chain selected')
+            self.cWidget.selectFirstItem()
         else:
             if not isinstance(chain, Chain):
                 logger.warning('select: Object is not of type Chain')

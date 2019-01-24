@@ -89,8 +89,7 @@ class MultipletTableModule(CcpnModule):
                                                            moduleParent=self, setLayout=True,
                                                            grid=(0, 0))
 
-        if multipletList is not None:
-            self.selectMultipletList(multipletList)
+        self.selectMultipletList(multipletList)
 
         self.installMaximiseEventHandler(self._maximise, self._closeModule)
 
@@ -342,8 +341,9 @@ class MultipletListTableWidget(QuickTable):
         Manually select a MultipletList from the pullDown
         """
         if multipletList is None:
-            logger.warning('select: No MultipletList selected')
-            raise ValueError('select: No MultipletList selected')
+            # logger.warning('select: No MultipletList selected')
+            # raise ValueError('select: No MultipletList selected')
+            self.mLwidget.selectFirstItem()
         else:
             if not isinstance(multipletList, MultipletList):
                 logger.warning('select: Object is not of type MultipletList')

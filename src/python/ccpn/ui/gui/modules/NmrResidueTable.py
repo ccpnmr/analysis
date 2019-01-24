@@ -103,8 +103,7 @@ class NmrResidueTableModule(CcpnModule):
                                                multiSelect=True,
                                                grid=(0, 0))
 
-        if nmrChain is not None:
-            self.selectNmrChain(nmrChain)
+        self.selectNmrChain(nmrChain)
 
         # install the event filter to handle maximising from floated dock
         self.installMaximiseEventHandler(self._maximise, self._closeModule)
@@ -353,8 +352,9 @@ class NmrResidueTable(QuickTable):
         Manually select a NmrChain from the pullDown
         """
         if nmrChain is None:
-            logger.warning('select: No NmrChain selected')
-            raise ValueError('select: No NmrChain selected')
+            # logger.warning('select: No NmrChain selected')
+            # raise ValueError('select: No NmrChain selected')
+            self.ncWidget.selectFirstItem()
         else:
             if not isinstance(nmrChain, NmrChain):
                 logger.warning('select: Object is not of type NmrChain')

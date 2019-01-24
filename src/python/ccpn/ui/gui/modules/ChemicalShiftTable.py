@@ -131,10 +131,8 @@ class ChemicalShiftTableModule(CcpnModule):
                                                      moduleParent=self,
                                                      setLayout=True,
                                                      grid=(0, 0))
-        # settingsWidget
 
-        if chemicalShiftList is not None:
-            self.selectChemicalShiftList(chemicalShiftList)
+        self.selectChemicalShiftList(chemicalShiftList)
 
         self.installMaximiseEventHandler(self._maximise, self._closeModule)
 
@@ -313,8 +311,9 @@ class ChemicalShiftTable(QuickTable):
         Manually select a ChemicalShiftList from the pullDown
         """
         if chemicalShiftList is None:
-            logger.warning('select: No ChemicalShiftList selected')
-            raise ValueError('select: No ChemicalShiftList selected')
+            # logger.warning('select: No ChemicalShiftList selected')
+            # raise ValueError('select: No ChemicalShiftList selected')
+            self._chemicalShiftListPulldown.selectFirstItem()
         else:
             if not isinstance(chemicalShiftList, ChemicalShiftList):
                 logger.warning('select: Object is not of type ChemicalShiftList')

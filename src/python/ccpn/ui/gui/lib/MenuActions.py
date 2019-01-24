@@ -518,7 +518,7 @@ class _openItemSampleDisplay(OpenItemABC):
                         spectrumDisplay.displaySpectrum(spectrum)
             mainWindow.application.current.strip = spectrumDisplay.strips[0]
             # if any([spec.dimensionCount for spec in sample.spectra]) == 1:
-            spectrumDisplay._maximiseRegions()
+            spectrumDisplay.autoRange()
 
     openItemDirectMethod = _openSampleSpectra
 
@@ -536,7 +536,7 @@ class _openItemSpectrumDisplay(OpenItemABC):
         if len(spectrumDisplay.strips) > 0:
             mainWindow.current.strip = spectrumDisplay.strips[0]
             # if spectrum.dimensionCount == 1:
-            spectrumDisplay._maximiseRegions()
+            spectrumDisplay.autoRange()
             # mainWindow.current.strip.plotWidget.autoRange()
 
         mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
@@ -576,7 +576,7 @@ class _openItemSpectrumGroupDisplay(OpenItemABC):
             spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
             mainWindow.application.current.strip = spectrumDisplay.strips[0]
             # if any([sp.dimensionCount for sp in spectrumGroup.spectra]) == 1:
-            spectrumDisplay._maximiseRegions()
+            spectrumDisplay.autoRange()
 
     openItemDirectMethod = _openSpectrumGroup
 

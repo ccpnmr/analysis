@@ -590,7 +590,7 @@ class CcpnGLWidget(QOpenGLWidget):
             region.region = value
         self.strip.project._undo.decreaseBlocking()
 
-    def _maximiseRegions(self):
+    def autoRange(self):
         self._updateVisibleSpectrumViews()
         for spectrumView in self._ordering:  # strip.spectrumViews:  #.orderedSpectrumViews():
             if spectrumView.isDeleted:

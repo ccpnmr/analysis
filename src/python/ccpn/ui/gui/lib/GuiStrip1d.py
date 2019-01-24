@@ -235,9 +235,9 @@ class GuiStrip1d(GuiStrip):
             spectrum.intensities = intensities
         self.spectrumDisplay.togglePhaseConsole()
 
-    def _maximiseRegions(self):
+    def autoRange(self):
         try:
-            self._CcpnGLWidget._maximiseRegions()
+            self._CcpnGLWidget.autoRange()
         except Exception as es:
             getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
 

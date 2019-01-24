@@ -1210,11 +1210,11 @@ class GuiSpectrumDisplay(CcpnModule):
                 # fix the width of the stripFrame
                 self.stripFrame.setMinimumWidth(self.stripFrame.minimumSizeHint().width())
 
-    def _maximiseRegions(self):
+    def autoRange(self):
         """Zooms Y axis of current strip to show entire region.
         """
         for strip in self.strips:
-            strip._maximiseRegions()
+            strip.autoRange()
 
     def resetYZooms(self):
         """Zooms Y axis of current strip to show entire region.

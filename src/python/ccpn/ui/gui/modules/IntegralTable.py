@@ -75,8 +75,7 @@ class IntegralTableModule(CcpnModule):
                                            setLayout=True,
                                            grid=(0, 0))
 
-        if integralList is not None:
-            self.selectIntegralList(integralList)
+        self.selectIntegralList(integralList)
 
         # install the event filter to handle maximising from floated dock
         self.installMaximiseEventHandler(self._maximise, self._closeModule)
@@ -223,8 +222,9 @@ class IntegralTable(QuickTable):
         Manually select a IntegralList from the pullDown
         """
         if integralList is None:
-            logger.debug('select: No IntegralList selected')
-            raise ValueError('select: No IntegralList selected')
+            # logger.debug('select: No IntegralList selected')
+            # raise ValueError('select: No IntegralList selected')
+            self.itWidget.selectFirstItem()
         else:
             if not isinstance(integralList, IntegralList):
                 logger.debug('select: Object is not of type IntegralList')

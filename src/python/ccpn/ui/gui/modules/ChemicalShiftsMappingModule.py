@@ -273,14 +273,15 @@ class ChemicalShiftsMapping(CcpnModule):
     self._nrChangedNotifier = Notifier(self.project, [Notifier.CHANGE], 'NmrResidue',self._nmrObjectChanged)
     self._nrDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'NmrResidue',self._nmrResidueDeleted)
 
-    if self.project:
-      if len(self.project.nmrChains) > 0:
-        self.nmrResidueTable.ncWidget.select(self.project.nmrChains[-1].pid)
-        self._setThresholdLineBySTD()
-        self._setKdUnit()
-    self._addCheckBoxesAttr(self.nmrAtomsCheckBoxes)
-    self._selectCurrentNmrResiduesNotifierCallback()
 
+    self._addSettingsWAttr(self.nmrAtomsCheckBoxes)
+    # self._selectCurrentNmrResiduesNotifierCallback()
+
+    # if self.project:
+    #   if len(self.project.nmrChains) > 0:
+    #     self.nmrResidueTable.ncWidget.select(self.project.nmrChains[-1].pid)
+    #     self._setThresholdLineBySTD()
+    #     self._setKdUnit()
 
   #####################################################
   #############   Main widgets creation    ############
@@ -378,8 +379,9 @@ class ChemicalShiftsMapping(CcpnModule):
     self.spectraSelectionWidget = SpectraSelectionWidget(self.scrollAreaWidgetContents, mainWindow=self.mainWindow,
                                                          grid=(i, 1), gridSpan=(1, 2))
     self._checkSpectraWithPeakListsOnly()
-    self._addCheckBoxesAttr(self.spectraSelectionWidget.allSpectraCheckBoxes)
-    self._addCheckBoxesAttr(self.spectraSelectionWidget.allSG_CheckBoxes)
+    self._addSettingsWAttr(self.spectraSelectionWidget.selectSpectraOption.radioButtons)
+    self._addSettingsWAttr(self.spectraSelectionWidget.allSpectraCheckBoxes)
+    self._addSettingsWAttr(self.spectraSelectionWidget.allSGCheckBoxes)
 
     i += 1
     self.concentrationLabel = Label(self.scrollAreaWidgetContents, text='Concentrations', grid=(i, 0), vAlign='t')
@@ -859,9 +861,10 @@ class ChemicalShiftsMapping(CcpnModule):
         event.ignore()
 
   def _getScatterData(self):
-      df = self.tableData[[Deltas, KD]]
-      df.index = self.tableData[DATAFRAME_OBJECT]
-      return df
+      if self.tableData is not None:
+        df = self.tableData[[Deltas, KD]]
+        df.index = self.tableData[DATAFRAME_OBJECT]
+        return df
 
 
   def _plotScatters(self, dataFrame, selectedObjs=None, *args):
@@ -961,9 +964,9 @@ class ChemicalShiftsMapping(CcpnModule):
           if self._openSpectra():
             self._navigateToNmrItems()
 
-
-  def _addCheckBoxesAttr(self, checkboxes):
-    '''For restoring layouts only '''
+  #
+  def _addSettingsWAttr(self, checkboxes):
+    """For restoring layouts only"""
     for n, w in enumerate(checkboxes):
       setattr(self, w.text(), w)
 
@@ -1183,13 +1186,12 @@ class ChemicalShiftsMapping(CcpnModule):
       weights.update({atomWSB.objectName():atomWSB.value()})
 
     selectedAtomNames = [cb.text() for cb in self.nmrAtomsCheckBoxes if cb.isChecked()]
+    spectra = self.spectraSelectionWidget.getSelections()
+    print("UPDATING", self.spectraSelectionWidget.selectSpectraOption.getIndex())
     if self.nmrResidueTable:
       if self.nmrResidueTable._nmrChain is not None:
         for nmrResidue in self.nmrResidueTable._nmrChain.nmrResidues:
-
           if self._isInt(nmrResidue.sequenceCode):
-
-            spectra = self.spectraSelectionWidget.getSelections()
             self._updatedPeakCount(nmrResidue, spectra)
             if nmrResidue._includeInDeltaShift:
               nmrResidue.spectraCount = len(spectra)
@@ -1203,7 +1205,10 @@ class ChemicalShiftsMapping(CcpnModule):
                 y = plotData.values.flatten(order='F')
                 xss = np.array([plotData.columns] * plotData.shape[0])
                 x = xss.flatten(order='F')
-                nmrResidue._estimatedKd = _getKd(oneSiteBindingCurve, x, y)
+                kd = _getKd(oneSiteBindingCurve, x, y)
+                if not kd:
+                  getLogger().debug('Kd not set for nmrResidue %s' % nmrResidue.pid)
+                nmrResidue._estimatedKd = kd
             else:
               nmrResidue._delta = None
         if not silent:
@@ -1281,11 +1286,12 @@ class ChemicalShiftsMapping(CcpnModule):
 
   def _selectCurrentNmrResiduesNotifierCallback(self, *args):
     nmrResidues = self.current.nmrResidues
-    pss = [str(nmrResidue.sequenceCode) for nmrResidue in nmrResidues]
-    self._selectBarLabels(pss)
-    self._plotBindingCFromCurrent()
-    self._plotFittedCallback()
-    self._plotScatters(self._getScatterData(), selectedObjs=self.current.nmrResidues)
+    if len(nmrResidues)>0:
+      pss = [str(nmrResidue.sequenceCode) for nmrResidue in nmrResidues]
+      self._selectBarLabels(pss)
+      self._plotBindingCFromCurrent()
+      self._plotFittedCallback()
+      self._plotScatters(self._getScatterData(), selectedObjs=nmrResidues)
 
   def _getAllBindingCurvesDataFrameForChain(self):
     nmrChainTxt = self.nmrResidueTable.ncWidget.getText()

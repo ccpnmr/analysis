@@ -113,6 +113,11 @@ class NmrChain(AbstractWrapperObject):
         """Set label of NmrChain."""
         self._wrappedData.label = value
 
+    @name.setter
+    def name(self, value:str):
+        """set name of nmrResidue."""
+        self.rename(value)
+
     @property
     def _parent(self) -> Project:
         """Parent (containing) object."""

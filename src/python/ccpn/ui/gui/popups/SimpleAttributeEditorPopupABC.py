@@ -82,9 +82,9 @@ class SimpleAttributeEditorPopupABC(CcpnDialog):
         Define an undo block for setting the properties of the object
         """
 
-        from ccpn.core.lib.ContextManagers import undoBlockManager
+        from ccpn.core.lib.ContextManagers import undoBlock
 
-        with undoBlockManager():
+        with undoBlock():
             try:
                 for attr, getFunction, setFunction, _tmp in self.attributes:
                     if setFunction is not None:

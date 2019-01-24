@@ -69,6 +69,7 @@ class CompoundBaseWidget(Frame):
         self._orientation = orientation
         self._gridding = layoutDict[orientation]  # list of grid tuples for all succesive widgets
         self._widgets = []  # list of all the widgets; use addWidget to add using the layoutDict
+        self._blockingLevel = 0
 
         # notifiers
         #TODO:GEERTEN: poor design?; rethink this over

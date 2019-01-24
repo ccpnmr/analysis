@@ -350,36 +350,47 @@ QuickTable::item::selected {
 
         # TableWidget.sortByColumn = __sortByColumn__   #MethodType(__sortByColumn__, TableWidget)
 
-    @contextmanager
-    def _tableBlockSignals(self, callerId='', blanking=True):
-        """Block all signals from the table
+    def _blockTableEvents(self, blanking=True):
+        """Block all updates/signals/notifiers in the table.
         """
-        try:
-            # block on first entry
-            if self._tableBlockingLevel <= 0:
-                # self._tableBlockingLevel = 0
-                self.blockSignals(True)
-                self.selectionModel().blockSignals(True)
-                self.setUpdatesEnabled(False)
-                if blanking:
-                    self.project.blankNotification()
+        # block on first entry
+        if self._tableBlockingLevel == 0:
+            self.blockSignals(True)
+            self.selectionModel().blockSignals(True)
+            self.setUpdatesEnabled(False)
+            if blanking:
+                self.project.blankNotification()
 
-            # print(' ' * self._tableBlockingLevel, '>>>INC', _moduleId(self.moduleParent), self._tableBlockingLevel, callerId)
-            self._tableBlockingLevel += 1
-            yield  # yield control to the main process
+        self._tableBlockingLevel += 1
 
-        finally:
+    def _unblockTableEvents(self, blanking=True):
+        """Unblock all updates/signals/notifiers in the table.
+        """
+        if self._tableBlockingLevel > 0:
             self._tableBlockingLevel -= 1
-            # print(' ' * self._tableBlockingLevel, '>>>DEC', _moduleId(self.moduleParent), self._tableBlockingLevel)
 
-            # unblock all signals on exit
-            if self._tableBlockingLevel <= 0:
-                # self._tableBlockingLevel = 0
+            # unblock all signals on last exit
+            if self._tableBlockingLevel == 0:
                 if blanking:
                     self.project.unblankNotification()
                 self.setUpdatesEnabled(True)
                 self.selectionModel().blockSignals(False)
                 self.blockSignals(False)
+        else:
+            raise RuntimeError('Error: tableBlockingLevel already at 0')
+
+    @contextmanager
+    def _tableBlockSignals(self, callerId='', blanking=True):
+        """Block all signals from the table
+        """
+        self._blockTableEvents(blanking)
+        try:
+            yield  # yield control to the calling process
+
+        except Exception as es:
+            raise es
+        finally:
+            self._unblockTableEvents(blanking)
 
     def _preSort(self, *args):
         """

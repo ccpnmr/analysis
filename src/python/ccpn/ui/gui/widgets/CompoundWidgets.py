@@ -24,6 +24,7 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 
 from PyQt5 import QtGui, QtWidgets, QtCore
 from functools import partial
+from contextlib import contextmanager
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
@@ -385,7 +386,7 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
             self.pulldownList.blockSignals(False)
 
     def modifyTexts(self, texts):
-        "Mofify the pulldown texts, retaining the current selection"
+        "Modify the pulldown texts, retaining the current selection"
         current = self.getText()
 
         self.pulldownList.blockSignals(True)
@@ -394,6 +395,46 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
         self.select(current, blockSignals=True)
         self.pulldownList.update()
         self.pulldownList.blockSignals(False)
+
+    def _blockEvents(self, blanking=False):
+        """Block all updates/signals/notifiers in the widget.
+        """
+        # block on first entry
+        if self._blockingLevel == 0:
+            self.blockSignals(True)
+            self.setUpdatesEnabled(False)
+            if blanking:
+                self.project.blankNotification()
+
+        self._blockingLevel += 1
+
+    def _unblockEvents(self, blanking=False):
+        """Unblock all updates/signals/notifiers in the widget.
+        """
+        if self._blockingLevel > 0:
+            self._blockingLevel -= 1
+
+            # unblock all signals on last exit
+            if self._blockingLevel == 0:
+                if blanking:
+                    self.project.unblankNotification()
+                self.setUpdatesEnabled(True)
+                self.blockSignals(False)
+        else:
+            raise RuntimeError('Error: PullDownList already at 0')
+
+    @contextmanager
+    def _blockSignals(self, blanking=False):
+        """Block all signals from the table
+        """
+        self._blockEvents(blanking)
+        try:
+            yield  # yield control to the calling process
+
+        except Exception as es:
+            raise es
+        finally:
+            self._unblockEvents(blanking)
 
 
 class CheckBoxCompoundWidget(CompoundBaseWidget):

@@ -135,8 +135,7 @@ class NotesEditorModule(CcpnModule):
         self.droppedNotifier = None
         self._setNotifiers()
 
-        if note is not None:
-            self.selectNote(note)
+        self.selectNote(note)
 
     def _processDroppedItems(self, data):
         """
@@ -171,17 +170,15 @@ class NotesEditorModule(CcpnModule):
         Manually select a Note from the pullDown
         """
         if note is None:
-            logger.warning('select: No Note selected')
-            raise ValueError('select: No Note selected')
+            self.noWidget.selectFirstItem()
         else:
             if not isinstance(note, Note):
                 logger.warning('select: Object is not of type Note')
                 raise TypeError('select: Object is not of type Note')
             else:
-                for widgetObj in self.noWidget.textList:
-                    if note.pid == widgetObj:
-                        self.note = note
-                        self.noWidget.select(self.note.pid)
+                if note.pid in self.noWidget.textList:
+                    self.note = note
+                    self.noWidget.select(self.note.pid)
 
     def _setNotifiers(self):
         """
@@ -190,12 +187,12 @@ class NotesEditorModule(CcpnModule):
         change calls on any other attribute
         """
         self._noteNotifier = self.setNotifier(self.project,
-                                      [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE],
-                                      Note.__name__,
-                                      self._updateCallback)
+                                              [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE],
+                                              Note.__name__,
+                                              self._updateCallback)
         self.droppedNotifier = self.setGuiNotifier(self.mainWidget,
-                                           [GuiNotifier.DROPEVENT], [DropBase.PIDS],
-                                           self._processDroppedItems)
+                                                   [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+                                                   self._processDroppedItems)
 
     # def _clearNotifiers(self):
     #     """

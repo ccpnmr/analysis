@@ -45,7 +45,8 @@ import string
 def istext(filename):
     try:
         print(filename)
-        s = open(filename).read(512)
+        with open(filename) as fp:
+            s = fp.read(512)
         print(map(chr, range(32, 127)), list("\n\r\t\b"))
         return
 

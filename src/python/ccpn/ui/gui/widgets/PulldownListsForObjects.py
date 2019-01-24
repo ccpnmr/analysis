@@ -183,6 +183,13 @@ class _PulldownABC(PulldownListCompoundWidget):
         #sys.stderr.write('>>> currentObject:\n', obj)
         return obj
 
+    def selectFirstItem(self):
+        """Set the table to the first item.
+        """
+        texts = [txt for txt in self.pulldownList.texts if txt != SELECT]
+        if texts:
+            self.select(texts[0])
+
     def object2value(self, obj):
         """Convert object to a value (pid or id), to be displayed
         """
@@ -253,20 +260,31 @@ class _PulldownABC(PulldownListCompoundWidget):
         if DEBUG: sys.stderr.write('>>> %s._updatePulldownList()\n' % self)
         pids = self._getPids()
 
+        # update the pid list with renamed, created or deleted pids
         lastPulldownItem = self.getText()
-        if callbackDict and callbackDict[Notifier.TRIGGER] in [Notifier.DELETE]:
-            # the object has been notified for delete but still exists so needs to be removed from the list
+        newName = None
+        if callbackDict:
             obj = callbackDict[Notifier.OBJECT]
-            if obj.pid in pids:
-                pids.remove(obj.pid)
+            trigger = callbackDict[Notifier.TRIGGER]
+            if trigger == Notifier.DELETE:
+                # the object has been notified for delete but still exists so needs to be removed from the list
+                if obj.pid in pids:
+                    pids.remove(obj.pid)
+            elif trigger == Notifier.RENAME:
+                if callbackDict[Notifier.OLDPID] == lastPulldownItem:
+                    newName = obj.pid
 
         self.modifyTexts(pids)
 
         # if the pulldownlist has updated then emit a changed notifier; assumes that the texts are unique
         newPulldownItem = self.getText()
         if lastPulldownItem != newPulldownItem:
-            newItem = self.pulldownList.currentIndex()
-            self.pulldownList.currentIndexChanged.emit(newItem)
+            if newName:
+                self.select(newName, blockSignals=True)
+
+            else:
+                newItem = self.pulldownList.currentIndex()
+                self.pulldownList.currentIndexChanged.emit(newItem)
 
         if DEBUG: sys.stderr.write('  < %s._updatePulldownList()\n' % self)
 

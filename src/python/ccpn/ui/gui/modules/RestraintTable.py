@@ -64,7 +64,8 @@ class RestraintTableModule(CcpnModule):
     className = 'RestraintTableModule'
 
     # we are subclassing this Module, hence some more arguments to the init
-    def __init__(self, mainWindow=None, name='Restraint Table', restraintList=None):
+    def __init__(self, mainWindow=None, name='Restraint Table',
+                 restraintList=None, selectFirstItem=False):
         """
         Initialise the Module widgets
         """
@@ -95,7 +96,10 @@ class RestraintTableModule(CcpnModule):
                                              setLayout=True,
                                              grid=(0, 0))
 
-        self.selectRestraintList(restraintList)
+        if restraintList is not None:
+            self.selectRestraintList(restraintList)
+        elif selectFirstItem:
+            self.restraintTable.rtWidget.selectFirstItem()
 
         # install the event filter to handle maximising from floated dock
         self.installMaximiseEventHandler(self._maximise, self._closeModule)

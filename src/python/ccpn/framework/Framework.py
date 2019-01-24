@@ -32,7 +32,7 @@ import tempfile
 import re
 from PyQt5 import QtWidgets
 from distutils.dir_util import copy_tree
-
+from functools import partial
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.PeakList import PeakList
 from ccpn.core.MultipletList import MultipletList
@@ -1155,18 +1155,18 @@ class Framework(NotifierBase):
                    ))
 
         ms.append(('View', [
-            ("Chemical Shift Table", self.showChemicalShiftTable, [('shortcut', 'ct')]),
-            ("NmrResidue Table", self.showNmrResidueTable, [('shortcut', 'nt')]),
-            # ("Structure Table", self.showStructureTable, [('shortcut', 'st')]),
-            ("Residue Table", self.showResidueTable),
-            ("Peak Table", self.showPeakTable, [('shortcut', 'lt')]),
-            ("Integral Table", self.showIntegralTable, [('shortcut', 'it')]),
-            ("Multiplet Table", self.showMultipletTable, [('shortcut', 'mt')]),
-            ("Restraint Table", self.showRestraintTable, [('shortcut', 'rt')]),
-            ("Structure Table", self.showStructureTable, [('shortcut', 'st')]),
+            ("Chemical Shift Table", partial(self.showChemicalShiftTable, selectFirstItem=True), [('shortcut', 'ct')]),
+            ("NmrResidue Table", partial(self.showNmrResidueTable, selectFirstItem=True), [('shortcut', 'nt')]),
+            # ("Structure Table", partial(self.showStructureTable, selectFirstItem=True), [('shortcut', 'st')]),
+            ("Residue Table", partial(self.showResidueTable, selectFirstItem=True)),
+            ("Peak Table", partial(self.showPeakTable, selectFirstItem=True), [('shortcut', 'lt')]),
+            ("Integral Table", partial(self.showIntegralTable, selectFirstItem=True), [('shortcut', 'it')]),
+            ("Multiplet Table", partial(self.showMultipletTable, selectFirstItem=True), [('shortcut', 'mt')]),
+            ("Restraint Table", partial(self.showRestraintTable, selectFirstItem=True), [('shortcut', 'rt')]),
+            ("Structure Table", partial(self.showStructureTable, selectFirstItem=True), [('shortcut', 'st')]),
             (),
-            ("Chemical Shift Mapping", self.showChemicalShiftMapping, [('shortcut', 'cm')]),
-            ("Notes Editor", self.showNotesEditor, [('shortcut', 'no')]),
+            ("Chemical Shift Mapping", partial(self.showChemicalShiftMapping, selectFirstItem=True), [('shortcut', 'cm')]),
+            ("Notes Editor", partial(self.showNotesEditor, selectFirstItem=True), [('shortcut', 'no')]),
             (),
             # (),
             ###("Sequence Graph", self.showSequenceGraph, [('shortcut', 'sg')]),
@@ -2219,144 +2219,152 @@ class Framework(NotifierBase):
     def showChemicalShiftTable(self,
                                position: str = 'bottom',
                                relativeTo: CcpnModule = None,
-                               chemicalShiftList=None):
-        """
-        Displays Chemical Shift table.
+                               chemicalShiftList=None, selectFirstItem=False):
+        """Displays Chemical Shift table.
         """
         from ccpn.ui.gui.modules.ChemicalShiftTable import ChemicalShiftTableModule
 
         mainWindow = self.ui.mainWindow
-        #FIXME:ED - sometimes crashes
         if not relativeTo:
-            relativeTo = mainWindow.moduleArea  # ejb
-        self.chemicalShiftTableModule = ChemicalShiftTableModule(mainWindow=mainWindow, chemicalShiftList=chemicalShiftList)
+            relativeTo = mainWindow.moduleArea
+        self.chemicalShiftTableModule = ChemicalShiftTableModule(mainWindow=mainWindow,
+                                                                 chemicalShiftList=chemicalShiftList, selectFirstItem=selectFirstItem)
+
         mainWindow.moduleArea.addModule(self.chemicalShiftTableModule, position=position, relativeTo=relativeTo)
         mainWindow.pythonConsole.writeConsoleCommand("application.showChemicalShiftTable()")
         getLogger().info("application.showChemicalShiftTable()")
         return self.chemicalShiftTableModule
 
-    def showNmrResidueTable(self, position='bottom', relativeTo=None, nmrChain=None):
-        """Displays Nmr Residue Table"""
+    def showNmrResidueTable(self, position='bottom', relativeTo=None,
+                            nmrChain=None, selectFirstItem=False):
+        """Displays Nmr Residue Table
+        """
         from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTableModule
 
         mainWindow = self.ui.mainWindow
-        #FIXME:ED - sometimes crashes
         if not relativeTo:
-            relativeTo = mainWindow.moduleArea  # ejb
-        self.nmrResidueTableModule = NmrResidueTableModule(mainWindow=mainWindow, nmrChain=nmrChain)
+            relativeTo = mainWindow.moduleArea
+        self.nmrResidueTableModule = NmrResidueTableModule(mainWindow=mainWindow,
+                                                           nmrChain=nmrChain, selectFirstItem=selectFirstItem)
+
         mainWindow.moduleArea.addModule(self.nmrResidueTableModule, position=position, relativeTo=relativeTo)
         mainWindow.pythonConsole.writeConsoleCommand("application.showNmrResidueTable()")
         getLogger().info("application.showNmrResidueTable()")
         return self.nmrResidueTableModule
 
-    def showResidueTable(self, position='bottom', relativeTo=None, chain=None):
-        """Displays  Residue Table"""
+    def showResidueTable(self, position='bottom', relativeTo=None,
+                         chain=None, selectFirstItem=False):
+        """Displays  Residue Table
+        """
         from ccpn.ui.gui.modules.ResidueTable import ResidueTableModule
 
         mainWindow = self.ui.mainWindow
-        #FIXME:ED - sometimes crashes
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
-        self.residueTableModule = ResidueTableModule(mainWindow=mainWindow, chain=chain)
+        self.residueTableModule = ResidueTableModule(mainWindow=mainWindow,
+                                                     chain=chain, selectFirstItem=selectFirstItem)
+
         mainWindow.moduleArea.addModule(self.residueTableModule, position=position, relativeTo=relativeTo)
         mainWindow.pythonConsole.writeConsoleCommand("application.showResidueTable()")
         getLogger().info("application.showResidueTable()")
         return self.residueTableModule
 
-    # def showStructureTable(self, position='bottom', relativeTo=None, structureEnsemble=None):
-    #   """Displays Structure Table"""
+    # def showStructureTable(self, position='bottom', relativeTo=None,
+    #                         structureEnsemble=None, selectFirstItem=False):
+    #   """Displays Structure Table
+    #   """
     #   from ccpn.ui.gui.modules.StructureTable import StructureTableModule
     #
     #   mainWindow = self.ui.mainWindow
-    #   #FIXME:ED - sometimes crashes
     #   if not relativeTo:
-    #     relativeTo = mainWindow.moduleArea      # ejb
+    #     relativeTo = mainWindow.moduleArea
     #   self.structureTableModule = StructureTableModule(mainWindow=mainWindow,
-    #                                               structureEnsemble=structureEnsemble)
+    #                                               structureEnsemble=structureEnsemble, selectFirstItem=selectFirstItem)
     #   mainWindow.moduleArea.addModule(self.structureTableModule, position=position, relativeTo=relativeTo)
     #
     #   mainWindow.pythonConsole.writeConsoleCommand("application.showStructureTable()")
     #   logger.info("application.showStructureTable()")
     #   return self.structureTableModule
     #
-    def showPeakTable(self, position: str = 'left', relativeTo: CcpnModule = None, peakList: PeakList = None):
-        """
-        Displays Peak table on left of main window with specified list selected.
+    def showPeakTable(self, position: str = 'left', relativeTo: CcpnModule = None,
+                      peakList: PeakList = None, selectFirstItem=False):
+        """Displays Peak table on left of main window with specified list selected.
         """
         from ccpn.ui.gui.modules.PeakTable import PeakTableModule
 
         mainWindow = self.ui.mainWindow
-        #FIXME:ED - sometimes crashes
         if not relativeTo:
-            relativeTo = mainWindow.moduleArea  # ejb
-        self.peakTableModule = PeakTableModule(mainWindow, peakList=peakList)
+            relativeTo = mainWindow.moduleArea
+        self.peakTableModule = PeakTableModule(mainWindow,
+                                               peakList=peakList, selectFirstItem=selectFirstItem)
+
         mainWindow.moduleArea.addModule(self.peakTableModule, position=position, relativeTo=relativeTo)
         mainWindow.pythonConsole.writeConsoleCommand("application.showPeakTable()")
         getLogger().info("application.showPeakTable()")
         return self.peakTableModule
 
-    def showMultipletTable(self, position: str = 'left', relativeTo: CcpnModule = None, multipletList: MultipletList = None):
-        """
-        Displays multipletList table on left of main window with specified list selected.
+    def showMultipletTable(self, position: str = 'left', relativeTo: CcpnModule = None,
+                           multipletList: MultipletList = None, selectFirstItem=False):
+        """Displays multipletList table on left of main window with specified list selected.
         """
         from ccpn.ui.gui.modules.MultipletListTable import MultipletTableModule
 
         mainWindow = self.ui.mainWindow
         if not relativeTo:
-            relativeTo = mainWindow.moduleArea  # ejb
-        self.multipletTableModule = MultipletTableModule(mainWindow, multipletList=multipletList)
+            relativeTo = mainWindow.moduleArea
+        self.multipletTableModule = MultipletTableModule(mainWindow,
+                                                         multipletList=multipletList, selectFirstItem=selectFirstItem)
+
         mainWindow.moduleArea.addModule(self.multipletTableModule, position=position, relativeTo=relativeTo)
         mainWindow.pythonConsole.writeConsoleCommand("application.showMultipletTable()")
         getLogger().info("application.showMultipletTable()")
         return self.multipletTableModule
 
-    def showIntegralTable(self, position: str = 'left', relativeTo: CcpnModule = None, integralList: IntegralList = None):
-        """
-        Displays integral table on left of main window with specified list selected.
+    def showIntegralTable(self, position: str = 'left', relativeTo: CcpnModule = None,
+                          integralList: IntegralList = None, selectFirstItem=False):
+        """Displays integral table on left of main window with specified list selected.
         """
         from ccpn.ui.gui.modules.IntegralTable import IntegralTableModule
 
         mainWindow = self.ui.mainWindow
         if not relativeTo:
-            relativeTo = mainWindow.moduleArea  # ejb
-        self.integralTableModule = IntegralTableModule(mainWindow=mainWindow, integralList=integralList)
+            relativeTo = mainWindow.moduleArea
+        self.integralTableModule = IntegralTableModule(mainWindow=mainWindow,
+                                                       integralList=integralList, selectFirstItem=selectFirstItem)
+
         mainWindow.moduleArea.addModule(self.integralTableModule, position=position, relativeTo=relativeTo)
         mainWindow.pythonConsole.writeConsoleCommand("application.showIntegralTable()")
         getLogger().info("application.showIntegralTable()")
         return self.integralTableModule
 
-    def showRestraintTable(self, position: str = 'bottom', relativeTo: CcpnModule = None, restraintList: PeakList = None):
-        """
-        Displays Peak table on left of main window with specified list selected.
+    def showRestraintTable(self, position: str = 'bottom', relativeTo: CcpnModule = None,
+                           restraintList: PeakList = None, selectFirstItem=False):
+        """Displays Peak table on left of main window with specified list selected.
         """
         from ccpn.ui.gui.modules.RestraintTable import RestraintTableModule
 
         mainWindow = self.ui.mainWindow
-        #FIXME:ED - sometimes crashes
         if not relativeTo:
-            relativeTo = mainWindow.moduleArea  # ejb
-        self.restraintTableModule = RestraintTableModule(mainWindow=mainWindow, restraintList=restraintList)
+            relativeTo = mainWindow.moduleArea
+        self.restraintTableModule = RestraintTableModule(mainWindow=mainWindow,
+                                                         restraintList=restraintList, selectFirstItem=selectFirstItem)
+
         mainWindow.moduleArea.addModule(self.restraintTableModule, position=position, relativeTo=relativeTo)
         mainWindow.pythonConsole.writeConsoleCommand("application.showRestraintTable()")
         getLogger().info("application.showRestraintTable()")
         return self.restraintTableModule
 
-    def showStructureTable(self, position='bottom', relativeTo=None, structureEnsemble=None):
-        """Displays Structure Table"""
+    def showStructureTable(self, position='bottom', relativeTo=None,
+                           structureEnsemble=None, selectFirstItem=False):
+        """Displays Structure Table
+        """
         from ccpn.ui.gui.modules.StructureTable import StructureTableModule
 
         mainWindow = self.ui.mainWindow
-
-        #FIXME:ED - sometimes crashes
         if not relativeTo:
-            relativeTo = mainWindow.moduleArea  # ejb
+            relativeTo = mainWindow.moduleArea
         self.structureTableModule = StructureTableModule(mainWindow=mainWindow,
-                                                         structureEnsemble=structureEnsemble)
-
-        # self.project.newModule(moduleType=self.structureTableModule.className,
-        #                        title=None,
-        #                        window=mainWindow,
-        #                        comment='')
+                                                         structureEnsemble=structureEnsemble, selectFirstItem=selectFirstItem)
 
         mainWindow.moduleArea.addModule(self.structureTableModule, position=position, relativeTo=relativeTo)
 
@@ -2364,18 +2372,18 @@ class Framework(NotifierBase):
         getLogger().info("application.showStructureTable()")
         return self.structureTableModule
 
-    def showNotesEditor(self, position: str = 'bottom', relativeTo: CcpnModule = None, note=None):
-        """
-        Displays Notes Editing Table
+    def showNotesEditor(self, position: str = 'bottom', relativeTo: CcpnModule = None,
+                        note=None, selectFirstItem=False):
+        """Displays Notes Editing Table
         """
         from ccpn.ui.gui.modules.NotesEditor import NotesEditorModule
 
         mainWindow = self.ui.mainWindow
-
-        #FIXME:ED - sometimes crashes
         if not relativeTo:
-            relativeTo = mainWindow.moduleArea  # ejb
-        self.notesEditorModule = NotesEditorModule(mainWindow=mainWindow, note=note)
+            relativeTo = mainWindow.moduleArea
+        self.notesEditorModule = NotesEditorModule(mainWindow=mainWindow,
+                                                   note=note, selectFirstItem=selectFirstItem)
+
         mainWindow.moduleArea.addModule(self.notesEditorModule, position=position, relativeTo=relativeTo)
         mainWindow.pythonConsole.writeConsoleCommand("application.showNotesEditorTable()")
         getLogger().info("application.showNotesEditorTable()")

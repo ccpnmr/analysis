@@ -56,7 +56,8 @@ class NotesEditorModule(CcpnModule):
     className = 'NotesEditorModule'
     attributeName = 'notes'  # self.project.notes
 
-    def __init__(self, mainWindow=None, name='Notes Editor', note=None):
+    def __init__(self, mainWindow=None, name='Notes Editor',
+                 note=None, selectFirstItem=False):
         """
         Initialise the widgets for the module.
         :param mainWindow: required
@@ -135,7 +136,10 @@ class NotesEditorModule(CcpnModule):
         self.droppedNotifier = None
         self._setNotifiers()
 
-        self.selectNote(note)
+        if note is not None:
+            self.selectNote(note)
+        elif selectFirstItem:
+            self.noWidget.selectFirstItem()
 
     def _processDroppedItems(self, data):
         """

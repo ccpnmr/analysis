@@ -71,7 +71,8 @@ class StructureTableModule(CcpnModule):
     className = 'StructureTableModule'
 
     # we are subclassing this Module, hence some more arguments to the init
-    def __init__(self, mainWindow=None, name='Structure Table', structureEnsemble=None):
+    def __init__(self, mainWindow=None, name='Structure Table',
+                 structureEnsemble=None, selectFirstItem=False):
         """
         Initialise the Module widgets
         """
@@ -171,7 +172,10 @@ class StructureTableModule(CcpnModule):
                                              setLayout=True,
                                              grid=(0, 0))
 
-        self.selectStructureEnsemble(structureEnsemble)
+        if structureEnsemble is not None:
+            self.selectStructureEnsemble(structureEnsemble)
+        elif selectFirstItem:
+            self.structureTable.stWidget.selectFirstItem()
 
     def selectStructureEnsemble(self, structureEnsemble=None):
         """

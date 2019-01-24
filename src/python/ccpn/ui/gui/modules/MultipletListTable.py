@@ -64,7 +64,8 @@ class MultipletTableModule(CcpnModule):
 
     className = 'MultipletTableModule'
 
-    def __init__(self, mainWindow=None, name='Multiplet Table', multipletList=None):
+    def __init__(self, mainWindow=None, name='Multiplet Table',
+                 multipletList=None, selectFirstItem=False):
         super().__init__(mainWindow=mainWindow, name=name)
 
         # Derive application, project, and current from mainWindow
@@ -89,7 +90,10 @@ class MultipletTableModule(CcpnModule):
                                                            moduleParent=self, setLayout=True,
                                                            grid=(0, 0))
 
-        self.selectMultipletList(multipletList)
+        if multipletList is not None:
+            self.selectMultipletList(multipletList)
+        elif selectFirstItem:
+            self.multipletListTable.mLwidget.selectFirstItem()
 
         self.installMaximiseEventHandler(self._maximise, self._closeModule)
 

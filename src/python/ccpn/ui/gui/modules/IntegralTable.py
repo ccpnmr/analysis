@@ -57,7 +57,8 @@ class IntegralTableModule(CcpnModule):
     className = 'IntegralTableModule'
 
     # we are subclassing this Module, hence some more arguments to the init
-    def __init__(self, mainWindow=None, name='Integral Table', integralList=None):
+    def __init__(self, mainWindow=None, name='Integral Table',
+                 integralList=None, selectFirstItem=False):
         """
         Initialise the Module widgets
         """
@@ -75,7 +76,10 @@ class IntegralTableModule(CcpnModule):
                                            setLayout=True,
                                            grid=(0, 0))
 
-        self.selectIntegralList(integralList)
+        if integralList is not None:
+            self.selectIntegralList(integralList)
+        elif selectFirstItem:
+            self.integralTable.itWidget.selectFirstItem()
 
         # install the event filter to handle maximising from floated dock
         self.installMaximiseEventHandler(self._maximise, self._closeModule)

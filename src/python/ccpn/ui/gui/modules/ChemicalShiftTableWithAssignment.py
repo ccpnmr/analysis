@@ -72,7 +72,8 @@ class ChemicalShiftTableWithAssignment(CcpnModule):
     maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
     Position = 'top'
 
-    def __init__(self, mainWindow, name='Chemical Shift Table', chemicalShiftList=None):
+    def __init__(self, mainWindow, name='Chemical Shift Table',
+                 chemicalShiftList=None, selectFirstItem=False):
         # CcpnModule.__init__(self, parent=mainWindow.moduleArea, name=name)
         CcpnModule.__init__(self, mainWindow=mainWindow, name=name)  # ejb
 
@@ -219,6 +220,8 @@ class ChemicalShiftTableWithAssignment(CcpnModule):
 
         if chemicalShiftList is not None:
             self.selectChemicalShiftList(chemicalShiftList)
+        elif selectFirstItem:
+            self.chemicalShiftTable._chemicalShiftListPulldown.selectFirstItem()
 
         # install the event filter to handle maximising from floated dock
         self.installMaximiseEventHandler(self._maximise, self._closeModule)

@@ -62,7 +62,8 @@ class PeakTableModule(CcpnModule):
 
     className = 'PeakTableModule'
 
-    def __init__(self, mainWindow=None, name='Peak Table', peakList=None):
+    def __init__(self, mainWindow=None, name='Peak Table',
+                 peakList=None, selectFirstItem=False):
         super().__init__(mainWindow=mainWindow, name=name)
 
         # Derive application, project, and current from mainWindow
@@ -78,7 +79,10 @@ class PeakTableModule(CcpnModule):
                                                  setLayout=True,
                                                  grid=(0, 0))
 
-        self.selectPeakList(peakList)
+        if peakList is not None:
+            self.selectPeakList(peakList)
+        elif selectFirstItem:
+            self.peakListTable.pLwidget.selectFirstItem()
 
         self.installMaximiseEventHandler(self._maximise, self._closeModule)
 

@@ -58,7 +58,8 @@ class ResidueTableModule(CcpnModule):
 
     className = 'ResidueTableModule'
 
-    def __init__(self, mainWindow=None, name='Residue Table', chain=None):
+    def __init__(self, mainWindow=None, name='Residue Table',
+                 chain=None, selectFirstItem=False):
         """
         Initialise the Module widgets
         """
@@ -82,7 +83,10 @@ class ResidueTableModule(CcpnModule):
                                                multiSelect=True,
                                                grid=(0, 0))
 
-        self.selectChain(chain)
+        if chain is not None:
+            self.selectChain(chain)
+        elif selectFirstItem:
+            self.residueTable.cWidget.selectFirstItem()
 
         self.installMaximiseEventHandler(self._maximise, self._closeModule)
 

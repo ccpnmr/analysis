@@ -71,7 +71,8 @@ class NmrResidueTableModule(CcpnModule):
     className = 'NmrResidueTableModule'
 
     # we are subclassing this Module, hence some more arguments to the init
-    def __init__(self, mainWindow=None, name='NmrResidue Table', nmrChain=None):
+    def __init__(self, mainWindow=None, name='NmrResidue Table',
+                 nmrChain=None, selectFirstItem=False):
         """
         Initialise the Module widgets
         """
@@ -103,7 +104,10 @@ class NmrResidueTableModule(CcpnModule):
                                                multiSelect=True,
                                                grid=(0, 0))
 
-        self.selectNmrChain(nmrChain)
+        if nmrChain is not None:
+            self.selectNmrChain(nmrChain)
+        elif selectFirstItem:
+            self.nmrResidueTable.ncWidget.selectFirstItem()
 
         # install the event filter to handle maximising from floated dock
         self.installMaximiseEventHandler(self._maximise, self._closeModule)

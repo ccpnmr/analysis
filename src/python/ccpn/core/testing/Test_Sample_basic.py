@@ -46,7 +46,7 @@ class TestSample_No_setUp(WrapperTesting):
         Test that creating a new Sample with no parameter creates a valid Sample.
         """
         newSample = self.project.newSample()
-        self.assertEqual(newSample.name, 'Sample_1')
+        self.assertEqual(newSample.name, 'sample')
         self.assertEqual(len(self.project.samples), 1)
 
     def test_newSample_None(self):
@@ -54,7 +54,7 @@ class TestSample_No_setUp(WrapperTesting):
         Test that creating a new Sample with None creates a valid Sample.
         """
         newSample = self.project.newSample(None)
-        self.assertEqual(newSample.name, 'Sample_1')
+        self.assertEqual(newSample.name, 'sample')
         self.assertEqual(len(self.project.samples), 1)
 
     #=========================================================================================
@@ -68,9 +68,8 @@ class TestSample_No_setUp(WrapperTesting):
         # with self.assertRaisesRegexp(ApiError, 'Empty string not allowed'):
         #   self.project.newSample('')
         #
-        with self.assertRaisesRegexp(ValueError, 'Sample name must be set'):
-            self.project.newSample('')
-        self.assertEqual(len(self.project.samples), 0)
+        self.project.newSample('')
+        self.assertEqual(len(self.project.samples), 1)
 
     def test_newSample_Badname(self):
         """
@@ -141,7 +140,7 @@ class TestSample_setUp(WrapperTesting):
         # with self.assertRaisesRegexp(ValueError, 'Sample name must be set'):
         #   self.newSample.rename(None)
         #
-        with self.assertRaisesRegexp(TypeError, 'Sample name must be a string'):
+        with self.assertRaisesRegexp(ValueError, 'None not allowed in Sample name'):
             self.newSample.rename(None)
         self.assertEqual(self.newSample.name, 'ValidSample')
 

@@ -316,7 +316,6 @@ def logCommandBlock(prefix='', get=None, isProperty=False, showArguments=[], log
 
     """
 
-
     # get the current application
     application = getApplication()
 
@@ -424,6 +423,7 @@ def catchExceptions(application=None, errorStringTemplate='Error: "%s"', popupAs
         getLogger().warning(errorStringTemplate % str(es))
         if application.hasGui and popupAsWarning:
             from ccpn.ui.gui.widgets import MessageDialog  # Local import: in case of no-gui, we never get here
+
             MessageDialog.showWarning('Warning', errorStringTemplate % str(es))
         if application._isInDebugMode:
             raise es
@@ -784,7 +784,6 @@ def newObject(klass):
 
         with notificationBlanking(application=application):
             with undoStackBlocking(application=application) as addUndoItem:
-
                 result = func(*args, **kwds)
                 if not isinstance(result, klass):
                     raise RuntimeError('Expected an object of class %s, obtained %s' % (klass, result.__class__))
@@ -833,7 +832,6 @@ def deleteObject():
 
         with notificationBlanking(application=application):
             with undoStackBlocking(application=application) as addUndoItem:
-
                 _storeDeleteObjectCurrent(self, addUndoItem)
 
                 # retrieve list of created items from the api
@@ -871,6 +869,26 @@ def renameObject(self):
 
             except AttributeError as es:
                 raise es
+
+    self._finaliseAction('rename')
+
+
+@contextmanager
+def renameObjectNoBlanking(self):
+    """ A decorator to wrap the rename(self) method of the V3 core classes
+    calls self._finaliseAction('rename', 'change') after the rename
+    """
+    # get the current application
+    application = getApplication()
+
+    with undoStackBlocking(application=application) as addUndoItem:
+
+        try:
+            # transfer control to the calling function
+            yield addUndoItem
+
+        except AttributeError as es:
+            raise es
 
     self._finaliseAction('rename')
 

@@ -369,6 +369,10 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
         "Convenience: Return selected text in Pulldown"
         return self.pulldownList.currentText()
 
+    def getIndex(self):
+        "Convenience: Return selected text in Pulldown"
+        return self.pulldownList.getSelectedIndex()
+
     def select(self, item, blockSignals=False):
         "Convenience: Set item in Pulldown; works with text or item"
         if blockSignals:

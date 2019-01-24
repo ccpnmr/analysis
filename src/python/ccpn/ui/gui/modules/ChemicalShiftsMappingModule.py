@@ -277,11 +277,14 @@ class ChemicalShiftsMapping(CcpnModule):
     self._addSettingsWAttr(self.nmrAtomsCheckBoxes)
     # self._selectCurrentNmrResiduesNotifierCallback()
 
-    # if self.project:
-    #   if len(self.project.nmrChains) > 0:
-    #     self.nmrResidueTable.ncWidget.select(self.project.nmrChains[-1].pid)
-    #     self._setThresholdLineBySTD()
-    #     self._setKdUnit()
+    if self.project:
+      if len(self.project.nmrChains) > 0:
+        if self.nmrResidueTable.ncWidget.getIndex() == 0:
+          self.spectraSelectionWidget._toggleAll()
+          self.nmrResidueTable.ncWidget.select(self.project.nmrChains[-1].pid)
+          self._setThresholdLineBySTD()
+          self._setKdUnit()
+          # self._updateModule()
 
   #####################################################
   #############   Main widgets creation    ############
@@ -1187,7 +1190,6 @@ class ChemicalShiftsMapping(CcpnModule):
 
     selectedAtomNames = [cb.text() for cb in self.nmrAtomsCheckBoxes if cb.isChecked()]
     spectra = self.spectraSelectionWidget.getSelections()
-    print("UPDATING", self.spectraSelectionWidget.selectSpectraOption.getIndex())
     if self.nmrResidueTable:
       if self.nmrResidueTable._nmrChain is not None:
         for nmrResidue in self.nmrResidueTable._nmrChain.nmrResidues:
@@ -1288,10 +1290,10 @@ class ChemicalShiftsMapping(CcpnModule):
     nmrResidues = self.current.nmrResidues
     if len(nmrResidues)>0:
       pss = [str(nmrResidue.sequenceCode) for nmrResidue in nmrResidues]
-      self._selectBarLabels(pss)
       self._plotBindingCFromCurrent()
       self._plotFittedCallback()
       self._plotScatters(self._getScatterData(), selectedObjs=nmrResidues)
+      self._selectBarLabels(pss)
 
   def _getAllBindingCurvesDataFrameForChain(self):
     nmrChainTxt = self.nmrResidueTable.ncWidget.getText()

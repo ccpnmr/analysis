@@ -2087,18 +2087,21 @@ class CcpnGLWidget(QOpenGLWidget):
         drawList._rebuild()
 
     def _processPeakNotifier(self, data):
+        self._updateVisibleSpectrumViews()
         self._GLPeaks._processNotifier(data)
 
         self._clearKeys()
         self.update()
 
     def _processIntegralNotifier(self, data):
+        self._updateVisibleSpectrumViews()
         self._GLIntegrals._processNotifier(data)
 
         self._clearKeys()
         self.update()
 
     def _processMultipletNotifier(self, data):
+        self._updateVisibleSpectrumViews()
         self._GLMultiplets._processNotifier(data)
 
         self._clearKeys()

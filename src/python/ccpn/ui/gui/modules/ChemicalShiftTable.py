@@ -62,7 +62,8 @@ class ChemicalShiftTableModule(CcpnModule):
     className = 'ChemicalShiftTableModule'
 
     # we are subclassing this Module, hence some more arguments to the init
-    def __init__(self, mainWindow=None, name='Chemical Shift Table', chemicalShiftList=None):
+    def __init__(self, mainWindow=None, name='Chemical Shift Table',
+                 chemicalShiftList=None, selectFirstItem=False):
         """
         Initialise the Module widgets
         """
@@ -132,7 +133,10 @@ class ChemicalShiftTableModule(CcpnModule):
                                                      setLayout=True,
                                                      grid=(0, 0))
 
-        self.selectChemicalShiftList(chemicalShiftList)
+        if chemicalShiftList is not None:
+            self.selectChemicalShiftList(chemicalShiftList)
+        elif selectFirstItem:
+            self.chemicalShiftTable._chemicalShiftListPulldown.selectFirstItem()
 
         self.installMaximiseEventHandler(self._maximise, self._closeModule)
 

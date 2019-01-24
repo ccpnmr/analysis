@@ -241,7 +241,6 @@ class CcpnModuleArea(ModuleArea, DropBase):  #, DropBase):
         for module in modules:
             if hasattr(module, '_repopulateModule'):
                 module._repopulateModule()
-        pass
 
     def _tempModules(self):
         ''':return list of modules in temp Areas '''

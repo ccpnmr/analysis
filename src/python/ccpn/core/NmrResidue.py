@@ -37,7 +37,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGro
 from ccpnmodel.ccpncore.lib.Constants import defaultNmrChainCode
 from ccpn.core import _importOrder
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, \
+from ccpn.core.lib.ContextManagers import newObject, renameObject, \
     ccpNmrV3CoreSetter, logCommandBlock, renameObjectNoBlanking
 from ccpn.util.Logging import getLogger
 
@@ -1184,6 +1184,7 @@ class NmrResidue(AbstractWrapperObject):
 
         # NBNB TODO - consider changing signature to sequenceCode, residueType
 
+        # use noBlanking for the minute to ensure that the adjacent nmrResidues are notified
         with renameObjectNoBlanking(self) as addUndoItem:
             apiResonanceGroup = self._apiResonanceGroup
             sequenceCode = residueType = None

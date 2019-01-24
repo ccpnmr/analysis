@@ -1165,7 +1165,7 @@ class Framework(NotifierBase):
             ("Restraint Table", partial(self.showRestraintTable, selectFirstItem=True), [('shortcut', 'rt')]),
             ("Structure Table", partial(self.showStructureTable, selectFirstItem=True), [('shortcut', 'st')]),
             (),
-            ("Chemical Shift Mapping", partial(self.showChemicalShiftMapping, selectFirstItem=True), [('shortcut', 'cm')]),
+            ("Chemical Shift Mapping", self.showChemicalShiftMapping, [('shortcut', 'cm')]),
             ("Notes Editor", partial(self.showNotesEditor, selectFirstItem=True), [('shortcut', 'no')]),
             (),
             # (),

@@ -64,14 +64,16 @@ MODULES = 'modules'
 def _createLayoutFile(application):
     try:
         path = application.statePath + '/' + DefaultLayoutFileName
-        file = open(path, "w")
+
         if General in DefaultLayoutFile:
             if ApplicationName in DefaultLayoutFile[General]:
                 DefaultLayoutFile[General][ApplicationName] = application.applicationName
             if ApplicationVersion in DefaultLayoutFile[General]:
                 DefaultLayoutFile[General][ApplicationVersion] = application.applicationVersion
-        json.dump(DefaultLayoutFile, file, sort_keys=False, indent=4, separators=(',', ': '))
-        file.close()
+
+        with open(path, "w") as file:
+            json.dump(DefaultLayoutFile, file, sort_keys=False, indent=4, separators=(',', ': '))
+
     except Exception as e:
         getLogger().debug('Impossible to create a layout File.', e)
 
@@ -203,9 +205,10 @@ def saveLayoutToJson(mainWindow, jsonFilePath=None):
         layout = mainWindow.application.layout
         if not jsonFilePath:
             jsonFilePath = getLayoutFile(mainWindow.application)
-        file = open(jsonFilePath, "w")
-        json.dump(layout, file, sort_keys=False, indent=4, separators=(',', ': '))
-        file.close()
+
+        with open(jsonFilePath, "w") as file:
+            json.dump(layout, file, sort_keys=False, indent=4, separators=(',', ': '))
+
     except Exception as e:
         getLogger().debug('Impossible to save Layout %s' % e)
 

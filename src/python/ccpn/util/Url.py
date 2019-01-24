@@ -65,9 +65,8 @@ def uploadFile(url, fileName, data=None):
     if not data:
         data = {}
 
-    fp = open(fileName, 'rb')
-    fileData = fp.read()
-    fp.close()
+    with open(fileName, 'rb') as fp:
+        fileData = fp.read()
 
     data['fileName'] = os.path.basename(fileName)
     data['fileData'] = fileData

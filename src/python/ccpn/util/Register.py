@@ -166,9 +166,10 @@ def _fetchGraceFile(application):
     f = 'grace.json'
     path = os.path.join(userPreferencesDirectory,v+f)
     if not os.path.exists(path):
-        file = open(path, "w")
-        json.dump(msg, file)
-        file.close()
+
+        with open(path, "w") as file:
+            json.dump(msg, file)
+
         return path
     else:
         return path

@@ -465,9 +465,8 @@ class Current:
     def _dumpStateToFile(self, statePath):
         try:
             path = os.path.join(statePath, self.className)
-            file = open(path, "w")
-            json.dump(self.state, file, sort_keys=False, indent=2, )
-            file.close()
+            with open(path, "w") as file:
+                json.dump(self.state, file, sort_keys=False, indent=2, )
         except Exception as e:
             getLogger().debug('Impossible to create a Current File.', e)
 

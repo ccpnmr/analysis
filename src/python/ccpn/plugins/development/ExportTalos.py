@@ -258,9 +258,8 @@ class TalosGuiPlugin(PluginModule):
         for shift in sortedShifts:
             out += '{0:>4d} {1:1s} {2:>4s} {3:>8.3f}\n'.format(shift[0],shift[1],shift[2],shift[3])
 
-        output = open(os.path.join(self.runPath,'{0}_talos.tab'.format(self.settings['General']['Run name'])),'w')
-        output.write(out)
-        output.close()
+        with open(os.path.join(self.runPath,'{0}_talos.tab'.format(self.settings['General']['Run name'])),'w') as output:
+            output.write(out)
 
     def _inputDataCheck(self):
         # Checks available input data at plugin start

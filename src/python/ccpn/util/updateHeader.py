@@ -50,19 +50,18 @@ thisFile = os.path.join(curDir, __file__)
 
 
 def updateFile(fileName):
-    fp = open(fileName, 'rU')
-    data = fp.read()
-    fp.close()
+    with open(fileName, 'rU') as fp:
+        data = fp.read()
+
     n1 = data.find(startMatch)
     n2 = data.find(endMatch)
     if n1 >= 0 and n2 > n1:  # have a match
         data = data[:n1] + template + data[n2 + len(endMatch):]
     else:
         data = moduleDoc + template + data
-    fp = open(fileName, 'w')
-    data = fp.write(data)
-    fp.close()
 
+    with open(fileName, 'w') as fp:
+        fp.write(data)
 
 def visitDirectory(directory):
     relFiles = os.listdir(directory)

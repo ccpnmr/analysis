@@ -64,7 +64,8 @@ def parseNmrPipeScript(path):
 
 
 def importCyanaRestraints(project, dataPath, restraintType='Distance'):
-    text = open(dataPath).read()
+    with open(dataPath) as fp:
+        text = fp.read()
 
     dataSet = project.dataSets[-1]
     restraintList = dataSet.newRestraintList(restraintType=restraintType,
@@ -73,7 +74,8 @@ def importCyanaRestraints(project, dataPath, restraintType='Distance'):
 
 
 def importInsightRestraints(project, dataPath, restraintType='Distance'):
-    text = open(dataPath).read()
+    with open(dataPath) as fp:
+        text = fp.read()
 
     dataSet = project.dataSets[-1]
     restraintList = dataSet.newRestraintList(restraintType=restraintType,

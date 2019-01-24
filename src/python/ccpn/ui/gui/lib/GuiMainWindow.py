@@ -693,7 +693,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         Displays macro editor with contents of the log.
         """
         editor = MacroEditor(self.moduleArea, self, "Macro Editor")
-        l = open(self.project._logger.logPath, 'r').readlines()
+        with open(self.project._logger.logPath, 'r') as fp:
+            l = fp.readlines()
         text = ''.join([line.strip().split(':', 6)[-1] + '\n' for line in l])
         editor.textBox.setText(text)
 

@@ -509,11 +509,15 @@ class Framework(NotifierBase):
 
         self.colourScheme = colourScheme
 
-        styleSheet = open(os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
-                                       '%sStyleSheet.qss' % metaUtil.upperFirst(colourScheme))).read()
+        with open(os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
+                                       '%sStyleSheet.qss' % metaUtil.upperFirst(colourScheme))) as fp:
+            styleSheet = fp.read()
+
         if platform.system() == 'Linux':
-            additions = open(os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
-                                          '%sAdditionsLinux.qss' % metaUtil.upperFirst(colourScheme))).read()
+            with open(os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
+                                          '%sAdditionsLinux.qss' % metaUtil.upperFirst(colourScheme))) as fp:
+                additions = fp.read()
+
             styleSheet += additions
         return styleSheet
 
@@ -2525,7 +2529,8 @@ class Framework(NotifierBase):
         #FIXME:ED - haven't checked this properly
         mainWindow = self.ui.mainWindow
         self.editor = MacroEditor(mainWindow=mainWindow)
-        l = open(getLogger().logPath, 'r').readlines()
+        with open(getLogger().logPath, 'r') as fp:
+            l = fp.readlines()
         text = ''.join([line.strip().split(':', 6)[-1] + '\n' for line in l])
         self.editor.textBox.setText(text)
         mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)

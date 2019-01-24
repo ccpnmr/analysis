@@ -1151,7 +1151,7 @@ class Spectrum(AbstractWrapperObject):
             self.getSliceData()
 
         if self._intensities is None:
-            raise RuntimeError('Unable to get 1D slice data for %s' % self)
+            getLogger().warning('Unable to get 1D slice data for %s' % self)
 
         # # store the unscaled value internally so need to multiply the return value again
         # if self.getSliceData() is  None:
@@ -1167,7 +1167,7 @@ class Spectrum(AbstractWrapperObject):
         return self._intensities
 
     @intensities.setter
-    def intensities(self, value):
+    def intensities(self, value: np.ndarray):
         self._intensities = value
         # temporary hack for showing straight the result of intensities change
         for spectrumView in self.spectrumViews:
@@ -1250,14 +1250,16 @@ class Spectrum(AbstractWrapperObject):
             else:
                 result = self._getSliceDataFromPlane(position=position, xDim=sliceDim, yDim=sliceDim + 1,
                                                      sliceDim=sliceDim)
-        # Optionally scale data depending on self.scale
-        if self.scale is not None:
-            if self.scale == 0.0:
-                getLogger().warning('Scaling "%s" by 0.0!' % self)
-            result *= self.scale
-        # For 1D, save as intensities attribute
-        self._intensities = result
-        return result
+
+        if result:
+            # Optionally scale data depending on self.scale
+            if self.scale is not None:
+                if self.scale == 0.0:
+                    getLogger().warning('Scaling "%s" by 0.0!' % self)
+                result *= self.scale
+            # For 1D, save as intensities attribute
+            self._intensities = result
+            return result
 
     @cached(PLANEDATACACHE, maxItems=64, debug=False)
     def _getPlaneData(self, position, xDim: int, yDim: int):

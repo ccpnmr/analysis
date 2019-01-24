@@ -49,8 +49,8 @@ class LoggingTest(CoreTesting):
         logPath = logger.logPath
         logger.shutdown()
 
-        logLines = open(logPath).readlines()
-
+        with open(logPath) as fp:
+            logLines = fp.readlines()
         assert len(logLines) == 2
 
         logLine = logLines[0].rstrip()

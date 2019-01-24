@@ -679,7 +679,10 @@ class CcpnGLWidget(QOpenGLWidget):
             else:
                 dy = -1.0 if self.INVERTYAXIS else -1.0  # dy = self.sign(self.axisT - self.axisB)
 
-                fy0, fy1 = np.max(spectrumView.spectrum.intensities), np.min(spectrumView.spectrum.intensities)
+                if spectrumView.spectrum.intensities:
+                    fy0, fy1 = np.max(spectrumView.spectrum.intensities), np.min(spectrumView.spectrum.intensities)
+                else:
+                    fy0, fy1 = 0.0, 0.0
 
                 # check tolerances
                 if not self._widthsChangedEnough((fy0, 0.0), (fy1, 0.0), tol=1e-10):

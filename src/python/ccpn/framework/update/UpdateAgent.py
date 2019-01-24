@@ -60,13 +60,12 @@ def calcHashCode(filePath):
         return 0
 
     # fp = open(filePath, 'rU', encoding='utf-8')
-    fp = open(filePath, 'rb')
     try:
-        data = fp.read()
+        with open(filePath, 'rb') as fp:
+            data = fp.read()
     except:
         getLogger().warning('error reading data, not Unicode')
         data = ''
-    fp.close()
 
     h = hashlib.md5()
     # h.update(data.encode('utf-8'))
@@ -158,13 +157,12 @@ def uploadFile(serverUser, serverPassword, serverScript, fileName, serverDbRoot,
     """Upload a file to the server
     """
     # fp = open(fileName, 'rU')
-    fp = open(fileName, 'rb')
     try:
-        fileData = fp.read()
+        with open(fileName, 'rb') as fp:
+            fileData = fp.read()
     except:
         getLogger().warning('error reading file, not unicode')
         fileData = ''
-    fp.close()
 
     return uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot, fileStoredAs)
 
@@ -220,9 +218,8 @@ class UpdateFile:
             directory = os.path.dirname(fullFilePath)
             if not os.path.exists(directory):
                 os.makedirs(directory)
-        fp = open(fullFilePath, 'w')
-        fp.write(data)
-        fp.close()
+        with open(fullFilePath, 'w') as fp:
+            fp.write(data)
 
     def commitUpdate(self, serverUser, serverPassword):
 
@@ -359,8 +356,8 @@ class UpdateAgent(object):
 
         testFile = os.path.join(self.installLocation, '__write_test__')
         try:
-            fp = open(testFile, 'w')
-            fp.close()
+            with open(testFile, 'w'):
+                pass
             os.remove(testFile)
             return True
         except:
@@ -480,7 +477,8 @@ class UpdateAgent(object):
                     write('No server copy of file\n')
                 else:
                     haveDiff = False
-                    localLines = open(fullFilePath, 'rU', encoding='utf-8').readlines()
+                    with open(fullFilePath, 'rU', encoding='utf-8') as fp:
+                        localLines = fp.readlines()
                     serverData = downloadFile(serverDownloadScript, self.serverDbRoot, updateFile.fileStoredAs)
                     if serverData:
                         serverLines = serverData.splitlines(True)

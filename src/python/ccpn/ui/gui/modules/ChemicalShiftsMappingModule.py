@@ -147,10 +147,10 @@ RelativeDisplacement = 'Relative Displacement'
 PymolScriptName = 'chemicalShiftMapping_Pymol_Template.py'
 DELTA = '\u0394'
 Delta = '\u03B4'
-MORE, LESS = 'More', 'Fewer'
+MORE, LESS = 'More', 'Less'
 PreferredNmrAtoms = ['H', 'HA', 'HB', 'C', 'CA', 'CB', 'N', 'NE', 'ND']
-ONESITE = 'One Site binding'
-DECAY = 'Exponential Decay'
+ONESITE = 'One-site binding'
+DECAY = 'Exponential decay'
 NIY = "This option has not been implemented yet"
 
 # colours
@@ -371,10 +371,10 @@ class ChemicalShiftsMapping(CcpnModule):
     self.scrollAreaWidgetContents.setContentsMargins(10, 10, 10, 15)  #l,t,r,b
     # self.scrollAreaWidgetContents.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
     self.scrollAreaWidgetContents.getLayout().setSpacing(10)
-    self._splitter.setStretchFactor(1, 1)  #makes the setting space fully visible when opening
+    self._splitter.setStretchFactor(1, 0)  #makes the setting space fully visible when opening
 
     i = 0
-    self.inputLabel = Label(self.scrollAreaWidgetContents, text='Select Data Input', grid=(i, 0), vAlign='t')
+    self.inputLabel = Label(self.scrollAreaWidgetContents, text='Select input data', grid=(i, 0), vAlign='t')
     self.spectraSelectionWidget = SpectraSelectionWidget(self.scrollAreaWidgetContents, mainWindow=self.mainWindow,
                                                          grid=(i, 1), gridSpan=(1, 2))
     self._checkSpectraWithPeakListsOnly()
@@ -392,7 +392,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self.modeButtons = RadioButtons(self.scrollAreaWidgetContents, selectedInd=0, texts=MODES,
                                     callback=self._toggleRelativeContribuitions, grid=(i, 1))
     i += 1
-    self.atomsLabel = Label(self.scrollAreaWidgetContents, text='Select Nmr Atoms', grid=(i, 0))
+    self.atomsLabel = Label(self.scrollAreaWidgetContents, text='Select NmrAtoms', grid=(i, 0))
     self.nmrAtomsFrame = Frame(self.scrollAreaWidgetContents, setLayout=True, grid=(i, 1))
     self._updateNmrAtomsOption()
     self._hideNonNecessaryNmrAtomsOption()
@@ -409,7 +409,7 @@ class ChemicalShiftsMapping(CcpnModule):
                                   grid=(0, 1))
     self.thresholdButton.setMaximumWidth(50)
     i += 1
-    self.aboveThresholdColourLabel = Label(self.scrollAreaWidgetContents, text='Above Threshold Colour', grid=(i, 0))
+    self.aboveThresholdColourLabel = Label(self.scrollAreaWidgetContents, text='Above threshold colour', grid=(i, 0))
     self.aboveThresholdColourBox = PulldownList(self.scrollAreaWidgetContents, grid=(i, 1))
     for item in spectrumColours.items():
       pix = QtGui.QPixmap(QtCore.QSize(20, 20))
@@ -421,7 +421,7 @@ class ChemicalShiftsMapping(CcpnModule):
       self.aboveThresholdColourBox.select(random.choice(self.aboveThresholdColourBox.texts))
 
     i += 1
-    self.belowThresholdColourLabel = Label(self.scrollAreaWidgetContents, text='Below Threshold Colour', grid=(i, 0))
+    self.belowThresholdColourLabel = Label(self.scrollAreaWidgetContents, text='Below threshold colour', grid=(i, 0))
     self.belowThresholdColourBox = PulldownList(self.scrollAreaWidgetContents, grid=(i, 1))
 
     for item in spectrumColours.items():
@@ -435,7 +435,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
     i += 1
     disappearedTipText = 'Mark NmrResidue bar with selected colour where assigned peaks have disapperead from the spectra'
-    self.disappearedColourLabel = Label(self.scrollAreaWidgetContents, text='Disappeared Peaks Colour', grid=(i, 0))
+    self.disappearedColourLabel = Label(self.scrollAreaWidgetContents, text='Disappeared peaks colour', grid=(i, 0))
     self.disappearedColourBox = PulldownList(self.scrollAreaWidgetContents, grid=(i, 1))
     for item in spectrumColours.items():
       pix = QtGui.QPixmap(QtCore.QSize(20, 20))
@@ -452,7 +452,7 @@ class ChemicalShiftsMapping(CcpnModule):
                                                         decimals=3, callback=None, grid=(i, 1))
     i += 1
     # molecular Structure
-    self.molecularStructure = Label(self.scrollAreaWidgetContents, text='Molecular Structure', grid=(i, 0))
+    self.molecularStructure = Label(self.scrollAreaWidgetContents, text='Molecular structure', grid=(i, 0))
     texts = ['PDB', 'CCPN Ensembles', 'Fetch From Server']
     self.molecularStructureRadioButton = RadioButtons(self.scrollAreaWidgetContents, texts=texts, direction='h',
                                                       grid=(i, 1))
@@ -469,11 +469,11 @@ class ChemicalShiftsMapping(CcpnModule):
     self.pathPDB = LineEditButtonDialog(self.mvWidgetContents, textDialog='Select PDB File',
                                         filter="PDB files (*.pdb)", directory=scriptPath, grid=(0, 1))
     i += 1
-    self.scaleBindingC = Label(self.scrollAreaWidgetContents, text='Scale Binding Curves', grid=(i, 0))
+    self.scaleBindingC = Label(self.scrollAreaWidgetContents, text='Scale binding curves', grid=(i, 0))
     self.scaleBindingCCb = CheckBox(self.scrollAreaWidgetContents, checked=True,
                                     callback=self._plotBindingCFromCurrent, grid=(i, 1))
     i += 1
-    self.fittingModeL = Label(self.scrollAreaWidgetContents, text='Fitting Curve mode', grid=(i, 0))
+    self.fittingModeL = Label(self.scrollAreaWidgetContents, text='Fitting mode', grid=(i, 0))
     self.fittingModeRB = RadioButtons(self.scrollAreaWidgetContents, texts=[ONESITE], grid=(i, 1))
     #
     # i += 1 ####  # Text editor to allow user curve fitting. N.B. Not implemented yet the mechanism to do this
@@ -1589,7 +1589,7 @@ class ChemicalShiftsMapping(CcpnModule):
       self.scrollAreaMoreNmrAtoms.setWidget(self.moreOptionFrame)
       self.moreOptionFrame.getLayout().setAlignment(QtCore.Qt.AlignTop)
       self.scrollAreaMoreNmrAtoms.hide()
-      self.moreButton = Button(atomFrame, 'More %s NmrAtoms' % name,
+      self.moreButton = Button(atomFrame, 'More %s' % name,
                                callback=partial(self._toggleMoreNmrAtoms, self.scrollAreaMoreNmrAtoms),
                                grid=(vFrame - 1, 1), hAlign='l', )
       self.moreButton.hide()

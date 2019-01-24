@@ -246,11 +246,14 @@ class Integral(AbstractWrapperObject):
                         limit1, limit2 = limits
                         x = self.integralList.spectrum.positions
                         index01 = np.where((x <= limit2) & (x >= limit1))
-                        values = spectrum.intensities[index01]
-                        self.value = float(trapz(values))
-                        # set to the attached peak if any
-                        # if self.peak:
-                        self.peak.volume = self.value
+
+                        # check whether intensities are defined
+                        if spectrum.intensities:
+                            values = spectrum.intensities[index01]
+                            self.value = float(trapz(values))
+                            # set to the attached peak if any
+                            # if self.peak:
+                            self.peak.volume = self.value
 
     @property
     def pointlimits(self) -> List[Tuple[float, float]]:

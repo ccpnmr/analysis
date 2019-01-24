@@ -81,6 +81,7 @@ from PyQt5.QtWidgets import QApplication, QOpenGLWidget
 from ccpn.util.Logging import getLogger
 from pyqtgraph import functions as fn
 from ccpn.core.PeakList import PeakList
+from ccpn.core.Integral import Integral
 # from ccpn.core.IntegralList import IntegralList
 from ccpn.ui.gui.lib.mouseEvents import getCurrentMouseMode
 from ccpn.ui.gui.lib.GuiStrip import DefaultMenu, PeakMenu, IntegralMenu, \
@@ -1678,7 +1679,7 @@ class CcpnGLWidget(QOpenGLWidget):
             if region._objectView and not region._objectView.isVisible():
                 continue
 
-            if region._object and hasattr(region._object, '_1Dregions'):
+            if isinstance(region._object, Integral):
                 # if not self._widthsChangedEnough((region.values[0], 0.0),
                 #                                  (self.cursorCoordinate[0], 0.0),
                 #                                  tol=abs(3*self.pixelX)):
@@ -4123,17 +4124,35 @@ class CcpnGLWidget(QOpenGLWidget):
             # get the bounding box of the spectra
             dx = self.sign(self.axisR - self.axisL)
             fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
+
+            # check tolerances
+            if not self._widthsChangedEnough((fx0, 0.0), (fx1, 0.0), tol=1e-10):
+                fx0, fx1 = 1.0, -1.0
+
             dxAF = fx0 - fx1
             xScale = dx * dxAF / self._spectrumValues[0].totalPointCount
 
             if spectrumView.spectrum.dimensionCount > 1:
                 dy = self.sign(self.axisT - self.axisB)
                 fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
+
+                # check tolerances
+                if not self._widthsChangedEnough((fy0, 0.0), (fy1, 0.0), tol=1e-10):
+                    fy0, fy1 = 1.0, -1.0
+
                 dyAF = fy0 - fy1
                 yScale = dy * dyAF / self._spectrumValues[1].totalPointCount
             else:
                 dy = self.sign(self.axisT - self.axisB)
-                fy0, fy1 = np.max(spectrumView.spectrum.intensities), np.min(spectrumView.spectrum.intensities)
+                if spectrumView.spectrum.intensities:
+                    fy0, fy1 = np.max(spectrumView.spectrum.intensities), np.min(spectrumView.spectrum.intensities)
+                else:
+                    fy0, fy1 = 0.0, 0.0
+
+                # check tolerances
+                if not self._widthsChangedEnough((fy0, 0.0), (fy1, 0.0), tol=1e-10):
+                    fy0, fy1 = 1.0, -1.0
+
                 dyAF = fy0 - fy1
                 yScale = dy * dyAF / 1.0
 

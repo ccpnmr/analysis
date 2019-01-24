@@ -243,7 +243,12 @@ class GLRegion(QtWidgets.QWidget):
         self.GLSignals.emitPaintEvent()
 
     def _rebuildIntegral(self):
-        if isinstance(self._object, Integral) and hasattr(self._object, '_1Dregions'):
+        if isinstance(self._object, Integral):
+
+            # needs addressing, check whether the intensities are defined
+            if not self._object.integralList.spectrum.intensities:
+                return
+
             intArea = self._integralArea = GLVertexArray(numLists=1,
                                                          renderMode=GLRENDERMODE_DRAW, blendMode=False,
                                                          drawMode=GL.GL_QUAD_STRIP, fillMode=GL.GL_FILL,

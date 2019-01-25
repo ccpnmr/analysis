@@ -235,8 +235,8 @@ class NefFileDialog(QtWidgets.QFileDialog):
     def _show(self):
         if self.useNative and not sys.platform.lower() == 'linux':
             funcName = self.staticFunctionDict[(self._acceptMode, self._fileMode)]
-            self.result = getattr(self, funcName)(caption=self._text, directory=self._selectFile, **self._kw)
-            # self.result = getattr(self, funcName)(caption=self._text, **self._kw)
+            self.result = getattr(self, funcName)(caption=self._text, directory=self._selectFile, **self._kwds)
+            # self.result = getattr(self, funcName)(caption=self._text, **self._kwds)
             if isinstance(self.result, tuple):
                 self.result = self.result[0]
         else:

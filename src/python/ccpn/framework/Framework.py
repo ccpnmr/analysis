@@ -2067,11 +2067,16 @@ class Framework(NotifierBase):
             getLogger().warning('Peak Picking: Project has no Specta.')
             MessageDialog.showWarning('Peak Picking', 'Project has no Spectra.')
         else:
-            from ccpn.ui.gui.popups.PickPeaks1DPopup import PickPeak1DPopup
+            spectra = [spec for spec in self.project.spectra if spec.dimensionCount == 1]
+            if spectra:
+                from ccpn.ui.gui.popups.PickPeaks1DPopup import PickPeak1DPopup
 
-            popup = PickPeak1DPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-            popup.exec_()
-            popup.raise_()
+                popup = PickPeak1DPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+                popup.exec_()
+                popup.raise_()
+            else:
+                getLogger().warning('Peak Picking: Project has no 1d Specta.')
+                MessageDialog.showWarning('Peak Picking', 'Project has no 1d Spectra.')
 
     def showPeakPickNDPopup(self):
         """
@@ -2081,15 +2086,20 @@ class Framework(NotifierBase):
             getLogger().warning('Peak Picking: Project has no Specta.')
             MessageDialog.showWarning('Peak Picking', 'Project has no Spectra.')
         else:
-            from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
+            spectra = [spec for spec in self.project.spectra if spec.dimensionCount > 1]
+            if spectra:
+                from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
 
-            if self.current.strip:
-                popup = PeakFindPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-                popup.exec_()
-                popup.raise_()
+                if self.current.strip:
+                    popup = PeakFindPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+                    popup.exec_()
+                    popup.raise_()
+                else:
+                    getLogger().warning('Pick Nd Peaks, no strip selected')
+                    MessageDialog.showWarning('Pick Nd Peaks', 'No strip selected')
             else:
-                getLogger().warning('Pick Nd Peaks, no strip selected')
-                MessageDialog.showWarning('Pick Nd Peaks', 'No strip selected')
+                getLogger().warning('Peak Picking: Project has no Nd Specta.')
+                MessageDialog.showWarning('Peak Picking', 'Project has no Nd Spectra.')
 
     def showCopyPeakListPopup(self):
         if not self.project.peakLists:

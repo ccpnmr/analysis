@@ -418,9 +418,9 @@ class ChemicalShiftTableWithAssignment(CcpnModule):
         if peak:
             self.current.peak = peak
 
-            self.application._startCommandBlock('%s.navigateToPositionInStrip(project.getByPid(%r))' %
-                                                (self.className, peak.position))
-            try:
+            from ccpn.core.lib.ContextManagers import undoBlock
+
+            with undoBlock():
                 # optionally clear the marks
                 if self.autoClearMarksWidget.checkBox.isChecked():
                     self.application.ui.mainWindow.clearMarks()
@@ -437,9 +437,6 @@ class ChemicalShiftTableWithAssignment(CcpnModule):
                                 widths = _getCurrentZoomRatio(strip.viewRange())
 
                             navigateToPositionInStrip(strip=strip, positions=peak.position, widths=widths)
-
-            finally:
-                self.application._endCommandBlock()
 
         # peak = data[CallBack.OBJECT]
         #

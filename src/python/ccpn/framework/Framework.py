@@ -1124,7 +1124,7 @@ class Framework(NotifierBase):
                    ))
 
         ms.append(('Spectrum', [
-            ("Load Spectrum...", lambda: self.loadData(text='Load Spectrum'), [('shortcut', 'ls')]),
+            ("Load Spectrum...", lambda: self._loadDataFromMenu(text='Load Spectrum'), [('shortcut', 'ls')]),
             (),
             ("Spectrum Groups...", self.showSpectrumGroupsPopup, [('shortcut', 'ss')]),
             ("Set Experiment Types...", self.showExperimentTypePopup, [('shortcut', 'et')]),
@@ -1143,7 +1143,7 @@ class Framework(NotifierBase):
                    ))
 
         ms.append(('Molecules', [
-            ("Chain from FASTA...", lambda: self.loadData(text='Load FASTA')),
+            ("Chain from FASTA...", lambda: self._loadDataFromMenu(text='Load FASTA')),
             (),
             ("Generate Chain...", self.showCreateChainPopup),
             ("Inspect...", self.inspectMolecule, [('enabled', False)]),
@@ -1247,6 +1247,18 @@ class Framework(NotifierBase):
     ###################################################################################################################
     ## MENU callbacks:  Project
     ###################################################################################################################
+
+    def _loadDataFromMenu(self, text=None):
+        """Call loadData from the menu and trap errors.
+        """
+        try:
+
+            self.loadData(text=text)
+
+        except Exception as es:
+            MessageDialog.showWarning(str(self.ui.mainWindow.windowTitle()), str(es))
+            if self._isInDebugMode:
+                raise es
 
     def createNewProject(self):
         "Callback for creating new project"

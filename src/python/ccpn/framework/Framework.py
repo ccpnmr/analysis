@@ -300,6 +300,10 @@ class Framework(NotifierBase):
         self.autoBackupThread = None
 
         # NBNB TODO The following block should maybe be moved into _getUi
+        # Assure that .ccpn exists
+        ccpnDir = Path.aPath(userPreferencesDirectory)
+        if not ccpnDir.exists():
+            ccpnDir.mkdir()
         self._getUserPrefs()
 
         # set the preferences if added from the commandline

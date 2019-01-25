@@ -214,7 +214,9 @@ class _GroupEditorPopupABC(CcpnDialog):
 
     def _updateButton(self, text):
         """Callback for nameEdit.textchanged"""
-        self.applyButtons.setButtonEnabled(self.BUTTON_APPLY_CLOSE, len(text)>0)
+        enabled = (self.editMode and self._editedObject is not None and len(text)>0) or \
+                  (not self.editMode and len(text)>0)
+        self.applyButtons.setButtonEnabled(self.BUTTON_APPLY_CLOSE, enabled)
 
     def _updateState(self):
         """Update state

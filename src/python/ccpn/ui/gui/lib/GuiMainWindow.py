@@ -504,7 +504,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         modulesMenu.clear()
 
         moduleSize = self._newSideBar.size()
-        visible = not (moduleSize.width() == 0 or moduleSize.height() == 0 or not self._newSideBar.isVisible())
+        visible = moduleSize.width() != 0 and moduleSize.height() != 0 and self._newSideBar.isVisible()
         modulesMenu.addAction(Action(modulesMenu, text='Sidebar',
                                      checkable=True, checked=visible,
                                      callback=partial(self._showSideBarModule, self._newSideBar, self, visible)))
@@ -515,13 +515,15 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
             modulesMenu.addAction(Action(modulesMenu, text=module.name(),
                                          checkable=True, checked=visible,
-                                         callback=partial(self._showModule, module, self)))
+                                         callback=partial(self._showModule, module, self, visible)))
 
-    def _showModule(self, module, modulesMenu):
+    def _showModule(self, module, modulesMenu, visible):
         try:
             menuItem = self.searchMenuAction(module.name())
             if menuItem:
-                if module.size().height() != 0 and module.size().width() != 0:  #menuItem.isChecked():    # opposite as it has toggled
+                # if module.size().height() != 0 and module.size().width() != 0:  #menuItem.isChecked():    # opposite as it has toggled
+
+                if visible:
                     module.setStretch(0, 0)
                 else:
                     module.setStretch(1, 1)
@@ -530,7 +532,9 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
     def _showSideBarModule(self, module, modulesMenu, visible):
         try:
-            if visible:     #     module.size().height() != 0 and module.size().width() != 0:  #menuItem.isChecked():    # opposite as it has toggled
+            # if module.size().height() != 0 and module.size().width() != 0:  #menuItem.isChecked():    # opposite as it has toggled
+
+            if visible:
                 module.hide()
             else:
                 module.show()

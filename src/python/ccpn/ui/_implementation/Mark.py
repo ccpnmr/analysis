@@ -90,9 +90,9 @@ class Mark(AbstractWrapperObject):
         return self._wrappedData.colour
 
     #GWV 20181127: deactivated all the setters
-    # @colour.setter
-    # def colour(self, value: Sequence):
-    #     self._wrappedData.colour = value
+    @colour.setter
+    def colour(self, value: Sequence):
+        self._wrappedData.colour = value
 
     @property
     def style(self) -> str:

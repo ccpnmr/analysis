@@ -1024,7 +1024,8 @@ class Project(AbstractWrapperObject):
         #TODO:RASMUS: Replace prints by logger calls
         #TODO:RASMUS: Fix all return types; define properly first
         if dataType is None:
-            print("Skipping: file data type not recognised for %s" % usePath)
+            # print("Skipping: file data type not recognised for %s" % usePath)
+            getLogger().warning("Skipping: file data type not recognised for %s" % usePath)
             return None
 
         elif dataType == 'Dirs':
@@ -1035,7 +1036,8 @@ class Project(AbstractWrapperObject):
                 self.loadData(path)
 
         elif not os.path.exists(usePath):
-            print("Skipping: no file found at %s" % usePath)
+            # print("Skipping: no file found at %s" % usePath)
+            getLogger().warning("Skipping: no file found at %s" % usePath)
             return []
 
         elif dataType == 'Text':
@@ -1081,7 +1083,8 @@ class Project(AbstractWrapperObject):
                 pids = getattr(self, funcname)(usePath, subType)
                 return pids
             else:
-                print("Skipping: project has no function %s" % funcname)
+                # print("Skipping: project has no function %s" % funcname)
+                getLogger().warning("Skipping: project has no function %s" % funcname)
 
         return []
 

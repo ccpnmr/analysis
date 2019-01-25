@@ -915,7 +915,8 @@ class NmrResidue(AbstractWrapperObject):
         for weight, residueType in value:
             chemComp = root.findFirstChemComp(code3Letter=residueType)
             if chemComp is None:
-                print("Residue type %s not recognised - skipping" % residueType)
+                # print("Residue type %s not recognised - skipping" % residueType)
+                getLogger().warning("Residue type %s not recognised - skipping" % residueType)
             else:
                 apiResonanceGroup.newResidueTypeProb(chemComp=chemComp, weight=weight)
 

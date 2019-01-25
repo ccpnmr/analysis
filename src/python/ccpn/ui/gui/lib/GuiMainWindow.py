@@ -872,6 +872,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                                                              phrase='create a new')
                 if okToContinue:
                     with progressManager(self, 'Loading project... ' + url):
+                        obj = None
                         with catchExceptions():
                             obj = self.application.loadProject(url)
 

@@ -153,9 +153,9 @@ class NmrResidueTableModule(CcpnModule):
             showWarning('startAssignment', 'Undefined display module(s);\nselect in settings first')
             return
 
-        self.application._startCommandBlock('%s.navigateToNmrResidue(project.getByPid(%r))' %
-                                            (self.className, nmrResidue.pid))
-        try:
+        from ccpn.core.lib.ContextManagers import undoBlock
+
+        with undoBlock():
             # optionally clear the marks
             if self.nmrResidueTableSettings.autoClearMarksWidget.checkBox.isChecked():
                 self.application.ui.mainWindow.clearMarks()
@@ -170,8 +170,6 @@ class NmrResidueTableModule(CcpnModule):
                                                                          self.nmrResidueTableSettings.sequentialStripsWidget.checkBox.isChecked(),
                                                   markPositions=self.nmrResidueTableSettings.markPositionsWidget.checkBox.isChecked()
                                                   )
-        finally:
-            self.application._endCommandBlock()
 
     def _closeModule(self):
         """CCPN-INTERNAL: used to close the module

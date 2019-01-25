@@ -504,10 +504,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         modulesMenu.clear()
 
         moduleSize = self._newSideBar.size()
-        visible = moduleSize.width() != 0 and moduleSize.height() != 0
+        visible = not (moduleSize.width() == 0 or moduleSize.height() == 0 or not self._newSideBar.isVisible())
         modulesMenu.addAction(Action(modulesMenu, text='Sidebar',
                                      checkable=True, checked=visible,
-                                     callback=partial(self._showSideBarModule, self._newSideBar, self)))
+                                     callback=partial(self._showSideBarModule, self._newSideBar, self, visible)))
 
         for module in self.moduleArea.ccpnModules:
             moduleSize = module.size()
@@ -528,9 +528,9 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         except Exception as es:
             Logging.getLogger().warning('Error expanding module: %s', module.name())
 
-    def _showSideBarModule(self, module, modulesMenu):
+    def _showSideBarModule(self, module, modulesMenu, visible):
         try:
-            if module.size().height() != 0 and module.size().width() != 0:  #menuItem.isChecked():    # opposite as it has toggled
+            if visible:     #     module.size().height() != 0 and module.size().width() != 0:  #menuItem.isChecked():    # opposite as it has toggled
                 module.hide()
             else:
                 module.show()

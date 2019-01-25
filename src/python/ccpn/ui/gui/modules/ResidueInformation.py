@@ -132,25 +132,29 @@ class ResidueInformation(CcpnModule):
             j = 0  # why was this introduced (it's not altered below)?
             for i in range(len(foundResidues)):
 
-                if foundResidues[j + i][0] is not None:
-                    label1 = Label(self, text=foundResidues[j + i][0].id,
+                checkResidues = foundResidues[j + i]
+
+                if checkResidues[0] is not None:
+                    label1 = Label(self, text=checkResidues[0].id,
                                    hAlign='c')
                     label1.setMaximumHeight(30)
-                    if foundResidues[j + i][0].nmrResidue is not None:
+                    if checkResidues[0].nmrResidue is not None:
                         label1.setStyleSheet(stylesheet)
 
                     self.residueWidget.layout().addWidget(label1, j + i, 0)
-                if len(foundResidues[j + i]) > 1:
-                    label2 = Label(self, text=foundResidues[j + i][1].id,
+                    
+                if len(checkResidues) > 1 and checkResidues[1] is not None:
+                    label2 = Label(self, text=checkResidues[1].id,
                                    hAlign='c')
-                    if foundResidues[j + i][1].nmrResidue is not None:
+                    if checkResidues[1].nmrResidue is not None:
                         label2.setStyleSheet(stylesheet)
                     label2.setMaximumHeight(30)
                     self.residueWidget.layout().addWidget(label2, j + i, 1)
-                if len(foundResidues[j + i]) > 2:
-                    label3 = Label(self, text=foundResidues[j + i][2].id,
+                    
+                if len(checkResidues) > 2 and checkResidues[2] is not None:
+                    label3 = Label(self, text=checkResidues[2].id,
                                    hAlign='c')
-                    if foundResidues[j + i][2].nmrResidue is not None:
+                    if checkResidues[2].nmrResidue is not None:
                         label3.setStyleSheet(stylesheet)
                     self.residueWidget.layout().addWidget(label3, j + i, 2)
                     label3.setMaximumHeight(30)

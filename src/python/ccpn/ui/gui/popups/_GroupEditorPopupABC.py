@@ -83,6 +83,9 @@ class _GroupEditorPopupABC(CcpnDialog):
     BUTTON_FILTER = 'Filter by:'
     RIGHT_RADIOBUTTONS = [BUTTON_ALL, BUTTON_FILTER]
 
+    BUTTON_CANCEL = 'Cancel'
+    BUTTON_APPLY_CLOSE = 'Apply and Close'
+
     FIXEDWIDTH = 120
 
     def __init__(self, parent=None, mainWindow=None, editMode=True, obj=None, defaultItems=None, **kwds):
@@ -115,6 +118,7 @@ class _GroupEditorPopupABC(CcpnDialog):
 
         self.nameLabel = Label(self, 'Name')
         self.nameEdit = LineEdit(self, backgroundText='> Enter name <', textAlignment='left')
+        self.nameEdit.textChanged.connect(self._updateButton)
         # self.nameEdit.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         self.nameEdit.setFixedWidth(self.FIXEDWIDTH)
 
@@ -150,7 +154,7 @@ class _GroupEditorPopupABC(CcpnDialog):
         self.rightListWidget.setFixedWidth(2*self.FIXEDWIDTH)
 
     def _setApplyButtons(self):
-        self.applyButtons = ButtonList(self, texts=['Cancel', 'Apply and Close'],
+        self.applyButtons = ButtonList(self, texts=[self.BUTTON_CANCEL, self.BUTTON_APPLY_CLOSE],
                                              callbacks=[self._cancel, self._applyAndClose],
                                              tipTexts=['Cancel the New/Edit operation',
                                                        'Apply according to current settings and close'],
@@ -208,11 +212,16 @@ class _GroupEditorPopupABC(CcpnDialog):
             return None
         return getattr(self.project, self.PROJECT_ITEM_ATTRIBUTE)
 
+    def _updateButton(self, text):
+        """Callback for nameEdit.textchanged"""
+        self.applyButtons.setButtonEnabled(self.BUTTON_APPLY_CLOSE, len(text)>0)
+
     def _updateState(self):
         """Update state
         """
         self._updateLeft()
         self._updateRight()
+        self._updateButton(self.nameEdit.get())
 
     def _updateLeft(self):
         """Update Left

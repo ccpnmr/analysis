@@ -238,9 +238,15 @@ class _GroupEditorPopupABC(CcpnDialog):
             if obj is not None:
                 self.nameEdit.setText(obj.name)
                 self._setLeftListWidgetItems(self._editedObjectItems)
+                self.nameEdit.setEnabled(True)
+                self.leftListWidget.setEnabled(True)
+                self.rightListWidget.setEnabled(True)
             else:
                 self.nameEdit.setText('')
                 self.leftListWidget.clear()
+                self.nameEdit.setEnabled(False)
+                self.leftListWidget.setEnabled(False)
+                self.rightListWidget.setEnabled(False)
 
         else:
             self.leftTopLabel.setText('New ' + self.KLASS.className)

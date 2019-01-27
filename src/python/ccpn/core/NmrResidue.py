@@ -1130,7 +1130,7 @@ class NmrResidue(AbstractWrapperObject):
     @classmethod
     def _getAllWrappedData(cls, parent: NmrChain) -> list:
         """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""
-        return parent._wrappedData.sortedResonanceGroups()
+        return parent._wrappedData.sortedResonanceGroups() if parent._wrappedData else ()
 
     def _reverseChainForDelete(self, apiNmrChain):
         """Reverse the chain.
@@ -1311,6 +1311,9 @@ class NmrResidue(AbstractWrapperObject):
 #                                   " NmrResidues NR:A.87, NR:A.87+0, NR:A.88-1, NR:A.82+5, etc.")
 
 def getter(self: NmrChain) -> typing.Tuple[NmrResidue]:
+    if not self._wrappedData:
+        return ()
+
     result = list(self._project._data2Obj.get(x) for x in self._wrappedData.mainResonanceGroups)
     if not self.isConnected:
         result.sort()

@@ -201,6 +201,9 @@ class NmrChain(AbstractWrapperObject):
         apiNmrChain = self._wrappedData
         project = self._project
 
+        if not apiNmrChain:
+            return
+
         if not self.isConnected:
           raise ValueError("assignConnectedResidues only allowed for connected NmrChains")
 

@@ -1110,6 +1110,17 @@ static PyObject *newList(size)
     return list;
 }
 
+static PyArrayObject *newArrayList(size)
+{
+    PyArrayObject *list;
+    list = PyList_New(size);
+    if (!list)
+    {
+    	RETURN_OBJ_ERROR("allocating list memory");
+    }
+    return list;
+}
+
 static appendFloatList(PyObject *list, double value)
 {
     if (PyList_Append(list, PyFloat_FromDouble((double) value)) != 0)
@@ -1186,15 +1197,24 @@ static PyObject *contourerGLList(PyObject *self, PyObject *args)
     colourCount = 0;
 
     int numArrays = PyTuple_GET_SIZE(dataArrays);
-    PyObject *posContours[numArrays], *negContours[numArrays];
+//    PyObject *posContours[numArrays], *negContours[numArrays];
+
+    PyObject *posContours, *negContours;
+    PyArrayObject *posCont, *negCont;
+    posContours = newList(0);
+    negContours = newList(0);
 
     for (arr=0; arr < numArrays; arr++)
     {
         dataArray = (PyArrayObject *) PyTuple_GET_ITEM(dataArrays, arr);
 
         // get the positive contours
-        posContours[arr] = calculate_contours(dataArray, posLevels);
-        negContours[arr] = calculate_contours(dataArray, negLevels);
+        //posContours[arr] = calculate_contours(dataArray, posLevels);
+        //negContours[arr] = calculate_contours(dataArray, negLevels);
+
+        PyList_Append(posContours, calculate_contours(dataArray, posLevels));
+        PyList_Append(negContours, calculate_contours(dataArray, negLevels));
+
     }
 
     npy_intp dims[1] = {numIndices};
@@ -1221,8 +1241,15 @@ static PyObject *contourerGLList(PyObject *self, PyObject *args)
     for (arr=0; arr < numArrays; arr++)
     {
         // fill the new arrays
-        fillContours(posContours[arr], posColour);
-        fillContours(negContours[arr], negColour);
+        //fillContours(posContours[arr], posColour);
+        //fillContours(negContours[arr], negColour);
+
+
+        posCont = (PyArrayObject *) PyList_GET_ITEM(posContours, arr);
+        negCont = (PyArrayObject *) PyList_GET_ITEM(negContours, arr);
+
+        fillContours(posCont, posColour);
+        fillContours(negCont, negColour);
     }
 
     PyObject *ind = PyLong_FromDouble(numIndices);

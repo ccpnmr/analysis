@@ -120,9 +120,9 @@ def undoBlock(application=None):
             sidebar = application.ui.mainWindow._newSideBar
             sidebar.increaseSidebarBlocking()
 
+    application._increaseNotificationBlocking()
     if not application._echoBlocking:
         application.project.suspendNotification()
-    application._increaseNotificationBlocking()
 
     getLogger().debug2('_enterUndoBlock')
 
@@ -131,9 +131,9 @@ def undoBlock(application=None):
         yield
 
     finally:
-        application._decreaseNotificationBlocking()
         if not application._echoBlocking:
             application.project.resumeNotification()
+        application._decreaseNotificationBlocking()
 
         if undo is not None:
             # if not application.project._blockSideBar and not undo._blocked:
@@ -559,6 +559,30 @@ def notificationBlanking(application=None):
     finally:
         # clean up after blocking notifications
         application.project.unblankNotification()
+
+@contextmanager
+def notificationEchoBlocking(application=None):
+    """
+    Disable echoing of commands to the terminal, re-enable at the end of the function block.
+    """
+
+    # get the application
+    if not application:
+        application = getApplication()
+    if application is None:
+        raise RuntimeError('Error getting application')
+
+    application._increaseNotificationBlocking()
+    try:
+        # transfer control to the calling function
+        yield
+
+    except AttributeError as es:
+        raise es
+
+    finally:
+        # clean up after disabling echo blocking
+        application._decreaseNotificationBlocking()
 
 
 @contextmanager

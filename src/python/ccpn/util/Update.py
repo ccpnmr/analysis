@@ -374,13 +374,17 @@ class UpdateAgent(object):
             self.showError('No updates', 'No updates for installation')
             return
 
+        n = 0
+        updateFilesInstalled = []
+
         if self.haveWriteAccess():
-            n = 0
             for updateFile in updateFiles:
                 try:
                     print('Installing %s' % (updateFile.fullFilePath))
                     updateFile.installUpdate()
+
                     n += 1
+                    updateFilesInstalled.append(updateFile)
                 except Exception as e:
                     print('Could not install %s: %s' % (updateFile.fullFilePath, e))
 
@@ -396,12 +400,14 @@ class UpdateAgent(object):
 
         self.resetFromServer()
 
+        return updateFilesInstalled
+
     def installUpdates(self):
 
         for updateFile in self.updateFiles:
             updateFile.shouldInstall = True
 
-        self.installChosen()
+        return self.installChosen()
 
     def diffUpdates(self, updateFiles=None, write=sys.stdout.write):
 

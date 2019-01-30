@@ -91,10 +91,10 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
     def _install(self):
         """The update button has been clicked. Install updates and flag that files have been changed
         """
-        self._numUpdatesInstalled += len(self.updateFiles)
-        self.installUpdates()
-
-        self.buttonList.buttons[2].setText('Close and Exit')
+        updateFilesInstalled = self.installUpdates()
+        if updateFilesInstalled:
+            self._numUpdatesInstalled += len(updateFilesInstalled)
+            self.buttonList.buttons[2].setText('Close and Exit')
 
     def _closeProgram(self):
         """Call the mainWindow close function giving user option to save, then close program

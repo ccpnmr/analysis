@@ -1251,7 +1251,7 @@ class Spectrum(AbstractWrapperObject):
                 result = self._getSliceDataFromPlane(position=position, xDim=sliceDim, yDim=sliceDim + 1,
                                                      sliceDim=sliceDim)
 
-        if result:
+        if result is not None and result.size != 0:
             # Optionally scale data depending on self.scale
             if self.scale is not None:
                 if self.scale == 0.0:

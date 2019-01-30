@@ -680,7 +680,7 @@ class CcpnGLWidget(QOpenGLWidget):
             else:
                 dy = -1.0 if self.INVERTYAXIS else -1.0  # dy = self.sign(self.axisT - self.axisB)
 
-                if spectrumView.spectrum.intensities:
+                if spectrumView.spectrum.intensities is not None and spectrumView.spectrum.intensities.size != 0:
                     fy0, fy1 = np.max(spectrumView.spectrum.intensities), np.min(spectrumView.spectrum.intensities)
                 else:
                     fy0, fy1 = 0.0, 0.0
@@ -4144,7 +4144,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 yScale = dy * dyAF / self._spectrumValues[1].totalPointCount
             else:
                 dy = self.sign(self.axisT - self.axisB)
-                if spectrumView.spectrum.intensities:
+                if spectrumView.spectrum.intensities is not None and spectrumView.spectrum.intensities.size != 0:
                     fy0, fy1 = np.max(spectrumView.spectrum.intensities), np.min(spectrumView.spectrum.intensities)
                 else:
                     fy0, fy1 = 0.0, 0.0

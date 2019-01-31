@@ -45,6 +45,9 @@ from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO
+from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
+from ccpn.util.Colour import hexToRgbRatio
+from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_REGIONSHADE
 
 
 ALL = '<all>'
@@ -516,9 +519,11 @@ class StripPlot(Widget):
             for row, spectrum in enumerate(self.validSpectrumViews.keys()):
                 spectraRow += 1
                 f = _SpectrumRow(parent=self._spectraWidget,
+                                 application=self.application,
+                                 spectrum=spectrum,
                                  row=spectraRow, col=0,
                                  setLayout=True,
-                                 spectrum=spectrum, visible=self.validSpectrumViews[spectrum])
+                                 visible=self.validSpectrumViews[spectrum])
 
                 spectraWidgets[spectrum.pid] = f
 
@@ -569,8 +574,8 @@ class StripPlot(Widget):
 class _SpectrumRow(Frame):
     "Class to make a spectrum row"
 
-    def __init__(self, parent, spectrum, row=0, col=0, visible=True, **kwds):
-        super(_SpectrumRow, self).__init__(parent, **kwds)
+    def __init__(self, parent, application, spectrum, row=0, col=0, visible=True, **kwds):
+        super().__init__(parent, **kwds)
 
         # col = 0
         # self.checkbox = CheckBoxCompoundWidget(self, grid=(0, col), gridSpan=(1, 1), hAlign='left',
@@ -594,6 +599,11 @@ class _SpectrumRow(Frame):
             self.spinBoxes.append(ds)
 
             ds.setEnabled(visible)
+
+        brush = (*hexToRgbRatio(spectrum.positiveContourColour), CCPNGLWIDGET_REGIONSHADE)
+        self.guiRegion = GLTargetButtonSpinBoxes(parent, application=application,
+                                                 orientation='v', brush=brush,
+                                                 grid=(row, col))
 
 
 class SequenceGraphSettings(Widget):
@@ -919,9 +929,11 @@ class SequenceGraphSettings(Widget):
             for row, spectrum in enumerate(self.validSpectrumViews.keys()):
                 spectraRow += 1
                 f = _SpectrumRow(parent=self._spectraWidget,
+                                 application=self.application,
+                                 spectrum=spectrum,
                                  row=spectraRow, col=0,
                                  setLayout=True,
-                                 spectrum=spectrum, visible=self.validSpectrumViews[spectrum])
+                                 visible=self.validSpectrumViews[spectrum])
 
                 spectraWidgets[spectrum.pid] = f
 

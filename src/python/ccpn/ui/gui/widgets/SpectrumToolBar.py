@@ -25,6 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+from contextlib import contextmanager
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ccpn.ui.gui.widgets.Menu import Menu
@@ -54,6 +55,55 @@ class SpectrumToolBar(ToolBar):
         self.eventFilter = self._eventFilter
         self.installEventFilter(self)
         self.setMouseTracking(True)
+        self._spectrumToolBarBlockingLevel = 0
+
+    @property
+    def isBlocked(self):
+        """True if spectrumToolBar is blocked
+        """
+        return self._spectrumToolBarBlockingLevel > 0
+
+    def _blockSpectrumToolBarEvents(self):
+        """Block all updates/signals/notifiers on the spectrumToolBar
+        """
+        self.setUpdatesEnabled(False)
+        self.blockSignals(True)
+
+    def _unblockSpectrumToolBarEvents(self):
+        """Unblock all updates/signals/notifiers on the spectrumToolBar
+        """
+        self.blockSignals(False)
+        self.setUpdatesEnabled(True)
+        
+    @contextmanager
+    def spectrumToolBarBlocking(self, node=None):
+        """Context manager to handle blocking of the spectrumToolBar events.
+        """
+        self.increaseSpectrumToolBarBlocking(node)
+        try:
+            # pass control to the calling function
+            yield
+
+        finally:
+            self.decreaseSpectrumToolBarBlocking(node)
+
+    def increaseSpectrumToolBarBlocking(self, node=None):
+        """increase level of blocking
+        """
+        if self._spectrumToolBarBlockingLevel == 0:
+            self._blockSpectrumToolBarEvents()
+        self._spectrumToolBarBlockingLevel += 1
+
+    def decreaseSpectrumToolBarBlocking(self, node=None):
+        """Reduce level of blocking - when level reaches zero, SpectrumToolBar is unblocked
+        """
+        if self._spectrumToolBarBlockingLevel > 0:
+            self._spectrumToolBarBlockingLevel -= 1
+            # check if level at zero; if so call post-blocking update
+            if self._spectrumToolBarBlockingLevel == 0:
+                self._unblockSpectrumToolBarEvents()
+        else:
+            raise RuntimeError('Error: cannot decrease spectrumToolBar blocking below 0')
 
     def _paintButtonToMove(self, button):
         pixmap = button.grab()  # makes a "ghost" of the button as we drag
@@ -84,43 +134,45 @@ class SpectrumToolBar(ToolBar):
         GLSignals._emitAxisUnitsChanged(source=None, strip=self.widget.strips[0], dataDict={})
 
     def _addSubMenusToContext(self, contextMenu, button):
-        dd = OrderedDict([(PeakList, PeakListView), (IntegralList, IntegralListView), (MultipletList, MultipletListView)])
-        spectrum = self.widget.project.getByPid(button.actions()[0].objectName())
-        if spectrum:
-            for coreObj, viewObj in dd.items():
-                smenu = contextMenu.addMenu(coreObj.className)
-                allViews = []
-                vv = getattr(self.widget, viewObj._pluralLinkName)
-                if vv:
-                    for view in vv:
-                        s = coreObj.className
-                        o = getattr(view, s[0].lower() + s[1:])
-                        if o:
-                            if o._parent == spectrum:
-                                allViews.append(view)
-                views = list(set(allViews))
-                smenu.setEnabled(len(views) > 0)
-                smenu.addAction('Show All', partial(self._setVisibleAllFromList, True, smenu, views))
-                smenu.addAction('Hide All', partial(self._setVisibleAllFromList, False, smenu, views))
-                smenu.addSeparator()
-                for view in sorted(views, reverse=False):
-                    ccpnObj = view._childClass
-                    strip = view._parent._parent
-                    toolTip = 'Toggle {0} {1} on strip {2}'.format(coreObj.className, ccpnObj._key, strip.id)
-                    if ccpnObj:
-                        if len(self.widget.strips) > 1:  #add shows in which strips the view is
-                            currentTxt = ''  # add in which strip is current
-                            if self.widget.current.strip == strip:
-                                currentTxt = ' Current'
-                            action = smenu.addItem('{0} ({1}{2})'.format(ccpnObj.id, strip.id, currentTxt), toolTip=toolTip)
-                        else:
-                            action = smenu.addItem(ccpnObj.id, toolTip=toolTip)
-
-                        action.setCheckable(True)
-                        if view.isVisible():
-                            action.setChecked(True)
-                        action.toggled.connect(view.setVisible)
-                        action.toggled.connect(self._updateGl)
+        
+        with self.spectrumToolBarBlocking():
+            dd = OrderedDict([(PeakList, PeakListView), (IntegralList, IntegralListView), (MultipletList, MultipletListView)])
+            spectrum = self.widget.project.getByPid(button.actions()[0].objectName())
+            if spectrum:
+                for coreObj, viewObj in dd.items():
+                    smenu = contextMenu.addMenu(coreObj.className)
+                    allViews = []
+                    vv = getattr(self.widget, viewObj._pluralLinkName)
+                    if vv:
+                        for view in vv:
+                            s = coreObj.className
+                            o = getattr(view, s[0].lower() + s[1:])
+                            if o:
+                                if o._parent == spectrum:
+                                    allViews.append(view)
+                    views = list(set(allViews))
+                    smenu.setEnabled(len(views) > 0)
+                    smenu.addAction('Show All', partial(self._setVisibleAllFromList, True, smenu, views))
+                    smenu.addAction('Hide All', partial(self._setVisibleAllFromList, False, smenu, views))
+                    smenu.addSeparator()
+                    for view in sorted(views, reverse=False):
+                        ccpnObj = view._childClass
+                        strip = view._parent._parent
+                        toolTip = 'Toggle {0} {1} on strip {2}'.format(coreObj.className, ccpnObj._key, strip.id)
+                        if ccpnObj:
+                            if len(self.widget.strips) > 1:  #add shows in which strips the view is
+                                currentTxt = ''  # add in which strip is current
+                                if self.widget.current.strip == strip:
+                                    currentTxt = ' Current'
+                                action = smenu.addItem('{0} ({1}{2})'.format(ccpnObj.id, strip.id, currentTxt), toolTip=toolTip)
+                            else:
+                                action = smenu.addItem(ccpnObj.id, toolTip=toolTip)
+    
+                            action.setCheckable(True)
+                            if view.isVisible():
+                                action.setChecked(True)
+                            action.toggled.connect(view.setVisible)
+                            action.toggled.connect(self._updateGl)
 
     def _createContextMenu(self, button: QtWidgets.QToolButton):
         """
@@ -420,55 +472,56 @@ class SpectrumToolBar(ToolBar):
 
     def _addSpectrumViewToolButtons(self, spectrumView):
 
-        spectrumDisplay = spectrumView.strip.spectrumDisplay
-        spectrum = spectrumView.spectrum
-        apiDataSource = spectrum._wrappedData
-        action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
-        if not action:
-            # add toolbar action (button)
-            spectrumName = spectrum.name
-            # This is a bug, it changes the name of button and crashes when moving them across
-            # if len(spectrumName) > 12:
-            #   spectrumName = spectrumName[:12]+'.....'
+        with self.spectrumToolBarBlocking():
+            spectrumDisplay = spectrumView.strip.spectrumDisplay
+            spectrum = spectrumView.spectrum
+            apiDataSource = spectrum._wrappedData
+            action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
+            if not action:
+                # add toolbar action (button)
+                spectrumName = spectrum.name
+                # This is a bug, it changes the name of button and crashes when moving them across
+                # if len(spectrumName) > 12:
+                #   spectrumName = spectrumName[:12]+'.....'
 
-            actionList = self.actions()
-            try:
-                # try and find the spectrumView in the orderedlist - for undo function
-                oldList = spectrumDisplay.spectrumViews
-                oldList = spectrumDisplay.orderedSpectrumViews(oldList)
-                if spectrumView in oldList:
-                    oldIndex = oldList.index(spectrumView)
-                else:
-                    oldIndex = len(oldList)
+                actionList = self.actions()
+                try:
+                    # try and find the spectrumView in the orderedlist - for undo function
+                    oldList = spectrumDisplay.spectrumViews
+                    oldList = spectrumDisplay.orderedSpectrumViews(oldList)
+                    if spectrumView in oldList:
+                        oldIndex = oldList.index(spectrumView)
+                    else:
+                        oldIndex = len(oldList)
 
-                if actionList and oldIndex < len(actionList):
-                    nextAction = actionList[oldIndex]
+                    if actionList and oldIndex < len(actionList):
+                        nextAction = actionList[oldIndex]
 
-                    # create a new action and move it to the correct place in the list
+                        # create a new action and move it to the correct place in the list
+                        action = self.addAction(spectrumName)
+                        action.setObjectName(spectrum.pid)
+                        self.insertAction(nextAction, action)
+                    else:
+                        action = self.addAction(spectrumName)
+                        action.setObjectName(spectrum.pid)
+
+                except Exception as es:
                     action = self.addAction(spectrumName)
                     action.setObjectName(spectrum.pid)
-                    self.insertAction(nextAction, action)
-                else:
-                    action = self.addAction(spectrumName)
-                    action.setObjectName(spectrum.pid)
 
-            except Exception as es:
-                action = self.addAction(spectrumName)
-                action.setObjectName(spectrum.pid)
+                action.setCheckable(True)
+                action.setChecked(True)
+                action.setToolTip(spectrum.name)
+                widget = self.widgetForAction(action)
+                widget.setIconSize(QtCore.QSize(120, 10))
+                self._setSizes(action)
+                # WHY _wrappedData and not spectrumView?
+                widget.spectrumView = spectrumView._wrappedData
+                action.spectrumViewPid = spectrumView.pid
 
-            action.setCheckable(True)
-            action.setChecked(True)
-            action.setToolTip(spectrum.name)
-            widget = self.widgetForAction(action)
-            widget.setIconSize(QtCore.QSize(120, 10))
-            self._setSizes(action)
-            # WHY _wrappedData and not spectrumView?
-            widget.spectrumView = spectrumView._wrappedData
-            action.spectrumViewPid = spectrumView.pid
-
-            spectrumDisplay.spectrumActionDict[apiDataSource] = action
-            # The following call sets the icon colours:
-            _spectrumViewHasChanged({Notifier.OBJECT: spectrumView})
+                spectrumDisplay.spectrumActionDict[apiDataSource] = action
+                # The following call sets the icon colours:
+                _spectrumViewHasChanged({Notifier.OBJECT: spectrumView})
 
         # if spectrumDisplay.is1D:
         #     action.toggled.connect(spectrumView.plot.setVisible)
@@ -481,21 +534,23 @@ class SpectrumToolBar(ToolBar):
         widget.setFixedSize(75, 30)
 
     def _toolbarChange(self, spectrumViews):
-        actionList = self.actions()
-        # self.clear()
-        for specView in spectrumViews:
 
-            # self._addSpectrumViewToolButtons(specView)
-            spectrum = specView.spectrum
-            spectrumName = spectrum.name
-            if len(spectrumName) > 12:
-                spectrumName = spectrumName[:12] + '.....'
+        with self.spectrumToolBarBlocking():
+            actionList = self.actions()
+            # self.clear()
+            for specView in spectrumViews:
 
-            for act in actionList:
-                if act.text() == spectrumName:
-                    self.addAction(act)
+                # self._addSpectrumViewToolButtons(specView)
+                spectrum = specView.spectrum
+                spectrumName = spectrum.name
+                if len(spectrumName) > 12:
+                    spectrumName = spectrumName[:12] + '.....'
 
-                    widget = self.widgetForAction(act)
-                    widget.setIconSize(QtCore.QSize(120, 10))
-                    self._setSizes(act)
+                for act in actionList:
+                    if act.text() == spectrumName:
+                        self.addAction(act)
+
+                        widget = self.widgetForAction(act)
+                        widget.setIconSize(QtCore.QSize(120, 10))
+                        self._setSizes(act)
         self.update()

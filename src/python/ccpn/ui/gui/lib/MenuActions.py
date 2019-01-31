@@ -40,6 +40,7 @@ from ccpn.core.RestraintList import RestraintList
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning
+from ccpn.core.lib.ContextManagers import undoBlock
 
 from ccpn.ui.gui.popups.ChainPopup import ChainPopup
 from ccpn.ui.gui.popups.ChemicalShiftListPopup import ChemicalShiftListPopup
@@ -567,13 +568,16 @@ class _openItemSpectrumGroupDisplay(OpenItemABC):
         if len(spectrumGroup.spectra) > 0:
             spectrumDisplay = mainWindow.createSpectrumDisplay(spectrumGroup.spectra[0])
             mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
-            for spectrum in spectrumGroup.spectra:  # Add the other spectra
-                spectrumDisplay.displaySpectrum(spectrum)
 
-            spectrumDisplay.isGrouped = True
-            spectrumDisplay.spectrumToolBar.hide()
-            spectrumDisplay.spectrumGroupToolBar.show()
-            spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
+            with undoBlock():
+                for spectrum in spectrumGroup.spectra:  # Add the other spectra
+                    spectrumDisplay.displaySpectrum(spectrum)
+
+                spectrumDisplay.isGrouped = True
+                spectrumDisplay.spectrumToolBar.hide()
+                spectrumDisplay.spectrumGroupToolBar.show()
+                spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
+
             mainWindow.application.current.strip = spectrumDisplay.strips[0]
             # if any([sp.dimensionCount for sp in spectrumGroup.spectra]) == 1:
             spectrumDisplay.autoRange()

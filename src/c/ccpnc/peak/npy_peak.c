@@ -537,7 +537,7 @@ static CcpnStatus find_peaks(PyArrayObject *data_array,
             continue; /* point is in some excluded region */
 
         v = get_value_at_point(data_array, point);
-        //printf("i = %d, v = %f, high = %f\n", i, v, high);
+        printf("i = %d, v = %f, high = %f\n", i, v, high);
 
         if (have_high && (v >= high))
             find_maximum = CCPN_TRUE;

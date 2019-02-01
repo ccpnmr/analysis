@@ -35,7 +35,7 @@ from ccpn.core.lib import Pid
 from ccpn.ui._implementation.Strip import Strip
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
-from ccpn.core.lib.ContextManagers import undoBlockManager, deleteObject, undoBlock, notificationBlanking
+from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar
 
 
 class SpectrumView(AbstractWrapperObject):
@@ -84,7 +84,7 @@ class SpectrumView(AbstractWrapperObject):
     def delete(self):
         """Delete SpectrumView for all strips.
         """
-        with undoBlock():
+        with undoBlockWithoutSideBar():
             # self._finaliseAction('delete')
             # with notificationBlanking():
 

@@ -145,6 +145,43 @@ def undoBlock(application=None):
 
         getLogger().debug2('_exitUndoBlock: echoBlocking=%s' % application._echoBlocking)
 
+@contextmanager
+def undoBlockWithoutSideBar(application=None):
+    """Wrap all the contained operations into a single undo/redo event.
+    """
+
+    # get the current application
+    if not application:
+        application = getApplication()
+    if application is None:
+        raise RuntimeError('Error getting application')
+
+    # get the undo stack
+    undo = application._getUndo()
+    if undo is not None:
+        undo.newWaypoint()  # DO NOT CHANGE
+        undo.increaseWaypointBlocking()
+
+    application._increaseNotificationBlocking()
+    if not application._echoBlocking:
+        application.project.suspendNotification()
+
+    getLogger().debug2('_enterUndoBlock')
+
+    try:
+        # transfer control to the calling function
+        yield
+
+    finally:
+        if not application._echoBlocking:
+            application.project.resumeNotification()
+        application._decreaseNotificationBlocking()
+
+        if undo is not None:
+            undo.decreaseWaypointBlocking()
+
+        getLogger().debug2('_exitUndoBlock: echoBlocking=%s' % application._echoBlocking)
+
 
 # @contextmanager
 # def blankNotification(obj, message, *args, **kwargs):

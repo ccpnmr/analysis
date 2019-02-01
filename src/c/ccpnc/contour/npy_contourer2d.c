@@ -156,7 +156,7 @@ static Contour_vertices new_contour_vertices(PyArrayObject *data, int nlevels, C
         contour_vertices->col_end_old[i][0] = npoints0;
     }
 
-// TBD: should not need _new variables if nlevels = 1 but crashes if do not have them
+    // TBD: should not need _new variables if nlevels = 1 but crashes if do not have them
     //if (nlevels > 1)
     {
         contour_vertices->nrows_new = 0;
@@ -191,7 +191,7 @@ static void delete_contour_vertices(Contour_vertices vertices, int nlevels, int 
     FREE2(vertices->col_start_old, int, npoints1);
     FREE2(vertices->col_end_old, int, npoints1);
 
-// TBD: should not need _new variables if nlevels = 1 but crashes if do not have them
+    // TBD: should not need _new variables if nlevels = 1 but crashes if do not have them
     //if (nlevels > 1)
     {
         FREE(vertices->row_new, int);

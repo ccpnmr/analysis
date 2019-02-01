@@ -619,7 +619,7 @@ class Strip(AbstractWrapperObject):
                     indices = spectrum.getByAxisCodes('indices', stripAxisCodes[0:2])
 
                 except Exception as es:
-                    
+
                     # final try with the complicated method
                     indices = self._getSpectrumAxisCodeIndexing(spectrum)
 

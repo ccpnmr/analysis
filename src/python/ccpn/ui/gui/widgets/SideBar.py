@@ -1139,6 +1139,34 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
             else:
                 super().dragMoveEvent(event)
 
+    def _displaySelectedSpectrum(self):
+        import time
+
+        s = time.time()
+        for item in self.selectedItems():
+            if item is not None:
+                dataPid = item.data(0, QtCore.Qt.DisplayRole)
+                objFromPid = self.project.getByPid(dataPid)
+                if isinstance(objFromPid,Spectrum):
+                    strip = self.application.current.strip
+                    e1 = time.time()
+                    print('1 time, ', e1 - s)
+                    if strip:
+                        strip._clear()
+                        e2 = time.time()
+                        print('time 2, ', e2 - e1)
+                        strip.spectrumDisplay.displaySpectrum(objFromPid)
+                        e3 = time.time()
+                        print('time 3, ', e3 - e2)
+
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_Up:
+            super().keyPressEvent(event)
+            self._displaySelectedSpectrum()
+        if event.key() == QtCore.Qt.Key_Down:
+            super().keyPressEvent(event)
+            self._displaySelectedSpectrum()
+
     def _cloneObject(self, objs):
         """Clones the specified objects.
         """

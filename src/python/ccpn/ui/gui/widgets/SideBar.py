@@ -968,18 +968,19 @@ class SideBarStructure(object):
         finally:
             self.decreaseSidebarBlocking(node)
 
-    def increaseSidebarBlocking(self, node=None):
+    def increaseSidebarBlocking(self, node=None, withSideBarUpdate=True):
         """increase level of blocking
         """
         if self._sidebarBlockingLevel == 0:
             self._blockSideBarEvents()
-            if node:
-                node._storeExpandedStates()
-            else:
-                self._sidebarData._storeExpandedStates()
+            if withSideBarUpdate:
+                if node:
+                    node._storeExpandedStates()
+                else:
+                    self._sidebarData._storeExpandedStates()
         self._sidebarBlockingLevel += 1
 
-    def decreaseSidebarBlocking(self, node=None):
+    def decreaseSidebarBlocking(self, node=None, withSideBarUpdate=True):
         """Reduce level of blocking - when level reaches zero, Sidebar is unblocked
         """
         if self._sidebarBlockingLevel > 0:
@@ -987,10 +988,11 @@ class SideBarStructure(object):
             # check if we arrived at level zero; if so call post-blocking update
             if self._sidebarBlockingLevel == 0:
                 self._sidebarData._postBlockingUpdate()
-                if node:
-                    node._restoreExpandedStates()
-                else:
-                    self._sidebarData._restoreExpandedStates()
+                if withSideBarUpdate:
+                    if node:
+                        node._restoreExpandedStates()
+                    else:
+                        self._sidebarData._restoreExpandedStates()
                 self._unblockSideBarEvents()
         else:
             raise RuntimeError('Error: cannot decrease sidebar blocking below 0')

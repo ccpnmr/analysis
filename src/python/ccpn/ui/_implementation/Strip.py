@@ -521,6 +521,7 @@ class Strip(AbstractWrapperObject):
                         spectrumAxisCodes = spectrumView.spectrum.axisCodes
                         stripAxisCodes = self.axisCodes
                         position = [0] * spectrumView.spectrum.dimensionCount
+                        height = None
 
                         remapIndices = commonUtil._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
                         if remapIndices:
@@ -532,8 +533,14 @@ class Strip(AbstractWrapperObject):
                                 position[n] = inPosition[idx]
                         else:
                             position = inPosition
+                    else:
+                        # 1d position with height
 
-                    peak = peakList.newPeak(ppmPositions=position)
+                        # note, the height below is not derived from any fitting
+                        # but is a weighted average of the values at the neighbouring grid points
+                        height = spectrumView.spectrum.getPositionValue(spectrumView.spectrum.mainSpectrumReferences[0].valueToPoint(position[0]))
+
+                    peak = peakList.newPeak(ppmPositions=position, height=height)
 
                     result.append(peak)
                     peakLists.append(peakList)

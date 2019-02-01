@@ -515,13 +515,13 @@ class Strip(AbstractWrapperObject):
                 for thisPeakListView in validPeakListViews:
                     peakList = thisPeakListView.peakList
 
+                    height = None
                     position = inPosition
                     if spectrumView.spectrum.dimensionCount > 1:
                         # sortedSelectedRegion =[list(sorted(x)) for x in selectedRegion]
                         spectrumAxisCodes = spectrumView.spectrum.axisCodes
                         stripAxisCodes = self.axisCodes
                         position = [0] * spectrumView.spectrum.dimensionCount
-                        height = None
 
                         remapIndices = commonUtil._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
                         if remapIndices:
@@ -538,8 +538,13 @@ class Strip(AbstractWrapperObject):
 
                         # note, the height below is not derived from any fitting
                         # but is a weighted average of the values at the neighbouring grid points
-                        pp = spectrumView.spectrum.mainSpectrumReferences[0].valueToPoint(position[0])
-                        height = spectrumView.spectrum.getPositionValue(position)
+                        spectrum = spectrumView.spectrum
+                        pp = spectrum.mainSpectrumReferences[0].valueToPoint(position[0])
+                        frac = pp % 1
+                        if spectrum.intensities is not None and spectrum.intensities.size != 0:
+                            # need to interpolate between pp-1, and pp
+                            height = spectrum.intensities[int(pp) - 1] + \
+                                     frac * (spectrum.intensities[int(pp)] - spectrum.intensities[int(pp) - 1])
 
                     peak = peakList.newPeak(ppmPositions=position, height=height)
 
@@ -578,7 +583,7 @@ class Strip(AbstractWrapperObject):
             stripAxisCodes = self.axisCodes
 
             # get the ordering of the strip axisCodes in the spectrum
-            indices = spectrum.getByAxisCodes('indices', stripAxisCodes)
+            indices = (0, 1)  #spectrum.getByAxisCodes('indices', stripAxisCodes)
 
             # sort the axis limits by spectrum axis order
             for n, axisCode in enumerate(spectrumAxisCodes):
@@ -613,9 +618,6 @@ class Strip(AbstractWrapperObject):
         project = self.project
         minDropfactor = self.application.preferences.general.peakDropFactor
 
-        # with logCommandBlock(get='self') as log:
-        #     log('peakPickRegion')
-
         with undoBlock():
             for spectrumView in (v for v in self.spectrumViews if v.isVisible()):
 
@@ -636,47 +638,10 @@ class Strip(AbstractWrapperObject):
                                                             doNeg=spectrumView.displayNegativeContours,
                                                             fitMethod='gaussian', minDropfactor=minDropfactor)
 
+                    else:
+                        newPeaks = peakList.pickPeaks1d(*axisCodeDict.values(), size=minDropfactor * 100)
+
                     result.extend(newPeaks)
-
-                # with notificationBlanking():
-                #
-                # for thisPeakListView in validPeakListViews:
-                #
-                #     peakList = thisPeakListView.peakList
-                #
-                #     if spectrumView.spectrum.dimensionCount > 1:
-                #         sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]
-                #         spectrumAxisCodes = spectrumView.spectrum.axisCodes
-                #         stripAxisCodes = self.axisCodes
-                #         sortedSpectrumRegion = [0] * spectrumView.spectrum.dimensionCount
-                #
-                #         remapIndices = commonUtil._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
-                #         if remapIndices:
-                #             for n, axisCode in enumerate(spectrumAxisCodes):
-                #                 # idx = stripAxisCodes.index(axisCode)
-                #                 idx = remapIndices[n]
-                #                 sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
-                #         else:
-                #             sortedSpectrumRegion = sortedSelectedRegion
-                #
-                #         newPeaks = peakList.pickPeaksNd(sortedSpectrumRegion,
-                #                                         doPos=spectrumView.displayPositiveContours,
-                #                                         doNeg=spectrumView.displayNegativeContours,
-                #                                         fitMethod='gaussian', minDropfactor=minDropfactor)
-                #         # newPeaks = peakList.pickPeaksRegion(sortedSpectrumRegion,
-                #         #                                     doPos=spectrumView.displayPositiveContours,
-                #         #                                     doNeg=spectrumView.displayNegativeContours,
-                #         #                                     fitMethod='gaussian', minDropfactor=minDropfactor)
-                #
-                #     else:
-                #         # 1D's
-                #         # NBNB This is a change - values are now rounded to three decimal places. RHF April 2017
-                #         newPeaks = peakList.pickPeaks1d(selectedRegion[0], sorted(selectedRegion[1]), size=minDropfactor * 100)
-                #
-                #     result.extend(newPeaks)
-
-        # for peak in result:
-        #     peak._finaliseAction('create')
 
         return tuple(result)
 

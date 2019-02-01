@@ -538,7 +538,8 @@ class Strip(AbstractWrapperObject):
 
                         # note, the height below is not derived from any fitting
                         # but is a weighted average of the values at the neighbouring grid points
-                        height = spectrumView.spectrum.getPositionValue(spectrumView.spectrum.mainSpectrumReferences[0].valueToPoint(position[0]))
+                        pp = spectrumView.spectrum.mainSpectrumReferences[0].valueToPoint(position[0])
+                        height = spectrumView.spectrum.getPositionValue(position)
 
                     peak = peakList.newPeak(ppmPositions=position, height=height)
 

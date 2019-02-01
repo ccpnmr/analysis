@@ -1494,8 +1494,9 @@ class Spectrum(AbstractWrapperObject):
             position1 = spectrumReference.valueToPoint(value1) - 1
             position0, position1 = min(position0, position1), max(position0, position1)
 
-            position0 = int(position0 + 1)
-            position1 = int(position1 + 1)
+            # not always perfect for the plane depth region
+            position0 = int(position0) + 1
+            position1 = int(position1) + 1
 
             startPoint.append((spectrumReference.dimension, position0))
             endPoint.append((spectrumReference.dimension, position1))

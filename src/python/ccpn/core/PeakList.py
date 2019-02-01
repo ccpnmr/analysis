@@ -843,6 +843,32 @@ class PeakList(AbstractWrapperObject):
 
             if dataArray.size:
 
+                # testing - plot the dataArray during debugging
+                import numpy as np
+                from mpl_toolkits import mplot3d
+                import matplotlib.pyplot as plt
+
+                fig = plt.figure()
+                ax = fig.gca(projection='3d')
+
+                shape = dataArray.shape
+                rr = (np.max(dataArray) - np.min(dataArray)) * 100
+                dims = []
+                for ii in shape:
+                    dims.append(np.linspace(0, ii-1, ii))
+
+                for ii in range(shape[0]):
+                    try:
+                        ax.contour(dims[2], dims[1], dataArray[ii] / rr, offset=ii, cmap=plt.cm.viridis)
+                    except Exception as es:
+                        pass                    # trap stupid plot error
+
+                ax.legend()
+                ax.set_xlim3d(-0.1, shape[2]-0.9)
+                ax.set_ylim3d(-0.1, shape[1]-0.9)
+                ax.set_zlim3d(-0.1, shape[0]-0.9)
+                plt.show()
+
                 # find new peaks
 
                 # exclusion code copied from Nmr/PeakList.py

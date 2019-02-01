@@ -65,7 +65,7 @@ static PyObject *newList()
     list = PyList_New(0);
     if (!list)
     {
-    	RETURN_OBJ_ERROR("allocating list memory");
+        RETURN_OBJ_ERROR("allocating list memory");
     }
     return list;
 }
@@ -85,11 +85,11 @@ static PyObject *testReturnList(PyObject *self, PyObject *args)
 
     // create a new list
     returnObject = newList();
-/*    if (!returnObject)
-    {
-    	RETURN_OBJ_ERROR("allocating returnObject memory");
-    }
-*/
+    /*    if (!returnObject)
+        {
+        	RETURN_OBJ_ERROR("allocating returnObject memory");
+        }
+    */
     // append an item to the list
     appendFloatList(returnObject, 126.45);
     appendFloatList(returnObject, 54.27);
@@ -100,22 +100,22 @@ static PyObject *testReturnList(PyObject *self, PyObject *args)
 //    appendFloatList(colours, 52.6);
 
 
-/*    if (PyList_Append(returnObject, PyFloat_FromDouble((double) 126.45)) != 0)
-    {
-        Py_DECREF(returnObject);
-        RETURN_OBJ_ERROR("appending item to returnObject");
-    }
-    if (PyList_Append(returnObject, PyFloat_FromDouble((double) 15.67)) != 0)
-    {
-        Py_DECREF(returnObject);
-        RETURN_OBJ_ERROR("appending item to returnObject");
-    }
-    if (PyList_Append(returnObject, PyFloat_FromDouble((double) -1.12)) != 0)
-    {
-        Py_DECREF(returnObject);
-        RETURN_OBJ_ERROR("appending item to returnObject");
-    }
-*/
+    /*    if (PyList_Append(returnObject, PyFloat_FromDouble((double) 126.45)) != 0)
+        {
+            Py_DECREF(returnObject);
+            RETURN_OBJ_ERROR("appending item to returnObject");
+        }
+        if (PyList_Append(returnObject, PyFloat_FromDouble((double) 15.67)) != 0)
+        {
+            Py_DECREF(returnObject);
+            RETURN_OBJ_ERROR("appending item to returnObject");
+        }
+        if (PyList_Append(returnObject, PyFloat_FromDouble((double) -1.12)) != 0)
+        {
+            Py_DECREF(returnObject);
+            RETURN_OBJ_ERROR("appending item to returnObject");
+        }
+    */
     return returnObject;
 }
 
@@ -127,20 +127,22 @@ static struct PyMethodDef Clibrary_type_methods[] =
     { NULL,         NULL,                       0,              NULL }
 };
 
-struct module_state {
+struct module_state
+{
     PyObject *error;
 };
 
-static struct PyModuleDef moduledef = {
-        PyModuleDef_HEAD_INIT,
-        "Clibrary",
-        NULL,
-        sizeof(struct module_state),
-        Clibrary_type_methods,
-        NULL,
-        NULL,
-        NULL,
-        NULL
+static struct PyModuleDef moduledef =
+{
+    PyModuleDef_HEAD_INIT,
+    "Clibrary",
+    NULL,
+    sizeof(struct module_state),
+    Clibrary_type_methods,
+    NULL,
+    NULL,
+    NULL,
+    NULL
 };
 
 PyObject *PyInit_Clibrary(void)
@@ -167,7 +169,8 @@ PyObject *PyInit_Clibrary(void)
     struct module_state *st = (struct module_state*)PyModule_GetState(module);
 
     st->error = PyErr_NewException("ClibraryPy.error", NULL, NULL);
-    if (st->error == NULL) {
+    if (st->error == NULL)
+    {
         Py_DECREF(module);
         return NULL;
     }

@@ -93,14 +93,15 @@ typedef struct _Contour_vertex
     CcpnBool visited; /* = CCPN_FALSE if not visited, CCPN_TRUE if visited */
 }   *Contour_vertex;
 
-typedef struct _Contour_vertices{
+typedef struct _Contour_vertices
+{
     int nvertices; /* number of vertices */
     int nalloc; /* size of each block of vertices allocated */
     int nblocks; /* number of blocks allocated */
     Contour_vertex *vertex_store; /* vertex store, ceil(nvertices/nalloc) long */
-        /* above used to speed up allocation of vertices */
-        /* allocate lots in one go and then use one after the other */
-        /* so access via vertex i = vertex_store[i/nalloc] + (i%nalloc) */
+    /* above used to speed up allocation of vertices */
+    /* allocate lots in one go and then use one after the other */
+    /* so access via vertex i = vertex_store[i/nalloc] + (i%nalloc) */
 
     /* below are things added to make contouring faster if more than one level */
     CcpnBool are_levels_increasing;
@@ -147,12 +148,12 @@ static Contour_vertices new_contour_vertices(PyArrayObject *data, int nlevels, C
     MALLOC_NEW(contour_vertices->col_end_old, int *, npoints1);
     for (i = 0; i < npoints1; i++)
     {
-	    contour_vertices->row_old[i] = i;
-	    contour_vertices->ncol_ranges_old[i] = 1;
+        contour_vertices->row_old[i] = i;
+        contour_vertices->ncol_ranges_old[i] = 1;
         MALLOC_NEW(contour_vertices->col_start_old[i], int, ncols);
         MALLOC_NEW(contour_vertices->col_end_old[i], int, ncols);
-	    contour_vertices->col_start_old[i][0] = 0;
-	    contour_vertices->col_end_old[i][0] = npoints0;
+        contour_vertices->col_start_old[i][0] = 0;
+        contour_vertices->col_end_old[i][0] = npoints0;
     }
 
 // TBD: should not need _new variables if nlevels = 1 but crashes if do not have them
@@ -229,7 +230,7 @@ static void update_new_range(Contour_vertices contour_vertices, int x, int y, in
 
     if ((x == 0) || (rangeType == START_RANGE))
     {
-    	/* new range */
+        /* new range */
         ncol_ranges = ncol_ranges_new[nrows_new-1];
         col_start[ncol_ranges] = x;
         col_end[ncol_ranges] = -1;
@@ -250,13 +251,13 @@ static void check_end_range(Contour_vertices contour_vertices, int npoints0)
 {
     int nrows_new = contour_vertices->nrows_new;
     int ncol_ranges, *col_end;
-    
+
     if (nrows_new > 0)
     {
         ncol_ranges = contour_vertices->ncol_ranges_new[nrows_new-1];
         col_end = contour_vertices->col_end_new[nrows_new-1];
         if ((ncol_ranges > 0) && (col_end[ncol_ranges-1] == -1))
-	    col_end[ncol_ranges-1] = npoints0;
+            col_end[ncol_ranges-1] = npoints0;
     }
 }
 
@@ -305,7 +306,7 @@ static Contour_vertex new_vertex(Contour_vertices contour_vertices)
 #define  INTERPOLATE(a, b)  ((level - (a)) / ((b) - (a)))
 
 static Contour_vertex new_vertex0(Contour_vertices contour_vertices,
-			float level, float d1, float d2, int x, int y)
+                                  float level, float d1, float d2, int x, int y)
 {
     Contour_vertex v;
 
@@ -318,7 +319,7 @@ static Contour_vertex new_vertex0(Contour_vertices contour_vertices,
 }
 
 static Contour_vertex new_vertex1(Contour_vertices contour_vertices,
-			float level, float d1, float d2, int x, int y)
+                                  float level, float d1, float d2, int x, int y)
 {
     Contour_vertex v;
 
@@ -339,18 +340,18 @@ static Contour_vertex new_vertex1(Contour_vertices contour_vertices,
 	     return CCPN_ERROR;
 
 typedef CcpnStatus (*New_edge_func)(Contour_vertices contour_vertices,
-		float level, CcpnBool more_levels,
-		float data_old0, float data_old1, float data_new0, float data_new1,
-		Contour_vertex *v_row, Contour_vertex *p_v_col,
-		int x, int y);
+                                    float level, CcpnBool more_levels,
+                                    float data_old0, float data_old1, float data_new0, float data_new1,
+                                    Contour_vertex *v_row, Contour_vertex *p_v_col,
+                                    int x, int y);
 
 /* 0 0
    0 0 */
 static CcpnStatus no_edge00(Contour_vertices contour_vertices,
-		float level, CcpnBool more_levels,
-		float data_old0, float data_old1, float data_new0, float data_new1,
-		Contour_vertex *v_row, Contour_vertex *p_v_col,
-		int x, int y)
+                            float level, CcpnBool more_levels,
+                            float data_old0, float data_old1, float data_new0, float data_new1,
+                            Contour_vertex *v_row, Contour_vertex *p_v_col,
+                            int x, int y)
 {
     if (more_levels && (x == 0) && !contour_vertices->are_levels_increasing)
         update_new_range(contour_vertices, x, y, NEITHER);
@@ -361,10 +362,10 @@ static CcpnStatus no_edge00(Contour_vertices contour_vertices,
 /* 0 0
    0 1 */
 static CcpnStatus new_edge01(Contour_vertices contour_vertices,
-		float level, CcpnBool more_levels,
-		float data_old0, float data_old1, float data_new0, float data_new1,
-		Contour_vertex *v_row, Contour_vertex *p_v_col,
-		int x, int y)
+                             float level, CcpnBool more_levels,
+                             float data_old0, float data_old1, float data_new0, float data_new1,
+                             Contour_vertex *v_row, Contour_vertex *p_v_col,
+                             int x, int y)
 {
     Contour_vertex v_col, v_old;
 
@@ -384,10 +385,10 @@ static CcpnStatus new_edge01(Contour_vertices contour_vertices,
 /* 1 1
    1 0 */
 static CcpnStatus new_edge32(Contour_vertices contour_vertices,
-		float level, CcpnBool more_levels,
-		float data_old0, float data_old1, float data_new0, float data_new1,
-		Contour_vertex *v_row, Contour_vertex *p_v_col,
-		int x, int y)
+                             float level, CcpnBool more_levels,
+                             float data_old0, float data_old1, float data_new0, float data_new1,
+                             Contour_vertex *v_row, Contour_vertex *p_v_col,
+                             int x, int y)
 {
     Contour_vertex v_col, v_old;
 
@@ -407,10 +408,10 @@ static CcpnStatus new_edge32(Contour_vertices contour_vertices,
 /* 0 1
    0 0 */
 static CcpnStatus new_edge02(Contour_vertices contour_vertices,
-		float level, CcpnBool more_levels,
-		float data_old0, float data_old1, float data_new0, float data_new1,
-		Contour_vertex *v_row, Contour_vertex *p_v_col,
-		int x, int y)
+                             float level, CcpnBool more_levels,
+                             float data_old0, float data_old1, float data_new0, float data_new1,
+                             Contour_vertex *v_row, Contour_vertex *p_v_col,
+                             int x, int y)
 {
     Contour_vertex v_col, v_new;
 
@@ -431,10 +432,10 @@ static CcpnStatus new_edge02(Contour_vertices contour_vertices,
 /* 1 0
    1 1 */
 static CcpnStatus new_edge31(Contour_vertices contour_vertices,
-		float level, CcpnBool more_levels,
-		float data_old0, float data_old1, float data_new0, float data_new1,
-		Contour_vertex *v_row, Contour_vertex *p_v_col,
-		int x, int y)
+                             float level, CcpnBool more_levels,
+                             float data_old0, float data_old1, float data_new0, float data_new1,
+                             Contour_vertex *v_row, Contour_vertex *p_v_col,
+                             int x, int y)
 {
     Contour_vertex v_col, v_new;
 
@@ -455,10 +456,10 @@ static CcpnStatus new_edge31(Contour_vertices contour_vertices,
 /* 0 1
    0 1 */
 static CcpnStatus new_edge03(Contour_vertices contour_vertices,
-		float level, CcpnBool more_levels,
-		float data_old0, float data_old1, float data_new0, float data_new1,
-		Contour_vertex *v_row, Contour_vertex *p_v_col,
-		int x, int y)
+                             float level, CcpnBool more_levels,
+                             float data_old0, float data_old1, float data_new0, float data_new1,
+                             Contour_vertex *v_row, Contour_vertex *p_v_col,
+                             int x, int y)
 {
     Contour_vertex v_old, v_new;
 
@@ -478,10 +479,10 @@ static CcpnStatus new_edge03(Contour_vertices contour_vertices,
 /* 1 0
    1 0 */
 static CcpnStatus new_edge30(Contour_vertices contour_vertices,
-		float level, CcpnBool more_levels,
-		float data_old0, float data_old1, float data_new0, float data_new1,
-		Contour_vertex *v_row, Contour_vertex *p_v_col,
-		int x, int y)
+                             float level, CcpnBool more_levels,
+                             float data_old0, float data_old1, float data_new0, float data_new1,
+                             Contour_vertex *v_row, Contour_vertex *p_v_col,
+                             int x, int y)
 {
     Contour_vertex v_old, v_new;
 
@@ -501,10 +502,10 @@ static CcpnStatus new_edge30(Contour_vertices contour_vertices,
 /* 0 0
    1 0 */
 static CcpnStatus new_edge10(Contour_vertices contour_vertices,
-		float level, CcpnBool more_levels,
-		float data_old0, float data_old1, float data_new0, float data_new1,
-		Contour_vertex *v_row, Contour_vertex *p_v_col,
-		int x, int y)
+                             float level, CcpnBool more_levels,
+                             float data_old0, float data_old1, float data_new0, float data_new1,
+                             Contour_vertex *v_row, Contour_vertex *p_v_col,
+                             int x, int y)
 {
     Contour_vertex v_col, v_old;
 
@@ -522,10 +523,10 @@ static CcpnStatus new_edge10(Contour_vertices contour_vertices,
 /* 1 1
    0 1 */
 static CcpnStatus new_edge23(Contour_vertices contour_vertices,
-		float level, CcpnBool more_levels,
-		float data_old0, float data_old1, float data_new0, float data_new1,
-		Contour_vertex *v_row, Contour_vertex *p_v_col,
-		int x, int y)
+                             float level, CcpnBool more_levels,
+                             float data_old0, float data_old1, float data_new0, float data_new1,
+                             Contour_vertex *v_row, Contour_vertex *p_v_col,
+                             int x, int y)
 {
     Contour_vertex v_col, v_old;
 
@@ -543,10 +544,10 @@ static CcpnStatus new_edge23(Contour_vertices contour_vertices,
 /* 0 0
    1 1 */
 static CcpnStatus new_edge11(Contour_vertices contour_vertices,
-		float level, CcpnBool more_levels,
-		float data_old0, float data_old1, float data_new0, float data_new1,
-		Contour_vertex *v_row, Contour_vertex *p_v_col,
-		int x, int y)
+                             float level, CcpnBool more_levels,
+                             float data_old0, float data_old1, float data_new0, float data_new1,
+                             Contour_vertex *v_row, Contour_vertex *p_v_col,
+                             int x, int y)
 {
     Contour_vertex v_col, v_new;
 
@@ -566,10 +567,10 @@ static CcpnStatus new_edge11(Contour_vertices contour_vertices,
 /* 1 1
    0 0 */
 static CcpnStatus new_edge22(Contour_vertices contour_vertices,
-		float level, CcpnBool more_levels,
-		float data_old0, float data_old1, float data_new0, float data_new1,
-		Contour_vertex *v_row, Contour_vertex *p_v_col,
-		int x, int y)
+                             float level, CcpnBool more_levels,
+                             float data_old0, float data_old1, float data_new0, float data_new1,
+                             Contour_vertex *v_row, Contour_vertex *p_v_col,
+                             int x, int y)
 {
     Contour_vertex v_col, v_new;
 
@@ -589,10 +590,10 @@ static CcpnStatus new_edge22(Contour_vertices contour_vertices,
 /* 0 1
    1 0 */
 static CcpnStatus new_edge12(Contour_vertices contour_vertices,
-		float level, CcpnBool more_levels,
-		float data_old0, float data_old1, float data_new0, float data_new1,
-		Contour_vertex *v_row, Contour_vertex *p_v_col,
-		int x, int y)
+                             float level, CcpnBool more_levels,
+                             float data_old0, float data_old1, float data_new0, float data_new1,
+                             Contour_vertex *v_row, Contour_vertex *p_v_col,
+                             int x, int y)
 {
     Contour_vertex v_col, v_new, v, v_old;
     float d, d1, d2, d3, d4;
@@ -611,17 +612,17 @@ static CcpnStatus new_edge12(Contour_vertices contour_vertices,
     v_old = v_row[x];
     if (d > level)
     {
-    	v_col->v1 = v;
-    	v->v2 = v_col;
+        v_col->v1 = v;
+        v->v2 = v_col;
         v_new->v1 = v_old;
         v_old->v2 = v_new;
     }
     else
     {
-    	v_col->v1 = v_old;
+        v_col->v1 = v_old;
         v_old->v2 = v_col;
         v_new->v1 = v;
-    	v->v2 = v_new;
+        v->v2 = v_new;
     }
 
     v_row[x] = v;
@@ -636,10 +637,10 @@ static CcpnStatus new_edge12(Contour_vertices contour_vertices,
 /* 1 0
    0 1 */
 static CcpnStatus new_edge21(Contour_vertices contour_vertices,
-		float level, CcpnBool more_levels,
-		float data_old0, float data_old1, float data_new0, float data_new1,
-		Contour_vertex *v_row, Contour_vertex *p_v_col,
-		int x, int y)
+                             float level, CcpnBool more_levels,
+                             float data_old0, float data_old1, float data_new0, float data_new1,
+                             Contour_vertex *v_row, Contour_vertex *p_v_col,
+                             int x, int y)
 {
     Contour_vertex v_col, v_new, v, v_old;
     float d, d1, d2, d3, d4;
@@ -658,15 +659,15 @@ static CcpnStatus new_edge21(Contour_vertices contour_vertices,
     v_old = v_row[x];
     if (d > level)
     {
-    	v_col->v2 = v_old;
+        v_col->v2 = v_old;
         v_old->v1 = v_col;
         v_new->v2 = v;
-    	v->v1 = v_new;
+        v->v1 = v_new;
     }
     else
     {
-    	v_col->v2 = v;
-    	v->v1 = v_col;
+        v_col->v2 = v;
+        v->v1 = v_col;
         v_new->v2 = v_old;
         v_old->v1 = v_new;
     }
@@ -683,10 +684,10 @@ static CcpnStatus new_edge21(Contour_vertices contour_vertices,
 /* 0 1
    1 1 */
 static CcpnStatus new_edge13(Contour_vertices contour_vertices,
-		float level, CcpnBool more_levels,
-		float data_old0, float data_old1, float data_new0, float data_new1,
-		Contour_vertex *v_row, Contour_vertex *p_v_col,
-		int x, int y)
+                             float level, CcpnBool more_levels,
+                             float data_old0, float data_old1, float data_new0, float data_new1,
+                             Contour_vertex *v_row, Contour_vertex *p_v_col,
+                             int x, int y)
 {
     Contour_vertex v_col, v_new;
 
@@ -706,10 +707,10 @@ static CcpnStatus new_edge13(Contour_vertices contour_vertices,
 /* 1 0
    0 0 */
 static CcpnStatus new_edge20(Contour_vertices contour_vertices,
-		float level, CcpnBool more_levels,
-		float data_old0, float data_old1, float data_new0, float data_new1,
-		Contour_vertex *v_row, Contour_vertex *p_v_col,
-		int x, int y)
+                             float level, CcpnBool more_levels,
+                             float data_old0, float data_old1, float data_new0, float data_new1,
+                             Contour_vertex *v_row, Contour_vertex *p_v_col,
+                             int x, int y)
 {
     Contour_vertex v_col, v_new;
 
@@ -729,10 +730,10 @@ static CcpnStatus new_edge20(Contour_vertices contour_vertices,
 /* 1 1
    1 1 */
 static CcpnStatus no_edge33(Contour_vertices contour_vertices,
-		float level, CcpnBool more_levels,
-		float data_old0, float data_old1, float data_new0, float data_new1,
-		Contour_vertex *v_row, Contour_vertex *p_v_col,
-		int x, int y)
+                            float level, CcpnBool more_levels,
+                            float data_old0, float data_old1, float data_new0, float data_new1,
+                            Contour_vertex *v_row, Contour_vertex *p_v_col,
+                            int x, int y)
 {
     if (more_levels && (x == 0) && contour_vertices->are_levels_increasing)
         update_new_range(contour_vertices, x, y, NEITHER);
@@ -747,7 +748,7 @@ static CcpnStatus no_edge33(Contour_vertices contour_vertices,
 #define  DATA_ABOVE_LEVEL2(d)  ( ((d) > level) ? 2 : 0 )
 
 static CcpnStatus find_vertices(Contour_vertices contour_vertices, float level,
-			PyArrayObject *data, CcpnBool more_levels)
+                                PyArrayObject *data, CcpnBool more_levels)
 {
     int npoints0 = PyArray_DIM(data, 1);
     int npoints1 = PyArray_DIM(data, 0);
@@ -757,10 +758,12 @@ static CcpnStatus find_vertices(Contour_vertices contour_vertices, float level,
     Contour_vertex *v_row, v_col;
     static New_edge_func *new_edge, edge_func;
     static New_edge_func new_edge_func[N][N] =
-        { { no_edge00,  new_edge01, new_edge02, new_edge03 },
-          { new_edge10, new_edge11, new_edge12, new_edge13 },
-          { new_edge20, new_edge21, new_edge22, new_edge23 },
-          { new_edge30, new_edge31, new_edge32, no_edge33 } };
+    {
+        { no_edge00,  new_edge01, new_edge02, new_edge03 },
+        { new_edge10, new_edge11, new_edge12, new_edge13 },
+        { new_edge20, new_edge21, new_edge22, new_edge23 },
+        { new_edge30, new_edge31, new_edge32, no_edge33 }
+    };
     int nrows_old = contour_vertices->nrows_old;
     int *row_old = contour_vertices->row_old;
     int *ncol_ranges_old = contour_vertices->ncol_ranges_old;
@@ -769,7 +772,7 @@ static CcpnStatus find_vertices(Contour_vertices contour_vertices, float level,
     int *col_start, *col_end;
 
     if ((nrows_old < 1) || (npoints0 < 2) || (npoints1 < 2))
-	    return CCPN_OK;
+        return CCPN_OK;
 
     MALLOC(v_row, Contour_vertex, npoints0-1);
 
@@ -830,15 +833,15 @@ static CcpnStatus find_vertices(Contour_vertices contour_vertices, float level,
                 edge_func = new_edge[b_new];
                 CHECK_STATUS((edge_func)(contour_vertices, level, more_levels, d_old0, d_old1, d_new0, d_new1, v_row, &v_col, i0-1, i1));
 
-        /*
-                if ((edge_func != no_edge00) && (edge_func != no_edge33))
-                {
-        */
-                    b_old = b_new;
-                    new_edge = new_edge_func[b_old];
-        /*
-                }
-        */
+                /*
+                        if ((edge_func != no_edge00) && (edge_func != no_edge33))
+                        {
+                */
+                b_old = b_new;
+                new_edge = new_edge_func[b_old];
+                /*
+                        }
+                */
 
                 d_old0 = d_old1;
                 d_new0 = d_new1;
@@ -875,27 +878,27 @@ static CcpnStatus process_chain(PyObject *contours, Contour_vertex v)
         v->visited = CCPN_TRUE;
     }
 
-/*
-    dims[0] = nvertices;
-    dims[1] = 2;
-    polyline = (PyArrayObject *) PyArray_SimpleNew(2, dims, typenum);
-*/
+    /*
+        dims[0] = nvertices;
+        dims[1] = 2;
+        polyline = (PyArrayObject *) PyArray_SimpleNew(2, dims, typenum);
+    */
     dims[0] = 2*nvertices;
     polyline = (PyArrayObject *) PyArray_SimpleNew(1, dims, typenum);
     if (!polyline)
-    	return CCPN_ERROR;
+        return CCPN_ERROR;
 
     if (PyList_Append(contours, (PyObject *) polyline) != 0)
-	    return CCPN_ERROR;
+        return CCPN_ERROR;
 
     Py_DECREF(polyline);
 
     for (i = k = 0, v = vv; i < nvertices; i++, v = v->v2)
     {
-    /*
-        *((float *) (PyArray_GETPTR2(polyline, i, 0))) = v->x[0];
-        *((float *) (PyArray_GETPTR2(polyline, i, 1))) = v->x[1];
-    */
+        /*
+            *((float *) (PyArray_GETPTR2(polyline, i, 0))) = v->x[0];
+            *((float *) (PyArray_GETPTR2(polyline, i, 1))) = v->x[1];
+        */
         *((float *) (PyArray_GETPTR1(polyline, k++))) = v->x[0];
         *((float *) (PyArray_GETPTR1(polyline, k++))) = v->x[1];
     }
@@ -996,34 +999,34 @@ static PyObject *calculate_contours(PyArrayObject *data, PyArrayObject *levels)
 
         for (l = 2; l < nlevels; l++)
         {
-    	    prev_level = level;
+            prev_level = level;
             level = *((float32 *) PyArray_GETPTR1(levels, l));
             if (are_levels_increasing)
             {
                 if (prev_level > level)
-                RETURN_OBJ_ERROR("levels initially increasing but later decrease");
+                    RETURN_OBJ_ERROR("levels initially increasing but later decrease");
             }
             else
             {
                 if (prev_level < level)
-                RETURN_OBJ_ERROR("levels initially decreasing but later increase");
+                    RETURN_OBJ_ERROR("levels initially decreasing but later increase");
             }
         }
     }
     else
     {
-    	are_levels_increasing = CCPN_TRUE; /* arbitrary and irrelevant */
+        are_levels_increasing = CCPN_TRUE; /* arbitrary and irrelevant */
     }
 
     contour_vertices = new_contour_vertices(data, nlevels, are_levels_increasing);
     if (!contour_vertices)
-    	RETURN_OBJ_ERROR("allocating vertex memory");
+        RETURN_OBJ_ERROR("allocating vertex memory");
 
     contours_list = PyList_New(0);
     if (!contours_list)
     {
         delete_contour_vertices(contour_vertices, nlevels, npoints1);
-	    RETURN_OBJ_ERROR("allocating contours_list memory");
+        RETURN_OBJ_ERROR("allocating contours_list memory");
     }
 
     for (l = 0; l < nlevels; l++)
@@ -1032,14 +1035,14 @@ static PyObject *calculate_contours(PyArrayObject *data, PyArrayObject *levels)
         if (!contours)
         {
             Py_DECREF(contours_list);
-                delete_contour_vertices(contour_vertices, nlevels, npoints1);
+            delete_contour_vertices(contour_vertices, nlevels, npoints1);
             RETURN_OBJ_ERROR("allocating contours memory");
         }
 
         if (PyList_Append(contours_list, contours) != 0)
         {
             Py_DECREF(contours_list);
-                delete_contour_vertices(contour_vertices, nlevels, npoints1);
+            delete_contour_vertices(contour_vertices, nlevels, npoints1);
             RETURN_OBJ_ERROR("appending contours to contours_list");
         }
         Py_DECREF(contours);
@@ -1050,19 +1053,19 @@ static PyObject *calculate_contours(PyArrayObject *data, PyArrayObject *levels)
 
         if (find_vertices(contour_vertices, level, data, more_levels) == CCPN_ERROR)
         {
-    	    Py_DECREF(contours_list);
+            Py_DECREF(contours_list);
             delete_contour_vertices(contour_vertices, nlevels, npoints1);
-	        RETURN_OBJ_ERROR("allocating vertex memory");
+            RETURN_OBJ_ERROR("allocating vertex memory");
         }
 
         if (contour_vertices->nvertices == 0)
-	    break;
+            break;
 
         if (process_chains(contours, contour_vertices) == CCPN_ERROR)
         {
-    	    Py_DECREF(contours_list);
+            Py_DECREF(contours_list);
             delete_contour_vertices(contour_vertices, nlevels, npoints1);
-	        RETURN_OBJ_ERROR("processing contours");
+            RETURN_OBJ_ERROR("processing contours");
         }
 
         if (more_levels)
@@ -1105,7 +1108,7 @@ static PyObject *newList(size)
     list = PyList_New(size);
     if (!list)
     {
-    	RETURN_OBJ_ERROR("allocating list memory");
+        RETURN_OBJ_ERROR("allocating list memory");
     }
     return list;
 }
@@ -1116,7 +1119,7 @@ static PyArrayObject *newArrayList(size)
     list = PyList_New(size);
     if (!list)
     {
-    	RETURN_OBJ_ERROR("allocating list memory");
+        RETURN_OBJ_ERROR("allocating list memory");
     }
     return list;
 }
@@ -1145,10 +1148,10 @@ static PyObject *contourerGLList(PyObject *self, PyObject *args)
 
     // assumes that the parameters are all numpy arrays
     if (!PyArg_ParseTuple(args, "O!O!O!O!O!", &PyTuple_Type, &dataArrays,
-                                            &PyArray_Type, &posLevels,
-                                            &PyArray_Type, &negLevels,
-                                            &PyArray_Type, &posColour,
-                                            &PyArray_Type, &negColour))
+                          &PyArray_Type, &posLevels,
+                          &PyArray_Type, &negLevels,
+                          &PyArray_Type, &posColour,
+                          &PyArray_Type, &negColour))
 
         RETURN_OBJ_ERROR("need arguments: dataArrays, posLevels, negLevels, posColour, negColour");
 
@@ -1220,17 +1223,17 @@ static PyObject *contourerGLList(PyObject *self, PyObject *args)
     npy_intp dims[1] = {numIndices};
     indexing = (PyArrayObject *) PyArray_SimpleNew(1, dims, NPY_UINT32);
     if (!indexing)
-    	return CCPN_ERROR;
+        return CCPN_ERROR;
 
     dims[0] = 2*numVertices;
     vertices = (PyArrayObject *) PyArray_SimpleNew(1, dims, NPY_FLOAT32);
     if (!vertices)
-    	return CCPN_ERROR;
+        return CCPN_ERROR;
 
     dims[0] = 4*numVertices;
     colours = (PyArrayObject *) PyArray_SimpleNew(1, dims, NPY_FLOAT32);
     if (!colours)
-    	return CCPN_ERROR;
+        return CCPN_ERROR;
 
     indexPTR = PyArray_GETPTR1(indexing,0);
     vertexPTR = PyArray_GETPTR1(vertices,0);
@@ -1295,20 +1298,22 @@ static struct PyMethodDef Contourer_type_methods[] =
     { NULL,         NULL,                       0,              NULL }
 };
 
-struct module_state {
+struct module_state
+{
     PyObject *error;
 };
 
-static struct PyModuleDef moduledef = {
-        PyModuleDef_HEAD_INIT,
-        "Contourer2d",
-        NULL,
-        sizeof(struct module_state),
-        Contourer_type_methods,
-        NULL,
-        NULL,
-        NULL,
-        NULL
+static struct PyModuleDef moduledef =
+{
+    PyModuleDef_HEAD_INIT,
+    "Contourer2d",
+    NULL,
+    sizeof(struct module_state),
+    Contourer_type_methods,
+    NULL,
+    NULL,
+    NULL,
+    NULL
 };
 
 PyObject *PyInit_Contourer2d(void)
@@ -1335,7 +1340,8 @@ PyObject *PyInit_Contourer2d(void)
     struct module_state *st = (struct module_state*)PyModule_GetState(module);
 
     st->error = PyErr_NewException("Contourer2d.error", NULL, NULL);
-    if (st->error == NULL) {
+    if (st->error == NULL)
+    {
         Py_DECREF(module);
         return NULL;
     }

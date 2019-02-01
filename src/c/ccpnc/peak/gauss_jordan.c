@@ -58,25 +58,25 @@ static CcpnStatus find_pivot(float **a, int *piv, int n, int *max_row, int *max_
 
     for (i = 0; i < n; i++)
     {
-	if (piv[i] != 1)
-	{
-	    for (j = 0; j < n; j++)
-	    {
-		if (piv[j] == 0)
-		{
-		    if (ABS(a[i][j]) >= max)
-		    {
-			max = ABS(a[i][j]);
-			*max_row = i;
-			*max_col = j;
-		    }
-		}
-		else if (piv[j] > 1)
-		{
-		    return  CCPN_ERROR;
-		}
-	    }
-	}
+        if (piv[i] != 1)
+        {
+            for (j = 0; j < n; j++)
+            {
+                if (piv[j] == 0)
+                {
+                    if (ABS(a[i][j]) >= max)
+                    {
+                        max = ABS(a[i][j]);
+                        *max_row = i;
+                        *max_col = j;
+                    }
+                }
+                else if (piv[j] > 1)
+                {
+                    return  CCPN_ERROR;
+                }
+            }
+        }
     }
 
     piv[*max_col]++;
@@ -85,12 +85,12 @@ static CcpnStatus find_pivot(float **a, int *piv, int n, int *max_row, int *max_
 }
 
 static void interchange_rows_vector(float **a, float *b, int n,
-						int max_row, int max_col)
+                                    int max_row, int max_col)
 {
     int j;
 
     for (j = 0; j < n; j++)
-	SWAP(a[max_row][j], a[max_col][j], float);
+        SWAP(a[max_row][j], a[max_col][j], float);
 
     SWAP(b[max_row], b[max_col], float);
 }
@@ -101,7 +101,7 @@ static CcpnStatus pivot_vector(float **a, float *b, int n, int max_col)
     float x, piv_inv = a[max_col][max_col];
 
     if (piv_inv == 0)
-	return  CCPN_ERROR;
+        return  CCPN_ERROR;
 
     piv_inv = 1 / piv_inv;
 
@@ -112,16 +112,16 @@ static CcpnStatus pivot_vector(float **a, float *b, int n, int max_col)
 
     for (i = 0; i < n; i++)
     {
-	if (i != max_col)
-	{
-	    x = a[i][max_col];
-	    a[i][max_col] = 0;
+        if (i != max_col)
+        {
+            x = a[i][max_col];
+            a[i][max_col] = 0;
 
-	    for (j = 0; j < n; j++)
-		a[i][j] -= x * a[max_col][j];
+            for (j = 0; j < n; j++)
+                a[i][j] -= x * a[max_col][j];
 
-	    b[i] -= x * b[max_col];
-	}
+            b[i] -= x * b[max_col];
+        }
     }
 
     return  CCPN_OK;
@@ -133,16 +133,16 @@ static void unscramble_vector(float **a, int n, int *row, int *col)
 
     for (j = n-1; j >= 0; j--)
     {
-	if (row[j] != col[j])
-	{
-	    for (i = 0; i < n; i++)
-		SWAP(a[i][row[j]], a[i][col[j]], float);
-	}
+        if (row[j] != col[j])
+        {
+            for (i = 0; i < n; i++)
+                SWAP(a[i][row[j]], a[i][col[j]], float);
+        }
     }
 }
 
 void gauss_jordan_vector(float **a, float *b, int n, int *piv,
-				int *row, int *col, CcpnBool *singular)
+                         int *row, int *col, CcpnBool *singular)
 {
     int i, max_row, max_col;
 
@@ -150,23 +150,23 @@ void gauss_jordan_vector(float **a, float *b, int n, int *piv,
 
     for (i = 0; i < n; i++)
     {
-	if (find_pivot(a, piv, n, &max_row, &max_col) == CCPN_ERROR)
-	{
-	    *singular = CCPN_TRUE;
-	    return;
-	}
+        if (find_pivot(a, piv, n, &max_row, &max_col) == CCPN_ERROR)
+        {
+            *singular = CCPN_TRUE;
+            return;
+        }
 
-	if (max_row != max_col)
-	    interchange_rows_vector(a, b, n, max_row, max_col);
+        if (max_row != max_col)
+            interchange_rows_vector(a, b, n, max_row, max_col);
 
-	row[i] = max_row;
-	col[i] = max_col;
+        row[i] = max_row;
+        col[i] = max_col;
 
-	if (pivot_vector(a, b, n, max_col) == CCPN_ERROR)
-	{
-	    *singular = CCPN_TRUE;
-	    return;
-	}
+        if (pivot_vector(a, b, n, max_col) == CCPN_ERROR)
+        {
+            *singular = CCPN_TRUE;
+            return;
+        }
 
     }
 

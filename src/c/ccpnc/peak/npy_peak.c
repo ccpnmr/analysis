@@ -72,7 +72,7 @@ static float get_value_at_point(PyArrayObject *data_array, npy_intp *point)
     int i, ndim = PyArray_NDIM(data_array);
     npy_intp reversed_point[MAX_NDIM];
     for (i = 0; i < ndim; i++)
-	reversed_point[i] = point[ndim-1-i];
+        reversed_point[i] = point[ndim-1-i];
 
     //return *((float *) PyArray_GetPtr(data_array, point));
     return *((float *) PyArray_GetPtr(data_array, reversed_point));
@@ -87,10 +87,10 @@ static CcpnBool point_within_peak_buffer(int ndim, npy_intp *point, PyObject *pe
     {
         posn = PyFloat_AsDouble(PyTuple_GetItem(peak_obj, i));
         p = NEAREST_INTEGER(posn);
-        
-	d = ABS(point[i] - p);
-	if (d > buffer[i])
-	    return CCPN_FALSE;
+
+        d = ABS(point[i] - p);
+        if (d > buffer[i])
+            return CCPN_FALSE;
     }
 
     return CCPN_TRUE;
@@ -110,43 +110,43 @@ static float fit_position_parabolic(float vm, float v, float vp)
 
     if (d > 1.0e-4)
     {
-	c = 0.25 * ABS(vp-vm) / d;
-	c = MIN(c, 0.49999);
+        c = 0.25 * ABS(vp-vm) / d;
+        c = MIN(c, 0.49999);
 
-	if (is_positive)
-	{
-	    if (vp < vm)
-		c = -c;
-	}
-	else
-	{
-	    if (vp > vm)
-		c = -c;
-	}
+        if (is_positive)
+        {
+            if (vp < vm)
+                c = -c;
+        }
+        else
+        {
+            if (vp > vm)
+                c = -c;
+        }
     }
     else
     {
-	c = 0;
+        c = 0;
     }
 
     return c;
 }
 
 static CcpnBool check_buffer(PyArrayObject *data_array,
-				PyObject *peak_list, long *buffer,
-				float value, npy_intp *point)
+                             PyObject *peak_list, long *buffer,
+                             float value, npy_intp *point)
 {
     int i, ndim = PyArray_NDIM(data_array);
     PyObject *point_obj;
 
-/* check that not within buffer */
-/* could do this first if implement efficient way of doing so */
+    /* check that not within buffer */
+    /* could do this first if implement efficient way of doing so */
 
     for (i = 0; i < PyList_Size(peak_list); i++)
     {
-	point_obj = PyTuple_GetItem(PyList_GetItem(peak_list, i), 0);
-	if (point_within_peak_buffer(ndim, point, point_obj, buffer))
-	    return CCPN_FALSE;
+        point_obj = PyTuple_GetItem(PyList_GetItem(peak_list, i), 0);
+        if (point_within_peak_buffer(ndim, point, point_obj, buffer))
+            return CCPN_FALSE;
     }
 
     return CCPN_TRUE;
@@ -160,7 +160,7 @@ static PyObject *peak_volume(PyArrayObject *data_array, float value, npy_intp *p
 }
 
 static CcpnStatus new_peak(PyArrayObject *data_array, PyObject *peak_list,
-		float value, npy_intp *point, int *points, char *error_msg)
+                           float value, npy_intp *point, int *points, char *error_msg)
 {
     long i, ndim = PyArray_NDIM(data_array);
     npy_intp pnt[MAX_NDIM];
@@ -169,20 +169,20 @@ static CcpnStatus new_peak(PyArrayObject *data_array, PyObject *peak_list,
 
     peak_obj = PyTuple_New(2);  /* point, height */
     if (!peak_obj)
-	RETURN_ERROR_MSG("allocating peak memory");
+        RETURN_ERROR_MSG("allocating peak memory");
 
     point_obj = PyTuple_New(ndim);
     if (!point_obj)
-	RETURN_ERROR_MSG("allocating peak point memory");
+        RETURN_ERROR_MSG("allocating peak point memory");
 
     PyTuple_SetItem(peak_obj, 0, point_obj);
     PyTuple_SetItem(peak_obj, 1, PyFloat_FromDouble((double) value));
 
     for (i = 0; i < ndim; i++)
-	PyTuple_SetItem(point_obj, i, PyLong_FromLong((long) point[i]));
+        PyTuple_SetItem(point_obj, i, PyLong_FromLong((long) point[i]));
 
     if (PyList_Append(peak_list, peak_obj))
-	RETURN_ERROR_MSG("appending peak data to peak list");
+        RETURN_ERROR_MSG("appending peak data to peak list");
     Py_DECREF(peak_obj);
 
     return CCPN_OK;
@@ -190,8 +190,8 @@ static CcpnStatus new_peak(PyArrayObject *data_array, PyObject *peak_list,
 
 /* TBD: ignores aliasing so does not work correctly on boundaries */
 static CcpnBool check_nonadjacent_points(PyArrayObject *data_array,
-		CcpnBool find_maximum, long *buffer, float v, npy_intp *point,
-		int *points, int npoints, int *cumulative)
+        CcpnBool find_maximum, long *buffer, float v, npy_intp *point,
+        int *points, int npoints, int *cumulative)
 {
     int i, n, zero_index, ndim = PyArray_NDIM(data_array);
     npy_intp p[MAX_NDIM];
@@ -200,47 +200,47 @@ static CcpnBool check_nonadjacent_points(PyArrayObject *data_array,
 
     zero_index = 1;
     for (i = 0; i < ndim; i++)
-	zero_index *= 3;
+        zero_index *= 3;
     zero_index = (zero_index - 1) / 2;
 
-/* check that local extremum */
+    /* check that local extremum */
 
     for (n = 0; n < npoints; n++)
     {
-	if (n == zero_index) /* this is the central point */
-	    continue;
+        if (n == zero_index) /* this is the central point */
+            continue;
 
-	ARRAY_OF_INDEX(p, n, cumulative, ndim);
+        ARRAY_OF_INDEX(p, n, cumulative, ndim);
 
-	do_point = CCPN_TRUE;
-	for (i = 0; i < ndim; i++)
-	{
-	    /* would have been more efficient to do this before this function called... */
-	    p[i] += point[i] - 1;
-	    /* p initially goes 0, 1, 2 so extra -1 makes it -1, 0, 1 */
+        do_point = CCPN_TRUE;
+        for (i = 0; i < ndim; i++)
+        {
+            /* would have been more efficient to do this before this function called... */
+            p[i] += point[i] - 1;
+            /* p initially goes 0, 1, 2 so extra -1 makes it -1, 0, 1 */
 
-	    if ((p[i] < 0) || (p[i] >= points[i]))
-	    {
-		do_point = CCPN_FALSE;
-		break;
-	    }
-	}
+            if ((p[i] < 0) || (p[i] >= points[i]))
+            {
+                do_point = CCPN_FALSE;
+                break;
+            }
+        }
 
-	if (!do_point)
-	    continue;
+        if (!do_point)
+            continue;
 
-	v2 = get_value_at_point(data_array, p);
+        v2 = get_value_at_point(data_array, p);
 
-	if (find_maximum)
-	{
-	    if (v2 > v)
-		return CCPN_FALSE;
-	}
-	else
-	{
-	    if (v2 < v)
-		return CCPN_FALSE;
-	}
+        if (find_maximum)
+        {
+            if (v2 > v)
+                return CCPN_FALSE;
+        }
+        else
+        {
+            if (v2 < v)
+                return CCPN_FALSE;
+        }
     }
 
     return CCPN_TRUE;
@@ -248,59 +248,59 @@ static CcpnBool check_nonadjacent_points(PyArrayObject *data_array,
 
 /* TBD: ignores aliasing so does not work correctly on boundaries */
 static CcpnBool check_adjacent_points(PyArrayObject *data_array, CcpnBool find_maximum,
-		long *buffer, float v, npy_intp *point, int *points)
+                                      long *buffer, float v, npy_intp *point, int *points)
 {
     int i, ndim = PyArray_NDIM(data_array);
     npy_intp pnt[MAX_NDIM];
     float v2;
 
-/* check that local extremum */
+    /* check that local extremum */
 
     COPY_VECTOR(pnt, point, ndim);
     for (i = 0; i < ndim; i++)
     {
-	if (point[i] > 0)
-	{
-	    pnt[i] = point[i] - 1;
-	    v2 = get_value_at_point(data_array, pnt);
+        if (point[i] > 0)
+        {
+            pnt[i] = point[i] - 1;
+            v2 = get_value_at_point(data_array, pnt);
 
-	    if (find_maximum)
-	    {
-		if (v2 > v)
-		    return CCPN_FALSE;
-	    }
-	    else
-	    {
-		if (v2 < v)
-		    return CCPN_FALSE;
-	    }
-	}
+            if (find_maximum)
+            {
+                if (v2 > v)
+                    return CCPN_FALSE;
+            }
+            else
+            {
+                if (v2 < v)
+                    return CCPN_FALSE;
+            }
+        }
 
-	if (point[i] < (points[i] - 1))
-	{
-	    pnt[i] = point[i] + 1;
-	    v2 = get_value_at_point(data_array, pnt);
+        if (point[i] < (points[i] - 1))
+        {
+            pnt[i] = point[i] + 1;
+            v2 = get_value_at_point(data_array, pnt);
 
-	    if (find_maximum)
-	    {
-		if (v2 > v)
-		    return CCPN_FALSE;
-	    }
-	    else
-	    {
-		if (v2 < v)
-		    return CCPN_FALSE;
-	    }
-	}
+            if (find_maximum)
+            {
+                if (v2 > v)
+                    return CCPN_FALSE;
+            }
+            else
+            {
+                if (v2 < v)
+                    return CCPN_FALSE;
+            }
+        }
 
-	pnt[i] = point[i];
+        pnt[i] = point[i];
     }
 
     return CCPN_TRUE;
 }
 
 static CcpnBool drops_in_direction(PyArrayObject *data_array, CcpnBool find_maximum,
-		float drop, float v, npy_intp *point, int *points, int dim, int dirn)
+                                   float drop, float v, npy_intp *point, int *points, int dim, int dirn)
 {
     int i, i_start, i_end, i_step, ndim = PyArray_NDIM(data_array);
     float v_prev = v, v_this;
@@ -308,68 +308,68 @@ static CcpnBool drops_in_direction(PyArrayObject *data_array, CcpnBool find_maxi
 
     if (dirn == 1)
     {
-	i_start = point[dim] + 1;
-	i_end = points[dim];
-	i_step = 1;
+        i_start = point[dim] + 1;
+        i_end = points[dim];
+        i_step = 1;
     }
     else
     {
-	i_start = point[dim] - 1;
-	i_end = -1;
-	i_step = -1;
+        i_start = point[dim] - 1;
+        i_end = -1;
+        i_step = -1;
     }
 
     COPY_VECTOR(q, point, ndim);
 
     for (i = i_start; i != i_end; i += i_step)
     {
-	q[dim] = i;
-	v_this = get_value_at_point(data_array, q);
+        q[dim] = i;
+        v_this = get_value_at_point(data_array, q);
 
-	if (find_maximum)
-	{
-	    if (v_this > v_prev)
-		return CCPN_FALSE;
-	    else if ((v-v_this) >= drop)
-		return CCPN_TRUE;
-	}
-	else
-	{
-	    if (v_this < v_prev)
-		return CCPN_FALSE;
-	    else if ((v_this-v) >= drop)
-		return CCPN_TRUE;
-	}
+        if (find_maximum)
+        {
+            if (v_this > v_prev)
+                return CCPN_FALSE;
+            else if ((v-v_this) >= drop)
+                return CCPN_TRUE;
+        }
+        else
+        {
+            if (v_this < v_prev)
+                return CCPN_FALSE;
+            else if ((v_this-v) >= drop)
+                return CCPN_TRUE;
+        }
 
-	v_prev = v_this;
+        v_prev = v_this;
     }
 
     return CCPN_TRUE;
 }
 
 static CcpnBool check_drop(PyArrayObject *data_array, CcpnBool find_maximum,
-		float drop_factor, float v, npy_intp *point, int *points)
+                           float drop_factor, float v, npy_intp *point, int *points)
 {
     int i, ndim = PyArray_NDIM(data_array);
     float drop = drop_factor * ABS(v);
 
     if (drop_factor <= 0)
-	return CCPN_TRUE;
+        return CCPN_TRUE;
 
     for (i = 0; i < ndim; i++)
     {
-	if (!drops_in_direction(data_array, find_maximum, drop, v, point, points, i, 1))
-	    return CCPN_FALSE;
+        if (!drops_in_direction(data_array, find_maximum, drop, v, point, points, i, 1))
+            return CCPN_FALSE;
 
-	if (!drops_in_direction(data_array, find_maximum, drop, v, point, points, i, -1))
-	    return CCPN_FALSE;
+        if (!drops_in_direction(data_array, find_maximum, drop, v, point, points, i, -1))
+            return CCPN_FALSE;
     }
 
     return CCPN_TRUE;
 }
 
 static float half_max_position(PyArrayObject *data_array, CcpnBool find_maximum,
-		float v, npy_intp *point, int *points, int dim, int dirn)
+                               float v, npy_intp *point, int *points, int dim, int dirn)
 {
     int i, i_start, i_end, i_step, ndim = PyArray_NDIM(data_array);
     float v_half = 0.5 * v, v_prev = v, v_this, half_max;
@@ -377,46 +377,46 @@ static float half_max_position(PyArrayObject *data_array, CcpnBool find_maximum,
 
     if (dirn == 1)
     {
-	i_start = point[dim] + 1;
-	i_end = points[dim];
-	i_step = 1;
+        i_start = point[dim] + 1;
+        i_end = points[dim];
+        i_step = 1;
     }
     else
     {
-	i_start = point[dim] - 1;
-	i_end = -1;
-	i_step = -1;
+        i_start = point[dim] - 1;
+        i_end = -1;
+        i_step = -1;
     }
 
     COPY_VECTOR(q, point, ndim);
 
     for (i = i_start; i != i_end; i += i_step)
     {
-	q[dim] = (i + points[dim]) % points[dim];
-	v_this = get_value_at_point(data_array, q);
+        q[dim] = (i + points[dim]) % points[dim];
+        v_this = get_value_at_point(data_array, q);
 
-	if (find_maximum)
-	{
-	    if (v_this < v_half)
-		return i - i_step*(v_half-v_this)/(v_prev-v_this);
-	}
-	else
-	{
-	    if (v_this > v_half)
-		return i - i_step*(v_half-v_this)/(v_prev-v_this);
-	}
+        if (find_maximum)
+        {
+            if (v_this < v_half)
+                return i - i_step*(v_half-v_this)/(v_prev-v_this);
+        }
+        else
+        {
+            if (v_this > v_half)
+                return i - i_step*(v_half-v_this)/(v_prev-v_this);
+        }
 
-	v_prev = v_this;
+        v_prev = v_this;
     }
 
     if (dirn == 1)
-	return points[dim] - 1.0;
+        return points[dim] - 1.0;
     else
-	return 1.0;
+        return 1.0;
 }
 
 static float half_max_linewidth(PyArrayObject *data_array, CcpnBool have_maximum,
-		float v, npy_intp *point, int *points, int dim)
+                                float v, npy_intp *point, int *points, int dim)
 {
     float linewidth, a, b;
 
@@ -429,39 +429,39 @@ static float half_max_linewidth(PyArrayObject *data_array, CcpnBool have_maximum
 }
 
 static CcpnBool check_dim_linewidth(PyArrayObject *data_array, CcpnBool have_maximum,
-		float min_linewidth, float v, npy_intp *point, int *points, int dim)
+                                    float min_linewidth, float v, npy_intp *point, int *points, int dim)
 {
     float linewidth = half_max_linewidth(data_array, have_maximum, v, point, points, dim);
 
     if (linewidth < min_linewidth)
-	return CCPN_FALSE;
+        return CCPN_FALSE;
 
     return CCPN_TRUE;
 }
 
 static CcpnBool check_linewidth(PyArrayObject *data_array, CcpnBool find_maximum,
-		float *min_linewidth, float v, npy_intp *point, int *points)
+                                float *min_linewidth, float v, npy_intp *point, int *points)
 {
     int i, ndim = PyArray_NDIM(data_array);
 
     for (i = 0; i < ndim; i++)
     {
-	if (min_linewidth[i] <= 0)
-	    continue;
+        if (min_linewidth[i] <= 0)
+            continue;
 
-	if (!check_dim_linewidth(data_array, find_maximum, min_linewidth[i], v, point, points, i))
-	    return CCPN_FALSE;
+        if (!check_dim_linewidth(data_array, find_maximum, min_linewidth[i], v, point, points, i))
+            return CCPN_FALSE;
     }
 
     return CCPN_TRUE;
 }
 
 static CcpnStatus find_peaks(PyArrayObject *data_array,
-	CcpnBool have_low, CcpnBool have_high, float low, float high,
-	long *buffer, CcpnBool nonadjacent, float drop_factor,
-	float *min_linewidth, PyObject *peak_list,
-	PyObject *excluded_regions_obj, PyObject *diagonal_exclusion_dims_obj,
-	PyObject *diagonal_exclusion_transform_obj, char *error_msg)
+                             CcpnBool have_low, CcpnBool have_high, float low, float high,
+                             long *buffer, CcpnBool nonadjacent, float drop_factor,
+                             float *min_linewidth, PyObject *peak_list,
+                             PyObject *excluded_regions_obj, PyObject *diagonal_exclusion_dims_obj,
+                             PyObject *diagonal_exclusion_transform_obj, char *error_msg)
 {
     int i, j, k, npoints, nadj_points, ndim, dim1, dim2;
     int cum_points[MAX_NDIM], cumulative[MAX_NDIM], points[MAX_NDIM];
@@ -473,16 +473,16 @@ static CcpnStatus find_peaks(PyArrayObject *data_array,
     ndim = PyArray_NDIM(data_array);
 
     if (!have_low && !have_high)
-	return CCPN_OK;
+        return CCPN_OK;
 
     if (nonadjacent)
     {
-	nadj_points = 1;
-	for (i = 0; i < ndim; i++)
-	{
-	    cumulative[i] = nadj_points;
-	    nadj_points *= 3;
-	}
+        nadj_points = 1;
+        for (i = 0; i < ndim; i++)
+        {
+            cumulative[i] = nadj_points;
+            nadj_points *= 3;
+        }
     }
 
     npoints = 1;
@@ -501,13 +501,13 @@ static CcpnStatus find_peaks(PyArrayObject *data_array,
         {
             diagonal_exclusion_dims_array = (PyArrayObject *) PyList_GetItem(diagonal_exclusion_dims_obj, j);
             diagonal_exclusion_transform_array = (PyArrayObject *) PyList_GetItem(diagonal_exclusion_transform_obj, j);
-	    dim1 = *((int *) PyArray_GETPTR1(diagonal_exclusion_dims_array, 0));
-	    dim2 = *((int *) PyArray_GETPTR1(diagonal_exclusion_dims_array, 1));
-	    a1 = *((float *) PyArray_GETPTR1(diagonal_exclusion_transform_array, 0));
-	    a2 = *((float *) PyArray_GETPTR1(diagonal_exclusion_transform_array, 1));
-	    b12 = *((float *) PyArray_GETPTR1(diagonal_exclusion_transform_array, 2));
-	    d = *((float *) PyArray_GETPTR1(diagonal_exclusion_transform_array, 3));
-	
+            dim1 = *((int *) PyArray_GETPTR1(diagonal_exclusion_dims_array, 0));
+            dim2 = *((int *) PyArray_GETPTR1(diagonal_exclusion_dims_array, 1));
+            a1 = *((float *) PyArray_GETPTR1(diagonal_exclusion_transform_array, 0));
+            a2 = *((float *) PyArray_GETPTR1(diagonal_exclusion_transform_array, 1));
+            b12 = *((float *) PyArray_GETPTR1(diagonal_exclusion_transform_array, 2));
+            d = *((float *) PyArray_GETPTR1(diagonal_exclusion_transform_array, 3));
+
             delta = a1*point[dim1] - a2*point[dim2] + b12;
             if (ABS(delta) < d)
                 break;
@@ -519,13 +519,13 @@ static CcpnStatus find_peaks(PyArrayObject *data_array,
         for (j = 0; j < PyList_Size(excluded_regions_obj); j++)
         {
             excluded_regions_array = (PyArrayObject *) PyList_GetItem(excluded_regions_obj, j);
-	    
+
             for (k = 0; k < ndim; k++)
             {
-		a1 = *((float *) PyArray_GETPTR2(excluded_regions_array, 0, k));
-		a2 = *((float *) PyArray_GETPTR2(excluded_regions_array, 1, k));
+                a1 = *((float *) PyArray_GETPTR2(excluded_regions_array, 0, k));
+                a2 = *((float *) PyArray_GETPTR2(excluded_regions_array, 1, k));
                 if ((point[k] < a1) ||
-                    (point[k] > a2))
+                        (point[k] > a2))
                     break; /* point is not in excluded region in this dim */
             }
 
@@ -535,45 +535,45 @@ static CcpnStatus find_peaks(PyArrayObject *data_array,
 
         if (j < PyList_Size(excluded_regions_obj))
             continue; /* point is in some excluded region */
-	
-	v = get_value_at_point(data_array, point);
-//printf("i = %d, v = %f, high = %f\n", i, v, high);
 
-	if (have_high && (v >= high))
-	    find_maximum = CCPN_TRUE;
-	else if (have_low && (v <= low))
-	    find_maximum = CCPN_FALSE;
-	else
-	    continue;
+        v = get_value_at_point(data_array, point);
+        //printf("i = %d, v = %f, high = %f\n", i, v, high);
 
-//printf("i = %d, nonadjacent = %d\n", i, nonadjacent);
-	if (nonadjacent)
-	    ok_extreme = check_nonadjacent_points(data_array, find_maximum,
-			buffer, v, point, points, nadj_points, cumulative);
-	else
-	    ok_extreme = check_adjacent_points(data_array, find_maximum,
-			buffer, v, point, points);
+        if (have_high && (v >= high))
+            find_maximum = CCPN_TRUE;
+        else if (have_low && (v <= low))
+            find_maximum = CCPN_FALSE;
+        else
+            continue;
 
-	if (!ok_extreme)
-	    continue;
+        //printf("i = %d, nonadjacent = %d\n", i, nonadjacent);
+        if (nonadjacent)
+            ok_extreme = check_nonadjacent_points(data_array, find_maximum,
+                                                  buffer, v, point, points, nadj_points, cumulative);
+        else
+            ok_extreme = check_adjacent_points(data_array, find_maximum,
+                                               buffer, v, point, points);
 
-	ok_drop = check_drop(data_array, find_maximum, drop_factor, v, point, points);
+        if (!ok_extreme)
+            continue;
 
-	if (!ok_drop)
-	    continue;
+        ok_drop = check_drop(data_array, find_maximum, drop_factor, v, point, points);
 
-	ok_linewidth = check_linewidth(data_array, find_maximum,
-		min_linewidth, v, point, points);
+        if (!ok_drop)
+            continue;
 
-	if (!ok_linewidth)
-	    continue;
+        ok_linewidth = check_linewidth(data_array, find_maximum,
+                                       min_linewidth, v, point, points);
 
-	ok_buffer = check_buffer(data_array, peak_list, buffer, v, point);
+        if (!ok_linewidth)
+            continue;
 
-	if (!ok_buffer)
-	    continue;
+        ok_buffer = check_buffer(data_array, peak_list, buffer, v, point);
 
-	CHECK_STATUS(new_peak(data_array, peak_list, v, point, points, error_msg));
+        if (!ok_buffer)
+            continue;
+
+        CHECK_STATUS(new_peak(data_array, peak_list, v, point, points, error_msg));
     }
 
     return CCPN_OK;
@@ -588,28 +588,28 @@ static float gaussian(int ndim, int *x, float *a, float *dy_da)
 
     if (dy_da)
     {
-	dy_dh = dy_da;
-	dy_dp = dy_da+1;
-	dy_dl = dy_da+1+ndim;
+        dy_dh = dy_da;
+        dy_dp = dy_da+1;
+        dy_dl = dy_da+1+ndim;
     }
 
     for (i = 0; i < ndim; i++)
     {
-	dx = x[i] - position[i];
-	lw = linewidth[i];
-	y *= exp(-4*log(2)*dx*dx/(lw*lw));
-	if (dy_da)
-	{
-	    dy_dp[i] = 8*log(2)*dx/(lw*lw);
-	    dy_dl[i] = 8*log(2)*dx*dx/(lw*lw*lw);
-	}
+        dx = x[i] - position[i];
+        lw = linewidth[i];
+        y *= exp(-4*log(2)*dx*dx/(lw*lw));
+        if (dy_da)
+        {
+            dy_dp[i] = 8*log(2)*dx/(lw*lw);
+            dy_dl[i] = 8*log(2)*dx*dx/(lw*lw*lw);
+        }
     }
 
     if (dy_da)
     {
-	*dy_dh = y / h;
-	SCALE_VECTOR(dy_dp, dy_dp, y, ndim);
-	SCALE_VECTOR(dy_dl, dy_dl, y, ndim);
+        *dy_dh = y / h;
+        SCALE_VECTOR(dy_dp, dy_dp, y, ndim);
+        SCALE_VECTOR(dy_dl, dy_dl, y, ndim);
     }
 
     return y;
@@ -624,26 +624,26 @@ static float lorentzian(int ndim, int *x, float *a, float *dy_da)
 
     if (dy_da)
     {
-	dy_dh = dy_da;
-	dy_dp = dy_da+1;
-	dy_dl = dy_da+1+ndim;
+        dy_dh = dy_da;
+        dy_dp = dy_da+1;
+        dy_dl = dy_da+1+ndim;
     }
 
     for (i = 0; i < ndim; i++)
     {
-	dx = x[i] - position[i];
-	lw = linewidth[i];
-	d = lw*lw+4*dx*dx;
-	y *= lw*lw/d;
-	dy_dp[i] = 8*dx/d;
-	dy_dl[i] = 8*dx*dx/(lw*d);
+        dx = x[i] - position[i];
+        lw = linewidth[i];
+        d = lw*lw+4*dx*dx;
+        y *= lw*lw/d;
+        dy_dp[i] = 8*dx/d;
+        dy_dl[i] = 8*dx*dx/(lw*d);
     }
 
     if (dy_da)
     {
-	*dy_dh = y / h;
-	SCALE_VECTOR(dy_dp, dy_dp, y, ndim);
-	SCALE_VECTOR(dy_dl, dy_dl, y, ndim);
+        *dy_dh = y / h;
+        SCALE_VECTOR(dy_dp, dy_dp, y, ndim);
+        SCALE_VECTOR(dy_dl, dy_dl, y, ndim);
     }
 
     return y;
@@ -662,38 +662,38 @@ static void _fitting_func(float xind, float *a, float *y_fit, float *dy_da, void
     int nparams_per_peak = 1 + 2*ndim;
     int i, j, x[MAX_NDIM];
     float *position = a+1;
- 
+
     ARRAY_OF_INDEX(x, ind, cumul_region, ndim);
     ADD_VECTORS(x, x, region_offset, ndim);
 
     // check whether position is outside the intended fitting region
     for (i = 0; i < ndim; i++)
     {
-	if ((position[i] < region_offset[i]) || (position[i] >= region_end[i]))
-	{
-	    *y_fit = LARGE_NUMBER;
-	    ZERO_VECTOR(dy_da, npeaks*nparams_per_peak); // arbitrary, hopefully ok
-	    return;
-	}
+        if ((position[i] < region_offset[i]) || (position[i] >= region_end[i]))
+        {
+            *y_fit = LARGE_NUMBER;
+            ZERO_VECTOR(dy_da, npeaks*nparams_per_peak); // arbitrary, hopefully ok
+            return;
+        }
     }
-  
+
     *y_fit = 0;
     for (j = 0; j < npeaks; j++)
     {
-	if (method == GAUSSIAN_METHOD)
-	    *y_fit += gaussian(ndim, x, a, dy_da);
-	else
-	    *y_fit += lorentzian(ndim, x, a, dy_da);
+        if (method == GAUSSIAN_METHOD)
+            *y_fit += gaussian(ndim, x, a, dy_da);
+        else
+            *y_fit += lorentzian(ndim, x, a, dy_da);
 
-	a += nparams_per_peak;
-	if (dy_da)
-	    dy_da += nparams_per_peak;
+        a += nparams_per_peak;
+        if (dy_da)
+            dy_da += nparams_per_peak;
     }
 }
 
 static CcpnStatus fit_peaks(PyArrayObject *data_array,
-	PyArrayObject *region_array, PyArrayObject *peak_array,
-	int method, PyObject *fit_list, char *error_msg)
+                            PyArrayObject *region_array, PyArrayObject *peak_array,
+                            int method, PyObject *fit_list, char *error_msg)
 {
     int i, j, k, ndim, total_region_size, first, last, nparams, npeaks, npts;
     int region_offset[MAX_NDIM], region_size[MAX_NDIM], cumul_region[MAX_NDIM], points[MAX_NDIM], region_end[MAX_NDIM];
@@ -710,9 +710,9 @@ static CcpnStatus fit_peaks(PyArrayObject *data_array,
     {
         first = *((int *) PyArray_GETPTR2(region_array, 0, i));
         last = *((int *) PyArray_GETPTR2(region_array, 1, i));
-	region_offset[i] = first;
-	region_end[i] = last;
-	region_size[i] = last - first;
+        region_offset[i] = first;
+        region_end[i] = last;
+        region_size[i] = last - first;
     }
 
     CUMULATIVE(cumul_region, region_size, total_region_size, ndim);
@@ -723,10 +723,10 @@ static CcpnStatus fit_peaks(PyArrayObject *data_array,
 
     for (j = 0; j < total_region_size; j++)
     {
-	x[j] = j;  // the real x is multidimensional so have to use index into it
+        x[j] = j;  // the real x is multidimensional so have to use index into it
         ARRAY_OF_INDEX(array, j, cumul_region, ndim);
         ADD_VECTORS(array, array, region_offset, ndim);
-	y[j] = get_value_at_point(data_array, array);
+        y[j] = get_value_at_point(data_array, array);
     }
 
     npeaks = PyArray_DIM(peak_array, 0);
@@ -741,25 +741,25 @@ static CcpnStatus fit_peaks(PyArrayObject *data_array,
     k = 0;
     for (j = 0; j < npeaks; j++)
     {
-	for (i = 0; i < ndim; i++)
-	{
+        for (i = 0; i < ndim; i++)
+        {
             peak_posn[i] = *((float *) PyArray_GETPTR2(peak_array, j, i));
-	    posn = NEAREST_INTEGER(peak_posn[i]);
-	    npts = PyArray_DIM(data_array, ndim-1-i);
-	    posn = MAX(0, posn);
-	    posn = MIN(npts-1, posn);
-	    grid_posn[i] = posn;
-	}
+            posn = NEAREST_INTEGER(peak_posn[i]);
+            npts = PyArray_DIM(data_array, ndim-1-i);
+            posn = MAX(0, posn);
+            posn = MIN(npts-1, posn);
+            grid_posn[i] = posn;
+        }
 
-	height = get_value_at_point(data_array, grid_posn);
-	have_maximum = height > 0;  // TBD: possibly wrong
+        height = get_value_at_point(data_array, grid_posn);
+        have_maximum = height > 0;  // TBD: possibly wrong
 
-	params[k++] = height;
-	for (i = 0; i < ndim; i++)
-	    params[k++] = grid_posn[i];
+        params[k++] = height;
+        for (i = 0; i < ndim; i++)
+            params[k++] = grid_posn[i];
 
-	for (i = 0; i < ndim; i++)
-	    params[k++] = half_max_linewidth(data_array, have_maximum, height, grid_posn, points, i);
+        for (i = 0; i < ndim; i++)
+            params[k++] = half_max_linewidth(data_array, have_maximum, height, grid_posn, points, i);
     }
 
     fitPeak.ndim = ndim;
@@ -770,9 +770,9 @@ static CcpnStatus fit_peaks(PyArrayObject *data_array,
     fitPeak.method = method;
 
     status = nonlinear_fit(total_region_size, x, y, w, y_fit,
-		nparams, params, params_dev,
-		max_iter, noise, &chisq,
-		_fitting_func, (void *) &fitPeak, error_msg);
+                           nparams, params, params_dev,
+                           max_iter, noise, &chisq,
+                           _fitting_func, (void *) &fitPeak, error_msg);
 
     FREE(x, float);
     FREE(y, float);
@@ -781,39 +781,39 @@ static CcpnStatus fit_peaks(PyArrayObject *data_array,
     {
         FREE(params, float);
         FREE(params_dev, float);
-	return CCPN_ERROR;
+        return CCPN_ERROR;
     }
 
     k = 0;
     for (j = 0; j < npeaks; j++)
     {
-	fit_obj = PyTuple_New(3); // height, position, linewidth
-	if (!fit_obj)
-	    RETURN_ERROR_MSG("allocating fit data");
+        fit_obj = PyTuple_New(3); // height, position, linewidth
+        if (!fit_obj)
+            RETURN_ERROR_MSG("allocating fit data");
 
-	posn_obj = PyTuple_New(ndim);
-	if (!posn_obj)
-	    RETURN_ERROR_MSG("allocating position");
+        posn_obj = PyTuple_New(ndim);
+        if (!posn_obj)
+            RETURN_ERROR_MSG("allocating position");
 
-	lw_obj = PyTuple_New(ndim);
-	if (!lw_obj)
-	    RETURN_ERROR_MSG("allocating linewidth");
+        lw_obj = PyTuple_New(ndim);
+        if (!lw_obj)
+            RETURN_ERROR_MSG("allocating linewidth");
 
-	height = params[k++];
+        height = params[k++];
         PyTuple_SetItem(fit_obj, 0, PyFloat_FromDouble((double) height));
         PyTuple_SetItem(fit_obj, 1, posn_obj);
         PyTuple_SetItem(fit_obj, 2, lw_obj);
 
-	for (i = 0; i < ndim; i++)
-	    PyTuple_SetItem(posn_obj, i, PyFloat_FromDouble((double) params[k++]));
+        for (i = 0; i < ndim; i++)
+            PyTuple_SetItem(posn_obj, i, PyFloat_FromDouble((double) params[k++]));
 
-	for (i = 0; i < ndim; i++)
-	    PyTuple_SetItem(lw_obj, i, PyFloat_FromDouble((double) params[k++]));
+        for (i = 0; i < ndim; i++)
+            PyTuple_SetItem(lw_obj, i, PyFloat_FromDouble((double) params[k++]));
 
         if (PyList_Append(fit_list, fit_obj))
-	    RETURN_ERROR_MSG("appending fit data to fit list");
+            RETURN_ERROR_MSG("appending fit data to fit list");
 
-	Py_DECREF(fit_obj);
+        Py_DECREF(fit_obj);
     }
 
     FREE(params, float);
@@ -833,14 +833,14 @@ static PyObject *findPeaks(PyObject *self, PyObject *args)
     char error_msg[1000];
 
     if (!PyArg_ParseTuple(args, "O!iiffO!ifO!O!O!O!",
-	&PyArray_Type, &data_array,
-	&have_low, &have_high, &low, &high,
-	&PyList_Type, &buffer_obj,
-	&nonadjacent, &drop_factor,
-	&PyList_Type, &min_linewidth_obj,
-	&PyList_Type, &excluded_regions_obj,
-	&PyList_Type, &diagonal_exclusion_dims_obj,
-	&PyList_Type, &diagonal_exclusion_transform_obj))
+                          &PyArray_Type, &data_array,
+                          &have_low, &have_high, &low, &high,
+                          &PyList_Type, &buffer_obj,
+                          &nonadjacent, &drop_factor,
+                          &PyList_Type, &min_linewidth_obj,
+                          &PyList_Type, &excluded_regions_obj,
+                          &PyList_Type, &diagonal_exclusion_dims_obj,
+                          &PyList_Type, &diagonal_exclusion_transform_obj))
         RETURN_OBJ_ERROR("need arguments: dataArray, haveLow, haveHigh, low, high, buffer, nonadjacent, dropFactor, minLinewidth, excludedRegions, diagonalExclusionDims, diagonalExclusionTransform");
 
     if (PyArray_TYPE(data_array) != NPY_FLOAT)
@@ -850,129 +850,129 @@ static PyObject *findPeaks(PyObject *self, PyObject *args)
 
     if (ndim > MAX_NDIM)
     {
-	sprintf(error_msg, "maximum ndim is %d", MAX_NDIM);
-	RETURN_OBJ_ERROR(error_msg);
+        sprintf(error_msg, "maximum ndim is %d", MAX_NDIM);
+        RETURN_OBJ_ERROR(error_msg);
     }
- 
+
     if (PyList_Size(buffer_obj) != ndim)
     {
-	sprintf(error_msg, "buffer is a list of size %ld, should be %ld", (long) PyList_Size(buffer_obj), ndim);
-	RETURN_OBJ_ERROR(error_msg);
+        sprintf(error_msg, "buffer is a list of size %ld, should be %ld", (long) PyList_Size(buffer_obj), ndim);
+        RETURN_OBJ_ERROR(error_msg);
     }
 
     for (i = 0; i < ndim; i++)
     {
-	z = PyList_GetItem(buffer_obj, i);
-	if (!PyLong_Check(z))
-	{
-	    sprintf(error_msg, "buffer element %ld is not an int", i);
-	    RETURN_OBJ_ERROR(error_msg);
-	}
+        z = PyList_GetItem(buffer_obj, i);
+        if (!PyLong_Check(z))
+        {
+            sprintf(error_msg, "buffer element %ld is not an int", i);
+            RETURN_OBJ_ERROR(error_msg);
+        }
 
-	buffer[i] = (long) PyLong_AsLong(z);
+        buffer[i] = (long) PyLong_AsLong(z);
     }
 
     if (PyList_Size(min_linewidth_obj) != ndim)
     {
-	sprintf(error_msg, "minLinewidth is a list of size %ld, should be %ld\n", (long) PyList_Size(buffer_obj), ndim);
-	RETURN_OBJ_ERROR(error_msg);
+        sprintf(error_msg, "minLinewidth is a list of size %ld, should be %ld\n", (long) PyList_Size(buffer_obj), ndim);
+        RETURN_OBJ_ERROR(error_msg);
     }
 
     for (i = 0; i < ndim; i++)
     {
-	z = PyList_GetItem(min_linewidth_obj, i);
-	if (!PyFloat_Check(z))
-	{
-	    sprintf(error_msg, "minLinewidth element %ld is not a float", i);
-	    RETURN_OBJ_ERROR(error_msg);
-	}
+        z = PyList_GetItem(min_linewidth_obj, i);
+        if (!PyFloat_Check(z))
+        {
+            sprintf(error_msg, "minLinewidth element %ld is not a float", i);
+            RETURN_OBJ_ERROR(error_msg);
+        }
 
-	min_linewidth[i] = (float) PyFloat_AsDouble(z);
+        min_linewidth[i] = (float) PyFloat_AsDouble(z);
     }
 
     for (i = 0; i < PyList_Size(excluded_regions_obj); i++)
     {
-    	excluded_regions_array = (PyArrayObject *) PyList_GetItem(excluded_regions_obj, i);
-	
-	if (!PyArray_Check(excluded_regions_array))
-	    RETURN_OBJ_ERROR("excludedRegions needs to be list of NumPy arrays");
-	
-    	if (PyArray_TYPE(excluded_regions_array) != NPY_FLOAT)
+        excluded_regions_array = (PyArrayObject *) PyList_GetItem(excluded_regions_obj, i);
+
+        if (!PyArray_Check(excluded_regions_array))
+            RETURN_OBJ_ERROR("excludedRegions needs to be list of NumPy arrays");
+
+        if (PyArray_TYPE(excluded_regions_array) != NPY_FLOAT)
             RETURN_OBJ_ERROR("excludedRegions needs to be list of NumPy float arrays");
 
         if (PyArray_NDIM(excluded_regions_array) != 2)
         {
-	    sprintf(error_msg, "excludedRegions must be list of 2 dimensional NumPy arrays");
-	    RETURN_OBJ_ERROR(error_msg);
+            sprintf(error_msg, "excludedRegions must be list of 2 dimensional NumPy arrays");
+            RETURN_OBJ_ERROR(error_msg);
         }
 
         if ((PyArray_DIM(excluded_regions_array, 0) != 2) || (PyArray_DIM(excluded_regions_array, 1) != ndim))
         {
-	    sprintf(error_msg, "excludedRegions must be list of 2 x %ld NumPy arrays", ndim);
-	    RETURN_OBJ_ERROR(error_msg);
+            sprintf(error_msg, "excludedRegions must be list of 2 x %ld NumPy arrays", ndim);
+            RETURN_OBJ_ERROR(error_msg);
         }
     }
- 
+
     if (PyList_Size(diagonal_exclusion_dims_obj) != PyList_Size(diagonal_exclusion_transform_obj))
     {
-	sprintf(error_msg, "diagonalExclusionDims is a list of size %ld, diagonalExclusionTransform is of size %ld, should be the same",
-	        (long) PyList_Size(diagonal_exclusion_dims_obj), (long) PyList_Size(diagonal_exclusion_transform_obj));
-	RETURN_OBJ_ERROR(error_msg);
+        sprintf(error_msg, "diagonalExclusionDims is a list of size %ld, diagonalExclusionTransform is of size %ld, should be the same",
+                (long) PyList_Size(diagonal_exclusion_dims_obj), (long) PyList_Size(diagonal_exclusion_transform_obj));
+        RETURN_OBJ_ERROR(error_msg);
     }
 
     for (i = 0; i < PyList_Size(diagonal_exclusion_dims_obj); i++)
     {
-    	diagonal_exclusion_dims_array = (PyArrayObject *) PyList_GetItem(diagonal_exclusion_dims_obj, i);
-	
-	if (!PyArray_Check(diagonal_exclusion_dims_array))
-	    RETURN_OBJ_ERROR("diagonalExclusionDims needs to be list of NumPy arrays");
-	
-    	if (PyArray_TYPE(diagonal_exclusion_dims_array) != NPY_INT)
+        diagonal_exclusion_dims_array = (PyArrayObject *) PyList_GetItem(diagonal_exclusion_dims_obj, i);
+
+        if (!PyArray_Check(diagonal_exclusion_dims_array))
+            RETURN_OBJ_ERROR("diagonalExclusionDims needs to be list of NumPy arrays");
+
+        if (PyArray_TYPE(diagonal_exclusion_dims_array) != NPY_INT)
             RETURN_OBJ_ERROR("diagonalExclusionDims needs to be list of NumPy int arrays");
 
         if (PyArray_NDIM(diagonal_exclusion_dims_array) != 1)
         {
-	    sprintf(error_msg, "diagonalExclusionDims must be list of 1 dimensional NumPy arrays");
-	    RETURN_OBJ_ERROR(error_msg);
+            sprintf(error_msg, "diagonalExclusionDims must be list of 1 dimensional NumPy arrays");
+            RETURN_OBJ_ERROR(error_msg);
         }
 
         if (PyArray_DIM(diagonal_exclusion_dims_array, 0) != 2)
         {
-	    sprintf(error_msg, "diagonalExclusionDims must be list of size 2 NumPy arrays");
-	    RETURN_OBJ_ERROR(error_msg);
+            sprintf(error_msg, "diagonalExclusionDims must be list of size 2 NumPy arrays");
+            RETURN_OBJ_ERROR(error_msg);
         }
     }
- 
+
     for (i = 0; i < PyList_Size(diagonal_exclusion_transform_obj); i++)
     {
-    	diagonal_exclusion_transform_array = (PyArrayObject *) PyList_GetItem(diagonal_exclusion_transform_obj, i);
-	
-	if (!PyArray_Check(diagonal_exclusion_transform_array))
-	    RETURN_OBJ_ERROR("diagonalExclusionTransform needs to be list of NumPy arrays");
-	
-    	if (PyArray_TYPE(diagonal_exclusion_transform_array) != NPY_FLOAT)
+        diagonal_exclusion_transform_array = (PyArrayObject *) PyList_GetItem(diagonal_exclusion_transform_obj, i);
+
+        if (!PyArray_Check(diagonal_exclusion_transform_array))
+            RETURN_OBJ_ERROR("diagonalExclusionTransform needs to be list of NumPy arrays");
+
+        if (PyArray_TYPE(diagonal_exclusion_transform_array) != NPY_FLOAT)
             RETURN_OBJ_ERROR("diagonalExclusionTransform needs to be list of NumPy float arrays");
 
         if (PyArray_NDIM(diagonal_exclusion_transform_array) != 1)
         {
-	    sprintf(error_msg, "diagonalExclusionTransform must be list of 1 dimensional NumPy arrays");
-	    RETURN_OBJ_ERROR(error_msg);
+            sprintf(error_msg, "diagonalExclusionTransform must be list of 1 dimensional NumPy arrays");
+            RETURN_OBJ_ERROR(error_msg);
         }
 
         if (PyArray_DIM(diagonal_exclusion_transform_array, 0) != 4)
         {
-	    sprintf(error_msg, "diagonalExclusionTransform must be list of size 4 NumPy arrays");
-	    RETURN_OBJ_ERROR(error_msg);
+            sprintf(error_msg, "diagonalExclusionTransform must be list of size 4 NumPy arrays");
+            RETURN_OBJ_ERROR(error_msg);
         }
     }
- 
+
     peak_list = PyList_New(0);
     if (!peak_list)
-	RETURN_OBJ_ERROR("allocating memory for peak list");
+        RETURN_OBJ_ERROR("allocating memory for peak list");
 
     if (find_peaks(data_array, have_low, have_high, low, high, buffer, nonadjacent, drop_factor, min_linewidth, peak_list,
                    excluded_regions_obj, diagonal_exclusion_dims_obj, diagonal_exclusion_transform_obj, error_msg) == CCPN_ERROR)
-	RETURN_OBJ_ERROR(error_msg);
+        RETURN_OBJ_ERROR(error_msg);
 
     return peak_list;
 }
@@ -985,10 +985,10 @@ static PyObject *fitPeaks(PyObject *self, PyObject *args)
     char error_msg[1000];
 
     if (!PyArg_ParseTuple(args, "O!O!O!i",
-	&PyArray_Type, &data_array,
-	&PyArray_Type, &region_array,
-	&PyArray_Type, &peak_array,
-	&method))
+                          &PyArray_Type, &data_array,
+                          &PyArray_Type, &region_array,
+                          &PyArray_Type, &peak_array,
+                          &method))
         RETURN_OBJ_ERROR("need arguments: dataArray, regionArray, peakArray, method");
 
     if (PyArray_TYPE(data_array) != NPY_FLOAT)
@@ -998,20 +998,20 @@ static PyObject *fitPeaks(PyObject *self, PyObject *args)
 
     if (ndim > MAX_NDIM)
     {
-	sprintf(error_msg, "maximum ndim is %d", MAX_NDIM);
-	RETURN_OBJ_ERROR(error_msg);
+        sprintf(error_msg, "maximum ndim is %d", MAX_NDIM);
+        RETURN_OBJ_ERROR(error_msg);
     }
- 
+
     if (PyArray_TYPE(region_array) != NPY_INT32)
         RETURN_OBJ_ERROR("regionArray needs to be array of ints");
 
     if (PyArray_NDIM(region_array) != 2)
-	RETURN_OBJ_ERROR("regionArray must be 2 dimensional");
+        RETURN_OBJ_ERROR("regionArray must be 2 dimensional");
 
     if ((PyArray_DIM(region_array, 0) != 2) || (PyArray_DIM(region_array, 1) != ndim))
     {
-	sprintf(error_msg, "regionArray must be 2 x %d", ndim);
-	RETURN_OBJ_ERROR(error_msg);
+        sprintf(error_msg, "regionArray must be 2 x %d", ndim);
+        RETURN_OBJ_ERROR(error_msg);
     }
 
     if (PyArray_TYPE(peak_array) != NPY_FLOAT)
@@ -1019,16 +1019,16 @@ static PyObject *fitPeaks(PyObject *self, PyObject *args)
 
     if (method != GAUSSIAN_METHOD && method != LORENTZIAN_METHOD)
     {
-	sprintf(error_msg, "method must be %d (Gaussian) or %d (Lorentzian)", GAUSSIAN_METHOD, LORENTZIAN_METHOD);
-	RETURN_OBJ_ERROR(error_msg);
+        sprintf(error_msg, "method must be %d (Gaussian) or %d (Lorentzian)", GAUSSIAN_METHOD, LORENTZIAN_METHOD);
+        RETURN_OBJ_ERROR(error_msg);
     }
 
     fit_list = PyList_New(0);
     if (!fit_list)
-	RETURN_OBJ_ERROR("allocating memory for fit list");
+        RETURN_OBJ_ERROR("allocating memory for fit list");
 
     if (fit_peaks(data_array, region_array, peak_array, method, fit_list, error_msg) == CCPN_ERROR)
-	RETURN_OBJ_ERROR(error_msg);
+        RETURN_OBJ_ERROR(error_msg);
 
     return fit_list;
 }
@@ -1043,20 +1043,22 @@ static struct PyMethodDef Peak_type_methods[] =
     { NULL,         NULL,                       0,              NULL }
 };
 
-struct module_state {
+struct module_state
+{
     PyObject *error;
 };
 
-static struct PyModuleDef moduledef = {
-        PyModuleDef_HEAD_INIT,
-        "Peak",
-        NULL,
-        sizeof(struct module_state),
-        Peak_type_methods,
-        NULL,
-        NULL,
-        NULL,
-        NULL
+static struct PyModuleDef moduledef =
+{
+    PyModuleDef_HEAD_INIT,
+    "Peak",
+    NULL,
+    sizeof(struct module_state),
+    Peak_type_methods,
+    NULL,
+    NULL,
+    NULL,
+    NULL
 };
 
 PyObject *PyInit_Peak(void)
@@ -1083,7 +1085,8 @@ PyObject *PyInit_Peak(void)
     struct module_state *st = (struct module_state*)PyModule_GetState(module);
 
     st->error = PyErr_NewException("Peak.error", NULL, NULL);
-    if (st->error == NULL) {
+    if (st->error == NULL)
+    {
         Py_DECREF(module);
         return NULL;
     }

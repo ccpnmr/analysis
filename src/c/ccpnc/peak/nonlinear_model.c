@@ -65,22 +65,22 @@ Development of a Software Pipeline. Proteins 59, 687 - 696.
 /* piv[m], row[m], col[m] (all ints) are also storage. */
 
 static void find_linearised(float *x, float *y, float *w, int n,
-		float *a, float *dy_da, float **alpha, float *beta, int m,
-		float *chisq, Nonlinear_model_func func, void *user_data)
+                            float *a, float *dy_da, float **alpha, float *beta, int m,
+                            float *chisq, Nonlinear_model_func func, void *user_data)
 {
     int i, j, k;
     float c, dy, y_fit, wgt;
 
-/*
-    printf("a:");
-    for (i = 0; i < m; i++)
-	printf("\t%4.3f", a[i]);
-    printf("\n");
-*/
+    /*
+        printf("a:");
+        for (i = 0; i < m; i++)
+    	printf("\t%4.3f", a[i]);
+        printf("\n");
+    */
 
     for (i = 0; i < m; i++)
-	for (j = 0; j <= i; j++)
-	    alpha[i][j] = 0;
+        for (j = 0; j <= i; j++)
+            alpha[i][j] = 0;
 
     ZERO_VECTOR(beta, m);
 
@@ -88,48 +88,48 @@ static void find_linearised(float *x, float *y, float *w, int n,
 
     for (i = 0; i < n; i++)
     {
-	(*func)(x[i], a, &y_fit, dy_da, user_data);
+        (*func)(x[i], a, &y_fit, dy_da, user_data);
 
-	dy = y[i] - y_fit;
+        dy = y[i] - y_fit;
 
-	for (j = 0; j < m; j++)
-	{
-	    if (w)
-	    	wgt = w[i] * dy_da[j];
-	    else
-	    	wgt = dy_da[j];
+        for (j = 0; j < m; j++)
+        {
+            if (w)
+                wgt = w[i] * dy_da[j];
+            else
+                wgt = dy_da[j];
 
-	    for (k = 0; k <= j; k++)
-		alpha[j][k] += wgt * dy_da[k];
+            for (k = 0; k <= j; k++)
+                alpha[j][k] += wgt * dy_da[k];
 
-	    beta[j] += wgt * dy;
-	}
+            beta[j] += wgt * dy;
+        }
 
-	if (w)
-	    c += w[i] * dy * dy;
-	else
-	    c += dy * dy;
+        if (w)
+            c += w[i] * dy * dy;
+        else
+            c += dy * dy;
 
-/*
-	printf("i = %d, y = %4.3f, y_fit = %4.3f, dy = %4.3f, c = %4.3f\n",
-						i, y[i], y_fit, dy, c);
-*/
+        /*
+        	printf("i = %d, y = %4.3f, y_fit = %4.3f, dy = %4.3f, c = %4.3f\n",
+        						i, y[i], y_fit, dy, c);
+        */
     }
 
     *chisq = c;
 
     for (i = 0; i < m-1; i++)
-	for (j = i+1; j < m; j++)
-	    alpha[i][j] = alpha[j][i];
+        for (j = i+1; j < m; j++)
+            alpha[i][j] = alpha[j][i];
 }
 
 CcpnStatus nonlinear_model(float *x, float *y, float *w, int n,
-			float *a, float **covar, float **alpha,
-			float *beta, float *da, float *ap, float *dy_da,
-			int *piv, int *row, int *col, int m,
-			float *chisq, float *lambda,
-			Nonlinear_model_func func, int stage,
-			void *user_data, char *error_msg)
+                           float *a, float **covar, float **alpha,
+                           float *beta, float *da, float *ap, float *dy_da,
+                           int *piv, int *row, int *col, int m,
+                           float *chisq, float *lambda,
+                           Nonlinear_model_func func, int stage,
+                           void *user_data, char *error_msg)
 {
     int i;
     float csq, lam;
@@ -137,75 +137,75 @@ CcpnStatus nonlinear_model(float *x, float *y, float *w, int n,
 
     if (stage == INITIAL_STAGE)
     {
-	lam = 0.001;
-	find_linearised(x, y, w, n, a, dy_da, alpha, beta, m, chisq, func, user_data);
+        lam = 0.001;
+        find_linearised(x, y, w, n, a, dy_da, alpha, beta, m, chisq, func, user_data);
     }
     else
     {
-	lam = *lambda;
+        lam = *lambda;
     }
 
     csq = *chisq;
 
     for (i = 0; i < m; i++)
     {
-	COPY_VECTOR(covar[i], alpha[i], m);
-	covar[i][i] *= 1 + lam;
+        COPY_VECTOR(covar[i], alpha[i], m);
+        covar[i][i] *= 1 + lam;
     }
 
-/*
-    gauss_jordan_vector(covar, beta, m, piv, row, col, &singular);
-*/
+    /*
+        gauss_jordan_vector(covar, beta, m, piv, row, col, &singular);
+    */
     COPY_VECTOR(da, beta, m);
     gauss_jordan_vector(covar, da, m, piv, row, col, &singular);
 
     if (singular)
-	RETURN_ERROR_MSG("singular nonlinear model");
+        RETURN_ERROR_MSG("singular nonlinear model");
 
     if (stage == FINAL_STAGE)
-	return CCPN_OK;
+        return CCPN_OK;
 
-/*
-    ADD_VECTORS(ap, a, beta, m);
-*/
+    /*
+        ADD_VECTORS(ap, a, beta, m);
+    */
     ADD_VECTORS(ap, a, da, m);
     find_linearised(x, y, w, n, ap, dy_da, covar, da, m, chisq, func, user_data);
 
-/*
-    printf("csq = %4.3f, chisq = %4.3f, ", csq, *chisq);
-*/
+    /*
+        printf("csq = %4.3f, chisq = %4.3f, ", csq, *chisq);
+    */
 
     if (*chisq < csq)
     {
-	*lambda = 0.1 * lam;
+        *lambda = 0.1 * lam;
 
-	for (i = 0; i < m; i++)
-	    COPY_VECTOR(alpha[i], covar[i], m);
+        for (i = 0; i < m; i++)
+            COPY_VECTOR(alpha[i], covar[i], m);
 
-	COPY_VECTOR(beta, da, m);
-	COPY_VECTOR(a, ap, m);
+        COPY_VECTOR(beta, da, m);
+        COPY_VECTOR(a, ap, m);
     }
     else
     {
-	*lambda = 10.0 * lam;
-	*chisq = csq;
+        *lambda = 10.0 * lam;
+        *chisq = csq;
     }
 
-/*
-    printf("lam = %4.3f, lambda = %4.3f\n", lam, *lambda);
-*/
+    /*
+        printf("lam = %4.3f, lambda = %4.3f\n", lam, *lambda);
+    */
 
     return CCPN_OK;
 }
 
 static CcpnStatus do_fit(float *x, float *y, float *w, float *y_fit, int npts,
-			float *params, float *params_dev,
-			float **covar, float **alpha,
-			float *beta, float *da, float *ap, float *dy_da,
-			int *piv, int *row, int *col, int nparams,
-			float *chisq,
-			Nonlinear_model_func func, float noise, int max_iter,
-			void *user_data, char *error_msg)
+                         float *params, float *params_dev,
+                         float **covar, float **alpha,
+                         float *beta, float *da, float *ap, float *dy_da,
+                         int *piv, int *row, int *col, int nparams,
+                         float *chisq,
+                         Nonlinear_model_func func, float noise, int max_iter,
+                         void *user_data, char *error_msg)
 {
     int i, iter, cond;
     float chisq_stop_criterion, lambda, old_chisq;
@@ -215,7 +215,7 @@ static CcpnStatus do_fit(float *x, float *y, float *w, float *y_fit, int npts,
     CHECK_NONLINEAR_MODEL(INITIAL_STAGE);
 
     for (iter = cond = 0; (iter < MAX_MODEL_ITER) &&
-                                (cond < MAX_CONDITION); iter++)
+            (cond < MAX_CONDITION); iter++)
     {
         old_chisq = *chisq;
 
@@ -236,7 +236,7 @@ static CcpnStatus do_fit(float *x, float *y, float *w, float *y_fit, int npts,
     if (y_fit)
     {
         for (i = 0; i < npts; i++)
-	    (*func)(x[i], params, &y_fit[i], NULL, user_data);
+            (*func)(x[i], params, &y_fit[i], NULL, user_data);
     }
 
     if (npts > nparams)
@@ -256,9 +256,9 @@ static CcpnStatus do_fit(float *x, float *y, float *w, float *y_fit, int npts,
 }
 
 CcpnStatus nonlinear_fit(int npts, float *x, float *y, float *w, float *y_fit,
-	int nparams, float *params, float *params_dev,
-	int max_iter, float noise, float *chisq,
-	Nonlinear_model_func func, void *user_data, char *error_msg)
+                         int nparams, float *params, float *params_dev,
+                         int max_iter, float noise, float *chisq,
+                         Nonlinear_model_func func, void *user_data, char *error_msg)
 {
     int i, *piv, *row, *col;
     float **alpha, *beta, *a, **covar, *da, *ap, *dy_da;
@@ -279,13 +279,13 @@ CcpnStatus nonlinear_fit(int npts, float *x, float *y, float *w, float *y_fit,
 
     if (noise == 0)
     {
-	for (i = 0; i < npts; i++)
-	    noise = MAX(noise, ABS(y[i]));
-	noise *= 0.05; /* arbitrary */
+        for (i = 0; i < npts; i++)
+            noise = MAX(noise, ABS(y[i]));
+        noise *= 0.05; /* arbitrary */
     }
 
     if (max_iter == 0)
-	max_iter = MAX_MODEL_ITER;
+        max_iter = MAX_MODEL_ITER;
 
     status = do_fit(x, y, w, y_fit, npts, params, params_dev, covar, alpha, beta, da, ap, dy_da, piv, row, col, nparams, chisq, func, noise, max_iter, user_data, error_msg);
 

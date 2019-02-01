@@ -267,7 +267,7 @@ def undoBlockWithoutSideBar(application=None):
 
 
 @contextmanager
-def logCommandBlock(prefix='', get=None, isProperty=False, showArguments=[], logCommandOnly=False):
+def logCommandBlock(prefix='', get=None, isProperty=False, showArguments=[], logCommandOnly=False, withSideBar=True):
     """
     Echo a command to the logger reflecting the python command required to call the function.
 
@@ -427,8 +427,13 @@ def logCommandBlock(prefix='', get=None, isProperty=False, showArguments=[], log
             yield log
         else:
             # transfer control to the calling function, create an undo waypoint
-            with undoBlockManager(application=application):  # as _undoBlocking:
-                yield log  # partial(log, _undoBlocking)
+            if withSidebar:
+                with undoBlock(application=application):  # as _undoBlocking:
+                    yield log  # partial(log, _undoBlocking)
+
+            else:
+                with undoBlockWithoutSideBar(application=application):  # as _undoBlocking:
+                    yield log  # partial(log, _undoBlocking)
 
     except AttributeError as es:
         raise

@@ -626,20 +626,21 @@ class Strip(AbstractWrapperObject):
                     spectrumView.spectrum.newPeakList()
 
                 validPeakListViews = (pp for pp in spectrumView.peakListViews if pp.isVisible())
-                axisCodeDict = self._getAxisCodeDict(spectrumView.spectrum, selectedRegion)
 
                 for thisPeakListView in validPeakListViews:
 
                     peakList = thisPeakListView.peakList
 
                     if spectrumView.spectrum.dimensionCount > 1:
+                        axisCodeDict = self._getAxisCodeDict(spectrumView.spectrum, selectedRegion)
                         newPeaks = peakList.pickPeaksRegion(axisCodeDict,
                                                             doPos=spectrumView.displayPositiveContours,
                                                             doNeg=spectrumView.displayNegativeContours,
                                                             fitMethod='gaussian', minDropfactor=minDropfactor)
 
                     else:
-                        newPeaks = peakList.pickPeaks1d(*axisCodeDict.values(), size=minDropfactor * 100)
+                        selectedRegion = [[min(ss), max(ss)] for ss in selectedRegion]
+                        newPeaks = peakList.pickPeaks1d(*selectedRegion, size=minDropfactor * 100)
 
                     result.extend(newPeaks)
 

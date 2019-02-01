@@ -52,6 +52,7 @@ Development of a Software Pipeline. Proteins 59, 687 - 696.
 
 #define GAUSSIAN_METHOD  0
 #define LORENTZIAN_METHOD  1
+#define PARABOLIC_METHOD  2
 
 #define LARGE_NUMBER 1.0e20
 
@@ -205,6 +206,9 @@ static CcpnBool check_nonadjacent_points(PyArrayObject *data_array,
 
     /* check that local extremum */
 
+    // npoints is now the number of adjacent points to any in the array
+    // i.e. 3d is 27, so will only check these elements offset from the current, ignoring the middle
+    // this is all the elements in the encompassing cube
     for (n = 0; n < npoints; n++)
     {
         if (n == zero_index) /* this is the central point */
@@ -256,6 +260,7 @@ static CcpnBool check_adjacent_points(PyArrayObject *data_array, CcpnBool find_m
 
     /* check that local extremum */
 
+    // only check the adjacent elements in the directions of the axes
     COPY_VECTOR(pnt, point, ndim);
     for (i = 0; i < ndim; i++)
     {
@@ -483,6 +488,7 @@ static CcpnStatus find_peaks(PyArrayObject *data_array,
             cumulative[i] = nadj_points;
             nadj_points *= 3;
         }
+        //printf("nadj_points %i\n"nadj_points);
     }
 
     npoints = 1;
@@ -491,10 +497,16 @@ static CcpnStatus find_peaks(PyArrayObject *data_array,
         cum_points[i] = npoints;
         points[i] = PyArray_DIM(data_array, ndim-1-i);
         npoints *= points[i];
+
+        //printf("%i, %i, %i\n", i, points[i], cum_points[i]);
     }
 
+    // iterate over all points in the dataArray
+    //printf("num of points: %i\n", npoints);
     for (i = 0; i < npoints; i++)
     {
+
+        // get the index of the point in the array
         ARRAY_OF_INDEX(point, i, cum_points, ndim);
 
         for (j = 0; j < PyList_Size(diagonal_exclusion_dims_obj); j++)
@@ -537,7 +549,7 @@ static CcpnStatus find_peaks(PyArrayObject *data_array,
             continue; /* point is in some excluded region */
 
         v = get_value_at_point(data_array, point);
-        printf("i = %d, v = %f, high = %f\n", i, v, high);
+        //printf("i = %d, v = %f, high = %f\n", i, v, high);
 
         if (have_high && (v >= high))
             find_maximum = CCPN_TRUE;
@@ -574,6 +586,9 @@ static CcpnStatus find_peaks(PyArrayObject *data_array,
             continue;
 
         CHECK_STATUS(new_peak(data_array, peak_list, v, point, points, error_msg));
+        printf("new point...");
+        printf("     array_of_index: %i - %i, %i, %i\n", i, point[0], point[1], point[2]);
+
     }
 
     return CCPN_OK;

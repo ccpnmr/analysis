@@ -1200,7 +1200,7 @@ static PyObject *contourerGLList(PyObject *self, PyObject *args)
     colourCount = 0;
 
     int numArrays = PyTuple_GET_SIZE(dataArrays);
-//    PyObject *posContours[numArrays], *negContours[numArrays];
+    //PyObject *posContours[numArrays], *negContours[numArrays];
 
     PyObject *posContours, *negContours;
     PyArrayObject *posCont, *negCont;
@@ -1246,7 +1246,6 @@ static PyObject *contourerGLList(PyObject *self, PyObject *args)
         // fill the new arrays
         //fillContours(posContours[arr], posColour);
         //fillContours(negContours[arr], negColour);
-
 
         posCont = (PyArrayObject *) PyList_GET_ITEM(posContours, arr);
         negCont = (PyArrayObject *) PyList_GET_ITEM(negContours, arr);

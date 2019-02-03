@@ -738,6 +738,29 @@ class PeakList(AbstractWrapperObject):
     #   """Readable string representation"""
     #   return "<%s; #peaks:%d (isSimulated=%s)>" % (self.pid, len(self.peaks), self.isSimulated)
 
+    # def positionIsInPlane(self, peakList, pointPosition) -> bool:
+    #     """Is peak in currently displayed planes for strip?
+    #     """
+    #     spectrumView = self.findSpectrumView(peakList.spectrum)
+    #     if spectrumView is None:
+    #         return False
+    #     displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
+    #     orderedAxes = self.orderedAxes[2:]
+    #
+    #     for ii, displayIndex in enumerate(displayIndices[2:]):
+    #         if displayIndex is not None:
+    #             # If no axis matches the index may be None
+    #             pp = pointPosition[displayIndex]
+    #             zPosition = peakList.spectrum.mainSpectrumReferences[ii].valueToPoint(pp)
+    #             if not zPosition:
+    #                 return False
+    #             zPlaneSize = 0.
+    #             zRegion = orderedAxes[ii].region
+    #             if zPosition < zRegion[0] - zPlaneSize or zPosition > zRegion[1] + zPlaneSize:
+    #                 return False
+    #
+    #     return True
+
     def pickPeaksRegion(self, regionToPick: dict = {},
                         doPos: bool = True, doNeg: bool = True,
                         minLinewidth=None, exclusionBuffer=None,
@@ -799,7 +822,9 @@ class PeakList(AbstractWrapperObject):
 
         if fitMethod:
             assert fitMethod in ('gaussian', 'lorentzian'), 'fitMethod = %s, must be one of ("gaussian", "lorentzian")' % fitMethod
-            method = 0 if fitMethod == 'gaussian' else 1
+
+            # method = 0 if fitMethod == 'gaussian' else 1
+            method = ('gaussian', 'lorentzian', 'parabolic').index(fitMethod)
 
         peaks = []
 
@@ -825,6 +850,12 @@ class PeakList(AbstractWrapperObject):
 
         if not excludedDiagonalTransform:
             excludedDiagonalTransform = []
+
+        # # need to change for the number of planes viewed
+        # outofPlaneMinTest = outofPlaneMaxTest = [2.0, 2.0]
+        # for outof in range(numDim - 2):
+        #     outofPlaneMinTest.append(0.5)
+        #     outofPlaneMaxTest.append(1.0)
 
         posLevel = spectrum.positiveContourBase if doPos else None
         negLevel = spectrum.negativeContourBase if doNeg else None
@@ -937,8 +968,18 @@ class PeakList(AbstractWrapperObject):
                                 result = CPeak.fitPeaks(dataArray, regionArray, peakArray, method)
                                 height, centerGuess, linewidth = result[0]
 
-                                center = numpy.array(centerGuess).clip(min=position - numpyExclusionBuffer,
-                                                                       max=position + numpyExclusionBuffer)
+                                # clip the point to the exclusion area, to stop rogue peaks
+                                # center = numpy.array(centerGuess).clip(min=position - numpyExclusionBuffer,
+                                #                                        max=position + numpyExclusionBuffer)
+                                center = numpy.array(centerGuess)
+
+                                # check whether the new peak is outside of the current plane
+                                # outofPlaneCenter = numpy.array(centerGuess).clip(min=position - numpy.array(outofPlaneMinTest),
+                                #                      max=position + numpy.array(outofPlaneMaxTest))
+                                #
+                                # print(">>>", center, outofPlaneCenter, not numpy.array_equal(center, outofPlaneCenter))
+
+                                # print(">>>", center, (center[2] < 0.5) or (center[2] > 1.0))
 
                             except Exception as es:
                                 dimCount = len(startPoints)

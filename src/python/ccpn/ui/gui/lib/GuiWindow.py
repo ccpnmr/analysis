@@ -553,14 +553,14 @@ class GuiWindow():
         n = len(peaks)
         # self.application.project.blankNotification()
         if n == 1:
-            peaks[0].snapToExtremum()
+            peaks[0].snapToExtremum(halfBoxSearchWidth=3, halfBoxFitWidth=10)
         elif n > 1:
             title = 'Snap Peak%s to extremum' % ('' if n == 1 else 's')
             msg = 'Snap %sselected peak%s?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
             if MessageDialog.showYesNo(title, msg, parent):
                 with progressManager(self, 'Snapping peaks to extrema'):
                     for peak in peaks:
-                        peak.snapToExtremum()
+                        peak.snapToExtremum(halfBoxSearchWidth=3, halfBoxFitWidth=10)
         else:
             getLogger().warning('No selected peak/s. Select a peak first.')
 

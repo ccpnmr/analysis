@@ -52,7 +52,7 @@ Development of a Software Pipeline. Proteins 59, 687 - 696.
 
 #define GAUSSIAN_METHOD  0
 #define LORENTZIAN_METHOD  1
-#define PARABOLIC_METHOD  2
+//#define PARABOLIC_METHOD  2
 
 #define LARGE_NUMBER 1.0e20
 
@@ -209,6 +209,7 @@ static CcpnBool check_nonadjacent_points(PyArrayObject *data_array,
     // npoints is now the number of adjacent points to any in the array
     // i.e. 3d is 27, so will only check these elements offset from the current, ignoring the middle
     // this is all the elements in the encompassing cube
+    //printf("     CHECKING POINT INDEX: %i, %i, %i\n", point[0], point[1], point[2]);
     for (n = 0; n < npoints; n++)
     {
         if (n == zero_index) /* this is the central point */
@@ -230,8 +231,11 @@ static CcpnBool check_nonadjacent_points(PyArrayObject *data_array,
             }
         }
 
+        // was continue, but any bad point means too near the boundary to check
         if (!do_point)
-            continue;
+            break;
+
+        //printf("              against: %i => %i, %i, %i\n", n, p[0], p[1], p[2]);
 
         v2 = get_value_at_point(data_array, p);
 
@@ -586,8 +590,8 @@ static CcpnStatus find_peaks(PyArrayObject *data_array,
             continue;
 
         CHECK_STATUS(new_peak(data_array, peak_list, v, point, points, error_msg));
-        printf("new point...");
-        printf("     array_of_index: %i - %i, %i, %i\n", i, point[0], point[1], point[2]);
+        //printf(">>>>> new point...");
+        //printf("     array_of_index: %i - %i, %i, %i\n", i, point[0], point[1], point[2]);
 
     }
 
@@ -616,7 +620,7 @@ static float gaussian(int ndim, int *x, float *a, float *dy_da)
         if (dy_da)
         {
             dy_dp[i] = 8*log(2)*dx/(lw*lw);
-            dy_dl[i] = 8*log(2)*dx*dx/(lw*lw*lw);
+            dy_dl[i] = -8*log(2)*dx*dx/(lw*lw*lw);
         }
     }
 
@@ -736,6 +740,7 @@ static CcpnStatus fit_peaks(PyArrayObject *data_array,
     MALLOC(x, float, total_region_size);
     MALLOC(y, float, total_region_size);
 
+    // get the block of elements surrounding the peak to test
     for (j = 0; j < total_region_size; j++)
     {
         x[j] = j;  // the real x is multidimensional so have to use index into it
@@ -754,8 +759,13 @@ static CcpnStatus fit_peaks(PyArrayObject *data_array,
         points[i] = PyArray_DIM(data_array, ndim-1-i);
 
     k = 0;
+
+    // iterate over all the peaks passed in
     for (j = 0; j < npeaks; j++)
     {
+
+        // find the index point nearest to the peak position (floats)
+        // relative to the dataArray, clipped to the dataArray bounds
         for (i = 0; i < ndim; i++)
         {
             peak_posn[i] = *((float *) PyArray_GETPTR2(peak_array, j, i));
@@ -1034,7 +1044,7 @@ static PyObject *fitPeaks(PyObject *self, PyObject *args)
 
     if (method != GAUSSIAN_METHOD && method != LORENTZIAN_METHOD)
     {
-        sprintf(error_msg, "method must be %d (Gaussian) or %d (Lorentzian)", GAUSSIAN_METHOD, LORENTZIAN_METHOD);
+	    sprintf(error_msg, "method must be %d (Gaussian) or %d (Lorentzian)", GAUSSIAN_METHOD, LORENTZIAN_METHOD);
         RETURN_OBJ_ERROR(error_msg);
     }
 
@@ -1048,13 +1058,64 @@ static PyObject *fitPeaks(PyObject *self, PyObject *args)
     return fit_list;
 }
 
+static PyObject *fitParabolicPeaks(PyObject *self, PyObject *args)
+{
+    int i, ndim;
+    PyObject *peak_list, *fit_list;
+    PyArrayObject *data_array, *region_array, *peak_array;
+    char error_msg[1000];
+
+    if (!PyArg_ParseTuple(args, "O!O!O!i",
+                          &PyArray_Type, &data_array,
+                          &PyArray_Type, &region_array,
+                          &PyArray_Type, &peak_array))
+        RETURN_OBJ_ERROR("need arguments: dataArray, regionArray, peakArray");
+
+    if (PyArray_TYPE(data_array) != NPY_FLOAT)
+        RETURN_OBJ_ERROR("dataArray needs to be array of floats");
+
+    ndim = PyArray_NDIM(data_array);
+
+    if (ndim > MAX_NDIM)
+    {
+        sprintf(error_msg, "maximum ndim is %d", MAX_NDIM);
+        RETURN_OBJ_ERROR(error_msg);
+    }
+
+    if (PyArray_TYPE(region_array) != NPY_INT32)
+        RETURN_OBJ_ERROR("regionArray needs to be array of ints");
+
+    if (PyArray_NDIM(region_array) != 2)
+        RETURN_OBJ_ERROR("regionArray must be 2 dimensional");
+
+    if ((PyArray_DIM(region_array, 0) != 2) || (PyArray_DIM(region_array, 1) != ndim))
+    {
+        sprintf(error_msg, "regionArray must be 2 x %d", ndim);
+        RETURN_OBJ_ERROR(error_msg);
+    }
+
+    if (PyArray_TYPE(peak_array) != NPY_FLOAT)
+        RETURN_OBJ_ERROR("peakArray needs to be array of floats");
+
+    fit_list = PyList_New(0);
+    if (!fit_list)
+        RETURN_OBJ_ERROR("allocating memory for fit list");
+
+    //if (fit_peaks(data_array, region_array, peak_array, fit_list, error_msg) == CCPN_ERROR)
+    //    RETURN_OBJ_ERROR(error_msg);
+
+    return fit_list;
+}
+
 static char findPeaks_doc[] = "Find peaks in ND data";
 static char fitPeaks_doc[] = "Fit peaks in ND data";
+static char fitParabolicPeaks_doc[] = "Fit parabolic peaks in ND data";
 
 static struct PyMethodDef Peak_type_methods[] =
 {
     { "findPeaks",      (PyCFunction) findPeaks,        METH_VARARGS,   findPeaks_doc },
     { "fitPeaks",      (PyCFunction) fitPeaks,        METH_VARARGS,   fitPeaks_doc },
+    { "fitParabolicPeaks",      (PyCFunction) fitParabolicPeaks,        METH_VARARGS,   fitParabolicPeaks_doc },
     { NULL,         NULL,                       0,              NULL }
 };
 

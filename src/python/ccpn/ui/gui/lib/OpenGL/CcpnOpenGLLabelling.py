@@ -190,7 +190,7 @@ class GLpeakListMethods():
         return text
 
     def objIsInVisiblePlanes(self, spectrumView, peak):
-        """Return whether in plane or adjacent
+        """Return whether in plane or flanking
         """
         displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
 
@@ -201,60 +201,16 @@ class GLpeakListMethods():
                 if not zPosition:
                     return False, False, 1.0
 
-                # get the list of displayed planes, including the extra flanking planes at either end of the list
-                # a, b, c = spectrumView._getVisiblePlaneList(self._GLParent._firstVisible)
-
-                zPlaneSize = 0.
-                orderedAxes = spectrumView.strip.orderedAxes[2:]
-
                 toolBar = spectrumView.strip.planeToolbar
-
                 settings = self._spectrumSettings[spectrumView]
 
-                # index = strip.axisOrder.index(axis.code)
-                # if not strip.beingUpdated and index > 1:
-                #     strip.beingUpdated = True
-                #
-                #     if len(strip.axisOrder) > 2:
-                #         n = index - 2
-                #         if n >= 0:
-                #             planeLabel = strip.planeToolbar.planeLabels[n]
-                #             planeSize = planeLabel.singleStep()
-                #             planeLabel.setValue(position)
-                #             strip.planeToolbar.planeCounts[n].setValue(width / planeSize)
-                #
-                # pc = spectrumView.strip.planeCount
-                # pv = spectrumView.spectrum.mainSpectrumReferences[ii].valueToPoint(zPosition)
-
-                pc = toolBar.planeCounts[ii].value()
-
                 closestPlane = int(settings[GLDefs.SPECTRUM_VALUETOPOINT](zPosition)+0.5)-1
-
                 visiblePlaneList = self._GLParent.visiblePlaneList[spectrumView][0]
+
                 if closestPlane in visiblePlaneList[1:-1]:
                     return True, False, 1.0
                 elif closestPlane == visiblePlaneList[0] or closestPlane == visiblePlaneList[-1]:
                     return False, True, GLDefs.FADE_FACTOR
-
-                # based on position and width
-                # position = nearest plane/half plane based on plane count
-
-                # if pc % 2:
-                #     # odd planes
-                #     midPos = int(spectrumView.spectrum.mainSpectrumReferences[ii].valueToPoint(zPosition) + 0.5)
-                #     width = 0.5 * pc * spectrumView.spectrum.mainSpectrumReferences[ii].valuePerPoint
-                # else:
-                #     # even planes
-                #     midPos = int(spectrumView.spectrum.mainSpectrumReferences[ii].valueToPoint(zPosition) + 0.5)
-                #     width = 0.5 * pc * spectrumView.spectrum.mainSpectrumReferences[ii].valuePerPoint
-
-                # zRegion = orderedAxes[ii].region
-                # if not (zPosition < zRegion[0] - zPlaneSize or zPosition > zRegion[1] + zPlaneSize):
-                #     return True, False, 1.0
-                #
-                # zWidth = orderedAxes[ii].width
-                # if zRegion[0] - zWidth < zPosition < zRegion[0] or zRegion[1] < zPosition < zRegion[1] + zWidth:
-                #     return False, True, GLDefs.FADE_FACTOR
 
                 return False, False, 1.0
 

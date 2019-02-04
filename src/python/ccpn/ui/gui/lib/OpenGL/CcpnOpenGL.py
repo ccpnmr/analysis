@@ -400,6 +400,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self._ordering = []
         self._firstVisible = None
+        self.visiblePlaneList = {}
         self._visibleSpectrumViewsChange = False
 
         self._glClientIndex = 0

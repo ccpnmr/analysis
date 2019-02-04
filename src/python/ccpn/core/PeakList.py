@@ -874,30 +874,36 @@ class PeakList(AbstractWrapperObject):
 
             if dataArray.size:
 
-                # # testing - plot the dataArray during debugging
-                # import numpy as np
-                # from mpl_toolkits import mplot3d
-                # import matplotlib.pyplot as plt
-                #
-                # fig = plt.figure()
-                # ax = fig.gca(projection='3d')
-                #
-                # shape = dataArray.shape
-                # rr = (np.max(dataArray) - np.min(dataArray)) * 100
-                # dims = []
-                # for ii in shape:
-                #     dims.append(np.linspace(0, ii-1, ii))
-                #
-                # for ii in range(shape[0]):
-                #     try:
-                #         ax.contour(dims[2], dims[1], dataArray[ii] / rr, offset=ii, cmap=plt.cm.viridis)
-                #     except Exception as es:
-                #         pass                    # trap stupid plot error
-                #
-                # ax.legend()
-                # ax.set_xlim3d(-0.1, shape[2]-0.9)
-                # ax.set_ylim3d(-0.1, shape[1]-0.9)
-                # ax.set_zlim3d(-0.1, shape[0]-0.9)
+                # testing - plot the dataArray during debugging
+                import numpy as np
+                from mpl_toolkits import mplot3d
+                import matplotlib.pyplot as plt
+
+                fig = plt.figure(figsize=(10, 8), dpi=100)
+                ax = fig.gca(projection='3d')
+
+                shape = dataArray.shape
+                rr = (np.max(dataArray) - np.min(dataArray)) * 100
+
+                from ccpn.ui.gui.lib.GuiSpectrumViewNd import _getLevels
+                posLevels = _getLevels(spectrum.positiveContourCount, spectrum.positiveContourBase,
+                                            spectrum.positiveContourFactor)
+                posLevels = np.array(posLevels)
+
+                dims = []
+                for ii in shape:
+                    dims.append(np.linspace(0, ii-1, ii))
+
+                for ii in range(shape[0]):
+                    try:
+                        ax.contour(dims[2], dims[1], dataArray[ii] / rr, posLevels / rr, offset=(shape[0]-ii-1), cmap=plt.cm.viridis)
+                    except Exception as es:
+                        pass                    # trap stupid plot error
+
+                ax.legend()
+                ax.set_xlim3d(-0.1, shape[2]-0.9)
+                ax.set_ylim3d(-0.1, shape[1]-0.9)
+                ax.set_zlim3d(-0.1, shape[0]-0.9)
                 # plt.show()
 
                 # find new peaks
@@ -979,9 +985,18 @@ class PeakList(AbstractWrapperObject):
                                 #
                                 # print(">>>", center, outofPlaneCenter, not numpy.array_equal(center, outofPlaneCenter))
 
-                                # print(">>>", center, (center[2] < 0.5) or (center[2] > 1.0))
+                                print(">>>", center)
+                                ax.scatter(*center, c='r', marker='^')
+
+                                x2, y2, _ = mplot3d.proj3d.proj_transform(1, 1, 1, ax.get_proj())
+
+                                ax.text(*center, str(center), fontsize=12)
+
+                                if len(center) > 2:
+                                    print(">>>", center, (center[2] < 0.5) or (center[2] > 1.0))
 
                             except Exception as es:
+                                print('>>>error:', str(es))
                                 dimCount = len(startPoints)
                                 height = float(dataArray[tuple(position[::-1])])
                                 # have to reverse position because dataArray backwards
@@ -993,6 +1008,8 @@ class PeakList(AbstractWrapperObject):
                         peak = self._newPickedPeak(pointPositions=position, height=height,
                                                    lineWidths=linewidth, fitMethod=fitMethod)
                         peaks.append(peak)
+
+                plt.show()
 
         return peaks
 

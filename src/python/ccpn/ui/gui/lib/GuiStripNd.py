@@ -744,7 +744,7 @@ class GuiStripNd(GuiStrip):
         """
         Decreases z ppm position by one plane
         """
-        self.changeZPlane(n, planeCount=1)  # -1 because ppm units are backwards
+        self.changeZPlane(n, planeCount=1)
         self._rebuildStripContours()
 
         self.pythonConsole.writeConsoleCommand("strip.prevZPlane()", strip=self)

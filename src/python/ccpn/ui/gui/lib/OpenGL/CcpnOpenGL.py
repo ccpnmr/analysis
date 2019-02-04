@@ -399,6 +399,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.resetRangeLimits()
 
         self._ordering = []
+        self._firstVisible = None
         self._visibleSpectrumViewsChange = False
 
         self._glClientIndex = 0
@@ -743,6 +744,25 @@ class CcpnGLWidget(QOpenGLWidget):
             indices = (0,)  # spectrumView.spectrum.getByAxisCodes('indices', self.strip.axisCodes)
 
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX] = indices
+
+        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YSCALE] = yScale
+
+        if len(self._spectrumValues) > 2:
+            specVal = self._spectrumValues[2]
+            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUEPERPOINT] = specVal.valuePerPoint
+            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_DATADIM] = specVal.dataDim
+
+            if hasattr(specVal.dataDim, 'primaryDataDimRef'):
+                ddr = specVal.dataDim.primaryDataDimRef
+                valueToPoint = ddr and ddr.valueToPoint
+            else:
+                valueToPoint = specVal.dataDim.valueToPoint
+
+            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUETOPOINT] = valueToPoint
+        else:
+            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUEPERPOINT] = None
+            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_DATADIM] = None
+            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUETOPOINT] = None
 
         self._maxX = max(self._maxX, fx0)
         self._minX = min(self._minX, fx1)
@@ -2131,11 +2151,24 @@ class CcpnGLWidget(QOpenGLWidget):
     def _updateVisibleSpectrumViews(self):
         """Update the list of visible spectrumViews when change occurs
         """
+
+        # make the list of ordered spectrumViews
         self._ordering = self.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
         for specView in tuple(self._spectrumSettings.keys()):
             if specView not in self._ordering:
                 del self._spectrumSettings[specView]
 
+        # make a list of the visible and not-deleted spectrumViews
+        visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+        visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+
+        # set the first visible, or the first in the ordered list
+        self._firstVisible = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[0].isDeleted else None
+        self.visiblePlaneList = {}
+        for visibleSpecView in self._ordering:
+            self.visiblePlaneList[visibleSpecView] = visibleSpecView._getVisiblePlaneList(self._firstVisible)
+
+        # update the labelling lists
         self._GLPeaks.setListViews(self._ordering)
         self._GLIntegrals.setListViews(self._ordering)
         self._GLMultiplets.setListViews(self._ordering)
@@ -4119,7 +4152,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             self._spectrumSettings[spectrumView] = {}
 
-            self._spectrumValues = spectrumView._getValues()
+            self._spectrumValues = spectrumView._getValues(dimensionCount=2)
 
             # get the bounding box of the spectra
             dx = self.sign(self.axisR - self.axisL)

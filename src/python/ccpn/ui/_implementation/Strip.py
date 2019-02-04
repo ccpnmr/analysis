@@ -433,27 +433,28 @@ class Strip(AbstractWrapperObject):
 
         return result
 
-    def peakIsInPlane(self, peak: Peak) -> bool:
-        """Is peak in currently displayed planes for strip?
-        """
-        spectrumView = self.findSpectrumView(peak.peakList.spectrum)
-        if spectrumView is None:
-            return False
-        displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
-        orderedAxes = self.orderedAxes[2:]
-
-        for ii, displayIndex in enumerate(displayIndices[2:]):
-            if displayIndex is not None:
-                # If no axis matches the index may be None
-                zPosition = peak.position[displayIndex]
-                if not zPosition:
-                    return False
-                zPlaneSize = 0.
-                zRegion = orderedAxes[ii].region
-                if zPosition < zRegion[0] - zPlaneSize or zPosition > zRegion[1] + zPlaneSize:
-                    return False
-
-        return True
+    # def peakIsInPlane(self, peak: Peak) -> bool:
+    #     """Is peak in currently displayed planes for strip?
+    #     """
+    #     spectrumView = self.findSpectrumView(peak.peakList.spectrum)
+    #     if spectrumView is None:
+    #         return False
+    #     displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
+    #     orderedAxes = self.orderedAxes[2:]
+    #
+    #     for ii, displayIndex in enumerate(displayIndices[2:]):
+    #         if displayIndex is not None:
+    #             # If no axis matches the index may be None
+    #             zPosition = peak.position[displayIndex]
+    #             if not zPosition:
+    #                 return False
+    #
+    #             # zPlaneSize = 0.
+    #             # zRegion = orderedAxes[ii].region
+    #             # if zPosition < zRegion[0] - zPlaneSize or zPosition > zRegion[1] + zPlaneSize:
+    #             #     return False
+    #
+    #     return True
 
         # apiSpectrumView = self._wrappedData.findFirstSpectrumView(
         #   dataSource=peak._wrappedData.peakList.dataSource)
@@ -476,27 +477,27 @@ class Strip(AbstractWrapperObject):
         # #
         # return True
 
-    def peakIsInFlankingPlane(self, peak: Peak) -> bool:
-        """Is peak in planes flanking currently displayed planes for strip?
-        """
-        spectrumView = self.findSpectrumView(peak.peakList.spectrum)
-        if spectrumView is None:
-            return False
-        displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
-        orderedAxes = self.orderedAxes[2:]
-
-        for ii, displayIndex in enumerate(displayIndices[2:]):
-            if displayIndex is not None:
-                # If no axis matches the index may be None
-                zPosition = peak.position[displayIndex]
-                if not zPosition:
-                    return False
-                zRegion = orderedAxes[ii].region
-                zWidth = orderedAxes[ii].width
-                if zRegion[0] - zWidth < zPosition < zRegion[0] or zRegion[1] < zPosition < zRegion[1] + zWidth:
-                    return True
-
-        return False
+    # def peakIsInFlankingPlane(self, peak: Peak) -> bool:
+    #     """Is peak in planes flanking currently displayed planes for strip?
+    #     """
+    #     spectrumView = self.findSpectrumView(peak.peakList.spectrum)
+    #     if spectrumView is None:
+    #         return False
+    #     displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
+    #     orderedAxes = self.orderedAxes[2:]
+    #
+    #     for ii, displayIndex in enumerate(displayIndices[2:]):
+    #         if displayIndex is not None:
+    #             # If no axis matches the index may be None
+    #             zPosition = peak.position[displayIndex]
+    #             if not zPosition:
+    #                 return False
+    #             zRegion = orderedAxes[ii].region
+    #             zWidth = orderedAxes[ii].width
+    #             if zRegion[0] - zWidth < zPosition < zRegion[0] or zRegion[1] < zPosition < zRegion[1] + zWidth:
+    #                 return True
+    #
+    #     return False
 
     @logCommand(get='self')
     def peakPickPosition(self, inPosition) -> Tuple[Peak]:

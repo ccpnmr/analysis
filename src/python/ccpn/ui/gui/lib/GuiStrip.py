@@ -1135,6 +1135,10 @@ class GuiStrip(Frame):
         """
         self._CcpnGLWidget.updateVisibleSpectrumViews()
 
+    def firstVisibleSpectrum(self):
+        """return the first visible spectrum in the strip, or the first if none are visible.
+        """
+        return self._CcpnGLWidget._firstVisible
 
 # Notifiers:
 def _updateDisplayedMarks(data):

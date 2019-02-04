@@ -440,7 +440,7 @@ class GLExporter():
 
             # if spectrumView.isVisible() and spectrumView.spectrum.dimensionCount > 1:
             if spectrumView.spectrum.pid in self.params[GLSELECTEDPIDS] and spectrumView.spectrum.dimensionCount > 1:
-                self._spectrumValues = spectrumView._getValues()
+                self._spectrumValues = spectrumView._getValues(dimensionCount=2)
 
                 # get the bounding box of the spectra
                 fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency

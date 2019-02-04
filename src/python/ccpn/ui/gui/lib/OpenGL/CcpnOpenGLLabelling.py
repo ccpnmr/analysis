@@ -200,63 +200,110 @@ class GLpeakListMethods():
                 zPosition = peak.position[displayIndex]
                 if not zPosition:
                     return False, False, 1.0
+
+                # get the list of displayed planes, including the extra flanking planes at either end of the list
+                # a, b, c = spectrumView._getVisiblePlaneList(self._GLParent._firstVisible)
+
                 zPlaneSize = 0.
                 orderedAxes = spectrumView.strip.orderedAxes[2:]
-                zRegion = orderedAxes[ii].region
-                if not (zPosition < zRegion[0] - zPlaneSize or zPosition > zRegion[1] + zPlaneSize):
-                    return True, False, 1.0
 
-                zWidth = orderedAxes[ii].width
-                if zRegion[0] - zWidth < zPosition < zRegion[0] or zRegion[1] < zPosition < zRegion[1] + zWidth:
+                toolBar = spectrumView.strip.planeToolbar
+
+                settings = self._spectrumSettings[spectrumView]
+
+                # index = strip.axisOrder.index(axis.code)
+                # if not strip.beingUpdated and index > 1:
+                #     strip.beingUpdated = True
+                #
+                #     if len(strip.axisOrder) > 2:
+                #         n = index - 2
+                #         if n >= 0:
+                #             planeLabel = strip.planeToolbar.planeLabels[n]
+                #             planeSize = planeLabel.singleStep()
+                #             planeLabel.setValue(position)
+                #             strip.planeToolbar.planeCounts[n].setValue(width / planeSize)
+                #
+                # pc = spectrumView.strip.planeCount
+                # pv = spectrumView.spectrum.mainSpectrumReferences[ii].valueToPoint(zPosition)
+
+                pc = toolBar.planeCounts[ii].value()
+
+                closestPlane = int(settings[GLDefs.SPECTRUM_VALUETOPOINT](zPosition)+0.5)-1
+
+                visiblePlaneList = self._GLParent.visiblePlaneList[spectrumView][0]
+                if closestPlane in visiblePlaneList[1:-1]:
+                    return True, False, 1.0
+                elif closestPlane == visiblePlaneList[0] or closestPlane == visiblePlaneList[-1]:
                     return False, True, GLDefs.FADE_FACTOR
+
+                # based on position and width
+                # position = nearest plane/half plane based on plane count
+
+                # if pc % 2:
+                #     # odd planes
+                #     midPos = int(spectrumView.spectrum.mainSpectrumReferences[ii].valueToPoint(zPosition) + 0.5)
+                #     width = 0.5 * pc * spectrumView.spectrum.mainSpectrumReferences[ii].valuePerPoint
+                # else:
+                #     # even planes
+                #     midPos = int(spectrumView.spectrum.mainSpectrumReferences[ii].valueToPoint(zPosition) + 0.5)
+                #     width = 0.5 * pc * spectrumView.spectrum.mainSpectrumReferences[ii].valuePerPoint
+
+                # zRegion = orderedAxes[ii].region
+                # if not (zPosition < zRegion[0] - zPlaneSize or zPosition > zRegion[1] + zPlaneSize):
+                #     return True, False, 1.0
+                #
+                # zWidth = orderedAxes[ii].width
+                # if zRegion[0] - zWidth < zPosition < zRegion[0] or zRegion[1] < zPosition < zRegion[1] + zWidth:
+                #     return False, True, GLDefs.FADE_FACTOR
 
                 return False, False, 1.0
 
         return True, False, 1.0
 
-    def objIsInPlane(self, strip, peak) -> bool:
-        """is peak in currently displayed planes for strip?"""
-
-        spectrumView = strip.findSpectrumView(peak.peakList.spectrum)
-        if spectrumView is None:
-            return False
-        displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
-        orderedAxes = strip.orderedAxes[2:]
-
-        for ii, displayIndex in enumerate(displayIndices[2:]):
-            if displayIndex is not None:
-                # If no axis matches the index may be None
-                zPosition = peak.position[displayIndex]
-                if not zPosition:
-                    return False
-                zPlaneSize = 0.
-                zRegion = orderedAxes[ii].region
-                if zPosition < zRegion[0] - zPlaneSize or zPosition > zRegion[1] + zPlaneSize:
-                    return False
-
-        return True
-
-    def objIsInFlankingPlane(self, strip, peak) -> bool:
-        """is peak in planes flanking currently displayed planes for strip?"""
-
-        spectrumView = strip.findSpectrumView(peak.peakList.spectrum)
-        if spectrumView is None:
-            return False
-        displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
-        orderedAxes = strip.orderedAxes[2:]
-
-        for ii, displayIndex in enumerate(displayIndices[2:]):
-            if displayIndex is not None:
-                # If no axis matches the index may be None
-                zPosition = peak.position[displayIndex]
-                if not zPosition:
-                    return False
-                zRegion = orderedAxes[ii].region
-                zWidth = orderedAxes[ii].width
-                if zRegion[0] - zWidth < zPosition < zRegion[0] or zRegion[1] < zPosition < zRegion[1] + zWidth:
-                    return True
-
-        return False
+    # def objIsInPlane(self, strip, peak) -> bool:
+    #     """is peak in currently displayed planes for strip?"""
+    #
+    #     spectrumView = strip.findSpectrumView(peak.peakList.spectrum)
+    #     if spectrumView is None:
+    #         return False
+    #     displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
+    #     orderedAxes = strip.orderedAxes[2:]
+    #
+    #     for ii, displayIndex in enumerate(displayIndices[2:]):
+    #         if displayIndex is not None:
+    #             # If no axis matches the index may be None
+    #             zPosition = peak.position[displayIndex]
+    #             if not zPosition:
+    #                 return False
+    #
+    #             zPlaneSize = 0.
+    #             zRegion = orderedAxes[ii].region
+    #             if zPosition < zRegion[0] - zPlaneSize or zPosition > zRegion[1] + zPlaneSize:
+    #                 return False
+    #
+    #     return True
+    #
+    # def objIsInFlankingPlane(self, strip, peak) -> bool:
+    #     """is peak in planes flanking currently displayed planes for strip?"""
+    #
+    #     spectrumView = strip.findSpectrumView(peak.peakList.spectrum)
+    #     if spectrumView is None:
+    #         return False
+    #     displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
+    #     orderedAxes = strip.orderedAxes[2:]
+    #
+    #     for ii, displayIndex in enumerate(displayIndices[2:]):
+    #         if displayIndex is not None:
+    #             # If no axis matches the index may be None
+    #             zPosition = peak.position[displayIndex]
+    #             if not zPosition:
+    #                 return False
+    #             zRegion = orderedAxes[ii].region
+    #             zWidth = orderedAxes[ii].width
+    #             if zRegion[0] - zWidth < zPosition < zRegion[0] or zRegion[1] < zPosition < zRegion[1] + zWidth:
+    #                 return True
+    #
+    #     return False
 
     def extraIndicesCount(self, obj):
         """Calculate how many indices to add
@@ -2290,59 +2337,59 @@ class GLmultipletListMethods():
     # List specific routines
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def objIsInPlane(self, strip, multiplet) -> bool:
-        """is multiplet in currently displayed planes for strip?
-        Use the first peak to determine the spectrumView and the actual multiplet position
-        """
-        if not multiplet.peaks:
-            return False
-
-        peak = multiplet.peaks[0]
-        spectrumView = strip.findSpectrumView(peak.peakList.spectrum)
-        if spectrumView is None:
-            return False
-        displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
-        orderedAxes = strip.orderedAxes[2:]
-
-        for ii, displayIndex in enumerate(displayIndices[2:]):
-            if displayIndex is not None:
-                # If no axis matches the index may be None
-                zPosition = multiplet.position[displayIndex]
-                if not zPosition:
-                    return False
-                zPlaneSize = 0.
-                zRegion = orderedAxes[ii].region
-                if zPosition < zRegion[0] - zPlaneSize or zPosition > zRegion[1] + zPlaneSize:
-                    return False
-
-        return True
-
-    def objIsInFlankingPlane(self, strip, multiplet) -> bool:
-        """is peak in planes flanking currently displayed planes for strip?
-        Use the first peak to determine the spectrumView and the actual multiplet position
-        """
-        if not multiplet.peaks:
-            return False
-
-        peak = multiplet.peaks[0]
-        spectrumView = strip.findSpectrumView(peak.peakList.spectrum)
-        if spectrumView is None:
-            return False
-        displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
-        orderedAxes = strip.orderedAxes[2:]
-
-        for ii, displayIndex in enumerate(displayIndices[2:]):
-            if displayIndex is not None:
-                # If no axis matches the index may be None
-                zPosition = multiplet.position[displayIndex]
-                if not zPosition:
-                    return False
-                zRegion = orderedAxes[ii].region
-                zWidth = orderedAxes[ii].width
-                if zRegion[0] - zWidth < zPosition < zRegion[0] or zRegion[1] < zPosition < zRegion[1] + zWidth:
-                    return True
-
-        return False
+    # def objIsInPlane(self, strip, multiplet) -> bool:
+    #     """is multiplet in currently displayed planes for strip?
+    #     Use the first peak to determine the spectrumView and the actual multiplet position
+    #     """
+    #     if not multiplet.peaks:
+    #         return False
+    #
+    #     peak = multiplet.peaks[0]
+    #     spectrumView = strip.findSpectrumView(peak.peakList.spectrum)
+    #     if spectrumView is None:
+    #         return False
+    #     displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
+    #     orderedAxes = strip.orderedAxes[2:]
+    #
+    #     for ii, displayIndex in enumerate(displayIndices[2:]):
+    #         if displayIndex is not None:
+    #             # If no axis matches the index may be None
+    #             zPosition = multiplet.position[displayIndex]
+    #             if not zPosition:
+    #                 return False
+    #             zPlaneSize = 0.
+    #             zRegion = orderedAxes[ii].region
+    #             if zPosition < zRegion[0] - zPlaneSize or zPosition > zRegion[1] + zPlaneSize:
+    #                 return False
+    #
+    #     return True
+    #
+    # def objIsInFlankingPlane(self, strip, multiplet) -> bool:
+    #     """is peak in planes flanking currently displayed planes for strip?
+    #     Use the first peak to determine the spectrumView and the actual multiplet position
+    #     """
+    #     if not multiplet.peaks:
+    #         return False
+    #
+    #     peak = multiplet.peaks[0]
+    #     spectrumView = strip.findSpectrumView(peak.peakList.spectrum)
+    #     if spectrumView is None:
+    #         return False
+    #     displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
+    #     orderedAxes = strip.orderedAxes[2:]
+    #
+    #     for ii, displayIndex in enumerate(displayIndices[2:]):
+    #         if displayIndex is not None:
+    #             # If no axis matches the index may be None
+    #             zPosition = multiplet.position[displayIndex]
+    #             if not zPosition:
+    #                 return False
+    #             zRegion = orderedAxes[ii].region
+    #             zWidth = orderedAxes[ii].width
+    #             if zRegion[0] - zWidth < zPosition < zRegion[0] or zRegion[1] < zPosition < zRegion[1] + zWidth:
+    #                 return True
+    #
+    #     return False
 
     def getLabelling(self, obj, labelType):
         """get the object label based on the current labelling method
@@ -2623,13 +2670,13 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
         drawList._rebuild()
         drawList.updateTextArrayVBOColour(enableVBO=True)
 
-    def objIsInPlane(self, strip, integral) -> bool:
-        """is integral in currently displayed planes for strip?"""
-        return True
-
-    def objIsInFlankingPlane(self, strip, integral) -> bool:
-        """is integral in planes flanking currently displayed planes for strip?"""
-        return True
+    # def objIsInPlane(self, strip, integral) -> bool:
+    #     """is integral in currently displayed planes for strip?"""
+    #     return True
+    #
+    # def objIsInFlankingPlane(self, strip, integral) -> bool:
+    #     """is integral in planes flanking currently displayed planes for strip?"""
+    #     return True
 
     def drawSymbols(self, spectrumSettings):
         if self.strip.isDeleted:

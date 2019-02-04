@@ -217,6 +217,8 @@ class GuiStripNd(GuiStrip):
     def _rebuildStripContours(self):
         # self._rebuildContours()
 
+        self._CcpnGLWidget._updateVisibleSpectrumViews()
+
         # redraw the contours
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 

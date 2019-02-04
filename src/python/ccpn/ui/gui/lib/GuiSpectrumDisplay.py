@@ -1490,6 +1490,7 @@ class GuiSpectrumDisplay(CcpnModule):
     #             inactivePeakItems = self.inactivePeakItemDict.get(peakListView)
     #             if inactivePeakItems:
     #                 inactivePeakItems.add(peakItem)
+    from ccpn.util.decorators import profile
 
     @logCommand(get='self')
     def displaySpectrum(self, spectrum, axisOrder: (str,) = ()):

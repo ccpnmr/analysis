@@ -285,6 +285,12 @@ class Strip(AbstractWrapperObject):
         # index = spectrumDisplay.strips.index(self)
         return index
 
+    # from ccpn.util.decorators import profile
+    # @profile
+    def _clear(self):
+        for spectrumView in self.spectrumViews:
+            spectrumView.delete()
+
     def delete(self):
         """trap this delete
         """

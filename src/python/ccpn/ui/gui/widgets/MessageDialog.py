@@ -360,6 +360,8 @@ def _stoppableProgressBar(data, title='Calculating...', buttonText='Cancel'):
     '''
 
     widget = QtWidgets.QProgressDialog(title, buttonText, 0, len(data))  # starts = 0, ends = len(data)
+    widget.setAutoClose(True)
+    widget.raise_()
     c = 0
     for v in iter(data):
         QtCore.QCoreApplication.instance().processEvents()

@@ -373,6 +373,8 @@ class PeakList(AbstractWrapperObject):
         Pick 1D peaks form data in  self.spectrum
         """
         ll = []
+        with logCommandBlock(get='self', withSideBar=False) as log:
+            log('pickPeaks1dFiltered')
 
         with undoBlock():
             if excludeRegions is None:

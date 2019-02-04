@@ -53,7 +53,7 @@ from ccpnmodel.ccpncore.lib.Io import Pdb as pdbIo
 # from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
-    logCommandBlock, undoStackBlocking, notificationBlanking, undoBlock, deleteBlockManager, undoBlockManager
+    logCommandBlock, undoStackBlocking, notificationBlanking, undoBlock, deleteBlockManager, undoBlockManager, undoBlockWithoutSideBar
 from ccpn.util.Logging import getLogger
 
 
@@ -306,8 +306,7 @@ class Project(AbstractWrapperObject):
         getByPid = self.getByPid
         objs = [getByPid(x) if isinstance(x, str) else x for x in objs]
 
-        apiObjs = [x._wrappedData for x in objs]
-        with deleteBlockManager():
+        with undoBlockWithoutSideBar():
             for obj in objs:
                 if obj and not obj.isDeleted:
                     obj.delete()

@@ -44,6 +44,8 @@ from collections import OrderedDict
 from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.SpectraSelectionWidget import SpectraSelectionWidget
+from ccpn.ui.gui.widgets.MessageDialog import _stoppableProgressBar
+from ccpn.core.lib.ContextManagers import logCommandBlock, notificationEchoBlocking
 from ccpn.ui.gui.widgets.Spacer import Spacer
 
 
@@ -309,10 +311,11 @@ class PickPeak1DPopup(CcpnDialog):
         ignoredRegions = self.excludedRegionsTab._getExcludedRegions()
         noiseThreshold = self._getNoiseThreshold()
         noiseThresholdFactor = self.noiseLevelFactorSpinbox.value()
-        for spectrum in spectra:
-            spectrum.peakLists[0].pickPeaks1dFiltered(size=size, mode=mode, excludeRegions=ignoredRegions,
-                                                      factor=noiseThresholdFactor,
-                                                      positiveNoiseThreshold=noiseThreshold, negativePeaks=negativePeaks)
+        with notificationEchoBlocking():
+            for spectrum in _stoppableProgressBar(spectra):
+                spectrum.peakLists[0].pickPeaks1dFiltered(size=size, mode=mode, excludeRegions=ignoredRegions,
+                                                          factor=noiseThresholdFactor,
+                                                          positiveNoiseThreshold=noiseThreshold, negativePeaks=negativePeaks)
         self.accept()
 
 

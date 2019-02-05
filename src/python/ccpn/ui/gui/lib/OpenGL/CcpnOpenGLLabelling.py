@@ -425,12 +425,20 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         """
         symbolType = self.strip.symbolType
         symbolWidth = self.strip.symbolSize / 2.0
+
+        # ax0 = self._GLParent._getValidAspectRatio(self._GLParent._axisCodes[0])
+        # ax1 = self._GLParent._getValidAspectRatio(self._GLParent._axisCodes[1])
+        # ratio = ax0 / ax1
+
         x = abs(self._GLParent.pixelX)
         y = abs(self._GLParent.pixelY)
+
         if x <= y:
+            # symbolWidth *= ratio
             r = symbolWidth
             w = symbolWidth * y / x
         else:
+            # symbolWidth /= ratio
             w = symbolWidth
             r = symbolWidth * x / y
 

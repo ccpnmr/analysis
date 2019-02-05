@@ -785,47 +785,6 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 if _isInPlane or _isInFlankingPlane:
                     iCount, _selected = self._makeSquareSymbol(drawList, indexPtr, index, planeIndex, obj)
 
-                    # if planeIndex == 0:
-                    #
-                    #     # normal square symbol
-                    #     if self._isSelected(obj):
-                    #         _selected = True
-                    #         drawList.indices[indexPtr:indexPtr + 12] = (index, index + 1, index + 2, index + 3,
-                    #                                                     index, index + 2, index + 2, index + 1,
-                    #                                                     index, index + 3, index + 3, index + 1)
-                    #         iCount = 12
-                    #     else:
-                    #         drawList.indices[indexPtr:indexPtr + 4] = (index, index + 1, index + 2, index + 3)
-                    #         iCount = 4
-                    #
-                    # elif planeIndex == 1:
-                    #
-                    #     # arrow indicating in the front flanking plane
-                    #     if self._isSelected(obj):
-                    #         _selected = True
-                    #         drawList.indices[indexPtr:indexPtr + 14] = (index, index + 4, index + 4, index + 3, index + 3, index,
-                    #                                                     index, index + 2, index + 2, index + 1,
-                    #                                                     index, index + 3, index + 3, index + 1)
-                    #         iCount = 14
-                    #     else:
-                    #         drawList.indices[indexPtr:indexPtr + 6] = (index, index + 4, index + 4, index + 3, index + 3, index)
-                    #         iCount = 6
-                    #
-                    # elif planeIndex == 2:
-                    #
-                    #     # arrow indicating in the back flanking plane
-                    #     if self._isSelected(obj):
-                    #         _selected = True
-                    #         drawList.indices[indexPtr:indexPtr + 14] = (index + 2, index + 4, index + 4, index + 1, index + 1, index + 2,
-                    #                                                     index, index + 2, index + 2, index + 1,
-                    #                                                     index, index + 3, index + 3, index + 1)
-                    #         iCount = 14
-                    #     else:
-                    #         drawList.indices[indexPtr:indexPtr + 6] = (index + 2, index + 4, index + 4, index + 1, index + 1, index + 2)
-                    #         iCount = 6
-
-                # times.append(('_ind:', time.time()))
-
                 # add extra indices for the peak
                 # extraIndices = self.appendExtraIndices(drawList, index + 4, obj)
                 extraIndices, extraIndexCount = self.insertExtraIndices(drawList, indexPtr + iCount, index + 4, obj)
@@ -1038,16 +997,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 _selected = False
                 # unselected
                 if _isInPlane or _isInFlankingPlane:
-
                     _selected = self._appendSquareSymbol(drawList, indexPtr, index, planeIndex, obj)
-
-                    # if self._isSelected(obj):
-                    #     _selected = True
-                    #     drawList.indices = np.append(drawList.indices, np.array((index, index + 1, index + 2, index + 3,
-                    #                                                              index, index + 2, index + 2, index + 1,
-                    #                                                              index, index + 3, index + 3, index + 1), dtype=np.uint32))
-                    # else:
-                    #     drawList.indices = np.append(drawList.indices, np.array((index, index + 1, index + 2, index + 3), dtype=np.uint32))
 
                 # add extra indices for the multiplet
                 extraIndices = self.appendExtraIndices(drawList, index + 4, obj)
@@ -1364,19 +1314,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                     _isInPlane, _isInFlankingPlane, planeIndex, fade = self.objIsInVisiblePlanes(spectrumView, obj)
 
                     if _isInPlane or _isInFlankingPlane:
-
                         _selected = self._appendSquareSymbol(drawList, indexPtr, index, planeIndex, obj)
-
-                        # if self._isSelected(obj):
-                        #     _selected = True
-                        #     cols = self._GLParent.highlightColour[:3]
-                        #     drawList.indices = np.append(drawList.indices, np.array((index, index + 1, index + 2, index + 3,
-                        #                                                              index, index + 2, index + 2, index + 1,
-                        #                                                              index, index + 3, index + 3, index + 1), dtype=np.uint32))
-                        # else:
-                        #     cols = listCol
-                        #
-                        #     drawList.indices = np.append(drawList.indices, np.array((index, index + 1, index + 2, index + 3), dtype=np.uint32))
 
                         if _selected:
                             cols = self._GLParent.highlightColour[:3]
@@ -1642,13 +1580,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
         if symbolType == 0:  # draw a square symbol
 
-            # if self._isSelected(obj):
-            #     ind = 12
-            # else:
-            #     ind = 4
-
             ind = self._getSquareSymbolCount(planeIndex, obj)
-
             ind += self.extraIndicesCount(obj)
             extraVertices = self.extraVerticesCount(obj)
 

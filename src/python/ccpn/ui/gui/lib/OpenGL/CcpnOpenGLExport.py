@@ -158,11 +158,8 @@ class GLExporter():
 
     def _importFonts(self):
         import os
-        import matplotlib.font_manager
         from ccpn.framework.PathsAndUrls import fontsPath
-        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import FONTPATH, SUBSTITUTEFONT
-
-        foundFonts = matplotlib.font_manager.findSystemFonts()
+        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import SUBSTITUTEFONT
 
         # load all system fonts to find matches with OpenGl fonts
         for glFonts in self._parent.globalGL.fonts.values():

@@ -189,8 +189,16 @@ class GLpeakListMethods():
 
         return text
 
-    def objIsInVisiblePlanes(self, spectrumView, peak):
-        """Return whether in plane or flanking
+    def objIsInVisiblePlanes(self, spectrumView, peak, viewOutOfPlanePeaks=True):
+        """Return whether in plane or flanking plane
+
+        :param spectrumView: current spectrumView containing peaks
+        :param peak: peak to test
+        :param viewOutOfPlanePeaks: whether to show outofplane peaks, defaults to true
+        :return: inPlane - true/false
+                inFlankingPlane - true/false
+                type of outofplane - currently 0/1/2 indicating whether normal, infront or behind
+                fade for colouring
         """
         displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
 
@@ -199,18 +207,24 @@ class GLpeakListMethods():
                 # If no axis matches the index may be None
                 zPosition = peak.position[displayIndex]
                 if not zPosition:
-                    return False, False, 1.0
+                    return False, False, 0, 1.0
 
-                toolBar = spectrumView.strip.planeToolbar
                 settings = self._spectrumSettings[spectrumView]
 
-                closestPlane = int(settings[GLDefs.SPECTRUM_VALUETOPOINT](zPosition)+0.5)-1
+                actualPlane = int(settings[GLDefs.SPECTRUM_VALUETOPOINT](zPosition)+0.5)-1
                 visiblePlaneList = self._GLParent.visiblePlaneList[spectrumView][0]
 
-                if closestPlane in visiblePlaneList[1:-1]:
-                    return True, False, 1.0
-                elif closestPlane == visiblePlaneList[0] or closestPlane == visiblePlaneList[-1]:
-                    return False, True, GLDefs.FADE_FACTOR
+                if actualPlane in visiblePlaneList[1:-1]:
+                    return True, False, 0, 1.0
+
+                elif not viewOutOfPlanePeaks:
+                    return False, False, 0, 1.0
+
+                elif actualPlane == visiblePlaneList[0]:               
+                    return False, True, 1, GLDefs.FADE_FACTOR
+
+                elif actualPlane == visiblePlaneList[-1]:
+                    return False, True, 2, GLDefs.FADE_FACTOR
 
                 return False, False, 1.0
 
@@ -465,7 +479,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         # if axisCount == 2:
         if pIndex:
             # get visible/plane status
-            _isInPlane, _isInFlankingPlane, fade = self.objIsInVisiblePlanes(spectrumView, obj)
+            _isInPlane, _isInFlankingPlane, planeIndex, fade = self.objIsInVisiblePlanes(spectrumView, obj)
 
             # skip if not visible
             if not _isInPlane and not _isInFlankingPlane:
@@ -548,7 +562,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         if pIndex:
 
             # get visible/plane status
-            _isInPlane, _isInFlankingPlane, fade = self.objIsInVisiblePlanes(spectrumView, obj)
+            _isInPlane, _isInFlankingPlane, planeIndex, fade = self.objIsInVisiblePlanes(spectrumView, obj)
 
             # skip if not visible
             if not _isInPlane and not _isInFlankingPlane:
@@ -638,7 +652,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         # times.append(('_col:', time.time()))
 
         # get visible/plane status
-        _isInPlane, _isInFlankingPlane, fade = self.objIsInVisiblePlanes(spectrumView, obj)
+        _isInPlane, _isInFlankingPlane, planeIndex, fade = self.objIsInVisiblePlanes(spectrumView, obj)
 
         # skip if not visible
         if not _isInPlane and not _isInFlankingPlane:
@@ -860,7 +874,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         indexPtr = indexList[1]
 
         # get visible/plane status
-        _isInPlane, _isInFlankingPlane, fade = self.objIsInVisiblePlanes(spectrumView, obj)
+        _isInPlane, _isInFlankingPlane, planeIndex, fade = self.objIsInVisiblePlanes(spectrumView, obj)
 
         # skip if not visible
         if not _isInPlane and not _isInFlankingPlane:
@@ -1131,7 +1145,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
             if obj and not obj.isDeleted:
                 # get visible/plane status
-                _isInPlane, _isInFlankingPlane, fade = self.objIsInVisiblePlanes(spectrumView, obj)
+                _isInPlane, _isInFlankingPlane, planeIndex, fade = self.objIsInVisiblePlanes(spectrumView, obj)
 
                 if _isInPlane or _isInFlankingPlane:
 
@@ -1205,7 +1219,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                     _selected = False
 
                     # get visible/plane status
-                    _isInPlane, _isInFlankingPlane, fade = self.objIsInVisiblePlanes(spectrumView, obj)
+                    _isInPlane, _isInFlankingPlane, planeIndex, fade = self.objIsInVisiblePlanes(spectrumView, obj)
 
                     if _isInPlane or _isInFlankingPlane:
                         if self._isSelected(obj):
@@ -1245,7 +1259,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
                     _selected = False
                     # get visible/plane status
-                    _isInPlane, _isInFlankingPlane, fade = self.objIsInVisiblePlanes(spectrumView, obj)
+                    _isInPlane, _isInFlankingPlane, planeIndex, fade = self.objIsInVisiblePlanes(spectrumView, obj)
 
                     if _isInPlane or _isInFlankingPlane:
                         drawList.indices = np.append(drawList.indices, np.array(tuple(val for an in ang
@@ -1284,7 +1298,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
                     _selected = False
                     # get visible/plane status
-                    _isInPlane, _isInFlankingPlane, fade = self.objIsInVisiblePlanes(spectrumView, obj)
+                    _isInPlane, _isInFlankingPlane, planeIndex, fade = self.objIsInVisiblePlanes(spectrumView, obj)
 
                     if _isInPlane or _isInFlankingPlane:
                         drawList.indices = np.append(drawList.indices, np.array(tuple(val for an in ang
@@ -1469,7 +1483,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         """return the number of indices and vertices for the object
         """
         # get visible/plane status
-        _isInPlane, _isInFlankingPlane, fade = self.objIsInVisiblePlanes(spectrumView, obj)
+        _isInPlane, _isInFlankingPlane, planeIndex, fade = self.objIsInVisiblePlanes(spectrumView, obj)
 
         # skip if not visible
         if not _isInPlane and not _isInFlankingPlane:
@@ -2091,7 +2105,7 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
 
         strip = spectrumView.strip
         # get visible/plane status
-        _isInPlane, _isInFlankingPlane, fade = self.objIsInVisiblePlanes(spectrumView, obj)
+        _isInPlane, _isInFlankingPlane, planeIndex, fade = self.objIsInVisiblePlanes(spectrumView, obj)
 
         if self._isSelected(obj):
             cols = self._GLParent.highlightColour[:3]

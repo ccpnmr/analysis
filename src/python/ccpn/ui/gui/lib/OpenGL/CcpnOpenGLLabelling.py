@@ -82,7 +82,7 @@ except ImportError:
                                    "PyOpenGL must be installed to run this example.")
     sys.exit(1)
 
-POINTCOLOURS = 4
+POINTCOLOURS = 5
 OBJ_ISINPLANE = 0
 OBJ_ISINFLANKINGPLANE = 1
 OBJ_LINEWIDTHS = 2
@@ -705,20 +705,21 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 # extraIndices = self.appendExtraIndices(drawList, index + 4, obj)
                 extraIndices, extraIndexCount = self.insertExtraIndices(drawList, indexPtr + iCount, index + 4, obj)
 
-                drawList.vertices[vertexPtr:vertexPtr + 8] = (p0[0] - r, p0[1] - w,
-                                                              p0[0] + r, p0[1] + w,
-                                                              p0[0] + r, p0[1] - w,
-                                                              p0[0] - r, p0[1] + w)
-                drawList.colors[2 * vertexPtr:2 * vertexPtr + 16] = (*cols, fade) * GLDefs.LENCOLORS
-                drawList.attribs[vertexPtr:vertexPtr + 8] = (p0[0], p0[1]) * 4
-                # drawList.offsets[vertexPtr:vertexPtr + 8] = (p0[0]+r, p0[1]+w) * 4
+                drawList.vertices[vertexPtr:vertexPtr + 10] = (p0[0] - r, p0[1] - w,
+                                                               p0[0] + r, p0[1] + w,
+                                                               p0[0] + r, p0[1] - w,
+                                                               p0[0] - r, p0[1] + w,
+                                                               p0[0], p0[1])
+                drawList.colors[2 * vertexPtr:2 * vertexPtr + 20] = (*cols, fade) * 5
+                drawList.attribs[vertexPtr:vertexPtr + 10] = (p0[0], p0[1]) * 5
+                # drawList.offsets[vertexPtr:vertexPtr + 10] = (p0[0]+r, p0[1]+w) * 5
 
                 # add extra vertices for the multiplet
-                extraVertices = self.insertExtraVertices(drawList, vertexPtr + 8, pIndex, obj, p0, (*cols, fade), fade)
+                extraVertices = self.insertExtraVertices(drawList, vertexPtr + 10, pIndex, obj, p0, (*cols, fade), fade)
 
                 try:
                     # keep a pointer to the obj
-                    drawList.pids[objNum:objNum + GLDefs.LENPID] = (obj, drawList.numVertices, (4 + extraVertices),
+                    drawList.pids[objNum:objNum + GLDefs.LENPID] = (obj, drawList.numVertices, (5 + extraVertices),
                                                                     _isInPlane, _isInFlankingPlane, _selected,
                                                                     indexPtr, len(drawList.indices), planeIndex, 0, 0, 0)
                 except Exception as es:
@@ -726,11 +727,11 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
                 # times.append(('_pids:', time.time()))
 
-                indexList[0] += (4 + extraIndexCount)
+                indexList[0] += (5 + extraIndexCount)
                 indexList[1] += (iCount + extraIndices)  # len(drawList.indices)
-                drawList.numVertices += (4 + extraVertices)
+                drawList.numVertices += (5 + extraVertices)
                 buildIndex[0] += GLDefs.LENPID
-                buildIndex[1] += (2 * (4 + extraVertices))
+                buildIndex[1] += (2 * (5 + extraVertices))
 
             elif symbolType == 1:  # draw an ellipse at lineWidth
 
@@ -921,23 +922,24 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 drawList.vertices = np.append(drawList.vertices, np.array((p0[0] - r, p0[1] - w,
                                                                            p0[0] + r, p0[1] + w,
                                                                            p0[0] + r, p0[1] - w,
-                                                                           p0[0] - r, p0[1] + w), dtype=np.float32))
-                drawList.colors = np.append(drawList.colors, np.array((*cols, fade) * GLDefs.LENCOLORS, dtype=np.float32))
-                drawList.attribs = np.append(drawList.attribs, np.array((p0[0], p0[1]) * 4, dtype=np.float32))
-                # drawList.offsets = np.append(drawList.offsets, (p0[0]+r, p0[1]+w) * 4)
+                                                                           p0[0] - r, p0[1] + w,
+                                                                           p0[0], p0[1]), dtype=np.float32))
+                drawList.colors = np.append(drawList.colors, np.array((*cols, fade) * 5, dtype=np.float32))
+                drawList.attribs = np.append(drawList.attribs, np.array((p0[0], p0[1]) * 5, dtype=np.float32))
+                # drawList.offsets = np.append(drawList.offsets, (p0[0]+r, p0[1]+w) * 5)
 
                 # add extra vertices for the multiplet
                 extraVertices = self.appendExtraVertices(drawList, pIndex, obj, p0, (*cols, fade), fade)
 
                 # keep a pointer to the obj
-                drawList.pids = np.append(drawList.pids, (obj, drawList.numVertices, (4 + extraVertices),
+                drawList.pids = np.append(drawList.pids, (obj, drawList.numVertices, (5 + extraVertices),
                                                           _isInPlane, _isInFlankingPlane, _selected,
                                                           indexPtr, len(drawList.indices), planeIndex, 0, 0, 0))
                 # indexPtr = len(drawList.indices)
 
-                indexList[0] += (4 + extraIndices)
+                indexList[0] += (5 + extraIndices)
                 indexList[1] = len(drawList.indices)
-                drawList.numVertices += (4 + extraVertices)
+                drawList.numVertices += (5 + extraVertices)
 
             elif symbolType == 1:  # draw an ellipse at lineWidth
 
@@ -1350,14 +1352,14 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         if symbolType == 0:  # a cross
             # drawList.clearVertices()
             # drawList.vertices.copy(drawList.attribs)
-            offsets = np.array([-r, -w, +r, +w, +r, -w, -r, +w], np.float32)
-            # for pp in range(0, 2 * drawList.numVertices, 8):
-            #     drawList.vertices[pp:pp + 8] = drawList.attribs[pp:pp + 8] + offsets
+            offsets = np.array([-r, -w, +r, +w, +r, -w, -r, +w, 0, 0], np.float32)
+            # for pp in range(0, 2 * drawList.numVertices, 10):
+            #     drawList.vertices[pp:pp + 10] = drawList.attribs[pp:pp + 10] + offsets
 
             for pp in range(0, len(drawList.pids), GLDefs.LENPID):
                 index = 2 * drawList.pids[pp + 1]
                 try:
-                    drawList.vertices[index:index + 8] = drawList.attribs[index:index + 8] + offsets
+                    drawList.vertices[index:index + 10] = drawList.attribs[index:index + 10] + offsets
                 except:
                     raise RuntimeError('Error _rescaleSymbols')
 
@@ -1501,7 +1503,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             ind += self.extraIndicesCount(obj)
             extraVertices = self.extraVerticesCount(obj)
 
-            vert = (4 + extraVertices)
+            vert = (5 + extraVertices)
             return ind, vert
 
         elif symbolType == 1:  # draw an ellipse at lineWidth
@@ -1896,7 +1898,7 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
                     drawList.colors[offset * 4:(offset + POINTCOLOURS) * 4] = (*cols, 1.0) * POINTCOLOURS  # numPoints
 
                     drawList.pids[pp + 3:pp + 9] = (True, True, _selected,
-                                                    indexPtr, len(drawList.indices), 0)     # don't need to change planeIndex, but keep space for it
+                                                    indexPtr, len(drawList.indices), 0)  # don't need to change planeIndex, but keep space for it
                     indexPtr = len(drawList.indices)
 
                 index += numPoints
@@ -1935,27 +1937,28 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
         # extraIndices = self.appendExtraIndices(drawList, index + 4, obj)
         extraIndices, extraIndexCount = self.insertExtraIndices(drawList, indexPtr + iCount, index + 4, obj)
 
-        drawList.vertices[vertexPtr:vertexPtr + 8] = (p0[0] - r, p0[1] - w,
-                                                      p0[0] + r, p0[1] + w,
-                                                      p0[0] + r, p0[1] - w,
-                                                      p0[0] - r, p0[1] + w)
-        drawList.colors[2 * vertexPtr:2 * vertexPtr + 16] = (*cols, 1.0) * GLDefs.LENCOLORS
-        drawList.attribs[vertexPtr:vertexPtr + 8] = (p0[0], p0[1]) * 4
-        # drawList.offsets[vertexPtr:vertexPtr + 8] = (p0[0]+r, p0[1]+w) * 4
+        drawList.vertices[vertexPtr:vertexPtr + 10] = (p0[0] - r, p0[1] - w,
+                                                       p0[0] + r, p0[1] + w,
+                                                       p0[0] + r, p0[1] - w,
+                                                       p0[0] - r, p0[1] + w,
+                                                       p0[0], p0[1])
+        drawList.colors[2 * vertexPtr:2 * vertexPtr + 20] = (*cols, 1.0) * 5
+        drawList.attribs[vertexPtr:vertexPtr + 10] = (p0[0], p0[1]) * 5
+        # drawList.offsets[vertexPtr:vertexPtr + 10] = (p0[0]+r, p0[1]+w) * 5
 
         # add extra vertices for the multiplet
-        extraVertices = self.insertExtraVertices(drawList, vertexPtr + 8, 0, obj, p0, (*cols, 1.0), 1.0)
+        extraVertices = self.insertExtraVertices(drawList, vertexPtr + 10, 0, obj, p0, (*cols, 1.0), 1.0)
 
         # keep a pointer to the obj
-        drawList.pids[objNum:objNum + GLDefs.LENPID] = (obj, drawList.numVertices, (4 + extraVertices),
+        drawList.pids[objNum:objNum + GLDefs.LENPID] = (obj, drawList.numVertices, (5 + extraVertices),
                                                         True, True, _selected,
                                                         indexPtr, len(drawList.indices), 0, 0, 0, 0)
 
-        indexList[0] += (4 + extraIndexCount)
+        indexList[0] += (5 + extraIndexCount)
         indexList[1] += (iCount + extraIndices)  # len(drawList.indices)
-        drawList.numVertices += (4 + extraVertices)
+        drawList.numVertices += (5 + extraVertices)
         buildIndex[0] += GLDefs.LENPID
-        buildIndex[1] += (2 * (4 + extraVertices))
+        buildIndex[1] += (2 * (5 + extraVertices))
 
     def _buildSymbols(self, spectrumView, objListView):
         spectrum = spectrumView.spectrum
@@ -2052,14 +2055,14 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
         if symbolType is not None:  #== 0:  # a cross
             # drawList.clearVertices()
             # drawList.vertices.copy(drawList.attribs)
-            offsets = np.array([-r, -w, +r, +w, +r, -w, -r, +w], np.float32)
-            # for pp in range(0, 2 * drawList.numVertices, 8):
-            #     drawList.vertices[pp:pp + 8] = drawList.attribs[pp:pp + 8] + offsets
+            offsets = np.array([-r, -w, +r, +w, +r, -w, -r, +w, 0, 0], np.float32)
+            # for pp in range(0, 2 * drawList.numVertices, 10):
+            #     drawList.vertices[pp:pp + 10] = drawList.attribs[pp:pp + 10] + offsets
 
             for pp in range(0, len(drawList.pids), GLDefs.LENPID):
                 index = 2 * drawList.pids[pp + 1]
                 try:
-                    drawList.vertices[index:index + 8] = drawList.attribs[index:index + 8] + offsets
+                    drawList.vertices[index:index + 10] = drawList.attribs[index:index + 10] + offsets
                 except Exception as es:
                     pass
 
@@ -2142,21 +2145,22 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
             drawList.vertices = np.append(drawList.vertices, np.array((p0[0] - r, p0[1] - w,
                                                                        p0[0] + r, p0[1] + w,
                                                                        p0[0] + r, p0[1] - w,
-                                                                       p0[0] - r, p0[1] + w), dtype=np.float32))
-            drawList.colors = np.append(drawList.colors, np.array((*cols, 1.0) * 4, dtype=np.float32))
-            drawList.attribs = np.append(drawList.attribs, np.array((p0[0], p0[1]) * 4, dtype=np.float32))
-            # drawList.offsets = np.append(drawList.offsets, (p0[0]+r, p0[1]+w) * 4)
+                                                                       p0[0] - r, p0[1] + w,
+                                                                       p0[0], p0[1]), dtype=np.float32))
+            drawList.colors = np.append(drawList.colors, np.array((*cols, 1.0) * 5, dtype=np.float32))
+            drawList.attribs = np.append(drawList.attribs, np.array((p0[0], p0[1]) * 5, dtype=np.float32))
+            # drawList.offsets = np.append(drawList.offsets, (p0[0]+r, p0[1]+w) * 5)
 
             # add extra vertices for the multiplet
             extraVertices = self.appendExtraVertices(drawList, pIndex, obj, p0, (*cols, 1.0), 1.0)
 
             # keep a pointer to the obj
-            drawList.pids = np.append(drawList.pids, (obj, drawList.numVertices, (4 + extraVertices),
+            drawList.pids = np.append(drawList.pids, (obj, drawList.numVertices, (5 + extraVertices),
                                                       True, True, _selected,
                                                       indexPtr, len(drawList.indices), 0, 0, 0, 0))
 
-            index += (4 + extraIndices)
-            drawList.numVertices += (4 + extraVertices)
+            index += (5 + extraIndices)
+            drawList.numVertices += (5 + extraVertices)
 
     def _removeSymbol(self, spectrumView, objListView, delObj):
         """Remove a symbol from the list

@@ -226,9 +226,9 @@ class GLpeakListMethods():
                 elif actualPlane == visiblePlaneList[-1]:
                     return False, True, 2, GLDefs.FADE_FACTOR
 
-                return False, False, 1.0
+                return False, False, 0, 1.0
 
-        return True, False, 1.0
+        return True, False, 0, 1.0
 
     # def objIsInPlane(self, strip, peak) -> bool:
     #     """is peak in currently displayed planes for strip?"""

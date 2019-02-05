@@ -1195,16 +1195,18 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         elif dimensionCount == 3:
 
             # make sure there is always a spectrumView to base visibility on
-            useFirstVisible = firstVisible if firstVisible else self
-            valuePerPoint, _, _, _, _ = useFirstVisible._getSpectrumViewParams(2)
+            # useFirstVisible = firstVisible if firstVisible else self
             zPosition = orderedAxes[2].position
 
             # check as there could be more dimensions
             planeCount = self.strip.planeToolbar.planeCounts[0].value()
-            zRegionValue = (zPosition + 0.5 * (planeCount+2) * valuePerPoint, zPosition - 0.5 * (planeCount+2) * valuePerPoint)  # Note + and - (axis backwards)
+
+            # valuePerPoint, _, _, _, _ = useFirstVisible._getSpectrumViewParams(2)
+            # zRegionValue = (zPosition + 0.5 * (planeCount+2) * valuePerPoint, zPosition - 0.5 * (planeCount+2) * valuePerPoint)  # Note + and - (axis backwards)
 
             # now get the z bounds for this spectrum
-            _, zTotalPointCount, minAliasedFrequency, maxAliasedFrequency, zDataDim = self._getSpectrumViewParams(2)
+            valuePerPoint, zTotalPointCount, minAliasedFrequency, maxAliasedFrequency, zDataDim = self._getSpectrumViewParams(2)
+            zRegionValue = (zPosition + 0.5 * (planeCount+2) * valuePerPoint, zPosition - 0.5 * (planeCount+2) * valuePerPoint)  # Note + and - (axis backwards)
 
             if not (minAliasedFrequency <= zPosition <= maxAliasedFrequency):
                 return

@@ -5153,7 +5153,11 @@ class CcpnGLWidget(QOpenGLWidget):
                             if len(peak.axisCodes) > 2 and zPositions is not None:
                                 zAxis = spectrumIndices[2]
 
-                                if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
+                                # within the XY bounds so check whether inPlane
+                                _isInPlane, _isInFlankingPlane, planeIndex, fade = self._GLPeaks.objIsInVisiblePlanes(spectrumView, peak)
+
+                                # if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
+                                if _isInPlane or _isInFlankingPlane:
                                     peaks.append(peak)
                             else:
                                 peaks.append(peak)
@@ -5203,7 +5207,11 @@ class CcpnGLWidget(QOpenGLWidget):
                             if len(multiplet.axisCodes) > 2 and zPositions is not None:
                                 zAxis = spectrumIndices[2]
 
-                                if zPositions[0] < float(multiplet.position[zAxis]) < zPositions[1]:
+                                # within the XY bounds so check whether inPlane
+                                _isInPlane, _isInFlankingPlane, planeIndex, fade = self._GLPeaks.objIsInVisiblePlanes(spectrumView, multiplet)
+
+                                # if zPositions[0] < float(multiplet.position[zAxis]) < zPositions[1]:
+                                if _isInPlane or _isInFlankingPlane:
                                     multiplets.append(multiplet)
                             else:
                                 multiplets.append(multiplet)

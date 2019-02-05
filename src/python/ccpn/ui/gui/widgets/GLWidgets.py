@@ -86,7 +86,11 @@ class GuiNdWidget(CcpnGLWidget):
                             if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
                                     and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
 
-                                if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
+                                # within the XY bounds so check whether inPlane
+                                _isInPlane, _isInFlankingPlane, planeIndex, fade = self._GLPeaks.objIsInVisiblePlanes(spectrumView, peak)
+
+                                # if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
+                                if _isInPlane or _isInFlankingPlane:
                                     peaks.append(peak)
                                     if firstOnly:
                                         return peaks
@@ -136,7 +140,11 @@ class GuiNdWidget(CcpnGLWidget):
                             if (xPositions[0] < float(multiplet.position[xAxis]) < xPositions[1]
                                     and yPositions[0] < float(multiplet.position[yAxis]) < yPositions[1]):
 
-                                if zPositions[0] < float(multiplet.position[zAxis]) < zPositions[1]:
+                                # within the XY bounds so check whether inPlane
+                                _isInPlane, _isInFlankingPlane, planeIndex, fade = self._GLMultiplets.objIsInVisiblePlanes(spectrumView, multiplet)
+
+                                # if zPositions[0] < float(multiplet.position[zAxis]) < zPositions[1]:
+                                if _isInPlane or _isInFlankingPlane:
                                     multiplets.append(multiplet)
                                     if firstOnly:
                                         return multiplets

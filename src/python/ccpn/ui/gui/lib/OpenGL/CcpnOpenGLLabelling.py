@@ -420,6 +420,22 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             self._changeSymbol(obj)
             self._changeLabel(obj)
 
+    def _getSymbolWidths(self):
+        """return the required r, w, symbolWidth for the current screen scaling.
+        """
+        symbolType = self.strip.symbolType
+        symbolWidth = self.strip.symbolSize / 2.0
+        x = abs(self._GLParent.pixelX)
+        y = abs(self._GLParent.pixelY)
+        if x <= y:
+            r = symbolWidth
+            w = symbolWidth * y / x
+        else:
+            w = symbolWidth
+            r = symbolWidth * x / y
+
+        return r, w, symbolType, symbolWidth
+
     def _appendLabel(self, spectrumView, objListView, stringList, obj):
         """Append a new label to the end of the list
         """
@@ -434,9 +450,6 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         # pls = peakListView.peakList
         pls = self.objectList(objListView)
 
-        symbolType = self.strip.symbolType
-        symbolWidth = self.strip.symbolSize / 2.0
-
         pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
         p0 = (obj.position[pIndex[0]], obj.position[pIndex[1]])
         lineWidths = (obj.lineWidths[pIndex[0]], obj.lineWidths[pIndex[1]])
@@ -446,14 +459,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
             return
 
-        x = abs(self._GLParent.pixelX)
-        y = abs(self._GLParent.pixelY)
-        if x <= y:
-            r = symbolWidth
-            w = symbolWidth * y / x
-        else:
-            w = symbolWidth
-            r = symbolWidth * x / y
+        r, w, symbolType, symbolWidth = self._getSymbolWidths()
 
         stringOffset = None
         if symbolType == 1:
@@ -518,9 +524,6 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         # use the first object for referencing
         obj = objectList(pls)[0]
 
-        symbolType = self.strip.symbolType
-        symbolWidth = self.strip.symbolSize / 2.0
-
         pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
         p0 = (obj.position[pIndex[0]], obj.position[pIndex[1]])
         lineWidths = (obj.lineWidths[pIndex[0]], obj.lineWidths[pIndex[1]])
@@ -530,14 +533,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
             return
 
-        x = abs(self._GLParent.pixelX)
-        y = abs(self._GLParent.pixelY)
-        if x <= y:
-            r = symbolWidth
-            w = symbolWidth * y / x
-        else:
-            w = symbolWidth
-            r = symbolWidth * x / y
+        r, w, symbolType, symbolWidth = self._getSymbolWidths()
 
         stringOffset = None
         if symbolType == 1:
@@ -1164,18 +1160,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         # find the correct scale to draw square pixels
         # don't forget to change when the axes change
 
-        symbolType = self.strip.symbolType
-        symbolWidth = self.strip.symbolSize / 2.0
-        lineThickness = self.strip.symbolThickness / 2.0
-
-        x = abs(self._GLParent.pixelX)
-        y = abs(self._GLParent.pixelY)
-        if x <= y:
-            r = symbolWidth
-            w = symbolWidth * y / x
-        else:
-            w = symbolWidth
-            r = symbolWidth * x / y
+        r, w, symbolType, symbolWidth = self._getSymbolWidths()
 
         if symbolType == 0:  # a cross
 
@@ -1422,16 +1407,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
         # if drawList.refreshMode == GLREFRESHMODE_REBUILD:
 
-        symbolType = self.strip.symbolType
-        symbolWidth = self.strip.symbolSize / 2.0
-        x = abs(self._GLParent.pixelX)
-        y = abs(self._GLParent.pixelY)
-        if x <= y:
-            r = symbolWidth
-            w = symbolWidth * y / x
-        else:
-            w = symbolWidth
-            r = symbolWidth * x / y
+        r, w, symbolType, symbolWidth = self._getSymbolWidths()
 
         if symbolType == 0:  # a cross
             # drawList.clearVertices()
@@ -1493,17 +1469,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
     def _rescaleLabels(self, spectrumView=None, objListView=None, drawList=None):
         """Rescale all labels to the new dimensions of the screen
         """
-        symbolType = self.strip.symbolType
-        symbolWidth = self.strip.symbolSize / 2.0
-
-        x = abs(self._GLParent.pixelX)
-        y = abs(self._GLParent.pixelY)
-        if x <= y:
-            r = symbolWidth
-            w = symbolWidth * y / x
-        else:
-            w = symbolWidth
-            r = symbolWidth * x / y
+        r, w, symbolType, symbolWidth = self._getSymbolWidths()
 
         if symbolType == 0:  # a cross
             for drawStr in drawList.stringList:
@@ -1672,17 +1638,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             # find the correct scale to draw square pixels
             # don't forget to change when the axes change
 
-            symbolType = self.strip.symbolType
-            symbolWidth = self.strip.symbolSize / 2.0
-
-            x = abs(self._GLParent.pixelX)
-            y = abs(self._GLParent.pixelY)
-            if x <= y:
-                r = symbolWidth
-                w = symbolWidth * y / x
-            else:
-                w = symbolWidth
-                r = symbolWidth * x / y
+            r, w, symbolType, symbolWidth = self._getSymbolWidths()
 
             if symbolType == 0:  # a cross
 
@@ -2075,18 +2031,7 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
             # find the correct scale to draw square pixels
             # don't forget to change when the axes change
 
-            # symbolType = self.strip.symbolType
-            symbolWidth = self.strip.symbolSize / 2.0
-            # lineThickness = self._preferences.symbolThickness / 2.0
-
-            x = abs(self._GLParent.pixelX)
-            y = abs(self._GLParent.pixelY)
-            if x <= y:
-                r = symbolWidth
-                w = symbolWidth * y / x
-            else:
-                w = symbolWidth
-                r = symbolWidth * x / y
+            r, w, symbolType, symbolWidth = self._getSymbolWidths()
 
             # change the ratio on resize
             drawList.refreshMode = GLREFRESHMODE_REBUILD
@@ -2127,16 +2072,7 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
 
         # if drawList.refreshMode == GLREFRESHMODE_REBUILD:
 
-        symbolType = self.strip.symbolType
-        symbolWidth = self.strip.symbolSize / 2.0
-        x = abs(self._GLParent.pixelX)
-        y = abs(self._GLParent.pixelY)
-        if x <= y:
-            r = symbolWidth
-            w = symbolWidth * y / x
-        else:
-            w = symbolWidth
-            r = symbolWidth * x / y
+        r, w, symbolType, symbolWidth = self._getSymbolWidths()
 
         if symbolType is not None:  #== 0:  # a cross
             # drawList.clearVertices()
@@ -2161,18 +2097,7 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
         # find the correct scale to draw square pixels
         # don't forget to change when the axes change
 
-        symbolType = self.strip.symbolType
-        symbolWidth = self.strip.symbolSize / 2.0
-        lineThickness = self.strip.symbolThickness / 2.0
-
-        x = abs(self._GLParent.pixelX)
-        y = abs(self._GLParent.pixelY)
-        if x <= y:
-            r = symbolWidth
-            w = symbolWidth * y / x
-        else:
-            w = symbolWidth
-            r = symbolWidth * x / y
+        r, w, symbolType, symbolWidth = self._getSymbolWidths()
 
         if symbolType is not None:  #== 0:  # a cross
 
@@ -2307,15 +2232,7 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
         # pls = peakListView.peakList
         pls = self.objectList(objListView)
 
-        symbolWidth = self.strip.symbolSize / 2.0
-        x = abs(self._GLParent.pixelX)
-        y = abs(self._GLParent.pixelY)
-        if x <= y:
-            r = symbolWidth
-            w = symbolWidth * y / x
-        else:
-            w = symbolWidth
-            r = symbolWidth * x / y
+        r, w, symbolType, symbolWidth = self._getSymbolWidths()
 
         pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
         if not obj.position:
@@ -2351,18 +2268,10 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
         """Rescale all labels to the new dimensions of the screen
         """
         symbolType = self.strip.symbolType
-        symbolWidth = self.strip.symbolSize / 2.0
 
         if symbolType is not None:  #== 0:  # a cross
 
-            x = abs(self._GLParent.pixelX)
-            y = abs(self._GLParent.pixelY)
-            if x <= y:
-                r = symbolWidth
-                w = symbolWidth * y / x
-            else:
-                w = symbolWidth
-                r = symbolWidth * x / y
+            r, w, _, symbolWidth = self._getSymbolWidths()
 
             for drawStr in drawList.stringList:
                 drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))

@@ -152,10 +152,12 @@ class GuiStrip(Frame):
         else:
             self.peakLabelling = self.application.preferences.general.annotationType
             self.symbolType = self.application.preferences.general.symbolType
-            if spectrumDisplay.is1D:
-                self.symbolSize = self.application.preferences.general.symbolSize1d
-            else:
-                self.symbolSize = self.application.preferences.general.symbolSizeNd
+            # if spectrumDisplay.is1D:
+            #     self.symbolSize = self.application.preferences.general.symbolSize1d
+            # else:
+            #     self.symbolSize = self.application.preferences.general.symbolSizeNd
+            self.symbolSize = self.application.preferences.general.symbolSizePixel
+
             self.symbolThickness = self.application.preferences.general.symbolThickness
             self.gridVisible = self.application.preferences.general.showGrid
             self.crosshairVisible = self.application.preferences.general.showCrosshair

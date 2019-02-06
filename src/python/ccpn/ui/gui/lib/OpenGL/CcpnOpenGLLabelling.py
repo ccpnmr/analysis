@@ -221,10 +221,10 @@ class GLpeakListMethods():
                     return False, False, 0, 1.0
 
                 elif actualPlane == visiblePlaneList[0]:
-                    return False, True, 1, GLDefs.FADE_FACTOR
+                    return False, True, 1, GLDefs.OUTOFPLANEFADE
 
                 elif actualPlane == visiblePlaneList[-1]:
-                    return False, True, 2, GLDefs.FADE_FACTOR
+                    return False, True, 2, GLDefs.OUTOFPLANEFADE
 
                 return False, False, 0, 1.0
 

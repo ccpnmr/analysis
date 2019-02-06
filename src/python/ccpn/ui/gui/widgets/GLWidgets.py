@@ -90,7 +90,7 @@ class GuiNdWidget(CcpnGLWidget):
                                 _isInPlane, _isInFlankingPlane, planeIndex, fade = self._GLPeaks.objIsInVisiblePlanes(spectrumView, peak)
 
                                 # if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
-                                if _isInPlane or _isInFlankingPlane:
+                                if _isInPlane:
                                     peaks.append(peak)
                                     if firstOnly:
                                         return peaks
@@ -144,7 +144,7 @@ class GuiNdWidget(CcpnGLWidget):
                                 _isInPlane, _isInFlankingPlane, planeIndex, fade = self._GLMultiplets.objIsInVisiblePlanes(spectrumView, multiplet)
 
                                 # if zPositions[0] < float(multiplet.position[zAxis]) < zPositions[1]:
-                                if _isInPlane or _isInFlankingPlane:
+                                if _isInPlane:
                                     multiplets.append(multiplet)
                                     if firstOnly:
                                         return multiplets
@@ -163,6 +163,31 @@ class GuiNdWidget(CcpnGLWidget):
         Currently not-defined for Nd integrals
         """
         return []
+
+    def _updateVisibleSpectrumViews(self):
+        """Update the list of visible spectrumViews when change occurs
+        """
+
+        # make the list of ordered spectrumViews
+        self._ordering = self.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
+        for specView in tuple(self._spectrumSettings.keys()):
+            if specView not in self._ordering:
+                del self._spectrumSettings[specView]
+
+        # make a list of the visible and not-deleted spectrumViews
+        visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+        visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+
+        # set the first visible, or the first in the ordered list
+        self._firstVisible = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[0].isDeleted else None
+        self.visiblePlaneList = {}
+        for visibleSpecView in self._ordering:
+            self.visiblePlaneList[visibleSpecView] = visibleSpecView._getVisiblePlaneList(self._firstVisible)
+
+        # update the labelling lists
+        self._GLPeaks.setListViews(self._ordering)
+        self._GLIntegrals.setListViews(self._ordering)
+        self._GLMultiplets.setListViews(self._ordering)
 
 
 class Gui1dWidget(CcpnGLWidget):
@@ -409,3 +434,26 @@ class Gui1dWidget(CcpnGLWidget):
         # rebuild the traces as the spectrum/plane may have changed
         if rebuildFlag:
             self.rebuildTraces()
+
+    def _updateVisibleSpectrumViews(self):
+        """Update the list of visible spectrumViews when change occurs
+        """
+
+        # make the list of ordered spectrumViews
+        self._ordering = self.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
+        for specView in tuple(self._spectrumSettings.keys()):
+            if specView not in self._ordering:
+                del self._spectrumSettings[specView]
+
+        # make a list of the visible and not-deleted spectrumViews
+        visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+        visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+
+        # set the first visible, or the first in the ordered list
+        self._firstVisible = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[0].isDeleted else None
+
+        # update the labelling lists
+        self._GLPeaks.setListViews(self._ordering)
+        self._GLIntegrals.setListViews(self._ordering)
+        self._GLMultiplets.setListViews(self._ordering)
+

@@ -89,7 +89,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
         # self.strip.viewBox.autoRange()
         # self.strip.zoomYAll()
 
-    def _getValues(self):
+    def _getValues(self, dimensionCount = None):
         # ejb - get some spectrum information for scaling the display
         return [self._getSpectrumViewParams(0)]
 

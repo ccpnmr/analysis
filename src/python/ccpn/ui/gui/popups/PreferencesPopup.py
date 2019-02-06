@@ -100,10 +100,12 @@ class PreferencesPopup(CcpnDialog):
             for strip in display.strips:
                 strip.peakLabelling = self.preferences.general.annotationType
                 strip.symbolType = self.preferences.general.symbolType
-                if display.is1D:
-                    strip.symbolSize = self.preferences.general.symbolSize1d
-                else:
-                    strip.symbolSize = self.preferences.general.symbolSizeNd
+                # if display.is1D:
+                #     strip.symbolSize = self.preferences.general.symbolSize1d
+                # else:
+                #     strip.symbolSize = self.preferences.general.symbolSizeNd
+                strip.symbolSize = self.preferences.general.symbolSizePixel
+
                 strip.symbolThickness = self.preferences.general.symbolThickness
                 strip.gridVisible = self.preferences.general.showGrid
                 strip.crosshairVisible = self.preferences.general.showCrosshair
@@ -538,23 +540,23 @@ class PreferencesPopup(CcpnDialog):
                                    grid=(row, 1), hAlign='l',
                                    tipTexts=None,
                                    )
-        row += 1
-        self.symbolSize1dLabel = Label(parent, text="Symbol Size 1d (ppm)", grid=(row, 0))
-        self.symbolSize1dData = DoubleSpinbox(parent, decimals=3, step=0.001,
-                                              min=0.001, max=1.0, grid=(row, 1), hAlign='l')
-        self.symbolSize1dData.setMinimumWidth(LineEditsMinimumWidth)
-        symbolSize1d = self.preferences.general.symbolSize1d
-        self.symbolSize1dData.setValue(float('%.3f' % symbolSize1d))
-        self.symbolSize1dData.editingFinished.connect(self._setSymbolSize1d)
+        # row += 1
+        # self.symbolSize1dLabel = Label(parent, text="Symbol Size 1d (ppm)", grid=(row, 0))
+        # self.symbolSize1dData = DoubleSpinbox(parent, decimals=3, step=0.001,
+        #                                       min=0.001, max=1.0, grid=(row, 1), hAlign='l')
+        # self.symbolSize1dData.setMinimumWidth(LineEditsMinimumWidth)
+        # symbolSize1d = self.preferences.general.symbolSize1d
+        # self.symbolSize1dData.setValue(float('%.3f' % symbolSize1d))
+        # self.symbolSize1dData.editingFinished.connect(self._setSymbolSize1d)
 
         row += 1
-        self.symbolSizeNdLabel = Label(parent, text="Symbol Size (pixel)", grid=(row, 0))
-        self.symbolSizeNdData = DoubleSpinbox(parent, decimals=0, step=1,
+        self.symbolSizePixelLabel = Label(parent, text="Symbol Size (pixel)", grid=(row, 0))
+        self.symbolSizePixelData = DoubleSpinbox(parent, decimals=0, step=1,
                                               min=2, max=25, grid=(row, 1), hAlign='l')
-        self.symbolSizeNdData.setMinimumWidth(LineEditsMinimumWidth)
-        symbolSizeNd = self.preferences.general.symbolSizeNd
-        self.symbolSizeNdData.setValue(float('%i' % symbolSizeNd))
-        self.symbolSizeNdData.editingFinished.connect(self._setSymbolSizeNd)
+        self.symbolSizePixelData.setMinimumWidth(LineEditsMinimumWidth)
+        symbolSizePixel = self.preferences.general.symbolSizePixel
+        self.symbolSizePixelData.setValue(float('%i' % symbolSizePixel))
+        self.symbolSizePixelData.editingFinished.connect(self._setSymbolSizePixel)
 
         # self.symbolSizeNdLabel = Label(parent, text="Symbol Size Nd (ppm)", grid=(row, 0))
         # self.symbolSizeNdData = DoubleSpinbox(parent, decimals=2, step=0.01,
@@ -824,26 +826,36 @@ class PreferencesPopup(CcpnDialog):
             return
         self.preferences.general.peakDropFactor = dropFactor
 
-    def _setSymbolSize1d(self):
-        """
-        Set the size of the 1d symbols (ppm)
-        """
-        try:
-            symbolSize1d = float(self.symbolSize1dData.text())
-        except:
-            return
-        self.preferences.general.symbolSize1d = symbolSize1d
+    # def _setSymbolSize1d(self):
+    #     """
+    #     Set the size of the 1d symbols (ppm)
+    #     """
+    #     try:
+    #         symbolSize1d = float(self.symbolSize1dData.text())
+    #     except:
+    #         return
+    #     self.preferences.general.symbolSize1d = symbolSize1d
 
-    def _setSymbolSizeNd(self):
+    # def _setSymbolSizeNd(self):
+    #     """
+    #     Set the size of the Nd symbols (ppm)
+    #     """
+    #     try:
+    #         symbolSizeNd = int(self.symbolSizeNdData.text())
+    #         # symbolSizeNd = float(self.symbolSizeNdData.text())
+    #     except:
+    #         return
+    #     self.preferences.general.symbolSizeNd = symbolSizeNd
+
+    def _setSymbolSizePixel(self):
         """
-        Set the size of the Nd symbols (ppm)
+        Set the size of the symbols (pixels)
         """
         try:
-            symbolSizeNd = int(self.symbolSizeNdData.text())
-            # symbolSizeNd = float(self.symbolSizeNdData.text())
+            symbolSizePixel = int(self.symbolSizePixelData.text())
         except:
             return
-        self.preferences.general.symbolSizeNd = symbolSizeNd
+        self.preferences.general.symbolSizePixel = symbolSizePixel
 
     def _setSymbolThickness(self):
         """

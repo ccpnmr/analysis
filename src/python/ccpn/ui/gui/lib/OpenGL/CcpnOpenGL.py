@@ -2154,30 +2154,30 @@ class CcpnGLWidget(QOpenGLWidget):
         self._visibleSpectrumViewsChange = True
         self.update()
 
-    def _updateVisibleSpectrumViews(self):
-        """Update the list of visible spectrumViews when change occurs
-        """
-
-        # make the list of ordered spectrumViews
-        self._ordering = self.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
-        for specView in tuple(self._spectrumSettings.keys()):
-            if specView not in self._ordering:
-                del self._spectrumSettings[specView]
-
-        # make a list of the visible and not-deleted spectrumViews
-        visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
-        visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
-
-        # set the first visible, or the first in the ordered list
-        self._firstVisible = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[0].isDeleted else None
-        self.visiblePlaneList = {}
-        for visibleSpecView in self._ordering:
-            self.visiblePlaneList[visibleSpecView] = visibleSpecView._getVisiblePlaneList(self._firstVisible)
-
-        # update the labelling lists
-        self._GLPeaks.setListViews(self._ordering)
-        self._GLIntegrals.setListViews(self._ordering)
-        self._GLMultiplets.setListViews(self._ordering)
+    # def _updateVisibleSpectrumViews(self):
+    #     """Update the list of visible spectrumViews when change occurs
+    #     """
+    #
+    #     # make the list of ordered spectrumViews
+    #     self._ordering = self.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
+    #     for specView in tuple(self._spectrumSettings.keys()):
+    #         if specView not in self._ordering:
+    #             del self._spectrumSettings[specView]
+    #
+    #     # make a list of the visible and not-deleted spectrumViews
+    #     visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+    #     visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+    #
+    #     # set the first visible, or the first in the ordered list
+    #     self._firstVisible = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[0].isDeleted else None
+    #     self.visiblePlaneList = {}
+    #     for visibleSpecView in self._ordering:
+    #         self.visiblePlaneList[visibleSpecView] = visibleSpecView._getVisiblePlaneList(self._firstVisible)
+    #
+    #     # update the labelling lists
+    #     self._GLPeaks.setListViews(self._ordering)
+    #     self._GLIntegrals.setListViews(self._ordering)
+    #     self._GLMultiplets.setListViews(self._ordering)
 
     # @profile
     def paintGL(self):
@@ -5120,8 +5120,9 @@ class CcpnGLWidget(QOpenGLWidget):
         self.strip.viewStripMenu = menu
 
     def _selectPeaksInRegion(self, xPositions, yPositions, zPositions):
-        peaks = list(self.current.peaks)
+        currentPeaks = set(self.current.peaks)
 
+        peaks = set()
         for spectrumView in self._ordering:  # strip.spectrumViews:
 
             if spectrumView.isDeleted:
@@ -5145,7 +5146,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     for peak in peakList.peaks:
                         height = peak.height  # * scale # TBD: is the scale already taken into account in peak.height???
                         if xPositions[0] < float(peak.position[xAxis]) < xPositions[1] and y0 < height < y1:
-                            peaks.append(peak)
+                            peaks.add(peak)
 
                 else:
                     spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
@@ -5162,16 +5163,17 @@ class CcpnGLWidget(QOpenGLWidget):
                                 _isInPlane, _isInFlankingPlane, planeIndex, fade = self._GLPeaks.objIsInVisiblePlanes(spectrumView, peak)
 
                                 # if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
-                                if _isInPlane or _isInFlankingPlane:
-                                    peaks.append(peak)
+                                if _isInPlane:
+                                    peaks.add(peak)
                             else:
-                                peaks.append(peak)
+                                peaks.add(peak)
 
-        self.current.peaks = peaks
+        self.current.peaks = list(currentPeaks ^ peaks)
 
     def _selectMultipletsInRegion(self, xPositions, yPositions, zPositions):
-        multiplets = list(self.current.multiplets)
+        currentMultiplets = set(self.current.multiplets)
 
+        multiplets = set()
         for spectrumView in self._ordering:  # strip.spectrumViews:
 
             if spectrumView.isDeleted:
@@ -5196,7 +5198,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
                         height = multiplet.height  # * scale # TBD: is the scale already taken into account in multiplet.height???
                         if xPositions[0] < float(multiplet.position[xAxis]) < xPositions[1] and y0 < height < y1:
-                            multiplets.append(multiplet)
+                            multiplets.add(multiplet)
 
                 else:
                     spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
@@ -5216,12 +5218,12 @@ class CcpnGLWidget(QOpenGLWidget):
                                 _isInPlane, _isInFlankingPlane, planeIndex, fade = self._GLPeaks.objIsInVisiblePlanes(spectrumView, multiplet)
 
                                 # if zPositions[0] < float(multiplet.position[zAxis]) < zPositions[1]:
-                                if _isInPlane or _isInFlankingPlane:
-                                    multiplets.append(multiplet)
+                                if _isInPlane:
+                                    multiplets.add(multiplet)
                             else:
-                                multiplets.append(multiplet)
+                                multiplets.add(multiplet)
 
-        self.current.multiplets = multiplets
+        self.current.multiplets = list(currentMultiplets ^ multiplets)
 
     def _mouseDragEvent(self, event: QtGui.QMouseEvent, axis=None):
         if controlShiftLeftMouse(event) or controlShiftRightMouse(event):

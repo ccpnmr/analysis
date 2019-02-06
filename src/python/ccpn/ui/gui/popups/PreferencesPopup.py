@@ -552,7 +552,7 @@ class PreferencesPopup(CcpnDialog):
         row += 1
         self.symbolSizePixelLabel = Label(parent, text="Symbol Size (pixel)", grid=(row, 0))
         self.symbolSizePixelData = DoubleSpinbox(parent, decimals=0, step=1,
-                                              min=2, max=25, grid=(row, 1), hAlign='l')
+                                              min=2, max=50, grid=(row, 1), hAlign='l')
         self.symbolSizePixelData.setMinimumWidth(LineEditsMinimumWidth)
         symbolSizePixel = self.preferences.general.symbolSizePixel
         self.symbolSizePixelData.setValue(float('%i' % symbolSizePixel))

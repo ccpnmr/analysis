@@ -228,11 +228,11 @@ def _makeLogString(prefix, addSelf, func, *args, **kwds):
         elif kinds[pName] == inspect.Parameter.VAR_KEYWORD:  # variable keywords
             pStrings.extend(['{0!s}={1!r}'.format(k, obj2pid(v)) for (k, v) in pValue.items()])
 
-        elif kinds[pName] == inspect.Parameter.POSITIONAL_ONLY or \
-                kinds[pName] == inspect.Parameter.POSITIONAL_OR_KEYWORD:  # positional keywords
+        elif kinds[pName] == inspect.Parameter.POSITIONAL_ONLY:
             pStrings.append(repr(obj2pid(pValue)))
 
-        elif kinds[pName] == inspect.Parameter.KEYWORD_ONLY:  #  keywords
+        elif kinds[pName] == inspect.Parameter.KEYWORD_ONLY or \
+             kinds[pName] == inspect.Parameter.POSITIONAL_OR_KEYWORD:  # #  keywords or positional keywords
             pStrings.append('{0!s}={1!r}'.format(pName, obj2pid(pValue)))
 
     if ('self' in ba.arguments or 'cls' in ba.arguments) and addSelf:

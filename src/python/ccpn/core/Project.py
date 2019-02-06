@@ -1289,7 +1289,7 @@ class Project(AbstractWrapperObject):
     # Call appropriate routines in their respective locations
     #===========================================================================================
 
-    @logCommand(get='self')
+    @logCommand('project.')
     def newMark(self, colour: str, positions: Sequence[float], axisCodes: Sequence,
                 style: str = 'simple', units: Sequence[str] = (), labels: Sequence[str] = ()):
         """Create new Mark
@@ -1330,7 +1330,7 @@ class Project(AbstractWrapperObject):
     #     """
     #     pass
 
-    @logCommand(get='self')
+    @logCommand('project.')
     def newSpectrum(self, name: str):
         """Creation of new Spectrum NOT IMPLEMENTED.
         Use Project.loadData or Project.createDummySpectrum instead.
@@ -1339,7 +1339,7 @@ class Project(AbstractWrapperObject):
 
         return _newSpectrum(self, name=name)
 
-    @logCommand(get='self')
+    @logCommand('project.')
     def createDummySpectrum(self, axisCodes: Sequence[str], name=None,
                             chemicalShiftList=None):
         """
@@ -1356,7 +1356,7 @@ class Project(AbstractWrapperObject):
         return _createDummySpectrum(self, axisCodes=axisCodes, name=name,
                                     chemicalShiftList=chemicalShiftList)
 
-    @logCommand(get='self')
+    @logCommand('project.')
     def newNmrChain(self, shortName: str = None, isConnected: bool = False, label: str = '?',
                     comment: str = None):
         """Create new NmrChain. Setting isConnected=True produces a connected NmrChain.
@@ -1372,7 +1372,7 @@ class Project(AbstractWrapperObject):
         return _newNmrChain(self, shortName=shortName, isConnected=isConnected,
                             label=label, comment=comment)
 
-    @logCommand(get='self')
+    @logCommand('project')
     def fetchNmrChain(self, shortName: str = None):
         """Fetch chain with given shortName; If none exists call newNmrChain to make one first
 
@@ -1385,7 +1385,7 @@ class Project(AbstractWrapperObject):
 
         return _fetchNmrChain(self, shortName=shortName)
 
-    @logCommand(get='self')
+    @logCommand('project.')
     def produceNmrAtom(self, atomId: str = None, chainCode: str = None,
                        sequenceCode: Union[int, str] = None,
                        residueType: str = None, name: str = None):
@@ -1405,7 +1405,7 @@ class Project(AbstractWrapperObject):
         return _produceNmrAtom(self, atomId=atomId, chainCode=chainCode,
                                sequenceCode=sequenceCode, residueType=residueType, name=name)
 
-    @logCommand(get='self')
+    @logCommand('project.')
     def newNote(self, name: str = None, text: str = None, **kwds):
         """Create new Note.
 
@@ -1421,7 +1421,7 @@ class Project(AbstractWrapperObject):
 
         return _newNote(self, name=name, text=text, **kwds)
 
-    @logCommand(get='self')
+    @logCommand('project.')
     def newWindow(self, title: str = None, position: tuple = (), size: tuple = (), **kwds):
         """Create new child Window.
 
@@ -1438,7 +1438,7 @@ class Project(AbstractWrapperObject):
 
         return _newWindow(self, title=title, position=position, size=size, **kwds)
 
-    @logCommand(get='self')
+    @logCommand('project.')
     def newStructureEnsemble(self, name: str = None, data=None, comment: str = None, **kwds):
         """Create new StructureEnsemble.
 
@@ -1455,7 +1455,7 @@ class Project(AbstractWrapperObject):
 
         return _newStructureEnsemble(self, name=name, data=data, comment=comment, **kwds)
 
-    @logCommand(get='self')
+    @logCommand('project.')
     def newPeakCluster(self, peaks: ['Peak'] = None, **kwds):
         """Create new PeakCluster.
 
@@ -1470,7 +1470,7 @@ class Project(AbstractWrapperObject):
 
         return _newPeakCluster(self, peaks=peaks, **kwds)
 
-    @logCommand(get='self')
+    @logCommand('project.')
     def newSample(self, name: str = None, pH: float = None, ionicStrength: float = None,
                   amount: float = None, amountUnit: str = None, isVirtual: bool = False, isHazardous: bool = None,
                   creationDate: datetime = None, batchIdentifier: str = None, plateIdentifier: str = None,
@@ -1504,7 +1504,7 @@ class Project(AbstractWrapperObject):
                           creationDate=creationDate, batchIdentifier=batchIdentifier, plateIdentifier=plateIdentifier,
                           rowNumber=rowNumber, columnNumber=columnNumber, comment=comment, **kwds)
 
-    @logCommand(get='self')
+    @logCommand('project.')
     def newDataSet(self, title: str = None, programName: str = None, programVersion: str = None,
                    dataPath: str = None, creationDate: datetime = None, uuid: str = None,
                    comment: str = None, **kwds):
@@ -1528,7 +1528,7 @@ class Project(AbstractWrapperObject):
         return _newDataSet(self, title=title, programName=programName, programVersion=programVersion,
                            dataPath=dataPath, creationDate=creationDate, uuid=uuid, comment=comment, **kwds)
 
-    @logCommand(get='self')
+    @logCommand('project.')
     def newSpectrumDisplay(self, axisCodes: (str,), stripDirection: str = 'Y',
                            title: str = None, window=None, comment: str = None,
                            independentStrips=False, nmrResidue=None, **kwds):
@@ -1554,7 +1554,7 @@ class Project(AbstractWrapperObject):
                                    title=title, window=window, independentStrips=independentStrips,
                                    comment=comment, **kwds)
 
-    @logCommand(get='self')
+    @logCommand('project.')
     def newSpectrumGroup(self, name: str, spectra=(), **kwds):
         """Create new SpectrumGroup
 
@@ -1570,7 +1570,7 @@ class Project(AbstractWrapperObject):
 
         return _newSpectrumGroup(self, name=name, spectra=spectra, **kwds)
 
-    @logCommand(get='self')
+    @logCommand('project.')
     def createChain(self, sequence: Union[str, Sequence[str]], compoundName: str = None,
                     startNumber: int = 1, molType: str = None, isCyclic: bool = False,
                     shortName: str = None, role: str = None, comment: str = None, **kwds):
@@ -1597,7 +1597,7 @@ class Project(AbstractWrapperObject):
                             startNumber=startNumber, molType=molType, isCyclic=isCyclic,
                             shortName=shortName, role=role, comment=comment, **kwds)
 
-    @logCommand(get='self')
+    @logCommand('project.')
     def newSubstance(self, name: str = None, labelling: str = None, substanceType: str = 'Molecule',
                      userCode: str = None, smiles: str = None, inChi: str = None, casNumber: str = None,
                      empiricalFormula: str = None, molecularMass: float = None, comment: str = None,
@@ -1642,7 +1642,7 @@ class Project(AbstractWrapperObject):
                              ringCount=ringCount, hBondDonorCount=hBondDonorCount, hBondAcceptorCount=hBondAcceptorCount,
                              polarSurfaceArea=polarSurfaceArea, logPartitionCoefficient=logPartitionCoefficient, **kwds)
 
-    @logCommand(get='self')
+    @logCommand('project.')
     def fetchNefSubstance(self, sequence: typing.Sequence[dict], name: str = None, **kwds):
         """Fetch Substance that matches sequence of NEF rows and/or name
 
@@ -1659,7 +1659,7 @@ class Project(AbstractWrapperObject):
 
         return _fetchNefSubstance(self, sequence=sequence, name=name, **kwds)
 
-    @logCommand(get='self')
+    @logCommand('project.')
     def createPolymerSubstance(self, sequence: typing.Sequence[str], name: str,
                                labelling: str = None, userCode: str = None, smiles: str = None,
                                synonyms: typing.Sequence[str] = (), comment: str = None,
@@ -1693,7 +1693,7 @@ class Project(AbstractWrapperObject):
                                        startNumber=startNumber, molType=molType, isCyclic=isCyclic,
                                        **kwds)
 
-    @logCommand(get='self')
+    @logCommand('project.')
     def fetchSubstance(self, name: str, labelling: str = None):
         """Get or create Substance with given name and labelling.
 
@@ -1708,7 +1708,7 @@ class Project(AbstractWrapperObject):
 
         return _fetchSubstance(self, name=name, labelling=labelling)
 
-    @logCommand(get='self')
+    @logCommand('project.')
     def newComplex(self, name: str, chains=(), **kwds):
         """Create new Complex.
 
@@ -1724,7 +1724,7 @@ class Project(AbstractWrapperObject):
 
         return _newComplex(self, name=name, chains=chains, **kwds)
 
-    @logCommand(get='self')
+    @logCommand('project.')
     def newChemicalShiftList(self, name: str = None, unit: str = 'ppm', autoUpdate: bool = True,
                              isSimulated: bool = False, comment: str = None, **kwds):
         """Create new ChemicalShiftList.

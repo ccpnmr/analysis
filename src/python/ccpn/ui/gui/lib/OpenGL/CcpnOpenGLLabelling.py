@@ -514,7 +514,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             text = self.getLabelling(obj, self.strip.peakLabelling)
 
             newString = GLString(text=text,
-                                 font=self._GLParent.globalGL.glSmallFont if _isInPlane else self._GLParent.globalGL.glSmallTransparentFont,
+                                 font=self._GLParent.globalGL.glSmallFont,              # if _isInPlane else self._GLParent.globalGL.glSmallTransparentFont,
                                  x=p0[0], y=p0[1],
                                  ox=r * np.sign(self._GLParent.pixelX), oy=w * np.sign(self._GLParent.pixelY),
                                  # ox=r, oy=w,
@@ -587,7 +587,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             text = self.getLabelling(obj, self.strip.peakLabelling)
 
             outString = GLString(text=text,
-                                 font=self._GLParent.globalGL.glSmallFont if _isInPlane else self._GLParent.globalGL.glSmallTransparentFont,
+                                 font=self._GLParent.globalGL.glSmallFont,              # if _isInPlane else self._GLParent.globalGL.glSmallTransparentFont,
                                  x=p0[0], y=p0[1],
                                  ox=r * np.sign(self._GLParent.pixelX), oy=w * np.sign(self._GLParent.pixelY),
                                  color=(*listCol, fade),

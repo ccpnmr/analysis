@@ -548,13 +548,21 @@ class PreferencesPopup(CcpnDialog):
         self.symbolSize1dData.editingFinished.connect(self._setSymbolSize1d)
 
         row += 1
-        self.symbolSizeNdLabel = Label(parent, text="Symbol Size Nd (ppm)", grid=(row, 0))
-        self.symbolSizeNdData = DoubleSpinbox(parent, decimals=2, step=0.01,
-                                              min=0.01, max=10.0, grid=(row, 1), hAlign='l')
+        self.symbolSizeNdLabel = Label(parent, text="Symbol Size (pixel)", grid=(row, 0))
+        self.symbolSizeNdData = DoubleSpinbox(parent, decimals=0, step=1,
+                                              min=2, max=25, grid=(row, 1), hAlign='l')
         self.symbolSizeNdData.setMinimumWidth(LineEditsMinimumWidth)
         symbolSizeNd = self.preferences.general.symbolSizeNd
-        self.symbolSizeNdData.setValue(float('%.2f' % symbolSizeNd))
+        self.symbolSizeNdData.setValue(float('%i' % symbolSizeNd))
         self.symbolSizeNdData.editingFinished.connect(self._setSymbolSizeNd)
+
+        # self.symbolSizeNdLabel = Label(parent, text="Symbol Size Nd (ppm)", grid=(row, 0))
+        # self.symbolSizeNdData = DoubleSpinbox(parent, decimals=2, step=0.01,
+        #                                       min=0.01, max=10.0, grid=(row, 1), hAlign='l')
+        # self.symbolSizeNdData.setMinimumWidth(LineEditsMinimumWidth)
+        # symbolSizeNd = self.preferences.general.symbolSizeNd
+        # self.symbolSizeNdData.setValue(float('%.2f' % symbolSizeNd))
+        # self.symbolSizeNdData.editingFinished.connect(self._setSymbolSizeNd)
 
         row += 1
         self.symbolThicknessLabel = Label(parent, text="Symbol Thickness (point)", grid=(row, 0))
@@ -831,7 +839,8 @@ class PreferencesPopup(CcpnDialog):
         Set the size of the Nd symbols (ppm)
         """
         try:
-            symbolSizeNd = float(self.symbolSizeNdData.text())
+            symbolSizeNd = int(self.symbolSizeNdData.text())
+            # symbolSizeNd = float(self.symbolSizeNdData.text())
         except:
             return
         self.preferences.general.symbolSizeNd = symbolSizeNd

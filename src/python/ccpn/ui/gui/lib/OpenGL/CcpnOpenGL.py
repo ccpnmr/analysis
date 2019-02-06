@@ -244,6 +244,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self.pixelY = 1.0
         self.deltaX = 1.0
         self.deltaY = 1.0
+        self.symbolX = 1.0
+        self.symbolY = 1.0
 
         self._devicePixelRatio = 1.0  # set in the initialiseGL routine
         self.peakWidthPixels = 16
@@ -488,6 +490,9 @@ class CcpnGLWidget(QOpenGLWidget):
             self.pixelY = (self.axisT - self.axisB) / h
             self.deltaX = 1.0 / w
             self.deltaY = 1.0 / h
+
+        self.symbolX = abs(self.strip.symbolSize * self.pixelX)
+        self.symbolY = abs(self.strip.symbolSize * self.pixelY)
 
         self._dataMatrix[0:16] = [self.axisL, self.axisR, self.axisT, self.axisB,
                                   self.pixelX, self.pixelY, w, h,
@@ -1153,10 +1158,10 @@ class CcpnGLWidget(QOpenGLWidget):
         for li in self.gridList:
             li.renderMode = GLRENDERMODE_REBUILD
 
-        if self._axisLocked:
-            # ratios have changed so rescale the peak/multiplet symbols
-            self._GLPeaks.rescale()
-            self._GLMultiplets.rescale()
+        # if self._axisLocked:
+        # ratios have changed so rescale the peak/multiplet symbols
+        self._GLPeaks.rescale()
+        self._GLMultiplets.rescale()
 
         self._rescaleOverlayText()
 

@@ -91,11 +91,11 @@ if __name__ == '__main__':
     import matplotlib.cm as cm
 
 
-    res = 7
-    span = ((-3, 3), (-3, 3))
+    res = 9
+    span = ((-4, 4), (-4, 4))
     h = 1.0
-    x0 = 2.6
-    y0 = 2.6
+    x0 = 2.245
+    y0 = -1.2357
     sigmax = 1.0
     sigmay = 1.0
 

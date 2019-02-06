@@ -217,6 +217,7 @@ static CcpnStatus do_fit(float *x, float *y, float *w, float *y_fit, int npts,
     for (iter = cond = 0; (iter < MAX_MODEL_ITER) &&
             (cond < MAX_CONDITION); iter++)
     {
+
         old_chisq = *chisq;
 
         CHECK_NONLINEAR_MODEL(GENERAL_STAGE);

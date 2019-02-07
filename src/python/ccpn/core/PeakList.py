@@ -940,7 +940,10 @@ class PeakList(AbstractWrapperObject):
                 # and 'if not exclusionBuffer' does not work on numpy arrays.
                 numpyExclusionBuffer = numpy.array(exclusionBuffer)
 
-                for position, height in peakPoints:
+                validPeakPoints = []
+                for thisPeak in peakPoints:
+
+                    position, height = thisPeak
 
                     position += startPointBufferActual
 
@@ -951,61 +954,78 @@ class PeakList(AbstractWrapperObject):
                         if (delta <= numpyExclusionBuffer).all():
                             break
                     else:
-                        linewidth = len(startPoints) * [None]
+                        validPeakPoints.append(thisPeak)
 
-                        if fitMethod:
-                            position -= startPointBufferActual
-                            numDim = len(position)
-                            firstArray = numpy.maximum(position - 2, 0)
-                            lastArray = numpy.minimum(position + 3, numPointInt)
-                            peakArray = position.reshape((1, numDim))
-                            peakArray = peakArray.astype('float32')
-                            firstArray = firstArray.astype('int32')
-                            lastArray = lastArray.astype('int32')
-                            regionArray = numpy.array((firstArray, lastArray))
+                allPeaksArray = None
+                regionArray = None
 
-                            try:
-                                result = CPeak.fitPeaks(dataArray, regionArray, peakArray, method)
-                                height, centerGuess, linewidth = result[0]
+                for position, height in validPeakPoints:
 
-                                # clip the point to the exclusion area, to stop rogue peaks
-                                # center = numpy.array(centerGuess).clip(min=position - numpyExclusionBuffer,
-                                #                                        max=position + numpyExclusionBuffer)
-                                center = numpy.array(centerGuess)
+                    position -= startPointBufferActual
+                    numDim = len(position)
+                    firstArray = numpy.maximum(position - 3, 0)
+                    lastArray = numpy.minimum(position + 4, numPointInt)
 
-                                # outofPlaneMinTest = numpy.array([])
-                                # outofPlaneMaxTest = numpy.array([])
-                                # for ii in range(numDim):
-                                #     outofPlaneMinTest = numpy.append(outofPlaneMinTest, 0.0)
-                                #     outofPlaneMaxTest = numpy.append(outofPlaneMaxTest, dataArray.shape[numDim-ii-1]-1.0)
-                                #
-                                # # check whether the new peak is outside of the current plane
-                                # outofPlaneCenter = numpy.array(centerGuess).clip(min=position - numpy.array(outofPlaneMinTest),
-                                #                      max=position + numpy.array(outofPlaneMaxTest))
-                                #
-                                # print(">>>", center, outofPlaneCenter, not numpy.array_equal(center, outofPlaneCenter))
+                    if regionArray is not None:
+                        firstArray = numpy.minimum(firstArray, regionArray[0])
+                        lastArray = numpy.maximum(lastArray, regionArray[1])
 
-                                # ax.scatter(*center, c='r', marker='^')
-                                #
-                                # x2, y2, _ = mplot3d.proj3d.proj_transform(1, 1, 1, ax.get_proj())
-                                #
-                                # ax.text(*center, str(center), fontsize=12)
+                    peakArray = position.reshape((1, numDim))
+                    peakArray = peakArray.astype('float32')
+                    firstArray = firstArray.astype('int32')
+                    lastArray = lastArray.astype('int32')
+                    regionArray = numpy.array((firstArray, lastArray))
 
-                            except Exception as es:
-                                print('>>>error:', str(es))
-                                dimCount = len(startPoints)
-                                height = float(dataArray[tuple(position[::-1])])
-                                # have to reverse position because dataArray backwards
-                                # have to float because API does not like numpy.float32
-                                center = position
-                                linewidth = dimCount * [None]
-                            position = center + startPointBufferActual
+                    if allPeaksArray is None:
+                        allPeaksArray = peakArray
+                    else:
+                        allPeaksArray = numpy.append(allPeaksArray, peakArray, axis=0)
+
+                if validPeakPoints:
+                    result = CPeak.fitPeaks(dataArray, regionArray, allPeaksArray, method)
+
+                    for dim in range(len(result)):
+                        height, centerGuess, linewidth = result[dim]
+
+                        # clip the point to the exclusion area, to stop rogue peaks
+                        # center = numpy.array(centerGuess).clip(min=position - numpyExclusionBuffer,
+                        #                                        max=position + numpyExclusionBuffer)
+                        center = numpy.array(centerGuess)
+
+                        # outofPlaneMinTest = numpy.array([])
+                        # outofPlaneMaxTest = numpy.array([])
+                        # for ii in range(numDim):
+                        #     outofPlaneMinTest = numpy.append(outofPlaneMinTest, 0.0)
+                        #     outofPlaneMaxTest = numpy.append(outofPlaneMaxTest, dataArray.shape[numDim-ii-1]-1.0)
+                        #
+                        # # check whether the new peak is outside of the current plane
+                        # outofPlaneCenter = numpy.array(centerGuess).clip(min=position - numpy.array(outofPlaneMinTest),
+                        #                      max=position + numpy.array(outofPlaneMaxTest))
+                        #
+                        # print(">>>", center, outofPlaneCenter, not numpy.array_equal(center, outofPlaneCenter))
+
+                        # ax.scatter(*center, c='r', marker='^')
+                        #
+                        # x2, y2, _ = mplot3d.proj3d.proj_transform(1, 1, 1, ax.get_proj())
+                        #
+                        # ax.text(*center, str(center), fontsize=12)
+
+                        # except Exception as es:
+                        #     print('>>>error:', str(es))
+                        #     dimCount = len(startPoints)
+                        #     height = float(dataArray[tuple(position[::-1])])
+                        #     # have to reverse position because dataArray backwards
+                        #     # have to float because API does not like numpy.float32
+                        #     center = position
+                        #     linewidth = dimCount * [None]
+
+                        position = center + startPointBufferActual
 
                         peak = self._newPickedPeak(pointPositions=position, height=height,
                                                    lineWidths=linewidth, fitMethod=fitMethod)
                         peaks.append(peak)
 
-                # plt.show()
+            # plt.show()
 
         return peaks
 

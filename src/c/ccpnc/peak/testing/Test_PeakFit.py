@@ -92,8 +92,15 @@ if __name__ == '__main__':
 
 
     res = 45
-    span = ((-(res//2), res//2), (-(res//2), res//2))
-    plotRange = ((-5, 10), (-6, 12))
+    span = ((-(res // 2), res // 2), (-(res // 2), res // 2))
+    plotRange = ((-5, 15), (-5, 15))
+
+    testPeaks = ((1.0, 2.0, 0.0, 0.0, 1.0),
+                 (1.0, 2.4, 2.0, 10.0, 1.7),
+                 (1.0, 1.4, 10.0, 1.0, 1.7),
+                 (4.2, 1.8, 7.0, 7.0, 1.1)
+                 )
+
     # h = 1.0
     # x0 = 2.245
     # y0 = -1.2357
@@ -109,6 +116,7 @@ if __name__ == '__main__':
     dropFactor = 0.01
     minLinewidth = [0.0, 0.0]
 
+
     def sigma2fwhm(sigma):
         return sigma * np.sqrt(8 * np.log(2))
 
@@ -121,7 +129,7 @@ if __name__ == '__main__':
         fwhmx = sigma2fwhm(sigmax)
         fwhmy = sigma2fwhm(sigmay)
 
-        pos = [ii-mx, jj-my]
+        pos = [ii - mx, jj - my]
         # for dim in range(2):
         #     ss = 1 / (span[dim][1] - span[dim][0])
         #     rr = plotRange[dim][1] - plotRange[dim][0]
@@ -139,16 +147,18 @@ if __name__ == '__main__':
     print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
     # print('SHOULD BE:', res, h, x0, y0, sigma2fwhm(sigmax), sigma2fwhm(sigmay))
 
-
     # xx = np.linspace(*span[0], res)
     # yy = np.linspace(*span[1], res)
     xx = np.linspace(*plotRange[0], res)
     yy = np.linspace(*plotRange[1], res)
     xm, ym = np.meshgrid(xx, yy)
 
-    dataArray = np.zeros(shape=(res,res), dtype=np.float32)
-    for numPeaks in range(2):
-        peakArray = np.array(_gauss(xm, ym, sigmax=2.0, sigmay=2.0, mx=5*numPeaks, my=5*numPeaks, h=1.0), dtype=np.float32)
+    dataArray = np.zeros(shape=(res, res), dtype=np.float32)
+    for thisPeak in testPeaks:
+
+        sigmax, sigmay, mx, my, h = thisPeak
+
+        peakArray = np.array(_gauss(xm, ym, sigmax=sigmax, sigmay=sigmay, mx=mx, my=mx, h=h), dtype=np.float32)
         dataArray = np.add(dataArray, peakArray)
 
     peakPoints = Peak.findPeaks(dataArray, haveLow, haveHigh, low, high, buffer, nonadjacent, dropFactor, minLinewidth, [], [], [])
@@ -156,7 +166,6 @@ if __name__ == '__main__':
     print('number of peaks found = %d' % len(peakPoints))
     peakPoints.sort(key=itemgetter(1), reverse=True)
     for peak in peakPoints:
-
         position, height = peak
         print('position of peak = %s, height = %s' % (position, height))
 
@@ -165,19 +174,35 @@ if __name__ == '__main__':
 
     ax.plot_wireframe(xm, ym, dataArray)
 
+    fig = plt.figure(figsize=(10, 8), dpi=100)
+    ax2 = fig.gca(projection='3d')
+
+    ax2.plot_wireframe(xm, ym, dataArray)
+
     peakPoints = [(np.array(position), height) for position, height in peakPoints]
 
     allPeaksArray = None
+    regionArray = None
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # fit all peaks in single operation
+
     for position, height in peakPoints:
 
         numDim = len(position)
-        firstArray = np.maximum(position - 2, 0)
         numPointInt = np.array([dataArray.shape[1], dataArray.shape[0]])
-        lastArray = np.minimum(position + 3, numPointInt)
+        firstArray = np.maximum(position - 3, 0)
+        lastArray = np.minimum(position + 4, numPointInt)
+
+        if regionArray is not None:
+            firstArray = np.minimum(firstArray, regionArray[0])
+            lastArray = np.maximum(lastArray, regionArray[1])
+
         peakArray = position.reshape((1, numDim))
         peakArray = peakArray.astype('float32')
         firstArray = firstArray.astype('int32')
         lastArray = lastArray.astype('int32')
+
         regionArray = np.array((firstArray, lastArray))
 
         if allPeaksArray is None:
@@ -194,13 +219,47 @@ if __name__ == '__main__':
 
         for dim in range(len(dataArray.shape)):
             mi, ma = plotRange[dim]
-            ww = ma-mi
+            ww = ma - mi
 
-            actualPos.append(mi + (centerGuess[dim] / (dataArray.shape[dim]-1)) * ww)
+            actualPos.append(mi + (centerGuess[dim] / (dataArray.shape[dim] - 1)) * ww)
 
-        ax.scatter(*actualPos, height, c='r', marker='^')
+        ax.scatter(*actualPos, height, c='g', marker='^', s=20)
         x2, y2, _ = mplot3d.proj3d.proj_transform(1, 1, 1, ax.get_proj())
 
-        ax.text(*actualPos, height, '%.4f, %.4f, %.4f' % (actualPos[0], actualPos[1],height), fontsize=20)
+        ax.text(*actualPos, height, '%.4f, %.4f, %.4f' % (actualPos[0], actualPos[1], height), fontsize=20)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # fit all peaks in individual operations (not correct)
+
+    for position, height in peakPoints:
+
+        numDim = len(position)
+        numPointInt = np.array([dataArray.shape[1], dataArray.shape[0]])
+        firstArray = np.maximum(position - 3, 0)
+        lastArray = np.minimum(position + 4, numPointInt)
+
+        peakArray = position.reshape((1, numDim))
+        peakArray = peakArray.astype('float32')
+        firstArray = firstArray.astype('int32')
+        lastArray = lastArray.astype('int32')
+
+        regionArray = np.array((firstArray, lastArray))
+
+        result = Peak.fitPeaks(dataArray, regionArray, peakArray, 0)
+
+        height, centerGuess, linewidth = result[0]
+
+        actualPos = []
+
+        for dim in range(len(dataArray.shape)):
+            mi, ma = plotRange[dim]
+            ww = ma - mi
+
+            actualPos.append(mi + (centerGuess[dim] / (dataArray.shape[dim] - 1)) * ww)
+
+        ax2.scatter(*actualPos, height, c='r', marker='^', s=20)
+        x2, y2, _ = mplot3d.proj3d.proj_transform(1, 1, 1, ax2.get_proj())
+
+        ax2.text(*actualPos, height, '%.4f, %.4f, %.4f' % (actualPos[0], actualPos[1], height), fontsize=20)
 
     plt.show()

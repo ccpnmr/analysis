@@ -158,7 +158,7 @@ if __name__ == '__main__':
 
         sigmax, sigmay, mx, my, h = thisPeak
 
-        peakArray = np.array(_gauss(xm, ym, sigmax=sigmax, sigmay=sigmay, mx=mx, my=mx, h=h), dtype=np.float32)
+        peakArray = np.array(_gauss(xm, ym, sigmax=sigmax, sigmay=sigmay, mx=mx, my=my, h=h), dtype=np.float32)
         dataArray = np.add(dataArray, peakArray)
 
     peakPoints = Peak.findPeaks(dataArray, haveLow, haveHigh, low, high, buffer, nonadjacent, dropFactor, minLinewidth, [], [], [])

@@ -217,11 +217,13 @@ class AbstractWrapperObject(NotifierBase):
         return self is not other
 
     def __repr__(self):
-        """Object quoted string representation; compatible with application.get()"""
-        return "'<%s>'" % (self.longPid)
+        """Object string representation; compatible with application.get()
+        """
+        return "<%s>" % (self.longPid)
 
     def __str__(self):
-        """Readable string representation; potentially subclassed"""
+        """Readable string representation; potentially subclassed
+        """
         return "<%s>" % self.pid
 
     __hash__ = object.__hash__

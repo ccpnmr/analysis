@@ -91,21 +91,22 @@ if __name__ == '__main__':
     import matplotlib.cm as cm
 
 
-    res = 9
-    span = ((-4, 4), (-4, 4))
-    h = 1.0
-    x0 = 2.245
-    y0 = -1.2357
-    sigmax = 1.0
-    sigmay = 1.0
+    res = 45
+    span = ((-(res//2), res//2), (-(res//2), res//2))
+    plotRange = ((-5, 10), (-6, 12))
+    # h = 1.0
+    # x0 = 2.245
+    # y0 = -1.2357
+    # sigmax = 1.0
+    # sigmay = 1.0
 
     haveLow = 0
     haveHigh = 1
     low = 0  # arbitrary
-    high = 0.000
+    high = 0.001
     buffer = [1, 1]
     nonadjacent = 1
-    dropFactor = 0.1
+    dropFactor = 0.01
     minLinewidth = [0.0, 0.0]
 
     def sigma2fwhm(sigma):
@@ -116,43 +117,57 @@ if __name__ == '__main__':
         return fwhm / np.sqrt(8 * np.log(2))
 
 
-    def _gauss(ii, jj):
+    def _gauss(ii, jj, sigmax=1.0, sigmay=1.0, mx=0.0, my=0.0, h=1.0):
         fwhmx = sigma2fwhm(sigmax)
         fwhmy = sigma2fwhm(sigmay)
 
-        # return h * np.exp(-4*np.log(2) * ((ii-x0)**2 / fwhmx**2 + (jj-y0)**2 / fwhmy**2))
-        return h / np.sqrt(4 * np.pi ** 2 * (sigmax * sigmay)) * np.exp(-((ii - x0) ** 2 / sigmax ** 2) - (((jj - y0) ** 2 / sigmay ** 2)))
+        pos = [ii-mx, jj-my]
+        # for dim in range(2):
+        #     ss = 1 / (span[dim][1] - span[dim][0])
+        #     rr = plotRange[dim][1] - plotRange[dim][0]
+        #
+        #     val = plotRange[dim][0] + (rr * ss * (pos[dim] - span[dim][0]))
+        #
+        #     pos[dim] = val
+        #
+        # xx = (ii - mx)      #(((ii - mx) - plotRange[0][0]) / (plotRange[0][1] - plotRange[0][0])) + plotRange[0][0]
+        # yy = (jj - my)      #(((jj - my) - plotRange[1][0]) / (plotRange[1][1] - plotRange[1][0])) + plotRange[1][0]
+        # return h * np.exp(-4*np.log(2) * ((ii-mx)**2 / fwhmx**2 + (jj-my)**2 / fwhmy**2))
+        return h * np.sqrt(4 * np.pi ** 2 * (sigmax * sigmay)) * np.exp(-(pos[0] ** 2 / sigmax ** 2) - (pos[1] ** 2 / sigmay ** 2))
 
 
     print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    print('SHOULD BE:', res, h, x0, y0, sigma2fwhm(sigmax), sigma2fwhm(sigmay))
+    # print('SHOULD BE:', res, h, x0, y0, sigma2fwhm(sigmax), sigma2fwhm(sigmay))
 
 
-    xx = np.linspace(*span[0], res)
-    yy = np.linspace(*span[1], res)
+    # xx = np.linspace(*span[0], res)
+    # yy = np.linspace(*span[1], res)
+    xx = np.linspace(*plotRange[0], res)
+    yy = np.linspace(*plotRange[1], res)
     xm, ym = np.meshgrid(xx, yy)
 
-    dataArray = np.array(_gauss(xm, ym), dtype=np.float32)
+    dataArray = np.zeros(shape=(res,res), dtype=np.float32)
+    for numPeaks in range(2):
+        peakArray = np.array(_gauss(xm, ym, sigmax=2.0, sigmay=2.0, mx=5*numPeaks, my=5*numPeaks, h=1.0), dtype=np.float32)
+        dataArray = np.add(dataArray, peakArray)
 
     peakPoints = Peak.findPeaks(dataArray, haveLow, haveHigh, low, high, buffer, nonadjacent, dropFactor, minLinewidth, [], [], [])
-    if peakPoints:
-        print('number of peaks found = %d' % len(peakPoints))
 
-        peakPoints.sort(key=itemgetter(1), reverse=True)
+    print('number of peaks found = %d' % len(peakPoints))
+    peakPoints.sort(key=itemgetter(1), reverse=True)
+    for peak in peakPoints:
 
-        position, height = peakPoints[0]
-    else:
-        position, height = (0.0, 0.0), 0.0
-
-    print('position of highest peak = %s, height = %s' % (position, height))
+        position, height = peak
+        print('position of peak = %s, height = %s' % (position, height))
 
     fig = plt.figure(figsize=(10, 8), dpi=100)
     ax = fig.gca(projection='3d')
 
-    ax.plot_surface(xm, ym, dataArray)
+    ax.plot_wireframe(xm, ym, dataArray)
 
     peakPoints = [(np.array(position), height) for position, height in peakPoints]
 
+    allPeaksArray = None
     for position, height in peakPoints:
 
         numDim = len(position)
@@ -165,13 +180,20 @@ if __name__ == '__main__':
         lastArray = lastArray.astype('int32')
         regionArray = np.array((firstArray, lastArray))
 
-        result = Peak.fitPeaks(dataArray, regionArray, peakArray, 0)
-        height, centerGuess, linewidth = result[0]
+        if allPeaksArray is None:
+            allPeaksArray = peakArray
+        else:
+            allPeaksArray = np.append(allPeaksArray, peakArray, axis=0)
+
+    result = Peak.fitPeaks(dataArray, regionArray, allPeaksArray, 0)
+
+    for dim in range(len(result)):
+        height, centerGuess, linewidth = result[dim]
 
         actualPos = []
 
         for dim in range(len(dataArray.shape)):
-            mi, ma = span[dim]
+            mi, ma = plotRange[dim]
             ww = ma-mi
 
             actualPos.append(mi + (centerGuess[dim] / (dataArray.shape[dim]-1)) * ww)

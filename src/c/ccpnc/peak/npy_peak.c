@@ -751,6 +751,9 @@ static CcpnStatus fit_peaks(PyArrayObject *data_array,
 
     npeaks = PyArray_DIM(peak_array, 0);
     nparams = (1+2*ndim) * npeaks;
+
+    printf(">>> npeaks: %i\n", npeaks);
+
     sprintf(error_msg, "allocating memory for params, params_dev");
     MALLOC(params, float, nparams);
     MALLOC(params_dev, float, nparams);
@@ -774,10 +777,15 @@ static CcpnStatus fit_peaks(PyArrayObject *data_array,
             posn = MAX(0, posn);
             posn = MIN(npts-1, posn);
             grid_posn[i] = posn;
+
+            printf(">>> npeak %i, %i -> [%i]\n", j, i, peak_posn[i]);
+
         }
 
         height = get_value_at_point(data_array, grid_posn);
         have_maximum = height > 0;  // TBD: possibly wrong
+
+        printf(">>> height %i, %f\n", j, height);
 
         params[k++] = height;
         for (i = 0; i < ndim; i++)

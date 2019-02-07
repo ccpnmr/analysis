@@ -963,6 +963,8 @@ class PeakList(AbstractWrapperObject):
 
                     position -= startPointBufferActual
                     numDim = len(position)
+
+                    # extended region helps
                     firstArray = numpy.maximum(position - 3, 0)
                     lastArray = numpy.minimum(position + 4, numPointInt)
 

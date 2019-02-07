@@ -97,7 +97,7 @@ if __name__ == '__main__':
 
     testPeaks = ((1.0, 2.0, 0.0, 0.0, 1.0),
                  (1.0, 2.4, 2.0, 10.0, 1.7),
-                 (1.0, 1.4, 10.0, 1.0, 1.7),
+                 (2.5, 1.7, 10.0, 1.0, 1.7),
                  (4.2, 1.8, 7.0, 7.0, 1.1)
                  )
 
@@ -187,7 +187,7 @@ if __name__ == '__main__':
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # fit all peaks in single operation
 
-    for position, height in peakPoints:
+    for peakNum, (position, height) in enumerate(peakPoints):
 
         numDim = len(position)
         numPointInt = np.array([dataArray.shape[1], dataArray.shape[0]])
@@ -212,8 +212,8 @@ if __name__ == '__main__':
 
     result = Peak.fitPeaks(dataArray, regionArray, allPeaksArray, 0)
 
-    for dim in range(len(result)):
-        height, centerGuess, linewidth = result[dim]
+    for peakNum in range(len(result)):
+        height, centerGuess, linewidth = result[peakNum]
 
         actualPos = []
 
@@ -223,15 +223,15 @@ if __name__ == '__main__':
 
             actualPos.append(mi + (centerGuess[dim] / (dataArray.shape[dim] - 1)) * ww)
 
-        ax.scatter(*actualPos, height, c='g', marker='^', s=20)
+        ax.scatter(*actualPos, height, c='g', marker='^', s=50)
         x2, y2, _ = mplot3d.proj3d.proj_transform(1, 1, 1, ax.get_proj())
 
-        ax.text(*actualPos, height, '%.4f, %.4f, %.4f' % (actualPos[0], actualPos[1], height), fontsize=20)
+        ax.text(*actualPos, height, '%i: %.4f, %.4f, %.4f' % (peakNum, actualPos[0], actualPos[1], height), fontsize=20)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # fit all peaks in individual operations (not correct)
 
-    for position, height in peakPoints:
+    for peakNum, (position, height) in enumerate(peakPoints):
 
         numDim = len(position)
         numPointInt = np.array([dataArray.shape[1], dataArray.shape[0]])
@@ -257,9 +257,9 @@ if __name__ == '__main__':
 
             actualPos.append(mi + (centerGuess[dim] / (dataArray.shape[dim] - 1)) * ww)
 
-        ax2.scatter(*actualPos, height, c='r', marker='^', s=20)
+        ax2.scatter(*actualPos, height, c='r', marker='^', s=50)
         x2, y2, _ = mplot3d.proj3d.proj_transform(1, 1, 1, ax2.get_proj())
 
-        ax2.text(*actualPos, height, '%.4f, %.4f, %.4f' % (actualPos[0], actualPos[1], height), fontsize=20)
+        ax2.text(*actualPos, height, '%i: %.4f, %.4f, %.4f' % (peakNum, actualPos[0], actualPos[1], height), fontsize=20)
 
     plt.show()

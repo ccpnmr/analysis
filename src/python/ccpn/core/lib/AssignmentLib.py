@@ -697,7 +697,12 @@ def sameAxisCodes(peaks: typing.List[Peak], dim: int):
 def refitPeaks(peaks: Sequence[Peak], method: str = 'gaussian'):
     from ccpnmodel.ccpncore.lib.spectrum import Peak as LibPeak
 
-    LibPeak.fitExistingPeaks([peak._wrappedData for peak in peaks], method)
+    # LibPeak.fitExistingPeaks([peak._wrappedData for peak in peaks], method)
+
+    if peaks:
+        peakList = peaks[0].peakList
+
+        peakList.fitExistingPeaks(peaks, method)
 
 
 def _assignNmrResiduesToPeaks(peaks, nmrResidues):

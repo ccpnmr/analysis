@@ -1031,7 +1031,7 @@ class PeakList(AbstractWrapperObject):
 
         return peaks
 
-    def fitExistingPeaks(self, peaks: Sequence['ApiPeak'], fitMethod: str = None):
+    def fitExistingPeaks(self, peaks: Sequence['Peak'], fitMethod: str = None):
         """Refit the current selected peaks.
         """
 
@@ -1047,6 +1047,9 @@ class PeakList(AbstractWrapperObject):
         regionArray = None
 
         for peak in peaks:
+
+            peak = peak._wrappedData
+
             dataSource = peak.peakList.dataSource
             numDim = dataSource.numDim
             dataDims = dataSource.sortedDataDims()
@@ -1073,32 +1076,79 @@ class PeakList(AbstractWrapperObject):
             # Cast to int for subsequent call
             firstArray = firstArray.astype('int32')
             lastArray = lastArray.astype('int32')
-            peakArray = (position - firstArray).reshape((1, numDim))
+            # peakArray = (position - firstArray).reshape((1, numDim))
+            peakArray = position.reshape((1, numDim))
             peakArray = peakArray.astype('float32')
+            regionArray = numpy.array((firstArray, lastArray))
+
+            if allPeaksArray is None:
+                allPeaksArray = peakArray
+            else:
+                allPeaksArray = numpy.append(allPeaksArray, peakArray, axis=0)
+
+        if allPeaksArray is not None and allPeaksArray.size != 0:
+
+            # map to (0, 0)
             regionArray = numpy.array((firstArray - firstArray, lastArray - firstArray))
 
+            # Get the data; note that arguments has to be castable to int?
+            dataArray, intRegion = dataSource.getRegionData(firstArray, lastArray)
 
-        # Get the data; note that arguments has to be castable to int?
-        dataArray, intRegion = dataSource.getRegionData(firstArray, lastArray)
+            # update positions relative to the corner of the data array
+            firstArray = firstArray.astype('float32')
+            updatePeaksArray = None
+            for pk in allPeaksArray:
+                if updatePeaksArray is None:
+                    updatePeaksArray = pk - firstArray
+                    updatePeaksArray = updatePeaksArray.reshape((1, numDim))
+                    updatePeaksArray = updatePeaksArray.astype('float32')
+                else:
+                    pk = pk-firstArray
+                    pk = pk.reshape((1, numDim))
+                    pk = pk.astype('float32')
+                    updatePeaksArray = numpy.append(updatePeaksArray, pk, axis=0)
 
-        try:
-            result = CPeak.fitPeaks(dataArray, regionArray, peakArray, method)
-            height, center, linewidth = result[0]
-        except CPeak.error as e:
-            logger = peak.root._logger
-            if logger:
-                logger.error("Aborting peak fit, Error for peak: %s:\n\n%s " % (peak, e))
-            return
+            print(updatePeaksArray)
+            for pp in range(updatePeaksArray.shape[0]):
+                print(">>>", pp)
 
-            position = firstArray + center
+                # newArray = updatePeaksArray[pp]# + updatePeaksArray[:pp] + updatePeaksArray[pp+1:]
+                print(">>>")
 
-        # go through the peaks, and update
-        for peaks in peaks:
-            for i, peakDim in enumerate(peakDims):
-                peakDim.position = position[i] + 1  # API position starts at 1
-                peakDim.lineWidth = linewidth[i]
+                # arr = np.array([10, 20, 30, 40, 50])
+                idx = [pp] + list(range(0, pp)) + list(range(pp+1, updatePeaksArray.shape[0]))
+                # >> > arr[idx]
+                # array([20, 10, 40, 50, 30])
+                print(">>>", updatePeaksArray[idx])
 
-            peak.height = dataSource.scale * height
+
+                try:
+                    result = CPeak.fitPeaks(dataArray, regionArray, updatePeaksArray[idx], method)
+                except CPeak.error as e:
+                    logger = peak.root._logger
+                    if logger:
+                        logger.error("Aborting peak fit, Error for peak: %s:\n\n%s " % (peak, e))
+                    return
+
+                print(">>>", firstArray)
+                # go through the peaks, and update
+
+                # DON'T THINK THE ORDER IS PRESERVED
+
+                height, center, linewidth = result[0]
+
+                peak = peaks[pp]._wrappedData
+                peakDims = peak.sortedPeakDims()
+
+                print(">>>", pp, height, center, linewidth)
+
+                for i, peakDim in enumerate(peakDims):
+                    # peakDim.position = position[i] + 1  # API position starts at 1
+
+                    peakDim.position = center[i] + firstArray[i] + 1.0  # API position starts at 1
+                    peakDim.lineWidth = linewidth[i]
+
+                peak.height = dataSource.scale * height
 
     #===========================================================================================
     # new'Object' and other methods

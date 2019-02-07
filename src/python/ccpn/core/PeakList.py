@@ -821,7 +821,7 @@ class PeakList(AbstractWrapperObject):
         numDim = dataSource.numDim
 
         if fitMethod:
-            assert fitMethod in ('gaussian', 'lorentzian'), 'fitMethod = %s, must be one of ("gaussian", "lorentzian")' % fitMethod
+            assert fitMethod in ('gaussian', 'lorentzian'), 'pickPeaksRegion: fitMethod = %s, must be one of ("gaussian", "lorentzian")' % fitMethod
 
             # method = 0 if fitMethod == 'gaussian' else 1
             method = ('gaussian', 'lorentzian', 'parabolic').index(fitMethod)
@@ -1030,6 +1030,75 @@ class PeakList(AbstractWrapperObject):
             # plt.show()
 
         return peaks
+
+    def fitExistingPeaks(self, peaks: Sequence['ApiPeak'], fitMethod: str = None):
+        """Refit the current selected peaks.
+        """
+
+        from ccpnc.peak import Peak as CPeak
+
+        if fitMethod:
+            assert fitMethod in ('gaussian', 'lorentzian'), 'fitExistingPeaks: fitMethod = %s, must be one of ("gaussian", "lorentzian")' % fitMethod
+
+            # method = 0 if fitMethod == 'gaussian' else 1
+            method = ('gaussian', 'lorentzian', 'parabolic').index(fitMethod)
+
+        allPeaksArray = None
+        regionArray = None
+
+        for peak in peaks:
+            dataSource = peak.peakList.dataSource
+            numDim = dataSource.numDim
+            dataDims = dataSource.sortedDataDims()
+
+            peakDims = peak.sortedPeakDims()
+
+            # generate a numpy array with the position of the peak in points rounded to integers
+            position = [peakDim.position - 1 for peakDim in peakDims]  # API position starts at 1
+            position = numpy.round(numpy.array(position))
+
+            # generate a numpy array with the number of points per dimension
+            numPoints = [peakDim.dataDim.numPoints for peakDim in peakDims]
+            numPoints = numpy.array(numPoints)
+
+            # consider for each dimension on the interval [point-3,point+4>, account for min and max
+            # of each dimension
+            firstArray = numpy.maximum(position - 3, 0)
+            lastArray = numpy.minimum(position + 4, numPoints)
+
+            if regionArray is not None:
+                firstArray = numpy.minimum(firstArray, regionArray[0])
+                lastArray = numpy.maximum(lastArray, regionArray[1])
+
+            # Cast to int for subsequent call
+            firstArray = firstArray.astype('int32')
+            lastArray = lastArray.astype('int32')
+            peakArray = (position - firstArray).reshape((1, numDim))
+            peakArray = peakArray.astype('float32')
+            regionArray = numpy.array((firstArray - firstArray, lastArray - firstArray))
+
+
+        # Get the data; note that arguments has to be castable to int?
+        dataArray, intRegion = dataSource.getRegionData(firstArray, lastArray)
+
+        try:
+            result = CPeak.fitPeaks(dataArray, regionArray, peakArray, method)
+            height, center, linewidth = result[0]
+        except CPeak.error as e:
+            logger = peak.root._logger
+            if logger:
+                logger.error("Aborting peak fit, Error for peak: %s:\n\n%s " % (peak, e))
+            return
+
+            position = firstArray + center
+
+        # go through the peaks, and update
+        for peaks in peaks:
+            for i, peakDim in enumerate(peakDims):
+                peakDim.position = position[i] + 1  # API position starts at 1
+                peakDim.lineWidth = linewidth[i]
+
+            peak.height = dataSource.scale * height
 
     #===========================================================================================
     # new'Object' and other methods

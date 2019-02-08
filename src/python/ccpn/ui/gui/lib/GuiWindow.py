@@ -288,19 +288,24 @@ class GuiWindow():
         if not peaks:
             return
 
-        project = peaks[0].project
-        undo = project._undo
+        with logCommandBlock(get='self') as log:
+            log('refitCurrentPeaks')
 
-        project.newUndoPoint()
-        undo.increaseBlocking()
-
-        currentParams = self._getPeaksParams(peaks)
-        try:
             AssignmentLib.refitPeaks(peaks)
-        finally:
-            undo.decreaseBlocking()
-            undo.newItem(self._setPeaksParams, self._setPeaksParams, undoArgs=[peaks, currentParams],
-                         redoArgs=[peaks, self._getPeaksParams(peaks)])
+
+        # project = peaks[0].project
+        # undo = project._undo
+        #
+        # project.newUndoPoint()
+        # undo.increaseBlocking()
+        #
+        # currentParams = self._getPeaksParams(peaks)
+        # try:
+        #     AssignmentLib.refitPeaks(peaks)
+        # finally:
+        #     undo.decreaseBlocking()
+        #     undo.newItem(self._setPeaksParams, self._setPeaksParams, undoArgs=[peaks, currentParams],
+        #                  redoArgs=[peaks, self._getPeaksParams(peaks)])
 
     def selectAllPeaks(self):
         '''selects all peaks in the current strip if the spectrum is toggled on'''

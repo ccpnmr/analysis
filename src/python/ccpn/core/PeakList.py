@@ -1066,8 +1066,8 @@ class PeakList(AbstractWrapperObject):
 
             # consider for each dimension on the interval [point-3,point+4>, account for min and max
             # of each dimension
-            firstArray = numpy.maximum(position - 3, 0)
-            lastArray = numpy.minimum(position + 4, numPoints)
+            firstArray = numpy.maximum(position - 2, 0)
+            lastArray = numpy.minimum(position + 3, numPoints)
 
             if regionArray is not None:
                 firstArray = numpy.minimum(firstArray, regionArray[0])
@@ -1108,44 +1108,42 @@ class PeakList(AbstractWrapperObject):
                     pk = pk.astype('float32')
                     updatePeaksArray = numpy.append(updatePeaksArray, pk, axis=0)
 
-            print(updatePeaksArray)
-            for pp in range(updatePeaksArray.shape[0]):
-                print(">>>", pp)
+            # print(updatePeaksArray)
+            # for pp in range(updatePeaksArray.shape[0]):
+            #     print(">>>", pp)
+            #
+            #     # newArray = updatePeaksArray[pp]# + updatePeaksArray[:pp] + updatePeaksArray[pp+1:]
+            #     print(">>>")
+            #
+            #     # arr = np.array([10, 20, 30, 40, 50])
+            #     idx = [pp] + list(range(0, pp)) + list(range(pp+1, updatePeaksArray.shape[0]))
+            #     # >> > arr[idx]
+            #     # array([20, 10, 40, 50, 30])
+            #     print(">>>", updatePeaksArray[idx])
 
-                # newArray = updatePeaksArray[pp]# + updatePeaksArray[:pp] + updatePeaksArray[pp+1:]
-                print(">>>")
 
-                # arr = np.array([10, 20, 30, 40, 50])
-                idx = [pp] + list(range(0, pp)) + list(range(pp+1, updatePeaksArray.shape[0]))
-                # >> > arr[idx]
-                # array([20, 10, 40, 50, 30])
-                print(">>>", updatePeaksArray[idx])
+            try:
+                print(">>>allpeaks", dataArray, updatePeaksArray)
+                result = CPeak.fitPeaks(dataArray, regionArray, updatePeaksArray, method)
+            except CPeak.error as e:
 
+                # there could be some fitting error
+                getLogger().warning("Aborting peak fit, Error for peak: %s:\n\n%s " % (peak, e))
+                return
 
-                try:
-                    result = CPeak.fitPeaks(dataArray, regionArray, updatePeaksArray[idx], method)
-                except CPeak.error as e:
-                    logger = peak.root._logger
-                    if logger:
-                        logger.error("Aborting peak fit, Error for peak: %s:\n\n%s " % (peak, e))
-                    return
+            for pkNum, peak in enumerate(peaks):
+                height, center, linewidth = result[pkNum]
 
-                print(">>>", firstArray)
-                # go through the peaks, and update
-
-                # DON'T THINK THE ORDER IS PRESERVED
-
-                height, center, linewidth = result[0]
-
-                peak = peaks[pp]._wrappedData
+                # work on the _wrappedData
+                peak = peak._wrappedData
                 peakDims = peak.sortedPeakDims()
-
-                print(">>>", pp, height, center, linewidth)
 
                 for i, peakDim in enumerate(peakDims):
                     # peakDim.position = position[i] + 1  # API position starts at 1
 
-                    peakDim.position = center[i] + firstArray[i] + 1.0  # API position starts at 1
+                    newPos = min(max(center[i], 0.5), dataArray.shape[i]-1.5)
+                    if abs(newPos - center[i]) < 1e-9:
+                        peakDim.position = center[i] + firstArray[i] + 1.0  # API position starts at 1
                     peakDim.lineWidth = linewidth[i]
 
                 peak.height = dataSource.scale * height

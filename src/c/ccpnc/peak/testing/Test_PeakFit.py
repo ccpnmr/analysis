@@ -125,23 +125,25 @@ if __name__ == '__main__':
         return fwhm / np.sqrt(8 * np.log(2))
 
 
-    def _gauss(ii, jj, sigmax=1.0, sigmay=1.0, mx=0.0, my=0.0, h=1.0):
+    def _gaussFWHM(ii, jj, sigmax=1.0, sigmay=1.0, mx=0.0, my=0.0, h=1.0):
+        """Calculate the normal(gaussian) distribution in Full-width-Half-Maximum.
+
+        (https://arthursonzogni.com/Diagon/)
+        """
+        pos = [ii - mx, jj - my]
+
         fwhmx = sigma2fwhm(sigmax)
         fwhmy = sigma2fwhm(sigmay)
 
+        return h * np.exp(-4*np.log(2) * ((pos[0] / fwhmx)**2 + (pos[1] / fwhmy)**2))
+
+    def _gaussSigma(ii, jj, sigmax=1.0, sigmay=1.0, mx=0.0, my=0.0, h=1.0):
+        """Calculate the normal(gaussian) distribution.
+        """
         pos = [ii - mx, jj - my]
-        # for dim in range(2):
-        #     ss = 1 / (span[dim][1] - span[dim][0])
-        #     rr = plotRange[dim][1] - plotRange[dim][0]
-        #
-        #     val = plotRange[dim][0] + (rr * ss * (pos[dim] - span[dim][0]))
-        #
-        #     pos[dim] = val
-        #
-        # xx = (ii - mx)      #(((ii - mx) - plotRange[0][0]) / (plotRange[0][1] - plotRange[0][0])) + plotRange[0][0]
-        # yy = (jj - my)      #(((jj - my) - plotRange[1][0]) / (plotRange[1][1] - plotRange[1][0])) + plotRange[1][0]
-        # return h * np.exp(-4*np.log(2) * ((ii-mx)**2 / fwhmx**2 + (jj-my)**2 / fwhmy**2))
-        return h * np.sqrt(4 * np.pi ** 2 * (sigmax * sigmay)) * np.exp(-(pos[0] ** 2 / sigmax ** 2) - (pos[1] ** 2 / sigmay ** 2))
+
+        ex = np.exp(-(pos[0] ** 2 / sigmax ** 2) - (pos[1] ** 2 / sigmay ** 2))
+        return (h / np.sqrt(4 * (np.pi ** 2) * (sigmax * sigmay))) * ex
 
 
     print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
@@ -154,12 +156,16 @@ if __name__ == '__main__':
     xm, ym = np.meshgrid(xx, yy)
 
     dataArray = np.zeros(shape=(res, res), dtype=np.float32)
+    dataArrayCheck = np.zeros(shape=(res, res), dtype=np.float32)
     for thisPeak in testPeaks:
 
         sigmax, sigmay, mx, my, h = thisPeak
 
-        peakArray = np.array(_gauss(xm, ym, sigmax=sigmax, sigmay=sigmay, mx=mx, my=my, h=h), dtype=np.float32)
-        dataArray = np.add(dataArray, peakArray)
+        peakArrayFWHM = np.array(_gaussFWHM(xm, ym, sigmax=sigmax, sigmay=sigmay, mx=mx, my=my, h=h), dtype=np.float32)
+        dataArray = np.add(dataArray, peakArrayFWHM)
+
+        peakArraySigma = np.array(_gaussSigma(xm, ym, sigmax=sigmax, sigmay=sigmay, mx=mx, my=my, h=h), dtype=np.float32)
+        dataArraySigma = np.add(dataArray, peakArraySigma)
 
     peakPoints = Peak.findPeaks(dataArray, haveLow, haveHigh, low, high, buffer, nonadjacent, dropFactor, minLinewidth, [], [], [])
 
@@ -177,7 +183,7 @@ if __name__ == '__main__':
     fig = plt.figure(figsize=(10, 8), dpi=100)
     ax2 = fig.gca(projection='3d')
 
-    ax2.plot_wireframe(xm, ym, dataArray)
+    ax2.plot_wireframe(xm, ym, dataArraySigma)
 
     peakPoints = [(np.array(position), height) for position, height in peakPoints]
 
@@ -198,17 +204,17 @@ if __name__ == '__main__':
             firstArray = np.minimum(firstArray, regionArray[0])
             lastArray = np.maximum(lastArray, regionArray[1])
 
-        peakArray = position.reshape((1, numDim))
-        peakArray = peakArray.astype('float32')
+        peakArrayFWHM = position.reshape((1, numDim))
+        peakArrayFWHM = peakArrayFWHM.astype('float32')
         firstArray = firstArray.astype('int32')
         lastArray = lastArray.astype('int32')
 
         regionArray = np.array((firstArray, lastArray))
 
         if allPeaksArray is None:
-            allPeaksArray = peakArray
+            allPeaksArray = peakArrayFWHM
         else:
-            allPeaksArray = np.append(allPeaksArray, peakArray, axis=0)
+            allPeaksArray = np.append(allPeaksArray, peakArrayFWHM, axis=0)
 
     result = Peak.fitPeaks(dataArray, regionArray, allPeaksArray, 0)
 
@@ -238,14 +244,14 @@ if __name__ == '__main__':
         firstArray = np.maximum(position - 3, 0)
         lastArray = np.minimum(position + 4, numPointInt)
 
-        peakArray = position.reshape((1, numDim))
-        peakArray = peakArray.astype('float32')
+        peakArrayFWHM = position.reshape((1, numDim))
+        peakArrayFWHM = peakArrayFWHM.astype('float32')
         firstArray = firstArray.astype('int32')
         lastArray = lastArray.astype('int32')
 
         regionArray = np.array((firstArray, lastArray))
 
-        result = Peak.fitPeaks(dataArray, regionArray, peakArray, 0)
+        result = Peak.fitPeaks(dataArray, regionArray, peakArrayFWHM, 0)
 
         height, centerGuess, linewidth = result[0]
 

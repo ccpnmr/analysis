@@ -5169,7 +5169,7 @@ class CcpnGLWidget(QOpenGLWidget):
                             else:
                                 peaks.add(peak)
 
-        self.current.peaks = list(currentPeaks ^ peaks)
+        self.current.peaks = list(currentPeaks | peaks)
 
     def _selectMultipletsInRegion(self, xPositions, yPositions, zPositions):
         currentMultiplets = set(self.current.multiplets)
@@ -5224,7 +5224,7 @@ class CcpnGLWidget(QOpenGLWidget):
                             else:
                                 multiplets.add(multiplet)
 
-        self.current.multiplets = list(currentMultiplets ^ multiplets)
+        self.current.multiplets = list(currentMultiplets | multiplets)
 
     def _mouseDragEvent(self, event: QtGui.QMouseEvent, axis=None):
         if controlShiftLeftMouse(event) or controlShiftRightMouse(event):

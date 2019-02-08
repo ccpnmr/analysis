@@ -666,25 +666,12 @@ static float gaussian(int ndim, int *x, float *a, float *dy_da)
     {
         dx = x[i] - position[i];
         lw = linewidth[i];
-//        y *= exp(-4*log(2)*dx*dx/(lw*lw));
-//        if (dy_da)
-//        {
-//            dy_dp[i] = 8*log(2)*dx/(lw*lw);
-//            dy_dl[i] = 8*log(2)*dx*dx/(lw*lw*lw);
-//        }
-
-
-        dx = log(x[i]) - position[i];
-        lw = linewidth[i];
-        y *= (1 / x[i]) * exp(-4*log(2)*dx*dx/(lw*lw));
+        y *= exp(-4*log(2)*dx*dx/(lw*lw));
         if (dy_da)
         {
-            dy_dp[i] = 8*log(2)*dx/(lw*lw*x[i]);
-            dy_dl[i] = 8*log(2)*dx*dx/(lw*lw*lw*x[i]);
+            dy_dp[i] = 8*log(2)*dx/(lw*lw);
+            dy_dl[i] = 8*log(2)*dx*dx/(lw*lw*lw);
         }
-
-
-
     }
 
     if (dy_da)

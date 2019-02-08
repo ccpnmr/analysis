@@ -1918,8 +1918,9 @@ class CcpnGLWidget(QOpenGLWidget):
         self._isALT = ''
         self._isMETA = ''
 
-    def _clearAndUpdate(self):
-        self._clearKeys()
+    def _clearAndUpdate(self, clearKeys=False):
+        if clearKeys:
+            self._clearKeys()
         self._drawSelectionBox = False
         self._drawDeltaOffset = False
         self._drawMouseMoveLine = False
@@ -1928,7 +1929,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def keyReleaseEvent(self, ev: QtGui.QKeyEvent):
         super().keyReleaseEvent(ev)
-        self._clearAndUpdate()
+        self._clearAndUpdate(clearKeys=True)
         self._clearAfterRelease(ev)
 
     def enterEvent(self, ev: QtCore.QEvent):

@@ -959,6 +959,8 @@ class PeakList(AbstractWrapperObject):
                 allPeaksArray = None
                 regionArray = None
 
+                # can I divide the peaks into subregions to make the solver more stable?
+
                 for position, height in validPeakPoints:
 
                     position -= startPointBufferActual
@@ -983,11 +985,11 @@ class PeakList(AbstractWrapperObject):
                     else:
                         allPeaksArray = numpy.append(allPeaksArray, peakArray, axis=0)
 
-                if validPeakPoints:
-                    result = CPeak.fitPeaks(dataArray, regionArray, allPeaksArray, method)
+                if allPeaksArray is not None:
+                    # result = CPeak.fitPeaks(dataArray, regionArray, allPeaksArray, method)
+                    result = CPeak.fitParabolicPeaks(dataArray, regionArray, allPeaksArray)
 
-                    for dim in range(len(result)):
-                        height, centerGuess, linewidth = result[dim]
+                    for height, centerGuess, linewidth in result:
 
                         # clip the point to the exclusion area, to stop rogue peaks
                         # center = numpy.array(centerGuess).clip(min=position - numpyExclusionBuffer,
@@ -1123,7 +1125,7 @@ class PeakList(AbstractWrapperObject):
 
 
             try:
-                print(">>>allpeaks", dataArray, updatePeaksArray)
+                # print(">>>allpeaks", dataArray, updatePeaksArray)
                 result = CPeak.fitPeaks(dataArray, regionArray, updatePeaksArray, method)
             except CPeak.error as e:
 
@@ -1138,13 +1140,19 @@ class PeakList(AbstractWrapperObject):
                 peak = peak._wrappedData
                 peakDims = peak.sortedPeakDims()
 
+                dataSource = peak.peakList.dataSource
+                numDim = dataSource.numDim
+                dataDims = dataSource.sortedDataDims()
+
                 for i, peakDim in enumerate(peakDims):
                     # peakDim.position = position[i] + 1  # API position starts at 1
 
                     newPos = min(max(center[i], 0.5), dataArray.shape[i]-1.5)
+
+                    # ignore if out of range
                     if abs(newPos - center[i]) < 1e-9:
                         peakDim.position = center[i] + firstArray[i] + 1.0  # API position starts at 1
-                    peakDim.lineWidth = linewidth[i]
+                    peakDim.lineWidth = dataDims[i].valuePerPoint * linewidth[i]
 
                 peak.height = dataSource.scale * height
 

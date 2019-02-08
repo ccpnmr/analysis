@@ -133,6 +133,23 @@ static float fit_position_parabolic(float vm, float v, float vp)
     return c;
 }
 
+static float fit_position_x(float vm, float v, float vp, float *height, float *lineFit)
+{
+    float a, b, c, x, halfX;
+    CcpnBool is_positive;
+
+    c = v;
+    a = 0.5*(vm+vp-2.0*v);
+    b = vp-0.5*(vp+vm);
+
+    x = -b / (2.0*a);
+    *height = a*x*x+b*x+c;
+    halfX = (sqrt(b*b-4.0*a*(c-0.5*(*height))) - b) / (2.0*a);
+    *lineFit = 2.0*ABS(x - halfX);
+
+    return x;
+}
+
 static CcpnBool check_buffer(PyArrayObject *data_array,
                              PyObject *peak_list, long *buffer,
                              float value, npy_intp *point)
@@ -209,7 +226,8 @@ static CcpnBool check_nonadjacent_points(PyArrayObject *data_array,
     // npoints is now the number of adjacent points to any in the array
     // i.e. 3d is 27, so will only check these elements offset from the current, ignoring the middle
     // this is all the elements in the encompassing cube
-    //printf("     CHECKING POINT INDEX: %i, %i, %i\n", point[0], point[1], point[2]);
+
+    do_point = CCPN_TRUE;
     for (n = 0; n < npoints; n++)
     {
         if (n == zero_index) /* this is the central point */
@@ -217,23 +235,19 @@ static CcpnBool check_nonadjacent_points(PyArrayObject *data_array,
 
         ARRAY_OF_INDEX(p, n, cumulative, ndim);
 
-        do_point = CCPN_TRUE;
         for (i = 0; i < ndim; i++)
         {
+            // can't test points on the border
+            if ((point[i] == 0) || (point[i] == points[i]-1))
+                return CCPN_FALSE;
+
             /* would have been more efficient to do this before this function called... */
             p[i] += point[i] - 1;
             /* p initially goes 0, 1, 2 so extra -1 makes it -1, 0, 1 */
 
             if ((p[i] < 0) || (p[i] >= points[i]))
-            {
-                do_point = CCPN_FALSE;
-                break;
-            }
+                return CCPN_FALSE;
         }
-
-        // was continue, but any bad point means too near the boundary to check
-        if (!do_point)
-            break;
 
         //printf("              against: %i => %i, %i, %i\n", n, p[0], p[1], p[2]);
 
@@ -437,6 +451,42 @@ static float half_max_linewidth(PyArrayObject *data_array, CcpnBool have_maximum
     return linewidth;
 }
 
+static CcpnBool fitParabolicToNDim(PyArrayObject *data_array,
+                                    float *v, npy_intp *point, int *points,
+                                    float *peakFit, float *lineWidth, int dim)
+{
+    int ndim = PyArray_NDIM(data_array);
+    npy_intp pnt[MAX_NDIM];
+    float vl, vr, vm;
+    float height, lineFit;
+
+    /* check that local extremum */
+
+    // only check the adjacent elements in the directions of the axes
+    COPY_VECTOR(pnt, point, ndim);
+
+    if ((point[dim] > 0) && (point[dim] < (points[dim] - 1)))
+    {
+        pnt[dim] = point[dim];
+        vm = get_value_at_point(data_array, pnt);
+
+        pnt[dim] = point[dim] - 1;
+        vl = get_value_at_point(data_array, pnt);
+
+        pnt[dim] = point[dim] + 1;
+        vr = get_value_at_point(data_array, pnt);
+
+//        *v = fit_position_parabolic(vl, vm, vr);
+        *peakFit = fit_position_x(vl, vm, vr, &height, &lineFit)+point[dim];
+        *v = height;
+        *lineWidth = lineFit;
+
+        return CCPN_OK;
+    }
+
+    return CCPN_ERROR;
+}
+
 static CcpnBool check_dim_linewidth(PyArrayObject *data_array, CcpnBool have_maximum,
                                     float min_linewidth, float v, npy_intp *point, int *points, int dim)
 {
@@ -616,12 +666,25 @@ static float gaussian(int ndim, int *x, float *a, float *dy_da)
     {
         dx = x[i] - position[i];
         lw = linewidth[i];
-        y *= exp(-4*log(2)*dx*dx/(lw*lw));
+//        y *= exp(-4*log(2)*dx*dx/(lw*lw));
+//        if (dy_da)
+//        {
+//            dy_dp[i] = 8*log(2)*dx/(lw*lw);
+//            dy_dl[i] = 8*log(2)*dx*dx/(lw*lw*lw);
+//        }
+
+
+        dx = log(x[i]) - position[i];
+        lw = linewidth[i];
+        y *= (1 / x[i]) * exp(-4*log(2)*dx*dx/(lw*lw));
         if (dy_da)
         {
-            dy_dp[i] = 8*log(2)*dx/(lw*lw);
-            dy_dl[i] = 8*log(2)*dx*dx/(lw*lw*lw);
+            dy_dp[i] = 8*log(2)*dx/(lw*lw*x[i]);
+            dy_dl[i] = 8*log(2)*dx*dx/(lw*lw*lw*x[i]);
         }
+
+
+
     }
 
     if (dy_da)
@@ -708,6 +771,117 @@ static void _fitting_func(float xind, float *a, float *y_fit, float *dy_da, void
         if (dy_da)
             dy_da += nparams_per_peak;
     }
+}
+
+static CcpnStatus fit_parabolic(PyArrayObject *data_array,
+                                PyArrayObject *region_array, PyArrayObject *peak_array,
+                                PyObject *fit_list, char *error_msg)
+{
+    int i, j, k, ndim, total_region_size, first, last, nparams, npeaks, npts;
+    int region_offset[MAX_NDIM], region_size[MAX_NDIM], cumul_region[MAX_NDIM], points[MAX_NDIM], region_end[MAX_NDIM];
+    npy_intp array[MAX_NDIM], grid_posn[MAX_NDIM], posn;
+    float *x, *y, *params, *params_dev, *w = NULL, *y_fit = NULL;
+    float peak_posn[MAX_NDIM], height, chisq, max_iter = 0, noise = 0;
+    float peakFit[MAX_NDIM], lineWidths[MAX_NDIM];
+    float peakHeight;
+    PyObject *fit_obj, *posn_obj, *lw_obj;
+    FitPeak fitPeak;
+    CcpnBool have_maximum;
+    CcpnStatus status;
+
+    ndim = PyArray_DIM(region_array, 1);
+    for (i = 0; i < ndim; i++)
+    {
+        first = *((int *) PyArray_GETPTR2(region_array, 0, i));
+        last = *((int *) PyArray_GETPTR2(region_array, 1, i));
+        region_offset[i] = first;
+        region_end[i] = last;
+        region_size[i] = last - first;
+    }
+
+    CUMULATIVE(cumul_region, region_size, total_region_size, ndim);
+
+    npeaks = PyArray_DIM(peak_array, 0);
+    nparams = (1+2*ndim) * npeaks;
+
+    sprintf(error_msg, "allocating memory for params, params_dev");
+    MALLOC(params, float, nparams);
+
+    for (i = 0; i < ndim; i++)
+        points[i] = PyArray_DIM(data_array, ndim-1-i);
+
+    k = 0;
+
+    // iterate over all the peaks passed in
+    for (j = 0; j < npeaks; j++)
+    {
+        // find the index point nearest to the peak position (floats)
+        // relative to the dataArray, clipped to the dataArray bounds
+        for (i = 0; i < ndim; i++)
+        {
+            peak_posn[i] = *((float *) PyArray_GETPTR2(peak_array, j, i));
+            posn = NEAREST_INTEGER(peak_posn[i]);
+            npts = PyArray_DIM(data_array, ndim-1-i);
+            posn = MAX(0, posn);
+            posn = MIN(npts-1, posn);
+            grid_posn[i] = posn;
+
+        }
+
+        for (i = 0; i < ndim; i++)
+            status = fitParabolicToNDim(data_array, &peakHeight, grid_posn, points, &peakFit[i], &lineWidths[i], i);
+
+        params[k++] = peakHeight;
+        for (i = 0; i < ndim; i++)
+            params[k++] = peakFit[i];
+
+        for (i = 0; i < ndim; i++)
+            params[k++] = lineWidths[i];
+    }
+
+    status = CCPN_OK;
+
+    if (status == CCPN_ERROR)
+    {
+        FREE(params, float);
+        return CCPN_ERROR;
+    }
+
+    k = 0;
+    for (j = 0; j < npeaks; j++)
+    {
+        fit_obj = PyTuple_New(3); // height, position, linewidth
+        if (!fit_obj)
+            RETURN_ERROR_MSG("allocating fit data");
+
+        posn_obj = PyTuple_New(ndim);
+        if (!posn_obj)
+            RETURN_ERROR_MSG("allocating position");
+
+        lw_obj = PyTuple_New(ndim);
+        if (!lw_obj)
+            RETURN_ERROR_MSG("allocating linewidth");
+
+        height = params[k++];
+        PyTuple_SetItem(fit_obj, 0, PyFloat_FromDouble((double) height));
+        PyTuple_SetItem(fit_obj, 1, posn_obj);
+        PyTuple_SetItem(fit_obj, 2, lw_obj);
+
+        for (i = 0; i < ndim; i++)
+            PyTuple_SetItem(posn_obj, i, PyFloat_FromDouble((double) params[k++]));
+
+        for (i = 0; i < ndim; i++)
+            PyTuple_SetItem(lw_obj, i, PyFloat_FromDouble((double) params[k++]));
+
+        if (PyList_Append(fit_list, fit_obj))
+            RETURN_ERROR_MSG("appending fit data to fit list");
+
+        Py_DECREF(fit_obj);
+    }
+
+    FREE(params, float);
+
+    return CCPN_OK;
 }
 
 static CcpnStatus fit_peaks(PyArrayObject *data_array,
@@ -1073,7 +1247,7 @@ static PyObject *fitParabolicPeaks(PyObject *self, PyObject *args)
     PyArrayObject *data_array, *region_array, *peak_array;
     char error_msg[1000];
 
-    if (!PyArg_ParseTuple(args, "O!O!O!i",
+    if (!PyArg_ParseTuple(args, "O!O!O!",
                           &PyArray_Type, &data_array,
                           &PyArray_Type, &region_array,
                           &PyArray_Type, &peak_array))
@@ -1109,9 +1283,10 @@ static PyObject *fitParabolicPeaks(PyObject *self, PyObject *args)
     if (!fit_list)
         RETURN_OBJ_ERROR("allocating memory for fit list");
 
-    //if (fit_peaks(data_array, region_array, peak_array, fit_list, error_msg) == CCPN_ERROR)
-    //    RETURN_OBJ_ERROR(error_msg);
-
+    // iterate over all the maximum presented and return the parabolic closest elements and height
+    if (fit_parabolic(data_array, region_array, peak_array, fit_list, error_msg) == CCPN_ERROR)
+        RETURN_OBJ_ERROR(error_msg);
+    
     return fit_list;
 }
 

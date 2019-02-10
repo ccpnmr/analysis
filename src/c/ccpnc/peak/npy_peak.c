@@ -133,21 +133,34 @@ static float fit_position_parabolic(float vm, float v, float vp)
     return c;
 }
 
-static float fit_position_x(float vm, float v, float vp, float *height, float *lineFit)
+static CcpnBool fit_position_x(float vm, float v, float vp, float *peakPos, float *height, float *lineFit)
 {
     float a, b, c, x, halfX;
     CcpnBool is_positive;
 
     c = v;
     a = 0.5*(vm+vp-2.0*v);
-    b = vp-0.5*(vp+vm);
 
-    x = -b / (2.0*a);
-    *height = a*x*x+b*x+c;
-    halfX = (sqrt(b*b-4.0*a*(c-0.5*(*height))) - b) / (2.0*a);
-    *lineFit = 2.0*ABS(x - halfX);
+    if (ABS(a) > 1e-6)
+    {
+        b = vp-0.5*(vp+vm);
 
-    return x;
+        x = -b / (2.0*a);
+        *peakPos = x;
+        *height = a*x*x+b*x+c;
+        halfX = (sqrt(b*b-4.0*a*(c-0.5*(*height))) - b) / (2.0*a);
+        *lineFit = 2.0*ABS(x - halfX);
+    }
+    else
+    {
+        *peakPos = 0.0;
+        *height = v;
+        *lineFit = 0.0;
+
+        return CCPN_ERROR;
+    }
+
+    return CCPN_OK;
 }
 
 static CcpnBool check_buffer(PyArrayObject *data_array,
@@ -458,7 +471,8 @@ static CcpnBool fitParabolicToNDim(PyArrayObject *data_array,
     int ndim = PyArray_NDIM(data_array);
     npy_intp pnt[MAX_NDIM];
     float vl, vr, vm;
-    float height, lineFit;
+    float height, lineFit, peak;
+    CcpnBool status;
 
     /* check that local extremum */
 
@@ -477,7 +491,12 @@ static CcpnBool fitParabolicToNDim(PyArrayObject *data_array,
         vr = get_value_at_point(data_array, pnt);
 
 //        *v = fit_position_parabolic(vl, vm, vr);
-        *peakFit = fit_position_x(vl, vm, vr, &height, &lineFit)+point[dim];
+        status = fit_position_x(vl, vm, vr, &peak, &height, &lineFit)+point[dim];
+        if (status == CCPN_OK)
+            *peakFit = peak;
+        else
+            *peakFit = point[dim];
+
         *v = height;
         *lineWidth = lineFit;
 

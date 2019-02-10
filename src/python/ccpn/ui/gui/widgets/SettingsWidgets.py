@@ -600,10 +600,10 @@ class _SpectrumRow(Frame):
 
             ds.setEnabled(visible)
 
-        brush = (*hexToRgbRatio(spectrum.positiveContourColour), CCPNGLWIDGET_REGIONSHADE)
-        self.guiRegion = GLTargetButtonSpinBoxes(parent, application=application,
-                                                 orientation='v', brush=brush,
-                                                 grid=(row, col))
+        # brush = (*hexToRgbRatio(spectrum.positiveContourColour), CCPNGLWIDGET_REGIONSHADE)
+        # self.guiRegion = GLTargetButtonSpinBoxes(parent, application=application,
+        #                                          orientation='v', brush=brush,
+        #                                          grid=(row, col))
 
 
 class SequenceGraphSettings(Widget):

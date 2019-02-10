@@ -88,7 +88,8 @@ class GuiWindow():
         addShortCut("p, t", self, self.newPhasingTrace, context=context)
         addShortCut("i, 1", self, self.add1DIntegral, context=context)
         addShortCut("w, 1", self, self.getCurrentPositionAndStrip, context=context)
-        addShortCut("r, p", self, self.refitCurrentPeaks, context=context)
+        addShortCut("r, p", self, partial(self.refitCurrentPeaks, singularMode=True), context=context)
+        addShortCut("r, g", self, partial(self.refitCurrentPeaks, singularMode=False), context=context)
         addShortCut("Tab,Tab", self, self.moveToNextSpectrum, context=context)
         addShortCut("Tab, q", self, self.moveToPreviousSpectrum, context=context)
         addShortCut("Tab, a", self, self.showAllSpectra, context=context)
@@ -283,7 +284,7 @@ class GuiWindow():
             else:
                 getLogger().warning('Current strip is not 1D')
 
-    def refitCurrentPeaks(self):
+    def refitCurrentPeaks(self, singularMode=True):
         peaks = self.application.current.peaks
         if not peaks:
             return
@@ -291,7 +292,7 @@ class GuiWindow():
         with logCommandBlock(get='self') as log:
             log('refitCurrentPeaks')
 
-            AssignmentLib.refitPeaks(peaks)
+            AssignmentLib.refitPeaks(peaks, singularMode=singularMode)
 
         # project = peaks[0].project
         # undo = project._undo

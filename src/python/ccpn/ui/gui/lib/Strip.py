@@ -249,10 +249,13 @@ def navigateToNmrAtomsInStrip(strip: GuiStrip, nmrAtoms: typing.List[NmrAtom], w
         # strip.header.setLabelText(position='r', text='>>>')
 
     # redraw the contours
+    strip._updateVisibility()
+    if len(strip.orderedAxes) > 2:
+        strip.axisRegionChanged(strip.orderedAxes[2])
+
     for specNum, thisSpecView in enumerate(strip.spectrumDisplay.spectrumViews):
         thisSpecView.buildContours = True
         thisSpecView.update()
-
 
 def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None,
                                   showSequentialResidues=False, markPositions=True):

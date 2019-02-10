@@ -47,6 +47,11 @@ from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, logComm
 
 from ccpn.util.Logging import getLogger
 
+GAUSSIAN = 'gaussian'
+LORENTZIAN = 'lorentzian'
+PARABOLIC = 'parabolic'
+PICKING_MODES = (GAUSSIAN, LORENTZIAN, PARABOLIC)
+
 
 def _estimateNoiseLevel1D(y):
     '''
@@ -255,7 +260,7 @@ class PeakList(AbstractWrapperObject):
     ###def pickPeaksNd(self, positions:Sequence[float]=None,
     def pickPeaksNd(self, regionToPick: Sequence[float] = None,
                     doPos: bool = True, doNeg: bool = True,
-                    fitMethod: str = 'gaussian', excludedRegions=None,
+                    fitMethod: str = GAUSSIAN, excludedRegions=None,
                     excludedDiagonalDims=None, excludedDiagonalTransform=None,
                     minDropfactor: float = 0.1):
 
@@ -266,7 +271,7 @@ class PeakList(AbstractWrapperObject):
         defaults = collections.OrderedDict(
                 ###( ('positions', None), ('doPos', True), ('doNeg', True),
                 (('regionToPick', None), ('doPos', True), ('doNeg', True),
-                 ('fitMethod', 'gaussian'), ('excludedRegions', None), ('excludedDiagonalDims', None),
+                 ('fitMethod', GAUSSIAN), ('excludedRegions', None), ('excludedDiagonalDims', None),
                  ('excludedDiagonalTransform', None), ('minDropfactor', 0.1)
                  )
                 )
@@ -699,7 +704,7 @@ class PeakList(AbstractWrapperObject):
 
         return peakList3
 
-    def refit(self, method: str = 'gaussian'):
+    def refit(self, method: str = GAUSSIAN):
         fitExistingPeakList(self._apiPeakList, method)
 
     def restrictedPick(self, positionCodeDict, doPos, doNeg):
@@ -765,7 +770,7 @@ class PeakList(AbstractWrapperObject):
                         doPos: bool = True, doNeg: bool = True,
                         minLinewidth=None, exclusionBuffer=None,
                         minDropfactor: float = 0.1, checkAllAdjacent: bool = True,
-                        fitMethod: str = 'gaussian', excludedRegions=None,
+                        fitMethod: str = GAUSSIAN, excludedRegions=None,
                         excludedDiagonalDims=None, excludedDiagonalTransform=None):
         """Pick peaks in the region defined by the regionToPick dict.
 
@@ -820,11 +825,8 @@ class PeakList(AbstractWrapperObject):
         dataSource = spectrum._apiDataSource
         numDim = dataSource.numDim
 
-        if fitMethod:
-            assert fitMethod in ('gaussian', 'lorentzian'), 'pickPeaksRegion: fitMethod = %s, must be one of ("gaussian", "lorentzian")' % fitMethod
-
-            # method = 0 if fitMethod == 'gaussian' else 1
-            method = ('gaussian', 'lorentzian', 'parabolic').index(fitMethod)
+        assert fitMethod in PICKING_MODES, 'pickPeaksRegion: fitMethod = %s, must be one of ("gaussian", "lorentzian", "parabolic")' % fitMethod
+        method = PICKING_MODES.index(fitMethod)
 
         peaks = []
 
@@ -957,6 +959,7 @@ class PeakList(AbstractWrapperObject):
                         validPeakPoints.append(thisPeak)
 
                 allPeaksArray = None
+                allRegionArrays = []
                 regionArray = None
 
                 # can I divide the peaks into subregions to make the solver more stable?
@@ -966,10 +969,15 @@ class PeakList(AbstractWrapperObject):
                     position -= startPointBufferActual
                     numDim = len(position)
 
-                    # extended region helps
+                    # get the region containing this point
+                    firstArray = numpy.maximum(position - 2, 0)
+                    lastArray = numpy.minimum(position + 3, numPointInt)
+                    localRegionArray = numpy.array((firstArray, lastArray))
+                    localRegionArray = localRegionArray.astype('int32')
+
+                    # get the larger regionArray size containing all points so far
                     firstArray = numpy.maximum(position - 3, 0)
                     lastArray = numpy.minimum(position + 4, numPointInt)
-
                     if regionArray is not None:
                         firstArray = numpy.minimum(firstArray, regionArray[0])
                         lastArray = numpy.maximum(lastArray, regionArray[1])
@@ -984,68 +992,84 @@ class PeakList(AbstractWrapperObject):
                         allPeaksArray = peakArray
                     else:
                         allPeaksArray = numpy.append(allPeaksArray, peakArray, axis=0)
+                    allRegionArrays.append(localRegionArray)
 
                 if allPeaksArray is not None:
-                    # result = CPeak.fitPeaks(dataArray, regionArray, allPeaksArray, method)
+
+                    # parabolic - generate all peaks in one operation
                     result = CPeak.fitParabolicPeaks(dataArray, regionArray, allPeaksArray)
 
                     for height, centerGuess, linewidth in result:
-
-                        # clip the point to the exclusion area, to stop rogue peaks
-                        # center = numpy.array(centerGuess).clip(min=position - numpyExclusionBuffer,
-                        #                                        max=position + numpyExclusionBuffer)
                         center = numpy.array(centerGuess)
 
-                        # outofPlaneMinTest = numpy.array([])
-                        # outofPlaneMaxTest = numpy.array([])
-                        # for ii in range(numDim):
-                        #     outofPlaneMinTest = numpy.append(outofPlaneMinTest, 0.0)
-                        #     outofPlaneMaxTest = numpy.append(outofPlaneMaxTest, dataArray.shape[numDim-ii-1]-1.0)
-                        #
-                        # # check whether the new peak is outside of the current plane
-                        # outofPlaneCenter = numpy.array(centerGuess).clip(min=position - numpy.array(outofPlaneMinTest),
-                        #                      max=position + numpy.array(outofPlaneMaxTest))
-                        #
-                        # print(">>>", center, outofPlaneCenter, not numpy.array_equal(center, outofPlaneCenter))
-
-                        # ax.scatter(*center, c='r', marker='^')
-                        #
-                        # x2, y2, _ = mplot3d.proj3d.proj_transform(1, 1, 1, ax.get_proj())
-                        #
-                        # ax.text(*center, str(center), fontsize=12)
-
-                        # except Exception as es:
-                        #     print('>>>error:', str(es))
-                        #     dimCount = len(startPoints)
-                        #     height = float(dataArray[tuple(position[::-1])])
-                        #     # have to reverse position because dataArray backwards
-                        #     # have to float because API does not like numpy.float32
-                        #     center = position
-                        #     linewidth = dimCount * [None]
-
                         position = center + startPointBufferActual
-
                         peak = self._newPickedPeak(pointPositions=position, height=height,
                                                    lineWidths=linewidth, fitMethod=fitMethod)
                         peaks.append(peak)
 
+                    if method != PARABOLIC:
+                        self.fitExistingPeaks(peaks, fitMethod=fitMethod, singularMode=True)
+
+                    # else:
+                    #
+                    # # result = CPeak.fitPeaks(dataArray, regionArray, allPeaksArray, method)
+                    # result = CPeak.fitParabolicPeaks(dataArray, regionArray, allPeaksArray)
+                    #
+                    # for height, centerGuess, linewidth in result:
+                    #
+                    #     # clip the point to the exclusion area, to stop rogue peaks
+                    #     # center = numpy.array(centerGuess).clip(min=position - numpyExclusionBuffer,
+                    #     #                                        max=position + numpyExclusionBuffer)
+                    #     center = numpy.array(centerGuess)
+                    #
+                    #     # outofPlaneMinTest = numpy.array([])
+                    #     # outofPlaneMaxTest = numpy.array([])
+                    #     # for ii in range(numDim):
+                    #     #     outofPlaneMinTest = numpy.append(outofPlaneMinTest, 0.0)
+                    #     #     outofPlaneMaxTest = numpy.append(outofPlaneMaxTest, dataArray.shape[numDim-ii-1]-1.0)
+                    #     #
+                    #     # # check whether the new peak is outside of the current plane
+                    #     # outofPlaneCenter = numpy.array(centerGuess).clip(min=position - numpy.array(outofPlaneMinTest),
+                    #     #                      max=position + numpy.array(outofPlaneMaxTest))
+                    #     #
+                    #     # print(">>>", center, outofPlaneCenter, not numpy.array_equal(center, outofPlaneCenter))
+                    #
+                    #     # ax.scatter(*center, c='r', marker='^')
+                    #     #
+                    #     # x2, y2, _ = mplot3d.proj3d.proj_transform(1, 1, 1, ax.get_proj())
+                    #     #
+                    #     # ax.text(*center, str(center), fontsize=12)
+                    #
+                    #     # except Exception as es:
+                    #     #     print('>>>error:', str(es))
+                    #     #     dimCount = len(startPoints)
+                    #     #     height = float(dataArray[tuple(position[::-1])])
+                    #     #     # have to reverse position because dataArray backwards
+                    #     #     # have to float because API does not like numpy.float32
+                    #     #     center = position
+                    #     #     linewidth = dimCount * [None]
+                    #
+                    #     position = center + startPointBufferActual
+                    #
+                    #     peak = self._newPickedPeak(pointPositions=position, height=height,
+                    #                                lineWidths=linewidth, fitMethod=fitMethod)
+                    #     peaks.append(peak)
+                    #
             # plt.show()
 
         return peaks
 
-    def fitExistingPeaks(self, peaks: Sequence['Peak'], fitMethod: str = None):
+    def fitExistingPeaks(self, peaks: Sequence['Peak'], fitMethod: str = None, singularMode=True):
         """Refit the current selected peaks.
         """
 
         from ccpnc.peak import Peak as CPeak
 
-        if fitMethod:
-            assert fitMethod in ('gaussian', 'lorentzian'), 'fitExistingPeaks: fitMethod = %s, must be one of ("gaussian", "lorentzian")' % fitMethod
-
-            # method = 0 if fitMethod == 'gaussian' else 1
-            method = ('gaussian', 'lorentzian', 'parabolic').index(fitMethod)
+        assert fitMethod in PICKING_MODES, 'pickPeaksRegion: fitMethod = %s, must be one of ("gaussian", "lorentzian", "parabolic")' % fitMethod
+        method = PICKING_MODES.index(fitMethod)
 
         allPeaksArray = None
+        allRegionArrays = []
         regionArray = None
 
         for peak in peaks:
@@ -1068,25 +1092,32 @@ class PeakList(AbstractWrapperObject):
 
             # consider for each dimension on the interval [point-3,point+4>, account for min and max
             # of each dimension
-            firstArray = numpy.maximum(position - 2, 0)
-            lastArray = numpy.minimum(position + 3, numPoints)
+            if method == PARABOLIC or singularMode is True:
+                firstArray = numpy.maximum(position - 2, 0)
+                lastArray = numpy.minimum(position + 3, numPoints)
+            else:
+                firstArray = numpy.maximum(position - 3, 0)
+                lastArray = numpy.minimum(position + 4, numPoints)
+
+            # Cast to int for subsequent call
+            firstArray = firstArray.astype('int32')
+            lastArray = lastArray.astype('int32')
+            localRegionArray = numpy.array((firstArray, lastArray), dtype=numpy.int32)
 
             if regionArray is not None:
                 firstArray = numpy.minimum(firstArray, regionArray[0])
                 lastArray = numpy.maximum(lastArray, regionArray[1])
 
-            # Cast to int for subsequent call
-            firstArray = firstArray.astype('int32')
-            lastArray = lastArray.astype('int32')
             # peakArray = (position - firstArray).reshape((1, numDim))
             peakArray = position.reshape((1, numDim))
             peakArray = peakArray.astype('float32')
-            regionArray = numpy.array((firstArray, lastArray))
+            regionArray = numpy.array((firstArray, lastArray), dtype=numpy.int32)
 
             if allPeaksArray is None:
                 allPeaksArray = peakArray
             else:
                 allPeaksArray = numpy.append(allPeaksArray, peakArray, axis=0)
+            allRegionArrays.append(localRegionArray)
 
         if allPeaksArray is not None and allPeaksArray.size != 0:
 
@@ -1110,23 +1141,31 @@ class PeakList(AbstractWrapperObject):
                     pk = pk.astype('float32')
                     updatePeaksArray = numpy.append(updatePeaksArray, pk, axis=0)
 
-            # print(updatePeaksArray)
-            # for pp in range(updatePeaksArray.shape[0]):
-            #     print(">>>", pp)
-            #
-            #     # newArray = updatePeaksArray[pp]# + updatePeaksArray[:pp] + updatePeaksArray[pp+1:]
-            #     print(">>>")
-            #
-            #     # arr = np.array([10, 20, 30, 40, 50])
-            #     idx = [pp] + list(range(0, pp)) + list(range(pp+1, updatePeaksArray.shape[0]))
-            #     # >> > arr[idx]
-            #     # array([20, 10, 40, 50, 30])
-            #     print(">>>", updatePeaksArray[idx])
-
-
             try:
-                # print(">>>allpeaks", dataArray, updatePeaksArray)
-                result = CPeak.fitPeaks(dataArray, regionArray, updatePeaksArray, method)
+                result = ()
+                if method == PARABOLIC:
+
+                    # parabolic - generate all peaks in one operation
+                    result = CPeak.fitParabolicPeaks(dataArray, regionArray, updatePeaksArray)
+
+                else:
+                    # currently gaussian or lorentzian
+                    if singularMode is True:
+
+                        # fit peaks individually
+                        for peakArray, localRegionArray in zip(allPeaksArray, allRegionArrays):
+                            peakArray = peakArray - firstArray
+                            peakArray = peakArray.reshape((1, numDim))
+                            peakArray = peakArray.astype('float32')
+                            localRegionArray = numpy.array((localRegionArray[0] - firstArray, localRegionArray[1] - firstArray), dtype=numpy.int32)
+
+                            localResult = CPeak.fitPeaks(dataArray, localRegionArray, peakArray, method)
+                            result += tuple(localResult)
+                    else:
+
+                        # fit all peaks in one operation
+                        result = CPeak.fitPeaks(dataArray, regionArray, updatePeaksArray, method)
+
             except CPeak.error as e:
 
                 # there could be some fitting error
@@ -1155,6 +1194,34 @@ class PeakList(AbstractWrapperObject):
                     peakDim.lineWidth = dataDims[i].valuePerPoint * linewidth[i]
 
                 peak.height = dataSource.scale * height
+
+    # if allPeaksArray is not None:
+    #
+    #     result = []
+    #     if method == PICKING_MODES[2]:
+    #
+    #         # parabolic - generate all peaks in one operation
+    #         result = CPeak.fitParabolicPeaks(dataArray, regionArray, allPeaksArray)
+    #
+    #     else:
+    #
+    #         # currently gaussian or lorentzian
+    #         if peakRefittingMode == SINGULAR_FIT:
+    #
+    #         # fit peaks individually
+    #
+    #         else:
+    #
+    #             # fit all peaks in one operation
+    #             result = CPeak.fitPeaks(dataArray, regionArray, allPeaksArray, method)
+    #
+    #     for height, centerGuess, linewidth in result:
+    #         center = numpy.array(centerGuess)
+    #
+    #         position = center + startPointBufferActual
+    #         peak = self._newPickedPeak(pointPositions=position, height=height,
+    #                                    lineWidths=linewidth, fitMethod=fitMethod)
+    #         peaks.append(peak)
 
     #===========================================================================================
     # new'Object' and other methods

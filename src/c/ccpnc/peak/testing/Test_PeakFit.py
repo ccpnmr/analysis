@@ -237,7 +237,7 @@ if __name__ == '__main__':
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # fit all peaks in individual operations (not correct)
 
-    for peakNum, (position, height) in enumerate(peakPoints):
+    for peakNum, (position, _) in enumerate(peakPoints):
 
         numDim = len(position)
         numPointInt = np.array([dataArray.shape[1], dataArray.shape[0]])

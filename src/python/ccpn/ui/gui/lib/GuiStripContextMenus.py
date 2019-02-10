@@ -32,7 +32,7 @@ __date__ = "$Date: 2018-05-17 10:28:43 +0000 (Thu, May 17, 2018) $"
 
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.util.Logging import getLogger
-
+from functools import partial
 
 MENU = 'Menu'
 ITEM = 'Item'
@@ -260,9 +260,15 @@ def _editPeakAssignmentItem(strip):
 
 
 def _refitPeakItem(strip):
-    return _SCMitem(name='Refit Peak(s)',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Refit current peak(s)', shortcut='RP',
-                    callback=strip.mainWindow.refitCurrentPeaks)
+    return _SCMitem(name='Refit Peak(s) Singular',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Refit current peak(s) as singular', shortcut='RP',
+                    callback=partial(strip.mainWindow.refitCurrentPeaks, singularMode=True))
+
+
+def _refitPeakGroupItem(strip):
+    return _SCMitem(name='Refit Peak(s) Group',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Refit current peak(s) as a group', shortcut='RG',
+                    callback=partial(strip.mainWindow.refitCurrentPeaks, singularMode=False))
 
 
 def _newMultipletItem(strip):
@@ -575,6 +581,7 @@ def _getNdPeakMenu(guiStripNd) -> Menu:
         _copyPeakItem(guiStripNd),
         _editPeakAssignmentItem(guiStripNd),
         _refitPeakItem(guiStripNd),
+        _refitPeakGroupItem(guiStripNd),
         _separator(),
         _newMultipletItem(guiStripNd),
         _separator(),

@@ -491,9 +491,9 @@ static CcpnBool fitParabolicToNDim(PyArrayObject *data_array,
         vr = get_value_at_point(data_array, pnt);
 
 //        *v = fit_position_parabolic(vl, vm, vr);
-        status = fit_position_x(vl, vm, vr, &peak, &height, &lineFit)+point[dim];
+        status = fit_position_x(vl, vm, vr, &peak, &height, &lineFit);
         if (status == CCPN_OK)
-            *peakFit = peak;
+            *peakFit = peak+point[dim];
         else
             *peakFit = point[dim];
 

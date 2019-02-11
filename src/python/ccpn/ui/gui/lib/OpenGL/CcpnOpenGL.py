@@ -1724,21 +1724,23 @@ class CcpnGLWidget(QOpenGLWidget):
                 #                                    tol=delta):
                 #     self._dragRegions.add((region, 'v', 3))   # both lines of v-region
 
-                mid = np.median(region._object._1Dregions[1])
-                delta = (np.max(region._object._1Dregions[1]) - np.min(region._object._1Dregions[1])) / 2.0
-                inX = self._widthsChangedEnough((mid, 0.0),
-                                                (self.cursorCoordinate[0], 0.0),
-                                                tol=delta)
+                thisRegion = region._object._1Dregions
+                if thisRegion:
+                    mid = np.median(thisRegion[1])
+                    delta = (np.max(thisRegion[1]) - np.min(thisRegion[1])) / 2.0
+                    inX = self._widthsChangedEnough((mid, 0.0),
+                                                    (self.cursorCoordinate[0], 0.0),
+                                                    tol=delta)
 
-                mx = np.max([region._object._1Dregions[0], np.max(region._object._1Dregions[2])])
-                mn = np.min([region._object._1Dregions[0], np.min(region._object._1Dregions[2])])
-                mid = (mx + mn) / 2.0
-                delta = (mx - mn) / 2.0
-                inY = self._widthsChangedEnough((0.0, mid),
-                                                (0.0, self.cursorCoordinate[1]),
-                                                tol=delta)
-                if not inX and not inY:
-                    self._dragRegions.add((region, 'v', 3))
+                    mx = np.max([thisRegion[0], np.max(thisRegion[2])])
+                    mn = np.min([thisRegion[0], np.min(thisRegion[2])])
+                    mid = (mx + mn) / 2.0
+                    delta = (mx - mn) / 2.0
+                    inY = self._widthsChangedEnough((0.0, mid),
+                                                    (0.0, self.cursorCoordinate[1]),
+                                                    tol=delta)
+                    if not inX and not inY:
+                        self._dragRegions.add((region, 'v', 3))
 
         return self._dragRegions
 

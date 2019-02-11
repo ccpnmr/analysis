@@ -309,11 +309,12 @@ class Integral(AbstractWrapperObject):
                 if not baseline:
                     try:
                         baseline = min(y[xRegion])
+                        return (baseline, x[xRegion], y[xRegion])
                     except Exception as es:
                         # TODO:Luca check empty list error
                         pass
                 # should be just one for 1D
-                return (baseline, x[xRegion], y[xRegion])
+        return None
 
     #=========================================================================================
     # CCPN functions

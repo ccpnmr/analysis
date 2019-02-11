@@ -254,12 +254,14 @@ class GLRegion(QtWidgets.QWidget):
                                                          drawMode=GL.GL_QUAD_STRIP, fillMode=GL.GL_FILL,
                                                          dimension=2, GLContext=self._parent)
 
-            intArea.numVertices = len(self._object._1Dregions[1]) * 2
-            intArea.vertices = np.empty(intArea.numVertices * 2, dtype=np.float32)
-            intArea.vertices[::4] = self._object._1Dregions[1]
-            intArea.vertices[2::4] = self._object._1Dregions[1]
-            intArea.vertices[1::4] = self._object._1Dregions[0]
-            intArea.vertices[3::4] = self._object._1Dregions[2]
+            thisRegion = self._object._1Dregions
+            if thisRegion:
+                intArea.numVertices = len(thisRegion[1]) * 2
+                intArea.vertices = np.empty(intArea.numVertices * 2, dtype=np.float32)
+                intArea.vertices[::4] = thisRegion[1]
+                intArea.vertices[2::4] = thisRegion[1]
+                intArea.vertices[1::4] = thisRegion[0]
+                intArea.vertices[3::4] = thisRegion[2]
 
             if self._object and self._object in self._glList._parent.current.integrals:
                 solidColour = list(self._glList._parent.highlightColour)

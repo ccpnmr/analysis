@@ -700,9 +700,17 @@ def refitPeaks(peaks: Sequence[Peak], method: str = 'gaussian', singularMode=Tru
     # LibPeak.fitExistingPeaks([peak._wrappedData for peak in peaks], method)
 
     if peaks:
-        peakList = peaks[0].peakList
+        # sort into peakLists for each spectrum, otherwise dataArrays are invalid
 
-        peakList.fitExistingPeaks(peaks, method, singularMode=singularMode)
+        peakLists = {}
+        for peak in peaks:
+            if peak.peakList in peakLists:
+                peakLists[peak.peakList].append(peak)
+            else:
+                peakLists[peak.peakList] = [peak]
+
+        for peakList, peaks in peakLists.items():
+            peakList.fitExistingPeaks(peaks, method, singularMode=singularMode)
 
 
 def _assignNmrResiduesToPeaks(peaks, nmrResidues):

@@ -1061,6 +1061,7 @@ class PeakList(AbstractWrapperObject):
 
     def fitExistingPeaks(self, peaks: Sequence['Peak'], fitMethod: str = None, singularMode=True):
         """Refit the current selected peaks.
+        Must be called with opeaks that belong to this peakList
         """
 
         from ccpnc.peak import Peak as CPeak
@@ -1071,6 +1072,10 @@ class PeakList(AbstractWrapperObject):
         allPeaksArray = None
         allRegionArrays = []
         regionArray = None
+
+        badPeaks = [peak for peak in peaks if peak.peakList is not self]
+        if badPeaks:
+            raise ValueError('List contains peaks that are not in the same peakList.')
 
         for peak in peaks:
 

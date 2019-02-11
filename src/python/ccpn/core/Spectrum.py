@@ -234,6 +234,7 @@ class Spectrum(AbstractWrapperObject):
 
     @positiveContourBase.setter
     def positiveContourBase(self, value):
+        value = max(value, 1e-6)
         self._wrappedData.positiveContourBase = value
 
     @property
@@ -293,6 +294,7 @@ class Spectrum(AbstractWrapperObject):
 
     @negativeContourBase.setter
     def negativeContourBase(self, value):
+        value = min(value, -1e-6)
         self._wrappedData.negativeContourBase = value
 
     @property

@@ -200,8 +200,38 @@ def _makeLogString(prefix, addSelf, func, *args, **kwds):
     from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 
     def obj2pid(obj):
-        "Convert core objects and CcpnModules to pids"
-        return obj.pid if isinstance(obj, (AbstractWrapperObject, CcpnModule)) else obj
+        "Convert core objects and CcpnModules to pids; expand list, tuples, dicts but don't use recursion"
+        if isinstance(obj, (AbstractWrapperObject, CcpnModule)):
+            obj = obj.pid
+
+        elif isinstance(obj, list):
+            _tmp = []
+            for itm in obj:
+                if isinstance(itm, (AbstractWrapperObject, CcpnModule)):
+                    _tmp.append(itm.pid)
+                else:
+                    _tmp.append(itm)
+            obj = _tmp
+
+        elif isinstance(obj, tuple):
+            _tmp = []
+            for itm in obj:
+                if isinstance(itm, (AbstractWrapperObject, CcpnModule)):
+                    _tmp.append(itm.pid)
+                else:
+                    _tmp.append(itm)
+            obj = tuple(_tmp)
+
+        elif isinstance(obj, dict):
+            _tmp = {}
+            for key, value in obj.items():
+                if isinstance(value, (AbstractWrapperObject, CcpnModule)):
+                    _tmp[key] = value.pid
+                else:
+                    _tmp[key] = value
+            obj = _tmp
+
+        return obj
 
     # get the signature
     sig = inspect.signature(func)
@@ -222,17 +252,17 @@ def _makeLogString(prefix, addSelf, func, *args, **kwds):
     for pName in pNames:
         pValue = ba.arguments[pName]
 
-        if kinds[pName] == inspect.Parameter.VAR_POSITIONAL:  # variable argument
+        if kinds[pName] == inspect.Parameter.VAR_POSITIONAL:  # variable arguments
             pStrings.extend([repr(obj2pid(p)) for p in pValue])
 
         elif kinds[pName] == inspect.Parameter.VAR_KEYWORD:  # variable keywords
             pStrings.extend(['{0!s}={1!r}'.format(k, obj2pid(v)) for (k, v) in pValue.items()])
 
-        elif kinds[pName] == inspect.Parameter.POSITIONAL_ONLY or \
-                kinds[pName] == inspect.Parameter.POSITIONAL_OR_KEYWORD:  # positional keywords
+        elif kinds[pName] == inspect.Parameter.POSITIONAL_ONLY:
             pStrings.append(repr(obj2pid(pValue)))
 
-        elif kinds[pName] == inspect.Parameter.KEYWORD_ONLY:  #  keywords
+        elif kinds[pName] == inspect.Parameter.KEYWORD_ONLY or \
+             kinds[pName] == inspect.Parameter.POSITIONAL_OR_KEYWORD:  # #  keywords or positional keywords
             pStrings.append('{0!s}={1!r}'.format(pName, obj2pid(pValue)))
 
     if ('self' in ba.arguments or 'cls' in ba.arguments) and addSelf:

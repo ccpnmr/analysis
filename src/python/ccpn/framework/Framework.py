@@ -40,6 +40,7 @@ from ccpn.core.Project import Project
 from ccpn.core._implementation import Io as coreIo
 from ccpn.core.lib import CcpnNefIo, CcpnSparkyIo
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
+from ccpn.core.lib.Pid import Pid
 from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.framework import Version
 from ccpn.framework.Current import Current
@@ -787,10 +788,30 @@ class Framework(NotifierBase):
             if len(self.project.strips) > 0:
                 self.current.strip = self.project.strips[0]
 
+    def get(self, identifier):
+        """General method to obtain object (either gui or data) from identifier (pid, gid, obj-string)
+        """
+        if identifier is None:
+            raise ValueError('Expected str or Pid, got "None"')
+
+        if not isinstance(identifier, (str, Pid)):
+            raise ValueError('Expected str or Pid, got "%s" %s' % (identifier, type(identifier)))
+        identifier = str(identifier)
+
+        if len(identifier) == 0:
+            raise ValueError('Expected str or Pid, got zero-length identifier')
+
+        if len(identifier) >= 2 and identifier[0] == '<' and identifier[-1] == '>':
+            identifier = identifier[1:-1]
+
+        return self.getByPid(identifier)
+
     def getByPid(self, pid):
+        "Convenience"
         return self.project.getByPid(pid)
 
     def getByGid(self, gid):
+        "Convenience"
         return self.ui.getByGid(gid)
 
     def _startCommandBlock(self, command: str, quiet: bool = False, **objectParameters):

@@ -535,7 +535,7 @@ class Peak(AbstractWrapperObject):
             values = self.reorderValues(values, axisCodes)
         setattr(self, attributeName, values)
 
-    def snapToExtremum(self, halfBoxSearchWidth: int = 2, halfBoxFitWidth: int = 2):
+    def snapToExtremum(self, halfBoxSearchWidth: int = 4, halfBoxFitWidth: int = 2):
         """Snap the Peak to the closest local extrema, if within range."""
         LibPeak.snapToExtremum(self._apiPeak, halfBoxSearchWidth=halfBoxSearchWidth, halfBoxFitWidth=halfBoxFitWidth)
 

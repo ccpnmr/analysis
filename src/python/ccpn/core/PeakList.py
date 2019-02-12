@@ -47,10 +47,10 @@ from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, logComm
 
 from ccpn.util.Logging import getLogger
 
-GAUSSIAN = 'gaussian'
-LORENTZIAN = 'lorentzian'
-PARABOLIC = 'parabolic'
-PICKING_MODES = (GAUSSIAN, LORENTZIAN, PARABOLIC)
+GAUSSIANMETHOD = 'gaussian'
+LORENTZIANMETHOD = 'lorentzian'
+PARABOLICMETHOD = 'parabolic'
+PICKINGMETHODS = (GAUSSIANMETHOD, LORENTZIANMETHOD, PARABOLICMETHOD)
 
 
 def _estimateNoiseLevel1D(y):
@@ -260,7 +260,7 @@ class PeakList(AbstractWrapperObject):
     ###def pickPeaksNd(self, positions:Sequence[float]=None,
     def pickPeaksNd(self, regionToPick: Sequence[float] = None,
                     doPos: bool = True, doNeg: bool = True,
-                    fitMethod: str = GAUSSIAN, excludedRegions=None,
+                    fitMethod: str = PARABOLICMETHOD, excludedRegions=None,
                     excludedDiagonalDims=None, excludedDiagonalTransform=None,
                     minDropfactor: float = 0.1):
 
@@ -271,7 +271,7 @@ class PeakList(AbstractWrapperObject):
         defaults = collections.OrderedDict(
                 ###( ('positions', None), ('doPos', True), ('doNeg', True),
                 (('regionToPick', None), ('doPos', True), ('doNeg', True),
-                 ('fitMethod', GAUSSIAN), ('excludedRegions', None), ('excludedDiagonalDims', None),
+                 ('fitMethod', PARABOLICMETHOD), ('excludedRegions', None), ('excludedDiagonalDims', None),
                  ('excludedDiagonalTransform', None), ('minDropfactor', 0.1)
                  )
                 )
@@ -704,8 +704,8 @@ class PeakList(AbstractWrapperObject):
 
         return peakList3
 
-    def refit(self, method: str = GAUSSIAN):
-        fitExistingPeakList(self._apiPeakList, method)
+    # def refit(self, method: str = GAUSSIANMETHOD):
+    #     fitExistingPeakList(self._apiPeakList, method)
 
     def restrictedPick(self, positionCodeDict, doPos, doNeg):
 
@@ -770,7 +770,7 @@ class PeakList(AbstractWrapperObject):
                         doPos: bool = True, doNeg: bool = True,
                         minLinewidth=None, exclusionBuffer=None,
                         minDropfactor: float = 0.1, checkAllAdjacent: bool = True,
-                        fitMethod: str = GAUSSIAN, excludedRegions=None,
+                        fitMethod: str = PARABOLICMETHOD, excludedRegions=None,
                         excludedDiagonalDims=None, excludedDiagonalTransform=None):
         """Pick peaks in the region defined by the regionToPick dict.
 
@@ -825,8 +825,8 @@ class PeakList(AbstractWrapperObject):
         dataSource = spectrum._apiDataSource
         numDim = dataSource.numDim
 
-        assert fitMethod in PICKING_MODES, 'pickPeaksRegion: fitMethod = %s, must be one of ("gaussian", "lorentzian", "parabolic")' % fitMethod
-        method = PICKING_MODES.index(fitMethod)
+        assert fitMethod in PICKINGMETHODS, 'pickPeaksRegion: fitMethod = %s, must be one of ("gaussian", "lorentzian", "parabolic")' % fitMethod
+        # method = PICKINGMETHODS.index(fitMethod)
 
         peaks = []
 
@@ -1007,7 +1007,7 @@ class PeakList(AbstractWrapperObject):
                                                    lineWidths=linewidth, fitMethod=fitMethod)
                         peaks.append(peak)
 
-                    if method != PARABOLIC:
+                    if fitMethod != PARABOLICMETHOD:
                         self.fitExistingPeaks(peaks, fitMethod=fitMethod, singularMode=True)
 
                     # else:
@@ -1059,15 +1059,15 @@ class PeakList(AbstractWrapperObject):
 
         return peaks
 
-    def fitExistingPeaks(self, peaks: Sequence['Peak'], fitMethod: str = None, singularMode=True):
+    def fitExistingPeaks(self, peaks: Sequence['Peak'], fitMethod: str = GAUSSIANMETHOD, singularMode=True):
         """Refit the current selected peaks.
         Must be called with opeaks that belong to this peakList
         """
 
         from ccpnc.peak import Peak as CPeak
 
-        assert fitMethod in PICKING_MODES, 'pickPeaksRegion: fitMethod = %s, must be one of ("gaussian", "lorentzian", "parabolic")' % fitMethod
-        method = PICKING_MODES.index(fitMethod)
+        assert fitMethod in PICKINGMETHODS, 'pickPeaksRegion: fitMethod = %s, must be one of ("gaussian", "lorentzian", "parabolic")' % fitMethod
+        method = PICKINGMETHODS.index(fitMethod)
 
         allPeaksArray = None
         allRegionArrays = []
@@ -1097,10 +1097,11 @@ class PeakList(AbstractWrapperObject):
 
             # consider for each dimension on the interval [point-3,point+4>, account for min and max
             # of each dimension
-            if method == PARABOLIC or singularMode is True:
+            if fitMethod == PARABOLICMETHOD or singularMode is True:
                 firstArray = numpy.maximum(position - 2, 0)
                 lastArray = numpy.minimum(position + 3, numPoints)
             else:
+                # extra plane in each direction increases accuracy of group fitting
                 firstArray = numpy.maximum(position - 3, 0)
                 lastArray = numpy.minimum(position + 4, numPoints)
 
@@ -1148,7 +1149,7 @@ class PeakList(AbstractWrapperObject):
 
             try:
                 result = ()
-                if method == PARABOLIC:
+                if fitMethod == PARABOLICMETHOD:
 
                     # parabolic - generate all peaks in one operation
                     result = CPeak.fitParabolicPeaks(dataArray, regionArray, updatePeaksArray)
@@ -1203,7 +1204,7 @@ class PeakList(AbstractWrapperObject):
     # if allPeaksArray is not None:
     #
     #     result = []
-    #     if method == PICKING_MODES[2]:
+    #     if method == PICKINGMETHODS[2]:
     #
     #         # parabolic - generate all peaks in one operation
     #         result = CPeak.fitParabolicPeaks(dataArray, regionArray, allPeaksArray)
@@ -1211,7 +1212,7 @@ class PeakList(AbstractWrapperObject):
     #     else:
     #
     #         # currently gaussian or lorentzian
-    #         if peakRefittingMode == SINGULAR_FIT:
+    #         if peakFittingMethod == SINGULAR_FIT:
     #
     #         # fit peaks individually
     #
@@ -1259,7 +1260,7 @@ class PeakList(AbstractWrapperObject):
 
     @logCommand(get='self')
     def _newPickedPeak(self, pointPositions: Sequence[float] = None, height: float = None,
-                       lineWidths: Sequence[float] = (), fitMethod: str = 'gaussian', **kwds):
+                       lineWidths: Sequence[float] = (), fitMethod: str = PARABOLICMETHOD, **kwds):
         """Create a new Peak within a peakList from a picked peak
 
         See the Peak class for details.

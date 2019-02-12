@@ -53,6 +53,9 @@ from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, 
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD
+
+PEAKFITTINGDEFAULTS = [PARABOLICMETHOD, GAUSSIANMETHOD]
 
 
 # FIXME separate pure GUI to project/preferences properites
@@ -335,6 +338,17 @@ class PreferencesPopup(CcpnDialog):
         self.dropFactorData.setMinimumWidth(LineEditsMinimumWidth)
         self.dropFactorData.setValue(float('%.1f' % (100 * self.preferences.general.peakDropFactor)))
         self.dropFactorData.editingFinished.connect(self._setDropFactor)
+
+        row += 1
+        self.peakFittingMethodLabel = Label(parent, text="Peak Region Fitting Method", grid=(row, 0))
+        peakFittingMethod = self.preferences.general.peakFittingMethod
+        self.peakFittingMethod = RadioButtons(parent, texts=PEAKFITTINGDEFAULTS,
+                                          selectedInd=PEAKFITTINGDEFAULTS.index(peakFittingMethod),
+                                          callback=self._setPeakFittingMethod,
+                                          direction='h',
+                                          grid=(row, 1), hAlign='l',
+                                          tipTexts=None,
+                                          )
 
         ### Not fully Tested, Had some issues with $Path routines in setting the path of the copied spectra.
         ###  Needs more testing for different spectra formats etc. Disabled until completion.
@@ -929,6 +943,16 @@ class PreferencesPopup(CcpnDialog):
         except:
             return
         self.preferences.general.matchAxisCode = matchAxisCode
+
+    def _setPeakFittingMethod(self):
+        """
+        Set the matching of the axis codes across different strips
+        """
+        try:
+            peakFittingMethod = PEAKFITTINGDEFAULTS[self.peakFittingMethod.getIndex()]
+        except:
+            return
+        self.preferences.general.peakFittingMethod = peakFittingMethod
 
     def _setAspect(self, aspect):
         """

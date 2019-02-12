@@ -271,6 +271,12 @@ def _refitPeakGroupItem(strip):
                     callback=partial(strip.mainWindow.refitCurrentPeaks, singularMode=False))
 
 
+def _snapToExtremaItem(strip):
+    return _SCMitem(name='Snap Peak(s) to Extrema',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Snap current peak(s) to closest extrema', shortcut='SE',
+                    callback=strip.mainWindow.snapCurrentPeaksToExtremum)
+
+
 def _newMultipletItem(strip):
     return _SCMitem(name='New Multiplet',
                     typeItem=ItemTypes.get(ITEM), toolTip='Add New Multiplet', shortcut='AM',
@@ -582,6 +588,7 @@ def _getNdPeakMenu(guiStripNd) -> Menu:
         _editPeakAssignmentItem(guiStripNd),
         _refitPeakItem(guiStripNd),
         _refitPeakGroupItem(guiStripNd),
+        _snapToExtremaItem(guiStripNd),
         _separator(),
         _newMultipletItem(guiStripNd),
         _separator(),

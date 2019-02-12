@@ -1205,11 +1205,12 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         self.setUpdatesEnabled(True)
 
     def selectPid(self, pid):
-
-        ws = self._findItems(pid)  #not sure why this returns a list!
-        for i in ws:
-            self.setCurrentItem(i)
-
+        """Select the item in the sideBar with the given pid.
+        """
+        item = self._sidebarData.findChildNode(pid)
+        if item and item.widget:
+            self.setCurrentItem(item.widget)
+            self.setFocus()
 
 #------------------------------------------------------------------------------------------------------------------
 # Emulate V3 objects

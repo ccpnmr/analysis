@@ -247,6 +247,23 @@ class Peak(AbstractWrapperObject):
             peakDim.lineWidth = value[ii]
 
     @property
+    def aliasing(self) -> Tuple[Optional[float], ...]:
+        """Aliasing values for the peak in each dimension."""
+        return tuple(x.numAliasing for x in self._wrappedData.sortedPeakDims())
+
+    @aliasing.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
+    def aliasing(self, value: Sequence):
+        if len(value) != len(self._wrappedData.sortedPeakDims()):
+            raise ValueError("Length of %s does not match number of dimensions." % str(value))
+        if not all(isinstance(dimVal, int) for dimVal in value):
+            raise ValueError("Aliasing values must be integer.")
+
+        for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+            peakDim.numAliasing = value[ii]
+
+    @property
     def dimensionNmrAtoms(self) -> Tuple[Tuple['NmrAtom', ...], ...]:
         """Peak dimension assignment - a tuple of tuples with the assigned NmrAtoms for each dimension.
         One of two alternative views on the Peak assignment.

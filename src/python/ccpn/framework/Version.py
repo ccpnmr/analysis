@@ -30,6 +30,6 @@ try:
     revision = int(__version__.split()[1])
 except:
     revision = -1
-applicationVersion = '3.0.b4'
+applicationVersion = '3.0.b5'
 authors = __credits__
 projectName = 'CCPN'

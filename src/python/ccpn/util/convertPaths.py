@@ -31,7 +31,7 @@ import string
 
 
 # PATH1 = '/Users/wb104/miniconda3/envs/ccpnmr_dist'
-# PATH2 = '/Users/wb104/release/ccpnmr3.0.b4/miniconda'
+# PATH2 = '/Users/wb104/release/ccpnmr3.0.b5/miniconda'
 
 # Search through the /bin and /lib subdirectories of /miniconda
 # and point the paths to the correct place

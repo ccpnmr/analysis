@@ -1153,6 +1153,7 @@ class Framework(NotifierBase):
             (),
             ("Spectrum Groups...", self.showSpectrumGroupsPopup, [('shortcut', 'ss')]),
             ("Set Experiment Types...", self.showExperimentTypePopup, [('shortcut', 'et')]),
+            ("Validate Paths...", self.showValidateSpectraPopup, [('shortcut', 'vp')]),
             (),
             ("Pick Peaks", (("Pick 1D Peaks...", self.showPeakPick1DPopup, [('shortcut', 'p1')]),
                             ("Pick ND Peaks...", self.showPeakPickNDPopup, [('shortcut', 'pp')])
@@ -2094,6 +2095,19 @@ class Framework(NotifierBase):
             from ccpn.ui.gui.popups.ExperimentTypePopup import ExperimentTypePopup
 
             popup = ExperimentTypePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+            popup.exec_()
+
+    def showValidateSpectraPopup(self):
+        """
+        Displays experiment type popup.
+        """
+        if not self.project.spectra:
+            getLogger().warning('Validate Paths Selection: Project has no Specta.')
+            MessageDialog.showWarning('Validate Paths Selection', 'Project has no Spectra.')
+        else:
+            from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraPopup
+
+            popup = ValidateSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
             popup.exec_()
 
     def showPeakPick1DPopup(self):

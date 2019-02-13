@@ -64,7 +64,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import numpy as np
-import operator
+import os
 from typing import Sequence, Tuple, Optional
 from functools import partial
 from ccpn.util import Common as commonUtil
@@ -234,7 +234,6 @@ class Spectrum(AbstractWrapperObject):
 
     @positiveContourBase.setter
     def positiveContourBase(self, value):
-        value = max(value, 1e-6)
         self._wrappedData.positiveContourBase = value
 
     @property
@@ -294,7 +293,6 @@ class Spectrum(AbstractWrapperObject):
 
     @negativeContourBase.setter
     def negativeContourBase(self, value):
-        value = min(value, -1e-6)
         self._wrappedData.negativeContourBase = value
 
     @property
@@ -446,7 +444,7 @@ class Spectrum(AbstractWrapperObject):
         self._wrappedData.experiment.name = value
 
     @property
-    def filePath(self) -> str:
+    def filePath(self) -> Optional[str]:
         """Absolute path to NMR data file."""
         xx = self._wrappedData.dataStore
         if xx:
@@ -470,7 +468,15 @@ class Spectrum(AbstractWrapperObject):
             apiDataStore.path = value[len(dataUrl.url.path) + 1:]
 
     @property
-    def headerSize(self) -> int:
+    def isValidPath(self) -> bool:
+        """Return true if the spectrum currently points to an existent file.
+        (contents of the file are not checked)"""
+        path = self.filePath
+        if path and os.path.exists(path):
+            return True
+
+    @property
+    def headerSize(self) -> Optional[int]:
         """File header size in bytes."""
         xx = self._wrappedData.dataStore
         if xx:

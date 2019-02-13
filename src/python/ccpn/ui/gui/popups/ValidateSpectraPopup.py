@@ -1,0 +1,249 @@
+"""
+Module Documentation here
+"""
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = ""
+__credits__ = ""
+__licence__ = ("")
+__reference__ = ("")
+#=========================================================================================
+# Last code modification:
+#=========================================================================================
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified$"
+__version__ = "$Revision$"
+#=========================================================================================
+# Created:
+#=========================================================================================
+__author__ = "$Author: Ed Brooksbank $"
+__date__ = "$Date$"
+#=========================================================================================
+# Start of code
+#=========================================================================================
+
+import os
+from functools import partial
+
+from PyQt5 import QtGui, QtWidgets, QtCore
+
+from ccpn.core.lib import Util as ccpnUtil
+
+from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
+from ccpn.ui.gui.widgets.FileDialog import FileDialog
+from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.Spinbox import Spinbox
+from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.popups.ExperimentTypePopup import _getExperimentTypes
+from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString
+from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.ui.gui.widgets.Tabs import Tabs
+from ccpn.util.Logging import getLogger
+from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
+from ccpn.util.OrderedSet import OrderedSet
+from ccpn.core.lib.ContextManagers import logCommandBlock, undoStackBlocking, undoBlockManager
+from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
+from ccpn.ui.gui.popups.SpectrumPropertiesPopup import FilePathValidator, _updateGl
+from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER, setColourScheme
+from ccpn.framework.Translation import languages
+from ccpn.ui.gui.popups.Dialog import CcpnDialog
+from ccpn.ui.gui.widgets import MessageDialog
+from ccpn.ui.gui.widgets.Tabs import Tabs
+from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.widgets.HLine import HLine
+from ccpnmodel.ccpncore.api.memops import Implementation
+
+LINEEDITSMINIMUMWIDTH = 195
+
+
+class ValidateSpectraPopup(CcpnDialog):
+    """
+    Class to validate the paths of the selected spectra.
+    """
+
+    def __init__(self, parent=None, mainWindow=None, spectra=None,
+                 title='Validate Spectra', **kwds):
+
+        super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
+
+        self.mainWindow = mainWindow
+        self.application = mainWindow.application
+        self.project = mainWindow.application.project
+        self.current = mainWindow.application.current
+        self.preferences = self.application.preferences
+
+        self.spectra = spectra
+
+        row = 0
+        # show current insideData, alongsideData, remoteData values
+        self.insidePathLabel = Label(self, "$INSIDE", grid=(row, 0), )
+        self.insidePathText = LineEdit(self, textAlignment='left', grid=(row, 1), vAlign='t')
+        self.insidePathText.setEnabled(False)
+        self.insidePathText.setText(self._findDataPath('insideData'))
+        row += 1
+
+        self.alonsidePathLabel = Label(self, "$ALONGSIDE", grid=(row, 0), )
+        self.alongsidePathText = LineEdit(self, textAlignment='left', grid=(row, 1), vAlign='t')
+        self.alongsidePathText.setEnabled(False)
+        self.alongsidePathText.setText(self._findDataPath('alongsideData'))
+        row += 1
+
+        self.dataPathLabel = Label(self, "User Data Path ($DATA)", grid=(row, 0), )
+        self.dataPathText = LineEdit(self, textAlignment='left', grid=(row, 1), vAlign='t')
+        self.dataPathText.setMinimumWidth(LINEEDITSMINIMUMWIDTH)
+        self.dataPathText.editingFinished.connect(self._setDataPath)
+        self.dataPathText.setText(self.preferences.general.dataPath)
+        self.dataPathButton = Button(parent, grid=(row, 2), callback=self._getDataPath, icon='icons/directory', hPolicy='fixed')
+        row += 1
+
+
+        # buttons for show/hide valid/invalid paths
+        self.showValid = CheckBoxCompoundWidget(parent=self, orientation='left', hAlign='left',
+                                                minimumWidths=(150, 100),
+                                                labelText='Show valid spectra',
+                                                callback=self._toggleValid, grid=(row, 0), gridSpan=(1, 3),
+                                                checked=True)
+        row += 1
+        self.showInvalid = CheckBoxCompoundWidget(parent=self, orientation='left', hAlign='left',
+                                                  minimumWidths=(150, 100),
+                                                  labelText='Show invalid spectra',
+                                                  callback=self._toggleInvalid, grid=(row, 0), gridSpan=(1, 3),
+                                                  checked=True)
+        row += 1
+        HLine(self, grid=(row, 0), gridSpan=(1,3), colour=getColours()[DIVIDER], height=15)
+
+        row += 1
+        # set up a scroll area
+        self.scrollArea = ScrollArea(self, setLayout=True, grid=(row, 0), gridSpan=(1, 3))
+        self.scrollArea.setWidgetResizable(True)
+
+        self.scrollAreaWidgetContents = Frame(self, setLayout=True, showBorder=False)
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+
+        self.scrollAreaWidgetContents.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        self.scrollArea.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.scrollArea.setStyleSheet("""ScrollArea { border: 0px; }""")
+
+        if not self.spectra:
+            self.spectra = self.project.spectra
+
+        # populate the widget with a list of spectrum buttons and filepath buttons
+        scrollRow = 0
+        self.spectrumData = {}
+        for spectrum in self.spectra:
+            # if not spectrum.isValidPath:
+
+            Label(self.scrollAreaWidgetContents, text=spectrum.pid, grid=(scrollRow, 0))
+            pathData = LineEdit(self.scrollAreaWidgetContents, textAlignment='left', grid=(scrollRow, 1))
+            pathData.setValidator(FilePathValidator(parent=pathData, spectrum=spectrum))
+            pathButton = Button(self.scrollAreaWidgetContents, grid=(scrollRow, 2), callback=partial(self._getSpectrumFile, spectrum, pathData),
+                                icon='icons/applications-system')
+
+            self.spectrumData[spectrum] = (pathData, pathButton)
+            self._setPathData(spectrum)
+            pathData.editingFinished.connect(partial(self._setSpectrumPath, spectrum))
+            scrollRow += 1
+
+        # finalise the scrollArea
+        Spacer(self.scrollAreaWidgetContents, 2, 2,
+               QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
+               grid=(len(self.spectra), 1), gridSpan=(1, 1))
+
+        row += 1
+        # add exit buttons
+        self.applyButtons = ButtonList(self, texts=['Close'],
+                                       callbacks=[self._closeButton],
+                                       tipTexts=[''], direction='h',
+                                       hAlign='r', grid=(row, 0), gridSpan=(1, 3))
+
+        self.setMinimumHeight(300)
+        self.setMinimumWidth(400)
+        # self.setFixedWidth(self.sizeHint().width()+24)
+
+    def _closeButton(self):
+        self.accept()
+
+    def _getSpectrumFile(self, spectrum, pathData):
+        if os.path.exists('/'.join(pathData.text().split('/')[:-1])):
+            currentSpectrumDirectory = '/'.join(pathData.text().split('/')[:-1])
+        else:
+            currentSpectrumDirectory = os.path.expanduser('~')
+        dialog = FileDialog(self, text='Select Spectrum File', directory=currentSpectrumDirectory,
+                            fileMode=1, acceptMode=0,
+                            preferences=self.application.preferences.general)
+        directory = dialog.selectedFiles()
+        if len(directory) > 0:
+            pathData.setText(directory[0])
+
+            # this does the clever bit
+            spectrum.filePath = directory[0]
+            self._setPathData(spectrum)
+
+    def _setPathData(self, spectrum):
+        """Set the pathData widgets from the spectrum.
+        """
+        if spectrum and spectrum in self.spectrumData:
+            pathData, pathButton = self.spectrumData[spectrum]
+
+            apiDataStore = spectrum._apiDataSource.dataStore
+            if not apiDataStore:
+                pathData.setText('<None>')
+            elif apiDataStore.dataLocationStore.name == 'standard':
+                dataUrlName = apiDataStore.dataUrl.name
+                if dataUrlName == 'insideData':
+                    pathData.setText('$INSIDE/%s' % apiDataStore.path)
+                elif dataUrlName == 'alongsideData':
+                    pathData.setText('$ALONGSIDE/%s' % apiDataStore.path)
+                elif dataUrlName == 'remoteData':
+                    pathData.setText('$DATA/%s' % apiDataStore.path)
+                else:
+                    pathData.setText(apiDataStore.fullPath)
+
+    def _setSpectrumPath(self, spectrum):
+        pass
+
+    def _toggleValid(self):
+        pass
+
+    def _toggleInvalid(self):
+        pass
+
+    def _getDataPath(self):
+        if os.path.exists('/'.join(self.dataPathText.text().split('/')[:-1])):
+            currentDataPath = '/'.join(self.dataPathText.text().split('/')[:-1])
+        else:
+            currentDataPath = os.path.expanduser('~')
+        dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
+                            preferences=self.preferences.general)
+        directory = dialog.selectedFiles()
+        if directory:
+            self.dataPathText.setText(directory[0])
+            self.preferences.general.dataPath = directory[0]
+
+    def _setDataPath(self):
+        if self.dataPathText.isModified():
+            newPath = self.dataPathText.text()
+            self.preferences.general.dataPath = newPath
+            dataUrl = self.project._apiNmrProject.root.findFirstDataLocationStore(
+                    name='standard').findFirstDataUrl(name='remoteData')
+            dataUrl.url = Implementation.Url(path=newPath)
+
+    def _findDataPath(self, storeType):
+        dataUrl = self.project._apiNmrProject.root.findFirstDataLocationStore(
+                name='standard').findFirstDataUrl(name=storeType)
+        return dataUrl.url.dataLocation
+
+

@@ -63,6 +63,7 @@ class ExperimentTypePopup(CcpnDialog):
         spectra = self.project.spectra
         self.experimentTypes = self.project._experimentTypeMap
         self.spPulldowns = []
+
         self.scrollArea = ScrollArea(self, setLayout=True, grid=(0, 0))
         self.scrollArea.setWidgetResizable(True)
 

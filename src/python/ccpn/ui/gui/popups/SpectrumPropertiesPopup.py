@@ -222,35 +222,12 @@ class FilePathValidator(QtGui.QValidator):
             raise NotImplemented('FilePathValidation only checks that the path exists')
         filePath = ccpnUtil.expandDollarFilePath(self.spectrum._project, p_str)
 
-
-        # palette = entryBox.palette()
-        #
-        # regIn = entryBox.text()
-        # validEmail = True if validEmailRegex.match(regIn) else False
-        # if validEmail:
-        #     palette.setColor(QtGui.QPalette.Base, baseColour)
-        # else:
-        #     palette.setColor(QtGui.QPalette.Base, QtGui.QColor('lightpink'))
-        #
-        # entryBox.setPalette(palette)
-
         palette = self.parent().palette()
 
         if os.path.exists(filePath):
-            # try:
-            #     # self.parent().setStyleSheet('background-color: #f7ffff')
-            # except:
-            #     pass
-
             palette.setColor(QtGui.QPalette.Base, self.baseColour)
             state = QtGui.QValidator.Acceptable
         else:
-            # try:
-            #     self.parent().setStyleSheet('background-color: #f7ffff')
-            # except:
-            #     pass
-            # self.parent().setStyleSheet('background-color: #f7ffbe')  # TODO: use a yellow in our colour scheme
-
             palette.setColor(QtGui.QPalette.Base, QtGui.QColor('lightpink'))
             state = QtGui.QValidator.Intermediate
         self.parent().setPalette(palette)

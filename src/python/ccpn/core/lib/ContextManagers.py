@@ -120,9 +120,9 @@ def undoBlock(application=None):
             sidebar = application.ui.mainWindow._newSideBar
             sidebar.increaseSidebarBlocking()
 
-    application._increaseNotificationBlocking()
     if not application._echoBlocking:
         application.project.suspendNotification()
+    application._increaseNotificationBlocking()
 
     getLogger().debug2('_enterUndoBlock')
 
@@ -131,9 +131,9 @@ def undoBlock(application=None):
         yield
 
     finally:
+        application._decreaseNotificationBlocking()
         if not application._echoBlocking:
             application.project.resumeNotification()
-        application._decreaseNotificationBlocking()
 
         if undo is not None:
             # if not application.project._blockSideBar and not undo._blocked:

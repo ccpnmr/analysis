@@ -97,6 +97,63 @@ AtomIdTuple = collections.namedtuple('AtomIdTuple', ['chainCode', 'sequenceCode'
                                                      'residueType', 'atomName', ])
 
 
+def _fetchDataUrl(memopsRoot, nameStore, filePath):
+    """Get or create DataUrl that matches fullPath, prioritising insideData, alongsideDta, remoteData
+    and existing dataUrls"""
+    from memops.api.Implementation import Url
+    from memops.universal import Io as uniIo
+    import os
+
+    standardStore = memopsRoot.findFirstDataLocationStore(name='standard')
+
+    # standardStore = (memopsRoot.findFirstDataLocationStore(name='standard')
+    #                  or memopsRoot.newDataLocationStore(name='standard'))
+
+    # [(store.name, store.url.dataLocation, url.path,) for store in standardStore.sortedDataUrls() for url in store.sortedDataStores()]
+    # [(store.dataUrl.name, store.dataUrl.url.dataLocation, store.path,) for store in standardStore.sortedDataStores()]
+
+    if standardStore is None:
+        raise TypeError("Coding error - standard DataLocationStore has not been set")
+
+    stores = set([(store, store.dataUrl) for store in standardStore.sortedDataStores() if store.path == filePath])
+
+    if stores and len(stores) > 1:
+        raise ValueError("Too many stores")
+
+    for store, dataUrl in stores:
+        directoryPath = os.path.join(dataUrl.url.path, '')
+
+        print('>>>_fetchDataUrl', filePath, directoryPath)
+
+        if filePath.startswith(directoryPath):
+            return store.fullPath
+        else:
+            return store.fullPath
+
+
+    # # for dataUrl in standardStore.sortedDataUrls():
+    # #     if dataUrl.name is nameStore:
+    #
+    #
+    # # fullPath = uniIo.normalisePath(fullPath, makeAbsolute=True)
+    # standardTags = ('insideData', 'alongsideData', 'remoteData')
+    # # Check standard DataUrls first
+    # checkUrls = [standardStore.findFirstDataUrl(name=tag) for tag in standardTags]
+    # # Then check other existing DataUrls
+    # checkUrls += [x for x in standardStore.sortedDataUrls() if x.name not in standardTags]
+    # for dataUrl in checkUrls:
+    #     if dataUrl is not None and dataUrl.name is nameStore:
+    #
+    #         directoryPath = os.path.join(dataUrl.url.path, '')
+    #         if filePath.startswith(directoryPath):
+    #             break
+    # else:
+    #     # No matches found, make a new one
+    #     dirName, path = os.path.split(filePath)
+    #     dataUrl = standardStore.newDataUrl(url=Url(path=dirName))
+    # #
+    # return dataUrl
+
 def expandDollarFilePath(project: 'Project', filePath: str) -> str:
     """Expand paths that start with $REPOSITORY to full path
 
@@ -113,18 +170,31 @@ def expandDollarFilePath(project: 'Project', filePath: str) -> str:
         # Nothing to expand
         return filePath
 
-    dataLocationStore = project._wrappedData.root.findFirstDataLocationStore(name='standard')
+    # dataUrl = _fetchDataUrl(project._wrappedData.root, filePath)
 
-    if dataLocationStore is None:
-        raise TypeError("Coding error - standard DataLocationStore has not been set")
 
+    # return dataUrl
+
+
+
+    # dataLocationStore = project._wrappedData.root.findFirstDataLocationStore(name='standard')
+    #
+    # if dataLocationStore is None:
+    #     raise TypeError("Coding error - standard DataLocationStore has not been set")
+    #
     for prefix, dataUrlName in stdRepositoryNames.items():
         if filePath.startswith(prefix):
-            dataUrl = dataLocationStore.findFirstDataUrl(name=dataUrlName)
-            if dataUrl is not None:
-                return joinPath(dataUrl.url.path, filePath[len(prefix):])
+
+            dataUrl = _fetchDataUrl(project._wrappedData.root, dataUrlName, filePath[len(prefix):])
+
+            print('>>>expandDollarFilePath', filePath, dataUrl)
+
+            # dataUrl = dataLocationStore.findFirstDataUrl(name=dataUrlName)
+            # if dataUrl is not None:
+            #     return joinPath(dataUrl.url.path, filePath[len(prefix):])
+
     #
-    return filePath
+    return dataUrl
 
 
 def commandParameterString(*params, values: dict = None, defaults: dict = None):

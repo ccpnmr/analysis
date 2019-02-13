@@ -76,7 +76,7 @@ class ValidateSpectraPopup(CcpnDialog):
     Class to validate the paths of the selected spectra.
     """
 
-    def __init__(self, parent=None, mainWindow=None, project=None, spectra=None,
+    def __init__(self, parent=None, mainWindow=None, spectra=None,
                  title='Validate Spectra', **kwds):
 
         super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
@@ -86,12 +86,7 @@ class ValidateSpectraPopup(CcpnDialog):
         self.project = mainWindow.application.project
         self.current = mainWindow.application.current
         self.preferences = self.application.preferences
-
         self.spectra = spectra
-
-        # may be called from the instantiation of the new project, in which case self.project points to the wrong object
-        if project:
-            self.project = project
 
         row = 0
         # show current insideData, alongsideData, remoteData values
@@ -266,6 +261,8 @@ class ValidateSpectraPopup(CcpnDialog):
             if not apiDataStore:
                 pathData.setText('<None>')
             elif apiDataStore.dataLocationStore.name == 'standard':
+
+                # this fails on the first loading of V2 projects - ordering issue?
                 dataUrlName = apiDataStore.dataUrl.name
                 if dataUrlName == 'insideData':
                     pathData.setText('$INSIDE/%s' % apiDataStore.path)

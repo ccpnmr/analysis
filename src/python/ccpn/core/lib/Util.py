@@ -170,31 +170,45 @@ def expandDollarFilePath(project: 'Project', filePath: str) -> str:
         # Nothing to expand
         return filePath
 
-    # dataUrl = _fetchDataUrl(project._wrappedData.root, filePath)
+    dataLocationStore = project._wrappedData.root.findFirstDataLocationStore(name='standard')
 
+    if dataLocationStore is None:
+        raise TypeError("Coding error - standard DataLocationStore has not been set")
 
-    # return dataUrl
-
-
-
-    # dataLocationStore = project._wrappedData.root.findFirstDataLocationStore(name='standard')
-    #
-    # if dataLocationStore is None:
-    #     raise TypeError("Coding error - standard DataLocationStore has not been set")
-    #
     for prefix, dataUrlName in stdRepositoryNames.items():
         if filePath.startswith(prefix):
-
-            dataUrl = _fetchDataUrl(project._wrappedData.root, dataUrlName, filePath[len(prefix):])
-
-            print('>>>expandDollarFilePath', filePath, dataUrl)
-
-            # dataUrl = dataLocationStore.findFirstDataUrl(name=dataUrlName)
-            # if dataUrl is not None:
-            #     return joinPath(dataUrl.url.path, filePath[len(prefix):])
-
+            dataUrl = dataLocationStore.findFirstDataUrl(name=dataUrlName)
+            if dataUrl is not None:
+                return joinPath(dataUrl.url.path, filePath[len(prefix):])
     #
-    return dataUrl
+    return filePath
+
+
+    # # dataUrl = _fetchDataUrl(project._wrappedData.root, filePath)
+    #
+    #
+    # # return dataUrl
+    #
+    #
+    #
+    # # dataLocationStore = project._wrappedData.root.findFirstDataLocationStore(name='standard')
+    # #
+    # # if dataLocationStore is None:
+    # #     raise TypeError("Coding error - standard DataLocationStore has not been set")
+    # #
+    # for prefix, dataUrlName in stdRepositoryNames.items():
+    #     if filePath.startswith(prefix):
+    #
+    #         dataUrl = _fetchDataUrl(project._wrappedData.root, dataUrlName, filePath[len(prefix):])
+    #
+    #         print('>>>expandDollarFilePath', filePath, dataUrl)
+    #
+    #         # dataUrl = dataLocationStore.findFirstDataUrl(name=dataUrlName)
+    #         # if dataUrl is not None:
+    #         #     return joinPath(dataUrl.url.path, filePath[len(prefix):])
+    #
+    # #
+    # return dataUrl
 
 
 def commandParameterString(*params, values: dict = None, defaults: dict = None):

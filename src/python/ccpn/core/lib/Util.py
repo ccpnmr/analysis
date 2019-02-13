@@ -27,6 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import collections
 import inspect
+import os
 from typing import Optional
 from ccpn.core.lib import Pid
 from ccpn.core import _coreClassMap
@@ -154,7 +155,7 @@ def _fetchDataUrl(memopsRoot, nameStore, filePath):
     # #
     # return dataUrl
 
-def expandDollarFilePath(project: 'Project', filePath: str) -> str:
+def expandDollarFilePath(project: 'Project', spectrum, filePath: str) -> str:
     """Expand paths that start with $REPOSITORY to full path
 
     NBNB Should be moved to ccpnmodel.ccpncore.lib.ccp.general.DataLocation.DataLocationstore"""
@@ -177,38 +178,15 @@ def expandDollarFilePath(project: 'Project', filePath: str) -> str:
 
     for prefix, dataUrlName in stdRepositoryNames.items():
         if filePath.startswith(prefix):
-            dataUrl = dataLocationStore.findFirstDataUrl(name=dataUrlName)
-            if dataUrl is not None:
-                return joinPath(dataUrl.url.path, filePath[len(prefix):])
+            # dataUrl = dataLocationStore.findFirstDataUrl(name=dataUrlName)
+
+            apiDataStore = spectrum._apiDataSource.dataStore
+            if apiDataStore and apiDataStore.dataUrl:
+
+                if apiDataStore.dataUrl is not None:
+                    return os.path.join(apiDataStore.dataUrl.url.dataLocation, filePath[len(prefix):])
     #
     return filePath
-
-
-    # # dataUrl = _fetchDataUrl(project._wrappedData.root, filePath)
-    #
-    #
-    # # return dataUrl
-    #
-    #
-    #
-    # # dataLocationStore = project._wrappedData.root.findFirstDataLocationStore(name='standard')
-    # #
-    # # if dataLocationStore is None:
-    # #     raise TypeError("Coding error - standard DataLocationStore has not been set")
-    # #
-    # for prefix, dataUrlName in stdRepositoryNames.items():
-    #     if filePath.startswith(prefix):
-    #
-    #         dataUrl = _fetchDataUrl(project._wrappedData.root, dataUrlName, filePath[len(prefix):])
-    #
-    #         print('>>>expandDollarFilePath', filePath, dataUrl)
-    #
-    #         # dataUrl = dataLocationStore.findFirstDataUrl(name=dataUrlName)
-    #         # if dataUrl is not None:
-    #         #     return joinPath(dataUrl.url.path, filePath[len(prefix):])
-    #
-    # #
-    # return dataUrl
 
 
 def commandParameterString(*params, values: dict = None, defaults: dict = None):

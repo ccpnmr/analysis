@@ -25,6 +25,7 @@ __date__ = "$Date$"
 
 import os
 from functools import partial
+import numpy as np
 
 from PyQt5 import QtGui, QtWidgets, QtCore
 
@@ -66,6 +67,7 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpnmodel.ccpncore.api.memops import Implementation
 
+
 LINEEDITSMINIMUMWIDTH = 195
 
 
@@ -74,7 +76,7 @@ class ValidateSpectraPopup(CcpnDialog):
     Class to validate the paths of the selected spectra.
     """
 
-    def __init__(self, parent=None, mainWindow=None, spectra=None,
+    def __init__(self, parent=None, mainWindow=None, project=None, spectra=None,
                  title='Validate Spectra', **kwds):
 
         super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
@@ -86,6 +88,10 @@ class ValidateSpectraPopup(CcpnDialog):
         self.preferences = self.application.preferences
 
         self.spectra = spectra
+
+        # may be called from the instantiation of the new project, in which case self.project points to the wrong object
+        if project:
+            self.project = project
 
         row = 0
         # show current insideData, alongsideData, remoteData values
@@ -125,7 +131,7 @@ class ValidateSpectraPopup(CcpnDialog):
                                                   callback=self._toggleInvalid, grid=(row, 0), gridSpan=(1, 3),
                                                   checked=True)
         row += 1
-        HLine(self, grid=(row, 0), gridSpan=(1,3), colour=getColours()[DIVIDER], height=15)
+        HLine(self, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
 
         row += 1
         # set up a scroll area
@@ -145,13 +151,18 @@ class ValidateSpectraPopup(CcpnDialog):
         # populate the widget with a list of spectrum buttons and filepath buttons
         scrollRow = 0
         self.spectrumData = {}
+
+        # I think there is a QT bug here - need to set a dummy button first otherwise a click is emitted, will investigate
+        rogueButton = Button(self, grid=(0,0))
+        rogueButton.hide()
+
         for spectrum in self.spectra:
             # if not spectrum.isValidPath:
 
             pathLabel = Label(self.scrollAreaWidgetContents, text=spectrum.pid, grid=(scrollRow, 0))
             pathData = LineEdit(self.scrollAreaWidgetContents, textAlignment='left', grid=(scrollRow, 1))
             pathData.setValidator(FilePathValidator(parent=pathData, spectrum=spectrum))
-            pathButton = Button(self.scrollAreaWidgetContents, grid=(scrollRow, 2), callback=partial(self._getSpectrumFile, spectrum, pathData),
+            pathButton = Button(self.scrollAreaWidgetContents, grid=(scrollRow, 2), callback=partial(self._getSpectrumFile, spectrum),
                                 icon='icons/applications-system')
 
             self.spectrumData[spectrum] = (pathData, pathButton, pathLabel)
@@ -171,28 +182,79 @@ class ValidateSpectraPopup(CcpnDialog):
                                        tipTexts=[''], direction='h',
                                        hAlign='r', grid=(row, 0), gridSpan=(1, 3))
 
-        self.setMinimumHeight(300)
-        self.setMinimumWidth(400)
+        self.setMinimumHeight(500)
+        self.setMinimumWidth(600)
         # self.setFixedWidth(self.sizeHint().width()+24)
 
     def _closeButton(self):
         self.accept()
 
-    def _getSpectrumFile(self, spectrum, pathData):
-        if os.path.exists('/'.join(pathData.text().split('/')[:-1])):
-            currentSpectrumDirectory = '/'.join(pathData.text().split('/')[:-1])
-        else:
-            currentSpectrumDirectory = os.path.expanduser('~')
-        dialog = FileDialog(self, text='Select Spectrum File', directory=currentSpectrumDirectory,
-                            fileMode=1, acceptMode=0,
-                            preferences=self.application.preferences.general)
-        directory = dialog.selectedFiles()
-        if len(directory) > 0:
-            pathData.setText(directory[0])
+    # def expandDollarFilePath(self, project: 'Project', spectrum, filePath: str) -> str:
+    #     """Expand paths that start with $REPOSITORY to full path
+    #
+    #     NBNB Should be moved to ccpnmodel.ccpncore.lib.ccp.general.DataLocation.DataLocationstore"""
+    #
+    #     # Convert from custom repository names to full names
+    #
+    #     stdRepositoryNames = {
+    #         '$INSIDE/'   : 'insideData',
+    #         '$ALONGSIDE/': 'alongsideData',
+    #         '$DATA/'     : 'remoteData',
+    #         }
+    #
+    #     if not filePath.startswith('$'):
+    #         # Nothing to expand
+    #         return filePath
+    #
+    #     dataLocationStore = project._wrappedData.root.findFirstDataLocationStore(name='standard')
+    #
+    #     if dataLocationStore is None:
+    #         raise TypeError("Coding error - standard DataLocationStore has not been set")
+    #
+    #     for prefix, dataUrlName in stdRepositoryNames.items():
+    #         if filePath.startswith(prefix):
+    #             # dataUrl = dataLocationStore.findFirstDataUrl(name=dataUrlName)
+    #
+    #             apiDataStore = spectrum._apiDataSource.dataStore
+    #             if apiDataStore and apiDataStore.dataUrl:
+    #
+    #                 if apiDataStore.dataUrl is not None:
+    #                     return os.path.join(apiDataStore.dataUrl.url.dataLocation, filePath[len(prefix):])
+    #     #
+    #     return filePath
 
-            # this does the clever bit
-            spectrum.filePath = directory[0]
-            self._setPathData(spectrum)
+    def _getSpectrumFile(self, spectrum):
+        """Get the path from the widget and call the open dialog.
+        """
+        if spectrum and spectrum in self.spectrumData:
+            pathData, pathButton, pathLabel = self.spectrumData[spectrum]
+
+            # if os.path.exists('/'.join(pathData.text().split('/')[:-1])):
+            #     currentSpectrumDirectory = '/'.join(pathData.text().split('/')[:-1])
+            # else:
+            #     currentSpectrumDirectory = os.path.expanduser('~')
+
+            filePath = ccpnUtil.expandDollarFilePath(self.project, spectrum, pathData.text().strip())
+
+            dialog = FileDialog(self, text='Select Spectrum File', directory=filePath,
+                                fileMode=1, acceptMode=0,
+                                preferences=self.application.preferences.general)
+            directory = dialog.selectedFiles()
+            if len(directory) > 0:
+                newFilePath = directory[0]
+
+                if spectrum.filePath != newFilePath:
+
+                    from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
+
+                    dataType, subType, usePath = ioFormats.analyseUrl(newFilePath)
+                    if dataType == 'Spectrum':
+                        spectrum.filePath = newFilePath
+                    else:
+                        getLogger().warning('Not a spectrum file: %s - (%s, %s)' % (newFilePath, dataType, subType))
+
+                    # set the widget text
+                    self._setPathData(spectrum)
 
     def _setPathData(self, spectrum):
         """Set the pathData widgets from the spectrum.
@@ -214,8 +276,33 @@ class ValidateSpectraPopup(CcpnDialog):
                 else:
                     pathData.setText(apiDataStore.fullPath)
 
+                pathData.validator().resetCheck()
+
     def _setSpectrumPath(self, spectrum):
-        pass
+        """Set the path from the widget by pressing enter
+        """
+        if spectrum and spectrum in self.spectrumData:
+            pathData, pathButton, pathLabel = self.spectrumData[spectrum]
+
+            # if os.path.exists('/'.join(pathData.text().split('/')[:-1])):
+            #     currentSpectrumDirectory = '/'.join(pathData.text().split('/')[:-1])
+            # else:
+            #     currentSpectrumDirectory = os.path.expanduser('~')
+
+            newFilePath = ccpnUtil.expandDollarFilePath(self.project, spectrum, pathData.text().strip())
+
+            if spectrum.filePath != newFilePath:
+
+                from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
+
+                dataType, subType, usePath = ioFormats.analyseUrl(newFilePath)
+                if dataType == 'Spectrum':
+                    spectrum.filePath = newFilePath
+                else:
+                    getLogger().warning('Not a spectrum file: %s - (%s, %s)' % (newFilePath, dataType, subType))
+
+                # set the widget text
+                self._setPathData(spectrum)
 
     def _toggleValid(self):
         visible = self.showValid.isChecked()
@@ -259,5 +346,3 @@ class ValidateSpectraPopup(CcpnDialog):
         dataUrl = self.project._apiNmrProject.root.findFirstDataLocationStore(
                 name='standard').findFirstDataUrl(name=storeType)
         return dataUrl.url.dataLocation
-
-

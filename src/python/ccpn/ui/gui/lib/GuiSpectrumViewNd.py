@@ -44,7 +44,7 @@ from ccpnc.contour import Contourer2d
 
 #from ccpn.ui.gui.modules import SpectrumDisplayNd
 from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
-
+from ccpn.util.Logging import getLogger
 
 ###from ccpn.ui.gui.widgets.ToolButton import ToolButton
 ###from ccpnc.peak import Peak
@@ -138,17 +138,16 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
         self.setZValue(-1)  # this is so that the contours are drawn on the bottom
 
-        """
-        self.visibilityAction = action = self._parent.spectrumDisplay.spectrumToolBar.addAction(self.spectrum.name)
-        self.setActionIconColour()
-        action.setCheckable(True)
-        action.setChecked(True)
-        widget = self._parent.spectrumDisplay.spectrumToolBar.widgetForAction(action)
-        widget.setFixedSize(60, 30)
-    
-        for func in ('setPositiveContourColour', 'setSliceColour'):
-          Notifiers.registerNotify(self.changedSpectrumColour, 'ccp.nmr.Nmr.DataSource', func)
-    """
+        # self.visibilityAction = action = self._parent.spectrumDisplay.spectrumToolBar.addAction(self.spectrum.name)
+        # self.setActionIconColour()
+        # action.setCheckable(True)
+        # action.setChecked(True)
+        # widget = self._parent.spectrumDisplay.spectrumToolBar.widgetForAction(action)
+        # widget.setFixedSize(60, 30)
+        #
+            # for func in ('setPositiveContourColour', 'setSliceColour'):
+        #   Notifiers.registerNotify(self.changedSpectrumColour, 'ccp.nmr.Nmr.DataSource', func)
+
         # self.strip.viewBox.addItem(self)
 
         # self._setupTrace()
@@ -687,16 +686,20 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         ##self.drawContoursCounter += 1
         ##print('***drawContours counter (%s): %d' % (self, self.drawContoursCounter))
 
-        # print('>>>_buildContours %s' % self)
-        # self.posColour = Colour.scaledRgba(self._getColour('positiveContourColour'))  # TBD: for now assume only one colour
-        # self.negColour = Colour.scaledRgba(self._getColour('negativeContourColour'))  # and assumes these attributes are set
-        # glList.posColour = self.posColour
-        # glList.negColour = self.negColour
-
         if self.spectrum.positiveContourBase == 10000.0:  # horrid
             # base has not yet been set, so guess a sensible value
-            self.spectrum.positiveContourBase = self.spectrum.estimateNoise()
-            self.spectrum.negativeContourBase = - self.spectrum.positiveContourBase
+
+            # empty spectra yield a noise of zero, this is not allowed.
+            # positiveContourBase must be > 0.0
+            try:
+                noise = self.spectrum.estimateNoise()
+            except:
+                getLogger().warning('Error reading noise from spectrum')
+                noise = 0
+
+            if noise > 0:
+                self.spectrum.positiveContourBase = noise
+                self.spectrum.negativeContourBase = -noise
 
         if self.spectrum.includePositiveContours:  # .displayPositiveContours:
             self.posLevels = _getLevels(self.positiveContourCount, self.positiveContourBase,
@@ -734,8 +737,18 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
         if self.spectrum.positiveContourBase == 10000.0:  # horrid
             # base has not yet been set, so guess a sensible value
-            self.spectrum.positiveContourBase = self.spectrum.estimateNoise()
-            self.spectrum.negativeContourBase = - self.spectrum.positiveContourBase
+
+            # empty spectra yield a noise of zero, this is not allowed.
+            # positiveContourBase must be > 0.0
+            try:
+                noise = self.spectrum.estimateNoise()
+            except:
+                getLogger().warning('Error reading noise from spectrum')
+                noise = 0
+
+            if noise > 0:
+                self.spectrum.positiveContourBase = noise
+                self.spectrum.negativeContourBase = -noise
 
         if self.spectrum.includePositiveContours:  # .displayPositiveContours:
             self.posLevels = _getLevels(self.positiveContourCount, self.positiveContourBase,

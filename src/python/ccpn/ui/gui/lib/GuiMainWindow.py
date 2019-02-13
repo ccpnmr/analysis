@@ -883,6 +883,13 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                                 # set the sidebar and open the new object's mainWindow
                                 obj._mainWindow._newSideBar.buildTree(obj)
                                 obj._mainWindow.show()
+
+                                # if the new project contains invalid spectra then open the popup to see them
+                                badSpectra = [spectrum for spectrum in obj.spectra if not spectrum.isValidPath]
+                                if badSpectra:
+                                    obj._mainWindow.application.showValidateSpectraPopup(obj._mainWindow, obj._mainWindow, badSpectra)
+                                    obj.save(createFallback=False, overwriteExisting=True)
+
                                 QtWidgets.QApplication.setActiveWindow(self)
 
                             except Exception as es:

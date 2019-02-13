@@ -220,12 +220,22 @@ class FilePathValidator(QtGui.QValidator):
     def validate(self, p_str, p_int):
         if self.validationType != 'exists':
             raise NotImplemented('FilePathValidation only checks that the path exists')
-        filePath = ccpnUtil.expandDollarFilePath(self.spectrum._project, p_str)
+        filePath = ccpnUtil.expandDollarFilePath(self.spectrum._project, self.spectrum, p_str.strip())
 
         palette = self.parent().palette()
 
         if os.path.exists(filePath):
-            palette.setColor(QtGui.QPalette.Base, self.baseColour)
+            if filePath == self.spectrum.filePath:
+                palette.setColor(QtGui.QPalette.Base, self.baseColour)
+            else:
+                from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
+
+                dataType, subType, usePath = ioFormats.analyseUrl(filePath)
+                if dataType == 'Spectrum':
+                    palette.setColor(QtGui.QPalette.Base, QtGui.QColor('palegreen'))
+                else:
+                    palette.setColor(QtGui.QPalette.Base, QtGui.QColor('orange'))
+
             state = QtGui.QValidator.Acceptable
         else:
             palette.setColor(QtGui.QPalette.Base, QtGui.QColor('lightpink'))
@@ -234,6 +244,13 @@ class FilePathValidator(QtGui.QValidator):
 
         return state, p_str, p_int
 
+    def clearValidCheck(self):
+        palette = self.parent().palette()
+        palette.setColor(QtGui.QPalette.Base, self.baseColour)
+        self.parent().setPalette(palette)
+
+    def resetCheck(self):
+        self.validate(self.parent().text(), 0)
 
 class GeneralTab(Widget):
     def __init__(self, parent=None, mainWindow=None, spectrum=None, item=None, colourOnly=False):
@@ -591,7 +608,7 @@ class GeneralTab(Widget):
             filePath = self.pathData.text()
 
             # Convert from custom repository names to full names
-            filePath = ccpnUtil.expandDollarFilePath(self.spectrum._project, filePath)
+            filePath = ccpnUtil.expandDollarFilePath(self.spectrum._project, self.spectrum, filePath)
 
             if os.path.exists(filePath):
                 self._changes['spectrumFilePath'] = partial(self._setSpectrumFilePath, filePath)

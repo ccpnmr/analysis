@@ -104,11 +104,13 @@ class ValidateSpectraPopup(CcpnDialog):
         self.dataPathLabel = Label(self, "User Data Path ($DATA)", grid=(row, 0), )
         self.dataPathText = LineEdit(self, textAlignment='left', grid=(row, 1), vAlign='t')
         self.dataPathText.setMinimumWidth(LINEEDITSMINIMUMWIDTH)
-        self.dataPathText.editingFinished.connect(self._setDataPath)
-        self.dataPathText.setText(self.preferences.general.dataPath)
-        self.dataPathButton = Button(parent, grid=(row, 2), callback=self._getDataPath, icon='icons/directory', hPolicy='fixed')
-        row += 1
+        self.dataPathText.setEnabled(False)
+        self.dataPathText.setText(self._findDataPath('remoteData'))
 
+        # self.dataPathText.editingFinished.connect(self._setDataPath)
+        # self.dataPathText.setText(self.preferences.general.dataPath)
+        # self.dataPathButton = Button(parent, grid=(row, 2), callback=self._getDataPath, icon='icons/directory', hPolicy='fixed')
+        row += 1
 
         # buttons for show/hide valid/invalid paths
         self.showValid = CheckBoxCompoundWidget(parent=self, orientation='left', hAlign='left',
@@ -146,13 +148,13 @@ class ValidateSpectraPopup(CcpnDialog):
         for spectrum in self.spectra:
             # if not spectrum.isValidPath:
 
-            Label(self.scrollAreaWidgetContents, text=spectrum.pid, grid=(scrollRow, 0))
+            pathLabel = Label(self.scrollAreaWidgetContents, text=spectrum.pid, grid=(scrollRow, 0))
             pathData = LineEdit(self.scrollAreaWidgetContents, textAlignment='left', grid=(scrollRow, 1))
             pathData.setValidator(FilePathValidator(parent=pathData, spectrum=spectrum))
             pathButton = Button(self.scrollAreaWidgetContents, grid=(scrollRow, 2), callback=partial(self._getSpectrumFile, spectrum, pathData),
                                 icon='icons/applications-system')
 
-            self.spectrumData[spectrum] = (pathData, pathButton)
+            self.spectrumData[spectrum] = (pathData, pathButton, pathLabel)
             self._setPathData(spectrum)
             pathData.editingFinished.connect(partial(self._setSpectrumPath, spectrum))
             scrollRow += 1
@@ -196,7 +198,7 @@ class ValidateSpectraPopup(CcpnDialog):
         """Set the pathData widgets from the spectrum.
         """
         if spectrum and spectrum in self.spectrumData:
-            pathData, pathButton = self.spectrumData[spectrum]
+            pathData, pathButton, pathLabel = self.spectrumData[spectrum]
 
             apiDataStore = spectrum._apiDataSource.dataStore
             if not apiDataStore:
@@ -216,10 +218,22 @@ class ValidateSpectraPopup(CcpnDialog):
         pass
 
     def _toggleValid(self):
-        pass
+        visible = self.showValid.isChecked()
+        for spectrum in self.spectra:
+
+            if spectrum in self.spectrumData and spectrum.isValidPath:
+                widgets = self.spectrumData[spectrum]
+                for widg in widgets:
+                    widg.setVisible(visible)
 
     def _toggleInvalid(self):
-        pass
+        visible = self.showInvalid.isChecked()
+        for spectrum in self.spectra:
+
+            if spectrum in self.spectrumData and not spectrum.isValidPath:
+                widgets = self.spectrumData[spectrum]
+                for widg in widgets:
+                    widg.setVisible(visible)
 
     def _getDataPath(self):
         if os.path.exists('/'.join(self.dataPathText.text().split('/')[:-1])):

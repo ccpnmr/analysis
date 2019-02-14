@@ -139,7 +139,7 @@ class SpectraSelectionWidget(Widget):
         else:
             return []
 
-    def selectSpectra(self, spectra):
+    def _selectSpectra(self, spectra):
         checkBoxes = [cb for cb in self.allSpectraCheckBoxes if self.project.getByPid(cb.text()) in spectra]
         tt = [checkBox.setChecked(True) for checkBox in checkBoxes]
 
@@ -150,4 +150,4 @@ class SpectraSelectionWidget(Widget):
     def _selectFromDisplay(self):
         """ Select spectra from current strip"""
         if self.current.strip:
-            self.selectSpectra(self.current.strip.spectra)
+            self._selectSpectra(self.current.strip.spectra)

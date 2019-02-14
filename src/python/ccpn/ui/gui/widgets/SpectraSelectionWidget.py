@@ -71,13 +71,16 @@ class SpectraSelectionWidget(Widget):
                                                     grid=(i, 0))
             i += 1
 
-            self.selectAllButton = ButtonList(self, texts=['All','Clear'],
+            self.selectAllButton = ButtonList(self, texts=['All','Clear', 'From Display'],
                                                     callbacks=[partial(self._toggleAll, True),
-                                                               partial(self._toggleAll, False)],
+                                                               partial(self._toggleAll, False),
+                                                               self._selectFromDisplay],
                                                     grid=(i, 0),
                                                     hAlign='l', vAlign='t')
 
             i += 1
+            if not self.current.strip:
+                self.selectAllButton.buttons[-1].setEnabled(False)
             self.scrollArea = ScrollArea(self, setLayout=False, grid=(i, 0), )
             self.scrollArea.setWidgetResizable(True)
             self.scrollAreaWidgetContents = Frame(self, setLayout=True)
@@ -139,3 +142,10 @@ class SpectraSelectionWidget(Widget):
     def showSpectraOption(self):
         sel = [(sbox.show(), gbox.hide()) if self.selectSpectraOption.getIndex() == 0 else (sbox.hide(), gbox.show())
                for gbox in self.allSGCheckBoxes for sbox in self.allSpectraCheckBoxes]
+
+    def _selectFromDisplay(self):
+        """ Select spectra from current strip"""
+        if self.current.strip:
+            spectra = self.current.strip.spectra
+            checkBoxes = [cb for cb in self.allSpectraCheckBoxes if self.project.getByPid(cb.text()) in spectra]
+            tt = [checkBox.setChecked(True) for checkBox in checkBoxes]

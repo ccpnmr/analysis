@@ -25,44 +25,20 @@ __date__ = "$Date$"
 
 import os
 from functools import partial
-import numpy as np
-
-from PyQt5 import QtGui, QtWidgets, QtCore
-
+from PyQt5 import QtWidgets
 from ccpn.core.lib import Util as ccpnUtil
-
-from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
-from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.Spinbox import Spinbox
-from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.ui.gui.popups.ExperimentTypePopup import _getExperimentTypes
-from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString
-from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.util.Logging import getLogger
-from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
-from ccpn.util.OrderedSet import OrderedSet
-from ccpn.core.lib.ContextManagers import logCommandBlock, undoStackBlocking, undoBlockManager
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
-from ccpn.ui.gui.popups.SpectrumPropertiesPopup import FilePathValidator, _updateGl
-from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER, setColourScheme
-from ccpn.framework.Translation import languages
+from ccpn.ui.gui.popups.SpectrumPropertiesPopup import FilePathValidator
+from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
-from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpnmodel.ccpncore.api.memops import Implementation
@@ -150,6 +126,11 @@ class ValidateSpectraPopup(CcpnDialog):
         # I think there is a QT bug here - need to set a dummy button first otherwise a click is emitted, will investigate
         rogueButton = Button(self, grid=(0,0))
         rogueButton.hide()
+
+        # standardStore = self.project._wrappedData.memopsRoot.findFirstDataLocationStore(name='standard')
+        # stores = [(store.name, store.url.dataLocation, url.path,) for store in standardStore.sortedDataUrls() for url in store.sortedDataStores()]
+        # urls = [(store.dataUrl.name, store.dataUrl.url.dataLocation, store.path,) for store in standardStore.sortedDataStores()]
+        # [dataUrl for store in self.project._wrappedData.memopsRoot.sortedDataLocationStores() for dataUrl in store.sortedDataUrls()]
 
         for spectrum in self.spectra:
             # if not spectrum.isValidPath:
@@ -245,6 +226,7 @@ class ValidateSpectraPopup(CcpnDialog):
                     dataType, subType, usePath = ioFormats.analyseUrl(newFilePath)
                     if dataType == 'Spectrum':
                         spectrum.filePath = newFilePath
+
                     else:
                         getLogger().warning('Not a spectrum file: %s - (%s, %s)' % (newFilePath, dataType, subType))
 
@@ -254,6 +236,11 @@ class ValidateSpectraPopup(CcpnDialog):
     def _setPathData(self, spectrum):
         """Set the pathData widgets from the spectrum.
         """
+        from memops.api.Implementation import Url
+        from memops.universal import Io as uniIo
+
+        standardStore = self.project._wrappedData.memopsRoot.findFirstDataLocationStore(name='standard')
+
         if spectrum and spectrum in self.spectrumData:
             pathData, pathButton, pathLabel = self.spectrumData[spectrum]
 
@@ -270,10 +257,10 @@ class ValidateSpectraPopup(CcpnDialog):
                     pathData.setText('$ALONGSIDE/%s' % apiDataStore.path)
                 elif dataUrlName == 'remoteData':
                     pathData.setText('$DATA/%s' % apiDataStore.path)
-                else:
-                    pathData.setText(apiDataStore.fullPath)
+            else:
+                pathData.setText(apiDataStore.fullPath)
 
-                pathData.validator().resetCheck()
+            pathData.validator().resetCheck()
 
     def _setSpectrumPath(self, spectrum):
         """Set the path from the widget by pressing enter

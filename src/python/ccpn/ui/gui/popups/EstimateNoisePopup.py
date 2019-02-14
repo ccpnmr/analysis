@@ -149,6 +149,8 @@ class NoiseTab(Widget):
         indices = self.strip._getAxisCodeIndices(self.spectrum)
 
         foundRegions = self.spectrum.getRegionData(**axisCodeDict)
+        if not foundRegions:
+            return
 
         # just use the first region
         for region in foundRegions[:1]:

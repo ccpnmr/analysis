@@ -617,7 +617,7 @@ class Strip(AbstractWrapperObject):
         result = []
 
         project = self.project
-        minDropfactor = self.application.preferences.general.peakDropFactor
+        minDropFactor = self.application.preferences.general.peakDropFactor
         fitMethod = self.application.preferences.general.peakFittingMethod
 
         with undoBlock():
@@ -638,11 +638,11 @@ class Strip(AbstractWrapperObject):
                         newPeaks = peakList.pickPeaksRegion(axisCodeDict,
                                                             doPos=spectrumView.displayPositiveContours,
                                                             doNeg=spectrumView.displayNegativeContours,
-                                                            fitMethod=fitMethod, minDropfactor=minDropfactor)
+                                                            fitMethod=fitMethod, minDropFactor=minDropFactor)
 
                     else:
                         selectedRegion = [[min(ss), max(ss)] for ss in selectedRegion]
-                        newPeaks = peakList.pickPeaks1d(*selectedRegion, size=minDropfactor * 100)
+                        newPeaks = peakList.pickPeaks1d(*selectedRegion, size=minDropFactor * 100)
 
                     result.extend(newPeaks)
 

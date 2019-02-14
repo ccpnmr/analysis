@@ -125,7 +125,7 @@ class PeakFindPopup(CcpnDialog):
 
             axisCodeDict = dict((code, positions[ii]) for ii, code in enumerate(self.peakList.spectrum.axisCodes))
             peaks = peakList.pickPeaksRegion(axisCodeDict, doPos=doPos, doNeg=doNeg,
-                                         minDropfactor = self.application.preferences.general.peakDropFactor)
+                                         minDropFactor = self.application.preferences.general.peakDropFactor)
 
             # for strip in self.project.strips:
             #     strip.showPeaks(peakList)

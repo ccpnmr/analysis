@@ -3589,8 +3589,8 @@ class CcpnGLWidget(QOpenGLWidget):
         pointInt[sliceDim - 1] = 1  # To improve caching; points, dimensions are 1-based
 
         # print('>>>_getSliceData', pointInt, points)
-        data = spectrumView.spectrum._getSliceDataFromPlane(pointInt,
-                                                            xDim=planeDims[0], yDim=planeDims[1], sliceDim=sliceDim)
+        data = np.array(spectrumView.spectrum._getSliceDataFromPlane(pointInt,
+                                                            xDim=planeDims[0], yDim=planeDims[1], sliceDim=sliceDim))
         return data
 
     def _newStaticHTraceData(self, spectrumView, tracesDict,

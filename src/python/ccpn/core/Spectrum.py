@@ -1249,25 +1249,40 @@ class Spectrum(AbstractWrapperObject):
             position = [1] * self.dimensionCount
 
         if self.dimensionCount == 1:
-            result = self._get1DSliceData(position=position, sliceDim=sliceDim)
+            result = np.array(self._get1DSliceData(position=position, sliceDim=sliceDim))
+
+            if result is not None and result.size != 0:
+                # Optionally scale data depending on self.scale
+                if self.scale is not None:
+                    if self.scale == 0.0:
+                        getLogger().warning('Scaling "%s" by 0.0!' % self)
+                    result *= self.scale
+                # For 1D, save as intensities attribute
+                self._intensities = result
+            else:
+                result = None
+
+            return result
+
         else:
             position[sliceDim - 1] = 1  # To improve caching; position, dimensions are 1-based
             if sliceDim > 1:
-                result = self._getSliceDataFromPlane(position=position, xDim=1, yDim=sliceDim,
-                                                     sliceDim=sliceDim)
+                result = np.array(self._getSliceDataFromPlane(position=position, xDim=1, yDim=sliceDim,
+                                                     sliceDim=sliceDim))
             else:
-                result = self._getSliceDataFromPlane(position=position, xDim=sliceDim, yDim=sliceDim + 1,
-                                                     sliceDim=sliceDim)
-
-        if result is not None and result.size != 0:
-            # Optionally scale data depending on self.scale
-            if self.scale is not None:
-                if self.scale == 0.0:
-                    getLogger().warning('Scaling "%s" by 0.0!' % self)
-                result *= self.scale
-            # For 1D, save as intensities attribute
-            self._intensities = result
+                result = np.array(self._getSliceDataFromPlane(position=position, xDim=sliceDim, yDim=sliceDim + 1,
+                                                     sliceDim=sliceDim))
             return result
+
+        # if result is not None and result.size != 0:
+        #     # Optionally scale data depending on self.scale
+        #     if self.scale is not None:
+        #         if self.scale == 0.0:
+        #             getLogger().warning('Scaling "%s" by 0.0!' % self)
+        #         result *= self.scale
+        #     # For 1D, save as intensities attribute
+        #     self._intensities = result
+        #     return result
 
     @cached(PLANEDATACACHE, maxItems=64, debug=False)
     def _getPlaneData(self, position, xDim: int, yDim: int):
@@ -1308,7 +1323,7 @@ class Spectrum(AbstractWrapperObject):
         # set the points of xDim, yDim to 1 as these do not matter (to improve caching)
         position[xDim - 1] = 1  # position is 1-based
         position[yDim - 1] = 1
-        result = self._getPlaneData(position=position, xDim=xDim, yDim=yDim)
+        result = np.array(self._getPlaneData(position=position, xDim=xDim, yDim=yDim))
         # Optionally scale data depending on self.scale
         if self.scale is not None:
             if self.scale == 0.0:
@@ -1456,6 +1471,9 @@ class Spectrum(AbstractWrapperObject):
         :param axisDict: dict of axis limits
         :return: numpy data array
         """
+        if not self.isValidPath:
+            return
+
         startPoint = []
         endPoint = []
         # spectrum = self.spectrum
@@ -1833,12 +1851,26 @@ class Spectrum(AbstractWrapperObject):
             addUndoItem(undo=partial(self.rename, oldName),
                         redo=partial(self.rename, value))
 
+    # @cached.clear(PLANEDATACACHE)  # Check if there was a planedata cache, and if so, clear it
+    # @cached.clear(SLICEDATACACHE)  # Check if there was a slicedata cache, and if so, clear it
+    def _clearCachesOnChange(self):
+        if hasattr(self, self.PLANEDATACACHE):
+            cache = getattr(self, self.PLANEDATACACHE)
+            cache.clear()
+
+        if hasattr(self, self.SLICEDATACACHE):
+            cache = getattr(self, self.SLICEDATACACHE)
+            cache.clear()
+
     def _finaliseAction(self, action: str):
         """Subclassed to handle associated spectrumViews instances
         """
         super()._finaliseAction(action=action)
         # propagate the rename to associated spectrumViews
         if action in ['change']:
+
+            self._clearCachesOnChange()
+
             for specView in self.spectrumViews:
                 specView._finaliseAction(action=action)
         if action in ['create', 'delete']:

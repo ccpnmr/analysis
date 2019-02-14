@@ -262,7 +262,7 @@ class PeakList(AbstractWrapperObject):
                     doPos: bool = True, doNeg: bool = True,
                     fitMethod: str = PARABOLICMETHOD, excludedRegions=None,
                     excludedDiagonalDims=None, excludedDiagonalTransform=None,
-                    minDropfactor: float = 0.1):
+                    minDropFactor: float = 0.1):
 
         # TODO NBNB Add doc string and put type annotation on all parameters
 
@@ -272,7 +272,7 @@ class PeakList(AbstractWrapperObject):
                 ###( ('positions', None), ('doPos', True), ('doNeg', True),
                 (('regionToPick', None), ('doPos', True), ('doNeg', True),
                  ('fitMethod', PARABOLICMETHOD), ('excludedRegions', None), ('excludedDiagonalDims', None),
-                 ('excludedDiagonalTransform', None), ('minDropfactor', 0.1)
+                 ('excludedDiagonalTransform', None), ('minDropFactor', 0.1)
                  )
                 )
         startPoint = []
@@ -329,7 +329,7 @@ class PeakList(AbstractWrapperObject):
             apiPeaks = pickNewPeaks(self._apiPeakList, startPoint=startPoints, endPoint=endPoints,
                                     posLevel=posLevel, negLevel=negLevel, fitMethod=fitMethod,
                                     excludedRegions=excludedRegions, excludedDiagonalDims=excludedDiagonalDims,
-                                    excludedDiagonalTransform=excludedDiagonalTransform, minDropfactor=minDropfactor)
+                                    excludedDiagonalTransform=excludedDiagonalTransform, minDropFactor=minDropFactor)
 
         data2ObjDict = self._project._data2Obj
         result = [data2ObjDict[apiPeak] for apiPeak in apiPeaks]
@@ -727,10 +727,10 @@ class PeakList(AbstractWrapperObject):
                 selectedRegion.insert(ii, [limits[ii][0], limits[ii][1]])
 
         # regionToPick = selectedRegion
-        # peaks = self.pickPeaksNd(regionToPick, doPos=doPos, doNeg=doNeg, minDropfactor=minDropFactor)
+        # peaks = self.pickPeaksNd(regionToPick, doPos=doPos, doNeg=doNeg, minDropFactor=minDropFactor)
 
         axisCodeDict = dict((code, selectedRegion[ii]) for ii, code in enumerate(self.spectrum.axisCodes))
-        peaks = self.pickPeaksRegion(axisCodeDict, doPos=doPos, doNeg=doNeg, minDropfactor=minDropFactor)
+        peaks = self.pickPeaksRegion(axisCodeDict, doPos=doPos, doNeg=doNeg, minDropFactor=minDropFactor)
 
         return peaks
 
@@ -769,7 +769,7 @@ class PeakList(AbstractWrapperObject):
     def pickPeaksRegion(self, regionToPick: dict = {},
                         doPos: bool = True, doNeg: bool = True,
                         minLinewidth=None, exclusionBuffer=None,
-                        minDropfactor: float = 0.1, checkAllAdjacent: bool = True,
+                        minDropFactor: float = 0.1, checkAllAdjacent: bool = True,
                         fitMethod: str = PARABOLICMETHOD, excludedRegions=None,
                         excludedDiagonalDims=None, excludedDiagonalTransform=None):
         """Pick peaks in the region defined by the regionToPick dict.
@@ -810,7 +810,7 @@ class PeakList(AbstractWrapperObject):
         :param doNeg: pick negative peaks
         :param minLinewidth:
         :param exclusionBuffer: array of int
-        :param minDropfactor: float defined on [0.0, 1.0] default is 0.1
+        :param minDropFactor: float defined on [0.0, 1.0] default is 0.1
         :param checkAllAdjacent: True/False, default True
         :param fitMethod: str in 'gaussian', 'lorentzian'
         :param excludedRegions:
@@ -826,6 +826,7 @@ class PeakList(AbstractWrapperObject):
         numDim = dataSource.numDim
 
         assert fitMethod in PICKINGMETHODS, 'pickPeaksRegion: fitMethod = %s, must be one of ("gaussian", "lorentzian", "parabolic")' % fitMethod
+        assert (minDropFactor >= 0.0) and (minDropFactor <= 1.0), 'pickPeaksRegion: minDropFactor %f not in range [0.0, 1.0]' % minDropFactor
         # method = PICKINGMETHODS.index(fitMethod)
 
         peaks = []
@@ -920,10 +921,11 @@ class PeakList(AbstractWrapperObject):
                 posLevel = posLevel or 0.0
                 negLevel = negLevel or 0.0
 
+                print('>>dataArray', dataArray)
                 # Note: requires an exclusionBuffer of 1 in all axis directions
                 peakPoints = CPeak.findPeaks(dataArray, doNeg, doPos,
                                              negLevel, posLevel, exclusionBuffer,
-                                             nonAdj, minDropfactor, minLinewidth,
+                                             nonAdj, minDropFactor, minLinewidth,
                                              excludedRegionsList, excludedDiagonalDimsList, excludedDiagonalTransformList)
 
                 peakPoints = [(numpy.array(position), height) for position, height in peakPoints]

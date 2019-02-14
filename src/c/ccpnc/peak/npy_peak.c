@@ -387,17 +387,17 @@ static CcpnBool check_drop(PyArrayObject *data_array, CcpnBool find_maximum,
                            float drop_factor, float v, npy_intp *point, int *points)
 {
     int i, ndim = PyArray_NDIM(data_array);
-    float drop = drop_factor * ABS(v);
+    float dropV = drop_factor * ABS(v);
 
     if (drop_factor <= 0)
         return CCPN_TRUE;
 
     for (i = 0; i < ndim; i++)
     {
-        if (!drops_in_direction(data_array, find_maximum, drop, v, point, points, i, 1))
+        if (!drops_in_direction(data_array, find_maximum, dropV, v, point, points, i, 1))
             return CCPN_FALSE;
 
-        if (!drops_in_direction(data_array, find_maximum, drop, v, point, points, i, -1))
+        if (!drops_in_direction(data_array, find_maximum, dropV, v, point, points, i, -1))
             return CCPN_FALSE;
     }
 

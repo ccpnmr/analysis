@@ -178,14 +178,10 @@ def expandDollarFilePath(project: 'Project', spectrum, filePath: str) -> str:
 
     for prefix, dataUrlName in stdRepositoryNames.items():
         if filePath.startswith(prefix):
-            # dataUrl = dataLocationStore.findFirstDataUrl(name=dataUrlName)
+            dataUrl = dataLocationStore.findFirstDataUrl(name=dataUrlName)
+            if dataUrl is not None:
+                return os.path.join(dataUrl.url.dataLocation, filePath[len(prefix):])
 
-            apiDataStore = spectrum._apiDataSource.dataStore
-            if apiDataStore and apiDataStore.dataUrl:
-
-                if apiDataStore.dataUrl is not None:
-                    return os.path.join(apiDataStore.dataUrl.url.dataLocation, filePath[len(prefix):])
-    #
     return filePath
 
 

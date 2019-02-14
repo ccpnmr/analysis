@@ -686,20 +686,26 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         ##self.drawContoursCounter += 1
         ##print('***drawContours counter (%s): %d' % (self, self.drawContoursCounter))
 
-        if self.spectrum.positiveContourBase == 10000.0:  # horrid
-            # base has not yet been set, so guess a sensible value
+        if self.spectrum.positiveContourBase is None or self.spectrum.positiveContourBase == 0.0:
+            raise RuntimeError('Positive Contour Base is not defined')
 
-            # empty spectra yield a noise of zero, this is not allowed.
-            # positiveContourBase must be > 0.0
-            try:
-                noise = self.spectrum.estimateNoise()
-            except:
-                getLogger().warning('Error reading noise from spectrum')
-                noise = 0
+        if self.spectrum.negativeContourBase is None or self.spectrum.negativeContourBase == 0.0:
+            raise RuntimeError('Negative Contour Base is not defined')
 
-            if noise > 0:
-                self.spectrum.positiveContourBase = noise
-                self.spectrum.negativeContourBase = -noise
+        # if self.spectrum.positiveContourBase == 10000.0:  # horrid
+        #     # base has not yet been set, so guess a sensible value
+        #
+        #     # empty spectra yield a noise of zero, this is not allowed.
+        #     # positiveContourBase must be > 0.0
+        #     try:
+        #         noise = self.spectrum.estimateNoise()
+        #     except:
+        #         getLogger().warning('Error reading noise from spectrum')
+        #         noise = 0
+        #
+        #     if noise > 0:
+        #         self.spectrum.positiveContourBase = noise
+        #         self.spectrum.negativeContourBase = -noise
 
         if self.spectrum.includePositiveContours:  # .displayPositiveContours:
             self.posLevels = _getLevels(self.positiveContourCount, self.positiveContourBase,
@@ -735,20 +741,26 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
         # print('>>>_buildContours %s' % self)
 
-        if self.spectrum.positiveContourBase == 10000.0:  # horrid
-            # base has not yet been set, so guess a sensible value
+        if self.spectrum.positiveContourBase is None or self.spectrum.positiveContourBase == 0.0:
+            raise RuntimeError('Positive Contour Base is not defined')
 
-            # empty spectra yield a noise of zero, this is not allowed.
-            # positiveContourBase must be > 0.0
-            try:
-                noise = self.spectrum.estimateNoise()
-            except:
-                getLogger().warning('Error reading noise from spectrum')
-                noise = 0
+        if self.spectrum.negativeContourBase is None or self.spectrum.negativeContourBase == 0.0:
+            raise RuntimeError('Negative Contour Base is not defined')
 
-            if noise > 0:
-                self.spectrum.positiveContourBase = noise
-                self.spectrum.negativeContourBase = -noise
+        # if self.spectrum.positiveContourBase == 10000.0:  # horrid
+        #     # base has not yet been set, so guess a sensible value
+        #
+        #     # empty spectra yield a noise of zero, this is not allowed.
+        #     # positiveContourBase must be > 0.0
+        #     try:
+        #         noise = self.spectrum.estimateNoise()
+        #     except:
+        #         getLogger().warning('Error reading noise from spectrum')
+        #         noise = 0
+        #
+        #     if noise > 0:
+        #         self.spectrum.positiveContourBase = noise
+        #         self.spectrum.negativeContourBase = -noise
 
         if self.spectrum.includePositiveContours:  # .displayPositiveContours:
             self.posLevels = _getLevels(self.positiveContourCount, self.positiveContourBase,
@@ -1027,6 +1039,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     def _getPlaneData(self):
 
         # NBNB TODO FIXME - Wayne, please check through the modified code
+
 
         spectrum = self.spectrum
         dimensionCount = spectrum.dimensionCount

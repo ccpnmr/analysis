@@ -272,8 +272,9 @@ class ExcelReader(object):
                 for obj, dct in objDict.items():
                     for key, value in dct.items():
                         if key == SPECTRUM_PATH:
+                            value = str(value) # no point of being int/float
                             if os.path.exists(value):
-                                if isinstance(value, str):  # means it's a pathlike str### the full path is given:
+                                # if isinstance(value, str):  # means it's a pathlike str### the full path is given:
                                     self._addSpectrum(filePath=value, dct=dct, obj=obj)
 
                             else:  ### needs to find the path from the excel file:

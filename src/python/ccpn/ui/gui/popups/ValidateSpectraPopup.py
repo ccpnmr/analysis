@@ -35,13 +35,11 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.util.Logging import getLogger
-from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
-from ccpnmodel.ccpncore.api.memops import Implementation
 
 
 LINEEDITSMINIMUMWIDTH = 195
@@ -370,11 +368,6 @@ class ValidateSpectraPopup(CcpnDialog):
     def _setPathData(self, spectrum):
         """Set the pathData widgets from the spectrum.
         """
-        from memops.api.Implementation import Url
-        from memops.universal import Io as uniIo
-
-        standardStore = self.project._wrappedData.memopsRoot.findFirstDataLocationStore(name='standard')
-
         if spectrum and spectrum in self.spectrumData:
             pathData, pathButton, pathLabel = self.spectrumData[spectrum]
 

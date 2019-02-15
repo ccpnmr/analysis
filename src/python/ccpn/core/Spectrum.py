@@ -1211,13 +1211,19 @@ class Spectrum(AbstractWrapperObject):
     #=========================================================================================
 
     def getHeight(self, ppmPositions):
-        """returns the interpolated height at the ppm position
+        """Returns the interpolated height at the ppm position
         """
-        #TODO: Urgently needs fixing
-        return 10
+        pointPosition = []
+        return self.getPositionValue(pointPosition)
 
     def getPositionValue(self, position):
-        return self._apiDataSource.getPositionValue(position)
+        """Return the value nearest to the position given in points.
+        """
+        scale = self.scale if self.scale is not None else 1.0
+        if self.scale == 0.0:
+            getLogger().warning('Scaling "%s" by 0.0!' % self)
+
+        return self._apiDataSource.getPositionValue(position) * scale
 
     @cached(_SLICE1DDATACACHE, maxItems=1, debug=False)
     def _get1DSliceData(self, position, sliceDim: int):

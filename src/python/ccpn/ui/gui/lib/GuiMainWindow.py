@@ -876,8 +876,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                         with catchExceptions():
                             obj = self.application.loadProject(url)
 
-                        if isinstance(obj, Project):
-                            try:
+                        try:
+                            if isinstance(obj, Project):
                                 # obj._mainWindow._newSideBar.fillSideBar(obj)
 
                                 # set the sidebar and open the new object's mainWindow
@@ -892,8 +892,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
                                 QtWidgets.QApplication.setActiveWindow(self)
 
-                            except Exception as es:
-                                getLogger().warning('Error: %s' % str(es))
+                        except Exception as es:
+                            getLogger().warning('Error: %s' % str(es))
 
             else:
                 # with progressManager(self.mainWindow, 'Loading data... ' + url):

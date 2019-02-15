@@ -99,7 +99,7 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
     def _closeProgram(self):
         """Call the mainWindow close function giving user option to save, then close program
         """
-        self.mainWindow._closeEvent()
+        self.mainWindow._closeEvent(disableCancel=True)
         os._exit(0)
 
     def _accept(self):

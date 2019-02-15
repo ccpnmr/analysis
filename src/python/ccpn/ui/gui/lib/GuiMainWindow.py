@@ -630,7 +630,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         info = MessageDialog.showInfo('Not implemented yet',
                                       'This function has not been implemented in the current version')
 
-    def _closeEvent(self, event=None):
+    def _closeEvent(self, event=None, disableCancel=False):
         """
         Saves application preferences. Displays message box asking user to save project or not.
         Closes Application.
@@ -652,9 +652,16 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         # set the active window to mainWindow so that the quit popup centres correctly.
         QtWidgets.QApplication.setActiveWindow(self)
-        reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
-                                        ['Save and Quit', 'Quit without Saving', 'Cancel'],
-                                        )
+
+        if disableCancel:
+            reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
+                                            ['Save and Quit', 'Quit without Saving'],
+                                            )
+        else:
+            reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
+                                            ['Save and Quit', 'Quit without Saving', 'Cancel'],
+                                            )
+
         if reply == 'Save and Quit':
             if event:
                 event.accept()

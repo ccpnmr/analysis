@@ -1213,12 +1213,24 @@ class Spectrum(AbstractWrapperObject):
     def getHeight(self, ppmPositions):
         """Returns the interpolated height at the ppm position
         """
-        pointPosition = []
+        ref = self.mainSpectrumReferences
+
+        if len(ppmPositions) != self.dimensionCount:
+            raise ValueError("Length of %s does not match number of dimensions." % str(ppmPositions))
+        if not all(isinstance(dimVal, (int, float)) for dimVal in ppmPositions):
+            raise ValueError("ppmPositions values must be floats.")
+
+        pointPosition = tuple(ref[dim].valueToPoint(ppm) for dim, ppm in enumerate(ppmPositions))
         return self.getPositionValue(pointPosition)
 
     def getPositionValue(self, position):
         """Return the value nearest to the position given in points.
         """
+        if len(position) != self.dimensionCount:
+            raise ValueError("Length of %s does not match number of dimensions." % str(position))
+        if not all(isinstance(dimVal, (int, float)) for dimVal in position):
+            raise ValueError("position values must be floats.")
+
         scale = self.scale if self.scale is not None else 1.0
         if self.scale == 0.0:
             getLogger().warning('Scaling "%s" by 0.0!' % self)

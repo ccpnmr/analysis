@@ -363,7 +363,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._staticVTraces = []
         self._currentTraces = []
 
-        self._stackingValue = None
+        self._stackingValue = 0.0
         self._stackingMode = False
         self._hTraceVisible = False
         self._vTraceVisible = False
@@ -706,15 +706,19 @@ class CcpnGLWidget(QOpenGLWidget):
                 self._minYRange = min(self._minYRange, self._intensityLimit)
                 self._maxYRange = max(self._maxYRange, (fy0 - fy1))
 
+                self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX] = np.zeros((16,), dtype=np.float32)
                 if self._stackingMode:
                     st = stackCount * self._stackingValue
                     stackCount += 1
-                    self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX] = np.zeros((16,), dtype=np.float32)
-
                     self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX][0:16] = [1.0, 0.0, 0.0, 0.0,
                                                                                                  0.0, 1.0, 0.0, 0.0,
                                                                                                  0.0, 0.0, 1.0, 0.0,
                                                                                                  0.0, st, 0.0, 1.0]
+                else:
+                    self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX][0:16] = [1.0, 0.0, 0.0, 0.0,
+                                                                                                 0.0, 1.0, 0.0, 0.0,
+                                                                                                 0.0, 0.0, 1.0, 0.0,
+                                                                                                 0.0, 0.0, 0.0, 1.0]
 
         self._rangeXDefined = True
         self._rangeYDefined = True

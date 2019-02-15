@@ -376,14 +376,14 @@ def _stackSpectraDefaultItem(strip):
     return _SCMitem(name='Stack Spectra',
                     typeItem=ItemTypes.get(ITEM), toolTip='Stack Spectra',
                     checkable=True, checked=strip._CcpnGLWidget._stackingMode,
-                    callback=strip.toggleStack, stripMethodName='stackAction')
+                    callback=strip._toggleStack, stripMethodName='stackAction')
 
 
 def _stackSpectraPhaseItem(strip):
     return _SCMitem(name='Stack Spectra',
                     typeItem=ItemTypes.get(ITEM), toolTip='Stack Spectra',
                     checkable=True, checked=strip._CcpnGLWidget._stackingMode,
-                    callback=strip.toggleStackPhase, stripMethodName='stackActionPhase')
+                    callback=strip._toggleStackPhase, stripMethodName='stackActionPhase')
 
 
 ########################################################################################################################

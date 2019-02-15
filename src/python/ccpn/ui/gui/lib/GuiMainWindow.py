@@ -398,12 +398,23 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 projectDir = dialog.selectedFile()
 
             if projectDir:
-                project = self.application.loadProject(projectDir)
+                try:
+                    project = self.application.loadProject(projectDir)
 
-                if project:
-                    project._mainWindow.show()
-                    QtWidgets.QApplication.setActiveWindow(project._mainWindow)
-                else:
+                    if project:
+                        project._mainWindow.show()
+                        QtWidgets.QApplication.setActiveWindow(project._mainWindow)
+
+                        # if the new project contains invalid spectra then open the popup to see them
+                        badSpectra = [spectrum for spectrum in project.spectra if not spectrum.isValidPath]
+                        if badSpectra:
+                            project.application.showValidateSpectraPopup(defaultSelected='invalid')
+                            project.save(createFallback=False, overwriteExisting=True)
+
+                    else:
+                        raise ValueError("Error loading project")
+
+                except Exception as es:
                     MessageDialog.showError('loadProject', 'Error loading project:\n%s' % str(projectDir))
                     Logging.getLogger().warning('Error loading project: %s' % str(projectDir))
 

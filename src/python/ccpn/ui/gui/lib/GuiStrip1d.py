@@ -384,7 +384,15 @@ class GuiStrip1d(GuiStrip):
         else:
             self.offsetWidget.setVisible(not self.offsetWidget.isVisible())
 
-    def toggleStack(self):
+    def setStackingMode(self, value):
+        if value != self.stackAction.isChecked():
+            self.stackAction.setChecked(value)
+            self._toggleStack()
+
+    def getStackingMode(self):
+        return self.stackAction.isChecked()
+
+    def _toggleStack(self):
         """Toggle stacking mode for 1d spectra
         This vertically stacks the spectra for clarity
         """
@@ -400,7 +408,7 @@ class GuiStrip1d(GuiStrip):
             except:
                 getLogger().debugGL('OpenGL widget not instantiated')
 
-    def toggleStackPhase(self):
+    def _toggleStackPhase(self):
         """Toggle stacking mode for 1d spectra
         This vertically stacks the spectra for clarity
         """

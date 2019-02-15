@@ -397,6 +397,8 @@ class Gui1dWidget(CcpnGLWidget):
         if self.strip.isDeleted:
             return
 
+        stackCount = 0
+
         # self._spectrumSettings = {}
         rebuildFlag = False
         for spectrumView in self.strip.spectrumViews:
@@ -428,7 +430,10 @@ class Gui1dWidget(CcpnGLWidget):
                                                                     GLContext=self)
                 spectrumView._buildGLContours(self._contourList[spectrumView])
 
-                self._buildSpectrumSetting(spectrumView=spectrumView)
+                self._buildSpectrumSetting(spectrumView=spectrumView, stackCount=stackCount)
+                if self._stackingMode:
+                    stackCount += 1
+
                 rebuildFlag = True
 
                 # define the VBOs to pass to the graphics card

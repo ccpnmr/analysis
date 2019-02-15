@@ -501,6 +501,18 @@ class _openItemSampleDisplay(OpenItemABC):
     objectArgumentName = 'sample'
     contextMenuText = 'Open linked spectra'
 
+    @staticmethod
+    def _openSampleSpectraOnDisplay(sample, spectrumDisplay, autoRange=False):
+        if len(sample.spectra) > 0:
+            for spectrum in sample.spectra:
+                spectrumDisplay.displaySpectrum(spectrum)
+            for sampleComponent in sample.sampleComponents:
+                if sampleComponent.substance is not None:
+                    for spectrum in sampleComponent.substance.referenceSpectra:
+                        spectrumDisplay.displaySpectrum(spectrum)
+            if autoRange:
+                spectrumDisplay.autoRange()
+
     def _openSampleSpectra(self, sample, position=None, relativeTo=None):
         """Add spectra linked to sample and sampleComponent. Particularly used for screening
         """
@@ -509,15 +521,8 @@ class _openItemSampleDisplay(OpenItemABC):
         if len(sample.spectra) > 0:
             spectrumDisplay = mainWindow.createSpectrumDisplay(sample.spectra[0])
             mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
-            for spectrum in sample.spectra:
-                spectrumDisplay.displaySpectrum(spectrum)
-            for sampleComponent in sample.sampleComponents:
-                if sampleComponent.substance is not None:
-                    for spectrum in sampleComponent.substance.referenceSpectra:
-                        spectrumDisplay.displaySpectrum(spectrum)
+            self._openSampleSpectraOnDisplay(sample, spectrumDisplay, autoRange=True)
             mainWindow.application.current.strip = spectrumDisplay.strips[0]
-            # if any([spec.dimensionCount for spec in sample.spectra]) == 1:
-            spectrumDisplay.autoRange()
 
     openItemDirectMethod = _openSampleSpectra
 

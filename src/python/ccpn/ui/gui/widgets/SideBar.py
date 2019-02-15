@@ -1140,24 +1140,22 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
                 super().dragMoveEvent(event)
 
     def _displaySelectedSpectrum(self):
-        import time
 
-        s = time.time()
         for item in self.selectedItems():
             if item is not None:
                 dataPid = item.data(0, QtCore.Qt.DisplayRole)
                 objFromPid = self.project.getByPid(dataPid)
-                if isinstance(objFromPid,Spectrum):
-                    strip = self.application.current.strip
-                    e1 = time.time()
-                    print('1 time, ', e1 - s)
-                    if strip:
-                        strip._clear()
-                        e2 = time.time()
-                        print('time 2, ', e2 - e1)
+                strip = self.application.current.strip
+                if strip:
+                    strip._clear()
+                    if isinstance(objFromPid,Spectrum):
                         strip.spectrumDisplay.displaySpectrum(objFromPid)
-                        e3 = time.time()
-                        print('time 3, ', e3 - e2)
+                    if isinstance(objFromPid, Sample):
+                        _openItemSampleDisplay._openSampleSpectraOnDisplay(objFromPid, strip.spectrumDisplay)
+                        v = strip._getInitialOffset()
+                        strip._CcpnGLWidget.setStackingValue(v)
+                        strip._CcpnGLWidget.setStackingMode(True)
+                        strip._stack1DSpectra(v)
 
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Up:

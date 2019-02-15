@@ -197,7 +197,7 @@ class ValidateSpectraPopup(CcpnDialog):
         urls = self._findDataUrl('remoteData')
         for url in urls:
             label = self._addUrl(self.dataUrlScrollAreaWidgetContents, url, urlList=self.dataUrlData, scrollRow=scrollRow, enabled=True)
-            label.setText('User Data Path ($DATA)')
+            label.setText('$DATA (user datapath)')
             scrollRow += 1
 
         otherUrls = [dataUrl for store in self.project._wrappedData.memopsRoot.sortedDataLocationStores()
@@ -219,14 +219,17 @@ class ValidateSpectraPopup(CcpnDialog):
         self.buttonFrame = Frame(self, setLayout=True, showBorder=False, fShape='noFrame',
                                  grid=(row, 0), gridSpan=(1, 3),
                                  vAlign='top', hAlign='left')
-        self.showValidLabel = Label(self.buttonFrame, text="Show Spectra: ", vAlign='t', grid=(0, 0))
+        self.showValidLabel = Label(self.buttonFrame, text="Show spectra: ", vAlign='t', grid=(0, 0), bold=True)
         self.showValid = RadioButtons(self.buttonFrame, texts=['valid', 'invalid', 'all'],
                                       selectedInd=self.defaultSelected,
                                       callback=self._toggleValid,
-                                      direction='v',
+                                      direction='h',
                                       grid=(0, 1), hAlign='l',
                                       tipTexts=None,
                                       )
+        row += 1
+
+        self.addSpacer(0,10, grid=(row,0))
         row += 1
 
         # set up a scroll area

@@ -61,7 +61,7 @@ class SelectSpectrumDisplayPopup(CcpnDialog):
         # self.project = project
         # self.application = QtCore.QCoreApplication.instance()._ccpnApplication
 
-        self.setContentsMargins(15, 20, 25, 5)  # L,T,R,B
+        self.setContentsMargins(15, 15, 15, 15)  # L,T,R,B
         # self.setFixedWidth(400)
         # self.setFixedHeight(300)
 
@@ -92,7 +92,8 @@ class SelectSpectrumDisplayPopup(CcpnDialog):
         # self.scrollArea.setWidget(self.radioButtonBox)
 
         # self.spectrumSelectionWidget = SpectrumDisplaySelectionWidget(self._sequenceGraphScrollArea, project, setLayout=True)
-        self.buttonBox = ButtonList(self, grid=(4, 1), callbacks=[self.reject, self.getStripToPrint],
+        self.buttonBox = ButtonList(self, grid=(4, 0), gridSpan=(1,3),
+                                    callbacks=[self.reject, self.getStripToPrint],
                                     texts=['Cancel', 'Select Strip'])
         if self.mainWindow:
             self.radioButtonBox.set(self.current.strip.id)

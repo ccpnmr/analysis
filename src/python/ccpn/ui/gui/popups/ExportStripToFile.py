@@ -92,10 +92,10 @@ class ExportStripToFilePopup(ExportDialog):
         self.spectrumDisplays = set()
         self.specToExport = None
 
-        super(ExportStripToFilePopup, self).__init__(parent=parent, mainWindow=mainWindow, title=title,
-                                                     fileMode=fileMode, text=text, acceptMode=acceptMode,
-                                                     preferences=preferences, selectFile=selectFile,
-                                                     filter=filter, **kwds)
+        super().__init__(parent=parent, mainWindow=mainWindow, title=title,
+                         fileMode=fileMode, text=text, acceptMode=acceptMode,
+                         preferences=preferences, selectFile=selectFile,
+                         filter=filter, **kwds)
 
         if not strips:
             showWarning(str(self.windowTitle()), 'No strips selected')
@@ -187,27 +187,25 @@ class ExportStripToFilePopup(ExportDialog):
         HLine(userFrame, grid=(row, 0), gridSpan=(1, 2), colour=getColours()[DIVIDER], height=20)
         row += 1
         topRow = row
-        Label(userFrame, text='Print Type', grid=(row, 0),
-              hAlign='left', vAlign='centre')
+        Label(userFrame, text='Print Type', grid=(row, 0), hAlign='left', vAlign='centre')
 
-        row += 1
+        # row += 1
         self.exportType = RadioButtons(userFrame, EXPORTTYPES,
-                                       grid=(row, 0), direction='h', hAlign='left', spacing=(20, 0),
+                                       grid=(row, 1), direction='h', hAlign='left', spacing=(20, 0),
                                        callback=self._changePrintType)
         self.exportType.set(EXPORTPDF)
 
         row += 1
-        Label(userFrame, text='Page Orientation', grid=(row, 0),
-              hAlign='left', vAlign='centre')
+        Label(userFrame, text='Page orientation', grid=(row, 0), hAlign='left', vAlign='centre')
 
-        row += 1
+        # row += 1
         self.pageType = RadioButtons(userFrame, PAGETYPES,
-                                     grid=(row, 0), direction='h', hAlign='left', spacing=(20, 0))
+                                     grid=(row, 1), direction='h', hAlign='left', spacing=(20, 0))
         self.pageType.set(PAGEPORTRAIT)
 
         # create a pulldown for the foreground (axes) colour
         row += 1
-        foregroundColourFrame = Frame(userFrame, grid=(row, 0), setLayout=True, showBorder=False)
+        foregroundColourFrame = Frame(userFrame, grid=(row, 0), gridSpan=(1,3), setLayout=True, showBorder=False)
         Label(foregroundColourFrame, text="Foreground Colour", vAlign='c', hAlign='l', grid=(0, 0))
         self.foregroundColourBox = PulldownList(foregroundColourFrame, vAlign='t', grid=(0, 1))
         self.foregroundColourButton = Button(foregroundColourFrame, vAlign='t', hAlign='l', grid=(0, 2), hPolicy='fixed',
@@ -233,7 +231,7 @@ class ExportStripToFilePopup(ExportDialog):
 
         # create a pulldown for the background colour
         row += 1
-        backgroundColourFrame = Frame(userFrame, grid=(row, 0), setLayout=True, showBorder=False)
+        backgroundColourFrame = Frame(userFrame, grid=(row, 0), gridSpan=(1,3), setLayout=True, showBorder=False)
         Label(backgroundColourFrame, text="Background Colour", vAlign='c', hAlign='l', grid=(0, 0))
         self.backgroundColourBox = PulldownList(backgroundColourFrame, vAlign='t', grid=(0, 1))
         self.backgroundColourButton = Button(backgroundColourFrame, vAlign='t', hAlign='l', grid=(0, 2), hPolicy='fixed',
@@ -259,19 +257,20 @@ class ExportStripToFilePopup(ExportDialog):
 
         row += 1
         self.baseThicknessBox = DoubleSpinBoxCompoundWidget(
-                userFrame, grid=(row, 0), gridSpan=(1, 1), hAlign='left',
+                userFrame, grid=(row, 0), gridSpan=(1, 3), hAlign='left',
                 labelText='Base Line Thickness',
                 value=1.0,
                 decimals=1, step=0.1, range=(0.1, 10))
         self.baseThicknessBox.setFixedHeight(25)
 
         row += 1
-        self.spacer = Spacer(userFrame, 5, 5,
-                             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
-                             grid=(row, 0), gridSpan=(1, 1))
+        # self.spacer = Spacer(userFrame, 5, 5,
+        #                      QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
+        #                      grid=(row, 0), gridSpan=(1, 1))
+        userFrame.addSpacer(0, 10, grid=(row,0))
 
         row += 1
-        self.treeView = PrintTreeCheckBoxes(userFrame, project=self.project, grid=(row, 0))
+        self.treeView = PrintTreeCheckBoxes(userFrame, project=self.project, grid=(row, 0), gridSpan=(1,3))
         if self.current.strip:
             self.objectPulldown.select(self.current.strip.id)
             self.strip = self.current.strip
@@ -589,11 +588,12 @@ class ExportStripToFilePopup(ExportDialog):
                     svgExport.writeSVGFile()
 
     def actionButtons(self):
+        self.buttonFrame.addSpacer(0, 10, grid=(0,1))
         self.buttons = ButtonList(self.buttonFrame, ['Close', 'Save', 'Save and Close'], [self._rejectDialog, self._saveDialog, self._acceptDialog],
                                   tipTexts=['Close the export dialog',
                                             'Export the strip to a file, dialog will remain open',
                                             'Export the strip and close the dialog'],
-                                  grid=(0, 1))
+                                  grid=(1, 0), gridSpan=(1,3))
 
     def _saveDialog(self, exitSaveFileName=None):
         """save button has been clicked

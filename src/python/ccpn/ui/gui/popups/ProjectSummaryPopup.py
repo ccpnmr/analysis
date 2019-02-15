@@ -46,6 +46,8 @@ from ccpn.ui.gui.widgets.QuickTable import QuickTable
 from ccpn.ui.gui.widgets.Column import Column, ColumnClass
 
 
+MINHEIGHT = 100
+
 class ProjectSummaryPopup(CcpnDialog):
     def __init__(self, parent=None, mainWindow=None, title='Project Summary', modal=False, **kwds):
         CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
@@ -71,7 +73,7 @@ class ProjectSummaryPopup(CcpnDialog):
         # SPECTRA
 
         self.spectrumFrame = Frame(self.mainFrame, grid=(row, 0), setLayout=True)
-        self.spectrumLabel = Label(self.spectrumFrame, text='Spectra', grid=(0, 0), hAlign='l')
+        self.spectrumLabel = Label(self.spectrumFrame, text='Spectra', grid=(0, 0), hAlign='l', bold=True)
         row += 1
 
         columnsSpectrum = ColumnClass([
@@ -96,13 +98,14 @@ class ProjectSummaryPopup(CcpnDialog):
                                         enableDelete=False,
                                         grid=(1, 0), gridSpan=(1, 1)
                                         )
+        self.spectrumTable.setMinimumHeight(MINHEIGHT)
         # self.spectrumTable = ObjectTable(self.spectrumFrame, columns=columns, objects=self.spectra, grid=(1, 0))
         row += 1
 
         # PEAKLISTS
 
         self.peakListFrame = Frame(self.mainFrame, grid=(row, 0), setLayout=True)
-        self.peakListLabel = Label(self.peakListFrame, text='PeakLists', grid=(0, 0), hAlign='l')
+        self.peakListLabel = Label(self.peakListFrame, text='PeakLists', grid=(0, 0), hAlign='l', bold=True)
         row += 1
 
         columnsPeakList = ColumnClass([
@@ -132,13 +135,14 @@ class ProjectSummaryPopup(CcpnDialog):
                                         enableDelete=False,
                                         grid=(1, 0), gridSpan=(1, 1)
                                         )
+        self.peakListTable.setMinimumHeight(MINHEIGHT)
         # self.peakListTable = ObjectTable(self.peakListFrame, columns=columns, objects=self.peakLists, grid=(1, 0))
         row += 1
 
         # CHAINS
 
         self.chainFrame = Frame(self.mainFrame, grid=(row, 0), setLayout=True)
-        self.chainLabel = Label(self.chainFrame, text='Chains', grid=(0, 0), hAlign='l')
+        self.chainLabel = Label(self.chainFrame, text='Chains', grid=(0, 0), hAlign='l', bold=True)
         row += 1
 
         columnsChain = ColumnClass([
@@ -166,11 +170,14 @@ class ProjectSummaryPopup(CcpnDialog):
                                      enableDelete=False,
                                      grid=(1, 0), gridSpan=(1, 1)
                                      )
+        self.chainTable.setMinimumHeight(MINHEIGHT)
         # self.chainTable = ObjectTable(self.chainFrame, columns=columns, objects=self.chains, grid=(1, 0))
         row += 1
 
-        # buttons
+        self.mainFrame.addSpacer(10, 10, grid=(row,0))
+        row += 1
 
+        # Buttons
         buttonFrame = Frame(self, grid=(1, 0), setLayout=True)
         button = Button(buttonFrame, 'Save to Excel', callback=self._saveToExcel, grid=(0, 0))
         button = Button(buttonFrame, 'Save to PDF', callback=self._saveToPdf, grid=(0, 1))

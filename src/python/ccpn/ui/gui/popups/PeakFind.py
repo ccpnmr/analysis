@@ -64,41 +64,48 @@ class PeakFindPopup(CcpnDialog):
                          % (str(self.current.strip.spectra[0].pid),
                             str(self.current.strip.spectra[0].peakLists[0].pid)))
 
-            self.peakListLabel = Label(self, text="PeakList: ", grid=(0, 0))
-            self.peakListPulldown = PulldownList(self, grid=(0, 1), gridSpan=(1, 4), hAlign='l', callback=self._selectPeakList)
+            self.peakListLabel = Label(self, text="PeakList ", grid=(0, 0))
+            self.peakListPulldown = PulldownList(self, grid=(0, 1), gridSpan=(1, 1), hAlign='l', callback=self._selectPeakList)
             self.peakListPulldown.setData([peakList.pid for peakList in self.project.peakLists
                                            if peakList.spectrum.dimensionCount != 1])
             if self.current is not None and self.current.strip is not None and len(self.current.strip.spectra) > 0:
                 self.peakListPulldown.select(self.current.strip.spectra[-1].peakLists[-1].pid)
             self.peakList = self.project.getByPid(self.peakListPulldown.currentText())
 
-            self.checkBoxWidget = QtWidgets.QWidget()
-            layout = QtWidgets.QGridLayout()
-            self.checkBoxWidget.setLayout(layout)
-            self.layout().addWidget(self.checkBoxWidget, 1, 0, 1, 4)
+            # self.checkBoxWidget = QtWidgets.QWidget()
+            # layout = QtWidgets.QGridLayout()
+            # self.checkBoxWidget.setLayout(layout)
+            # self.layout().addWidget(self.checkBoxWidget, 1, 0, 1, 4)
+
+            Label(self, 'Pick', grid=(1,0))
+            self.checkBoxWidget = Frame(self, setLayout=True, grid=(1,1), gridSpan=(1,3))
+
             self.checkBox1 = RadioButton(self)
-            self.checkBoxWidget.layout().addWidget(self.checkBox1, 0, 0)
+            self.checkBoxWidget.getLayout().addWidget(self.checkBox1, 0, 0)
             self.checkBox1Label = Label(self, 'Positive only')
-            self.checkBoxWidget.layout().addWidget(self.checkBox1Label, 0, 1)
+            self.checkBoxWidget.getLayout().addWidget(self.checkBox1Label, 0, 1)
             self.checkBox2 = RadioButton(self)
-            self.checkBoxWidget.layout().addWidget(self.checkBox2, 0, 2)
+            self.checkBoxWidget.getLayout().addWidget(self.checkBox2, 0, 2)
             self.checkBox2Label = Label(self, 'Negative only')
-            self.checkBoxWidget.layout().addWidget(self.checkBox2Label, 0, 3)
+            self.checkBoxWidget.getLayout().addWidget(self.checkBox2Label, 0, 3)
             self.checkBox3 = RadioButton(self)
-            self.checkBoxWidget.layout().addWidget(self.checkBox3, 0, 4)
+            self.checkBoxWidget.getLayout().addWidget(self.checkBox3, 0, 4)
             self.checkBox3Label = Label(self, 'Both')
-            self.checkBoxWidget.layout().addWidget(self.checkBox3Label, 0, 5)
+            self.checkBoxWidget.getLayout().addWidget(self.checkBox3Label, 0, 5)
             self.checkBox3.setChecked(True)
+
 
             self.estimateFrame = Frame(parent=self, setLayout=True, spacing=(5, 0),
                                        showBorder=False, fShape='noFrame',
-                                       grid=(7, 0))
+                                       grid=(7, 0), gridSpan=(1,2))
             self.estimateLineWidthLabel = Label(self.estimateFrame, 'Estimate Line Widths', grid=(0, 1))
             self.estimateLineWidthData = CheckBox(self.estimateFrame, grid=(0, 0), checked=True, vAlign='t', hAlign='l')
             self.estimateLineWidthData.setChecked(True)
             self._updateContents()
 
-            self.buttonBox = ButtonList(self, grid=(8, 2), gridSpan=(1, 4), texts=['Cancel', 'Find Peaks'],
+            self.addSpacer(0, 10, grid=(8,0))
+
+            self.buttonBox = ButtonList(self, grid=(9, 0), gridSpan=(1, 4), texts=['Cancel', 'Find Peaks'],
                                         callbacks=[self.reject, self._pickPeaks])
         else:
             self.close()

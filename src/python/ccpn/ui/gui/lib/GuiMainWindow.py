@@ -887,7 +887,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                                 # if the new project contains invalid spectra then open the popup to see them
                                 badSpectra = [spectrum for spectrum in obj.spectra if not spectrum.isValidPath]
                                 if badSpectra:
-                                    obj._mainWindow.application.showValidateSpectraPopup(spectra=badSpectra)
+                                    obj._mainWindow.application.showValidateSpectraPopup(defaultSelected='invalid')
                                     obj.save(createFallback=False, overwriteExisting=True)
 
                                 QtWidgets.QApplication.setActiveWindow(self)
@@ -902,5 +902,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                     if data:
                         objs.extend(data)
                 except Exception as es:
+                    MessageDialog.showError('Load Data', 'loadData Error: %s' % str(es))
                     getLogger().warning('loadData Error: %s' % str(es))
         return objs

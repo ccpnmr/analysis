@@ -1075,7 +1075,7 @@ class Project(AbstractWrapperObject):
                 # NBNB TBD #TODO:RASMUS:FIXME check if loadSpectrum should start with underscore
                 # (NB referred to elsewhere
                 # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
-                with undoBlockManager():
+                with undoBlock():
                     thisSpec = self.loadSpectrum(usePath, subType)
                 return thisSpec
 

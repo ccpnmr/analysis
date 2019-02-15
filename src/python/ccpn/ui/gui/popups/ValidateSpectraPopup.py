@@ -169,6 +169,7 @@ class ValidateSpectraPopup(CcpnDialog):
         self.dataUrlScrollAreaWidgetContents.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         self.dataUrlScrollArea.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         self.dataUrlScrollArea.setStyleSheet("""ScrollArea { border: 0px; }""")
+        self.dataUrlScrollArea.setFixedHeight(120)
 
         # populate the widget with a list of spectrum buttons and filepath buttons
         scrollRow = 0
@@ -267,11 +268,6 @@ class ValidateSpectraPopup(CcpnDialog):
         Spacer(self.spectrumScrollAreaWidgetContents, 2, 2,
                QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(scrollRow, 1), gridSpan=(1, 1))
-        row += 1
-
-        # finalise widget
-        Spacer(self, 2, 2, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
-               grid=(row, 1), gridSpan=(1, 1))
         row += 1
 
         # add exit buttons

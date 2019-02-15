@@ -2097,7 +2097,7 @@ class Framework(NotifierBase):
             popup = ExperimentTypePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
             popup.exec_()
 
-    def showValidateSpectraPopup(self, spectra=None):
+    def showValidateSpectraPopup(self, spectra=None, defaultSelected='all'):
         """
         Displays validate spectra popup.
         """
@@ -2107,7 +2107,7 @@ class Framework(NotifierBase):
         else:
             from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraPopup
 
-            popup = ValidateSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra)
+            popup = ValidateSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra, defaultSelected=defaultSelected)
             popup.exec_()
 
     def showPeakPick1DPopup(self):

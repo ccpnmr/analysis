@@ -69,19 +69,23 @@ class SpectrumProjectionPopup(CcpnDialog):
         # threshold
         thresholdLabel = Label(self, 'Threshold', grid=(5, 0))
         self.thresholdData = ScientificDoubleSpinBox(self, grid=(5, 1), gridSpan=(1, 2), vAlign='t', min=0.1, max=1e12)
+        self.thresholdData.setMinimumHeight(25)
         # Contour coulours checkbox
         contourLabel = Label(self, 'Preserve contour colours', grid=(6, 0))
         self.contourCheckBox = CheckBox(self, checked=True, grid=(6, 1))
+
+        self.addSpacer(0, 10, grid=(7,0))
         # action buttons
-        self.buttonBox = ButtonList(self, grid=(7, 0), gridSpan=(1, 2), hAlign='r',
-                                    callbacks=[self.reject, self.makeProjection],
-                                    texts=['Close', 'Make Projection'])
+        self.buttonBox = ButtonList(self, grid=(8, 0), gridSpan=(1, 3),
+                                          callbacks=[self.reject, self.makeProjection],
+                                          texts=['Close', 'Make Projection'])
 
         # update all widgets to correct settings
         if self.application.current.strip is not None:
             spectrum = self.application.current.strip.spectra[0]
-            self.spectrumPulldown.set(spectrum.pid)
-        self._setSpectrum(self.spectrumPulldown.currentText())
+            if spectrum.dimensionCount == 3:
+                self.spectrumPulldown.set(spectrum.pid)
+                self._setSpectrum(spectrum.pid)
         self._setMethod(self.methodPulldown.currentText())
 
     def _setSpectrum(self, spectrumPid):

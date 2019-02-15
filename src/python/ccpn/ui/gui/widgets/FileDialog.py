@@ -31,6 +31,7 @@ import sys
 import os
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.util.Path import aPath
 
 
 class FileDialog(QtWidgets.QFileDialog):
@@ -39,14 +40,21 @@ class FileDialog(QtWidgets.QFileDialog):
     #              acceptMode=QtWidgets.QFileDialog.AcceptOpen, preferences=None, **kwds):
 
     def __init__(self, parent=None, fileMode=QtWidgets.QFileDialog.AnyFile, text=None,
-                 acceptMode=QtWidgets.QFileDialog.AcceptOpen, preferences=None, selectFile=None, filter=None,
+                 acceptMode=QtWidgets.QFileDialog.AcceptOpen, preferences=None,
+                 selectFile=None, filter=None, directory=None,
                  restrictDirToFilter=False, multiSelection=False,
                  **kwds):
 
         # ejb - added selectFile to suggest a filename in the file box
         #       this is not passed to the super class
 
-        QtWidgets.QFileDialog.__init__(self, parent, caption=text, **kwds)
+        # GWV - added default directory and path expansion
+        if directory is None:
+            directory = str(aPath('~'))
+        else:
+            directory = str(aPath(directory))
+
+        QtWidgets.QFileDialog.__init__(self, parent, caption=text, directory=directory, **kwds)
 
         staticFunctionDict = {
             (0, 0)                               : 'getOpenFileName',

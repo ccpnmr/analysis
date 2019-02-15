@@ -474,6 +474,8 @@ class Spectrum(AbstractWrapperObject):
         path = self.filePath
         if path and os.path.exists(path):
             return True
+        else:
+            return False
 
     @property
     def headerSize(self) -> Optional[int]:
@@ -1867,26 +1869,12 @@ class Spectrum(AbstractWrapperObject):
             addUndoItem(undo=partial(self.rename, oldName),
                         redo=partial(self.rename, value))
 
-    # @cached.clear(PLANEDATACACHE)  # Check if there was a planedata cache, and if so, clear it
-    # @cached.clear(SLICEDATACACHE)  # Check if there was a slicedata cache, and if so, clear it
-    def _clearCachesOnChange(self):
-        if hasattr(self, self.PLANEDATACACHE):
-            cache = getattr(self, self.PLANEDATACACHE)
-            cache.clear()
-
-        if hasattr(self, self.SLICEDATACACHE):
-            cache = getattr(self, self.SLICEDATACACHE)
-            cache.clear()
-
     def _finaliseAction(self, action: str):
         """Subclassed to handle associated spectrumViews instances
         """
         super()._finaliseAction(action=action)
         # propagate the rename to associated spectrumViews
         if action in ['change']:
-
-            self._clearCachesOnChange()
-
             for specView in self.spectrumViews:
                 specView._finaliseAction(action=action)
         if action in ['create', 'delete']:

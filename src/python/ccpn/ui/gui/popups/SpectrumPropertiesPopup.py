@@ -54,6 +54,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.core.lib.ContextManagers import logCommandBlock, undoStackBlocking, undoBlockManager
+from ccpn.ui.gui.popups.ValidateSpectraPopup import SpectrumValidator
 
 
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
@@ -209,48 +210,48 @@ class SpectrumPropertiesPopup(CcpnDialog):
             self.accept()
 
 
-class FilePathValidator(QtGui.QValidator):
-
-    def __init__(self, spectrum, parent=None, validationType='exists'):
-        QtGui.QValidator.__init__(self, parent=parent)
-        self.spectrum = spectrum
-        self.validationType = validationType
-        self.baseColour = self.parent().palette().color(QtGui.QPalette.Base)
-
-    def validate(self, p_str, p_int):
-        if self.validationType != 'exists':
-            raise NotImplemented('FilePathValidation only checks that the path exists')
-        filePath = ccpnUtil.expandDollarFilePath(self.spectrum._project, self.spectrum, p_str.strip())
-
-        palette = self.parent().palette()
-
-        if os.path.exists(filePath):
-            if filePath == self.spectrum.filePath:
-                palette.setColor(QtGui.QPalette.Base, self.baseColour)
-            else:
-                from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
-
-                dataType, subType, usePath = ioFormats.analyseUrl(filePath)
-                if dataType == 'Spectrum':
-                    palette.setColor(QtGui.QPalette.Base, QtGui.QColor('palegreen'))
-                else:
-                    palette.setColor(QtGui.QPalette.Base, QtGui.QColor('orange'))
-
-            state = QtGui.QValidator.Acceptable
-        else:
-            palette.setColor(QtGui.QPalette.Base, QtGui.QColor('lightpink'))
-            state = QtGui.QValidator.Intermediate
-        self.parent().setPalette(palette)
-
-        return state, p_str, p_int
-
-    def clearValidCheck(self):
-        palette = self.parent().palette()
-        palette.setColor(QtGui.QPalette.Base, self.baseColour)
-        self.parent().setPalette(palette)
-
-    def resetCheck(self):
-        self.validate(self.parent().text(), 0)
+# class SpectrumValidator(QtGui.QValidator):
+#
+#     def __init__(self, spectrum, parent=None, validationType='exists'):
+#         QtGui.QValidator.__init__(self, parent=parent)
+#         self.spectrum = spectrum
+#         self.validationType = validationType
+#         self.baseColour = self.parent().palette().color(QtGui.QPalette.Base)
+#
+#     def validate(self, p_str, p_int):
+#         if self.validationType != 'exists':
+#             raise NotImplemented('FilePathValidation only checks that the path exists')
+#         filePath = ccpnUtil.expandDollarFilePath(self.spectrum._project, self.spectrum, p_str.strip())
+#
+#         palette = self.parent().palette()
+#
+#         if os.path.exists(filePath):
+#             if filePath == self.spectrum.filePath:
+#                 palette.setColor(QtGui.QPalette.Base, self.baseColour)
+#             else:
+#                 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
+#
+#                 dataType, subType, usePath = ioFormats.analyseUrl(filePath)
+#                 if dataType == 'Spectrum':
+#                     palette.setColor(QtGui.QPalette.Base, QtGui.QColor('palegreen'))
+#                 else:
+#                     palette.setColor(QtGui.QPalette.Base, QtGui.QColor('orange'))
+#
+#             state = QtGui.QValidator.Acceptable
+#         else:
+#             palette.setColor(QtGui.QPalette.Base, QtGui.QColor('lightpink'))
+#             state = QtGui.QValidator.Intermediate
+#         self.parent().setPalette(palette)
+#
+#         return state, p_str, p_int
+#
+#     def clearValidCheck(self):
+#         palette = self.parent().palette()
+#         palette.setColor(QtGui.QPalette.Base, self.baseColour)
+#         self.parent().setPalette(palette)
+#
+#     def resetCheck(self):
+#         self.validate(self.parent().text(), 0)
 
 class GeneralTab(Widget):
     def __init__(self, parent=None, mainWindow=None, spectrum=None, item=None, colourOnly=False):
@@ -288,7 +289,7 @@ class GeneralTab(Widget):
 
         Label(self, text="Path", vAlign='t', hAlign='l', grid=(row, 0))
         self.pathData = LineEdit(self, textAlignment = 'left', vAlign='t', grid=(row, 1))
-        self.pathData.setValidator(FilePathValidator(parent=self.pathData, spectrum=self.spectrum))
+        self.pathData.setValidator(SpectrumValidator(parent=self.pathData, spectrum=self.spectrum))
         self.pathButton = Button(self, grid=(row, 2), callback=self._getSpectrumFile, icon='icons/applications-system')
         row += 1
 
@@ -452,7 +453,7 @@ class GeneralTab(Widget):
         from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
 
         self.nameData.setText(self.spectrum.name)
-        self.pathData.setValidator(FilePathValidator(parent=self.pathData, spectrum=self.spectrum))
+        self.pathData.setValidator(SpectrumValidator(parent=self.pathData, spectrum=self.spectrum))
 
         try:
             index = self.spectrum.project.chemicalShiftLists.index(self.spectrum.chemicalShiftList)

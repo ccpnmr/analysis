@@ -1143,7 +1143,6 @@ class Framework(NotifierBase):
             ("Restore From Archive...", self.restoreFromArchive, [('enabled', False)]),
             (),
             ("Preferences...", self.showApplicationPreferences),
-            ("Validate Project...", self.showValidatePathsPopup, [('shortcut', 'vv')]),
             (),
             ("Quit", self._closeEvent, [('shortcut', '⌃q')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ]
@@ -2109,19 +2108,6 @@ class Framework(NotifierBase):
             from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraPopup
 
             popup = ValidateSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra)
-            popup.exec_()
-
-    def showValidatePathsPopup(self, spectra=None):
-        """
-        Displays validate paths (urls) popup.
-        """
-        if not self.project.spectra:
-            getLogger().warning('ValidatePaths Selection: Project has no Specta.')
-            MessageDialog.showWarning('ValidatePaths Selection', 'Project has no Spectra.')
-        else:
-            from ccpn.ui.gui.popups.ValidatePathsPopup import ValidatePathsPopup
-
-            popup = ValidatePathsPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
             popup.exec_()
 
     def showPeakPick1DPopup(self):

@@ -117,6 +117,7 @@ def _filtered1DArray(data, ignoredRegions):
     # returns an array without ignoredRegions. Used for automatic 1d peak picking
     ppmValues = data[0]
     masks = []
+    ignoredRegions = [sorted(pair, reverse=True) for pair in ignoredRegions]
     for region in ignoredRegions:
         mask = (ppmValues > region[0]) | (ppmValues < region[1])
         masks.append(mask)
@@ -588,7 +589,7 @@ class PeakList(AbstractWrapperObject):
 
         with undoBlock():
             spectrum = self.spectrum
-            integralList = self.spectrum.newIntegralList()
+            # integralList = self.spectrum.newIntegralList()
 
             peaks = []
             x, y = spectrum.positions, spectrum.intensities
@@ -599,6 +600,7 @@ class PeakList(AbstractWrapperObject):
             maxValues, minValues = peakdet(y=filteredY, x=filteredX, delta=noiseThreshold / deltaFactor)
             for position, height in maxValues:
                 peak = self.newPeak(ppmPositions=[position], height=height)
+            spectrum.snr = SNR
 
             # const = round(len(y) * 0.0039, 1)
             # correlatedSignal1 = signal.correlate(y, np.ones(int(const)), mode='same') / const

@@ -142,9 +142,9 @@ class Spectrum(AbstractWrapperObject):
 
     MAXDIM = 4  # Maximum dimensionality
 
-    PLANEDATACACHE = '_planeDataCache'  # Attribute name for the planeData cache
-    SLICEDATACACHE = '_sliceDataCache'  # Attribute name for the slicedata cache
-    SLICE1DDATACACHE = '_slice1DDataCache'  # Attribute name for the 1D slicedata cache
+    _PLANEDATACACHE = '_planeDataCache'  # Attribute name for the planeData cache
+    _SLICEDATACACHE = '_sliceDataCache'  # Attribute name for the slicedata cache
+    _SLICE1DDATACACHE = '_slice1DDataCache'  # Attribute name for the 1D slicedata cache
 
     def __init__(self, project: Project, wrappedData: Nmr.ShiftList):
 
@@ -1217,13 +1217,13 @@ class Spectrum(AbstractWrapperObject):
     def getPositionValue(self, position):
         return self._apiDataSource.getPositionValue(position)
 
-    @cached(SLICE1DDATACACHE, maxItems=1, debug=False)
+    @cached(_SLICE1DDATACACHE, maxItems=1, debug=False)
     def _get1DSliceData(self, position, sliceDim: int):
         """Internal routine to get 1D sliceData;
         """
         return self._apiDataSource.getSliceData(position=position, sliceDim=sliceDim)
 
-    @cached(SLICEDATACACHE, maxItems=1024, debug=False)
+    @cached(_SLICEDATACACHE, maxItems=1024, debug=False)
     def _getSliceDataFromPlane(self, position, xDim: int, yDim: int, sliceDim: int):
         """Internal routine to get sliceData; optimised to use (buffered) getPlaneData
         CCPNINTERNAL: used in CcpnOpenGL
@@ -1248,43 +1248,42 @@ class Spectrum(AbstractWrapperObject):
         if position is None:
             position = [1] * self.dimensionCount
 
+        result = None
+        scale = self.scale if self.scale is not None else 1.0
+        if self.scale == 0.0:
+            getLogger().warning('Scaling "%s" by 0.0!' % self)
+
         if self.dimensionCount == 1:
-            result = np.array(self._get1DSliceData(position=position, sliceDim=sliceDim))
-
-            if result is not None and result.size != 0:
-                # Optionally scale data depending on self.scale
-                if self.scale is not None:
-                    if self.scale == 0.0:
-                        getLogger().warning('Scaling "%s" by 0.0!' % self)
-                    result *= self.scale
-                # For 1D, save as intensities attribute
-                self._intensities = result
-            else:
-                result = None
-
-            return result
-
+            # 1D data
+            result = self._get1DSliceData(position=position, sliceDim=sliceDim)
+            # Make a copy in order to preserve the original data and apply scaling
+            if result is not None:
+                result = result.copy(order='K') * scale
         else:
+            # nD data; get slice via appropriate plane
             position[sliceDim - 1] = 1  # To improve caching; position, dimensions are 1-based
             if sliceDim > 1:
-                result = np.array(self._getSliceDataFromPlane(position=position, xDim=1, yDim=sliceDim,
-                                                     sliceDim=sliceDim))
+                result = self._getSliceDataFromPlane(position=position, xDim=1, yDim=sliceDim,
+                                                     sliceDim=sliceDim)
             else:
-                result = np.array(self._getSliceDataFromPlane(position=position, xDim=sliceDim, yDim=sliceDim + 1,
-                                                     sliceDim=sliceDim))
-            return result
+                result = self._getSliceDataFromPlane(position=position, xDim=sliceDim, yDim=sliceDim + 1,
+                                                     sliceDim=sliceDim)
 
-        # if result is not None and result.size != 0:
-        #     # Optionally scale data depending on self.scale
-        #     if self.scale is not None:
-        #         if self.scale == 0.0:
-        #             getLogger().warning('Scaling "%s" by 0.0!' % self)
-        #         result *= self.scale
-        #     # For 1D, save as intensities attribute
-        #     self._intensities = result
-        #     return result
+            # Make a copy in order to preserve the original data; do not apply scaling, as this was already done
+            # by the _getSliceDataFromPlane routine which calls getPlaneData
+            if result is not None:
+                result = result.copy(order='K')
 
-    @cached(PLANEDATACACHE, maxItems=64, debug=False)
+        # check if we have something valid to return
+        if result is None:
+            raise RuntimeError('Failed to get slice data along dimension "%s" at position %s' %
+                               (sliceDim, position))
+
+        # For 1D, save as intensities attribute
+        self._intensities = result
+        return result
+
+    @cached(_PLANEDATACACHE, maxItems=64, debug=False)
     def _getPlaneData(self, position, xDim: int, yDim: int):
         "Internal routine to improve caching: Calling routine set the positions of xDim, yDim to 1 "
         return self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
@@ -1323,12 +1322,21 @@ class Spectrum(AbstractWrapperObject):
         # set the points of xDim, yDim to 1 as these do not matter (to improve caching)
         position[xDim - 1] = 1  # position is 1-based
         position[yDim - 1] = 1
-        result = np.array(self._getPlaneData(position=position, xDim=xDim, yDim=yDim))
-        # Optionally scale data depending on self.scale
-        if self.scale is not None:
-            if self.scale == 0.0:
-                getLogger().warning('Scaling "%s" by 0.0!' % self)
-            result *= self.scale
+
+        result = None
+        scale = self.scale if self.scale is not None else 1.0
+        if self.scale == 0.0:
+            getLogger().warning('Scaling "%s" by 0.0!' % self)
+
+        result = self._getPlaneData(position=position, xDim=xDim, yDim=yDim)
+        # Make a copy in order to preserve the original data and apply scaling
+        result = result.copy(order='K') * scale
+
+        # check if we have something valid to return
+        if result is None:
+            raise RuntimeError('Failed to get plane data along dimensions (%s,%s) at position %s' %
+                               (xDim, yDim, position))
+
         return result
 
     def getPlane(self, axisCodes: tuple, position=None, exactMatch=True):
@@ -1773,12 +1781,20 @@ class Spectrum(AbstractWrapperObject):
         """
         self._wrappedData.delete()
 
-    @cached.clear(PLANEDATACACHE)  # Check if there was a planedata cache, and if so, clear it
-    @cached.clear(SLICEDATACACHE)  # Check if there was a slicedata cache, and if so, clear it
+    @cached.clear(_PLANEDATACACHE)  # Check if there was a planedata cache, and if so, clear it
+    @cached.clear(_SLICEDATACACHE)  # Check if there was a slicedata cache, and if so, clear it
+    @cached.clear(_SLICE1DDATACACHE)  # Check if there was a slice1ddata cache, and if so, clear it
+    def _clearCache(self):
+        """Convenience to clear the cache; all action done by the decorators
+        """
+        pass
+
     def delete(self):
         """Delete Spectrum"""
         with logCommandBlock(get='self') as log:
             log('delete')
+
+            self._clearCache()
 
             # handle spectrumView ordering - this should be moved to spectrumView or spectrumDisplay via notifier?
             specDisplays = []

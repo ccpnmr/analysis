@@ -8,5 +8,7 @@ export FONTCONFIG_FILE=${ANACONDA3}/etc/fonts/fonts.conf
 export FONTCONFIG_PATH=${ANACONDA3}/etc/fonts
 export QT_PLUGIN_PATH=${QT_PLUGIN_PATH}:${ANACONDA3}/plugins
 
-[[ $(xattr "$UPDATE") = *$attr* ]] && xattr -d $attr "$UPDATE" #removes quarantine checks
+if [[ `uname` == 'Darwin' ]]; then
+  [[ $(xattr "$UPDATE") = *$attr* ]] && xattr -d $attr "$UPDATE" #removes quarantine checks
+fi
 ${ANACONDA3}/bin/python -W ignore::DeprecationWarning ${UPDATE} $*

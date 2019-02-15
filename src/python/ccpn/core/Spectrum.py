@@ -1271,6 +1271,8 @@ class Spectrum(AbstractWrapperObject):
             raise RuntimeError('Failed to get slice data along dimension "%s" at position %s' %
                                (sliceDim, position))
 
+        # For 1D, save as intensities attribute
+        self._intensities = result
         return result
 
     @cached(_PLANEDATACACHE, maxItems=64, debug=False)

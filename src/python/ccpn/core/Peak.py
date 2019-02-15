@@ -248,8 +248,10 @@ class Peak(AbstractWrapperObject):
 
     @property
     def aliasing(self) -> Tuple[Optional[float], ...]:
-        """Aliasing values for the peak in each dimension."""
-        return tuple(x.numAliasing for x in self._wrappedData.sortedPeakDims())
+        """Aliasing for the peak in each dimension.
+        Defined as integer number of spectralWidths added or subtracted along each dimension
+        """
+        return tuple(-1* x.numAliasing for x in self._wrappedData.sortedPeakDims())
 
     @aliasing.setter
     @logCommand(get='self', isProperty=True)
@@ -261,7 +263,7 @@ class Peak(AbstractWrapperObject):
             raise ValueError("Aliasing values must be integer.")
 
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-            peakDim.numAliasing = value[ii]
+            peakDim.numAliasing = -1* value[ii]
 
     @property
     def dimensionNmrAtoms(self) -> Tuple[Tuple['NmrAtom', ...], ...]:

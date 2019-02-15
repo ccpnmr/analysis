@@ -370,10 +370,10 @@ class ValidateSpectraPopup(CcpnDialog):
     def _setPathData(self, spectrum):
         """Set the pathData widgets from the spectrum.
         """
-        from memops.api.Implementation import Url
-        from memops.universal import Io as uniIo
-
-        standardStore = self.project._wrappedData.memopsRoot.findFirstDataLocationStore(name='standard')
+        # from memops.api.Implementation import Url
+        # from memops.universal import Io as uniIo
+        #
+        # standardStore = self.project._wrappedData.memopsRoot.findFirstDataLocationStore(name='standard')
 
         if spectrum and spectrum in self.spectrumData:
             pathData, pathButton, pathLabel = self.spectrumData[spectrum]

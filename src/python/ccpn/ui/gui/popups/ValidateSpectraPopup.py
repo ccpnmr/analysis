@@ -112,10 +112,7 @@ class DataUrlValidator(QtGui.QValidator):
 
                 # validate dataStores
                 localStores = [store for store in self.dataUrl.sortedDataStores()]
-                print('>>>Check dataUrl', localStores)
-
                 for store in self.dataUrl.sortedDataStores():
-                    print('>>>', os.path.join(filePath, store.path))
                     if not os.path.exists(os.path.join(filePath, store.path)):
                         palette.setColor(QtGui.QPalette.Base, QtGui.QColor('orange'))
                         break

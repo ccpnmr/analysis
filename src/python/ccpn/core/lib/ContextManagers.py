@@ -117,7 +117,7 @@ def undoBlock(application=None):
 
         # if not application.project._blockSideBar and not undo._blocked:
         if application.ui and application.ui.mainWindow:
-            sidebar = application.ui.mainWindow._newSideBar
+            sidebar = application.ui.mainWindow.sideBar
             sidebar.increaseSidebarBlocking()
 
     if not application._echoBlocking:
@@ -138,7 +138,7 @@ def undoBlock(application=None):
         if undo is not None:
             # if not application.project._blockSideBar and not undo._blocked:
             if application.ui and application.ui.mainWindow:
-                sidebar = application.ui.mainWindow._newSideBar
+                sidebar = application.ui.mainWindow.sideBar
                 sidebar.decreaseSidebarBlocking()
 
             undo.decreaseWaypointBlocking()
@@ -164,7 +164,7 @@ def undoBlockWithoutSideBar(application=None):
 
         # if not application.project._blockSideBar and not undo._blocked:
         if application.ui and application.ui.mainWindow:
-            sidebar = application.ui.mainWindow._newSideBar
+            sidebar = application.ui.mainWindow.sideBar
             sidebar.increaseSidebarBlocking(withSideBarUpdate=False)
 
     application._increaseNotificationBlocking()
@@ -185,7 +185,7 @@ def undoBlockWithoutSideBar(application=None):
         if undo is not None:
             # if not application.project._blockSideBar and not undo._blocked:
             if application.ui and application.ui.mainWindow:
-                sidebar = application.ui.mainWindow._newSideBar
+                sidebar = application.ui.mainWindow.sideBar
                 sidebar.decreaseSidebarBlocking(withSideBarUpdate=False)
 
             undo.decreaseWaypointBlocking()
@@ -542,7 +542,7 @@ def sidebarBlocking(application=None, blockSidebarOnly=False):
         raise RuntimeError('Error getting application')
 
     if application.ui and application.ui.mainWindow:
-        sidebar = application.ui.mainWindow._newSideBar
+        sidebar = application.ui.mainWindow.sideBar
         sidebar.increaseSidebarBlocking()
 
     try:
@@ -560,7 +560,7 @@ def sidebarBlocking(application=None, blockSidebarOnly=False):
     finally:
         # clean up after suspending sidebar updates
         if application.ui and application.ui.mainWindow:
-            sidebar = application.ui.mainWindow._newSideBar
+            sidebar = application.ui.mainWindow.sideBar
             sidebar.decreaseSidebarBlocking()
 
 

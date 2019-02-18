@@ -477,7 +477,7 @@ class Framework(NotifierBase):
         mainWindow = self.ui.mainWindow
         if mainWindow is not None:
             # mainWindow.sideBar.setProjectName(self.project)
-            mainWindow._newSideBar.setProjectName(self.project)
+            mainWindow.sideBar.setProjectName(self.project)
 
     def _getUI(self):
         if self.args.interface == 'Gui':
@@ -838,7 +838,7 @@ class Framework(NotifierBase):
             # _blockedSideBar is a project override
             if not self.project._blockSideBar and not undo._blocked:
                 if undo._waypointBlockingLevel < 1 and self.ui and self.ui.mainWindow:
-                    self.ui.mainWindow._newSideBar._saveExpandedState()
+                    self.ui.mainWindow.sideBar._saveExpandedState()
 
             undo.increaseWaypointBlocking()
 
@@ -885,7 +885,7 @@ class Framework(NotifierBase):
 
             if not self.project._blockSideBar and not undo._blocked:
                 if undo._waypointBlockingLevel < 1 and self.ui and self.ui.mainWindow:
-                    self.ui.mainWindow._newSideBar._restoreExpandedState()
+                    self.ui.mainWindow.sideBar._restoreExpandedState()
 
         # if self._echoBlocking > 0:
         #   # If statement should always be True, but to avoid weird behaviour in error situations we check
@@ -2045,7 +2045,7 @@ class Framework(NotifierBase):
             # ui/gui cleanup
             self._closeMainWindows()
             self._closeExtraWindows()
-            self.ui.mainWindow._newSideBar.clearSideBar()
+            self.ui.mainWindow.sideBar.clearSideBar()
             self.ui.mainWindow.deleteLater()
             self.ui.mainWindow = None
 

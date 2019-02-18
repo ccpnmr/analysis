@@ -289,20 +289,20 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self.pythonConsole = IpythonConsole(self)
 
         # create the sidebar
-        self._newSideBar = SideBar(parent=self)
+        self.sideBar = SideBar(parent=self)
 
         # self.sideBar = SideBar(parent=self)
         #
         # # create temporary new sidebar for testing
         # self._sidebarSplitter = Splitter(horizontal=False)
         # self._sidebarSplitter.addWidget(self.sideBar)
-        # self._sidebarSplitter.addWidget(self._newSideBar)
+        # self._sidebarSplitter.addWidget(self.sideBar)
 
         # create a splitter to put the sidebar on the left
         self._horizontalSplitter = Splitter(horizontal=True)
         # self._horizontalSplitter.addWidget(self._sidebarSplitter)
 
-        self._horizontalSplitter.addWidget(self._newSideBar)
+        self._horizontalSplitter.addWidget(self.sideBar)
         self._horizontalSplitter.addWidget(self.moduleArea)
         self.setCentralWidget(self._horizontalSplitter)
 
@@ -396,7 +396,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         project = self.application.loadProject(projectDir)
 
         if project:
-            project._mainWindow._newSideBar.buildTree(project)
+            project._mainWindow.sideBar.buildTree(project)
             project._mainWindow.show()
             QtWidgets.QApplication.setActiveWindow(project._mainWindow)
 
@@ -438,7 +438,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             else:
                 # open a new project again
                 project = self.application.newProject()
-                project._mainWindow._newSideBar.buildTree(project)
+                project._mainWindow.sideBar.buildTree(project)
                 project._mainWindow.show()
                 QtWidgets.QApplication.setActiveWindow(project._mainWindow)
                 return project
@@ -572,11 +572,11 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         modulesMenu = self.searchMenuAction('Show/hide Modules')
         modulesMenu.clear()
 
-        moduleSize = self._newSideBar.size()
-        visible = moduleSize.width() != 0 and moduleSize.height() != 0 and self._newSideBar.isVisible()
+        moduleSize = self.sideBar.size()
+        visible = moduleSize.width() != 0 and moduleSize.height() != 0 and self.sideBar.isVisible()
         modulesMenu.addAction(Action(modulesMenu, text='Sidebar',
                                      checkable=True, checked=visible,
-                                     callback=partial(self._showSideBarModule, self._newSideBar, self, visible)))
+                                     callback=partial(self._showSideBarModule, self.sideBar, self, visible)))
 
         for module in self.moduleArea.ccpnModules:
             moduleSize = module.size()
@@ -955,10 +955,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                         #
                         # try:
                         #     if isinstance(obj, Project):
-                        #         # obj._mainWindow._newSideBar.fillSideBar(obj)
+                        #         # obj._mainWindow.sideBar.fillSideBar(obj)
                         #
                         #         # set the sidebar and open the new object's mainWindow
-                        #         obj._mainWindow._newSideBar.buildTree(obj)
+                        #         obj._mainWindow.sideBar.buildTree(obj)
                         #         obj._mainWindow.show()
                         #
                         #         # if the new project contains invalid spectra then open the popup to see them

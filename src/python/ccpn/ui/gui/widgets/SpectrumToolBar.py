@@ -198,7 +198,7 @@ class SpectrumToolBar(ToolBar):
     def _jumpOnSideBar(self, button):
         spectrum = self.widget.project.getByPid(button.actions()[0].objectName())
         if spectrum:
-            sideBar = self.widget.application.ui.mainWindow._newSideBar
+            sideBar = self.widget.application.ui.mainWindow.sideBar
             sideBar.selectPid(spectrum.pid)
 
     def _showSpectrumProperties(self, button):

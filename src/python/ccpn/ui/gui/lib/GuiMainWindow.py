@@ -55,7 +55,7 @@ from ccpn.ui.gui.widgets.Action import Action
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
 from ccpn.ui.gui.widgets.Menu import Menu, MenuBar
-from ccpn.ui.gui.widgets.SideBar import SideBar      #,SideBar
+from ccpn.ui.gui.widgets.SideBar import SideBar  #,SideBar
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 from ccpn.ui.gui.widgets.Splitter import Splitter
@@ -64,6 +64,7 @@ from ccpn.util import Logging
 
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 from ccpn.core.Peak import Peak
+
 
 #from ccpn.util.Logging import getLogger
 #from collections import OrderedDict
@@ -297,7 +298,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # self._sidebarSplitter.addWidget(self.sideBar)
         # self._sidebarSplitter.addWidget(self._newSideBar)
 
-
         # create a splitter to put the sidebar on the left
         self._horizontalSplitter = Splitter(horizontal=True)
         # self._horizontalSplitter.addWidget(self._sidebarSplitter)
@@ -369,6 +369,12 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 menuAction = Action(self, action[0], callback=action[1], **kwDict)
                 menu.addAction(menuAction)
 
+    def _isTemporaryProject(self):
+        """Return true if the project is temporary, i.e., not saved or updated.
+        """
+        apiProject = self._project._wrappedData.root
+        return hasattr(apiProject, '_temporaryDirectory')
+
     def _queryCloseProject(self, title, phrase):
 
         apiProject = self._project._wrappedData.root
@@ -384,12 +390,67 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         return result
 
+    def _loadProjectSingleTry(self, projectDir):
+        """Load/Reload project after load dialog.
+        """
+        project = self.application.loadProject(projectDir)
+
+        if project:
+            project._mainWindow._newSideBar.buildTree(project)
+            project._mainWindow.show()
+            QtWidgets.QApplication.setActiveWindow(project._mainWindow)
+
+            # if the new project contains invalid spectra then open the popup to see them
+            badSpectra = [spectrum for spectrum in project.spectra if not spectrum.isValidPath]
+            if badSpectra:
+                project.application.showValidateSpectraPopup(defaultSelected='invalid')
+                project.save(createFallback=False, overwriteExisting=True)
+
+            return project
+
+        else:
+            raise ValueError("Error loading project")
+
+    def _loadProjectLastValid(self, projectDir):
+        """Try and load a new project, if error try and load the last valid project.
+        """
+        lastValidProject = self.project.path
+        lastProjectisTemporary = self._isTemporaryProject()
+
+        # try and load the new project
+        try:
+            project = self._loadProjectSingleTry(projectDir)
+            return project
+
+        except Exception as es:
+            MessageDialog.showError('loadProject', 'Fatal error loading project:\n%s\nReloading last saved position.' % str(projectDir))
+            Logging.getLogger().warning('Fatal error loading project: %s - Reloading last saved position.' % str(projectDir))
+
+            if not lastProjectisTemporary:
+                # try and load the previous project (only one try)
+                try:
+                    project = self._loadProjectSingleTry(lastValidProject)
+                    return project
+
+                except Exception as es:
+                    MessageDialog.showError('loadProject', 'Fatal error loading last project:\n%s' % str(lastValidProject))
+                    Logging.getLogger().warning('Fatal error loading last project: %s' % str(lastValidProject))
+            else:
+                # open a new project again
+                project = self.application.newProject()
+                project._mainWindow._newSideBar.buildTree(project)
+                project._mainWindow.show()
+                QtWidgets.QApplication.setActiveWindow(project._mainWindow)
+                return project
+
     def loadProject(self, projectDir=None):
         """
         Opens a loadProject dialog box if project directory is not specified.
         Loads the selected project.
         """
         result = self._queryCloseProject(title='Open Project', phrase='open another')
+        lastValidProject = self.project.path
+
         project = None
         if result:
             if projectDir is None:
@@ -398,25 +459,22 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 projectDir = dialog.selectedFile()
 
             if projectDir:
-                try:
-                    project = self.application.loadProject(projectDir)
-
-                    if project:
-                        project._mainWindow.show()
-                        QtWidgets.QApplication.setActiveWindow(project._mainWindow)
-
-                        # if the new project contains invalid spectra then open the popup to see them
-                        badSpectra = [spectrum for spectrum in project.spectra if not spectrum.isValidPath]
-                        if badSpectra:
-                            project.application.showValidateSpectraPopup(defaultSelected='invalid')
-                            project.save(createFallback=False, overwriteExisting=True)
-
-                    else:
-                        raise ValueError("Error loading project")
-
-                except Exception as es:
-                    MessageDialog.showError('loadProject', 'Error loading project:\n%s' % str(projectDir))
-                    Logging.getLogger().warning('Error loading project: %s' % str(projectDir))
+                # try and load the new project
+                project = self._loadProjectLastValid(projectDir)
+                # try:
+                #     project = self._loadProject(projectDir)
+                #
+                # except Exception as es:
+                #     MessageDialog.showError('loadProject', 'Fatal error loading project:\n%s\nReloading last saved position.' % str(projectDir))
+                #     Logging.getLogger().warning('Fatal error loading project: %s - Reloading last saved position.' % str(projectDir))
+                #
+                #     # try and load the previous project (only one try)
+                #     try:
+                #         project = self._loadProject(lastValidProject)
+                #
+                #     except Exception as es:
+                #         MessageDialog.showError('loadProject', 'Fatal error loading previous project:\n%s' % str(lastValidProject))
+                #         Logging.getLogger().warning('Fatal error loading previous project: %s' % str(lastValidProject))
 
         return project
 
@@ -869,7 +927,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # except Exception as es:
         #   Logging.warning(str(es))
 
-
     # def _processDroppedItems(self, application, project, data):
     def _processDroppedItems(self, data):
         """Handle the dropped urls
@@ -887,31 +944,33 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                                                      ioFormats.SPARKY):
 
                 okToContinue = self._queryCloseProject(title='Load %s project' % subType,
-                                                             phrase='create a new')
+                                                       phrase='create a new')
                 if okToContinue:
                     with progressManager(self, 'Loading project... ' + url):
                         obj = None
-                        with catchExceptions():
-                            obj = self.application.loadProject(url)
+                        obj = self._loadProjectLastValid(url)
 
-                        try:
-                            if isinstance(obj, Project):
-                                # obj._mainWindow._newSideBar.fillSideBar(obj)
-
-                                # set the sidebar and open the new object's mainWindow
-                                obj._mainWindow._newSideBar.buildTree(obj)
-                                obj._mainWindow.show()
-
-                                # if the new project contains invalid spectra then open the popup to see them
-                                badSpectra = [spectrum for spectrum in obj.spectra if not spectrum.isValidPath]
-                                if badSpectra:
-                                    obj._mainWindow.application.showValidateSpectraPopup(defaultSelected='invalid')
-                                    obj.save(createFallback=False, overwriteExisting=True)
-
-                                QtWidgets.QApplication.setActiveWindow(self)
-
-                        except Exception as es:
-                            getLogger().warning('Error: %s' % str(es))
+                        # with catchExceptions():
+                        #     obj = self.application.loadProject(url)
+                        #
+                        # try:
+                        #     if isinstance(obj, Project):
+                        #         # obj._mainWindow._newSideBar.fillSideBar(obj)
+                        #
+                        #         # set the sidebar and open the new object's mainWindow
+                        #         obj._mainWindow._newSideBar.buildTree(obj)
+                        #         obj._mainWindow.show()
+                        #
+                        #         # if the new project contains invalid spectra then open the popup to see them
+                        #         badSpectra = [spectrum for spectrum in obj.spectra if not spectrum.isValidPath]
+                        #         if badSpectra:
+                        #             obj._mainWindow.application.showValidateSpectraPopup(defaultSelected='invalid')
+                        #             obj.save(createFallback=False, overwriteExisting=True)
+                        #
+                        #         QtWidgets.QApplication.setActiveWindow(self)
+                        #
+                        # except Exception as es:
+                        #     getLogger().warning('Error: %s' % str(es))
 
             else:
                 # with progressManager(self.mainWindow, 'Loading data... ' + url):

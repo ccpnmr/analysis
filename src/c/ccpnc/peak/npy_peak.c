@@ -135,7 +135,7 @@ static float fit_position_parabolic(float vm, float v, float vp)
 
 static CcpnBool fit_position_x(float vm, float v, float vp, float *peakPos, float *height, float *lineFit)
 {
-    float a, b, c, x, halfX;
+    float a, b, c, x, halfX, k;
     CcpnBool is_positive;
 
     c = v;
@@ -148,7 +148,17 @@ static CcpnBool fit_position_x(float vm, float v, float vp, float *peakPos, floa
         x = -b / (2.0*a);
         *peakPos = x;
         *height = a*x*x+b*x+c;
-        halfX = (sqrt(b*b-4.0*a*(c-0.5*(*height))) - b) / (2.0*a);
+
+        k = b*b-4.0*a*(c-0.5*(*height));
+        if (k <= 0)
+        {
+            *peakPos = 0.0;
+            *height = v;
+            *lineFit = 0.0;
+
+            return CCPN_ERROR;
+        }
+        halfX = (sqrt(k) - b) / (2.0*a);
         *lineFit = 2.0*ABS(x - halfX);
     }
     else

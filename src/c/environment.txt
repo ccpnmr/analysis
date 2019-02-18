@@ -1,4 +1,4 @@
-PYTHON_DIR = /Users/geerten/Code/CCPNv3/CcpNmr/miniconda
+PYTHON_DIR = /Users/ejb66/PycharmProjects/Git/AnalysisV3/miniconda
 
 # should work if suitably edited for Linux, Irix, Solaris, OSX, Windows
 

@@ -143,7 +143,7 @@ def createLogger(loggerName, memopsRoot, stream=None, level=None, mode='a',
         # there seems no way to close the logger itself
         # and just closing the handler does not work
         # (and certainly do not want to close stdout or stderr)
-        for handler in logger.handlers:
+        for handler in tuple(logger.handlers):
             logger.removeHandler(handler)
     else:
         logger = logging.getLogger(loggerName)

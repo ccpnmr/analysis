@@ -230,8 +230,9 @@ class GuiSpectrumDisplay(CcpnModule):
         else:
             self.spectrumUtilToolBar.hide()
 
-        self.stripFrame = Frame(setLayout=True, showBorder=False, spacing=(5, 0), stretch=(1, 1), acceptDrops=True)
-        self.stripFrame.layout().setContentsMargins(0, 0, 0, 0)
+        self.stripFrame = Frame(setLayout=True, showBorder=False, spacing=(5, 0), stretch=(1, 1), margins=(0, 0, 0, 0),
+                                acceptDrops=True)
+        # self.stripFrame.layout().setContentsMargins(0, 0, 0, 0)
 
         if useScrollArea:
             # scroll area for strips
@@ -315,6 +316,16 @@ class GuiSpectrumDisplay(CcpnModule):
     #     """
     #     if self._spectrumViewNotifier:
     #         self._spectrumViewNotifier.unRegister()
+
+    def showAllStripHeaders(self):
+        """Convenience to show headers of all strips"""
+        for strip in self.strips:
+            strip.header.show()
+
+    def hideAllStripHeaders(self):
+        """Convenience to hide headers of all strips"""
+        for strip in self.strips:
+            strip.header.hide()
 
     def _spectrumViewChanged(self, data):
         """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame

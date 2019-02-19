@@ -76,14 +76,13 @@ class GuiStrip(Frame):
         self.current = self.application.current
 
         getLogger().debug('GuiStrip>>> spectrumDisplay: %s' % self.spectrumDisplay)
-        super().__init__(parent=spectrumDisplay.stripFrame, setLayout=True,
-                         acceptDrops=True  #, hPolicy='expanding', vPolicy='expanding' ##'minimal'
+        super().__init__(parent=spectrumDisplay.stripFrame, setLayout=True, showBorder=False,
+                         spacing=(0,0), acceptDrops=True  #, hPolicy='expanding', vPolicy='expanding' ##'minimal'
                          )
 
         self.setMinimumWidth(50)
         self.setMinimumHeight(150)
 
-        self.layout().setSpacing(0)
         self.header = StripHeader(parent=self, mainWindow=self.mainWindow,
                                   grid=(0, 0), gridSpan=(1, 2), setLayout=True, spacing=(0, 0))
 

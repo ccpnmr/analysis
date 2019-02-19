@@ -334,8 +334,8 @@ class StripHeader(Widget):
                                                    textFont.fontName,
                                                    textFont.pointSize()))
 
-            self._labels[lab].obj = None
-            self._labels[lab]._connectDir = STRIPCONNECT_NONE
+            # self._labels[lab].obj = None
+            # self._labels[lab]._connectDir = STRIPCONNECT_NONE
             self._labels[lab].setFixedHeight(16)
             self._labels[lab].setAlignment(QtCore.Qt.AlignAbsolute)
 
@@ -344,14 +344,17 @@ class StripHeader(Widget):
         self._labels[STRIPPOSITION_RIGHT].setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
         self.setFixedHeight(16)
+        self.reset()
 
     def reset(self):
         for lab in STRIPPOSITIONS:
             self._labels[lab].setText('')
             self._labels[lab].obj = None
             self._labels[lab]._connectDir = STRIPCONNECT_NONE
+        self.hide()
 
     def setLabelObject(self, obj=None, position=STRIPPOSITION_CENTRE):
+        self.show()
         if position in STRIPPOSITIONS:
             self._labels[position].obj = obj
 
@@ -360,6 +363,7 @@ class StripHeader(Widget):
             return self._labels[position].obj
 
     def setLabelText(self, text=None, position=STRIPPOSITION_CENTRE):
+        self.show()
         if position in STRIPPOSITIONS:
             self._labels[position].setText(text)
 
@@ -374,12 +378,15 @@ class StripHeader(Widget):
 
     def showLabel(self, position=STRIPPOSITION_CENTRE, doShow: bool = True):
         """show / hide the header label"""
+        if doShow:
+            self.show()
         position = position[0]
         if position in STRIPPOSITIONS:
             self._labels[position].setVisible(doShow)
 
     def hideLabel(self, position=STRIPPOSITION_CENTRE):
-        "Hide the header label; convienience"
+        "Hide the header labels; convienience"
+        self.hide()
         if position in STRIPPOSITIONS:
             self._labels[position].setVisible(False)
 

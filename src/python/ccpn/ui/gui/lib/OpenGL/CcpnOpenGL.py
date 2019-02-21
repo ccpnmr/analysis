@@ -591,7 +591,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def rescaleSpectra(self):
         if self.strip.isDeleted:
             return
-
+        self.updateVisibleSpectrumViews()
         # rescale the matrices for each spectrumView
         # stackCount = 0
         self.resetRangeLimits(allLimits=False)

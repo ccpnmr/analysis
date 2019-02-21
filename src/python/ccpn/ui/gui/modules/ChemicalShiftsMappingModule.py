@@ -36,7 +36,7 @@ Module Documentation
     >>>
     import numpy as np
     from ccpn.util.Common import splitDataFrameWithinRange
-    from ccpn.ui.gui.widgets.PandasPlot import PandasPlot
+    from ccpn.ui.gui.widgets.PyPlotWidget import PyPlotWidget
     from ccpn.ui.gui.modules.NmrResidueTable import KD, Deltas
     from ccpn.core.lib.DataFrameObject import  DATAFRAME_OBJECT
     
@@ -48,7 +48,7 @@ Module Documentation
     kdsROI = [0.01, 0.2]  # Kds Region of Interest.
     inner, outer =  splitDataFrameWithinRange(tableData, Deltas, KD, *deltasROI, *kdsROI) # Split the data based on ROIs
     inner.index = [nr.sequenceCode+" "+nr.residueType for nr in inner.index] # will be used to make labels on the plot.
-    widget = PandasPlot()
+    widget = PyPlotWidget()
     plot = widget.plotDataFrame(dataFrame=inner, kind='bar',title='KDs and Deltas') # See Pandas and Matplotlib for plots customisations.
     widget.show(windowTitle='Macro CSM', size=(500, 500))
     >>>

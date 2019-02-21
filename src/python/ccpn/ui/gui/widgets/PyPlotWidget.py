@@ -23,17 +23,27 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 #=========================================================================================
 
 import matplotlib
+from ccpn.ui.gui.guiSettings import getColourScheme, DARK
 from ccpn.ui.gui.widgets.Widget import Widget
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
 
+# Background colour:
+# Use style.available for all list
+# print(plt.style.available)
+if getColourScheme() == DARK:
+    plt.style.use('dark_background')
+
+# backend
 matplotlib.rcParams['backend'] = 'Qt5Agg'
 # valid strings are: ['Qt4Agg', 'template', 'GTK3Cairo', 'ps', 'GTKAgg',
 #                     'GTKCairo', 'Qt5Agg', 'WebAgg', 'WXAgg', 'nbAgg',
 #                     'cairo', 'WXCairo', 'TkCairo', 'GTK3Agg', 'svg',
 #                     'GTK', 'pgf', 'pdf', 'MacOSX', 'gdk', 'WX',
 #                     'Qt4Cairo', 'agg', 'TkAgg', 'Qt5Cairo']
+
+
 
 
 class PyPlotWidget(Widget):
@@ -85,12 +95,12 @@ class PyPlotWidget(Widget):
     def __init__(self, parent=None, **kwds):
         super().__init__(parent, setLayout=True, **kwds)
         self._parent = parent
-        self._figure = plt.figure() # as to be init here
+        self.pyplot = plt
+        self._figure = self.pyplot.figure() # as to be init here
         self.canvas = FigureCanvas(self._figure)
         self.toolbar = NavigationToolbar(self.canvas, self)
-        self.pyplot = plt
-        self.pyplot.show = self.show # override the original show method so to open the CcpnDialog
-        for att in dir(self.pyplot): # set all plt attr to this widget to easy access them
+        self.pyplot.show = self.show # overrides the original show method so to open the CcpnDialog
+        for att in dir(self.pyplot): # sets all plt attr to this widget to easy access them
             setattr(self, att, getattr(self.pyplot, att))
 
         layout = self.getLayout()

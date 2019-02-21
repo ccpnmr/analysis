@@ -339,9 +339,9 @@ class SpectrumHit(AbstractWrapperObject):
         peakLists = list(set(peakLists))
         referencePeakList = [pl for pl in peakLists if pl in referenceSpectrum.peakLists]
         if len(referencePeakList) == 1:
-            return referencePeakList[0]
+            return referencePeakList[-1]
         else:
-            print('ADD Warning')
+            return []
 
     def _removeReference(self, referenceSpectrum):
         pass

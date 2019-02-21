@@ -70,6 +70,7 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning
 from ccpn.ui.gui.widgets.Menu import Menu
+from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.util.Constants import ccpnmrJsonData
 from ccpn.core.lib.Notifiers import Notifier, NotifierBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
@@ -1025,17 +1026,17 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
     New sideBar class with new sidebar tree handling
     """
 
-    def __init__(self, parent=None, mainWindow=None, multiSelect=True):
+    def __init__(self, parent=None, mainWindow=None, multiSelect=True,  **kwds):
 
         super().__init__(parent)
-        Base._init(self, acceptDrops=True)
+        Base._init(self, acceptDrops=True,  **kwds)
         SideBarStructure._init(self)
 
         self.multiSelect = multiSelect
         if self.multiSelect:
             self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
 
-        self.mainWindow = parent
+        self.mainWindow = mainWindow
         self.application = self.mainWindow.application
 
         self.setFont(sidebarFont)
@@ -1051,6 +1052,9 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
                             self.mainWindow._processDroppedItems)
 
         self.itemDoubleClicked.connect(self._raiseObjectProperties)
+        txt = 'Search Pid e.g. SP:1010'
+        self._searchWidget = LineEdit(self.getParent(), backgroundText=txt, grid=(1, 0))
+        self._searchWidget.returnPressed.connect(self._searchWidgetCallback)
 
     def _clearQTreeWidget(self, tree):
         """Clear contents of the sidebar.
@@ -1151,11 +1155,10 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
                     if isinstance(objFromPid,Spectrum):
                         strip.spectrumDisplay.displaySpectrum(objFromPid)
                     if isinstance(objFromPid, Sample):
+                        strip.setStackingMode(False)
                         _openItemSampleDisplay._openSampleSpectraOnDisplay(objFromPid, strip.spectrumDisplay)
                         v = strip._getInitialOffset()
-                        strip._CcpnGLWidget.setStackingValue(v)
-                        strip._CcpnGLWidget.setStackingMode(True)
-                        strip._stack1DSpectra(v)
+                        strip.setStackingMode(True)
 
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Up:
@@ -1234,6 +1237,22 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         self.setUpdatesEnabled(True)
 
     def selectPid(self, pid):
+        """Select the item in the sideBar with the given pid.
+        """
+        item = self._sidebarData.findChildNode(pid)
+        if item and item.widget:
+            self.setCurrentItem(item.widget)
+            self.setFocus()
+            self.expandItem(item.widget.parent())
+
+    def _searchWidgetCallback(self):
+        """Private callback from search widget"""
+        text = self._searchWidget.get()
+        obj = self.project.getByPid(text)
+        if obj:
+            self.selectPid(obj.pid)
+        else:
+            showWarning('Search', 'Not found')
         """Select the item in the sideBar with the given pid.
         """
         item = self._sidebarData.findChildNode(pid)

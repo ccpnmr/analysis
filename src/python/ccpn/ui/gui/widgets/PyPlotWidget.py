@@ -23,22 +23,21 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 #=========================================================================================
 
 import matplotlib
-
-matplotlib.rcParams['backend'] = 'Qt5Agg'
-""" 
-This is not the best way to set the backend.
-But the quickest way to change if something goes wrong in some machine
-valid strings are: ['Qt4Agg', 'template', 'GTK3Cairo', 'ps', 'GTKAgg', 
-                    'GTKCairo', 'Qt5Agg', 'WebAgg', 'WXAgg', 'nbAgg', 
-                    'cairo', 'WXCairo', 'TkCairo', 'GTK3Agg', 'svg', 
-                    'GTK', 'pgf', 'pdf', 'MacOSX', 'gdk', 'WX', 
-                    'Qt4Cairo', 'agg', 'TkAgg', 'Qt5Cairo']
-"""
 from ccpn.ui.gui.widgets.Widget import Widget
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
 
+matplotlib.rcParams['backend'] = 'Qt5Agg'
+# """
+# This is not the best way to set the backend.
+# But the quickest way to change if something goes wrong in some machine
+# valid strings are: ['Qt4Agg', 'template', 'GTK3Cairo', 'ps', 'GTKAgg',
+#                     'GTKCairo', 'Qt5Agg', 'WebAgg', 'WXAgg', 'nbAgg',
+#                     'cairo', 'WXCairo', 'TkCairo', 'GTK3Agg', 'svg',
+#                     'GTK', 'pgf', 'pdf', 'MacOSX', 'gdk', 'WX',
+#                     'Qt4Cairo', 'agg', 'TkAgg', 'Qt5Cairo']
+# """
 
 class PyPlotWidget(Widget):
     """
@@ -130,6 +129,7 @@ class PyPlotWidget(Widget):
         quick way to display images using the built-in methods from pyPlot
         :param image: str -- Path
         :param format: as imread
+        :param axis: False doesn't display axis around the image.
         :param args: as imshow
         :param kwds: as imshow
         :return:
@@ -256,5 +256,7 @@ if __name__ == '__main__':
         fig.colorbar(surf, shrink=0.5, aspect=5)
         plt.show(windowTitle='Surface Example', size=(1000, 500))
 
-    _imageExample()
+    # _imageExample()
+    # _multiPlotExample()
+    _3DsurfaceExample()
     app.start()

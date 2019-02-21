@@ -280,7 +280,7 @@ class ChemicalShiftsMapping(CcpnModule):
     if self.project:
       if len(self.project.nmrChains) > 0:
         if self.nmrResidueTable.ncWidget.getIndex() == 0:
-          self.spectraSelectionWidget._toggleAll()
+          # self.spectraSelectionWidget._toggleAll()
           self.nmrResidueTable.ncWidget.select(self.project.nmrChains[-1].pid)
           self._setThresholdLineBySTD()
           self._setKdUnit()
@@ -1057,6 +1057,8 @@ class ChemicalShiftsMapping(CcpnModule):
             lsts.append(True)
       if not any(lsts):
         cb.setChecked(False)
+      else:
+        cb.setChecked(True)
 
   def _toggleRelativeContribuitions(self):
     value = self.modeButtons.getSelectedText()

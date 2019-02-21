@@ -29,15 +29,12 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 import matplotlib.pyplot as plt
 
 matplotlib.rcParams['backend'] = 'Qt5Agg'
-# """
-# This is not the best way to set the backend.
-# But the quickest way to change if something goes wrong in some machine
 # valid strings are: ['Qt4Agg', 'template', 'GTK3Cairo', 'ps', 'GTKAgg',
 #                     'GTKCairo', 'Qt5Agg', 'WebAgg', 'WXAgg', 'nbAgg',
 #                     'cairo', 'WXCairo', 'TkCairo', 'GTK3Agg', 'svg',
 #                     'GTK', 'pgf', 'pdf', 'MacOSX', 'gdk', 'WX',
 #                     'Qt4Cairo', 'agg', 'TkAgg', 'Qt5Cairo']
-# """
+
 
 class PyPlotWidget(Widget):
     """

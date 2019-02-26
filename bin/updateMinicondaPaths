@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Configure the paths inside the release miniconda directory
 
-ROOT=./
-PATHFROM=./
-PATHTO=./
+ROOT=~/release/ccpnmr3.0.b5/miniconda
+PATHFROM=/Users/ejb66/miniconda3/envs/ccpnmr_distqt5
+PATHTO=~/release/ccpnmr3.0.b5/miniconda
 
 export CCPNMR_TOP_DIR="$(dirname $(cd $(dirname "$0"); pwd))"
 export ANACONDA3=${CCPNMR_TOP_DIR}/miniconda

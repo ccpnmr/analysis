@@ -1,12 +1,9 @@
 #!/usr/bin/env bash
 
-export CCPNMR_TOP_DIR="$(dirname $(cd $(dirname "$0"); pwd))"
-export NEFIO=${CCPNMR_TOP_DIR}/src/python/ccpn/core/lib/CcpnNefIo.py
-export ANACONDA3=${CCPNMR_TOP_DIR}/miniconda
-export PYTHONPATH=${CCPNMR_TOP_DIR}/src/python:${CCPNMR_TOP_DIR}/src/c
-export FONTCONFIG_FILE=${ANACONDA3}/etc/fonts/fonts.conf
-export FONTCONFIG_PATH=${ANACONDA3}/etc/fonts
-export QT_PLUGIN_PATH=${QT_PLUGIN_PATH}:${ANACONDA3}/plugins
+export CCPNMR_TOP_DIR="$(cd $(dirname "$0")/..; pwd)"
+#echo ">>> CCPNMR_TOP_DIR=${CCPNMR_TOP_DIR}"
 
-[[ $(xattr "$NEFIO") = *$attr* ]] && xattr -d $attr "$NEFIO" #removes quarantine checks
-${ANACONDA3}/bin/python -W ignore::DeprecationWarning ${NEFIO} $*
+NEFIO="${CCPNMR_TOP_DIR}"/src/python/ccpn/core/lib/CcpnNefIo.py
+
+source "${CCPNMR_TOP_DIR}"/bin/paths.sh
+"${ANACONDA3}"/bin/python -W ignore::DeprecationWarning "${NEFIO}" $*

@@ -29,6 +29,7 @@ import itertools
 import errno
 import os
 import sys
+from contextlib import contextmanager
 
 
 def _iter_incrementing_file_names(path):
@@ -45,6 +46,7 @@ def _iter_incrementing_file_names(path):
         yield prefix + '({0})'.format(i) + ext
 
 
+@contextmanager
 def safeOpen(path, mode):
     """
     Open path, but if it already exists, add '(n)' before the extension,
@@ -52,23 +54,34 @@ def safeOpen(path, mode):
     exist.
     Returns an open file handle.
 
-    Usage:  with safeOpen(path, [options]) as ...
+    Usage:  with safeOpen(path, [options]) as (fd, safeFileName):
+                ...
+
+        fd is the file descriptor, to be used as with open, e.g., fd.read()
+        safeFileName is the new safe filename.
 
     :param path: filepath and filename.
-    :return: Open file handle... be sure to close!
+    :return: Open file handle and new fileName
     """
     flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
 
     if 'b' in mode and sys.platform.system() == 'Windows' and hasattr(os, 'O_BINARY'):
         flags |= os.O_BINARY
 
+    # repeat over filenames with iterating number
     for filename in _iter_incrementing_file_names(path):
         try:
             file_handle = os.open(filename, flags)
         except OSError as e:
             if e.errno == errno.EEXIST:
+                # force repeat of the loop if file exists (file not opened)
                 pass
             else:
                 raise
         else:
-            return os.fdopen(file_handle, mode)
+            # yield the file descriptor and new, safe filename
+            with os.fdopen(file_handle, mode) as fd:
+                yield fd, filename
+
+            # ...and exit
+            return

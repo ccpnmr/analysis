@@ -4568,8 +4568,8 @@ def _exportToNef(path: str, skipPrefixes: Sequence[str] = ()):
     time3 = time.time()
     print("====> Saved  %s  to  NEF file in seconds %s" % (project.name, time3 - time2))
 
-    # Needed to clean up notifiers
-    project.delete()
+    # Needed to clean up notifiers - not any more
+    # project.delete()
     #
     return outPath
 

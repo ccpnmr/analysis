@@ -3,8 +3,33 @@
 export CCPNMR_TOP_DIR="$(cd "$PWD"/../../..; pwd)"
 echo ">>> CCPNMR_TOP_DIR=${CCPNMR_TOP_DIR}"
 
+case "$OSTYPE" in
+  solaris*) echo "SOLARIS" ;;
+  darwin*)  echo "OSX"
+	QUAR="com.apple.quarantine"
+	APP="${CCPNMR_TOP_DIR}/AnalysisAssign.app/"
+
+	if [[ $(xattr -l ${APP}) == *${QUAR}* ]]; then
+  	  echo "Items are currently quarantined, please run ./RemoveQuarantine"
+	  echo "from the root of your Analysis folder, and try again."
+	  sleep 10s
+	  exit
+
+	  # need to find the unlocked file here and unlock that
+	  # xattr -d -r ${QUAR} ${APP}
+	fi
+	;;
+  linux*)   echo "LINUX" ;;
+  bsd*)     echo "BSD" ;;
+  msys*)    echo "WINDOWS" ;;
+  *)        echo "unknown: $OSTYPE" ;;
+esac
+
 ANALYSIS="${CCPNMR_TOP_DIR}"/src/python/ccpn/AnalysisAssign
 echo ">>> ANALYSIS=${ANALYSIS}"
 
 source "${CCPNMR_TOP_DIR}"/bin/paths.sh
 "${ANACONDA3}"/bin/python -W ignore::DeprecationWarning "${ANALYSIS}" $*
+
+# wait for a few seconds before closing in case there are any error messages
+sleep 5s

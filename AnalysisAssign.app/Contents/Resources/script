@@ -4,8 +4,8 @@ export CCPNMR_TOP_DIR="$(cd "$PWD"/../../..; pwd)"
 echo ">>> CCPNMR_TOP_DIR=${CCPNMR_TOP_DIR}"
 
 case "$OSTYPE" in
-  solaris*) echo "SOLARIS" ;;
-  darwin*)  echo "OSX"
+  solaris*) echo ">>> SOLARIS" ;;
+  darwin*)  echo ">>> OSX"
 	QUAR="com.apple.quarantine"
 	APP="${CCPNMR_TOP_DIR}/AnalysisAssign.app/"
 
@@ -19,10 +19,10 @@ case "$OSTYPE" in
 	  # xattr -d -r ${QUAR} ${APP}
 	fi
 	;;
-  linux*)   echo "LINUX" ;;
-  bsd*)     echo "BSD" ;;
-  msys*)    echo "WINDOWS" ;;
-  *)        echo "unknown: $OSTYPE" ;;
+  linux*)   echo ">>> LINUX" ;;
+  bsd*)     echo ">>> BSD" ;;
+  msys*)    echo ">>> WINDOWS" ;;
+  *)        echo ">>> unknown: $OSTYPE" ;;
 esac
 
 ANALYSIS="${CCPNMR_TOP_DIR}"/src/python/ccpn/AnalysisAssign

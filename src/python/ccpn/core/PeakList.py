@@ -859,10 +859,16 @@ class PeakList(AbstractWrapperObject):
         if posLevel is None and negLevel is None:
             return peaks
 
-        # find the regions from the spectrum
+        # find the regions from the spectrum - sometimes returning None which gives an error
         foundRegions = self.spectrum.getRegionData(exclusionBuffer, **regionToPick)
 
+        if not foundRegions:
+            return peaks
+
         for region in foundRegions:
+            if not region:
+                continue
+
             dataArray, intRegion, \
             startPoints, endPoints, \
             startPointBufferActual, endPointBufferActual, \

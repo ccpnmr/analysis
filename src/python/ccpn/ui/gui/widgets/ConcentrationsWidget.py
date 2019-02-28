@@ -79,7 +79,7 @@ class ConcentrationWidget(Widget):
         i += 1
         for name in self.names:
             label = Label(self.scrollAreaWidgetContents, text=name, grid=(i, 0))
-            concentrationEdit = DoubleSpinbox(self.scrollAreaWidgetContents, value=0.00, grid=(i, 1))
+            concentrationEdit = DoubleSpinbox(self.scrollAreaWidgetContents, value=0.00, decimals=4, grid=(i, 1))
             self.concentrationEditors.append(concentrationEdit)
             i += 1
 

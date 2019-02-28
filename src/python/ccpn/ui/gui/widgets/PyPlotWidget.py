@@ -161,6 +161,8 @@ class PyPlotWidget(Widget):
         popup.show()
         popup.raise_()
 
+    def clear(self):
+        self._figure.clear()
 
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
@@ -172,7 +174,15 @@ if __name__ == '__main__':
     def _simplePlotExample():
         plt = PyPlotWidget()
         x = [1,2,3,4,5]
-        plt.plot(x)
+        y = [10,20,30,14,5]
+        x1 = [1, 2, 3, 4, 5]
+        y1 = [100, 200, 300, 140, 50]
+        m = np.mean([y])
+        m1 = np.mean([y1])
+        ys = y/m
+        y1s = y1/m1
+
+        plt.plot(x,ys, x1,y1s,)
         plt.ylabel('some numbers')
         plt.show(windowTitle='Simple plot', size=(500, 500))
 
@@ -265,5 +275,5 @@ if __name__ == '__main__':
 
     # _imageExample()
     # _multiPlotExample()
-    _3DsurfaceExample()
+    _simplePlotExample()
     app.start()

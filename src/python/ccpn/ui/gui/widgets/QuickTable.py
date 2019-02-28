@@ -809,7 +809,7 @@ QuickTable::item::selected {
         headers.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         headers.customContextMenuRequested.connect(self._raiseHeaderContextMenu)
 
-    def _getExportData(self):
+    def _getAsDataFrame(self):
         if self._dataFrameObject is not None:
             df = self._dataFrameObject.dataFrame
             return df

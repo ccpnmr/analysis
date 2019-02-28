@@ -59,11 +59,9 @@ DefaultTarget = 0.00
 
 def addShiftToSpectra(spectra, shift):
     alignedSpectra = []
-    print(spectra)
     for sp in spectra:
         if shift is not None:
             sp.positions -= float(shift)
-            print(sp.name, shift)
             alignedSpectra.append(sp)
     return alignedSpectra
 

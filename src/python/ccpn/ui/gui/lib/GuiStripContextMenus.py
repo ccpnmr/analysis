@@ -403,7 +403,7 @@ def _stackSpectraDefaultItem(strip):
     return _SCMitem(name='Stack Spectra',
                     typeItem=ItemTypes.get(ITEM), toolTip='Stack Spectra',
                     checkable=True, checked=strip._CcpnGLWidget._stackingMode,
-                    callback=strip._toggleStack, stripMethodName='stackAction')
+                    callback=strip._toggleStack, shortcut='ST', stripMethodName='stackAction')
 
 
 def _stackSpectraPhaseItem(strip):

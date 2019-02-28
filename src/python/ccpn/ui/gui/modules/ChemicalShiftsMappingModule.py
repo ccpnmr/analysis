@@ -128,7 +128,7 @@ from ccpn.util.Constants import concentrationUnits
 from ccpn.util.Common import splitDataFrameWithinRange
 from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRandomColours
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.core.lib.peakUtils import getNmrResidueDeltas,_getKd, oneSiteBindingCurve, _fit1SiteBindCurve,\
+from ccpn.core.lib.peakUtils import getNmrResidueDeltas,_getKd, oneSiteBindingCurve, _fit1SiteBindCurve, _fitExpDecayCurve,\
                                     MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME, DefaultAtomWeights, H, N, OTHER, C
 from ccpn.core.lib import CcpnSorting
 from ccpn.core.lib.DataFrameObject import  DATAFRAME_OBJECT
@@ -152,6 +152,8 @@ PreferredNmrAtoms = ['H', 'HA', 'HB', 'C', 'CA', 'CB', 'N', 'NE', 'ND']
 ONESITE = 'One-site binding'
 DECAY = 'Exponential decay'
 NIY = "This option has not been implemented yet"
+
+FittingAvailable=[ONESITE, DECAY]
 
 # colours
 BackgroundColour = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
@@ -263,6 +265,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self._kDunit = DefaultKDunit
     self._availableFittingPlots  = {
                           ONESITE: self._plot1SiteBindFitting, # Only this implemented
+                          DECAY: self._plotExponentialDecay,
                           }
 
     self._initMainWidgets()
@@ -479,7 +482,7 @@ class ChemicalShiftsMapping(CcpnModule):
                                     callback=self._plotBindingCFromCurrent, grid=(i, 1))
     i += 1
     self.fittingModeL = Label(self.scrollAreaWidgetContents, text='Fitting mode', grid=(i, 0))
-    self.fittingModeRB = RadioButtons(self.scrollAreaWidgetContents, texts=[ONESITE], grid=(i, 1))
+    self.fittingModeRB = RadioButtons(self.scrollAreaWidgetContents, texts=FittingAvailable, grid=(i, 1))
     #
     # i += 1 ####  # Text editor to allow user curve fitting. N.B. Not implemented yet the mechanism to do this
     # self.fittingModeTextL = Label(self.scrollAreaWidgetContents, text='', grid=(i, 0))
@@ -1297,6 +1300,7 @@ class ChemicalShiftsMapping(CcpnModule):
       self._plotScatters(self._getScatterData(), selectedObjs=nmrResidues)
       self._selectBarLabels(pss)
 
+
   def _getAllBindingCurvesDataFrameForChain(self):
     nmrChainTxt = self.nmrResidueTable.ncWidget.getText()
     nmrChain = self.project.getByPid(nmrChainTxt)
@@ -1341,6 +1345,23 @@ class ChemicalShiftsMapping(CcpnModule):
     self.fittingPlot.setRange(xRange=[0, max(xf)], yRange=[0, 1])
     self.bindingPlot.autoRange()
 
+  def _plotExponentialDecay(self, bindingCurves):
+    """ """
+    if bindingCurves is None:
+      return
+
+    self.fittingLine.hide()
+    ### the actual fitting call
+    xs, ys, xf, yf, *popt = _fitExpDecayCurve(bindingCurves)
+    ## setting the plot
+    if not np.any(yf):
+      return # just zeros
+    A, K,  = popt
+    label = 'Fitted Function: %s, %s1' %(A, K)
+    self.fittingPlot.plot(xs, ys, symbol='o', pen=None)
+    self.fittingPlot.plot(xf, yf, name=label)
+    self.fittingPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=None)
+    self.bindingPlot.autoRange()
 
 
 
@@ -1360,7 +1381,7 @@ class ChemicalShiftsMapping(CcpnModule):
     return False
 
   def _setupConcentrationsPopup(self):
-    popup = CcpnDialog(windowTitle='Setup Concentrations', setLayout=True)
+    popup = CcpnDialog(windowTitle='Setup Concentrations', setLayout=True, size=(1000, 500))
 
     spectra = self.spectraSelectionWidget.getSelections()
     names = [sp.name for sp in spectra]
@@ -1436,7 +1457,8 @@ class ChemicalShiftsMapping(CcpnModule):
   #############################################################
   ######   Updating widgets (plots and table) callbacks #######
   #############################################################
-
+  from ccpn.util.decorators import profile
+  @profile
   def _updateBarGraph(self):
     xs = []
     ys = []

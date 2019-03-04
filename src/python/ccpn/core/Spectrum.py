@@ -139,6 +139,7 @@ class Spectrum(AbstractWrapperObject):
     _apiClassQualifiedName = Nmr.DataSource._metaclass.qualifiedName()
 
     _referenceSpectrumHit = None
+    _snr = None
 
     MAXDIM = 4  # Maximum dimensionality
 

@@ -59,7 +59,7 @@ from collections import OrderedDict
 from ccpn.util.Logging import getLogger
 
 
-class QuickTableFilter(Frame):
+class GuiTableFilter(Frame):
   def __init__(self, table, parent=None, **kwds):
     super().__init__(parent, setLayout=False, **kwds)
 
@@ -193,7 +193,7 @@ def attachSearchWidget(parent, table):
       if location is not None:
         if len(location)>0:
           row, column, rowSpan, columnSpan = location
-          table.searchWidget = QuickTableFilter(parent=parent, table=table, vAlign='b')
+          table.searchWidget = GuiTableFilter(parent=parent, table=table, vAlign='b')
           parentLayout.addWidget(table.searchWidget, row+1, column, 1, columnSpan)
           table.searchWidget.setFixedHeight(30)
           table.searchWidget.hide()

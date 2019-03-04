@@ -35,7 +35,8 @@ from ccpn.util import Constants
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
 from ccpn.util.Logging import getLogger
-
+import numpy as np
+from ccpn.util.Common import makeIterableList
 
 SpectrumHitPeakList = 'SpectrumHitPeakList'
 
@@ -57,6 +58,25 @@ def _getReferenceLevel(project, referenceSpectrum):
 
     return levelHit
 
+
+def scoreHit(heights, snr, shifts):
+    score = 0
+    try:
+        totHeights= np.sum(heights)
+        maxShift = np.max(np.absolute(shifts))
+        count = len(shifts)
+        score = (totHeights*snr*count)/maxShift
+    except Exception as err:
+        print('Hit Scoring Error:', err)
+    return abs(score)
+
+def _norm(x):
+    z = None
+    try:
+        z = (x-np.min(x))/(np.max(x)-np.min(x))
+    except ZeroDivisionError:
+        print('Normalisation Error')
+    return z
 
 class SpectrumHit(AbstractWrapperObject):
     """Used in screening and metabolomics implementations to describe
@@ -278,15 +298,20 @@ class SpectrumHit(AbstractWrapperObject):
         return referencePeakHits
 
     def _getDeltaPositions(self, referencePeakList):
-        deltas = [round(abs(lp.position[0] - p.position[0]), 4)
+        deltas = [(lp.position[0] - p.position[0])
                   for p in self._getPeakHits() for lp in p._linkedPeaks
                   if len(p.position) > 0 and len(lp.position) > 0
                   if lp in referencePeakList.peaks]
+        deltas = makeIterableList(deltas)
         return deltas
 
     def _scoreByIntesities(self, peaks):
         heights = [p.height for p in peaks if p.height is not None]
         return sum(heights)
+
+    def _getHitHeights(self, peaks):
+        heights = [p.height for p in peaks if p.height is not None]
+        return heights
 
     def _getSingleScore(self, referencePeakList):
         ''' calculate as Total score but for the single reference spectrum'''

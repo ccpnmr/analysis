@@ -34,7 +34,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 # from ccpn.ui.gui.widgets.Table import ObjectTable, Column
-from ccpn.ui.gui.widgets.QuickTable import QuickTable
+from ccpn.ui.gui.widgets.GuiTable import GuiTable
 from ccpn.ui.gui.widgets.Column import ColumnClass, Column
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
@@ -175,16 +175,16 @@ class ChemicalShiftTableWithAssignment(CcpnModule):
         #                                       grid=(1, 0), gridSpan=(1, 5), **policies
         #                                       )
 
-        self.assignedPeaksTable = QuickTable(parent=self.frame2,
-                                             mainWindow=self.mainWindow,
-                                             dataFrameObject=None,
-                                             setLayout=True,
-                                             autoResize=True, multiSelect=False,
-                                             selectionCallback=self._setCurrentPeak,
-                                             actionCallback=self._navigateToPeak,
-                                             grid=(1, 0), gridSpan=(1, 5),
-                                             enableDelete=False, enableSearch=False,
-                                             **policies)
+        self.assignedPeaksTable = GuiTable(parent=self.frame2,
+                                           mainWindow=self.mainWindow,
+                                           dataFrameObject=None,
+                                           setLayout=True,
+                                           autoResize=True, multiSelect=False,
+                                           selectionCallback=self._setCurrentPeak,
+                                           actionCallback=self._navigateToPeak,
+                                           grid=(1, 0), gridSpan=(1, 5),
+                                           enableDelete=False, enableSearch=False,
+                                           **policies)
 
         #self.attachedNmrAtomsList.setFixedHeight(200)
         #self.assignedPeaksTable.setFixedHeight(200)

@@ -34,7 +34,7 @@ from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import ChemicalShiftListPulldown
 # from ccpn.ui.gui.widgets.Table import ObjectTable, Column
-from ccpn.ui.gui.widgets.QuickTable import QuickTable
+from ccpn.ui.gui.widgets.GuiTable import GuiTable
 from ccpn.ui.gui.widgets.Column import Column, ColumnClass
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
@@ -184,7 +184,7 @@ class ChemicalShiftTableModule(CcpnModule):
         self._closeModule()
 
 
-class ChemicalShiftTable(QuickTable):
+class ChemicalShiftTable(GuiTable):
     """
     Class to present a NmrResidue Table and a NmrChain pulldown list, wrapped in a Widget
     """

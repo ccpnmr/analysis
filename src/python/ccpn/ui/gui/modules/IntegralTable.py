@@ -29,7 +29,7 @@ from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.LinearRegionsPlot import LinearRegionsPlot
 # from ccpn.ui.gui.widgets.Table import ObjectTable, Column
-from ccpn.ui.gui.widgets.QuickTable import QuickTable
+from ccpn.ui.gui.widgets.GuiTable import GuiTable
 from ccpn.ui.gui.widgets.Column import Column, ColumnClass
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import IntegralListPulldown
@@ -110,7 +110,7 @@ class IntegralTableModule(CcpnModule):
         self._closeModule()
 
 
-class IntegralTable(QuickTable):
+class IntegralTable(GuiTable):
     """
     Class to present a IntegralTable pulldown list, wrapped in a Widget
     """

@@ -36,7 +36,7 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
-from ccpn.ui.gui.widgets.QuickTable import QuickTable
+from ccpn.ui.gui.widgets.GuiTable import GuiTable
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import StructureEnsemblePulldown
 from ccpn.ui.gui.widgets.Table import ObjectTable
@@ -273,13 +273,13 @@ class StructureTableModule(CcpnModule):
 #
 #   pass
 
-class QuickTableStructure(QuickTable):
+class GuiTableStructure(GuiTable):
     """
-    QuickTable specific to tables that only contain a single pid for the pandas dataframe
+    GuiTable specific to tables that only contain a single pid for the pandas dataframe
     """
 
     def __init__(self, *args, **kwargs):
-        super(QuickTableStructure, self).__init__(*args, **kwargs)
+        super(GuiTableStructure, self).__init__(*args, **kwargs)
 
     def _selectionTableCallback(self, itemSelection):
         with self._tableBlockSignals('_selectionTableCallback'):
@@ -347,7 +347,7 @@ class QuickTableStructure(QuickTable):
                 self.editItem(item)  # enter the editing mode
 
 
-class StructureTable(QuickTableStructure):
+class StructureTable(GuiTableStructure):
     """
     Class to present a StructureTable and a StructureData pulldown list, wrapped in a Widget
     """

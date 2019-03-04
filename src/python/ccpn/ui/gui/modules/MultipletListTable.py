@@ -32,7 +32,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.PulldownListsForObjects import MultipletListPulldown
 # from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ColumnViewSettings,  ObjectTableFilter
-from ccpn.ui.gui.widgets.QuickTable import QuickTable
+from ccpn.ui.gui.widgets.GuiTable import GuiTable
 from ccpn.ui.gui.widgets.Column import ColumnClass, Column
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.core.MultipletList import MultipletList
@@ -130,7 +130,7 @@ class MultipletTableModule(CcpnModule):
         self._closeModule()
 
 
-class MultipletListTableWidget(QuickTable):
+class MultipletListTableWidget(GuiTable):
     """
     Class to present a multipletList Table
     """

@@ -31,7 +31,7 @@ from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
-from ccpn.ui.gui.widgets.QuickTable import QuickTable
+from ccpn.ui.gui.widgets.GuiTable import GuiTable
 from ccpn.ui.gui.widgets.Column import Column, ColumnClass
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import RestraintPulldown
@@ -144,7 +144,7 @@ class RestraintTableModule(CcpnModule):
         self._closeModule()
 
 
-class RestraintTable(QuickTable):
+class RestraintTable(GuiTable):
     """
     Class to present a RestraintTable pulldown list, wrapped in a Widget
     """

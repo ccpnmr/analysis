@@ -42,7 +42,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Label import Label
 # from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
-from ccpn.ui.gui.widgets.QuickTable import QuickTable
+from ccpn.ui.gui.widgets.GuiTable import GuiTable
 from ccpn.ui.gui.widgets.Column import Column, ColumnClass
 
 
@@ -90,14 +90,14 @@ class ProjectSummaryPopup(CcpnDialog):
         self.dataFrameSpectrum = None
 
         # initialise the table
-        self.spectrumTable = QuickTable(parent=self.spectrumFrame,
-                                        mainWindow=self.mainWindow,
-                                        dataFrameObject=None,
-                                        setLayout=True,
-                                        autoResize=True,
-                                        enableDelete=False,
-                                        grid=(1, 0), gridSpan=(1, 1)
-                                        )
+        self.spectrumTable = GuiTable(parent=self.spectrumFrame,
+                                      mainWindow=self.mainWindow,
+                                      dataFrameObject=None,
+                                      setLayout=True,
+                                      autoResize=True,
+                                      enableDelete=False,
+                                      grid=(1, 0), gridSpan=(1, 1)
+                                      )
         self.spectrumTable.setMinimumHeight(MINHEIGHT)
         # self.spectrumTable = ObjectTable(self.spectrumFrame, columns=columns, objects=self.spectra, grid=(1, 0))
         row += 1
@@ -127,14 +127,14 @@ class ProjectSummaryPopup(CcpnDialog):
         self.dataFramePeakList = None
 
         # initialise the table
-        self.peakListTable = QuickTable(parent=self.peakListFrame,
-                                        mainWindow=self.mainWindow,
-                                        dataFrameObject=None,
-                                        setLayout=True,
-                                        autoResize=True,
-                                        enableDelete=False,
-                                        grid=(1, 0), gridSpan=(1, 1)
-                                        )
+        self.peakListTable = GuiTable(parent=self.peakListFrame,
+                                      mainWindow=self.mainWindow,
+                                      dataFrameObject=None,
+                                      setLayout=True,
+                                      autoResize=True,
+                                      enableDelete=False,
+                                      grid=(1, 0), gridSpan=(1, 1)
+                                      )
         self.peakListTable.setMinimumHeight(MINHEIGHT)
         # self.peakListTable = ObjectTable(self.peakListFrame, columns=columns, objects=self.peakLists, grid=(1, 0))
         row += 1
@@ -162,14 +162,14 @@ class ProjectSummaryPopup(CcpnDialog):
         self.dataFrameChains = None
 
         # initialise the table
-        self.chainTable = QuickTable(parent=self.chainFrame,
-                                     mainWindow=self.mainWindow,
-                                     dataFrameObject=None,
-                                     setLayout=True,
-                                     autoResize=True,
-                                     enableDelete=False,
-                                     grid=(1, 0), gridSpan=(1, 1)
-                                     )
+        self.chainTable = GuiTable(parent=self.chainFrame,
+                                   mainWindow=self.mainWindow,
+                                   dataFrameObject=None,
+                                   setLayout=True,
+                                   autoResize=True,
+                                   enableDelete=False,
+                                   grid=(1, 0), gridSpan=(1, 1)
+                                   )
         self.chainTable.setMinimumHeight(MINHEIGHT)
         # self.chainTable = ObjectTable(self.chainFrame, columns=columns, objects=self.chains, grid=(1, 0))
         row += 1

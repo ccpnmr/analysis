@@ -37,7 +37,7 @@ from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.ui.gui.widgets.QuickTable import QuickTable
+from ccpn.ui.gui.widgets.GuiTable import GuiTable
 from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay
@@ -193,7 +193,7 @@ class NmrResidueTableModule(CcpnModule):
         event.ignore()
 
 
-class NmrResidueTable(QuickTable):
+class NmrResidueTable(GuiTable):
     """
     Class to present a NmrResidue Table and a NmrChain pulldown list, wrapped in a Widget
     """
@@ -714,7 +714,7 @@ class _CSMNmrResidueTable(NmrResidueTable):
   @staticmethod
   def _setChecked(obj, value):
     """
-    CCPN-INTERNAL: Insert a comment into QuickTable
+    CCPN-INTERNAL: Insert a comment into GuiTable
     """
 
     obj._includeInDeltaShift = value

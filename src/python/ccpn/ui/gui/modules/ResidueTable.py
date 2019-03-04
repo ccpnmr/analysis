@@ -32,7 +32,7 @@ from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import ChainPulldown
 from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning, showNotImplementedMessage
-from ccpn.ui.gui.widgets.QuickTable import QuickTable, QuickTableFrame
+from ccpn.ui.gui.widgets.GuiTable import GuiTable, GuiTableFrame
 from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.Chain import Chain
@@ -124,7 +124,7 @@ class ResidueTableModule(CcpnModule):
         event.ignore()
 
 
-class ResidueTable(QuickTable):
+class ResidueTable(GuiTable):
     """
     Class to present a residue Table and a Chain pulldown list, wrapped in a Widget
     """

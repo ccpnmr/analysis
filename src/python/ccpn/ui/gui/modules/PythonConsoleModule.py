@@ -60,6 +60,7 @@ class PythonConsoleModule(CcpnModule):
 
         self.settingsEditorCheckBox = CheckBox(self.settingsWidget, checked=True, text='Log Display', callback=self._toggleTextEditor,
                                                grid=(0, 0))
+        self._toggleTextEditor(False)
 
         # make the widget visible, it is hidden when first instantiated
         self.pythonConsoleWidget.show()

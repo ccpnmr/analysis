@@ -74,6 +74,7 @@ class ColumnViewSettings(Widget):
         self.filterLabel = Label(self, 'Display Columns', grid=(0, 1), vAlign='t', hAlign='l')
 
     def initCheckBoxes(self):
+
         columns = self.dataFrameObject.headings  #   self.table._columns
         hiddenColumns = self.dataFrameObject.hiddenColumns or []
 

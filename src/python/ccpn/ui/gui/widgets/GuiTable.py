@@ -180,23 +180,23 @@ def exportTableDialog(dataFrame, columns=None, path='~/table.xlsx'):
         findExportFormats(path, dataFrame, filterType=filterType, columns=columns)
 
 
-class QuickTable(TableWidget, Base):
+class GuiTable(TableWidget, Base):
     ICON_FILE = os.path.join(os.path.dirname(__file__), 'icons', 'editable.png')
 
     styleSheet = """
-QuickTable {
-    background-color: %(QUICKTABLE_BACKGROUND)s;
-    alternate-background-color: %(QUICKTABLE_ALT_BACKGROUND)s;
+GuiTable {
+    background-color: %(GUITABLE_BACKGROUND)s;
+    alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
 }
 
-QuickTable::item {
+GuiTable::item {
     padding: 2px;
-    color: %(QUICKTABLE_ITEM_FOREGROUND)s;
+    color: %(GUITABLE_ITEM_FOREGROUND)s;
 }
 
-QuickTable::item::selected {
-    background-color: %(QUICKTABLE_SELECTED_BACKGROUND)s;
-    color: %(QUICKTABLE_SELECTED_FOREGROUND)s;
+GuiTable::item::selected {
+    background-color: %(GUITABLE_SELECTED_BACKGROUND)s;
+    color: %(GUITABLE_SELECTED_FOREGROUND)s;
 }"""
 
     def __init__(self, parent=None,
@@ -312,7 +312,7 @@ QuickTable::item::selected {
         #     self.itemClicked.connect(self._cellClicked)
 
         # set the delegate for editing
-        delegate = QuickTableDelegate(self)
+        delegate = GuiTableDelegate(self)
         self.setItemDelegate(delegate)
 
         # set the callback for changing selection on table
@@ -411,7 +411,7 @@ QuickTable::item::selected {
     @staticmethod
     def _getCommentText(obj):
         """
-        CCPN-INTERNAL: Get a comment from QuickTable
+        CCPN-INTERNAL: Get a comment from GuiTable
         """
         try:
             if obj.comment == '' or not obj.comment:
@@ -424,7 +424,7 @@ QuickTable::item::selected {
     @staticmethod
     def _setComment(obj, value):
         """
-        CCPN-INTERNAL: Insert a comment into QuickTable
+        CCPN-INTERNAL: Insert a comment into GuiTable
         """
         # ejb - why is it blanking a notification here?
         # NmrResidueTable._project.blankNotification()
@@ -772,10 +772,10 @@ QuickTable::item::selected {
             # we are selecting from the table
             self._mousePressed = True
             event.ignore()
-            super(QuickTable, self).mousePressEvent(event)
+            super(GuiTable, self).mousePressEvent(event)
         else:
             event.ignore()
-            super(QuickTable, self).mousePressEvent(event)
+            super(GuiTable, self).mousePressEvent(event)
 
     def mouseReleaseEvent(self, event):
         self._mousePressed = False
@@ -785,7 +785,7 @@ QuickTable::item::selected {
             QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval(),
                                      partial(self._handleCellClicked, event))
 
-        super(QuickTable, self).mouseReleaseEvent(event)
+        super(GuiTable, self).mouseReleaseEvent(event)
 
     def _handleCellClicked(self, event):
         """handle a single click event, but ignore double click events
@@ -800,7 +800,7 @@ QuickTable::item::selected {
         """set the doubleClick flag
         """
         self._lastClick = 'doubleClick'
-        super(QuickTable, self).mouseDoubleClickEvent(event)
+        super(GuiTable, self).mouseDoubleClickEvent(event)
 
     def _setHeaderContextMenu(self):
         """Set up the context menu for the table header
@@ -918,7 +918,7 @@ QuickTable::item::selected {
     # def resizeColumnsToContents(self):
     #   self.hide()
     #   self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.ResizeToContents)
-    #   super(QuickTable, self).resizeColumnsToContents()
+    #   super(GuiTable, self).resizeColumnsToContents()
     #   self.show()
     #   self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
 
@@ -1877,7 +1877,7 @@ QuickTable::item::selected {
 EDIT_ROLE = QtCore.Qt.EditRole
 
 
-class QuickTableDelegate(QtWidgets.QStyledItemDelegate):
+class GuiTableDelegate(QtWidgets.QStyledItemDelegate):
     """
     handle the setting of data when editing the table
     """
@@ -1928,14 +1928,14 @@ class QuickTableDelegate(QtWidgets.QStyledItemDelegate):
         # return QtWidgets.QStyledItemDelegate.setModelData(self, widget, mode, index)
 
 
-class QuickTableFrame(Frame):
+class GuiTableFrame(Frame):
     def __init__(self, *args, **kwargs):
-        super(QuickTableFrame, self).__init__(parent=self.mainWidget, setLayout=True, spacing=(0, 0),
+        super(GuiTableFrame, self).__init__(parent=self.mainWidget, setLayout=True, spacing=(0, 0),
                                               showBorder=False, fShape='noFrame',
                                               grid=(1, 0),
                                               hPolicy='expanding', vPolicy='expanding')
 
-        self.quickTable = QuickTable(self, *args, **kwargs)
+        self.quickTable = GuiTable(self, *args, **kwargs)
         self.searchWidget = None
 
 
@@ -2019,7 +2019,7 @@ if __name__ == '__main__':
             lambda mockObj, value: mockObj.editFlags(mockObj, value),
             )
         ])
-    table = QuickTable(parent=popup, dataFrameObject=None, checkBoxCallback=_checkBoxCallBack, grid=(0, 0))
+    table = GuiTable(parent=popup, dataFrameObject=None, checkBoxCallback=_checkBoxCallBack, grid=(0, 0))
     df = table.getDataFrameFromList(table, [mockObj] * 5, colDefs=columns)
 
     table.setTableFromDataFrameObject(dataFrameObject=df)

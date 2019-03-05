@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from typing import Sequence, Tuple, Optional
 import collections
-
+from functools import partial
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
@@ -40,7 +40,8 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
 from ccpn.core.lib.OrderedSpectrumViews import SPECTRUMVIEWINDEX, OrderedSpectrumViews
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock, undoBlockManager
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
+    logCommandBlock, undoBlockManager, undoStackBlocking
 from ccpn.util.Logging import getLogger
 
 logger = getLogger()
@@ -242,19 +243,33 @@ class SpectrumDisplay(AbstractWrapperObject):
             self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
         return self._orderedSpectrumViews.getOrderedSpectrumViewsIndex()
 
+    def _rescaleSpectra(self):
+        self._spectrumViewChanged({})
+
     def setOrderedSpectrumViewsIndex(self, spectrumIndex: Tuple[int]):
         """
         Set the new indexing of the spectrumViews attached to the strip/spectrumDisplay
         :param newIndex - tuple of int:
         """
+        # TODO:ED this should really be in GuiSpectrumDisplay
+
         defaults = collections.OrderedDict((('spectrumIndex', None),))
 
         with logCommandBlock(get='self') as log:
             log('setOrderedSpectrumViewsIndex')
 
+            # rebuild the display when the ordering has changed
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(undo=self._rescaleSpectra)
+
             if not self._orderedSpectrumViews:
                 self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
             self._orderedSpectrumViews.setOrderedSpectrumViewsIndex(spectrumIndex=spectrumIndex)
+
+            # rebuild the display when the ordering has changed
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(redo=self._rescaleSpectra)
+
 
     def _removeOrderedSpectrumViewIndex(self, index):
         # self.removeOrderedSpectrumView(index)
@@ -271,12 +286,20 @@ class SpectrumDisplay(AbstractWrapperObject):
                 self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
             oldIndex = list(self.getOrderedSpectrumViewsIndex())
 
+            # rebuild the display when the ordering has changed
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(undo=self._rescaleSpectra)
+
             # index = oldIndex.index(ind)
             oldIndex.remove(index)
             for ii in range(len(oldIndex)):
                 if oldIndex[ii] > index:
                     oldIndex[ii] -= 1
             self._orderedSpectrumViews.setOrderedSpectrumViewsIndex(spectrumIndex=oldIndex)
+
+            # rebuild the display when the ordering has changed
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(redo=self._rescaleSpectra)
 
     # CCPN functions
     def resetAxisOrder(self):

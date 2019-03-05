@@ -577,20 +577,20 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.strip.isDeleted:
             return
 
-        # rescale the matrices each spectrumView
-        stackCount = 0
+        # rescale the matrices for each spectrumView
+        # stackCount = 0
         self.resetRangeLimits(allLimits=False)
 
-        for spectrumView in self._ordering:  # _ordering:                             # strip.spectrumViews:  #.orderedSpectrumViews():
+        for stackCount, spectrumView in enumerate(self._ordering):  # _ordering:                             # strip.spectrumViews:  #.orderedSpectrumViews():
             # self._spectrumSettings[spectrumView] = {}
 
             if spectrumView.isDeleted:
                 self._spectrumSettings[spectrumView] = {}
                 continue
 
-            self._buildSpectrumSetting(spectrumView, stackCount)
-            if self._stackingMode:
-                stackCount += 1
+            self._buildSpectrumSetting(spectrumView=spectrumView, stackCount=stackCount)
+            # if self._stackingMode:
+            #     stackCount += 1
 
     def _setRegion(self, region, value):
         self.strip.project._undo.increaseBlocking()
@@ -707,18 +707,19 @@ class CcpnGLWidget(QOpenGLWidget):
                 self._maxYRange = max(self._maxYRange, (fy0 - fy1))
 
                 self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX] = np.zeros((16,), dtype=np.float32)
-                if self._stackingMode:
-                    st = stackCount * self._stackingValue
-                    stackCount += 1
-                    self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX][0:16] = [1.0, 0.0, 0.0, 0.0,
-                                                                                                 0.0, 1.0, 0.0, 0.0,
-                                                                                                 0.0, 0.0, 1.0, 0.0,
-                                                                                                 0.0, st, 0.0, 1.0]
-                else:
-                    self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX][0:16] = [1.0, 0.0, 0.0, 0.0,
-                                                                                                 0.0, 1.0, 0.0, 0.0,
-                                                                                                 0.0, 0.0, 1.0, 0.0,
-                                                                                                 0.0, 0.0, 0.0, 1.0]
+
+                # if self._stackingMode:
+                st = stackCount * self._stackingValue
+                # stackCount += 1
+                self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX][0:16] = [1.0, 0.0, 0.0, 0.0,
+                                                                                             0.0, 1.0, 0.0, 0.0,
+                                                                                             0.0, 0.0, 1.0, 0.0,
+                                                                                             0.0, st, 0.0, 1.0]
+                # else:
+                #     self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX][0:16] = [1.0, 0.0, 0.0, 0.0,
+                #                                                                                  0.0, 1.0, 0.0, 0.0,
+                #                                                                                  0.0, 0.0, 1.0, 0.0,
+                #                                                                                  0.0, 0.0, 0.0, 1.0]
 
         self._rangeXDefined = True
         self._rangeYDefined = True
@@ -2455,10 +2456,13 @@ class CcpnGLWidget(QOpenGLWidget):
 
                         if self._stackingMode:
                             # use the stacking matrix to offset the 1D spectra
-                            currentShader.setGLUniformMatrix4fv('mvMatrix',
-                                                                1, GL.GL_FALSE,
-                                                                self._spectrumSettings[spectrumView][
-                                                                    GLDefs.SPECTRUM_STACKEDMATRIX])
+                            try:
+                                currentShader.setGLUniformMatrix4fv('mvMatrix',
+                                                                    1, GL.GL_FALSE,
+                                                                    self._spectrumSettings[spectrumView][
+                                                                        GLDefs.SPECTRUM_STACKEDMATRIX])
+                            except Exception as es:
+                                pass
 
                         # self._contourList[spectrumView].drawVertexColor()
                         self._contourList[spectrumView].drawVertexColorVBO(enableVBO=True)
@@ -4157,7 +4161,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def initialiseTraces(self):
         # set up the arrays and dimension for showing the horizontal/vertical traces
-        stackCount = 0
         for spectrumView in self._ordering:  # strip.spectrumViews:
 
             if spectrumView.isDeleted:

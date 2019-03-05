@@ -85,6 +85,10 @@ class OrderedSpectrumViews(object):
         if _spectrumViewIndex is None:
             _spectrumViewIndex = tuple(ii for ii in range(len(spectrumList)))
 
+        # if there are too many spectrumViews then increase the length of the list
+        while len(_spectrumViewIndex) < len(spectrumList):
+            _spectrumViewIndex += (len(_spectrumViewIndex),)
+
         self._storeOrderedSpectrumViewIndex(_spectrumViewIndex)
 
         # return the reordered spectrumList

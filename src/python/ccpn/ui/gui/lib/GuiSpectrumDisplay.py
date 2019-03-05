@@ -1364,16 +1364,28 @@ class GuiSpectrumDisplay(CcpnModule):
 
             oldIndex = self.getOrderedSpectrumViewsIndex()
 
+            # need set ordering here on undo
+            # with undoStackBlocking() as addUndoItem:
+            #     addUndoItem(undo=partial(self._listViewChanged, {}))
+            #     addUndoItem(undo=partial(self.setOrderedSpectrumViewsIndex, tuple(oldIndex)))
+
             newSpectrum = self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
             if newSpectrum:
-                newInd = self.spectrumViews.index(newSpectrum)
+                # newInd = self.spectrumViews.index(newSpectrum)
                 index = self.getOrderedSpectrumViewsIndex()
-                index = tuple((ii + 1) if (ii >= newInd) else ii for ii in index)
-                index += (newInd,)
+                # index = tuple((ii + 1) if (ii >= newInd) else ii for ii in index)
+                # index += (newInd,)
 
                 # index = list(self.getOrderedSpectrumViewsIndex())
                 # index.append(len(index))
+
                 self.setOrderedSpectrumViewsIndex(tuple(index))
+                # self._listViewChanged({})
+
+                # with undoStackBlocking() as addUndoItem:
+                #     addUndoItem(redo=partial(self._listViewChanged, {}))
+
+                # need ordering here on redo
 
                 # now move the inserted item to the end
                 # get index of the new item, update all current indices greater than this + 1

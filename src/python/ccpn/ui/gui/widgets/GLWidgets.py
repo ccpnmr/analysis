@@ -401,7 +401,9 @@ class Gui1dWidget(CcpnGLWidget):
 
         # self._spectrumSettings = {}
         rebuildFlag = False
-        for spectrumView in self.strip.spectrumViews:
+        for stackCount, spectrumView in enumerate(self._ordering):  # .strip.spectrumViews:
+            if spectrumView.isDeleted:
+                continue
 
             if spectrumView.buildContours or spectrumView.buildContoursOnly:
 
@@ -431,8 +433,8 @@ class Gui1dWidget(CcpnGLWidget):
                 spectrumView._buildGLContours(self._contourList[spectrumView])
 
                 self._buildSpectrumSetting(spectrumView=spectrumView, stackCount=stackCount)
-                if self._stackingMode:
-                    stackCount += 1
+                # if self._stackingMode:
+                #     stackCount += 1
 
                 rebuildFlag = True
 
@@ -454,6 +456,8 @@ class Gui1dWidget(CcpnGLWidget):
 
         for specView in tuple(self._spectrumSettings.keys()):
             if specView not in self._ordering:
+                # print('>>>_updateVisibleSpectrumViews delete', specView, id(specView))
+                # print('>>>', [id(spec) for spec in self._ordering])
                 del self._spectrumSettings[specView]
 
         # make a list of the visible and not-deleted spectrumViews

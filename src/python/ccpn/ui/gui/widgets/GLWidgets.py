@@ -436,7 +436,6 @@ class Gui1dWidget(CcpnGLWidget):
                 self._buildSpectrumSetting(spectrumView=spectrumView, stackCount=stackCount)
                 # if self._stackingMode:
                 #     stackCount += 1
-
                 rebuildFlag = True
 
                 # define the VBOs to pass to the graphics card

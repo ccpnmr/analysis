@@ -181,9 +181,6 @@ class GuiStrip(Frame):
         # respond to values changed in the containing spectrumDispaly settings widget
         self.spectrumDisplay._spectrumDisplaySettings.symbolsChanged.connect(self._symbolsChangedInSettings)
 
-    def _symbolsChangedInSettings(self, aDict):
-        print('>>>_symbolsChangedInSettings')
-
     def setStripNotifiers(self):
         """Set the notifiers for the strip.
         """
@@ -243,8 +240,7 @@ class GuiStrip(Frame):
         popup = CopyPeaks(parent=self.mainWindow, mainWindow=self.mainWindow)
         peaks = self.current.peaks
         popup._selectPeaks(peaks)
-        popup.exec()
-        popup.raise_()
+        popup.exec_()
 
     def _updateStripLabel(self, callbackDict):
         """Update the striplabel if it represented a NmrResidue that has changed its id.
@@ -541,14 +537,14 @@ class GuiStrip(Frame):
         self.pivotLine.setValue(self._newPosition)
         phasingFrame.pivotEntry.valueChanged.connect(self._newPositionPivotCallback)
 
-        # make sure that all traces are clear
-        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-
-        GLSignals = GLNotifier(parent=self)
+        # # make sure that all traces are clear
+        # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+        #
+        # GLSignals = GLNotifier(parent=self)
         if self.spectrumDisplay.is1D:
-            GLSignals.emitEvent(triggers=[GLNotifier.GLADD1DPHASING], display=self.spectrumDisplay)
+            self._CcpnGLWidget.GLSignals.emitEvent(triggers=[self._CcpnGLWidget.GLSignals.GLADD1DPHASING], display=self.spectrumDisplay)
         else:
-            GLSignals.emitEvent(triggers=[GLNotifier.GLCLEARPHASING], display=self.spectrumDisplay)
+            self._CcpnGLWidget.GLSignals.emitEvent(triggers=[self._CcpnGLWidget.GLSignals.GLCLEARPHASING], display=self.spectrumDisplay)
 
     def _newPositionLineCallback(self):
         if not self.isDeleted:
@@ -572,10 +568,7 @@ class GuiStrip(Frame):
         #     spectrumView._turnOffPhasing()
 
         # make sure that all traces are clear
-        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-
-        GLSignals = GLNotifier(parent=self)
-        GLSignals.emitEvent(triggers=[GLNotifier.GLCLEARPHASING], display=self.spectrumDisplay)
+        self._CcpnGLWidget.GLSignals.emitEvent(triggers=[self._CcpnGLWidget.GLSignals.GLCLEARPHASING], display=self.spectrumDisplay)
 
         self._CcpnGLWidget.removeInfiniteLine(self.pivotLine)
         self.pivotLine.valuesChanged.disconnect(self._newPositionLineCallback)
@@ -700,13 +693,7 @@ class GuiStrip(Frame):
         except:
             getLogger().debugGL('OpenGL widget not instantiated')
 
-    def cyclePeakLabelling(self):
-        """Toggles whether peak labelling is minimal is visible in the strip.
-        """
-        self.peakLabelling += 1
-        if self.peakLabelling > 2:
-            self.peakLabelling = 0
-
+    def _setPeakLabelling(self):
         if self.spectrumViews:
             for sV in self.spectrumViews:
 
@@ -715,10 +702,17 @@ class GuiStrip(Frame):
                     peakListView.buildLabels = True
 
             # spawn a redraw of the GL windows
-            from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+            self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
-            GLSignals = GLNotifier(parent=None)
-            GLSignals.emitPaintEvent()
+    def cyclePeakLabelling(self):
+        """Toggles whether peak labelling is minimal is visible in the strip.
+        """
+        self.peakLabelling += 1
+        if self.peakLabelling > 2:
+            self.peakLabelling = 0
+
+        self._setPeakLabelling()
+        if self.spectrumViews:
             self._emitSymbolChanged()
 
     def setPeakLabelling(self, labelling):
@@ -728,18 +722,8 @@ class GuiStrip(Frame):
         if self.peakLabelling > 2:
             self.peakLabelling = 0
 
+        self._setPeakLabelling()
         if self.spectrumViews:
-            for sV in self.spectrumViews:
-
-                for peakListView in sV.peakListViews:
-                    # peakListView.buildSymbols = True
-                    peakListView.buildLabels = True
-
-            # spawn a redraw of the GL windows
-            from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-
-            GLSignals = GLNotifier(parent=None)
-            GLSignals.emitPaintEvent()
             self._emitSymbolChanged()
 
     def _emitSymbolChanged(self):
@@ -749,13 +733,7 @@ class GuiStrip(Frame):
                                                                                               SYMBOLSIZE     : self.symbolSize,
                                                                                               SYMBOLTHICKNESS: self.symbolThickness})
 
-    def cyclePeakSymbols(self):
-        """Cycle through peak symbol types.
-        """
-        self.symbolType += 1
-        if self.symbolType > 2:
-            self.symbolType = 0
-
+    def _setPeakSymbols(self):
         if self.spectrumViews:
             for sV in self.spectrumViews:
 
@@ -768,11 +746,18 @@ class GuiStrip(Frame):
                     multipletListView.buildLabels = True
 
             # spawn a redraw of the GL windows
-            from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+            self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
-            GLSignals = GLNotifier(parent=None)
-            GLSignals.emitPaintEvent()
-            # self._emitSymbolChanged()
+    def cyclePeakSymbols(self):
+        """Cycle through peak symbol types.
+        """
+        self.symbolType += 1
+        if self.symbolType > 2:
+            self.symbolType = 0
+
+        self._setPeakSymbols()
+        if self.spectrumViews:
+            self._emitSymbolChanged()
 
     def setPeakSymbols(self, symbolNum):
         """set the peak symbol type.
@@ -781,23 +766,38 @@ class GuiStrip(Frame):
         if self.symbolType > 2:
             self.symbolType = 0
 
+        self._setPeakSymbols()
         if self.spectrumViews:
-            for sV in self.spectrumViews:
+            self._emitSymbolChanged()
 
-                for peakListView in sV.peakListViews:
-                    peakListView.buildSymbols = True
-                    peakListView.buildLabels = True
+    def _setSymbolsPaintEvent(self):
+        # prompt the GLwidgets to update
+        self._CcpnGLWidget.GLSignals.emitEvent(triggers=[self._CcpnGLWidget.GLSignals.GLRESCALE,
+                                                         self._CcpnGLWidget.GLSignals.GLALLPEAKS,
+                                                         self._CcpnGLWidget.GLSignals.GLALLMULTIPLETS,
+                                                         ])
 
-                for multipletListView in sV.multipletListViews:
-                    multipletListView.buildSymbols = True
-                    multipletListView.buildLabels = True
+    def _symbolsChangedInSettings(self, aDict):
+        """Respond to changes in the symbol values in the settings widget
+        """
+        symbolType = aDict[SYMBOLTYPES]
+        annotationsType = aDict[ANNOTATIONTYPES]
+        symbolSize = aDict[SYMBOLSIZE]
+        symbolThickness = aDict[SYMBOLTHICKNESS]
 
-            # spawn a redraw of the GL windows
-            from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-
-            GLSignals = GLNotifier(parent=None)
-            GLSignals.emitPaintEvent()
-            # self._emitSymbolChanged()
+        self.blockSignals(True)
+        # update the current settings from the dict
+        if symbolType != self.symbolType:
+            self.setPeakSymbols(symbolType)
+        elif annotationsType != self.peakLabelling:
+            self.setPeakLabelling(annotationsType)
+        elif symbolSize != self.symbolSize:
+            self.symbolSize = symbolSize
+            self._setSymbolsPaintEvent()
+        elif symbolThickness != self.symbolThickness:
+            self.symbolThickness = symbolThickness
+            self._setSymbolsPaintEvent()
+        self.blockSignals(False)
 
     @property
     def symbolSize(self):
@@ -815,7 +815,7 @@ class GuiStrip(Frame):
     @symbolThickness.setter
     def symbolThickness(self, value):
         self._symbolThickness = value
-        # self._emitSymbolChanged()
+        self._emitSymbolChanged()
 
     def _crosshairCode(self, axisCode):
         """Determines what axisCodes are compatible as far as drawing crosshair is concerned

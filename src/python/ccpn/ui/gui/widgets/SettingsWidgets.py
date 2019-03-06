@@ -222,7 +222,13 @@ class SpectrumDisplaySettings(Widget):
         """Respond to an external change in symbol settings
         """
         if aDict[GLNotifier.GLSPECTRUMDISPLAY] == self._spectrumDisplay:
-            print('>>>_symbolsChanged')
+            values = aDict[GLNotifier.GLVALUES]
+            self.blockSignals(True)
+            self.symbol.setIndex(values[SYMBOLTYPES])
+            self.annotationsData.setIndex(values[ANNOTATIONTYPES])
+            self.symbolSizePixelData.set(values[SYMBOLSIZE])
+            self.symbolThicknessData.set(values[SYMBOLTHICKNESS])
+            self.blockSignals(False)
 
     def doCallback(self):
         """Handle the user callback

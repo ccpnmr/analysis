@@ -54,6 +54,7 @@ class GLNotifier(QtWidgets.QWidget):
     GLHIGHLIGHTPEAKS = 'glHighlightPeaks'
     GLHIGHLIGHTINTEGRALS = 'glHighlightIntegrals'
     GLHIGHLIGHTMULTIPLETS = 'glHighlightMultiplets'
+    GLRESCALE = 'glRescale'
     GLALLPEAKS = 'glAllPeaks'
     GLALLINTEGRALS = 'glAllIntegrals'
     GLALLMULTIPLETS = 'glAllMultiplets'

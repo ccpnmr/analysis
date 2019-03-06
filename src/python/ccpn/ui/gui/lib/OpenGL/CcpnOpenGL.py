@@ -4787,6 +4787,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 if triggers or targets:
 
+                    if GLNotifier.GLRESCALE in triggers:
+                        self._rescaleXAxis(update=False)
+
                     if GLNotifier.GLPREFERENCES in triggers:
                         self._preferencesUpdate()
                         self._rescaleXAxis(update=False)

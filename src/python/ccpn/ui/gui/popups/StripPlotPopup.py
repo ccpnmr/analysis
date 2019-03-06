@@ -29,7 +29,7 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
-from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot, STRIPPLOT_PEAKS, STRIPPLOT_NMRRESIDUES
+from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot, STRIPPLOT_PEAKS, STRIPPLOT_NMRRESIDUES, NO_STRIP
 from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
 
 
@@ -62,7 +62,7 @@ class StripPlotPopup(CcpnDialog):
                                              includePeakLists=includePeakLists,
                                              includeNmrChains=includeNmrChains,
                                              includeSpectrumTable=includeSpectrumTable,
-                                             defaultSpectrum=spectrumDisplay,
+                                             defaultSpectrum=NO_STRIP,
                                              grid=(1, 0), gridSpan=(1, 3))
 
         ButtonList(self, ['Cancel', 'OK'], [self.reject, self._accept], grid=(3, 3))

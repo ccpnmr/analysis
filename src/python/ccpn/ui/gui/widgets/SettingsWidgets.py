@@ -54,7 +54,7 @@ ALL = '<all>'
 
 STRIPPLOT_PEAKS = 'peaks'
 STRIPPLOT_NMRRESIDUES = 'nmrResidues'
-
+NO_STRIP = 'noStrip'
 
 class SpectrumDisplaySettings(Widget):
     # signal for parentWidgets to respond to changes in the widget
@@ -203,7 +203,7 @@ class StripPlot(Widget):
         row = 0
         colwidth = 140
 
-        texts = [defaultSpectrum.pid] if defaultSpectrum else ([ALL] + displayText)
+        texts = [defaultSpectrum.pid] if (defaultSpectrum and defaultSpectrum is not NO_STRIP) else ([ALL] + displayText)
 
         self.displaysWidget = ListCompoundWidget(self,
                                                  grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
@@ -217,11 +217,13 @@ class StripPlot(Widget):
                                                  callback=self._selectDisplayInList)
         self.displaysWidget.setFixedHeights((None, None, 40))
 
-        if defaultSpectrum:
-            self.displaysWidget.pulldownList.set(defaultSpectrum.pid)
-        else:
-            self.displaysWidget.pulldownList.set(ALL)
+        if defaultSpectrum is not NO_STRIP:
+            if defaultSpectrum:
+                self.displaysWidget.pulldownList.set(defaultSpectrum.pid)
+            else:
+                self.displaysWidget.pulldownList.set(ALL)
 
+        # function to make sure that the pullDown is always populated properly just before opening
         self.displaysWidget.setPreSelect(self._fillDisplayWidget)
 
         # handle signals when the items in the displaysWidget have changed

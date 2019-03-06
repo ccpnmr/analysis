@@ -1477,6 +1477,8 @@ class GuiSpectrumDisplay(CcpnModule):
                             _w = _widths.setdefault(_ac[0], 1.0)
                             newWidths = [_w, 'full']
 
+
+                        indices = strip._getAxisCodeIndices(pk.peakList.spectrum)
                         navigateToPositionInStrip(strip, pk.position, pk.axisCodes, widths=newWidths)
 
                 elif nmrs:

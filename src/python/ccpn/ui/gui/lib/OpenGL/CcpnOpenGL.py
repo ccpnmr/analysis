@@ -4328,6 +4328,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         labelling = {'0': [], '1': []}
         labelsChanged = False
+        scaleBounds = (self.w, self.h)
 
         if gridGLList.renderMode == GLRENDERMODE_REBUILD:
 
@@ -4483,15 +4484,19 @@ class CcpnGLWidget(QOpenGLWidget):
 
                     for ax in axisList:  #   range(0,2):  ## Draw grid for both axes
 
-                        # skip grid lines for point grids
+                        # skip grid lines for point grids - not sure this is working
                         if d[0] < 0.1 and ax == 0 and self.XMode == self._intFormat:
                             continue
                         if d[1] < 0.1 and ax == 1 and self.YMode == self._intFormat:
                             continue
 
+                        # # ignore narrow grids
+                        # if self.w * (scaleOrder+1) < 250 or self.h * (scaleOrder+1) < 250:
+                        #     continue
+                        #
                         c = 30.0 + (scaleOrder * 20)
-
                         bx = (ax + 1) % 2
+
                         for x in range(0, int(nl[ax])):
                             p1 = np.array([0., 0.])
                             p2 = np.array([0., 0.])
@@ -4503,19 +4508,8 @@ class CcpnGLWidget(QOpenGLWidget):
                                 continue
 
                             if i == 1:  # should be largest scale grid
-                                # p1[0] = self._round_sig(p1[0], sig=4)
-                                # p1[1] = self._round_sig(p1[1], sig=4)
-                                # p2[0] = self._round_sig(p2[0], sig=4)
-                                # p2[1] = self._round_sig(p2[1], sig=4)
                                 d[0] = self._round_sig(d[0], sig=4)
                                 d[1] = self._round_sig(d[1], sig=4)
-
-                                # if '%.5f' % p1[0] == '%.5f' % p2[0]:  # easy to round off as strings
-                                #     labelling[str(ax)].append((i, ax, valueToRatio(p1[0], self.axisL, self.axisR),
-                                #                                p1[0], d[0]))
-                                # else:
-                                #     labelling[str(ax)].append((i, ax, valueToRatio(p1[1], self.axisB, self.axisT),
-                                #                                p1[1], d[1]))
 
                                 if '%.5f' % p1[0] == '%.5f' % p2[0]:  # check whether a vertical line - x axis
 
@@ -4527,32 +4521,20 @@ class CcpnGLWidget(QOpenGLWidget):
                                     labelling[str(ax)].append((i, ax, valueToRatio(p1[1], axisLimitB, axisLimitT),
                                                                p1[1], d[1]))
 
-                            # append the new points to the end of nparray
-                            # gridGLList.indices = np.append(gridGLList.indices, (index, index + 1))
-                            indexList += (index, index + 1)
+                            # append the new points to the end of nparray, ignoring narrow grids
+                            if scaleBounds[ax] * (scaleOrder + 1) > 225:
+                                indexList += (index, index + 1)
+                                vertexList += (valueToRatio(p1[0], axisLimitL, axisLimitR),
+                                               valueToRatio(p1[1], axisLimitB, axisLimitT),
+                                               valueToRatio(p2[0], axisLimitL, axisLimitR),
+                                               valueToRatio(p2[1], axisLimitB, axisLimitT))
 
-                            # gridGLList.vertices = np.append(gridGLList.vertices, [p1[0], p1[1], p2[0], p2[1]])
+                                alpha = min([1.0, c / transparency])
+                                # gridGLList.colors = np.append(gridGLList.colors, (r, g, b, alpha, r, g, b, alpha))
+                                colorList += (r, g, b, alpha, r, g, b, alpha)
 
-                            # gridGLList.vertices = np.append(gridGLList.vertices, (valueToRatio(p1[0], self.axisL, self.axisR),
-                            #                                                       valueToRatio(p1[1], self.axisB, self.axisT),
-                            #                                                       valueToRatio(p2[0], self.axisL, self.axisR),
-                            #                                                       valueToRatio(p2[1], self.axisB, self.axisT)))
-
-                            # gridGLList.vertices = np.append(gridGLList.vertices, (valueToRatio(p1[0], axisLimitL, axisLimitR),
-                            #                                                       valueToRatio(p1[1], axisLimitB, axisLimitT),
-                            #                                                       valueToRatio(p2[0], axisLimitL, axisLimitR),
-                            #                                                       valueToRatio(p2[1], axisLimitB, axisLimitT)))
-                            vertexList += (valueToRatio(p1[0], axisLimitL, axisLimitR),
-                                           valueToRatio(p1[1], axisLimitB, axisLimitT),
-                                           valueToRatio(p2[0], axisLimitL, axisLimitR),
-                                           valueToRatio(p2[1], axisLimitB, axisLimitT))
-
-                            alpha = min([1.0, c / transparency])
-                            # gridGLList.colors = np.append(gridGLList.colors, (r, g, b, alpha, r, g, b, alpha))
-                            colorList += (r, g, b, alpha, r, g, b, alpha)
-
-                            gridGLList.numVertices += 2
-                            index += 2
+                                gridGLList.numVertices += 2
+                                index += 2
 
                 # copy the arrays the the GLstore
                 gridGLList.vertices = np.array(vertexList, dtype=np.float32)

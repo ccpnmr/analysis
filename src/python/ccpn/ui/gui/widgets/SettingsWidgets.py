@@ -39,6 +39,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget, DoubleSpinBoxCompoundWidget
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.widgets.HLine import HLine
+from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui._implementation.SpectrumView import SpectrumView
 from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
@@ -54,6 +55,7 @@ ALL = '<all>'
 
 STRIPPLOT_PEAKS = 'peaks'
 STRIPPLOT_NMRRESIDUES = 'nmrResidues'
+STRIPPLOT_NMRCHAINS = 'nmrChains'
 NO_STRIP = 'noStrip'
 
 class SpectrumDisplaySettings(Widget):
@@ -171,7 +173,7 @@ class StripPlot(Widget):
                  callback=None,
                  returnCallback=None,
                  applyCallback=None,
-                 includePeakLists=True, includeNmrChains=True,
+                 includePeakLists=True, includeNmrChains=True, includeNmrChainPullSelection=False,
                  includeSpectrumTable=True,
                  defaultSpectrum=None,
                  **kwds):
@@ -196,7 +198,9 @@ class StripPlot(Widget):
 
         self.includePeakLists = includePeakLists
         self.includeNmrChains = includeNmrChains
+        self.includeNmrChainPullSelection = includeNmrChainPullSelection
         self.includeSpectrumTable = includeSpectrumTable
+        self.nmrChain = None
 
         # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
         # underpinning the addNotifier call do not allow for it either
@@ -286,6 +290,17 @@ class StripPlot(Widget):
         if self.listButtons:
             self.listButtons.buttonTypes = buttonTypes
 
+        if self.includeNmrChainPullSelection:
+            # add a pulldown to select an nmrChain
+            row += 1
+            self.ncWidget = NmrChainPulldown(parent=self,
+                                             project=self.project, default=None,  #first NmrChain in project (if present)
+                                             grid=(row, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
+                                             showSelectName=True,
+                                             sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
+                                             callback=self._selectionPulldownCallback
+                                             )
+
         self._spectraWidget = None
         self.axisCodeOptions = None
 
@@ -322,7 +337,8 @@ class StripPlot(Widget):
     def _buttonClick(self):
         """Handle clicking the peak/nmrChain buttons
         """
-        pass
+        if self.includeNmrChainPullSelection:
+            self.ncWidget.setIndex(0, blockSignals=True)
 
     def _fillDisplayWidget(self):
         """Fill the display box with the currently available spectrumDisplays
@@ -571,6 +587,18 @@ class StripPlot(Widget):
         """Cleanup the notifiers that are left behind after the widget is closed
         """
         self._unRegisterNotifiers()
+
+    def _selectionPulldownCallback(self, item):
+        """Notifier Callback for selecting NmrChain
+        """
+        self.nmrChain = self.project.getByPid(item)
+        if self.nmrChain is not None:
+            # select the nmrChain here
+            self.listButtons.deselectAll()
+
+        else:
+            # do nothing for the minute
+            pass
 
 
 class _SpectrumRow(Frame):

@@ -277,6 +277,12 @@ def _snapToExtremaItem(strip):
                     callback=strip.mainWindow.snapCurrentPeaksToExtremum)
 
 
+def _makeStripPlotItem(strip):
+    return _SCMitem(name='Make Strip Plot...',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Make Strip Plot from Selected Peaks', shortcut='SP',
+                    callback=partial(strip.makeStripPlot, includePeakLists=True, includeNmrChains=False))
+
+
 def _newMultipletItem(strip):
     return _SCMitem(name='New Multiplet',
                     typeItem=ItemTypes.get(ITEM), toolTip='Add New Multiplet', shortcut='AM',
@@ -589,6 +595,7 @@ def _getNdPeakMenu(guiStripNd) -> Menu:
         _refitPeakItem(guiStripNd),
         _refitPeakGroupItem(guiStripNd),
         _snapToExtremaItem(guiStripNd),
+        _makeStripPlotItem(guiStripNd),
         _separator(),
         _newMultipletItem(guiStripNd),
         _separator(),

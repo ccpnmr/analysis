@@ -113,8 +113,8 @@ class RadioButtons(QtWidgets.QWidget, Base):
         return self.texts[self.getIndex()]
 
     def getIndex(self):
-
-        return self.radioButtons.index(self.buttonGroup.checkedButton())
+        if self.buttonGroup.checkedButton() is not None:
+            return self.radioButtons.index(self.buttonGroup.checkedButton())
 
     @property
     def isChecked(self):

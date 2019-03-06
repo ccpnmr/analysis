@@ -37,6 +37,7 @@ class StripPlotPopup(CcpnDialog):
     def __init__(self, parent=None, mainWindow=None, spectrumDisplay=None, title='StripPlot',
                  includePeakLists=False,
                  includeNmrChains=False,
+                 includeNmrChainPullSelection=False,
                  includeSpectrumTable=False, **kwds):
         """
         Initialise the widget
@@ -61,6 +62,7 @@ class StripPlotPopup(CcpnDialog):
         self._newStripPlotWidget = StripPlot(parent=self, mainWindow=self.mainWindow,
                                              includePeakLists=includePeakLists,
                                              includeNmrChains=includeNmrChains,
+                                             includeNmrChainPullSelection=includeNmrChainPullSelection,
                                              includeSpectrumTable=includeSpectrumTable,
                                              defaultSpectrum=NO_STRIP,
                                              grid=(1, 0), gridSpan=(1, 3))
@@ -71,12 +73,16 @@ class StripPlotPopup(CcpnDialog):
         """OK button pressed
         """
         listType = self._newStripPlotWidget.listButtons.getIndex()
-        buttonType = self._newStripPlotWidget.listButtons.buttonTypes[listType]
+        if listType:
+            buttonType = self._newStripPlotWidget.listButtons.buttonTypes[listType]
 
-        if buttonType == STRIPPLOT_PEAKS:
-            self._buildStrips(peaks=self.current.peaks)
-        elif buttonType == STRIPPLOT_NMRRESIDUES:
-            self._buildStrips(nmrResidues=self.current.nmrResidues)
+            if buttonType == STRIPPLOT_PEAKS:
+                self._buildStrips(peaks=self.current.peaks)
+            elif buttonType == STRIPPLOT_NMRRESIDUES:
+                self._buildStrips(nmrResidues=self.current.nmrResidues)
+        else:
+            # nmrChain selected
+            self._buildStrips(nmrResidues=self._newStripPlotWidget.nmrChain.nmrResidues)
 
         self.accept()
 

@@ -515,12 +515,12 @@ class Framework(NotifierBase):
         self.colourScheme = colourScheme
 
         with open(os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
-                                       '%sStyleSheet.qss' % metaUtil.upperFirst(colourScheme))) as fp:
+                               '%sStyleSheet.qss' % metaUtil.upperFirst(colourScheme))) as fp:
             styleSheet = fp.read()
 
         if platform.system() == 'Linux':
             with open(os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
-                                          '%sAdditionsLinux.qss' % metaUtil.upperFirst(colourScheme))) as fp:
+                                   '%sAdditionsLinux.qss' % metaUtil.upperFirst(colourScheme))) as fp:
                 additions = fp.read()
 
             styleSheet += additions
@@ -746,7 +746,7 @@ class Framework(NotifierBase):
                 # for iSV, spectrumView in enumerate(strip.orderedSpectrumViews(includeDeleted=False)):
 
                 for iSV, spectrumView in enumerate(spectrumDisplay.orderedSpectrumViews(specViews)):
-                    _createdSpectrumView({Notifier.OBJECT:spectrumView})
+                    _createdSpectrumView({Notifier.OBJECT: spectrumView})
                     # for peakList in spectrumView.spectrum.peakLists:
                     #     strip.showPeaks(peakList)
 
@@ -1160,6 +1160,7 @@ class Framework(NotifierBase):
                             )),
             ("Copy PeakList...", self.showCopyPeakListPopup, [('shortcut', 'cl')]),
             ("Copy Peaks...", self.showCopyPeaks, [('shortcut', 'cp')]),
+            ("Make Strip Plot...", self.makeStripPlotPopup, [('shortcut', 'sp')]),
 
             (),
             ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj')]),
@@ -2176,6 +2177,20 @@ class Framework(NotifierBase):
             popup._selectPeaks(peaks)
             popup.exec()
             popup.raise_()
+
+    def makeStripPlotPopup(self, includePeakLists=True, includeNmrChains=True, includeNmrChainPullSelection=True):
+        if not self.project.peaks and not self.project.nmrResidues and not self.project.nmrChains:
+            getLogger().warning('Cannot make strip plot, nothing to display')
+            MessageDialog.showWarning('Cannot make strip plot,', 'nothing to display')
+            return
+        else:
+            from ccpn.ui.gui.popups.StripPlotPopup import StripPlotPopup
+
+            popup = StripPlotPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
+                                   spectrumDisplay=self.current.strip.spectrumDisplay,
+                                   includePeakLists=includePeakLists, includeNmrChains=includeNmrChains,
+                                   includeNmrChainPullSelection=includeNmrChainPullSelection, includeSpectrumTable=False)
+            popup.exec_()
 
     ################################################################################################
     ## MENU callbacks:  Molecule

@@ -266,13 +266,13 @@ class GuiStrip(Frame):
         popup.exec_()
         popup._cleanupWidget()
 
-    def makeStripPlot(self):
+    def makeStripPlot(self, includePeakLists=True, includeNmrChains=True, includeSpectrumTable=False):
         """Make a strip plot in the current spectrumDisplay
         """
         from ccpn.ui.gui.popups.StripPlotPopup import StripPlotPopup
 
         popup = StripPlotPopup(parent=self.mainWindow, mainWindow=self.mainWindow, spectrumDisplay=self.spectrumDisplay,
-                               includePeakLists=True, includeNmrChains=True, includeSpectrumTable=False)
+                               includePeakLists=includePeakLists, includeNmrChains=includeNmrChains, includeSpectrumTable=includeSpectrumTable)
         popup.exec_()
         popup._cleanupWidget()
 

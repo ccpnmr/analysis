@@ -73,7 +73,7 @@ class StripPlotPopup(CcpnDialog):
         """OK button pressed
         """
         listType = self._newStripPlotWidget.listButtons.getIndex()
-        if listType:
+        if listType is not None:
             buttonType = self._newStripPlotWidget.listButtons.buttonTypes[listType]
 
             if buttonType == STRIPPLOT_PEAKS:

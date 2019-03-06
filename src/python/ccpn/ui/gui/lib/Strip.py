@@ -139,6 +139,11 @@ def navigateToPositionInStrip(strip, positions: typing.List[float], axisCodes: t
                                 strip._CcpnGLWidget.setAxisWidth(axisCode=flippedAxisCode, width=0.5,
                                                                  update=False)
 
+        # redraw the contours
+        strip._updateVisibility()
+        if len(strip.orderedAxes) > 2:
+            strip.axisRegionChanged(strip.orderedAxes[2])
+
         # build here so it doesn't conflict with OpenGl update
         strip._CcpnGLWidget.buildAllContours()
         strip._CcpnGLWidget.update()

@@ -785,7 +785,10 @@ class GuiStrip(Frame):
         symbolSize = aDict[SYMBOLSIZE]
         symbolThickness = aDict[SYMBOLTHICKNESS]
 
-        self.blockSignals(True)
+        if self.isDeleted:
+            return
+
+        self.spectrumDisplay._spectrumDisplaySettings.blockSignals(True)
         # update the current settings from the dict
         if symbolType != self.symbolType:
             self.setPeakSymbols(symbolType)
@@ -797,7 +800,7 @@ class GuiStrip(Frame):
         elif symbolThickness != self.symbolThickness:
             self.symbolThickness = symbolThickness
             self._setSymbolsPaintEvent()
-        self.blockSignals(False)
+        self.spectrumDisplay._spectrumDisplaySettings.blockSignals(False)
 
     @property
     def symbolSize(self):

@@ -1282,8 +1282,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         strip = self.strip
 
         symbolType = strip.symbolType
-        symbolWidth = strip.symbolSize / 2.0
-        lineThickness = strip.symbolThickness / 2.0
+        # symbolWidth = strip.symbolSize / 2.0
+        # lineThickness = strip.symbolThickness / 2.0
 
         drawList = self._GLSymbols[objListView]
         drawList.indices = np.empty(0, dtype=np.uint32)
@@ -1906,8 +1906,8 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
         strip = self.strip
 
         symbolType = strip.symbolType
-        symbolWidth = strip.symbolSize / 2.0
-        lineThickness = strip.symbolThickness / 2.0
+        # symbolWidth = strip.symbolSize / 2.0
+        # lineThickness = strip.symbolThickness / 2.0
 
         drawList = self._GLSymbols[objListView]
         drawList.indices = np.array([], dtype=np.uint32)
@@ -2805,7 +2805,7 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
         # pls = peakListView.peakList
         pls = self.objectList(objListView)
 
-        symbolWidth = self.strip.symbolSize / 2.0
+        # symbolWidth = self.strip.symbolSize / 2.0
 
         # get the correct coordinates based on the axisCodes
         p0 = [0.0] * 2  # len(self.axisOrder)

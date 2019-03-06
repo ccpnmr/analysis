@@ -4775,6 +4775,9 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.strip.isDeleted:
             return
 
+        if not self.globalGL:
+            return
+
         if aDict:
             if aDict[GLNotifier.GLSOURCE] != self:
 

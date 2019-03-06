@@ -22,7 +22,7 @@
         "peakDropFactor": 0.1,
         "peakFittingMethod": "parabolic",
         "annotationType": 0,
-        "symbolSizePixel": 12,
+        "symbolSizePixel": 9,
         "symbolType": 0,
         "symbolThickness": 2,
         "zoomCentreType": 0,

@@ -43,7 +43,8 @@ from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME
 from functools import partial
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO, \
+    SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS
 from ccpn.core.lib.ContextManagers import logCommandBlock, undoStackBlocking
 
 
@@ -138,8 +139,8 @@ class GuiStrip(Frame):
         if len(spectrumDisplay.strips) > 1:
             self.peakLabelling = spectrumDisplay.strips[0].peakLabelling
             self.symbolType = spectrumDisplay.strips[0].symbolType
-            self.symbolSize = spectrumDisplay.strips[0].symbolSize
-            self.symbolThickness = spectrumDisplay.strips[0].symbolThickness
+            self._symbolSize = spectrumDisplay.strips[0].symbolSize
+            self._symbolThickness = spectrumDisplay.strips[0].symbolThickness
             self.gridVisible = spectrumDisplay.strips[0].gridVisible
             self.crosshairVisible = spectrumDisplay.strips[0].crosshairVisible
             self.showSpectraOnPhasing = spectrumDisplay.strips[0].showSpectraOnPhasing
@@ -156,9 +157,9 @@ class GuiStrip(Frame):
             #     self.symbolSize = self.application.preferences.general.symbolSize1d
             # else:
             #     self.symbolSize = self.application.preferences.general.symbolSizeNd
-            self.symbolSize = self.application.preferences.general.symbolSizePixel
+            self._symbolSize = self.application.preferences.general.symbolSizePixel
 
-            self.symbolThickness = self.application.preferences.general.symbolThickness
+            self._symbolThickness = self.application.preferences.general.symbolThickness
             self.gridVisible = self.application.preferences.general.showGrid
             self.crosshairVisible = self.application.preferences.general.showCrosshair
             self.showSpectraOnPhasing = self.application.preferences.general.showSpectraOnPhasing
@@ -176,6 +177,12 @@ class GuiStrip(Frame):
 
         # initialise the notifiers
         self.setStripNotifiers()
+
+        # respond to values changed in the containing spectrumDispaly settings widget
+        self.spectrumDisplay._spectrumDisplaySettings.symbolsChanged.connect(self._symbolsChangedInSettings)
+
+    def _symbolsChangedInSettings(self, aDict):
+        print('>>>_symbolsChangedInSettings')
 
     def setStripNotifiers(self):
         """Set the notifiers for the strip.
@@ -712,6 +719,35 @@ class GuiStrip(Frame):
 
             GLSignals = GLNotifier(parent=None)
             GLSignals.emitPaintEvent()
+            self._emitSymbolChanged()
+
+    def setPeakLabelling(self, labelling):
+        """Toggles whether peak labelling is minimal is visible in the strip.
+        """
+        self.peakLabelling = labelling
+        if self.peakLabelling > 2:
+            self.peakLabelling = 0
+
+        if self.spectrumViews:
+            for sV in self.spectrumViews:
+
+                for peakListView in sV.peakListViews:
+                    # peakListView.buildSymbols = True
+                    peakListView.buildLabels = True
+
+            # spawn a redraw of the GL windows
+            from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
+            GLSignals = GLNotifier(parent=None)
+            GLSignals.emitPaintEvent()
+            self._emitSymbolChanged()
+
+    def _emitSymbolChanged(self):
+        # spawn a redraw of the GL windows
+        self._CcpnGLWidget.GLSignals._emitSymbolsChanged(source=None, strip=self, symbolDict={SYMBOLTYPES    : self.symbolType,
+                                                                                              ANNOTATIONTYPES: self.peakLabelling,
+                                                                                              SYMBOLSIZE     : self.symbolSize,
+                                                                                              SYMBOLTHICKNESS: self.symbolThickness})
 
     def cyclePeakSymbols(self):
         """Cycle through peak symbol types.
@@ -736,6 +772,50 @@ class GuiStrip(Frame):
 
             GLSignals = GLNotifier(parent=None)
             GLSignals.emitPaintEvent()
+            # self._emitSymbolChanged()
+
+    def setPeakSymbols(self, symbolNum):
+        """set the peak symbol type.
+        """
+        self.symbolType = symbolNum
+        if self.symbolType > 2:
+            self.symbolType = 0
+
+        if self.spectrumViews:
+            for sV in self.spectrumViews:
+
+                for peakListView in sV.peakListViews:
+                    peakListView.buildSymbols = True
+                    peakListView.buildLabels = True
+
+                for multipletListView in sV.multipletListViews:
+                    multipletListView.buildSymbols = True
+                    multipletListView.buildLabels = True
+
+            # spawn a redraw of the GL windows
+            from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
+            GLSignals = GLNotifier(parent=None)
+            GLSignals.emitPaintEvent()
+            # self._emitSymbolChanged()
+
+    @property
+    def symbolSize(self):
+        return self._symbolSize
+
+    @symbolSize.setter
+    def symbolSize(self, value):
+        self._symbolSize = value
+        self._emitSymbolChanged()
+
+    @property
+    def symbolThickness(self):
+        return self._symbolThickness
+
+    @symbolThickness.setter
+    def symbolThickness(self, value):
+        self._symbolThickness = value
+        # self._emitSymbolChanged()
 
     def _crosshairCode(self, axisCode):
         """Determines what axisCodes are compatible as far as drawing crosshair is concerned
@@ -1141,6 +1221,7 @@ class GuiStrip(Frame):
         """return the first visible spectrum in the strip, or the first if none are visible.
         """
         return self._CcpnGLWidget._firstVisible
+
 
 # Notifiers:
 def _updateDisplayedMarks(data):

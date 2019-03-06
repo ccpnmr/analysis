@@ -45,10 +45,13 @@ from ccpn.ui._implementation.SpectrumView import SpectrumView
 from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO, \
+    SYMBOLTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, ANNOTATIONTYPES
 from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 from ccpn.util.Colour import hexToRgbRatio
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_REGIONSHADE
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
+from ccpn.ui.gui.widgets.Spinbox import Spinbox
 
 
 ALL = '<all>'
@@ -57,10 +60,13 @@ STRIPPLOT_PEAKS = 'peaks'
 STRIPPLOT_NMRRESIDUES = 'nmrResidues'
 STRIPPLOT_NMRCHAINS = 'nmrChains'
 NO_STRIP = 'noStrip'
+LineEditsMinimumWidth = 195
+
 
 class SpectrumDisplaySettings(Widget):
     # signal for parentWidgets to respond to changes in the widget
     settingsChanged = pyqtSignal(dict)
+    symbolsChanged = pyqtSignal(dict)
 
     def __init__(self, parent=None,
                  mainWindow=None,
@@ -69,6 +75,7 @@ class SpectrumDisplaySettings(Widget):
                  xAxisUnits=0, xTexts=[], showXAxis=True,
                  yAxisUnits=0, yTexts=[], showYAxis=True,
                  lockAspect=False,
+                 symbolType=0, annotationType=0, symbolSize=9, symbolThickness=2,
                  **kwds):
         super().__init__(parent, setLayout=True, **kwds)
 
@@ -124,6 +131,50 @@ class SpectrumDisplaySettings(Widget):
         self.lockAspectCheckBox.toggled.connect(self._settingsChanged)
 
         row += 1
+        self.symbolsLabel = Label(parent, text="Symbol Type", grid=(row, 0))
+        # symbol = self._spectrumDisplay.strips[0].symbolType
+        self.symbol = RadioButtons(parent, texts=['Cross', 'lineWidths', 'Filled lineWidths'],
+                                   selectedInd=symbolType,
+                                   callback=self._symbolsChanged,
+                                   direction='h',
+                                   grid=(row, 1), hAlign='l',
+                                   tipTexts=None,
+                                   )
+
+        row += 1
+        self.annotationsLabel = Label(parent, text="Symbol Annotation", grid=(row, 0))
+        # try:
+        #     annType = self.preferences.general.annotationType
+        # except:
+        #     annType = 0
+        #     self.preferences.general.annotationType = annType
+        self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid'],
+                                            selectedInd=annotationType,
+                                            callback=self._symbolsChanged,
+                                            direction='horizontal',
+                                            grid=(row, 1), hAlign='l',
+                                            tipTexts=None,
+                                            )
+
+        row += 1
+        self.symbolSizePixelLabel = Label(parent, text="Symbol Size (pixel)", grid=(row, 0))
+        self.symbolSizePixelData = DoubleSpinbox(parent, decimals=0, step=1,
+                                                 min=2, max=50, grid=(row, 1), hAlign='l')
+        self.symbolSizePixelData.setMinimumWidth(LineEditsMinimumWidth)
+        # symbolSizePixel = self._spectrumDisplay.strips[0].symbolSizePixel
+        self.symbolSizePixelData.setValue(float('%i' % symbolSize))
+        self.symbolSizePixelData.valueChanged.connect(self._symbolsChanged)
+
+        row += 1
+        self.symbolThicknessLabel = Label(parent, text="Symbol Thickness (point)", grid=(row, 0))
+        self.symbolThicknessData = Spinbox(parent, step=1,
+                                           min=1, max=20, grid=(row, 1), hAlign='l')
+        self.symbolThicknessData.setMinimumWidth(LineEditsMinimumWidth)
+        # symbolThickness = self._spectrumDisplay.strips[0].symbolThickness
+        self.symbolThicknessData.setValue(int(symbolThickness))
+        self.symbolThicknessData.valueChanged.connect(self._symbolsChanged)
+
+        row += 1
         self._spacer = Spacer(parent, 5, 5,
                               QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
                               grid=(row, 2), gridSpan=(1, 1))
@@ -132,14 +183,20 @@ class SpectrumDisplaySettings(Widget):
 
         # connect to the lock changed pyqtSignal
         self._GLSignals = GLNotifier(parent=self._parent)
-        self._GLSignals.glAxisLockChanged.connect(self._lockAspectRatioChanged)
+        self._GLSignals.glAxisLockChanged.connect(self._lockAspectRatioChangedInDisplay)
+        self._GLSignals.glSymbolsChanged.connect(self._symbolsChangedInDisplay)
 
     def getValues(self):
         """Return a dict containing the current settings
         """
         return {AXISXUNITS         : self.xAxisUnitsButtons.getIndex(),
                 AXISYUNITS         : self.yAxisUnitsButtons.getIndex(),
-                AXISLOCKASPECTRATIO: self.lockAspectCheckBox.isChecked()}
+                AXISLOCKASPECTRATIO: self.lockAspectCheckBox.isChecked(),
+                SYMBOLTYPES        : self.symbol.getIndex(),
+                ANNOTATIONTYPES    : self.annotationsData.getIndex(),
+                SYMBOLSIZE         : int(self.symbolSizePixelData.text()),
+                SYMBOLTHICKNESS    : int(self.symbolThicknessData.text())
+                }
 
     @pyqtSlot()
     def _settingsChanged(self):
@@ -148,11 +205,24 @@ class SpectrumDisplaySettings(Widget):
         self.settingsChanged.emit(self.getValues())
 
     @pyqtSlot(dict)
-    def _lockAspectRatioChanged(self, aDict):
-        """respond to a change in the lock status of a strip
+    def _lockAspectRatioChangedInDisplay(self, aDict):
+        """Respond to an external change in the lock status of a strip
         """
         if aDict[GLNotifier.GLSPECTRUMDISPLAY] == self._spectrumDisplay:
             self.lockAspectCheckBox.setChecked(aDict[GLNotifier.GLVALUES])
+
+    @pyqtSlot()
+    def _symbolsChanged(self):
+        """Handle changing the symbols
+        """
+        self.symbolsChanged.emit(self.getValues())
+
+    @pyqtSlot(dict)
+    def _symbolsChangedInDisplay(self, aDict):
+        """Respond to an external change in symbol settings
+        """
+        if aDict[GLNotifier.GLSPECTRUMDISPLAY] == self._spectrumDisplay:
+            print('>>>_symbolsChanged')
 
     def doCallback(self):
         """Handle the user callback
@@ -164,6 +234,61 @@ class SpectrumDisplaySettings(Widget):
         """Handle the return from widget callback
         """
         pass
+
+    # def _setSymbol(self):
+    #     """
+    #     Set the peak symbol type - current a cross or lineWidths
+    #     """
+    #     try:
+    #         symbol = self.symbol.getIndex()
+    #     except:
+    #         return
+    #     # for strip in self._spectrumDisplay.strips:
+    #     #     strip.setPeakSymbols(symbol)
+    #
+    #     # # spawn a redraw of the GL windows
+    #     # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+    #     #
+    #     # GLSignals = GLNotifier(parent=None)
+    #     # GLSignals.emitEvent(triggers=[GLNotifier.GLALLCONTOURS,
+    #     #                               GLNotifier.GLALLPEAKS,
+    #     #                               GLNotifier.GLALLMULTIPLETS,
+    #     #                               GLNotifier.GLPREFERENCES])
+    #
+    # def _setAnnotations(self):
+    #     """
+    #     Set the annotation type for the pid labels
+    #     """
+    #     try:
+    #         annotationType = self.annotationsData.getIndex()
+    #     except:
+    #         return
+    #     for strip in self._spectrumDisplay.strips:
+    #         strip.setPeakLabelling(annotationType)
+    #
+    # def _setSymbolSizePixel(self):
+    #     """
+    #     Set the size of the symbols (pixels)
+    #     """
+    #     try:
+    #         symbolSizePixel = int(self.symbolSizePixelData.text())
+    #     except:
+    #         return
+    #     for strip in self._spectrumDisplay.strips:
+    #         strip.symbolSize = symbolSizePixel
+    #     self._setSymbol()
+    #
+    # def _setSymbolThickness(self):
+    #     """
+    #     Set the Thickness of the peak symbols (ppm)
+    #     """
+    #     try:
+    #         symbolThickness = int(self.symbolThicknessData.text())
+    #     except:
+    #         return
+    #     for strip in self._spectrumDisplay.strips:
+    #         strip.symbolThickness = symbolThickness
+    #     self._setSymbol()
 
 
 class StripPlot(Widget):

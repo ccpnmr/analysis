@@ -82,7 +82,8 @@ class StripPlotPopup(CcpnDialog):
                 self._buildStrips(nmrResidues=self.current.nmrResidues)
         else:
             # nmrChain selected
-            self._buildStrips(nmrResidues=self._newStripPlotWidget.nmrChain.nmrResidues)
+            if self._newStripPlotWidget.nmrChain:
+                self._buildStrips(nmrResidues=self._newStripPlotWidget.nmrChain.nmrResidues)
 
         self.accept()
 

@@ -40,6 +40,23 @@ from ccpn.util.Common import makeIterableList
 
 SpectrumHitPeakList = 'SpectrumHitPeakList'
 
+from collections import OrderedDict as od
+
+defaultScoring = od((
+                    ('A (Highest)',     100),
+                    ('B (Very High)',    80),
+                    ('C (High)',         60),
+                    ('D (Moderate)',     40),
+                    ('E (Low)',          30),
+                    ('F (Very low)',     10),
+                    ('G (Dubious)',       1),
+                    ('H (Unlikely)',      0),
+                    ))
+
+
+def _grade(i):
+    for k,v in defaultScoring.items():
+        if i>=v: return k
 
 def _getReferenceLevel(project, referenceSpectrum):
     '''
@@ -77,6 +94,8 @@ def _norm(x):
     except ZeroDivisionError:
         print('Normalisation Error')
     return z
+
+
 
 class SpectrumHit(AbstractWrapperObject):
     """Used in screening and metabolomics implementations to describe

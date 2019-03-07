@@ -365,6 +365,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             elif len(action) == 3:
                 kwDict = dict(action[2])
                 for k, v in kwDict.items():
+                    if hasattr(action[1],'__name__') and not isinstance(v, bool):
+                        print(action[1].__name__, v)
                     if (k == 'shortcut') and v.startswith('⌃'):  # Unicode U+2303, NOT the carrot on your keyboard.
                         kwDict[k] = QKeySequence('Ctrl+{}'.format(v[1:]))
                 menuAction = Action(self, action[0], callback=action[1], **kwDict)

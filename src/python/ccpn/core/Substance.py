@@ -704,7 +704,8 @@ def _newSubstance(self: Project, name: str = None, labelling: str = None, substa
         apiLabeling = labelling
 
     if not isinstance(name, str):
-        raise TypeError("ccpn.Substance name must be a string")
+        name = str(name)
+        # raise TypeError("ccpn.Substance name must be a string")
     elif not name:
         raise ValueError("ccpn.Substance name must be set")
     elif Pid.altCharacter in name:

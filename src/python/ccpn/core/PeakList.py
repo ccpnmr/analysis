@@ -44,6 +44,8 @@ from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import pickNewPeaks
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, logCommandBlock, \
     notificationBlanking, undoBlock
+import numpy as np
+import math
 
 from ccpn.util.Logging import getLogger
 
@@ -53,8 +55,69 @@ LORENTZIANMETHOD = 'lorentzian'
 PARABOLICMETHOD = 'parabolic'
 PICKINGMETHODS = (GAUSSIANMETHOD, LORENTZIANMETHOD, PARABOLICMETHOD)
 
+def _signalToNoiseFunc(noise, signal):
+    snr = math.log10(abs(np.mean(signal) ** 2 / np.mean(noise) ** 2))
+    return snr
+
+def _estimateSNR1D(y):
+
+    if y is None: return 0
+    e = _estimateNoiseLevel1D(y)
+    eS = np.where(y >= e)
+    eSN = np.where(y <= -e)
+    eN = np.where((y < e) & (y > -e))
+    estimatedSignalRegionPos = y[eS]
+    estimatedSignalRegionNeg = y[eSN]
+    estimatedSignalRegion = np.concatenate((estimatedSignalRegionPos, estimatedSignalRegionNeg))
+    estimatedNoiseRegion = y[eN]
+    lenghtESR = len(estimatedSignalRegion)
+    lenghtENR = len(estimatedNoiseRegion)
+    if lenghtESR > lenghtENR:
+        l = lenghtENR
+    else:
+        l = lenghtESR
+    if l == 0:
+        return 1
+    else:
+        noise = estimatedNoiseRegion[:l - 1]
+        signalAndNoise = estimatedSignalRegion[:l - 1]
+        signal = abs(signalAndNoise - noise)
+        signal[::-1].sort()  # descending
+        noise[::1].sort()
+        if hasattr(signal, 'compressed') and hasattr(noise, 'compressed'):
+            signal = signal.compressed()  # remove the mask
+            noise = noise.compressed()  # remove the mask
+        s = signal[:int(l / 2)]
+        n = noise[:int(l / 2)]
+        if len(signal) == 0:
+            return 1
+        SNR = _signalToNoiseFunc(n,s)
+        if SNR is not None:
+            return abs(SNR)
+        else:
+            return 1
+
+
+
 
 def _estimateNoiseLevel1D(y):
+    '''
+    Estimates the noise threshold based on the max intensity of the first portion of the spectrum where
+    only noise is present. To increase the threshold value: increase the factor.
+    return:  float of estimated noise threshold and Signal to Noise Ratio
+    '''
+    if y is None:
+        return 0
+    f = 10 # int: percent of region all array (1-100)
+    nl = np.std(y[:int(len(y) / f)]) # ! this can be out of bounds
+    estimatedGaussian = np.random.normal(size=y.shape) * nl
+    if len(estimatedGaussian)==0: return nl
+    eG = np.max(estimatedGaussian) + np.min(estimatedGaussian[estimatedGaussian>=0])
+    if nl < eG:
+        nl = eG
+    return nl
+
+def _estimateNoiseLevel1D_OLD(y):
     '''
     # TODO split in two functions . Clean up line 62:  e =
     Estimates the noise threshold based on the max intensity of the first portion of the spectrum where
@@ -65,7 +128,7 @@ def _estimateNoiseLevel1D(y):
     import math
 
     if y is not None:
-        firstEstimation = np.std(y[:int(len(y) / 20)])
+        firstEstimation = np.std(y[:int(len(y) / 10)])
         estimatedGaussian = np.random.normal(size=y.shape) * firstEstimation
         e = (np.std(estimatedGaussian) + (np.std(firstEstimation) - np.std(estimatedGaussian)))
         e2 = np.max(estimatedGaussian) + (abs(np.min(estimatedGaussian)))
@@ -95,8 +158,9 @@ def _estimateNoiseLevel1D(y):
 
             signal[::-1].sort()  # descending
             noise[::1].sort()
-            signal = signal.compressed()  # remove the mask
-            noise = noise.compressed()  # remove the mask
+            if hasattr(signal, 'compressed') and hasattr(noise, 'compressed'):
+                signal = signal.compressed()  # remove the mask
+                noise = noise.compressed()  # remove the mask
             s = signal[:int(l / 2)]
             n = noise[:int(l / 2)]
             if len(signal) == 0:
@@ -580,6 +644,7 @@ class PeakList(AbstractWrapperObject):
     #
     #   return peaks
 
+    def peakFinder1D(self, deltaFactor=1, ignoredRegions=[[20, 19]], negativePeaks=True):
     @logCommand(get='self')
     def peakFinder1D(self, deltaFactor=1.5, ignoredRegions=[[20, 19]], negativePeaks=True):
         from ccpn.core.lib.peakUtils import peakdet, _getIntersectionPoints, _pairIntersectionPoints
@@ -595,12 +660,16 @@ class PeakList(AbstractWrapperObject):
             x, y = spectrum.positions, spectrum.intensities
             masked = _filtered1DArray(numpy.array([x, y]), ignoredRegions)
             filteredX, filteredY = masked[0], masked[1]
-            SNR, noiseThreshold = _estimateNoiseLevel1D(filteredY)
+            noiseThreshold = _estimateNoiseLevel1D(filteredY)
+            snr = _estimateSNR1D(filteredY)
+
+            # deltaFactor = (snr / 2) - (1 / snr)
 
             maxValues, minValues = peakdet(y=filteredY, x=filteredX, delta=noiseThreshold / deltaFactor)
             for position, height in maxValues:
                 peak = self.newPeak(ppmPositions=[position], height=height)
-            spectrum.snr = SNR
+            spectrum._snr = snr
+            spectrum.noiseLevel = noiseThreshold
 
             # const = round(len(y) * 0.0039, 1)
             # correlatedSignal1 = signal.correlate(y, np.ones(int(const)), mode='same') / const

@@ -96,7 +96,7 @@ class PyPlotWidget(Widget):
         super().__init__(parent, setLayout=True, **kwds)
         self._parent = parent
         self.pyplot = plt
-        self._figure = self.pyplot.figure() # as to be init here
+        self._figure = self.pyplot.figure(clear=False) # as to be init here
         self.canvas = FigureCanvas(self._figure)
         self.toolbar = NavigationToolbar(self.canvas, self)
         self.pyplot.show = self.show # overrides the original show method so to open the CcpnDialog

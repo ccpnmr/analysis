@@ -302,9 +302,11 @@ def logCommand(prefix='', get=None, isProperty=False):
 
             application.ui.echoCommands([logS])
 
-        blocking += 1
+        # blocking += 1
+        application._increaseNotificationBlocking()
         result = func(*args, **kwds)
-        blocking -= 1
+        # blocking -= 1
+        application._decreaseNotificationBlocking()
 
         return result
 

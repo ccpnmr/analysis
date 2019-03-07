@@ -115,32 +115,34 @@ def undoBlock(application=None):
         undo.newWaypoint()  # DO NOT CHANGE
         undo.increaseWaypointBlocking()
 
-        # if not application.project._blockSideBar and not undo._blocked:
-        if application.ui and application.ui.mainWindow:
-            sidebar = application.ui.mainWindow.sideBar
-            sidebar.increaseSidebarBlocking()
+    # if not application.project._blockSideBar and not undo._blocked:
+    if application.ui and application.ui.mainWindow:
+        sidebar = application.ui.mainWindow.sideBar
+        sidebar.increaseSidebarBlocking()
 
-    if not application._echoBlocking:
-        application.project.suspendNotification()
+    # if not application._echoBlocking:
     application._increaseNotificationBlocking()
+    application.project.suspendNotification()
 
     getLogger().debug2('_enterUndoBlock')
 
     try:
         # transfer control to the calling function
         yield
+        application.project.resumeNotification()
 
     finally:
         application._decreaseNotificationBlocking()
-        if not application._echoBlocking:
-            application.project.resumeNotification()
+        # if not application._echoBlocking:
+        # application.project.resumeNotification()
+
+        # if undo is not None:
+        # if not application.project._blockSideBar and not undo._blocked:
+        if application.ui and application.ui.mainWindow:
+            sidebar = application.ui.mainWindow.sideBar
+            sidebar.decreaseSidebarBlocking()
 
         if undo is not None:
-            # if not application.project._blockSideBar and not undo._blocked:
-            if application.ui and application.ui.mainWindow:
-                sidebar = application.ui.mainWindow.sideBar
-                sidebar.decreaseSidebarBlocking()
-
             undo.decreaseWaypointBlocking()
 
         getLogger().debug2('_exitUndoBlock: echoBlocking=%s' % application._echoBlocking)

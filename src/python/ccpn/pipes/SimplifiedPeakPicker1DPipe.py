@@ -74,8 +74,12 @@ class PeakDetector1DGuiPipe(GuiPipe):
         GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
         self._parent = parent
 
+        # row = 0
+        # self.pickNegativeLabel = Label(self.pipeFrame, text=NegativePeaks, grid=(row, 0))
+        # setattr(self, NegativePeaks, CheckBox(self.pipeFrame, text='', checked=True, grid=(row, 1)))
+
         row = 0
-        self.pickNegativeLabel = Label(self.pipeFrame, text=NegativePeaks, grid=(row, 0))
+        self.estimateFactorLabel = Label(self.pipeFrame, text=NegativePeaks, grid=(row, 0))
         setattr(self, NegativePeaks, CheckBox(self.pipeFrame, text='', checked=True, grid=(row, 1)))
 
         row += 1

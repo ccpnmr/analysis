@@ -85,7 +85,7 @@ class ReferencingSpectraGuiPipe(GuiPipe):
             Label(self.pipeFrame, params[0], grid=(i, 0))
             setattr(self, params[0], DoubleSpinbox(self.pipeFrame, value=params[1],
                                                    max=1000, min=-1000,
-                                                   decimals=3, step=0.1,
+                                                   decimals=5, step=0.1,
                                                    grid=(i, 1)))
 
 

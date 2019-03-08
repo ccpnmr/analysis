@@ -75,8 +75,17 @@ def _getReferenceLevel(project, referenceSpectrum):
 
     return levelHit
 
+def scoreHit(heights, snr):
+    score = 0
+    try:
+        totHeights= np.sum(heights)
+        count = len(heights)
+        score = (snr/totHeights)*count
+    except Exception as err:
+        print('Hit Scoring Error:', err)
+    return abs(score)
 
-def scoreHit(heights, snr, shifts):
+def scoreHit_tot(heights, snr, shifts):
     score = 0
     try:
         totHeights= np.sum(heights)
@@ -96,6 +105,13 @@ def _norm(x):
     return z
 
 
+def _scoreMatches(deltas):
+    "score = median(deltas) * len(deltas). The Smaller the better"
+    d = abs(np.array(deltas))
+    c = len(d)
+    D = np.median(d)
+    s = D/c
+    return s
 
 class SpectrumHit(AbstractWrapperObject):
     """Used in screening and metabolomics implementations to describe

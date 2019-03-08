@@ -63,6 +63,7 @@ def _estimateSNR1D(y):
 
     if y is None: return 0
     e = _estimateNoiseLevel1D(y)
+    print('Est --+', e)
     eS = np.where(y >= e)
     eSN = np.where(y <= -e)
     eN = np.where((y < e) & (y > -e))
@@ -106,23 +107,26 @@ def _estimateNoiseLevel1D(y):
     only noise is present. To increase the threshold value: increase the factor.
     return:  float of estimated noise threshold and Signal to Noise Ratio
     '''
+    nl = 0
     if y is None:
-        return 0
-    f = 10 # int: percent of region all array (1-100)
-    nl = np.std(y[:int(len(y) / f)]) # ! this can be out of bounds
-    estimatedGaussian = np.random.normal(size=y.shape) * nl
-    if len(estimatedGaussian)==0: return nl
-    eG = np.max(estimatedGaussian) + np.min(estimatedGaussian[estimatedGaussian>=0])
-    if nl < eG:
-        nl = eG
+        return nl
+    nls = []
+    for i in range(10): #reapet in a range to reduce the variability of the estimated gaussian values
+        f = 20 # int: percent of region all array (1-100)
+        nl = np.std(y[:int(len(y) / f)]) # ! this can be out of bounds
+        estimatedGaussian = np.random.normal(size=y.shape) * nl
+        if len(estimatedGaussian)==0: return nl
+        eG = np.max(estimatedGaussian) + np.min(estimatedGaussian[estimatedGaussian>=0])
+        if nl < eG:
+            nl = eG
+        nls.append(nl)
+    if len(nls)>0:
+        nl = np.min(nls)
     return nl
 
 def _estimateNoiseLevel1D_OLD(y):
     '''
-    # TODO split in two functions . Clean up line 62:  e =
-    Estimates the noise threshold based on the max intensity of the first portion of the spectrum where
-    only noise is present. To increase the threshold value: increase the factor.
-    return:  float of estimated noise threshold and Signal to Noise Ratio
+    OLD
     '''
     import numpy as np
     import math

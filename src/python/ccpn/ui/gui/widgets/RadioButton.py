@@ -22,6 +22,8 @@ class RadioButton(QtWidgets.QRadioButton, Base):
       self.setStyleSheet('QRadioButton {font-size: %s;}' % textSize)
     if callback:
       self.setCallback(callback)
+    if not self.objectName():
+      self.setObjectName(text)
 
     self.setStyleSheet('''
     RadioButton::disabled {

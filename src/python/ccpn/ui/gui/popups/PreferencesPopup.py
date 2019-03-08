@@ -103,10 +103,6 @@ class PreferencesPopup(CcpnDialog):
             for strip in display.strips:
                 strip.peakLabelling = self.preferences.general.annotationType
                 strip.symbolType = self.preferences.general.symbolType
-                # if display.is1D:
-                #     strip.symbolSize = self.preferences.general.symbolSize1d
-                # else:
-                #     strip.symbolSize = self.preferences.general.symbolSizeNd
                 strip.symbolSize = self.preferences.general.symbolSizePixel
 
                 strip.symbolThickness = self.preferences.general.symbolThickness
@@ -399,39 +395,6 @@ class PreferencesPopup(CcpnDialog):
         #self.showDoubleCursorBox.setDisabled(True)
         ## self.showDoubleCursorBox.toggled.connect(partial(self._toggleGeneralOptions, 'showDoubleCursor'))
 
-        # row += 1
-        # Spacer(parent, row, 1,
-        #         QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
-        #         grid=(row, 0), gridSpan=(row, 1))
-
-        # row += 1
-        # self.symbolsLabel = Label(parent, text="Peak Symbols", grid=(row, 0))
-        # symbol = self.preferences.general.symbolType
-        # self.symbol = RadioButtons(parent, texts=['Cross', 'lineWidths', 'Filled lineWidths'],
-        #                                 selectedInd=symbol,
-        #                                 callback=self._setSymbol,
-        #                                 direction='v',
-        #                                 grid=(row, 1), hAlign='l',
-        #                                 tipTexts=None,
-        #                                 )
-        # row += 1
-        # self.symbolSizeLabel = Label(parent, text="Peak Symbol Size (ppm)", grid=(row, 0))
-        # self.symbolSizeData = DoubleSpinbox(parent, decimals=3, step=0.01,
-        #                                         min=0.01, max=1.0, grid=(row, 1), hAlign='l')
-        # self.symbolSizeData.setMinimumWidth(LineEditsMinimumWidth)
-        # symbolSize = self.preferences.general.symbolSize
-        # self.symbolSizeData.setValue(float('%.3f' % symbolSize))
-        # self.symbolSizeData.editingFinished.connect(self._setSymbolSize)
-        #
-        # row += 1
-        # self.symbolThicknessLabel = Label(parent, text="Peak Symbol Thickness (point)", grid=(row, 0))
-        # self.symbolThicknessData = Spinbox(parent, step=1,
-        #                                         min=1, max=20, grid=(row, 1), hAlign='l')
-        # self.symbolThicknessData.setMinimumWidth(LineEditsMinimumWidth)
-        # symbolThickness = self.preferences.general.symbolThickness
-        # self.symbolThicknessData.setValue(int(symbolThickness))
-        # self.symbolThicknessData.editingFinished.connect(self._setSymbolThickness)
-
         row += 1
         self.zoomCentreLabel = Label(parent, text="Zoom Centre", grid=(row, 0))
         zoomCentre = self.preferences.general.zoomCentreType
@@ -554,14 +517,6 @@ class PreferencesPopup(CcpnDialog):
                                    grid=(row, 1), hAlign='l',
                                    tipTexts=None,
                                    )
-        # row += 1
-        # self.symbolSize1dLabel = Label(parent, text="Symbol Size 1d (ppm)", grid=(row, 0))
-        # self.symbolSize1dData = DoubleSpinbox(parent, decimals=3, step=0.001,
-        #                                       min=0.001, max=1.0, grid=(row, 1), hAlign='l')
-        # self.symbolSize1dData.setMinimumWidth(LineEditsMinimumWidth)
-        # symbolSize1d = self.preferences.general.symbolSize1d
-        # self.symbolSize1dData.setValue(float('%.3f' % symbolSize1d))
-        # self.symbolSize1dData.editingFinished.connect(self._setSymbolSize1d)
 
         row += 1
         self.symbolSizePixelLabel = Label(parent, text="Symbol Size (pixel)", grid=(row, 0))
@@ -571,14 +526,6 @@ class PreferencesPopup(CcpnDialog):
         symbolSizePixel = self.preferences.general.symbolSizePixel
         self.symbolSizePixelData.setValue(float('%i' % symbolSizePixel))
         self.symbolSizePixelData.editingFinished.connect(self._setSymbolSizePixel)
-
-        # self.symbolSizeNdLabel = Label(parent, text="Symbol Size Nd (ppm)", grid=(row, 0))
-        # self.symbolSizeNdData = DoubleSpinbox(parent, decimals=2, step=0.01,
-        #                                       min=0.01, max=10.0, grid=(row, 1), hAlign='l')
-        # self.symbolSizeNdData.setMinimumWidth(LineEditsMinimumWidth)
-        # symbolSizeNd = self.preferences.general.symbolSizeNd
-        # self.symbolSizeNdData.setValue(float('%.2f' % symbolSizeNd))
-        # self.symbolSizeNdData.editingFinished.connect(self._setSymbolSizeNd)
 
         row += 1
         self.symbolThicknessLabel = Label(parent, text="Symbol Thickness (point)", grid=(row, 0))
@@ -839,27 +786,6 @@ class PreferencesPopup(CcpnDialog):
         except:
             return
         self.preferences.general.peakDropFactor = dropFactor
-
-    # def _setSymbolSize1d(self):
-    #     """
-    #     Set the size of the 1d symbols (ppm)
-    #     """
-    #     try:
-    #         symbolSize1d = float(self.symbolSize1dData.text())
-    #     except:
-    #         return
-    #     self.preferences.general.symbolSize1d = symbolSize1d
-
-    # def _setSymbolSizeNd(self):
-    #     """
-    #     Set the size of the Nd symbols (ppm)
-    #     """
-    #     try:
-    #         symbolSizeNd = int(self.symbolSizeNdData.text())
-    #         # symbolSizeNd = float(self.symbolSizeNdData.text())
-    #     except:
-    #         return
-    #     self.preferences.general.symbolSizeNd = symbolSizeNd
 
     def _setSymbolSizePixel(self):
         """

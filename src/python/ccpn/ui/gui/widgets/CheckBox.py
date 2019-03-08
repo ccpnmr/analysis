@@ -45,7 +45,8 @@ class CheckBox(QtWidgets.QCheckBox, Base):
             self.setText(text)
         if callback:
             self.setCallback(callback)
-        self.setObjectName(text)
+        if not self.objectName():
+            self.setObjectName(text)
 
     def get(self):
         return self.isChecked()

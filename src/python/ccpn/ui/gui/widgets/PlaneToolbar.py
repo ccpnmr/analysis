@@ -214,7 +214,7 @@ class PlaneSelectorWidget(Widget):
         self.previousPlaneButton.setFixedHeight(height)
 
         self.spinBox = DoubleSpinbox(parent=self, showButtons=False, grid=(0, 1),
-                                     callback=self._spinBoxChanged)
+                                     callback=self._spinBoxChanged, objectName='PlaneSelectorWidget_planeDepth')
         self.spinBox.setFixedHeight(height)
 
         self.nextPlaneButton = Button(parent=self, text='<', grid=(0, 2),
@@ -223,7 +223,7 @@ class PlaneSelectorWidget(Widget):
         self.nextPlaneButton.setFixedHeight(height)
 
         self.planeCountSpinBox = DoubleSpinbox(parent=self, showButtons=False, grid=(0, 3),
-                                               callback=self._planeCountChanged
+                                               callback=self._planeCountChanged, objectName='PlaneSelectorWidget_planeCount'
                                                )
         self.planeCountSpinBox.setFixedHeight(height)
 
@@ -254,7 +254,7 @@ class PlaneToolbar(ToolBar):
             self.prevPlaneButton = Button(self, '<', callback=partial(callbacks[0], i))
             self.prevPlaneButton.setFixedWidth(19)
             self.prevPlaneButton.setFixedHeight(19)
-            planeLabel = DoubleSpinbox(self, showButtons=False)
+            planeLabel = DoubleSpinbox(self, showButtons=False, objectName="PlaneToolbar_planeLabel"+str(i))
             # planeLabel.setFixedHeight(19)
 
             # force the minimum width of the planeLabel

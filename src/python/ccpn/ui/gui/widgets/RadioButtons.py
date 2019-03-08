@@ -34,7 +34,7 @@ UNCHECKED = QtCore.Qt.Unchecked
 class RadioButtons(QtWidgets.QWidget, Base):
 
     def __init__(self, parent, texts=None, selectedInd=None, exclusive=True,
-                 callback=None, direction='h', tipTexts=None, **kwds):
+                 callback=None, direction='h', tipTexts=None, objectNames=None, **kwds):
 
         super().__init__(parent)
         Base._init(self, setLayout=True, **kwds)
@@ -50,9 +50,11 @@ class RadioButtons(QtWidgets.QWidget, Base):
 
         if not tipTexts:
             tipTexts = [None] * len(texts)
+        if not objectNames:
+            objectNames = [None] * len(texts)
 
         self.radioButtons = []
-        self.setButtons(texts, selectedInd, direction, tipTexts)
+        self.setButtons(texts, selectedInd, direction, tipTexts, objectNames)
         # for i, text in enumerate(texts):
         #   if 'h' in direction:
         #     grid = (0, i)
@@ -72,7 +74,7 @@ class RadioButtons(QtWidgets.QWidget, Base):
 
         self.setCallback(callback)
 
-    def setButtons(self, texts=None, selectedInd=None, direction='h', tipTexts=None, silent=False):
+    def setButtons(self, texts=None, selectedInd=None, direction='h', tipTexts=None, objectNames=None, silent=False):
         """Change the buttons in the button group
         """
         # clear the original buttons
@@ -94,6 +96,8 @@ class RadioButtons(QtWidgets.QWidget, Base):
 
             self.buttonGroup.addButton(button)
             self.buttonGroup.setId(button, i)
+            if objectNames[i]:
+                button.setObjectName(objectNames[i])
 
         self.texts = texts
         if selectedInd is not None:

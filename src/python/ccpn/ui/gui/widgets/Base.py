@@ -151,6 +151,10 @@ class Base(DropBase):
             self._addToParent(grid=grid, gridSpan=gridSpan, stretch=stretch,
                               hAlign=hAlign, vAlign=vAlign)
 
+        # set the object name of the widget to give unique name for restoring widgets
+        if objectName:
+            self.setObjectName(objectName)
+
         # connect destruction of widget to onDestroyed method,
         # which subsequently can be subclassed
         self.destroyed.connect(partial(self.onDestroyed, self))

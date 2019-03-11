@@ -144,6 +144,8 @@ class StripPlotPopup(CcpnDialog):
             self._unblockEvents(specDisplay)
             specDisplay.setColumnStretches(stretchValue=True, widths=True, minimumWidth=100)
 
+            # this is not spawning the correct resize event so the mainWindow container is not resizing
+
     def _cleanupWidget(self):
         """Cleanup the notifiers that are left behind after the widget is closed
         """

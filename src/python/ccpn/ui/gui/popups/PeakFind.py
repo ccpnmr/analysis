@@ -38,8 +38,8 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
 from ccpn.ui.gui.widgets.MessageDialog import showWarning, showInfo
-from ccpn.core.lib.ContextManagers import undoBlockManager
-
+from ccpn.core.lib.ContextManagers import undoBlock, logCommandBlock
+from ccpn.util.decorators import logCommand
 
 class PeakFindPopup(CcpnDialog):
     """
@@ -115,24 +115,27 @@ class PeakFindPopup(CcpnDialog):
         self._updateContents()
 
     def _pickPeaks(self):
-        with undoBlockManager():
-            peakList = self.peakList
-            positions = [[x.value(), y.value()] for x, y in zip(self.minPositionBoxes, self.maxPositionBoxes)]
+        peakList = self.peakList
+        positions = [[x.value(), y.value()] for x, y in zip(self.minPositionBoxes, self.maxPositionBoxes)]
 
-            doPos = True
-            doNeg = True
-            if self.checkBox1.isChecked():
-                # Positive only
-                doNeg = False
-            elif self.checkBox2.isChecked():
-                # negative only
-                doPos = False
-            # Checking the third box turns the others off and sets both. Hence default
-            # peakList.pickPeaksNd(positions, doPos=doPos, doNeg=doNeg, fitMethod='gaussian')
+        doPos = True
+        doNeg = True
+        if self.checkBox1.isChecked():
+            # Positive only
+            doNeg = False
+        elif self.checkBox2.isChecked():
+            # negative only
+            doPos = False
+        # Checking the third box turns the others off and sets both. Hence default
+        # peakList.pickPeaksNd(positions, doPos=doPos, doNeg=doNeg, fitMethod='gaussian')
 
-            axisCodeDict = dict((code, positions[ii]) for ii, code in enumerate(self.peakList.spectrum.axisCodes))
-            peaks = peakList.pickPeaksRegion(axisCodeDict, doPos=doPos, doNeg=doNeg,
-                                         minDropFactor = self.application.preferences.general.peakDropFactor)
+        axisCodeDict = dict((code, positions[ii]) for ii, code in enumerate(self.peakList.spectrum.axisCodes))
+
+        # with logCommandBlock(get='peakList') as log:
+        #     log('pickPeaksRegion')
+
+        peaks = peakList.pickPeaksRegion(regionToPick=axisCodeDict, doPos=doPos, doNeg=doNeg,
+                                     minDropFactor = self.application.preferences.general.peakDropFactor)
 
             # for strip in self.project.strips:
             #     strip.showPeaks(peakList)

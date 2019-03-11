@@ -62,6 +62,8 @@ from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.PlaneToolbar import PlaneToolbar  #, PlaneSelectorWidget
 # from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.util.Logging import getLogger
+from ccpn.util.decorators import logCommand
+from ccpn.core.lib.ContextManagers import undoBlock
 
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, IntegralMenu, MultipletMenu, PhasingMenu
 from ccpn.ui.gui.lib.GuiStripContextMenus import _getNdPhasingMenu, _getNdDefaultMenu, _getNdPeakMenu, \
@@ -390,18 +392,21 @@ class GuiStripNd(GuiStrip):
                                       preferences=self.mainWindow.application.preferences.general)
         self.exportPdf.exec_()
 
+    @logCommand(get='self')
     def copyStrip(self):
         """
         Copy the strip into new SpectrumDisplay
         """
-        # create a new spectrum display
-        newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisOrder=self.axisOrder)
-        for spectrum in self.spectra:
-            newDisplay.displaySpectrum(spectrum)
+        with undoBlock():
+            # create a new spectrum display
+            newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisOrder=self.axisOrder)
+            for spectrum in self.spectra:
+                newDisplay.displaySpectrum(spectrum)
 
-        #TODO: also restore zoom, plane etc settings
-        newDisplay.autoRange()
+            #TODO: also restore zoom, plane etc settings
+            newDisplay.autoRange()
 
+    @logCommand(get='self')
     def flipXYAxis(self):
         """
         Flip the X and Y axes
@@ -414,12 +419,14 @@ class GuiStripNd(GuiStrip):
             if nDim > len(axisOrder):
                 axisOrder.extend(self.axisOrder[2:])
 
-            # create a new spectrum display with the new axis order
-            newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisOrder=axisOrder)
-            for spectrum in self.spectra:
-                newDisplay.displaySpectrum(spectrum)
-            newDisplay.autoRange()
+            with undoBlock():
+                # create a new spectrum display with the new axis order
+                newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisOrder=axisOrder)
+                for spectrum in self.spectra:
+                    newDisplay.displaySpectrum(spectrum)
+                newDisplay.autoRange()
 
+    @logCommand(get='self')
     def flipXZAxis(self):
         """
         Flip the X and Z axes
@@ -434,12 +441,14 @@ class GuiStripNd(GuiStrip):
             if nDim > len(axisOrder):
                 axisOrder.extend(self.axisOrder[3:])
 
-            # create a new spectrum display with the new axis order
-            newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisOrder=axisOrder)
-            for spectrum in self.spectra:  #[1:]:
-                newDisplay.displaySpectrum(spectrum)
-            newDisplay.autoRange()
+            with undoBlock():
+                # create a new spectrum display with the new axis order
+                newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisOrder=axisOrder)
+                for spectrum in self.spectra:  #[1:]:
+                    newDisplay.displaySpectrum(spectrum)
+                newDisplay.autoRange()
 
+    @logCommand(get='self')
     def flipYZAxis(self):
         """
         Flip the Y and Z axes
@@ -454,11 +463,12 @@ class GuiStripNd(GuiStrip):
             if nDim > len(axisOrder):
                 axisOrder.extend(self.axisOrder[3:])
 
-            # create a new spectrum display with the new axis order
-            newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisOrder=axisOrder)
-            for spectrum in self.spectra:
-                newDisplay.displaySpectrum(spectrum)
-            newDisplay.autoRange()
+            with undoBlock():
+                # create a new spectrum display with the new axis order
+                newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisOrder=axisOrder)
+                for spectrum in self.spectra:
+                    newDisplay.displaySpectrum(spectrum)
+                newDisplay.autoRange()
 
     def reorderSpectra(self):
         pass

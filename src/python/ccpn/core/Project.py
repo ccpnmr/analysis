@@ -865,6 +865,7 @@ class Project(AbstractWrapperObject):
 
     # Library functions
 
+    @logCommand(get='self')
     def exportNef(self, path: str = None,
                   overwriteExisting: bool = False,
                   skipPrefixes: typing.Sequence = (),
@@ -890,8 +891,7 @@ class Project(AbstractWrapperObject):
         """
         from ccpn.core.lib import CcpnNefIo
 
-        with logCommandBlock(get='self') as log:
-            log('exportNef')
+        with undoBlock():
             with notificationBlanking():
                 CcpnNefIo.exportNef(self, path,
                                     overwriteExisting=overwriteExisting,

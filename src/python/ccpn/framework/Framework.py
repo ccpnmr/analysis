@@ -41,7 +41,6 @@ from ccpn.core._implementation import Io as coreIo
 from ccpn.core.lib import CcpnNefIo, CcpnSparkyIo
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 from ccpn.core.lib.Pid import Pid
-from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.framework import Version
 from ccpn.framework.Current import Current
 from ccpn.framework.lib.Pipeline import Pipeline
@@ -54,23 +53,19 @@ from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
-from ccpn.ui.gui.lib.GuiSpectrumView import _createdSpectrumView, _spectrumViewHasChanged
+from ccpn.ui.gui.lib.GuiSpectrumView import _createdSpectrumView
 from ccpn.util import Logging
 from ccpn.util import Path
-from ccpn.util import Register
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Common import uniquify
 from ccpn.util.Logging import getLogger
 from ccpn.util import Layout
 from ccpn.ui.gui.Gui import Gui
-# from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 from ccpnmodel.ccpncore.api.memops import Implementation
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
-from ccpn.ui.gui.guiSettings import getColourScheme
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import logCommandBlock
 from ccpn.core.lib.ContextManagers import catchExceptions
 
 
@@ -2505,33 +2500,25 @@ class Framework(NotifierBase):
 
     def copyStrip(self):
         if self.current.strip is not None:
-            with logCommandBlock(get='self') as log:
-                log('copyStrip')
-                self.current.strip.copyStrip()
+            self.current.strip.copyStrip()
         else:
             getLogger().warning('No strip selected')
 
     def flipXYAxis(self):
         if self.current.strip is not None:
-            with logCommandBlock(get='self') as log:
-                log('flipXYAxis')
-                self.current.strip.flipXYAxis()
+            self.current.strip.flipXYAxis()
         else:
             getLogger().warning('No strip selected')
 
     def flipXZAxis(self):
         if self.current.strip is not None:
-            with logCommandBlock(get='self') as log:
-                log('flipXZAxis')
-                self.current.strip.flipXZAxis()
+            self.current.strip.flipXZAxis()
         else:
             getLogger().warning('No strip selected')
 
     def flipYZAxis(self):
         if self.current.strip is not None:
-            with logCommandBlock(get='self') as log:
-                log('flipYZAxis')
-                self.current.strip.flipYZAxis()
+            self.current.strip.flipYZAxis()
         else:
             getLogger().warning('No strip selected')
 

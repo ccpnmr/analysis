@@ -345,6 +345,9 @@ class StripPlot(Widget):
         tipTexts = []
         callbacks = []
         buttonTypes = []
+
+        # put hLine and text here
+
         if includePeakLists:
             texts += ['use Peak selection']
             tipTexts += ['Use current selected peaks']
@@ -355,6 +358,11 @@ class StripPlot(Widget):
             tipTexts += ['Use current selected nmrResidues']
             callbacks += [partial(self._buttonClick, STRIPPLOT_NMRRESIDUES)]
             buttonTypes += [STRIPPLOT_NMRRESIDUES]
+        if includeNmrChainPullSelection:
+            texts += ['use nmrChain']
+            tipTexts += ['Use nmrResidues in selected nmrChain']
+            callbacks += [partial(self._buttonClick, STRIPPLOT_NMRCHAINS)]
+            buttonTypes += [STRIPPLOT_NMRCHAINS]
 
         self.listButtons = RadioButtons(self, texts=texts, tipTexts=tipTexts, callback=self._buttonClick,
                                         grid=(row, 0), direction='v') if texts else None
@@ -665,7 +673,7 @@ class StripPlot(Widget):
         self.nmrChain = self.project.getByPid(item)
         if self.nmrChain is not None:
             # select the nmrChain here
-            self.listButtons.deselectAll()
+            self.listButtons.setIndex(2)
 
         else:
             # do nothing for the minute

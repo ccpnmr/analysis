@@ -279,6 +279,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                           'preferences': self.application.preferences,
                           'redo'       : self.application.redo,
                           'undo'       : self.application.undo,
+                          'get'        : self.application.get,
 
                           'ui'         : self.application.ui,
                           'mainWindow' : self,

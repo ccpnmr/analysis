@@ -78,7 +78,7 @@ from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple, _getProjection
 from ccpn.core.lib.Cache import cached
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
-    logCommandBlock, undoStackBlocking, renameObject
+    logCommandBlock, undoStackBlocking, renameObject, undoBlock
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import axisCodeMapping
 from ccpn.util.Logging import getLogger
@@ -1809,11 +1809,10 @@ class Spectrum(AbstractWrapperObject):
         """
         pass
 
+    @logCommand(get='self')
     def delete(self):
         """Delete Spectrum"""
-        with logCommandBlock(get='self') as log:
-            log('delete')
-
+        with undoBlock():
             self._clearCache()
 
             # handle spectrumView ordering - this should be moved to spectrumView or spectrumDisplay via notifier?

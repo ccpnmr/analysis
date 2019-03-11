@@ -70,7 +70,8 @@ from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySettings
 from ccpn.ui._implementation.SpectrumView import SpectrumView
 from ccpn.core.lib.ContextManagers import logCommandBlock, undoBlockManager, \
     newObject, deleteObject, undoStackBlocking, \
-    notificationBlanking, _storeDeleteObjectCurrent, BlankedPartial
+    notificationBlanking, _storeDeleteObjectCurrent, BlankedPartial, undoBlock
+from ccpn.util.decorators import logCommand
 from ccpn.util.Common import makeIterableList
 from ccpn.core.lib import Undo
 
@@ -1389,6 +1390,7 @@ class GuiSpectrumDisplay(CcpnModule):
         except:
             getLogger().warning('Error, %s does not exist' % spectrum)
 
+    @logCommand(get='self')
     def makeStripPlot(self, peaks=None, nmrResidues=None,
                       autoClearMarks=True,
                       sequentialStrips=True,
@@ -1401,12 +1403,12 @@ class GuiSpectrumDisplay(CcpnModule):
         pkList = makeIterableList(peaks)
         pks = []
         for peak in pkList:
-            pks.append(self.project.getByPid(peak.pid) if isinstance(peak, str) else peak)
+            pks.append(self.project.getByPid(peak) if isinstance(peak, str) else peak)
 
         resList = makeIterableList(nmrResidues)
         nmrs = []
         for nmrRes in resList:
-            nmrs.append(self.project.getByPid(nmrRes.pid) if isinstance(nmrRes, str) else nmrRes)
+            nmrs.append(self.project.getByPid(nmrRes) if isinstance(nmrRes, str) else nmrRes)
 
         # need to clean up the use of GLNotifier - possibly into AbstractWrapperObject
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
@@ -1423,11 +1425,12 @@ class GuiSpectrumDisplay(CcpnModule):
             _undo = self.project._undo
 
             project = self.project
-            with logCommandBlock(get='self') as log:
-                peakStr = '[' + ','.join(["'%s'" % peak.pid for peak in pks]) + ']'
-                nmrResidueStr = '[' + ','.join(["'%s'" % nmrRes.pid for nmrRes in nmrs]) + ']'
-                log('addPeaks', peaks=peakStr, nmrResidues=nmrResidueStr)
+            # with logCommandBlock(get='self') as log:
+            #     peakStr = '[' + ','.join(["'%s'" % peak.pid for peak in pks]) + ']'
+            #     nmrResidueStr = '[' + ','.join(["'%s'" % nmrRes.pid for nmrRes in nmrs]) + ']'
+            #     log('addPeaks', peaks=peakStr, nmrResidues=nmrResidueStr)
 
+            with undoBlock():
                 # _undo._newItem(undoPartial=partial(_updateGl, self, []))
 
                 if autoClearMarks:

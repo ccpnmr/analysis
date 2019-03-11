@@ -40,7 +40,7 @@ from ccpnmodel.ccpncore.lib import Constants
 from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpn.util.Common import name2IsotopeCode
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, deleteObject, logCommandBlock, renameObject
+from ccpn.core.lib.ContextManagers import newObject, logCommandBlock, renameObject, undoBlock
 from ccpn.util.Logging import getLogger
 
 
@@ -190,12 +190,12 @@ class NmrAtom(AbstractWrapperObject):
         data2Obj = self._project._data2Obj
         return sorted(data2Obj[x] for x in set(apiPeaks))
 
+    @logCommand(get='self')
     def deassign(self):
         """Reset NmrAtom back to its originalName, cutting all assignment links"""
-        with logCommandBlock(get='self') as log:
-            log('deassign')
-            self._wrappedData.name = None
+        self._wrappedData.name = None
 
+    @logCommand(get='self')
     def assignTo(self, chainCode: str = None, sequenceCode: Union[int, str] = None,
                  residueType: str = None, name: str = None, mergeToExisting=False) -> 'NmrAtom':
         """Assign NmrAtom to naming parameters) and return the reassigned result
@@ -234,9 +234,7 @@ class NmrAtom(AbstractWrapperObject):
         apiResonance = self._apiResonance
         apiResonanceGroup = apiResonance.resonanceGroup
 
-        with logCommandBlock(get='self') as log:
-            log('assignTo')
-
+        with undoBlock():
             if sequenceCode is not None:
                 sequenceCode = str(sequenceCode) or None
 

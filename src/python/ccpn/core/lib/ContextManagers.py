@@ -121,7 +121,7 @@ def undoBlock(application=None):
         sidebar.increaseSidebarBlocking()
 
     # if not application._echoBlocking:
-    application._increaseNotificationBlocking()
+    # application._increaseNotificationBlocking()
     application.project.suspendNotification()
 
     getLogger().debug2('_enterUndoBlock')
@@ -132,7 +132,7 @@ def undoBlock(application=None):
         application.project.resumeNotification()
 
     finally:
-        application._decreaseNotificationBlocking()
+        # application._decreaseNotificationBlocking()
         # if not application._echoBlocking:
         # application.project.resumeNotification()
 
@@ -164,32 +164,33 @@ def undoBlockWithoutSideBar(application=None):
         undo.newWaypoint()  # DO NOT CHANGE
         undo.increaseWaypointBlocking()
 
-        # if not application.project._blockSideBar and not undo._blocked:
-        if application.ui and application.ui.mainWindow:
-            sidebar = application.ui.mainWindow.sideBar
-            sidebar.increaseSidebarBlocking(withSideBarUpdate=False)
+    # if not application.project._blockSideBar and not undo._blocked:
+    if application.ui and application.ui.mainWindow:
+        sidebar = application.ui.mainWindow.sideBar
+        sidebar.increaseSidebarBlocking(withSideBarUpdate=False)
 
-    application._increaseNotificationBlocking()
-    if not application._echoBlocking:
-        application.project.suspendNotification()
+    # application._increaseNotificationBlocking()
+    # if not application._echoBlocking:
+    application.project.suspendNotification()
 
-    getLogger().debug2('_enterUndoBlock')
+    getLogger().debug2('_enterUndoBlockWithoutSideBar')
 
     try:
         # transfer control to the calling function
         yield
+        application.project.resumeNotification()
 
     finally:
-        if not application._echoBlocking:
-            application.project.resumeNotification()
-        application._decreaseNotificationBlocking()
+        # if not application._echoBlocking:
+        #     application.project.resumeNotification()
+        # application._decreaseNotificationBlocking()
+
+        # if not application.project._blockSideBar and not undo._blocked:
+        if application.ui and application.ui.mainWindow:
+            sidebar = application.ui.mainWindow.sideBar
+            sidebar.decreaseSidebarBlocking(withSideBarUpdate=False)
 
         if undo is not None:
-            # if not application.project._blockSideBar and not undo._blocked:
-            if application.ui and application.ui.mainWindow:
-                sidebar = application.ui.mainWindow.sideBar
-                sidebar.decreaseSidebarBlocking(withSideBarUpdate=False)
-
             undo.decreaseWaypointBlocking()
 
         getLogger().debug2('_exitUndoBlock: echoBlocking=%s' % application._echoBlocking)
@@ -412,8 +413,8 @@ def logCommandBlock(prefix='', get=None, isProperty=False, showArguments=[], log
                 sig1 = [k for k, v in signature(selfFunc).parameters.items()
                         if v.default is Parameter.empty
                         or k in showArguments
-                        or k in kwargs
-                        or repr(fr1.f_locals[k]) != repr(v.default)]
+                        or k in kwargs]
+                        # or (k in fr1.f_locals and (repr(fr1.f_locals[k]) != repr(v.default)))]
             else:
                 sig1 = {}
 

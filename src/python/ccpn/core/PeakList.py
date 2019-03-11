@@ -766,7 +766,23 @@ class PeakList(AbstractWrapperObject):
     #
     #     return True
 
+    @logCommand(get='self')
     def pickPeaksRegion(self, regionToPick: dict = {},
+                        doPos: bool = True, doNeg: bool = True,
+                        minLinewidth=None, exclusionBuffer=None,
+                        minDropFactor: float = 0.1, checkAllAdjacent: bool = True,
+                        fitMethod: str = PARABOLICMETHOD, excludedRegions=None,
+                        excludedDiagonalDims=None, excludedDiagonalTransform=None):
+
+        with undoBlock():
+            self._pickPeaksRegion(regionToPick=regionToPick,
+                        doPos=doPos, doNeg=doNeg,
+                        minLinewidth=minLinewidth, exclusionBuffer=exclusionBuffer,
+                        minDropFactor=minDropFactor, checkAllAdjacent=checkAllAdjacent,
+                        fitMethod=fitMethod, excludedRegions=excludedRegions,
+                        excludedDiagonalDims=excludedDiagonalDims, excludedDiagonalTransform=excludedDiagonalTransform)
+
+    def _pickPeaksRegion(self, regionToPick: dict = {},
                         doPos: bool = True, doNeg: bool = True,
                         minLinewidth=None, exclusionBuffer=None,
                         minDropFactor: float = 0.1, checkAllAdjacent: bool = True,

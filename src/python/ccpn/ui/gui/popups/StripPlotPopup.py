@@ -27,11 +27,10 @@ __date__ = "$Date: 2017-07-04 09:28:16 +0000 (Tue, July 04, 2017) $"
 
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
-from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot, STRIPPLOT_PEAKS, STRIPPLOT_NMRRESIDUES, NO_STRIP
-from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
-
+from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot, STRIPPLOT_PEAKS, STRIPPLOT_NMRRESIDUES, STRIPPLOT_NMRCHAINS, NO_STRIP
+from ccpn.ui.gui.widgets.MessageDialog import progressManager
+from ccpn.util.decorators import profile
 
 class StripPlotPopup(CcpnDialog):
     def __init__(self, parent=None, mainWindow=None, spectrumDisplay=None, title='StripPlot',
@@ -67,30 +66,58 @@ class StripPlotPopup(CcpnDialog):
                                              defaultSpectrum=NO_STRIP,
                                              grid=(1, 0), gridSpan=(1, 3))
 
-        ButtonList(self, ['Cancel', 'OK'], [self.reject, self._accept], grid=(3, 3))
+        ButtonList(self, ['Cancel', 'OK'], [self.reject, self._accept], grid=(2, 1), gridSpan=(1, 2))
+        self.setFixedSize(self.sizeHint())
 
-    def _accept(self):
+    @profile
+    def _accept(self, dummy=None):
         """OK button pressed
         """
         listType = self._newStripPlotWidget.listButtons.getIndex()
         if listType is not None:
-            buttonType = self._newStripPlotWidget.listButtons.buttonTypes[listType]
+            with progressManager(self, 'Making Strip Plot...'):
+                buttonType = self._newStripPlotWidget.listButtons.buttonTypes[listType]
 
-            if buttonType == STRIPPLOT_PEAKS:
-                self._buildStrips(peaks=self.current.peaks)
-            elif buttonType == STRIPPLOT_NMRRESIDUES:
-                self._buildStrips(nmrResidues=self.current.nmrResidues)
-        else:
-            # nmrChain selected
-            if self._newStripPlotWidget.nmrChain:
-                self._buildStrips(nmrResidues=self._newStripPlotWidget.nmrChain.nmrResidues)
+                if buttonType == STRIPPLOT_PEAKS:
+                    self._buildStrips(peaks=self.current.peaks)
+                elif buttonType == STRIPPLOT_NMRRESIDUES:
+                    self._buildStrips(nmrResidues=self.current.nmrResidues)
+                elif buttonType == STRIPPLOT_NMRCHAINS:
+                    if self._newStripPlotWidget.nmrChain:
+                        self._buildStrips(nmrResidues=self._newStripPlotWidget.nmrChain.nmrResidues)
 
         self.accept()
+
+    def _blockEvents(self, specDisplay):
+        """Block all updates/signals/notifiers in the scene.
+        """
+        specDisplay.setUpdatesEnabled(False)
+        specDisplay.blockSignals(True)
+        # self.setBlankingAllNotifiers(True)
+
+    def _unblockEvents(self, specDisplay):
+        """Unblock all updates/signals/notifiers in the scene.
+        """
+        # self.setBlankingAllNotifiers(False)
+        specDisplay.blockSignals(False)
+        specDisplay.setUpdatesEnabled(True)
+
+    # @contextmanager
+    # def sceneBlocking(self):
+    #     """Context manager to handle blocking, unblocking, resizing of the scene.
+    #     """
+    #     self._blockEvents()
+    #     try:
+    #         # pass control to the calling function
+    #         yield
+    #
+    #     finally:
+    #         self._unblockEvents()
 
     def _buildStrips(self, spectrumDisplays=None, peaks=None, nmrResidues=None):
         """Build the strips in the selected spectrumDisplays
         """
-        spectrumDisplays = self._newStripPlotWidget._getDisplays()
+        spectrumDisplays = self._newStripPlotWidget.displaysWidget._getDisplays()
 
         autoClearMarks = self._newStripPlotWidget.autoClearMarksWidget.isChecked()
         sequentialStrips = self._newStripPlotWidget.sequentialStripsWidget.isChecked()
@@ -98,6 +125,8 @@ class StripPlotPopup(CcpnDialog):
 
         # loop through the spectrumDisplays
         for specDisplay in spectrumDisplays:
+
+            self._blockEvents(specDisplay)      # doesn't make a difference?
 
             if peaks:
                 specDisplay.makeStripPlot(peaks=peaks, nmrResidues=None,
@@ -111,6 +140,8 @@ class StripPlotPopup(CcpnDialog):
                                           sequentialStrips=sequentialStrips,
                                           markPositions=markPositions
                                           )
+
+            self._unblockEvents(specDisplay)
 
     def _cleanupWidget(self):
         """Cleanup the notifiers that are left behind after the widget is closed

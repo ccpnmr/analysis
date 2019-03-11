@@ -98,7 +98,7 @@ class SpectrumDisplaySettings(Widget):
         row = 0
         self.xAxisUnits = Label(parent, text="X Axis Units", grid=(row, 0))
         self.xAxisUnitsButtons = RadioButtons(parent, texts=xTexts,
-                                              objectNames=[text+'_x_SDS' for text in xTexts],
+                                              objectNames=[text + '_x_SDS' for text in xTexts],
                                               selectedInd=xAxisUnits,
                                               callback=self._settingsChanged,
                                               direction='h',
@@ -114,7 +114,7 @@ class SpectrumDisplaySettings(Widget):
         row += 1
         self.yAxisUnits = Label(parent, text="Y Axis Units", grid=(row, 0))
         self.yAxisUnitsButtons = RadioButtons(parent, texts=yTexts,
-                                              objectNames=[text+'_y_SDS' for text in xTexts],
+                                              objectNames=[text + '_y_SDS' for text in xTexts],
                                               selectedInd=yAxisUnits,
                                               callback=self._settingsChanged,
                                               direction='h',
@@ -168,6 +168,9 @@ class SpectrumDisplaySettings(Widget):
         self.symbolThicknessData.setMinimumWidth(LineEditsMinimumWidth)
         self.symbolThicknessData.setValue(int(symbolThickness))
         self.symbolThicknessData.valueChanged.connect(self._symbolsChanged)
+
+        row += 1
+        self.displaysWidget = SpectrumDisplaySelectionWidget(parent, mainWindow=self.mainWindow, grid=(row, 0), gridSpan=(1, 2), texts=[ALL], displayText=[])
 
         row += 1
         self._spacer = Spacer(parent, 5, 5,
@@ -280,32 +283,41 @@ class StripPlot(Widget):
 
         texts = [defaultSpectrum.pid] if (defaultSpectrum and defaultSpectrum is not NO_STRIP) else ([ALL] + displayText)
 
-        self.displaysWidget = ListCompoundWidget(self,
-                                                 grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                                                 vPolicy='minimal',
-                                                 #minimumWidths=(colwidth, 0, 0),
-                                                 fixedWidths=(colwidth, colwidth, colwidth),
-                                                 orientation='left',
-                                                 labelText='Display(s):',
-                                                 tipText='SpectrumDisplay modules to respond to double-click',
-                                                 texts=texts,
-                                                 callback=self._selectDisplayInList)
-        self.displaysWidget.setFixedHeights((None, None, 40))
+        # self.displaysWidget = ListCompoundWidget(self,
+        #                                          grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
+        #                                          vPolicy='minimal',
+        #                                          #minimumWidths=(colwidth, 0, 0),
+        #                                          fixedWidths=(colwidth, colwidth, colwidth),
+        #                                          orientation='left',
+        #                                          labelText='Display(s):',
+        #                                          tipText='SpectrumDisplay modules to respond to double-click',
+        #                                          texts=texts,
+        #                                          callback=self._selectDisplayInList)
+        # self.displaysWidget.setFixedHeights((None, None, 40))
+        #
+        # if defaultSpectrum is not NO_STRIP:
+        #     if defaultSpectrum:
+        #         self.displaysWidget.pulldownList.set(defaultSpectrum.pid)
+        #     else:
+        #         self.displaysWidget.pulldownList.set(ALL)
+        #
+        # # function to make sure that the pullDown is always populated properly just before opening
+        # self.displaysWidget.setPreSelect(self._fillDisplayWidget)
+        #
+        # # handle signals when the items in the displaysWidget have changed
+        # model = self.displaysWidget.listWidget.model()
+        # model.rowsInserted.connect(self._displayWidgetChanged)
+        # model.rowsRemoved.connect(self._displayWidgetChanged)
+        # self.displaysWidget.listWidget.cleared.connect(self._displayWidgetChanged)
 
-        if defaultSpectrum is not NO_STRIP:
-            if defaultSpectrum:
-                self.displaysWidget.pulldownList.set(defaultSpectrum.pid)
-            else:
-                self.displaysWidget.pulldownList.set(ALL)
-
-        # function to make sure that the pullDown is always populated properly just before opening
-        self.displaysWidget.setPreSelect(self._fillDisplayWidget)
-
-        # handle signals when the items in the displaysWidget have changed
-        model = self.displaysWidget.listWidget.model()
-        model.rowsInserted.connect(self._displayWidgetChanged)
-        model.rowsRemoved.connect(self._displayWidgetChanged)
-        self.displaysWidget.listWidget.cleared.connect(self._displayWidgetChanged)
+        row += 1
+        self.displaysWidget = SpectrumDisplaySelectionWidget(self, mainWindow=self.mainWindow, grid=(row, 0), gridSpan=(1, 1), texts=texts, displayText=[],
+                                                             displayWidgetChangedCallback=self._displayWidgetChanged)
+        # if defaultSpectrum is not NO_STRIP:
+        #     if defaultSpectrum:
+        #         self._tempDisplay.pulldownList.set(defaultSpectrum.pid)
+        #     else:
+        #         self._tempDisplay.pulldownList.set(ALL)
 
         row += 1
         self.sequentialStripsWidget = CheckBoxCompoundWidget(
@@ -348,6 +360,12 @@ class StripPlot(Widget):
 
         # put hLine and text here
 
+        if includePeakLists and includeNmrChains and includeNmrChainPullSelection:
+            HLine(self, grid=(row, 0), gridSpan=(1, 4),
+                  colour=getColours()[DIVIDER], height=15)
+            row += 1
+            Label(self, text='Strip Selection', grid=(row, 0), gridSpan=(1, 4))
+
         if includePeakLists:
             texts += ['use Peak selection']
             tipTexts += ['Use current selected peaks']
@@ -364,6 +382,7 @@ class StripPlot(Widget):
             callbacks += [partial(self._buttonClick, STRIPPLOT_NMRCHAINS)]
             buttonTypes += [STRIPPLOT_NMRCHAINS]
 
+        row += 1
         self.listButtons = RadioButtons(self, texts=texts, tipTexts=tipTexts, callback=self._buttonClick,
                                         grid=(row, 0), direction='v') if texts else None
         if self.listButtons:
@@ -397,10 +416,10 @@ class StripPlot(Widget):
 
         self._registerNotifiers()
 
-    def _selectDisplayInList(self):
-        """Handle clicking items in display selection
-        """
-        pass
+    # def _selectDisplayInList(self):
+    #     """Handle clicking items in display selection
+    #     """
+    #     pass
 
     def _displayWidgetChanged(self):
         """Handle adding/removing items from display selection
@@ -419,29 +438,29 @@ class StripPlot(Widget):
         if self.includeNmrChainPullSelection:
             self.ncWidget.setIndex(0, blockSignals=True)
 
-    def _fillDisplayWidget(self):
-        """Fill the display box with the currently available spectrumDisplays
-        """
-        list = ['> select-to-add <'] + [ALL]
-        if self.mainWindow:
-            list += [display.pid for display in self.mainWindow.spectrumDisplays]
-        self.displaysWidget.pulldownList.setData(texts=list)
+    # def _fillDisplayWidget(self):
+    #     """Fill the display box with the currently available spectrumDisplays
+    #     """
+    #     list = ['> select-to-add <'] + [ALL]
+    #     if self.mainWindow:
+    #         list += [display.pid for display in self.mainWindow.spectrumDisplays]
+    #     self.displaysWidget.pulldownList.setData(texts=list)
 
-    def _getDisplays(self):
-        """Return list of displays to navigate - if needed
-        """
-        if not self.application:
-            return []
-
-        displays = []
-        # check for valid displays
-        gids = self.displaysWidget.getTexts()
-        if len(gids) == 0: return displays
-        if ALL in gids:
-            displays = self.application.ui.mainWindow.spectrumDisplays
-        else:
-            displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
-        return displays
+    # def _getDisplays(self):
+    #     """Return list of displays to navigate - if needed
+    #     """
+    #     if not self.application:
+    #         return []
+    #
+    #     displays = []
+    #     # check for valid displays
+    #     gids = self.displaysWidget.getTexts()
+    #     if len(gids) == 0: return displays
+    #     if ALL in gids:
+    #         displays = self.application.ui.mainWindow.spectrumDisplays
+    #     else:
+    #         displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
+    #     return displays
 
     def _getSpectraFromDisplays(self):
         """Get the list of active spectra from the spectrumDisplays
@@ -452,7 +471,7 @@ class StripPlot(Widget):
         from ccpn.util.Common import _axisCodeMapIndices, axisCodeMapping
 
         # get the valid displays
-        displays = self._getDisplays()
+        displays = self.displaysWidget._getDisplays()
         validSpectrumViews = {}
 
         # loop through all the selected displays/spectrumViews that are visible
@@ -751,24 +770,26 @@ class SequenceGraphSettings(Widget):
 
         texts = [ALL] + defaultListItem.pid if defaultListItem else ([ALL] + displayText)
 
-        self.displaysWidget = ListCompoundWidget(self,
-                                                 grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                                                 vPolicy='minimal',
-                                                 #minimumWidths=(colwidth, 0, 0),
-                                                 fixedWidths=(colwidth, colwidth, colwidth),
-                                                 orientation='left',
-                                                 labelText='Display(s):',
-                                                 tipText='SpectrumDisplay modules to respond to double-click',
-                                                 texts=texts,
-                                                 callback=self._selectDisplayInList)
-        self.displaysWidget.setFixedHeights((None, None, 40))
-        self.displaysWidget.setPreSelect(self._fillDisplayWidget)
+        # self.displaysWidget = ListCompoundWidget(self,
+        #                                          grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
+        #                                          vPolicy='minimal',
+        #                                          #minimumWidths=(colwidth, 0, 0),
+        #                                          fixedWidths=(colwidth, colwidth, colwidth),
+        #                                          orientation='left',
+        #                                          labelText='Display(s):',
+        #                                          tipText='SpectrumDisplay modules to respond to double-click',
+        #                                          texts=texts,
+        #                                          callback=self._selectDisplayInList)
+        # self.displaysWidget.setFixedHeights((None, None, 40))
+        # self.displaysWidget.setPreSelect(self._fillDisplayWidget)
+        #
+        # # handle signals when the items in the displaysWidget have changed
+        # model = self.displaysWidget.listWidget.model()
+        # model.rowsInserted.connect(self._displayWidgetChanged)
+        # model.rowsRemoved.connect(self._displayWidgetChanged)
+        # self.displaysWidget.listWidget.cleared.connect(self._displayWidgetChanged)
 
-        # handle signals when the items in the displaysWidget have changed
-        model = self.displaysWidget.listWidget.model()
-        model.rowsInserted.connect(self._displayWidgetChanged)
-        model.rowsRemoved.connect(self._displayWidgetChanged)
-        self.displaysWidget.listWidget.cleared.connect(self._displayWidgetChanged)
+        self.displaysWidget = SpectrumDisplaySelectionWidget(self, mainWindow=self.mainWindow, grid=(row, 0), gridSpan=(1, 1), texts=[ALL], displayText=[])
 
         self.checkBoxes = {}
         if settingsDict:
@@ -812,44 +833,44 @@ class SequenceGraphSettings(Widget):
         self.setMinimumWidth(self.sizeHint().width())
         self._registerNotifiers()
 
-    def _selectDisplayInList(self):
-        """Handle clicking items in display selection
-        """
-        pass
-
-    def _displayWidgetChanged(self):
-        """Handle adding/removing items from display selection
-        """
-        pass
+    # def _selectDisplayInList(self):
+    #     """Handle clicking items in display selection
+    #     """
+    #     pass
+    #
+    # def _displayWidgetChanged(self):
+    #     """Handle adding/removing items from display selection
+    #     """
+    #     pass
 
     def _changeAxisCode(self):
         """Handle clicking the axis code buttons
         """
         pass
 
-    def _fillDisplayWidget(self):
-        """Fill the display box with the currently available spectrumDisplays
-        """
-        list = ['> select-to-add <'] + [ALL]
-        if self.mainWindow:
-            list += [display.pid for display in self.mainWindow.spectrumDisplays]
-        self.displaysWidget.pulldownList.setData(texts=list)
-
-    def _getDisplays(self):
-        """Return list of displays to navigate - if needed
-        """
-        if not self.application:
-            return []
-
-        displays = []
-        # check for valid displays
-        gids = self.displaysWidget.getTexts()
-        if len(gids) == 0: return displays
-        if ALL in gids:
-            displays = self.application.ui.mainWindow.spectrumDisplays
-        else:
-            displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
-        return displays
+    # def _fillDisplayWidget(self):
+    #     """Fill the display box with the currently available spectrumDisplays
+    #     """
+    #     list = ['> select-to-add <'] + [ALL]
+    #     if self.mainWindow:
+    #         list += [display.pid for display in self.mainWindow.spectrumDisplays]
+    #     self.displaysWidget.pulldownList.setData(texts=list)
+    #
+    # def _getDisplays(self):
+    #     """Return list of displays to navigate - if needed
+    #     """
+    #     if not self.application:
+    #         return []
+    #
+    #     displays = []
+    #     # check for valid displays
+    #     gids = self.displaysWidget.getTexts()
+    #     if len(gids) == 0: return displays
+    #     if ALL in gids:
+    #         displays = self.application.ui.mainWindow.spectrumDisplays
+    #     else:
+    #         displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
+    #     return displays
 
     def _checkInit(self, checkBoxItem, item, data):
         """This is a hack so that the state changes when the layout loads
@@ -1071,6 +1092,80 @@ class SequenceGraphSettings(Widget):
         """Cleanup the notifiers that are left behind after the widget is closed
         """
         self._unRegisterNotifiers()
+
+
+class SpectrumDisplaySelectionWidget(ListCompoundWidget):
+
+    def __init__(self, parent=None, mainWindow=None, vAlign='top', stretch=(0, 0), hAlign='left',
+                 vPolicy='minimal', fixedWidths=(140, 140, 140), orientation='left', labelText='Display(s):',
+                 tipText='SpectrumDisplay modules to respond to double-click',
+                 texts=None, callback=None, displayWidgetChangedCallback=None,
+                 defaultListItem=None, displayText=[],
+                 **kwds):
+
+        if not texts:
+            texts = [ALL] + defaultListItem.pid if defaultListItem else ([ALL] + displayText)
+
+        self.mainWindow = mainWindow
+        self.application = mainWindow.application
+        self._displayWidgetChangedCallback = displayWidgetChangedCallback
+        self._selectDisplayInListCallback = callback
+
+        super().__init__(parent=parent,
+                         vAlign=vAlign, stretch=stretch, hAlign=hAlign, vPolicy=vPolicy,
+                         fixedWidths=fixedWidths, orientation=orientation,
+                         labelText=labelText, tipText=tipText, texts=texts,
+                         callback=self._selectDisplayInList, **kwds)
+
+        self.setFixedHeights((None, None, 40))
+        self.setPreSelect(self._fillDisplayWidget)
+
+        # handle signals when the items in the displaysWidget have changed
+        model = self.listWidget.model()
+        model.rowsInserted.connect(self._displayWidgetChanged)
+        model.rowsRemoved.connect(self._displayWidgetChanged)
+        self.listWidget.cleared.connect(self._displayWidgetChanged)
+
+    def _selectDisplayInList(self):
+        """Handle clicking items in display selection
+        """
+        if self._selectDisplayInListCallback:
+            self._selectDisplayInListCallback()
+
+    def _displayWidgetChanged(self):
+        """Handle adding/removing items from display selection
+        """
+        if self._displayWidgetChangedCallback:
+            self._displayWidgetChangedCallback()
+
+    def _changeAxisCode(self):
+        """Handle clicking the axis code buttons
+        """
+        pass
+
+    def _fillDisplayWidget(self):
+        """Fill the display box with the currently available spectrumDisplays
+        """
+        list = ['> select-to-add <'] + [ALL]
+        if self.mainWindow:
+            list += [display.pid for display in self.mainWindow.spectrumDisplays]
+        self.pulldownList.setData(texts=list)
+
+    def _getDisplays(self):
+        """Return list of displays to navigate - if needed
+        """
+        if not self.application:
+            return []
+
+        displays = []
+        # check for valid displays
+        gids = self.getTexts()
+        if len(gids) == 0: return displays
+        if ALL in gids:
+            displays = self.mainWindow.spectrumDisplays
+        else:
+            displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
+        return displays
 
 
 if __name__ == '__main__':

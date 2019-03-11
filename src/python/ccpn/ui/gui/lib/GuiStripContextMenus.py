@@ -208,7 +208,7 @@ def _estimateNoise(strip):
 
 
 def _makeStripPlot(strip):
-    return _SCMitem(name='Make Strip Plot',
+    return _SCMitem(name='Make Strip Plot...',
                     typeItem=ItemTypes.get(ITEM), toolTip='Make a strip plot in the current SpectrumDisplay', shortcut='SP',
                     callback=strip.makeStripPlot)
 

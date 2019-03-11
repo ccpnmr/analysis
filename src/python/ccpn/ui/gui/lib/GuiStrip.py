@@ -81,7 +81,7 @@ class GuiStrip(Frame):
                          acceptDrops=True  #, hPolicy='expanding', vPolicy='expanding' ##'minimal'
                          )
 
-        self.setMinimumWidth(50)
+        self.setMinimumWidth(150)
         self.setMinimumHeight(150)
 
         self.layout().setSpacing(0)

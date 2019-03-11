@@ -1146,7 +1146,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
         return result
 
-    def setColumnStretches(self, stretchValue=False, scaleFactor=1.0, widths=True):
+    def setColumnStretches(self, stretchValue=False, scaleFactor=1.0, widths=True, minimumWidth=None):
         """Set the column widths of the strips so that the last strip accommodates the axis bar
         if necessary."""
         widgets = self.stripFrame.children()
@@ -1165,6 +1165,9 @@ class GuiSpectrumDisplay(CcpnModule):
                 AXIS_WIDTH = self.orderedStrips[0]._CcpnGLWidget.AXIS_MARGINRIGHT
             else:
                 firstStripWidth = thisLayout.itemAt(0).widget().width()
+
+            if minimumWidth:
+                firstStripWidth = max(firstStripWidth, minimumWidth)
 
             if not self.lastAxisOnly:
                 maxCol = 0
@@ -1191,6 +1194,10 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 # set the correct widths for the strips
                 leftWidth = scaleFactor * (thisLayoutWidth - AXIS_WIDTH - (maxCol * AXIS_PADDING)) / (maxCol + 1)
+
+                if minimumWidth:
+                    leftWidth = max(leftWidth, minimumWidth)
+
                 endWidth = leftWidth + AXIS_WIDTH
 
                 # set the widths and column stretches

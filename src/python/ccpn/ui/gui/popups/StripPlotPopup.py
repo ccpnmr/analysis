@@ -142,6 +142,7 @@ class StripPlotPopup(CcpnDialog):
                                           )
 
             self._unblockEvents(specDisplay)
+            specDisplay.setColumnStretches(stretchValue=True, widths=True, minimumWidth=100)
 
     def _cleanupWidget(self):
         """Cleanup the notifiers that are left behind after the widget is closed

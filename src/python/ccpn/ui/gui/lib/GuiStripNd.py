@@ -189,7 +189,7 @@ class GuiStripNd(GuiStrip):
 
         # self.plotWidget.scene().sigMouseMoved.connect(self._mouseMoved)
 
-        self.setMinimumWidth(50)
+        self.setMinimumWidth(150)
         self.setMinimumHeight(150)
 
         # self.planeToolbar.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.MinimumExpanding)

@@ -1152,12 +1152,13 @@ class GuiSpectrumDisplay(CcpnModule):
         widgets = self.stripFrame.children()
 
         if widgets:
-            self.stripFrame.hide()
             thisLayout = self.stripFrame.layout()
             thisLayoutWidth = self.width()
 
             if not thisLayout.itemAt(0):
                 return
+
+            self.stripFrame.hide()
 
             AXIS_WIDTH = 1
             AXIS_PADDING = 5

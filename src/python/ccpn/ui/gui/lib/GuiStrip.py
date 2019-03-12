@@ -326,7 +326,7 @@ class GuiStrip(Frame):
                             for strip in spectrumDisplay.strips:
                                 if strip != currentStrip:
                                     toolTip = 'Show cursor in strip %s at Peak position %s' % (str(strip.id), str([round(x, 3) for x in position]))
-                                    if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 2:
+                                    if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 3:
                                         self.navigateToPeakMenu.addItem(text=strip.pid,
                                                                         callback=partial(navigateToPositionInStrip, strip=strip,
                                                                                          positions=self.current.peak.position,
@@ -355,7 +355,7 @@ class GuiStrip(Frame):
                         for strip in spectrumDisplay.strips:
                             if strip != currentStrip:
                                 toolTip = 'Show cursor in strip %s at Cursor position %s' % (str(strip.id), str([round(x, 3) for x in position]))
-                                if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 2:
+                                if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 3:
                                     self.navigateCursorMenu.addItem(text=strip.pid,
                                                                     callback=partial(navigateToPositionInStrip, strip=strip,
                                                                                      positions=position, axisCodes=currentStrip.axisCodes, ),
@@ -363,6 +363,61 @@ class GuiStrip(Frame):
                             self.navigateCursorMenu.addSeparator()
                 else:
                     self.navigateCursorMenu.setEnabled(False)
+
+    def _addItemsToMarkInPeakMenu(self):
+        """Adds item to mark peak position from context menu.
+        """
+        # TODO, merge the two menu (cursor and peak) in one single menu to avoid code duplication. Issues: when tried, only one menu at the time worked!
+        from functools import partial
+
+        if self.markInPeakMenu:
+            self.markInPeakMenu.clear()
+            currentStrip = self.current.strip
+            position = self.current.cursorPosition
+            if currentStrip:
+                if self.current.peak:
+                    if len(self.current.project.spectrumDisplays) > 1:
+                        self.markInPeakMenu.setEnabled(True)
+                        for spectrumDisplay in self.current.project.spectrumDisplays:
+                            for strip in spectrumDisplay.strips:
+                                if strip != currentStrip:
+                                    toolTip = 'Show cursor in strip %s at Peak position %s' % (str(strip.id), str([round(x, 3) for x in position]))
+                                    if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 3:
+                                        self.markInPeakMenu.addItem(text=strip.pid,
+                                                                        callback=partial(self._createMarkAtPosition,
+                                                                                         positions=self.current.peak.position,
+                                                                                         axisCodes=self.current.peak.axisCodes),
+                                                                        toolTip=toolTip)
+                                self.markInPeakMenu.addSeparator()
+                    else:
+                        self.markInPeakMenu.setEnabled(False)
+
+    def _addItemsToMarkInCursorPosMenu(self):
+        """Copied from old viewbox. This function apparently take the current cursorPosition
+         and uses to pan a selected display from the list of spectrumViews or the current cursor position.
+        """
+        # TODO needs clear documentation
+        from functools import partial
+
+        if self.markInCursorMenu:
+            self.markInCursorMenu.clear()
+            currentStrip = self.current.strip
+            position = self.current.cursorPosition
+            if currentStrip:
+                if len(self.current.project.spectrumDisplays) > 1:
+                    self.markInCursorMenu.setEnabled(True)
+                    for spectrumDisplay in self.current.project.spectrumDisplays:
+                        for strip in spectrumDisplay.strips:
+                            if strip != currentStrip:
+                                toolTip = 'Show cursor in strip %s at Cursor position %s' % (str(strip.id), str([round(x, 3) for x in position]))
+                                if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 3:
+                                    self.markInCursorMenu.addItem(text=strip.pid,
+                                                                    callback=partial(self._createMarkAtPosition,
+                                                                                     positions=position, axisCodes=currentStrip.axisCodes, ),
+                                                                    toolTip=toolTip)
+                            self.markInCursorMenu.addSeparator()
+                else:
+                    self.markInCursorMenu.setEnabled(False)
 
     def _updateDisplayedIntegrals(self, data):
         """Callback when integrals have changed.
@@ -821,6 +876,15 @@ class GuiStrip(Frame):
         TBD: the naive approach below should be improved
         """
         return axisCode  #if axisCode[0].isupper() else axisCode
+
+    def _createMarkAtPosition(self, positions, axisCodes):
+        try:
+            defaultColour = self.application.preferences.general.defaultMarksColour
+            self._project.newMark(defaultColour, positions, axisCodes)
+
+        except Exception as es:
+            getLogger().warning('Error setting mark at current cursor position')
+            raise (es)
 
     def _createMarkAtCursorPosition(self):
         try:

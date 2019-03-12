@@ -5047,6 +5047,7 @@ class CcpnGLWidget(QOpenGLWidget):
             # Search if the event is in a range of a selected peak.
             peaks = list(self.current.peaks)
             strip._addItemsToNavigateToCursorPosMenu()
+            strip._addItemsToMarkInCursorPosMenu()
 
             from ccpn.ui.gui.lib.GuiStripContextMenus import _hidePeaksSingleActionItems, _enableAllItems
 
@@ -5055,7 +5056,10 @@ class CcpnGLWidget(QOpenGLWidget):
                 _hidePeaksSingleActionItems(strip, ii)
             else:
                 _enableAllItems(ii)
-                strip._addItemsToNavigateToPeakMenu()
+
+            # will only work for self.current.peak
+            strip._addItemsToNavigateToPeakMenu()
+            strip._addItemsToMarkInPeakMenu()
 
             # check other menu items before raising menues
             strip._checkMenuItems()

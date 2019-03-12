@@ -192,7 +192,8 @@ class DataFrameObject(object):
                 # remove from table by pid
                 row = self.find(self._table, str(obj.pid), column='Pid')
                 if row is not None:
-                    self._table.removeRow(row)
+                    with self._table._quickTableUpdate(self):
+                        self._table.removeRow(row)
 
             except Exception as es:
                 getLogger().warning(str(es))

@@ -962,7 +962,7 @@ QuickTable::item::selected {
             self.setHorizontalHeaderLabels(dataFrameObject.headings)
             self.showColumns(dataFrameObject)
             # self.resizeColumnsToContents()
-            self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
+            # self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
 
             # required to make the header visible
             self.setColumnCount(dataFrameObject.numColumns)
@@ -973,6 +973,7 @@ QuickTable::item::selected {
                 self.sortByColumn(sortColumn, sortOrder)
 
             if resize:
+                self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
                 self.resizeColumnsToContents()
 
             self.show()
@@ -997,7 +998,7 @@ QuickTable::item::selected {
             #
             # return
 
-            # self.hide()
+            self.hide()
             #self._silenceCallback = True
 
             # keep the original sorting method
@@ -1035,7 +1036,9 @@ QuickTable::item::selected {
             self.resizeColumnsToContents()
 
             self._highLightObjs(objs)
-            # self.show()
+
+        # outside of the with to spawn a repaint
+        self.show()
 
     def getDataFrameFromList(self, table=None,
                              buildList=None,
@@ -1455,6 +1458,9 @@ QuickTable::item::selected {
                     if sortColumn < self.columnCount():
                         self.sortByColumn(sortColumn, sortOrder)
 
+                    self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
+                    self.resizeColumnsToContents()
+
             # else:
             #   self.clearTable()
 
@@ -1491,8 +1497,8 @@ QuickTable::item::selected {
             # TODO:ED move these into the table class
 
             # keep the original sorting method
-            sortOrder = self.horizontalHeader().sortIndicatorOrder()
-            sortColumn = self.horizontalHeader().sortIndicatorSection()
+            # sortOrder = self.horizontalHeader().sortIndicatorOrder()
+            # sortColumn = self.horizontalHeader().sortIndicatorSection()
 
             if trigger == Notifier.DELETE:
 

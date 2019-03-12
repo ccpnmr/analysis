@@ -96,7 +96,7 @@ class RadioButtons(QtWidgets.QWidget, Base):
 
             self.buttonGroup.addButton(button)
             self.buttonGroup.setId(button, i)
-            if objectNames[i]:
+            if objectNames and objectNames[i]:
                 button.setObjectName(objectNames[i])
 
         self.texts = texts

@@ -1152,6 +1152,7 @@ class GuiSpectrumDisplay(CcpnModule):
         widgets = self.stripFrame.children()
 
         if widgets:
+            self.stripFrame.hide()
             thisLayout = self.stripFrame.layout()
             thisLayoutWidth = self.width()
 
@@ -1182,7 +1183,10 @@ class GuiSpectrumDisplay(CcpnModule):
                         thisLayout.itemAt(col).widget().setMinimumWidth(firstStripWidth)
                     thisLayout.setColumnStretch(col, 1 if stretchValue else 0)
 
-                self.stripFrame.setMinimumWidth(self.stripFrame.minimumSizeHint().width())
+                if minimumWidth:
+                    self.stripFrame.setMinimumWidth((firstStripWidth + 5) * len(self.orderedStrips) - 5)
+                else:
+                    self.stripFrame.setMinimumWidth(self.stripFrame.minimumSizeHint().width())
 
             else:
                 maxCol = 0
@@ -1216,7 +1220,13 @@ class GuiSpectrumDisplay(CcpnModule):
                                 wid.setMinimumWidth(leftWidth)
 
                 # fix the width of the stripFrame
-                self.stripFrame.setMinimumWidth(self.stripFrame.minimumSizeHint().width())
+                if minimumWidth:
+                    # this depends on the spacing in stripFrame
+                    self.stripFrame.setMinimumWidth((leftWidth + 5) * len(self.orderedStrips) + AXIS_WIDTH)
+                else:
+                    self.stripFrame.setMinimumWidth(self.stripFrame.minimumSizeHint().width())
+
+            self.stripFrame.show()
 
     def autoRange(self):
         """Zooms Y axis of current strip to show entire region.

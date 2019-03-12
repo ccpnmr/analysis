@@ -141,8 +141,8 @@ class StripPlotPopup(CcpnDialog):
                                           markPositions=markPositions
                                           )
 
-            self._unblockEvents(specDisplay)
             specDisplay.setColumnStretches(stretchValue=True, widths=True, minimumWidth=100)
+            self._unblockEvents(specDisplay)
 
             # this is not spawning the correct resize event so the mainWindow container is not resizing
 

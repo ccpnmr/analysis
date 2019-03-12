@@ -1314,6 +1314,24 @@ class Project(AbstractWrapperObject):
                         style=style, units=units, labels=labels
                         )
 
+    @logCommand('project.')
+    def findMark(self, colour: str, positions: Sequence[float], axisCodes: Sequence, labels: Sequence[str] = ()):
+        """Find existing Mark
+
+        :param str colour: Mark colour
+        :param tuple/list positions: Position in unit (default ppm) of all lines in the mark
+        :param tuple/list axisCodes: Axis codes for all lines in the mark
+        :param str style: Mark drawing style (dashed line etc.) default: full line ('simple')
+        :param tuple/list units: Axis units for all lines in the mark, Default: all ppm
+        :param tuple/list labels: Ruler labels for all lines in the mark. Default: None
+
+        :return Mark instance
+
+        """
+        from ccpn.ui._implementation.Mark import _findMark
+
+        return _findMark(self, colour=colour, positions=positions, axisCodes=axisCodes, labels=labels)
+
     # GWV 20181127: not used
     # def _newSimpleMark(self, colour: str, position: float, axisCode: str, style: str = 'simple',
     #                    unit: str = 'ppm', label: str = None):

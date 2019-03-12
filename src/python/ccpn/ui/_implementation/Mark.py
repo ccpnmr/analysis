@@ -40,6 +40,7 @@ from ccpn.util.Logging import getLogger
 
 
 RulerData = collections.namedtuple('RulerData', ['position', 'axisCode', 'unit', 'label'])
+MARKTOLERANCE = 1e-7
 
 
 class Mark(AbstractWrapperObject):
@@ -195,6 +196,29 @@ class Mark(AbstractWrapperObject):
 #=========================================================================================
 # Connections to parents:
 #=========================================================================================
+
+def _findMark(self: Project, colour: str, positions: Sequence[float], axisCodes: Sequence, labels: Sequence[str] = ()) -> Mark:
+    """Find existing Mark based on colour, position, axisCode and label.
+
+    See the Mark class for details.
+
+    :param str colour: Mark colour
+    :param tuple/list positions: Position in unit (default ppm) of all lines in the mark
+    :param tuple/list axisCodes: Axis codes for all lines in the mark
+    :param tuple/list labels: Ruler labels for all lines in the mark. Default: None
+    :return: existing Mark instance.
+    """
+    for pos, axis, label in zip(positions, axisCodes, labels):
+        for mark in self.marks:
+            try:
+                for mPos, mAxis, mLabel in zip(mark.positions, mark.axisCodes, mark.labels):
+                    posClose = abs(mPos - pos) < MARKTOLERANCE
+                    if mark.colour == colour and mAxis == axis and mLabel == label and posClose:
+                        return mark
+            except:
+                # mark may not be defined correctly.
+                continue
+
 
 @newObject(Mark)
 def _newMark(self: Project, colour: str, positions: Sequence[float], axisCodes: Sequence,

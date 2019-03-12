@@ -39,7 +39,7 @@ from ccpn.ui.gui.popups.ShortcutsPopup import UserShortcuts
 from ccpn.ui.gui.widgets.MessageDialog import progressManager
 from ccpn.ui.gui.lib.mouseEvents import MouseModes, setCurrentMouseMode, getCurrentMouseMode
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import logCommandBlock
+from ccpn.core.lib.ContextManagers import logCommandBlock, undoBlock
 
 
 #TODO:WAYNE: incorporate most functionality in GuiMainWindow. See also MainMenu
@@ -482,15 +482,18 @@ class GuiWindow():
                 if found:
                     continue
 
-                with logCommandBlock(get='self') as log:
-                    log('markPositions')
+                # with logCommandBlock(get='self') as log:
+                #     log('markPositions')
+                with undoBlock():
                     # GWV 20181030: changed from atomName to id
-                    if colour:
-                        project.newMark(colour, [chemicalShift.value], [axisCode], labels=[atomId])
-                    else:
-                        # just use gray rather than checking colourScheme
-                        defaultColour = self.application.preferences.general.defaultMarksColour
-                        project.newMark(defaultColour, [chemicalShift.value], [atomId])
+                    if not project.findMark(colour, [chemicalShift.value], [axisCode], labels=[atomId]):
+
+                        if colour:
+                            project.newMark(colour, [chemicalShift.value], [axisCode], labels=[atomId])
+                        else:
+                            # just use gray rather than checking colourScheme
+                            defaultColour = self.application.preferences.general.defaultMarksColour
+                            project.newMark(defaultColour, [chemicalShift.value], [atomId])
 
     def toggleGridAll(self):
         """

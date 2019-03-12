@@ -1502,6 +1502,9 @@ class GuiSpectrumDisplay(CcpnModule):
                         navigateToNmrAtomsInStrip(strip, nmr.nmrAtoms,
                                                   widths=newWidths, markPositions=markPositions, setNmrResidueLabel=False)
 
+                        strip.header.reset()
+                        strip.header.setLabelText(position='c', text=nmr.pid)
+
                 # _undo._newItem(redoPartial=partial(_updateGl, self, []))
 
                 # repaint - not sure whether needed here

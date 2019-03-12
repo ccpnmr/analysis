@@ -891,6 +891,7 @@ class GuiSpectrumDisplay(CcpnModule):
         else:
             raise RuntimeError('Error, stripFrame layout in invalid state')
 
+    @logCommand(get='self')
     def deleteStrip(self, strip):
         """Delete a strip from the spectrumDisplay
 
@@ -912,9 +913,10 @@ class GuiSpectrumDisplay(CcpnModule):
                         % (self.pid,))
             return
 
-        with logCommandBlock(get='self') as log:
-            log('deleteStrip', strip=repr(strip.pid))
+        # with logCommandBlock(get='self') as log:
+        #     log('deleteStrip', strip=repr(strip.pid))
 
+        with undoBlock():
             with undoStackBlocking() as addUndoItem:
                 # retrieve list of created items from the api
                 # strangely, this modifies _wrappedData.orderedStrips
@@ -1085,6 +1087,7 @@ class GuiSpectrumDisplay(CcpnModule):
         if self.phasingFrame.isVisible():
             toStrip.turnOnPhasing()
 
+    @logCommand(get='self')
     def addStrip(self, strip=None) -> 'GuiStripNd':
         """Creates a new strip by cloning strip with index (default the last) in the display.
         """
@@ -1095,9 +1098,10 @@ class GuiSpectrumDisplay(CcpnModule):
             showWarning(str(self.windowTitle()), 'Please disable Phasing Console before adding strips')
             return
 
-        with logCommandBlock(get='self') as log:
-            log('addStrip')
+        # with logCommandBlock(get='self') as log:
+        #     log('addStrip')
 
+        with undoBlock():
             with undoStackBlocking() as addUndoItem:
                 addUndoItem(undo=self._redrawAxes)
 
@@ -1373,14 +1377,16 @@ class GuiSpectrumDisplay(CcpnModule):
     #             if inactivePeakItems:
     #                 inactivePeakItems.add(peakItem)
 
+    @logCommand(get='self')
     def displaySpectrum(self, spectrum, axisOrder: (str,) = ()):
         """Display additional spectrum, with spectrum axes ordered according ton axisOrder
         """
         spectrum = self.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
 
-        with logCommandBlock(get='self') as log:
-            log('displaySpectrum', spectrum=repr(spectrum.pid))
+        # with logCommandBlock(get='self') as log:
+        #     log('displaySpectrum', spectrum=repr(spectrum.pid))
 
+        with undoBlock():
             oldIndex = self.getOrderedSpectrumViewsIndex()
 
             # need set ordering here on undo

@@ -32,6 +32,10 @@ from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot, STRIPPLOT_PEAKS, STRI
 from ccpn.ui.gui.widgets.MessageDialog import progressManager
 from ccpn.util.decorators import profile
 
+
+STRIPPLOTMINIMUMWIDTH = 100
+
+
 class StripPlotPopup(CcpnDialog):
     def __init__(self, parent=None, mainWindow=None, spectrumDisplay=None, title='StripPlot',
                  includePeakLists=False,
@@ -126,7 +130,7 @@ class StripPlotPopup(CcpnDialog):
         # loop through the spectrumDisplays
         for specDisplay in spectrumDisplays:
 
-            self._blockEvents(specDisplay)      # doesn't make a difference?
+            self._blockEvents(specDisplay)  # doesn't make a difference?
 
             if peaks:
                 specDisplay.makeStripPlot(peaks=peaks, nmrResidues=None,
@@ -141,7 +145,7 @@ class StripPlotPopup(CcpnDialog):
                                           markPositions=markPositions
                                           )
 
-            specDisplay.setColumnStretches(stretchValue=True, widths=True, minimumWidth=100)
+            specDisplay.setColumnStretches(stretchValue=True, widths=True, minimumWidth=STRIPPLOTMINIMUMWIDTH)
             self._unblockEvents(specDisplay)
 
             # this is not spawning the correct resize event so the mainWindow container is not resizing

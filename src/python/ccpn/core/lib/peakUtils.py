@@ -146,7 +146,7 @@ import sys
 from numpy import NaN, Inf, arange, isscalar, asarray, array
 
 
-def peakdet(y, x, delta):
+def peakdet(y, x, delta, negative=False):
     """
     Converted from MATLAB script at http://billauer.co.il/peakdet.html
     % Eli Billauer, 3.4.05 (Explicitly not copyrighted).
@@ -171,7 +171,9 @@ def peakdet(y, x, delta):
             mn = this
             mnpos = x[i]
         if lookformax:
-            if abs(this) < mx - delta:  #changed to abs for STDs test
+            if not negative: # just positives
+                this = abs(this)
+            if this < mx - delta:
                 maxtab.append((float(mxpos), float(mx)))
                 mn = this
                 mnpos = x[i]

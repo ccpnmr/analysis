@@ -221,7 +221,7 @@ class DataFrameObject(object):
                     self._objects = [obj]
                     self._dataFrame = pd.DataFrame([listDict], columns=self.headings)
 
-                    with self._table._quickTableUpdate(self):
+                    with self._table._guiTableUpdate(self):
                         self._table.setData(self._dataFrame.values)
 
                 else:
@@ -238,7 +238,7 @@ class DataFrameObject(object):
                     appendDataFrame = pd.DataFrame([listDict], columns=self.headings)
                     self._dataFrame = self._dataFrame.append(appendDataFrame)
 
-                    with self._table._quickTableUpdate(self):  # keep the column widths
+                    with self._table._guiTableUpdate(self):  # keep the column widths
                         self._table.appendRow(list(listDict.values()))
 
                     # # get indexing from pulldown selection and set in dataFrame/table
@@ -340,7 +340,7 @@ class DataFrameObject(object):
                     listDict['Index'] = newIndex
 
             # store to the table
-            with self._table._quickTableUpdate(self):
+            with self._table._guiTableUpdate(self):
                 self._table.setRow(row, list(listDict.values()))
 
             # store the actual object in the dataFrame

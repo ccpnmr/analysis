@@ -105,10 +105,14 @@ def _norm(x):
     return z
 
 
-def _scoreMatches(deltas):
-    "score = median(deltas) * len(deltas). The Smaller the better"
+def _scoreHits(deltas):
+    """score = median(deltas) * len(deltas). The Smaller the better
+    if len(deltas) <=2 than is only the min
+    """
     d = abs(np.array(deltas))
     c = len(d)
+    if c <=2:
+        return np.min(d)
     D = np.median(d)
     s = D/c
     return s

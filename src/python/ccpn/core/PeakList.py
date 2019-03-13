@@ -27,6 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from typing import Sequence, List, Optional
 import collections
 import numpy
+from ccpn.util.Common import percentage
 
 from numpy import argwhere
 from scipy.ndimage import maximum_filter, minimum_filter
@@ -58,15 +59,55 @@ PICKINGMETHODS = (GAUSSIANMETHOD, LORENTZIANMETHOD, PARABOLICMETHOD)
 def _signalToNoiseFunc(noise, signal):
     snr = math.log10(abs(np.mean(signal) ** 2 / np.mean(noise) ** 2))
     return snr
+# def _signalToNoiseFunc(noise, signal):
+#     snr = math.log10(abs(np.mean(signal) ** 2 / np.mean(noise) ** 2))
+#     return snr
 
-def _estimateSNR1D(y):
+# def _estimateSNR1D_OLD(y):
+#
+#     if y is None: return 0
+#     e = _estimateNoiseLevel1D(y)
+#     eS = np.where(y >= e)
+#     eSN = np.where(y <= -e)
+#     eN = np.where((y < e) & (y > -e))
+#     estimatedSignalRegionPos = y[eS]
+#     estimatedSignalRegionNeg = y[eSN]
+#     estimatedSignalRegion = np.concatenate((estimatedSignalRegionPos, estimatedSignalRegionNeg))
+#     estimatedNoiseRegion = y[eN]
+#     lenghtESR = len(estimatedSignalRegion)
+#     lenghtENR = len(estimatedNoiseRegion)
+#     if lenghtESR > lenghtENR:
+#         l = lenghtENR
+#     else:
+#         l = lenghtESR
+#     if l == 0:
+#         return 1
+#     else:
+#         noise = estimatedNoiseRegion[:l - 1]
+#         signalAndNoise = estimatedSignalRegion[:l - 1]
+#         signal = abs(signalAndNoise - noise)
+#         signal[::-1].sort()  # descending
+#         noise[::1].sort()
+#         if hasattr(signal, 'compressed') and hasattr(noise, 'compressed'):
+#             signal = signal.compressed()  # remove the mask
+#             noise = noise.compressed()  # remove the mask
+#         s = signal[:int(l / 2)]
+#         n = noise[:int(l / 2)]
+#         if len(signal) == 0:
+#             return 1
+#         SNR = _signalToNoiseFunc(n,s)
+#         if SNR is not None:
+#             return abs(SNR)
+#         else:
+#             return 1
 
+def estimateSignalRegion(y, noiseLevel=None):
     if y is None: return 0
-    e = _estimateNoiseLevel1D(y)
-    print('Est --+', e)
-    eS = np.where(y >= e)
-    eSN = np.where(y <= -e)
-    eN = np.where((y < e) & (y > -e))
+    if noiseLevel is None:
+        eMax, emin = estimateNoiseLevel1D(y)
+    eS = np.where(y >= eMax)
+    eSN = np.where(y <= emin)
+    eN = np.where((y < eMax) & (y > -emin))
     estimatedSignalRegionPos = y[eS]
     estimatedSignalRegionNeg = y[eSN]
     estimatedSignalRegion = np.concatenate((estimatedSignalRegionPos, estimatedSignalRegionNeg))
@@ -78,7 +119,7 @@ def _estimateSNR1D(y):
     else:
         l = lenghtESR
     if l == 0:
-        return 1
+        return np.array([])
     else:
         noise = estimatedNoiseRegion[:l - 1]
         signalAndNoise = estimatedSignalRegion[:l - 1]
@@ -91,95 +132,80 @@ def _estimateSNR1D(y):
         s = signal[:int(l / 2)]
         n = noise[:int(l / 2)]
         if len(signal) == 0:
-            return 1
-        SNR = _signalToNoiseFunc(n,s)
-        if SNR is not None:
-            return abs(SNR)
+            return np.array([])
         else:
-            return 1
+            return s
 
 
+def estimateSNR_1D(noiseLevels, signalPoints, ratio=2.5):
+    """
 
+    :param noiseLevels: (max, min) floats
+    :param signalPoints: iterable of floats estimated to be signal or peak heights
+    :param ratio: default 2.5
+    :return: array of snr for each point compared to the delta noise level
+    """
+    maxNL = max(noiseLevels)
+    minNL = min(noiseLevels)
+    dd = abs(maxNL - minNL)
+    pp = np.array([s for s in signalPoints])
+    if dd != 0 and dd is not None:
+        snRatios = (ratio * pp) / dd
+        return snRatios
 
-def _estimateNoiseLevel1D(y):
-    '''
-    Estimates the noise threshold based on the max intensity of the first portion of the spectrum where
-    only noise is present. To increase the threshold value: increase the factor.
-    return:  float of estimated noise threshold and Signal to Noise Ratio
-    '''
-    nl = 0
+def estimateNoiseLevel1D(y, f=10, stdFactor = 0.5):
+    """
+
+    :param y: the y region of the spectrum.
+    :param f: percentage of the spectrum to use. If given a portion known to be just noise, set it to 100.
+    :param increaseBySTD: increase the estimated by the STD for the y region
+    :param stdFactor: 0 to don't adjust the initial guess.
+    :return:   (float, float) of estimated noise threshold  as max and min
+    """
+
+    eMax, eMin = 0,0
+    if stdFactor == 0:
+        stdFactor = 0.01
+        getLogger().warning('stdFactor of value zero is not allowed.')
     if y is None:
-        return nl
-    nls = []
-    for i in range(10): #reapet in a range to reduce the variability of the estimated gaussian values
-        f = 20 # int: percent of region all array (1-100)
-        nl = np.std(y[:int(len(y) / f)]) # ! this can be out of bounds
-        estimatedGaussian = np.random.normal(size=y.shape) * nl
-        if len(estimatedGaussian)==0: return nl
-        eG = np.max(estimatedGaussian) + np.min(estimatedGaussian[estimatedGaussian>=0])
-        if nl < eG:
-            nl = eG
-        nls.append(nl)
-    if len(nls)>0:
-        nl = np.min(nls)
-    return nl
+        return eMax, eMin
+    percent = percentage(f,int(len(y)))
+    fy = y[:int(percent)]
 
-def _estimateNoiseLevel1D_OLD(y):
-    '''
-    OLD
-    '''
-    import numpy as np
-    import math
+    stdValue = np.std(fy)*stdFactor
 
-    if y is not None:
-        firstEstimation = np.std(y[:int(len(y) / 10)])
-        estimatedGaussian = np.random.normal(size=y.shape) * firstEstimation
-        e = (np.std(estimatedGaussian) + (np.std(firstEstimation) - np.std(estimatedGaussian)))
-        e2 = np.max(estimatedGaussian) + (abs(np.min(estimatedGaussian)))
-        if e < e2:
-            e = e2
+    eMax = np.max(fy) + stdValue
+    eMin = np.min(fy) - stdValue
+    return eMax, eMin
 
-        eS = np.where(y >= e)
-        eSN = np.where(y <= -e)
-        eN = np.where((y < e) & (y > -e))
-        estimatedSignalRegionPos = y[eS]
-        estimatedSignalRegionNeg = y[eSN]
-        estimatedSignalRegion = np.concatenate((estimatedSignalRegionPos, estimatedSignalRegionNeg))
-        estimatedNoiseRegion = y[eN]
 
-        lenghtESR = len(estimatedSignalRegion)
-        lenghtENR = len(estimatedNoiseRegion)
-        if lenghtESR > lenghtENR:
-            l = lenghtENR
-        else:
-            l = lenghtESR
-        if l == 0:
-            SNR = 1
-        else:
-            noise = estimatedNoiseRegion[:l - 1]
-            signalAndNoise = estimatedSignalRegion[:l - 1]
-            signal = abs(signalAndNoise - noise)
+# def _estimateNoiseLevel1D_gaussian(y, f=5):
+#     '''
+#     Estimates the noise threshold based on the max intensity of the first portion of the spectrum where
+#     only noise is present. To increase the threshold value: increase the factor.
+#     return:  float of estimated noise threshold and Signal to Noise Ratio
+#     '''
+#     nl = 0
+#     if y is None:
+#         return nl
+#     nls = []
+#     for i in range(10): #reapet in a range to reduce the variability of the estimated gaussian values
+#         percent = percentage(f, int(len(y)))
+#         nl = np.std(y[:int(percent)]) # ! this can be out of bounds
+#         estimatedGaussian = np.random.normal(size=y.shape) * nl
+#         if len(estimatedGaussian)==0: return nl
+#         eG = np.max(estimatedGaussian) + np.min(estimatedGaussian[estimatedGaussian>=0])
+#         if nl < eG:
+#             nl = eG
+#         nls.append(nl)
+#     if len(nls)>0:
+#         nl = np.min(nls)
+#     return nl
 
-            signal[::-1].sort()  # descending
-            noise[::1].sort()
-            if hasattr(signal, 'compressed') and hasattr(noise, 'compressed'):
-                signal = signal.compressed()  # remove the mask
-                noise = noise.compressed()  # remove the mask
-            s = signal[:int(l / 2)]
-            n = noise[:int(l / 2)]
-            if len(signal) == 0:
-                return 1, e
-
-            SNR = math.log10(abs(np.mean(s) ** 2 / np.mean(n) ** 2))
-            if SNR:
-                return SNR, e
-            else:
-                return 1, e
-
-        return SNR, e
-    else:
-        return 1, 0
-
+def _filterROI1Darray(x,y, roi):
+    """ Return region included in the ROI ppm position"""
+    mask = (x > max(roi)) | (x > min(roi))
+    return x[mask], y[mask]
 
 def _filtered1DArray(data, ignoredRegions):
     # returns an array without ignoredRegions. Used for automatic 1d peak picking
@@ -648,32 +674,25 @@ class PeakList(AbstractWrapperObject):
     #
     #   return peaks
 
-    def peakFinder1D(self, deltaFactor=1, ignoredRegions=[[20, 19]], negativePeaks=True):
-    @logCommand(get='self')
-    def peakFinder1D(self, deltaFactor=1.5, ignoredRegions=[[20, 19]], negativePeaks=True):
+    def peakFinder1D(self, maxNoiseLevel = None, ignoredRegions=[[20, 19]], negativePeaks=True):
         from ccpn.core.lib.peakUtils import peakdet, _getIntersectionPoints, _pairIntersectionPoints
         from scipy import signal
-        import numpy as np
-        import time
-
-        with undoBlock():
+        from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar
+        with undoBlockWithoutSideBar():
             spectrum = self.spectrum
             # integralList = self.spectrum.newIntegralList()
 
-            peaks = []
             x, y = spectrum.positions, spectrum.intensities
             masked = _filtered1DArray(numpy.array([x, y]), ignoredRegions)
             filteredX, filteredY = masked[0], masked[1]
-            noiseThreshold = _estimateNoiseLevel1D(filteredY)
-            snr = _estimateSNR1D(filteredY)
+            if maxNoiseLevel is None:
+                maxNoiseLevel, minNoiseLevel = estimateNoiseLevel1D(filteredY)
 
-            # deltaFactor = (snr / 2) - (1 / snr)
 
-            maxValues, minValues = peakdet(y=filteredY, x=filteredX, delta=noiseThreshold / deltaFactor)
+            maxValues, minValues = peakdet(y=filteredY, x=filteredX, delta=maxNoiseLevel)
             for position, height in maxValues:
                 peak = self.newPeak(ppmPositions=[position], height=height)
-            spectrum._snr = snr
-            spectrum.noiseLevel = noiseThreshold
+            spectrum.noiseLevel = float(maxNoiseLevel)
 
             # const = round(len(y) * 0.0039, 1)
             # correlatedSignal1 = signal.correlate(y, np.ones(int(const)), mode='same') / const

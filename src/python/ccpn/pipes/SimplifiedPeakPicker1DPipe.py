@@ -42,14 +42,9 @@ from ccpn.util.Logging import getLogger, _debug3
 ###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
 ########################################################################################################################
 
-PipeName = 'Peak Detector 1D (experimental)'
-
+PipeName = 'STD Peak Detector 1D (experimental)'
 ExcludeRegions = 'Exclude_Regions'
-NoiseThreshold = 'Noise_Threshold'
-NoiseLevelFactor = 'Noise_Level_Factor'
-NegativePeaks = 'Negative_Peaks'
 
-DefaultNoiseThresholdFactor = 1.5
 DefaultExcludeRegions = [[0.0, 0.0], [0.0, 0.0]]
 DefaultPeakListIndex = -1
 
@@ -59,6 +54,7 @@ DefaultPeakListIndex = -1
 ########################################################################################################################
 
 # see in ccpn.core.PeakList.py function peakFinder1D
+# This algorithm uses noise threshold and excluded regions in ppm. Set these using other pipes
 
 ########################################################################################################################
 ##########################################     GUI PIPE    #############################################################
@@ -74,17 +70,8 @@ class PeakDetector1DGuiPipe(GuiPipe):
         GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
         self._parent = parent
 
-        # row = 0
-        # self.pickNegativeLabel = Label(self.pipeFrame, text=NegativePeaks, grid=(row, 0))
-        # setattr(self, NegativePeaks, CheckBox(self.pipeFrame, text='', checked=True, grid=(row, 1)))
 
-        row = 0
-        self.estimateFactorLabel = Label(self.pipeFrame, text=NegativePeaks, grid=(row, 0))
-        setattr(self, NegativePeaks, CheckBox(self.pipeFrame, text='', checked=True, grid=(row, 1)))
 
-        row += 1
-        self.noiseLevelFactorLabel = Label(self.pipeFrame, text=NoiseLevelFactor, grid=(row, 0))
-        setattr(self, NoiseLevelFactor, DoubleSpinbox(self.pipeFrame, value=0.5, min=0.01, step=0.1, grid=(row, 1)))
 
 
 ########################################################################################################################
@@ -97,20 +84,14 @@ class PeakPicker1DPipe(SpectraPipe):
     pipeName = PipeName
 
     _kwargs = {
-        ExcludeRegions  : DefaultExcludeRegions,
-        NoiseLevelFactor: DefaultNoiseThresholdFactor,
-        NegativePeaks   : True,
-
-        }
+               ExcludeRegions  : DefaultExcludeRegions,
+              }
 
     def runPipe(self, spectra):
         '''
         :param data:
         :return:
         '''
-
-        negativePeaks = self._kwargs[NegativePeaks]
-        noiseLevelFactor = self._kwargs[NoiseLevelFactor]
 
         if ExcludeRegions in self.pipeline._kwargs:
             excludeRegions = self.pipeline._kwargs[ExcludeRegions]
@@ -120,9 +101,9 @@ class PeakPicker1DPipe(SpectraPipe):
 
         for spectrum in self.inputData:
             if len(spectrum.peakLists) > 0:
-                spectrum.peakLists[DefaultPeakListIndex].peakFinder1D(deltaFactor=noiseLevelFactor,
+                spectrum.peakLists[DefaultPeakListIndex].peakFinder1D(maxNoiseLevel=spectrum.noiseLevel,
                                                                       ignoredRegions=excludeRegions,
-                                                                      negativePeaks=negativePeaks)
+                                                                      )
             else:
                 getLogger().warning('Error: PeakList not found for Spectrum: %s. Add a new PeakList first' % spectrum.pid)
 

@@ -29,10 +29,11 @@ from ccpn.ui.gui.widgets.LinearRegionsPlot import TargetButtonSpinBoxes
 from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
-from ccpn.core.lib.SpectrumLib import _oldEstimateNoiseLevel1D
+from ccpn.core.PeakList import _filterROI1Darray, estimateNoiseLevel1D
 import numpy as np
 
 
@@ -43,19 +44,27 @@ import numpy as np
 
 PipeName = 'Noise Threshold'
 NoiseThreshold = 'Noise_Threshold'
+UseRegion = 'Calibration_region'
 EstimateNoiseThreshold = 'Estimate_Noise_Threshold'
+IncreaseBySTD = 'Add_STD'
+
 DefaultEstimateNoiseThreshold = False
 DefaultNoiseThreshold = [0, 0]
-
+DefaultCalibration_region = [14,12]
+DefaultIncreaseBySTD = 0.50
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
 
-def _getNoiseThreshold(spectrum, factor=5):
+def _getNoiseThreshold(spectrum, roi, stdFactor):
     if spectrum is not None:
-        x, y = np.array(spectrum.positions), np.array(spectrum.intensities)
-        return _oldEstimateNoiseLevel1D(y, factor=factor)
+        x, y =spectrum.positions, spectrum.intensities
+        xRoi, yRoi = _filterROI1Darray(x,y,roi)
+        maxNL, minNL = estimateNoiseLevel1D(yRoi, f=100, stdFactor=stdFactor)
+        return maxNL, minNL
+
+
 
 
 ########################################################################################################################
@@ -71,27 +80,50 @@ class NoiseThresholdGuiPipe(GuiPipe):
         super(NoiseThresholdGuiPipe, self)
         GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
         self._parent = parent
-
-        self.estimateNoiseThresholdLabel = Label(self.pipeFrame, EstimateNoiseThreshold, grid=(0, 0))
+        i=0
+        self.estimateNoiseThresholdLabel = Label(self.pipeFrame, EstimateNoiseThreshold, grid=(i, 0))
         setattr(self, EstimateNoiseThreshold,
-                CheckBox(self.pipeFrame, checked=DefaultEstimateNoiseThreshold, callback=self._manageButtons, grid=(0, 1)))
+                CheckBox(self.pipeFrame, checked=DefaultEstimateNoiseThreshold, callback=self._manageButtons, grid=(i, 1)))
+        i += 1
+        # auto noise widgets
+        self.noiseThresholdLabel = Label(self.pipeFrame, text=UseRegion, grid=(i, 0))
+        setattr(self, UseRegion,
+                GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application, colour='red',
+                                        orientation='v', values=DefaultCalibration_region, grid=(i, 1)))
 
-        self.noiseThresholdLabel = Label(self.pipeFrame, text=NoiseThreshold, grid=(1, 0))
+        i += 1
+        self.addError = Label(self.pipeFrame, IncreaseBySTD, grid=(i, 0))
+        setattr(self, IncreaseBySTD,
+                DoubleSpinbox(self.pipeFrame, value=DefaultIncreaseBySTD, min=0.0, max=None,
+                              step=0.5, prefix=None, suffix=None, showButtons=True, decimals=3, grid=(i, 1)))
+
+        # manual noise widgets
+        i += 1
+        self.noiseThresholdLabel = Label(self.pipeFrame, text=NoiseThreshold, grid=(i, 0))
         setattr(self, NoiseThreshold, GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application, colour='green',
-                                                              orientation='h', grid=(1, 1)))
+                                                              orientation='h', grid=(i, 1)))
         self._manageButtons()
 
     def _manageButtons(self):
         checkBox = _getWidgetByAtt(self, EstimateNoiseThreshold)
         noiseThreshold = _getWidgetByAtt(self, NoiseThreshold)
+        calibrRegion = _getWidgetByAtt(self, UseRegion)
+        addStd = _getWidgetByAtt(self, IncreaseBySTD)
+
         if checkBox.isChecked():
             noiseThreshold.setDisabled(True)
+            calibrRegion.setDisabled(False)
+            addStd.setDisabled(False)
+
         else:
             noiseThreshold.setDisabled(False)
+            calibrRegion.setDisabled(True)
+            addStd.setDisabled(True)
 
     def _closeBox(self):
         'remove the lines from plotwidget if any'
         _getWidgetByAtt(self, NoiseThreshold)._turnOffPositionPicking()
+        _getWidgetByAtt(self, UseRegion)._turnOffPositionPicking()
         self.closeBox()
 
 
@@ -106,7 +138,9 @@ class NoiseThresholdPipe(SpectraPipe):
 
     _kwargs = {
         EstimateNoiseThreshold: DefaultEstimateNoiseThreshold,
-        NoiseThreshold        : DefaultNoiseThreshold
+        NoiseThreshold        : DefaultNoiseThreshold,
+        UseRegion             : DefaultCalibration_region,
+        IncreaseBySTD         : DefaultIncreaseBySTD,
         }
 
     def runPipe(self, spectra):
@@ -120,8 +154,11 @@ class NoiseThresholdPipe(SpectraPipe):
         for spectrum in spectra:
             if spectrum is not None:
                 if self._kwargs[EstimateNoiseThreshold]:
-                    spectrum.noiseLevel = _getNoiseThreshold(spectrum)
-                    self._kwargs.update({NoiseThreshold: [spectrum.noiseLevel, -spectrum.noiseLevel]})
+                    roi = self._kwargs[UseRegion]
+                    stdFactor = self._kwargs[IncreaseBySTD]
+                    maxNL, minNL = _getNoiseThreshold(spectrum, roi, stdFactor)
+                    spectrum.noiseLevel = maxNL
+                    self._kwargs.update({NoiseThreshold: [spectrum.noiseLevel, minNL]})
                 else:
                     spectrum.noiseLevel = max(self._kwargs[NoiseThreshold])
 

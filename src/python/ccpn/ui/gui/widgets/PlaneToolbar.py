@@ -29,27 +29,24 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from functools import partial
-
+import json
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.guiSettings import textFont, getColours, STRIPHEADER_BACKGROUND, \
     STRIPHEADER_FOREGROUND, GUINMRRESIDUE
-
-import json
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
-
 from PyQt5 import QtGui, QtWidgets, QtCore
 
 
 STRIPLABEL_CONNECTDIR = '_connectDir'
 STRIPLABEL_CONNECTNONE = 'none'
+SINGLECLICK = 'click'
+DOUBLECLICK = 'doubleClick'
 
 
 class _StripLabel(Label):
@@ -57,12 +54,16 @@ class _StripLabel(Label):
     Specific Label to be used in Strip displays
     """
 
-    def __init__(self, parent, text, dragKey=DropBase.TEXT, **kwds):
+    def __init__(self, parent, mainWindow, text, dragKey=DropBase.PIDS, **kwds):
 
         super().__init__(parent, text, **kwds)
         # The text of the label can be dragged; it will be passed on in the dict under key dragKey
 
         self._parent = parent
+        self.mainWindow = mainWindow
+        self.application = mainWindow.application
+        self.project = mainWindow.project
+
         self._dragKey = dragKey
         self.setAcceptDrops(True)
         # self.setDragEnabled(True)           # not possible for Label
@@ -71,24 +72,32 @@ class _StripLabel(Label):
         self.eventFilter = self._eventFilter
         self.installEventFilter(self)
 
+        self._lastClick = None
+        self._mousePressed = False
+
         # disable any drop event callback's until explicitly defined later
         self.setDropEventCallback(None)
 
-    def _mousePressEvent(self, event: QtGui.QMouseEvent):
+    def _createDragEvent(self, mouseDict):           # event: QtGui.QMouseEvent):
         """
         Re-implementation of the mouse press event to enable a NmrResidue label to be dragged as a json object
         containing its id and a modifier key to encode the direction to drop the strip.
         """
-        event.accept()
+        if not self.project.getByPid(self.text()):
+            # label does not point to an object
+            return
+
         mimeData = QtCore.QMimeData()
         # create the dataDict
-        dataDict = {self._dragKey: self.text()}
+        dataDict = {self._dragKey: [self.text()],
+                    DropBase.TEXT: self.text()
+                    }
         connectDir = self._connectDir if hasattr(self, STRIPLABEL_CONNECTDIR) else STRIPLABEL_CONNECTNONE
         dataDict[STRIPLABEL_CONNECTDIR] = connectDir
 
         # update the dataDict with all mouseEvents﻿{"controlRightMouse": false, "text": "NR:@-.@27.", "leftMouse": true, "controlShiftMiddleMouse": false, "middleMouse": false, "controlMiddleMouse": false, "controlShiftLeftMouse": false, "controlShiftRightMouse": false, "shiftMiddleMouse": false, "_connectDir": "isRight", "controlLeftMouse": false, "rightMouse": false, "shiftLeftMouse": false, "shiftRightMouse": false}
-        dataDict.update(getMouseEventDict(event))
-        # convert into json
+        dataDict.update(mouseDict)
+        # convert to json
         itemData = json.dumps(dataDict)
 
         # ejb - added so that itemData works with PyQt5
@@ -120,7 +129,7 @@ class _StripLabel(Label):
         drag.setPixmap(pixmap)
 
         # drag.setHotSpot(event.pos())
-        drag.setHotSpot(QtCore.QPoint(dragLabel.width() / 2, dragLabel.height() / 2))
+        drag.setHotSpot(QtCore.QPoint(dragLabel.width() // 2, dragLabel.height() // 2))
 
         # drag.targetChanged.connect(self._targetChanged)
         drag.exec_(QtCore.Qt.CopyAction)
@@ -135,60 +144,47 @@ class _StripLabel(Label):
         and allows changing of the cursor (cursor not changing properly in pyqt5) - ejb
         """
         if event.type() == QtCore.QEvent.MouseButtonPress:
-            self._mousePressEvent(event)  # call the standard mouse event
+
+            # process the single click event
+            self._mousePressEvent(event)
             return True
 
-        # if event.type() == QtCore.QEvent.DragEnter:
-        #     self._source = event.source()
-        #     if isinstance(obj, _StripLabel) and self._source != self:
-        #         mime = event.mimeData().text()
-        #         dataItem = json.loads(mime)
-        #         if 'text' in dataItem and dataItem['text'].startswith('NR'):
-        #             # only test NmrResidues
-        #             #   print('>>>DragEnterFilter %s' % dataItem['text'])
-        #             #   QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.DragCopyCursor)
-        #             #   event.setDropAction(QtCore.Qt.CopyAction)
-        #             QtWidgets.QApplication.processEvents()
-        #             event.accept()
-        #             return True
-        #
-        #     event.ignore()
-        #     return False
+        if event.type() == QtCore.QEvent.MouseButtonDblClick:
 
-        # if event.type() == QtCore.QEvent.DragLeave:
-        #     # QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.ClosedHandCursor)
-        #     # QtWidgets.QApplication.restoreOverrideCursor()
-        #     # QtWidgets.QApplication.processEvents()
-        #     # print('>>>DragLeaveFilter')
-        #     # event.setDropAction(QtCore.Qt.MoveAction)
-        #     event.ignore()
-        #     return True
-        #
-        # if event.type() == QtCore.QEvent.Leave:
-        #     # QtWidgets.QApplication.restoreOverrideCursor()
-        #     # QtWidgets.QApplication.processEvents()
-        #     # print('>>>DragLeaveFilter')
-        #     # event.setDropAction(QtCore.Qt.MoveAction)
-        #     event.accept()
-        #     return True
-        #
-        # if event.type() == QtCore.QEvent.MouseMove:
-        #     if not isinstance(obj, _StripLabel):
-        #         # QtWidgets.QApplication.restoreOverrideCursor()
-        #         # QtWidgets.QApplication.processEvents()
-        #         # print(">>>MoveFilter")
-        #         event.accept()
-        #         return True
+            # process the doubleClick event
+            self._mouseButtonDblClick(event)
+            return True
 
-        if event.type() == QtCore.QEvent.Drop:
-            # QtWidgets.QApplication.restoreOverrideCursor()
-            # QtWidgets.QApplication.processEvents()
-            # print(">>>DropFilter")
-            # event.setDropAction(QtCore.Qt.MoveAction)
-            event.ignore()
-            # no return True needed, so BackboneAssignment._processDroppedItem still fires
+        if event.type() == QtCore.QEvent.MouseButtonRelease:
+
+            # process the mouse release event
+            self._mouseReleaseEvent(event)
+            return True
 
         return super(_StripLabel, self).eventFilter(obj, event)  # do the rest
+
+    def _mousePressEvent(self, event):
+        self._mousePressed = True
+        if not self._lastClick:
+            self._lastClick = SINGLECLICK
+
+        if self._lastClick == SINGLECLICK:
+            mouseDict = getMouseEventDict(event)
+            QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval(),
+                                     partial(self._handleMouseClicked, mouseDict))
+
+    def _mouseButtonDblClick(self, event):
+        self._lastClick = DOUBLECLICK
+
+    def _mouseReleaseEvent(self, event):
+        self._mousePressed = False
+
+    def _handleMouseClicked(self, mouseDict):
+        """handle a single mouse event, but ignore double click events
+        """
+        if self._lastClick == SINGLECLICK and self._mousePressed:
+            self._createDragEvent(mouseDict)
+        self._lastClick = None
 
 
 #TODO:GEERTEN: complete this and replace
@@ -205,7 +201,7 @@ class PlaneSelectorWidget(Widget):
         self.strip = strip
         self.axis = axis
 
-        width = 20;
+        width = 20
         height = 20
 
         self.previousPlaneButton = Button(parent=self, text='<', grid=(0, 0),
@@ -226,18 +222,6 @@ class PlaneSelectorWidget(Widget):
                                                callback=self._planeCountChanged, objectName='PlaneSelectorWidget_planeCount'
                                                )
         self.planeCountSpinBox.setFixedHeight(height)
-
-    def _previousPlane(self):
-        print('clicked previous')
-
-    def _nextPlane(self):
-        print('clicked previous')
-
-    def _spinBoxChanged(self, value):
-        print('spinBox chnaged to:', value)
-
-    def _planeCountChanged(self, value):
-        print('planeCount changed to:', value)
 
 
 class PlaneToolbar(ToolBar):
@@ -315,7 +299,7 @@ class StripHeader(Widget):
         self._labels = {}
 
         for lab in STRIPPOSITIONS:
-            self._labels[lab] = _StripLabel(parent=self,
+            self._labels[lab] = _StripLabel(parent=self, mainWindow=mainWindow,
                                             text='', spacing=(0, 0),
                                             grid=(0, STRIPPOSITIONS.index(lab)))
 

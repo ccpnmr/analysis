@@ -446,7 +446,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     showWarning('Forbidden drop', 'A Single spectrum cannot be dropped onto grouped displays.')
                     return success
 
-                with undoBlockManager():
+                with undoBlock():
                     self.displaySpectrum(obj)
 
                 if strip in self.strips:
@@ -462,15 +462,15 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 success = True
             elif obj is not None and isinstance(obj, PeakList):
-                with undoBlockManager():
+                with undoBlock():
                     self._handlePeakList(obj)
                 success = True
             elif obj is not None and isinstance(obj, SpectrumGroup):
-                with undoBlockManager():
+                with undoBlock():
                     self._handleSpectrumGroup(obj)
                 success = True
             elif obj is not None and isinstance(obj, Sample):
-                with undoBlockManager():
+                with undoBlock():
                     self._handleSample(obj)
                 success = True
             elif obj is not None and isinstance(obj, NmrAtom):
@@ -484,6 +484,9 @@ class GuiSpectrumDisplay(CcpnModule):
 
             elif obj is not None and isinstance(obj, GuiStrip):
                 self._handleStrip(obj, strip)
+
+            elif obj is not None and isinstance(obj, Peak):
+                self._handlePeak(obj, strip)
 
             else:
                 showWarning('Dropped item "%s"' % obj.pid, 'Wrong kind; drop Spectrum, SpectrumGroup, PeakList,'
@@ -499,6 +502,34 @@ class GuiSpectrumDisplay(CcpnModule):
                 self._handleNmrAtoms(nmrAtoms)
 
         return success
+
+    def _handlePeak(self, peak, strip, widths=None):
+        """Navigate to the peak position in the strip
+        """
+        from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
+        # strip = self.strips[ii]
+
+        newWidths = [0.2] * len(self.axisCodes)
+        pos = [None] * len(self.axisCodes)
+        mappedNewWidths = ['full'] * len(self.axisCodes)
+        newWidths = ['full'] * len(self.axisCodes)
+
+        if widths == None:
+            # set the width in case of nD (n>2)
+            _widths = {'H': 0.3, 'C': 1.0, 'N': 1.0}
+            _ac = strip.axisCodes[0]
+            _w = _widths.setdefault(_ac[0], 1.0)
+            newWidths[0] = _w
+
+        indices = strip._getAxisCodeIndices(peak.peakList.spectrum)
+        for ind, ii in enumerate(indices):
+            if ii < len(pos):
+                pos[ii] = peak.position[ind]
+                mappedNewWidths[ii] = newWidths[ind]
+
+        navigateToPositionInStrip(strip, pos, self.axisCodes, widths=mappedNewWidths)
+        strip.header.reset()
+        strip.header.setLabelText(position='c', text=peak.pid)
 
     def _handleStrip(self, moveStrip, dropStrip):
         """Move a strip within a spectrumDisplay by dragging the strip label to another strip

@@ -65,12 +65,9 @@ from ccpn.ui.gui.lib.Strip import GuiStrip
 from ccpn.ui._implementation.PeakListView import PeakListView
 from ccpn.ui._implementation.IntegralListView import IntegralListView
 from ccpn.ui._implementation.MultipletListView import MultipletListView
-from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySettings
 from ccpn.ui._implementation.SpectrumView import SpectrumView
-from ccpn.core.lib.ContextManagers import logCommandBlock, undoBlockManager, \
-    newObject, deleteObject, undoStackBlocking, \
-    notificationBlanking, _storeDeleteObjectCurrent, BlankedPartial, undoBlock
+from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, BlankedPartial, undoBlock
 from ccpn.util.decorators import logCommand
 from ccpn.util.Common import makeIterableList
 from ccpn.core.lib import Undo
@@ -944,9 +941,6 @@ class GuiSpectrumDisplay(CcpnModule):
                         % (self.pid,))
             return
 
-        # with logCommandBlock(get='self') as log:
-        #     log('deleteStrip', strip=repr(strip.pid))
-
         with undoBlock():
             with undoStackBlocking() as addUndoItem:
                 # retrieve list of created items from the api
@@ -1128,9 +1122,6 @@ class GuiSpectrumDisplay(CcpnModule):
         if self.phasingFrame.isVisible():
             showWarning(str(self.windowTitle()), 'Please disable Phasing Console before adding strips')
             return
-
-        # with logCommandBlock(get='self') as log:
-        #     log('addStrip')
 
         with undoBlock():
             with undoStackBlocking() as addUndoItem:
@@ -1413,9 +1404,6 @@ class GuiSpectrumDisplay(CcpnModule):
         """Display additional spectrum, with spectrum axes ordered according ton axisOrder
         """
         spectrum = self.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
-
-        # with logCommandBlock(get='self') as log:
-        #     log('displaySpectrum', spectrum=repr(spectrum.pid))
 
         with undoBlock():
             oldIndex = self.getOrderedSpectrumViewsIndex()

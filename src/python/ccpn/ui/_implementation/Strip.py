@@ -357,16 +357,17 @@ class Strip(AbstractWrapperObject):
         # move the strip
         self._wrappedData.moveTo(newIndex)
 
+    @logCommand(get='self')
     def resetAxisOrder(self):
         """Reset display to original axis order"""
-        with logCommandBlock(get='self') as log:
-            log('resetAxisOrder')
+        with undoBlock():
             self._wrappedData.resetAxisOrder()
 
     def findAxis(self, axisCode):
         """Find axis"""
         return self._project._data2Obj.get(self._wrappedData.findAxis(axisCode))
 
+    @logCommand(get='self')
     def displaySpectrum(self, spectrum: Spectrum, axisOrder: Sequence = ()):
         """Display additional spectrum on strip, with spectrum axes ordered according to axisOrder
         """
@@ -422,9 +423,7 @@ class Strip(AbstractWrapperObject):
         else:
             stripSerial = 0
 
-        with logCommandBlock(get='self') as log:
-            log('displaySpectrum', spectrum=repr(spectrum.pid))
-
+        with undoBlock():
             # Make spectrumView
             obj = apiStrip.spectrumDisplay.newSpectrumView(spectrumName=dataSource.name,
                                                            stripSerial=stripSerial, dataSource=dataSource,

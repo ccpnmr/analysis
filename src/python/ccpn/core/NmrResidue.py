@@ -38,7 +38,7 @@ from ccpnmodel.ccpncore.lib.Constants import defaultNmrChainCode
 from ccpn.core import _importOrder
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject, \
-    ccpNmrV3CoreSetter, logCommandBlock, renameObjectNoBlanking
+    ccpNmrV3CoreSetter, logCommandBlock, renameObjectNoBlanking, undoBlock
 from ccpn.util.Logging import getLogger
 
 
@@ -278,6 +278,7 @@ class NmrResidue(AbstractWrapperObject):
         #
         return result
 
+    @logCommand(get='self')
     def connectNext(self, nmrResidue: typing.Union['NmrResidue', str]) -> NmrChain:
         """Connect free end of self to free end of next residue in sequence,
         and return resulting connected NmrChain
@@ -324,9 +325,7 @@ class NmrResidue(AbstractWrapperObject):
         elif apiNmrChain.isConnected and apiValueNmrChain is apiNmrChain:
             raise ValueError("Cannot make cyclical connected NmrChain")
 
-        with logCommandBlock(get='self') as log:
-            log('connectNext', nmrResidue=repr(nmrResidue.pid))
-
+        with undoBlock():
             if apiNmrChain.isConnected:
 
                 # At this point, self must be the last NmrResidue in a connected chain
@@ -368,9 +367,9 @@ class NmrResidue(AbstractWrapperObject):
 
         return result
 
+    @logCommand(get='self')
     def deassignNmrChain(self):
-        with logCommandBlock(get='self') as log:
-            log('deassignNmrChain')
+        with undoBlock():
             if self.residue is not None:  # assigned to chain
                 self._deassignNmrChain()
             else:
@@ -406,9 +405,9 @@ class NmrResidue(AbstractWrapperObject):
             self._deassignSingle()
         return None
 
+    @logCommand(get='self')
     def disconnectAll(self):
-        with logCommandBlock(get='self') as log:
-            log('disconnectAll')
+        with undoBlock():
             if self.residue is not None:  # assigned to chain
                 self._disconnectAssignedAll(assigned=True)
             else:
@@ -419,9 +418,9 @@ class NmrResidue(AbstractWrapperObject):
         for nmr in self._getAllConnectedList():
             nmr._deassignSingle()
 
+    @logCommand(get='self')
     def disconnectNext(self) -> typing.Optional['NmrChain']:
-        with logCommandBlock(get='self') as log:
-            log('disconnectNext')
+        with undoBlock():
             if self.residue is not None:  # assigned to chain
                 newNmrChain = self._disconnectAssignedNext()
             else:
@@ -546,6 +545,7 @@ class NmrResidue(AbstractWrapperObject):
 
         return result
 
+    @logCommand(get='self')
     def connectPrevious(self, nmrResidue=None) -> NmrChain:
         """Connect free end of self to free end of previous residue in sequence,
         and return resulting connected NmrChain
@@ -594,9 +594,7 @@ class NmrResidue(AbstractWrapperObject):
         elif apiNmrChain.isConnected and apiValueNmrChain is apiNmrChain:
             raise ValueError("Cannot make cyclical connected NmrChain")
 
-        with logCommandBlock(get='self') as log:
-            log('connectPrevious', nmrResidue=repr(nmrResidue.pid))
-
+        with undoBlock():
             if apiNmrChain.isConnected:
                 # At this point, self must be the first NmrResidue in a connected chain
                 undo = apiValueNmrChain.root._undo
@@ -650,21 +648,21 @@ class NmrResidue(AbstractWrapperObject):
     # def _bubbleTail(self, ll):
     #     ll.append(ll.pop(0))
 
+    @logCommand(get='self')
     def unlinkPreviousNmrResidue(self):
-        with logCommandBlock(get='self') as log:
-            log('unlinkPreviousNmrResidue')
+        with undoBlock():
             if self.residue is not None:  # assigned to chain
                 self._disconnectAssignedPrevious()
 
+    @logCommand(get='self')
     def unlinkNextNmrResidue(self):
-        with logCommandBlock(get='self') as log:
-            log('unlinkNextNmrResidue')
+        with undoBlock():
             if self.residue is not None:  # assigned to chain
                 self._disconnectAssignedNext()
 
+    @logCommand(get='self')
     def disconnectPrevious(self):
-        with logCommandBlock(get='self') as log:
-            log('disconnectPrevious')
+        with undoBlock():
             if self.residue is not None:  # assigned to chain
                 self._disconnectAssignedPrevious()
             else:
@@ -762,9 +760,9 @@ class NmrResidue(AbstractWrapperObject):
 
                 return newNmrChain
 
+    @logCommand(get='self')
     def disconnect(self):
-        with logCommandBlock(get='self') as log:
-            log('disconnect')
+        with undoBlock():
             if self.residue is not None:  # assigned to chain
                 self._disconnectAssigned()
             else:
@@ -920,14 +918,15 @@ class NmrResidue(AbstractWrapperObject):
             else:
                 apiResonanceGroup.newResidueTypeProb(chemComp=chemComp, weight=weight)
 
+    @logCommand(get='self')
     def deassign(self):
         """Reset sequenceCode and residueType assignment to default values"""
-        with logCommandBlock(get='self') as log:
-            log('deassign')
+        with undoBlock():
             apiResonanceGroup = self._apiResonanceGroup
             apiResonanceGroup.sequenceCode = None
             apiResonanceGroup.resetResidueType(None)
 
+    @logCommand(get='self')
     def moveToNmrChain(self, newNmrChain: typing.Union['NmrChain', str] = 'NC:@-', sequenceCode: str = None, residueType: str = None):
         """Move residue to newNmrChain, breaking connected NmrChain if necessary.
         Optionally rename residue using sequenceCode and residueType
@@ -954,10 +953,7 @@ class NmrResidue(AbstractWrapperObject):
 
         nmrChain = self.nmrChain
 
-        #print('>>> start try')
-        with logCommandBlock(get='self') as log:
-            log('moveToNmrChain')
-
+        with undoBlock():
             try:
                 # if needed: move self to newNmrChain
                 movedChain = False
@@ -981,6 +977,7 @@ class NmrResidue(AbstractWrapperObject):
                     apiResonanceGroup.moveToNmrChain(nmrChain._wrappedData)
                 raise es
 
+    @logCommand(get='self')
     def assignTo(self, chainCode: str = None, sequenceCode: typing.Union[int, str] = None,
                  residueType: str = None, mergeToExisting: bool = False) -> 'NmrResidue':
 
@@ -1009,9 +1006,7 @@ class NmrResidue(AbstractWrapperObject):
         clearUndo = False
         undo = apiResonanceGroup.root._undo
 
-        with logCommandBlock(get='self') as log:
-            log('assignTo')
-
+        with undoBlock():
             sequenceCode = str(sequenceCode) if sequenceCode else None
             # apiResonanceGroup = self._apiResonanceGroup
 
@@ -1205,8 +1200,6 @@ class NmrResidue(AbstractWrapperObject):
                 if ll and ll != [self]:
                     raise ValueError("Cannot rename %s to %s.%s - assignment already exists" % (self, self.nmrChain.id, value))
 
-            # with logCommandBlock(get='self') as log:
-            #     log('rename')
             oldName = '.'.join((apiResonanceGroup.sequenceCode, apiResonanceGroup.residueType or ''))
             apiResonanceGroup.sequenceCode = sequenceCode
             apiResonanceGroup.resetResidueType(residueType)

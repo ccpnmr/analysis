@@ -85,7 +85,7 @@ class GuiStrip(Frame):
         self.setMinimumHeight(150)
 
         self.layout().setSpacing(0)
-        self.header = StripHeader(parent=self, mainWindow=self.mainWindow,
+        self.header = StripHeader(parent=self, mainWindow=self.mainWindow, strip=self,
                                   grid=(0, 0), gridSpan=(1, 2), setLayout=True, spacing=(0, 0))
 
         self._useCcpnGL = True

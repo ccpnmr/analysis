@@ -41,7 +41,8 @@ from ccpn.ui.gui.guiSettings import textFont, getColours, STRIPHEADER_BACKGROUND
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
 from PyQt5 import QtGui, QtWidgets, QtCore
-
+from ccpn.core.Peak import Peak
+from ccpn.core.NmrResidue import NmrResidue
 
 STRIPLABEL_CONNECTDIR = '_connectDir'
 STRIPLABEL_CONNECTNONE = 'none'
@@ -54,12 +55,14 @@ class _StripLabel(Label):
     Specific Label to be used in Strip displays
     """
 
-    def __init__(self, parent, mainWindow, text, dragKey=DropBase.PIDS, **kwds):
+    def __init__(self, parent, mainWindow, strip, text, dragKey=DropBase.PIDS, **kwds):
 
         super().__init__(parent, text, **kwds)
         # The text of the label can be dragged; it will be passed on in the dict under key dragKey
 
         self._parent = parent
+        self.strip = strip
+        self.spectrumDisplay = self.strip.spectrumDisplay
         self.mainWindow = mainWindow
         self.application = mainWindow.application
         self.project = mainWindow.project
@@ -175,6 +178,7 @@ class _StripLabel(Label):
 
     def _mouseButtonDblClick(self, event):
         self._lastClick = DOUBLECLICK
+        self._processDoubleClick(self.text())
 
     def _mouseReleaseEvent(self, event):
         self._mousePressed = False
@@ -185,6 +189,23 @@ class _StripLabel(Label):
         if self._lastClick == SINGLECLICK and self._mousePressed:
             self._createDragEvent(mouseDict)
         self._lastClick = None
+
+    def _processDoubleClick(self, obj):
+        """Process the doubleClick event, action the clicked stripHeader in the selected strip
+        """
+        from ccpn.ui.gui.lib.SpectrumDisplay import navigateToPeakInStrip, navigateToNmrResidueInStrip
+
+        obj = self.project.getByPid(obj) if isinstance(obj, str) else obj
+        if obj:
+            spectrumDisplays = self.spectrumDisplay._spectrumDisplaySettings.displaysWidget._getDisplays()
+            for specDisplay in spectrumDisplays:
+
+                if specDisplay.strips:
+                    if isinstance(obj, Peak):
+                        navigateToPeakInStrip(specDisplay, specDisplay.strips[0], obj)
+
+                    elif isinstance(obj, NmrResidue):
+                        navigateToNmrResidueInStrip(specDisplay, specDisplay.strips[0], obj)
 
 
 #TODO:GEERTEN: complete this and replace
@@ -290,7 +311,7 @@ STRIPPOSITIONS = (STRIPPOSITION_LEFT, STRIPPOSITION_CENTRE, STRIPPOSITION_RIGHT)
 
 
 class StripHeader(Widget):
-    def __init__(self, parent, mainWindow, **kwds):
+    def __init__(self, parent, mainWindow, strip, **kwds):
         super().__init__(parent=parent, **kwds)
 
         self._parent = parent
@@ -299,7 +320,7 @@ class StripHeader(Widget):
         self._labels = {}
 
         for lab in STRIPPOSITIONS:
-            self._labels[lab] = _StripLabel(parent=self, mainWindow=mainWindow,
+            self._labels[lab] = _StripLabel(parent=self, mainWindow=mainWindow, strip=strip,
                                             text='', spacing=(0, 0),
                                             grid=(0, STRIPPOSITIONS.index(lab)))
 

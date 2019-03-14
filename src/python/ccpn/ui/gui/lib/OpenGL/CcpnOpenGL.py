@@ -2773,7 +2773,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 axisCode = self._axisCodes[0]
                 orientation = 'v'
 
-        self._infiniteLines.append(GLInfiniteLine(self.strip, self._regionList,
+        newInfiniteLine = GLInfiniteLine(self.strip, self._regionList,
                                                   values=values,
                                                   axisCode=axisCode,
                                                   orientation=orientation,
@@ -2784,10 +2784,11 @@ class CcpnGLWidget(QOpenGLWidget):
                                                   bounds=bounds,
                                                   obj=obj,
                                                   lineStyle=lineStyle,
-                                                  lineWidth=lineWidth))
+                                                  lineWidth=lineWidth)
+        self._infiniteLines.append(newInfiniteLine)
 
         self.update()
-        return self._infiniteLines[-1]
+        return newInfiniteLine
 
     def removeExternalRegion(self, region):
         pass
@@ -2853,7 +2854,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 axisCode = self._axisCodes[0]
                 orientation = 'v'
 
-        self._regions.append(GLRegion(self.strip, self._regionList,
+        newRegion = GLRegion(self.strip, self._regionList,
                                       values=values,
                                       axisCode=axisCode,
                                       orientation=orientation,
@@ -2862,11 +2863,12 @@ class CcpnGLWidget(QOpenGLWidget):
                                       movable=movable,
                                       visible=visible,
                                       bounds=bounds,
-                                      obj=obj))
+                                      obj=obj)
+        self._regions.append(newRegion)
 
         self._regionList.renderMode = GLRENDERMODE_REBUILD
         self.update()
-        return self._regions[-1]
+        return newRegion
 
     def buildRegions(self):
 
@@ -2940,16 +2942,17 @@ class CcpnGLWidget(QOpenGLWidget):
                         # build the string and add the extra axis code
                         label = rr.label if rr.label else rr.axisCode
 
-                        self._marksAxisCodes.append(GLString(text=label,
+                        newMarkString = GLString(text=label,
                                                              font=self.globalGL.glSmallFont,
                                                              x=textX,
                                                              y=textY,
                                                              color=(colR, colG, colB, 1.0),
                                                              GLContext=self,
-                                                             obj=None))
+                                                             obj=None)
                         # this is in the attribs
-                        self._marksAxisCodes[-1].axisIndex = axisIndex
-                        self._marksAxisCodes[-1].axisPosition = pos
+                        newMarkString.axisIndex = axisIndex
+                        newMarkString.axisPosition = pos
+                        self._marksAxisCodes.append(newMarkString)
 
                         index += 2
                         drawList.numVertices += 2
@@ -3622,19 +3625,21 @@ class CcpnGLWidget(QOpenGLWidget):
             colG = int(colour.strip('# ')[2:4], 16) / 255.0
             colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
-            tracesDict.append(GLVertexArray(numLists=1,
+            hSpectrum = GLVertexArray(numLists=1,
                                             renderMode=GLRENDERMODE_RESCALE,
                                             blendMode=False,
                                             drawMode=GL.GL_LINE_STRIP,
                                             dimension=2,
-                                            GLContext=self))
+                                            GLContext=self)
+            tracesDict.append(hSpectrum)
 
             # add extra vertices to give a horizontal line across the trace
-            x = np.append(x, (x[-1], x[0]))
+            xLen = x.size
+            x = np.append(x, (x[xLen-1], x[0]))
             # y = np.append(y, (positionPixel[1], positionPixel[1]))
 
             numVertices = len(x)
-            hSpectrum = tracesDict[-1]
+            # hSpectrum = tracesDict[-1]
             hSpectrum.indices = numVertices
             hSpectrum.numVertices = numVertices
             hSpectrum.indices = np.arange(numVertices, dtype=np.uint32)
@@ -3644,7 +3649,8 @@ class CcpnGLWidget(QOpenGLWidget):
             hSpectrum.colors = np.array(self._phasingTraceColour * numVertices, dtype=np.float32)
 
             # change to colour of the last 2 points to the spectrum colour
-            hSpectrum.colors[-8:] = (colR, colG, colB, 1.0, colR, colG, colB, 1.0)
+            colLen = hSpectrum.colors.size
+            hSpectrum.colors[colLen-8:colLen] = (colR, colG, colB, 1.0, colR, colG, colB, 1.0)
 
             # store the pre-phase data
             hSpectrum.data = data
@@ -3677,19 +3683,21 @@ class CcpnGLWidget(QOpenGLWidget):
             colG = int(colour.strip('# ')[2:4], 16) / 255.0
             colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
-            tracesDict.append(GLVertexArray(numLists=1,
+            vSpectrum = GLVertexArray(numLists=1,
                                             renderMode=GLRENDERMODE_RESCALE,
                                             blendMode=False,
                                             drawMode=GL.GL_LINE_STRIP,
                                             dimension=2,
-                                            GLContext=self))
+                                            GLContext=self)
+            tracesDict.append(vSpectrum)
 
             # add extra vertices to give a horizontal line across the trace
-            y = np.append(y, (y[-1], y[0]))
+            yLen = y.size
+            y = np.append(y, (y[yLen-1], y[0]))
             # x = np.append(x, (positionPixel[0], positionPixel[0]))
 
             numVertices = len(y)
-            vSpectrum = tracesDict[-1]
+            # vSpectrum = tracesDict[-1]
             vSpectrum.indices = numVertices
             vSpectrum.numVertices = numVertices
             vSpectrum.indices = np.arange(numVertices, dtype=np.uint32)
@@ -3699,7 +3707,8 @@ class CcpnGLWidget(QOpenGLWidget):
             vSpectrum.colors = np.array(self._phasingTraceColour * numVertices, dtype=np.float32)
 
             # change to colour of the last 2 points to the spectrum colour
-            vSpectrum.colors[-8:] = (colR, colG, colB, 1.0, colR, colG, colB, 1.0)
+            colLen = vSpectrum.colors.size
+            vSpectrum.colors[colLen-8:colLen] = (colR, colG, colB, 1.0, colR, colG, colB, 1.0)
 
             # store the pre-phase data
             vSpectrum.data = data
@@ -3752,7 +3761,8 @@ class CcpnGLWidget(QOpenGLWidget):
                                                          GLContext=self)
 
             # add extra vertices to give a horizontal line across the trace
-            x = np.append(x, (x[-1], x[0]))
+            xLen = x.size
+            x = np.append(x, (x[xLen-1], x[0]))
             y = np.append(y, (positionPixel[1], positionPixel[1]))
 
             numVertices = len(x)
@@ -3811,7 +3821,8 @@ class CcpnGLWidget(QOpenGLWidget):
                                                          GLContext=self)
 
             # add extra vertices to give a vertical line across the trace
-            y = np.append(y, (y[-1], y[0]))
+            yLen = y.size
+            y = np.append(y, (y[yLen-1], y[0]))
             x = np.append(x, (positionPixel[0], positionPixel[0]))
 
             numVertices = len(x)
@@ -4320,7 +4331,8 @@ class CcpnGLWidget(QOpenGLWidget):
         def check(ll):
             # check if a number ends in an even digit
             val = '%.0f' % (ll[3] / ll[4])
-            if val[-1] in '02468':
+            valLen = len(val)
+            if val[valLen-1] in '02468':
                 return True
 
         def valueToRatio(val, x0, x1):
@@ -5487,7 +5499,8 @@ class CcpnGLWidget(QOpenGLWidget):
             return [(n1 * dp[0] - n2 * dc[0]) * n3, (n1 * dp[1] - n2 * dc[1]) * n3]
 
         outputList = subjectPolygon
-        cp1 = clipPolygon[-1]
+        cLen = len(clipPolygon)
+        cp1 = clipPolygon[cLen-1]
 
         for clipVertex in clipPolygon:
             cp2 = clipVertex
@@ -5496,7 +5509,8 @@ class CcpnGLWidget(QOpenGLWidget):
             if not inputList:
                 break
 
-            s = inputList[-1]
+            ilLen = len(inputList)
+            s = inputList[ilLen-1]
 
             for subjectVertex in inputList:
                 e = subjectVertex
@@ -5536,7 +5550,8 @@ class CcpnGLWidget(QOpenGLWidget):
             return [(n1 * dp[0] - n2 * dc[0]) * n3, (n1 * dp[1] - n2 * dc[1]) * n3]
 
         outputList = subjectPolygon
-        cp1 = clipPolygon[-1]
+        cLen = len(clipPolygon)
+        cp1 = clipPolygon[cLen-1]
 
         for clipVertex in clipPolygon:
             cp2 = clipVertex
@@ -5545,7 +5560,8 @@ class CcpnGLWidget(QOpenGLWidget):
             if not inputList:
                 break
 
-            s = inputList[-1]
+            ilLen = len(inputList)
+            s = inputList[ilLen-1]
             e = inputList[0]
             if inside(e):
                 outputList.append(e)

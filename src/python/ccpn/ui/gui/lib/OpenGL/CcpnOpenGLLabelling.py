@@ -214,8 +214,8 @@ class GLpeakListMethods():
                 actualPlane = int(settings[GLDefs.SPECTRUM_VALUETOPOINT](zPosition) + 0.5) - 1
                 visiblePlaneList = self._GLParent.visiblePlaneList[spectrumView][0]
 
-                vpl = len(visiblePlaneList)
-                if actualPlane in visiblePlaneList[1:vpl-1]:
+                vplLen = len(visiblePlaneList)
+                if actualPlane in visiblePlaneList[1:vplLen-1]:
                     return True, False, 0, 1.0
 
                 elif not viewOutOfPlanePeaks:
@@ -224,7 +224,7 @@ class GLpeakListMethods():
                 elif actualPlane == visiblePlaneList[0]:
                     return False, True, 1, GLDefs.OUTOFPLANEFADE
 
-                elif actualPlane == visiblePlaneList[vpl-1]:
+                elif actualPlane == visiblePlaneList[vplLen-1]:
                     return False, True, 2, GLDefs.OUTOFPLANEFADE
 
                 return False, False, 0, 1.0

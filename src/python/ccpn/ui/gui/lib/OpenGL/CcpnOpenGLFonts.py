@@ -75,10 +75,10 @@ class CcpnGLFont():
         self.fontName = self.fontInfo[1].split()[0]
 
         fontInfo = self.fontInfo[1].split()
-        fi = len(fontInfo)
-        fontSize = fontInfo[fi-1]
-        fs = len(fontSize)
-        self.fontSize = int(fontSize[:(fs-2)])
+        fiLen = len(fontInfo)
+        fontSize = fontInfo[fiLen-1]
+        fsLen = len(fontSize)
+        self.fontSize = int(fontSize[:(fsLen-2)])
 
         # fontSize = self.fontInfo[1].split()[-1]
         # self.fontSize = int(fontSize[:-2])

@@ -333,7 +333,7 @@ class GLString(GLVertexArray):
         self._GLContext.globalGL._shaderProgramTex.setGLUniform1i('texture', self.font.activeTextureNum)
         super().drawTextArray()
 
-    def drawTextArrayVBO(self, enableVBO=False):
+    def drawTextArrayVBO(self, enableVBO=False, enableClientState=False, disableClientState=False):
         self._GLContext.globalGL._shaderProgramTex.setGLUniform1i('texture', self.font.activeTextureNum)
         super().drawTextArrayVBO(enableVBO=enableVBO)
 

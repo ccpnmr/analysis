@@ -35,7 +35,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_RESCALE, GLREND
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray
 from ccpn.core.Integral import Integral
 # spawn a redraw of the GL windows
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLREGIONTYPE, GLLINETYPE
 
 

@@ -35,7 +35,7 @@ __date__ = "$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $"
 
 from typing import Tuple, Optional, List
 from functools import partial
-from ccpn.core.lib.ContextManagers import logCommandBlock, undoStackBlocking
+from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock
 
 
 SPECTRUMVIEWINDEX = '_spectrumViewIndex'
@@ -131,8 +131,7 @@ class OrderedSpectrumViews(object):
         Set the ordering of the spectrumViews attached to the strip/spectrumDisplay
         :param spectrumIndex: tuple of ints
         """
-        with logCommandBlock(get='self') as log:
-            log('setOrderedSpectrumViewsIndex')
+        with undoBlock():
             with undoStackBlocking() as addUndoItem:
                 # _oldSpectrumViews = self._spectrumViewIndex
                 _oldSpectrumViews = self._retrieveOrderedSpectrumViewIndex()

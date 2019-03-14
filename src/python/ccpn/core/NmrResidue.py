@@ -1432,9 +1432,7 @@ def _fetchNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None
     #                             parName='newNmrResidue')
     # try:
 
-    with logCommandBlock(prefix='nmrResidue=', get='self') as log:
-        log('fetchNmrResidue')
-
+    with undoBlock():
         if sequenceCode is None:
             # Make new NmrResidue always
             result = self.newNmrResidue(sequenceCode=None, residueType=residueType)

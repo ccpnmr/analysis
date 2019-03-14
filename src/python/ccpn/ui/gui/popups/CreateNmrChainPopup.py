@@ -45,7 +45,7 @@ from ccpn.core.Chain import Chain
 from ccpn.core.Substance import Substance
 from ccpn.core.Complex import Complex
 from ccpn.util.Logging import getLogger
-from ccpn.core.lib.ContextManagers import logCommandBlock
+from ccpn.core.lib.ContextManagers import logCommandBlock, undoBlock
 
 
 CHAIN = Chain.className
@@ -188,8 +188,7 @@ class CreateNmrChainPopup(CcpnDialog):
         self.buttonBox.setButtonEnabled(Create, value)
 
     def _cloneFromChain(self, name):
-        with logCommandBlock(get='self') as log:
-            log('_cloneFromChain')
+        with undoBlock():
 
             newNmrChain = self._createEmptyNmrChain(name)
             if newNmrChain:
@@ -209,11 +208,10 @@ class CreateNmrChainPopup(CcpnDialog):
                     for atom in lastResidue.atoms:
                         lastNmrResidue.fetchNmrAtom(atom.name)
 
-            return newNmrChain
+                return newNmrChain
 
     def _cloneFromNmrChain(self, name):
-        with logCommandBlock(get='self') as log:
-            log('_cloneFromNmrChain')
+        with undoBlock():
 
             newNmrChain = self._createEmptyNmrChain(name)
             if newNmrChain:
@@ -239,12 +237,11 @@ class CreateNmrChainPopup(CcpnDialog):
                     for nmrAtom in lastNmrResidue.nmrAtoms:
                         lastTargetNmrResidue.fetchNmrAtom(nmrAtom.name)
 
-            return newNmrChain
+                return newNmrChain
 
     def _cloneFromSubstance(self, name):
         """Create a new nmr chain from a substance which has a SMILES set."""
-        with logCommandBlock(get='self') as log:
-            log('_cloneFromSubstance')
+        with undoBlock():
 
             newNmrChain = self._createEmptyNmrChain(name)
             if newNmrChain:
@@ -256,7 +253,7 @@ class CreateNmrChainPopup(CcpnDialog):
                     for atom in compound.atoms:
                         nmrAtom = nmrResidue.fetchNmrAtom(atom.name)
 
-            return newNmrChain
+                return newNmrChain
 
     # def _disableSubstanceWithoutSMILES(self):
     #   'disables from selection substances without SMILES'
@@ -405,7 +402,6 @@ if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
     from ccpn.ui.gui.widgets.Widget import Widget
-
 
     app = TestApplication()
     popup = CreateNmrChainPopup()

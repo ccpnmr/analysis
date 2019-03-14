@@ -275,12 +275,12 @@ class SpectrumDisplay(AbstractWrapperObject):
         # self.removeOrderedSpectrumView(index)
         pass
 
+    @logCommand(get='self')
     def removeOrderedSpectrumView(self, ind):
         defaults = collections.OrderedDict((('ind', None),))
 
         index = ind #.spectrumViews.index(spectrumView)
-        with logCommandBlock(get='self') as log:
-            log('removeOrderedSpectrumView')
+        with undoBlock():
 
             if not self._orderedSpectrumViews:
                 self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)

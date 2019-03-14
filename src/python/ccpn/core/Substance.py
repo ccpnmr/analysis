@@ -42,7 +42,7 @@ from ccpnmodel.ccpncore.lib import Util as coreUtil
 from ccpnmodel.ccpncore.lib.molecule import MoleculeModify
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, \
-    ccpNmrV3CoreSetter, logCommandBlock, renameObject
+    ccpNmrV3CoreSetter, logCommandBlock, renameObject, undoBlock
 from ccpn.util.Logging import getLogger
 
 
@@ -920,9 +920,7 @@ def _fetchSubstance(self: Project, name: str, labelling: str = None) -> Substanc
     apiRefComponentStore = self._apiNmrProject.sampleStore.refSampleComponentStore
     apiResult = apiRefComponentStore.findFirstComponent(name=name, labeling=apiLabeling)
 
-    with logCommandBlock(prefix='substance=', get='self') as log:
-        log('fetchSubstance')
-
+    with undoBlock():
         if apiResult:
             result = self._data2Obj[apiResult]
         else:

@@ -501,9 +501,7 @@ def _fetchNmrAtom(self: NmrResidue, name: str):
     """
     # resonanceGroup = self._wrappedData
 
-    with logCommandBlock(prefix='nmrAtom=', get='self') as log:
-        log('fetchNmrAtom')
-
+    with undoBlock():
         result = (self.getNmrAtom(name.translate(Pid.remapSeparators)) or
                   self.newNmrAtom(name=name))
 
@@ -520,8 +518,7 @@ def _produceNmrAtom(self: Project, atomId: str = None, chainCode: str = None,
     or explicit parameters, and find or create an NmrAtom that matches
     Empty chainCode gets NmrChain:@- ; empty sequenceCode get a new NmrResidue"""
 
-    with logCommandBlock(prefix='nmrAtom=', get='self') as log:
-        log('produceNmrAtom')
+    with undoBlock():
 
         # Get ID parts to use
         if sequenceCode is not None:

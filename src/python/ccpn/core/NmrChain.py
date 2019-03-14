@@ -39,7 +39,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrChain as ApiNmrChain
 from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.lib import Constants
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, logCommandBlock, undoStackBlocking, renameObject
+from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, logCommandBlock, undoStackBlocking, renameObject, undoBlock
 
 
 class NmrChain(AbstractWrapperObject):
@@ -159,12 +159,13 @@ class NmrChain(AbstractWrapperObject):
     #     # NB The API code will throw ValueError if there is already an NmrChain with that code
     #     self.rename(value._wrappedData.code)
 
+    @logCommand(get='self')
     def deassign(self):
         """Reset NmrChain back to its originalName, cutting all assignment links"""
-        with logCommandBlock(get='self') as log:
-            log('deassign')
+        with undoBlock():
             self._wrappedData.code = None
 
+    @logCommand(get='self')
     def assignSingleResidue(self, thisNmrResidue: typing.Union['NmrResidue'], firstResidue: typing.Union[Residue, str]):
         """Assign a single unconnected residue from the default '@-' chain"""
 
@@ -187,10 +188,10 @@ class NmrChain(AbstractWrapperObject):
                              % (thisNmrResidue.id, firstResidue.id))
 
         # If we get here we are OK - assign residues and delete NmrChain
-        with logCommandBlock(get='self') as log:
-            log('assignSingleResidue', thisNmrResidue=repr(firstResidue.pid))
+        with undoBlock():
             thisNmrResidue._wrappedData.assignedResidue = firstResidue._wrappedData
 
+    @logCommand(get='self')
     def assignConnectedResidues(self, firstResidue: typing.Union[Residue, str]):
         """Assign all NmrResidues in connected NmrChain sequentially,
         with the first NmrResidue assigned to firstResidue.
@@ -234,8 +235,7 @@ class NmrChain(AbstractWrapperObject):
                 residues.append(next)
 
         # check whether
-        with logCommandBlock(get='self') as log:
-            log('assignConnectedResidues', firstResidue=repr(firstResidue.pid))
+        with undoBlock():
 
             tempChain = self.project.fetchNmrChain(firstResidue.chain.shortName)
             for ii, res in enumerate(residues):
@@ -249,6 +249,7 @@ class NmrChain(AbstractWrapperObject):
             if not V3nmrChain.id.startswith('@-'):
                 V3nmrChain.delete()
 
+    @logCommand(get='self')
     def reverse(self, _force=False):
         """Reverse order of NmrResidues within NmrChain
 
@@ -259,13 +260,13 @@ class NmrChain(AbstractWrapperObject):
             raise ValueError("NmrChain is assigned (to %s) and cannot be reversed"
                              % self.chain.longPid)
 
-        with logCommandBlock(get='self') as log:
-            log('reverse')
+        with undoBlock():
             with undoStackBlocking() as addUndoItem:
                 self._wrappedData.__dict__['mainResonanceGroups'].reverse()
 
                 addUndoItem(undo=partial(self.reverse), redo=partial(self.reverse))
 
+    @logCommand(get='self')
     def renumberNmrResidues(self, offset: int, start: int = None, stop: int = None):
         """Renumber nmrResidues in range start-stop (inclusive) by adding offset
 
@@ -282,8 +283,7 @@ class NmrChain(AbstractWrapperObject):
             nmrResidues.reverse()
 
         changedNmrResidues = []
-        with logCommandBlock(get='self') as log:
-            log('renumberNmrResidues')
+        with undoBlock():
 
             for nmrResidue in nmrResidues:
                 sequenceCode = nmrResidue.sequenceCode
@@ -470,8 +470,7 @@ def _fetchNmrChain(self: Project, shortName: str = None) -> NmrChain:
     :param shortName:
     :return: nmrChain instance.
     """
-    with logCommandBlock(prefix='newNmrChain=', get='self') as log:
-        log('fetchNmrChain')
+    with undoBlock():
 
         if not shortName:
             result = self.newNmrChain()

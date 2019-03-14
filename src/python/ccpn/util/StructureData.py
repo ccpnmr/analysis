@@ -658,6 +658,7 @@ class EnsembleData(pd.DataFrame):
 
                 self._finaliseStructureEnsemble('change')
 
+
     def deleteRow(self, rowNumber: None):  # ejb - *args, **kwargs):
         """
         Delete a numbered row of the table.
@@ -685,8 +686,7 @@ class EnsembleData(pd.DataFrame):
             self._finaliseStructureEnsemble('change')
 
         else:
-            with logCommandBlock(get='self') as log:
-                log('deleteRow')
+            with undoBlock():
 
                 colData = dict((x, self.loc[index].get(x)) for x in self.columns)  # grab the original values
 
@@ -778,6 +778,7 @@ class EnsembleData(pd.DataFrame):
 
                 self._finaliseStructureEnsemble('change')
 
+    @logCommand(get='self')
     def setValues(self, accessor: typing.Union[int, 'EnsembleData', pd.Series], **kwargs) -> None:
         """
         Allows you to easily set values (in place) for fields in the EnsembleData
@@ -906,8 +907,7 @@ class EnsembleData(pd.DataFrame):
             self._finaliseStructureEnsemble('change')
 
         else:
-            with logCommandBlock(get='self') as log:
-                log('setValues')
+            with undoBlock():
                 with undoStackBlocking() as addUndoItem:
 
                     # We must do this one by one - passing in the dictionary

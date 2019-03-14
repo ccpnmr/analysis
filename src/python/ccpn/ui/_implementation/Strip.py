@@ -748,8 +748,9 @@ def _copyStrip(self: SpectrumDisplay, strip: Strip, newIndex=None) -> Strip:
                     % (newIndex, stripCount))
         newIndex = None
 
-    with logCommandBlock(prefix='newStrip=', get='self') as log:
-        log('copyStrip', strip=repr(strip.pid))
+    # with logCommandBlock(prefix='newStrip=', get='self') as log:
+    #     log('copyStrip', strip=repr(strip.pid))
+    with undoBlock():
 
         if strip.spectrumDisplay is self:
             # Within same display. Not that useful, but harmless

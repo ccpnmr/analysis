@@ -241,19 +241,30 @@ class Integral(AbstractWrapperObject):
                 limits = value[ii] if value and len(value) > ii else ()
                 if len(limits) == 2:
 
-                    # small change, only calculate if there is a peak
-                    if self.peak:
+                    if spectrum.intensities is not None and spectrum.intensities.size != 0:
                         limit1, limit2 = limits
-                        x = self.integralList.spectrum.positions
+                        x = spectrum.positions
                         index01 = np.where((x <= limit2) & (x >= limit1))
+                        values = spectrum.intensities[index01]
+                        self.value = float(trapz(values))
 
-                        # check whether intensities are defined
-                        if spectrum.intensities:
-                            values = spectrum.intensities[index01]
-                            self.value = float(trapz(values))
-                            # set to the attached peak if any
-                            # if self.peak:
+                        # small change, only calculate if there is a peak
+                        if self.peak:
                             self.peak.volume = self.value
+
+                    # # small change, only calculate if there is a peak
+                    # if self.peak:
+                    #     limit1, limit2 = limits
+                    #     x = self.integralList.spectrum.positions
+                    #     index01 = np.where((x <= limit2) & (x >= limit1))
+                    #
+                    #     # check whether intensities are defined
+                    #     if spectrum.intensities:
+                    #         values = spectrum.intensities[index01]
+                    #         self.value = float(trapz(values))
+                    #         # set to the attached peak if any
+                    #         # if self.peak:
+                    #         self.peak.volume = self.value
 
     @property
     def pointlimits(self) -> List[Tuple[float, float]]:

@@ -214,7 +214,8 @@ class GLpeakListMethods():
                 actualPlane = int(settings[GLDefs.SPECTRUM_VALUETOPOINT](zPosition) + 0.5) - 1
                 visiblePlaneList = self._GLParent.visiblePlaneList[spectrumView][0]
 
-                if actualPlane in visiblePlaneList[1:-1]:
+                vpl = len(visiblePlaneList)
+                if actualPlane in visiblePlaneList[1:vpl-1]:
                     return True, False, 0, 1.0
 
                 elif not viewOutOfPlanePeaks:
@@ -223,7 +224,7 @@ class GLpeakListMethods():
                 elif actualPlane == visiblePlaneList[0]:
                     return False, True, 1, GLDefs.OUTOFPLANEFADE
 
-                elif actualPlane == visiblePlaneList[-1]:
+                elif actualPlane == visiblePlaneList[vpl-1]:
                     return False, True, 2, GLDefs.OUTOFPLANEFADE
 
                 return False, False, 0, 1.0
@@ -2849,7 +2850,7 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
         textX = pos or 0.0 + (3.0 * self._GLParent.pixelX)
         textY = self._GLParent.axisT - (36.0 * self._GLParent.pixelY)
 
-        stringList.append(GLString(text=text,
+        newString = GLString(text=text,
                                    font=self._GLParent.globalGL.glSmallFont,
                                    # x=p0[0], y=p0[1],
                                    x=textX,
@@ -2858,12 +2859,16 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
                                    # x=self._screenZero[0], y=self._screenZero[1]
                                    color=(*listCol, 1.0),
                                    GLContext=self._GLParent,
-                                   obj=obj))
-
+                                   obj=obj)
         # this is in the attribs
-        stringList[-1].axisIndex = 0
-        stringList[-1].axisPosition = pos or 0.0
+        newString.axisIndex = 0
+        newString.axisPosition = pos or 0.0
 
+        stringList.append(newString)
+
+        # # this is in the attribs
+        # stringList[-1].axisIndex = 0
+        # stringList[-1].axisPosition = pos or 0.0
 
 class GLintegral1dLabelling(GLintegralNdLabelling):
     """Class to handle symbol and symbol labelling for 1d displays

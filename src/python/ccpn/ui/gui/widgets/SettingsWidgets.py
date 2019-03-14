@@ -42,7 +42,7 @@ from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui._implementation.SpectrumView import SpectrumView
 from functools import partial
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO, \
     SYMBOLTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, ANNOTATIONTYPES
 from ccpn.ui.gui.widgets.Spinbox import Spinbox

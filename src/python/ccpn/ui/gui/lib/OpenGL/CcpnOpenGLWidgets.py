@@ -243,35 +243,35 @@ class GLRegion(QtWidgets.QWidget):
         self.GLSignals.emitPaintEvent()
 
     def _rebuildIntegral(self):
+        """Build the VBO containing the polygons for the IntegralRegion
+        """
         if isinstance(self._object, Integral):
 
-            # needs addressing, check whether the intensities are defined
-            if not self._object.integralList.spectrum.intensities:
-                return
+            if self._object.integralList.spectrum.intensities is not None and self._object.integralList.spectrum.intensities.size != 0:
 
-            intArea = self._integralArea = GLVertexArray(numLists=1,
-                                                         renderMode=GLRENDERMODE_DRAW, blendMode=False,
-                                                         drawMode=GL.GL_QUAD_STRIP, fillMode=GL.GL_FILL,
-                                                         dimension=2, GLContext=self._parent)
+                intArea = self._integralArea = GLVertexArray(numLists=1,
+                                                             renderMode=GLRENDERMODE_DRAW, blendMode=False,
+                                                             drawMode=GL.GL_QUAD_STRIP, fillMode=GL.GL_FILL,
+                                                             dimension=2, GLContext=self._parent)
 
-            thisRegion = self._object._1Dregions
-            if thisRegion:
-                intArea.numVertices = len(thisRegion[1]) * 2
-                intArea.vertices = np.empty(intArea.numVertices * 2, dtype=np.float32)
-                intArea.vertices[::4] = thisRegion[1]
-                intArea.vertices[2::4] = thisRegion[1]
-                intArea.vertices[1::4] = thisRegion[0]
-                intArea.vertices[3::4] = thisRegion[2]
+                thisRegion = self._object._1Dregions
+                if thisRegion:
+                    intArea.numVertices = len(thisRegion[1]) * 2
+                    intArea.vertices = np.empty(intArea.numVertices * 2, dtype=np.float32)
+                    intArea.vertices[::4] = thisRegion[1]
+                    intArea.vertices[2::4] = thisRegion[1]
+                    intArea.vertices[1::4] = thisRegion[0]
+                    intArea.vertices[3::4] = thisRegion[2]
 
-            if self._object and self._object in self._glList._parent.current.integrals:
-                solidColour = list(self._glList._parent.highlightColour)
-            else:
-                solidColour = list(self._brush)
-            solidColour[3] = 1.0
+                if self._object and self._object in self._glList._parent.current.integrals:
+                    solidColour = list(self._glList._parent.highlightColour)
+                else:
+                    solidColour = list(self._brush)
+                solidColour[3] = 1.0
 
-            intArea.colors = np.array(solidColour * intArea.numVertices, dtype=np.float32)
+                intArea.colors = np.array(solidColour * intArea.numVertices, dtype=np.float32)
 
-            intArea.defineVertexColorVBO(enableVBO=True)
+                intArea.defineVertexColorVBO(enableVBO=True)
 
 class GLInfiniteLine(GLRegion):
     valuesChanged = pyqtSignal(float)
@@ -631,7 +631,8 @@ class GLIntegralRegion(GLExternalRegion):
                 axisCode = self._parent._axisCodes[0]
                 orientation = 'v'
 
-        self._regions.append(GLRegion(self._parent, self,
+        # get the new added region
+        newRegion = GLRegion(self._parent, self,
                                       values=values,
                                       axisCode=axisCode,
                                       orientation=orientation,
@@ -641,7 +642,8 @@ class GLIntegralRegion(GLExternalRegion):
                                       visible=visible,
                                       bounds=bounds,
                                       obj=obj,
-                                      objectView=objectView))
+                                      objectView=objectView)
+        self._regions.append(newRegion)
 
         axisIndex = 0
         for ps, psCode in enumerate(self._parent.axisOrder[0:2]):
@@ -667,8 +669,8 @@ class GLIntegralRegion(GLExternalRegion):
             x0 = self._parent.axisL - self._parent.pixelX
             x1 = self._parent.axisR + self._parent.pixelX
 
-        # get the new added region
-        newRegion = self._regions[-1]
+        # # get the new added region
+        # newRegion = self._regions[-1]
 
         if obj and obj in self._parent.current.integrals:
 

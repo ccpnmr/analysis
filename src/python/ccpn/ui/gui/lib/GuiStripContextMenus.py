@@ -330,6 +330,13 @@ def _showSpectraOnPhasingItem(strip):
                     callback=strip._toggleShowSpectraOnPhasing, stripMethodName='spectraOnPhasingAction')
 
 
+def _showActivePhaseTraceItem(strip):
+    return _SCMitem(name='Show Active Phasing Trace',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Show active phasing trace under cursor',
+                    checkable=True, checked=strip.showActivePhaseTrace, shortcut='AT',
+                    callback=strip._toggleShowActivePhaseTrace, stripMethodName='activePhaseTraceAction')
+
+
 # def _propagateAssignmentItem(strip):
 #     # Not implemented
 #     return
@@ -591,6 +598,7 @@ def _getNdPhasingMenu(guiStripNd) -> Menu:
         _increaseTraceScaleItem(guiStripNd),
         _decreaseTraceScaleItem(guiStripNd),
         _setPivotItem(guiStripNd),
+        _showActivePhaseTraceItem(guiStripNd),
         _separator(),
         _exitPhasingConsoleItem(guiStripNd),
         _separator(),

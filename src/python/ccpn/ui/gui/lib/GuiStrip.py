@@ -162,6 +162,7 @@ class GuiStrip(Frame):
             self.showSpectraOnPhasing = self.application.preferences.general.showSpectraOnPhasing
 
         self._storedPhasingData = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
+        self.showActivePhaseTrace = True
 
         try:
             self._CcpnGLWidget.gridVisible = self.application.preferences.general.showGrid
@@ -706,6 +707,15 @@ class GuiStrip(Frame):
         try:
             self.crosshairVisible = False
             self._CcpnGLWidget.crossHairVisible = False
+        except:
+            getLogger().debugGL('OpenGL widget not instantiated')
+
+    def _toggleShowActivePhaseTrace(self):
+        """Toggles whether the active phasing trace is visible.
+        """
+        try:
+            self.showActivePhaseTrace = not self.showActivePhaseTrace
+            self._CcpnGLWidget.showActivePhaseTrace = self.showActivePhaseTrace
         except:
             getLogger().debugGL('OpenGL widget not instantiated')
 

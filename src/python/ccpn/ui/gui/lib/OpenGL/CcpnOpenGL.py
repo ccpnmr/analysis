@@ -320,6 +320,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._updateHTrace = False
         self._updateVTrace = False
         self._lastTracePoint = {}  # [-1, -1]
+        self.showActivePhaseTrace = True
 
         self._applyXLimit = self._preferences.zoomXLimitApply
         self._applyYLimit = self._preferences.zoomYLimitApply
@@ -4141,7 +4142,7 @@ class CcpnGLWidget(QOpenGLWidget):
             #   self.updateTraces()
 
             deleteHList = []
-            if self._updateHTrace:
+            if self._updateHTrace and (self.showActivePhaseTrace or not phasingFrame.isVisible()):
                 for hTrace in self._hTraces.keys():
                     trace = self._hTraces[hTrace]
                     if hTrace and hTrace.isDeleted:
@@ -4156,7 +4157,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 del self._hTraces[dd]
 
             deleteVList = []
-            if self._updateVTrace:
+            if self._updateVTrace and (self.showActivePhaseTrace or not phasingFrame.isVisible()):
                 for vTrace in self._vTraces.keys():
                     trace = self._vTraces[vTrace]
                     if vTrace and vTrace.isDeleted:

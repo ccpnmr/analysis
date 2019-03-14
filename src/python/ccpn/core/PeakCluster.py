@@ -42,7 +42,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakCluster as apiPeakCluster
 from typing import Optional, Tuple, Any, Union, Sequence
 from ccpn.util.Common import makeIterableList
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock, undoBlock
 from ccpn.util.Logging import getLogger
 
 
@@ -130,6 +130,7 @@ class PeakCluster(AbstractWrapperObject):
     # CCPN functions
     #=========================================================================================
 
+    @logCommand(get='self')
     def addPeaks(self, peaks: ['Peak'] = None):
         """
         Add a peak or list of peaks to the peakCluster
@@ -146,16 +147,18 @@ class PeakCluster(AbstractWrapperObject):
             if not isinstance(pp, Peak):
                 raise TypeError('%s is not of type Peak' % pp)
 
-        with logCommandBlock(get='self') as log:
-            if pks:
-                peakStr = '[' + ','.join(["'%s'" % peak.pid for peak in pks]) + ']'
-                log('addPeaks', peaks=peakStr)
-            else:
-                log('addPeaks')
+        # with logCommandBlock(get='self') as log:
+        #     if pks:
+        #         peakStr = '[' + ','.join(["'%s'" % peak.pid for peak in pks]) + ']'
+        #         log('addPeaks', peaks=peakStr)
+        #     else:
+        #         log('addPeaks')
 
+        with undoBlock():
             for pk in pks:
                 self._wrappedData.addPeak(pk._wrappedData)
 
+    @logCommand(get='self')
     def removePeaks(self, peaks: ['Peak'] = None):
         """
         Remove a peak or list of peaks from the peakCluster
@@ -174,15 +177,16 @@ class PeakCluster(AbstractWrapperObject):
             if pp not in self.peaks:
                 raise ValueError('%s does not belong to multiplet: %s' % (pp.pid, self.pid))
 
-        with logCommandBlock(get='self') as log:
-            if pks:
-                peakStr = '[' + ','.join(["'%s'" % peak.pid for peak in pks]) + ']'
-                log('removePeaks', peaks=peakStr)
-            else:
-                log('removePeaks')
+        # with logCommandBlock(get='self') as log:
+        #     if pks:
+        #         peakStr = '[' + ','.join(["'%s'" % peak.pid for peak in pks]) + ']'
+        #         log('removePeaks', peaks=peakStr)
+        #     else:
+        #         log('removePeaks')
 
-                for pk in pks:
-                    self._wrappedData.removePeak(pk._wrappedData)
+        with undoBlock():
+            for pk in pks:
+                self._wrappedData.removePeak(pk._wrappedData)
 
 #===========================================================================================
 # new'Object' and other methods

@@ -41,7 +41,7 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDispl
 from ccpn.core.lib.OrderedSpectrumViews import SPECTRUMVIEWINDEX, OrderedSpectrumViews
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
-    logCommandBlock, undoBlockManager, undoStackBlocking
+    logCommandBlock, undoStackBlocking, undoBlock
 from ccpn.util.Logging import getLogger
 
 logger = getLogger()
@@ -246,6 +246,7 @@ class SpectrumDisplay(AbstractWrapperObject):
     def _rescaleSpectra(self):
         self._spectrumViewChanged({})
 
+    @logCommand(get='self')
     def setOrderedSpectrumViewsIndex(self, spectrumIndex: Tuple[int]):
         """
         Set the new indexing of the spectrumViews attached to the strip/spectrumDisplay
@@ -255,8 +256,7 @@ class SpectrumDisplay(AbstractWrapperObject):
 
         defaults = collections.OrderedDict((('spectrumIndex', None),))
 
-        with logCommandBlock(get='self') as log:
-            log('setOrderedSpectrumViewsIndex')
+        with undoBlock():
 
             # rebuild the display when the ordering has changed
             with undoStackBlocking() as addUndoItem:
@@ -302,12 +302,11 @@ class SpectrumDisplay(AbstractWrapperObject):
                 addUndoItem(redo=self._rescaleSpectra)
 
     # CCPN functions
+    @logCommand(get='self')
     def resetAxisOrder(self):
         """Reset display to original axis order"""
 
-        with logCommandBlock(get='self') as log:
-            log('resetAxisOrder')
-
+        with undoBlock():
             self._wrappedData.resetAxisOrder()
 
     def findAxis(self, axisCode):
@@ -538,7 +537,7 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
                 "Display of sampled dimension spectra is not implemented yet")
         # # NBNB TBD FIXME
 
-    with undoBlockManager():
+    with undoBlock():
         display = project.newSpectrumDisplay(axisCodes=displayAxisCodes, stripDirection=stripDirection,
                                              independentStrips=independentStrips,
                                              title=title)

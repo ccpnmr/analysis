@@ -85,6 +85,7 @@ from ccpn.ui.gui.lib.mouseEvents import \
     rightMouse, shiftRightMouse, controlRightMouse, controlShiftRightMouse, PICK, SELECT
 from ccpn.ui.gui.widgets.LinearRegionsPlot import LinearRegionsPlot
 from ccpn.ui.gui.lib.mouseEvents import MouseModes, getCurrentMouseMode
+from ccpn.core.lib.ContextManagers import undoBlock
 
 
 class CrossHair:
@@ -477,15 +478,17 @@ class ViewBox(pg.ViewBox):
                     project.unblankNotification()
 
                 # hide all the messages from the peak annotation generation
-                project._startCommandEchoBlock('mousePeakPicking')
+                # project._startCommandEchoBlock('mousePeakPicking')
                 # update strips which have the above peaks in them
                 # (could check for visibility...)
-                peakLists = set([peak.peakList for peak in peaks])
-                for peakList in peakLists:
-                    for peakListView in peakList.peakListViews:
-                        peakListView.spectrumView.strip.showPeaks(peakList)
 
-                project._endCommandEchoBlock()
+                with undoBlock():
+                    peakLists = set([peak.peakList for peak in peaks])
+                    for peakList in peakLists:
+                        for peakListView in peakList.peakListViews:
+                            peakListView.spectrumView.strip.showPeaks(peakList)
+
+                # project._endCommandEchoBlock()
                 # update peak table
                 # limitation: this will only update the first peak table
                 if hasattr(self.current.strip.spectrumDisplay.mainWindow.application, 'peakTableModule'):

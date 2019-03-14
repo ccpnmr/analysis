@@ -809,83 +809,83 @@ class Framework(NotifierBase):
         "Convenience"
         return self.ui.getByGid(gid)
 
-    def _startCommandBlock(self, command: str, quiet: bool = False, **objectParameters):
-        """Start block for command echoing, set undo waypoint, and echo command to ui and logger
+    # def _startCommandBlock(self, command: str, quiet: bool = False, **objectParameters):
+    #     """Start block for command echoing, set undo waypoint, and echo command to ui and logger
+    #
+    #     MUST be paired with _endCommandBlock call - use try ... finally to ensure both are called
+    #
+    #     Set keyword:value objectParameters to point to the relevant objects in setup commands,
+    #     and pass setup commands and command proper to ui for echoing
+    #
+    #     Example calls:
+    #
+    #     _startCommandBlock("application.createSpectrumDisplay(spectrum)", spectrum=spectrumOrPid)
+    #
+    #     _startCommandBlock(
+    #        "newAssignment = peak.assignDimension(axisCode=%s, value=[newNmrAtom]" % axisCode,
+    #        peak=peakOrPid)"""
+    #
+    #     undo = self.project._undo
+    #     if undo is not None:  # ejb - changed from if undo:
+    #         # set undo step
+    #         undo.newWaypoint()  # DO NOT CHANGE
+    #
+    #         # _blockedSideBar is a project override
+    #         if not self.project._blockSideBar and not undo._blocked:
+    #             if undo._waypointBlockingLevel < 1 and self.ui and self.ui.mainWindow:
+    #                 self.ui.mainWindow.sideBar._saveExpandedState()
+    #
+    #         undo.increaseWaypointBlocking()
+    #
+    #     if not self._echoBlocking:
+    #         self.project.suspendNotification()
+    #
+    #         # Get list of command strings
+    #         commands = []
+    #         for parameter, value in sorted(objectParameters.items()):
+    #             if value is not None:
+    #                 if not isinstance(value, str):
+    #                     value = value.pid
+    #                 commands.append("%s = project.getByPid(%s)\n" % (parameter, repr(value)))
+    #         commands.append(command)  # ED: newLine NOT needed here
+    #
+    #         # echo command strings
+    #         # added 'quiet' mode to keep full functionality to 'startCommandEchoBLock'
+    #         # but without the screen output
+    #         if not quiet:
+    #             self.ui.echoCommands(commands)
+    #
+    #     self._increaseNotificationBlocking()
+    #     getLogger().debug2('command=%s, echoBlocking=%s, undo.blocking=%s'
+    #                        % (command, self._echoBlocking, undo.blocking))
 
-        MUST be paired with _endCommandBlock call - use try ... finally to ensure both are called
-
-        Set keyword:value objectParameters to point to the relevant objects in setup commands,
-        and pass setup commands and command proper to ui for echoing
-
-        Example calls:
-
-        _startCommandBlock("application.createSpectrumDisplay(spectrum)", spectrum=spectrumOrPid)
-
-        _startCommandBlock(
-           "newAssignment = peak.assignDimension(axisCode=%s, value=[newNmrAtom]" % axisCode,
-           peak=peakOrPid)"""
-
-        undo = self.project._undo
-        if undo is not None:  # ejb - changed from if undo:
-            # set undo step
-            undo.newWaypoint()  # DO NOT CHANGE
-
-            # _blockedSideBar is a project override
-            if not self.project._blockSideBar and not undo._blocked:
-                if undo._waypointBlockingLevel < 1 and self.ui and self.ui.mainWindow:
-                    self.ui.mainWindow.sideBar._saveExpandedState()
-
-            undo.increaseWaypointBlocking()
-
-        if not self._echoBlocking:
-            self.project.suspendNotification()
-
-            # Get list of command strings
-            commands = []
-            for parameter, value in sorted(objectParameters.items()):
-                if value is not None:
-                    if not isinstance(value, str):
-                        value = value.pid
-                    commands.append("%s = project.getByPid(%s)\n" % (parameter, repr(value)))
-            commands.append(command)  # ED: newLine NOT needed here
-
-            # echo command strings
-            # added 'quiet' mode to keep full functionality to 'startCommandEchoBLock'
-            # but without the screen output
-            if not quiet:
-                self.ui.echoCommands(commands)
-
-        self._increaseNotificationBlocking()
-        getLogger().debug2('command=%s, echoBlocking=%s, undo.blocking=%s'
-                           % (command, self._echoBlocking, undo.blocking))
-
-    #TODO:TJ: Why is this a private method; it is and should be used all over the code?
-    def _endCommandBlock(self):
-        """End block for command echoing,
-
-        MUST be paired with _startCommandBlock call - use try ... finally to ensure both are called"""
-
-        getLogger().debug2('echoBlocking=%s' % self._echoBlocking)
-        undo = self.project._undo
-
-        # if self._echoBlocking > 0:
-        #     self._echoBlocking -= 1
-        self._decreaseNotificationBlocking()
-
-        if not self._echoBlocking:
-            self.project.resumeNotification()
-
-        if undo is not None:  # ejb - changed from if undo:
-            undo.decreaseWaypointBlocking()
-
-            if not self.project._blockSideBar and not undo._blocked:
-                if undo._waypointBlockingLevel < 1 and self.ui and self.ui.mainWindow:
-                    self.ui.mainWindow.sideBar._restoreExpandedState()
-
-        # if self._echoBlocking > 0:
-        #   # If statement should always be True, but to avoid weird behaviour in error situations we check
-        #   self._echoBlocking -= 1
-        # # self.project.resumeNotification()
+    # #TODO:TJ: Why is this a private method; it is and should be used all over the code?
+    # def _endCommandBlock(self):
+    #     """End block for command echoing,
+    #
+    #     MUST be paired with _startCommandBlock call - use try ... finally to ensure both are called"""
+    #
+    #     getLogger().debug2('echoBlocking=%s' % self._echoBlocking)
+    #     undo = self.project._undo
+    #
+    #     # if self._echoBlocking > 0:
+    #     #     self._echoBlocking -= 1
+    #     self._decreaseNotificationBlocking()
+    #
+    #     if not self._echoBlocking:
+    #         self.project.resumeNotification()
+    #
+    #     if undo is not None:  # ejb - changed from if undo:
+    #         undo.decreaseWaypointBlocking()
+    #
+    #         if not self.project._blockSideBar and not undo._blocked:
+    #             if undo._waypointBlockingLevel < 1 and self.ui and self.ui.mainWindow:
+    #                 self.ui.mainWindow.sideBar._restoreExpandedState()
+    #
+    #     # if self._echoBlocking > 0:
+    #     #   # If statement should always be True, but to avoid weird behaviour in error situations we check
+    #     #   self._echoBlocking -= 1
+    #     # # self.project.resumeNotification()
 
     def addApplicationMenuSpec(self, spec, position=3):
         """Add an entirely new menu at specified position"""

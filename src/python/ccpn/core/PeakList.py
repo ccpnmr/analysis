@@ -378,15 +378,15 @@ class PeakList(AbstractWrapperObject):
 
         return peaks
 
+    @logCommand(get='self')
     def pickPeaks1dFiltered(self, size: int = 9, mode: str = 'wrap', factor=2, excludeRegions=None,
                             positiveNoiseThreshold=None, negativeNoiseThreshold=None, negativePeaks=True):
         """
         Pick 1D peaks form data in  self.spectrum
         """
         ll = []
-        with logCommandBlock(get='self') as log:
-            log('pickPeaks1dFiltered')
 
+        with undoBlock():
             if excludeRegions is None:
                 excludeRegions = [[-20.1, -19.1]]
             excludeRegions = [sorted(pair, reverse=True) for pair in excludeRegions]
@@ -589,15 +589,14 @@ class PeakList(AbstractWrapperObject):
     #
     #   return peaks
 
+    @logCommand(get='self')
     def peakFinder1D(self, deltaFactor=1.5, ignoredRegions=[[20, 19]], negativePeaks=True):
         from ccpn.core.lib.peakUtils import peakdet, _getIntersectionPoints, _pairIntersectionPoints
         from scipy import signal
         import numpy as np
         import time
 
-        with logCommandBlock(get='self') as log:
-            log('peakFinder1D')
-
+        with undoBlock():
             spectrum = self.spectrum
             integralList = self.spectrum.newIntegralList()
 
@@ -635,6 +634,7 @@ class PeakList(AbstractWrapperObject):
 
         # return peaks
 
+    @logCommand(get='self')
     def copyTo(self, targetSpectrum: Spectrum, **kwargs) -> 'PeakList':
         """Make (and return) a copy of the PeakList attached to targetSpectrum
 
@@ -656,14 +656,17 @@ class PeakList(AbstractWrapperObject):
                 params[key] = val
             else:
                 raise ValueError("PeakList has no attribute %s" % key)
-        newPeakList = targetSpectrum.newPeakList(**params)
-        # newPeakList.symbolColour = targetSpectrum.positiveContourColour
-        # newPeakList.textColour = targetSpectrum.positiveContourColour
-        for peak in self.peaks:
-            peak.copyTo(newPeakList)
+
+        with undoBlock():
+            newPeakList = targetSpectrum.newPeakList(**params)
+            # newPeakList.symbolColour = targetSpectrum.positiveContourColour
+            # newPeakList.textColour = targetSpectrum.positiveContourColour
+            for peak in self.peaks:
+                peak.copyTo(newPeakList)
         #
         return newPeakList
 
+    @logCommand(get='self')
     def subtractPeakLists(self, peakListIn: 'PeakList') -> 'PeakList':
         """
         Subtracts peaks in peakList2 from peaks in peakList1, based on position,
@@ -681,10 +684,11 @@ class PeakList(AbstractWrapperObject):
 
         peakList2 = [self.project.getByPid(peak) if isinstance(peak, str) else peak for peak in peakListIn]
 
-        with logCommandBlock(prefix='newPeakList=', get='self') as log:
-            peakStr = '[' + ','.join(["'%s'" % peak.pid for peak in peakList2]) + ']'
-            log('subtractPeakLists', peaks=peakStr)
+        # with logCommandBlock(prefix='newPeakList=', get='self') as log:
+        #     peakStr = '[' + ','.join(["'%s'" % peak.pid for peak in peakList2]) + ']'
+        #     log('subtractPeakLists', peaks=peakStr)
 
+        with undoBlock():
             spectrum = self.spectrum
 
             assert spectrum is peakList2.spectrum, 'For now requires both peak lists to be in same spectrum'
@@ -707,6 +711,7 @@ class PeakList(AbstractWrapperObject):
     # def refit(self, method: str = GAUSSIANMETHOD):
     #     fitExistingPeakList(self._apiPeakList, method)
 
+    @logCommand(get='self')
     def restrictedPick(self, positionCodeDict, doPos, doNeg):
 
         codes = list(positionCodeDict.keys())
@@ -720,17 +725,18 @@ class PeakList(AbstractWrapperObject):
         selectedRegion = []
         minDropFactor = self.project._appBase.preferences.general.peakDropFactor
 
-        for ii, mapping in enumerate(axisCodeMapping):
-            if mapping is not None:
-                selectedRegion.insert(ii, [positions[mapping] - tolerances[ii], positions[mapping] + tolerances[ii]])
-            else:
-                selectedRegion.insert(ii, [limits[ii][0], limits[ii][1]])
+        with undoBlock():
+            for ii, mapping in enumerate(axisCodeMapping):
+                if mapping is not None:
+                    selectedRegion.insert(ii, [positions[mapping] - tolerances[ii], positions[mapping] + tolerances[ii]])
+                else:
+                    selectedRegion.insert(ii, [limits[ii][0], limits[ii][1]])
 
-        # regionToPick = selectedRegion
-        # peaks = self.pickPeaksNd(regionToPick, doPos=doPos, doNeg=doNeg, minDropFactor=minDropFactor)
+            # regionToPick = selectedRegion
+            # peaks = self.pickPeaksNd(regionToPick, doPos=doPos, doNeg=doNeg, minDropFactor=minDropFactor)
 
-        axisCodeDict = dict((code, selectedRegion[ii]) for ii, code in enumerate(self.spectrum.axisCodes))
-        peaks = self.pickPeaksRegion(axisCodeDict, doPos=doPos, doNeg=doNeg, minDropFactor=minDropFactor)
+            axisCodeDict = dict((code, selectedRegion[ii]) for ii, code in enumerate(self.spectrum.axisCodes))
+            peaks = self.pickPeaksRegion(axisCodeDict, doPos=doPos, doNeg=doNeg, minDropFactor=minDropFactor)
 
         return peaks
 

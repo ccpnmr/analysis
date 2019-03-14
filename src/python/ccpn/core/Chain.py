@@ -40,7 +40,7 @@ from ccpn.core.lib import Pid
 from typing import Tuple, Optional, Union, Sequence
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
-    logCommandBlock, undoBlockManager, renameObject
+    logCommandBlock, renameObject, undoBlock
 from ccpn.util.Logging import getLogger
 
 
@@ -157,6 +157,7 @@ class Chain(AbstractWrapperObject):
     #     value.chain = self
 
     # CCPN functions
+    @logCommand(get='self', prefix='newChain=')
     def clone(self, shortName: str = None):
         """Make copy of chain."""
 
@@ -173,9 +174,10 @@ class Chain(AbstractWrapperObject):
         topObjectParameters = {'code': shortName,
                                'pdbOneLetterCode': shortName[0]}
 
-        with logCommandBlock(prefix='newChain=', get='self') as log:
-            log('clone')
+        # with logCommandBlock(prefix='newChain=', get='self') as log:
+        #     log('clone')
 
+        with undoBlock():
             newApiChain = copySubTree(apiChain, apiMolSystem, maySkipCrosslinks=True,
                                       topObjectParameters=topObjectParameters)
             result = self._project._data2Obj.get(newApiChain)
@@ -195,9 +197,10 @@ class Chain(AbstractWrapperObject):
 
     def _lock(self):
         """Finalise chain so that it can no longer be modified, and add missing data."""
-        with undoBlockManager():
+        with undoBlock():
             self._wrappedData.molecule.isFinalised = True
 
+    @logCommand(get='self')
     def renumberResidues(self, offset: int, start: int = None,
                          stop: int = None):
         """Renumber residues in range start-stop (inclusive) by adding offset
@@ -218,9 +221,7 @@ class Chain(AbstractWrapperObject):
 
         changedResidues = []
 
-        with logCommandBlock(get='self') as log:
-            log('renumberResidues')
-
+        with undoBlock():
             for residue in residues:
                 sequenceCode = residue.sequenceCode
                 code, ss, unused = commonUtil.parseSequenceCode(sequenceCode)

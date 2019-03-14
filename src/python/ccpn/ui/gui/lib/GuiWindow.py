@@ -232,6 +232,7 @@ class GuiWindow():
             peak.position = position
             peak.lineWidths = lineWidths
 
+    @logCommand(get='self')
     def add1DIntegral(self, peak=None):
         """Peak: take self.application.currentPeak as default
         """
@@ -246,12 +247,13 @@ class GuiWindow():
 
                     validViews = [sv for sv in strip.spectrumViews if sv.isVisible()]
 
-                    with logCommandBlock(get='self') as log:
-                        if peak:
-                            log('add1DIntegral', peak=repr(peak.pid))
-                        else:
-                            log('add1DIntegral')
+                    # with logCommandBlock(get='self') as log:
+                    #     if peak:
+                    #         log('add1DIntegral', peak=repr(peak.pid))
+                    #     else:
+                    #         log('add1DIntegral')
 
+                    with undoBlock():
                         currentIntegrals = list(self.current.integrals)
                         for spectrumView in validViews:
 
@@ -284,14 +286,13 @@ class GuiWindow():
             else:
                 getLogger().warning('Current strip is not 1D')
 
+    @logCommand(get='self')
     def refitCurrentPeaks(self, singularMode=True):
         peaks = self.application.current.peaks
         if not peaks:
             return
 
-        with logCommandBlock(get='self') as log:
-            log('refitCurrentPeaks')
-
+        with undoBlock():
             AssignmentLib.refitPeaks(peaks, singularMode=singularMode)
 
         # project = peaks[0].project
@@ -317,13 +318,12 @@ class GuiWindow():
                 peakLists = [peakList.peaks for spectrum in spectra for peakList in spectrum.peakLists]
                 self.application.current.peaks = [peak for peakList in peakLists for peak in peakList]
 
+    @logCommand(get='self')
     def addMultiplet(self):
         """add current peaks to a new multiplet"""
         strip = self.application.current.strip
 
-        with logCommandBlock(get='self') as log:
-            log('addMultiplet')
-
+        with undoBlock():
             if strip and strip.spectrumDisplay:
                 spectra = [spectrumView.spectrum for spectrumView in
                            strip.spectrumDisplay.spectrumViews if spectrumView.isVisible()]

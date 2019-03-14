@@ -154,6 +154,7 @@ from functools import partial
 
 from collections import OrderedDict
 from ccpn.util.Logging import getLogger
+from ccpn.core.lib.ContextManagers import undoBlock
 
 
 BG_COLOR = QtGui.QColor('#E0E0E0')
@@ -758,23 +759,25 @@ class ObjectTable(QtWidgets.QTableView, Base):
 
             if hasattr(selected[0], 'project'):
                 thisProject = selected[0].project
-                thisProject._startCommandEchoBlock('application.table.deleteFromTable', [sI.pid for sI in selected])
-                try:
 
-                    self.blockSignals(True)
+                # thisProject._startCommandEchoBlock('application.table.deleteFromTable', [sI.pid for sI in selected])
+                with undoBlock():
+                    try:
 
-                    for obj in selected:
-                        if hasattr(obj, 'pid'):
-                            # print ('>>> deleting', obj)
-                            obj.delete()
+                        self.blockSignals(True)
 
-                except Exception as es:
-                    getLogger().warning(str(es))
-                finally:
+                        for obj in selected:
+                            if hasattr(obj, 'pid'):
+                                # print ('>>> deleting', obj)
+                                obj.delete()
 
-                    self.blockSignals(False)
+                    except Exception as es:
+                        getLogger().warning(str(es))
+                    finally:
 
-                    thisProject._endCommandEchoBlock()
+                        self.blockSignals(False)
+                        # thisProject._endCommandEchoBlock()
+
             else:
 
                 # TODO:ED this is deleting from PandasTable, check for another way to get project

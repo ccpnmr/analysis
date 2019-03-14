@@ -45,7 +45,8 @@ from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO, \
     SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS
-from ccpn.core.lib.ContextManagers import logCommandBlock, undoStackBlocking
+from ccpn.core.lib.ContextManagers import logCommandBlock, undoStackBlocking, undoBlock
+from ccpn.util.decorators import logCommand
 
 
 STRIPLABEL_ISPLUS = 'stripLabel_isPlus'
@@ -1169,6 +1170,7 @@ class GuiStrip(Frame):
 
         strip.beingUpdated = False
 
+    @logCommand(get='self')
     def moveTo(self, newIndex: int):
         """Move strip to index newIndex in orderedStrips.
         """
@@ -1187,9 +1189,7 @@ class GuiStrip(Frame):
                                 % (newIndex, stripCount))
             newIndex = stripCount - 1
 
-        with logCommandBlock(get='self') as log:
-            log('moveTo')
-
+        with undoBlock():
             with undoStackBlocking() as addUndoItem:
                 # needs to be first as it uses currentOrdering
                 addUndoItem(undo=partial(self._resetStripLayout, newIndex, currentIndex))

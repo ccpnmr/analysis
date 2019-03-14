@@ -232,6 +232,7 @@ class Model(AbstractWrapperObject):
     # def comment(self, value: str):
     #     self._wrappedData.details = value
 
+    @logCommand(get='self')
     def clearData(self):
         """Remove all data for model by successively calling the deleteRow method
         """
@@ -242,8 +243,7 @@ class Model(AbstractWrapperObject):
 
             from ccpn.core.lib.ContextManagers import logCommandBlock
 
-            with logCommandBlock(get='self') as log:
-                log('clearData')
+            with undoBlock():
 
                 if 'modelNumber' in data.columns:
                     # If there are no modelNumbers, we must be in the process of deleting

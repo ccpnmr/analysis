@@ -34,7 +34,7 @@ from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Residue as ApiResidue
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
-    logCommandBlock, undoStackBlocking, notificationBlanking, renameObject
+    logCommandBlock, undoStackBlocking, notificationBlanking, renameObject, undoBlock
 from ccpn.util.Logging import getLogger
 
 
@@ -285,6 +285,7 @@ class Residue(AbstractWrapperObject):
         """
         self._wrappedData.delete()
 
+    @logCommand(get='self')
     def delete(self):
         """delete residue.
         Causes an error when just calling residue._wrappedData.delete()
@@ -297,9 +298,8 @@ class Residue(AbstractWrapperObject):
             raise TypeError('Cannot delete residue that has assigned nmrResidues')
 
         if self._wrappedData in chainFragment.residues:
-            with logCommandBlock(get='self') as log:
-                log('delete')
 
+            with undoBlock():
                 oldResidues = list(chainFragment.residues)
                 newResidues = list(chainFragment.residues)
                 # delRes = newResidues.pop(newResidues.index(apiResidue))

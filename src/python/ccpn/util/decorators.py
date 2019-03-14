@@ -304,9 +304,11 @@ def logCommand(prefix='', get=None, isProperty=False):
 
         # blocking += 1
         application._increaseNotificationBlocking()
-        result = func(*args, **kwds)
-        # blocking -= 1
-        application._decreaseNotificationBlocking()
+        try:
+            result = func(*args, **kwds)
+        finally:
+            # blocking -= 1
+            application._decreaseNotificationBlocking()
 
         return result
 

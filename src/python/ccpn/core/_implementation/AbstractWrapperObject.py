@@ -1151,56 +1151,56 @@ class AbstractWrapperObject(NotifierBase):
         commonUtil.resetSerial(self._wrappedData, newSerial)
         self._resetIds()
 
-    def _startCommandEchoBlock(self, funcName, *params, values=None, defaults=None, parName=None, propertySetter=False,
-                               quiet=False):
-        """Start block for command echoing, set undo waypoint, and echo command to ui and logger
+    # def _startCommandEchoBlock(self, funcName, *params, values=None, defaults=None, parName=None, propertySetter=False,
+    #                            quiet=False):
+    #     """Start block for command echoing, set undo waypoint, and echo command to ui and logger
+    #
+    #     *params, values, and defaults are used by coreUtil.commandParameterString to set the function
+    #     parameter string - see the documentation of commandParameterString for details
+    #     """
+    #
+    #     # if not hasattr(self, 'blockindent'):
+    #     #   self.blockindent = 1
+    #     # getLogger().info('.'*self.blockindent+'>>>start_'+str(funcName))
+    #     # self.blockindent+=4
+    #
+    #     #CCPNINTERNAL
+    #
+    #     project = self._project
+    #
+    #     parameterString = coreUtil.commandParameterString(*params, values=values, defaults=defaults)
+    #
+    #     if self is project:
+    #         if propertySetter:
+    #             if parameterString:
+    #                 command = "project.%s = %s" % (funcName, parameterString)
+    #             else:
+    #                 command = "project.%s" % funcName
+    #         else:
+    #             command = "project.%s(%s)" % (funcName, parameterString)
+    #     else:
+    #         if propertySetter:
+    #             if parameterString:
+    #                 command = "project.getByPid('%s').%s = %s" % (self.pid, funcName, parameterString)
+    #             else:
+    #                 command = "project.getByPid('%s').%s" % (self.pid, funcName)
+    #         else:
+    #             command = "project.getByPid('%s').%s(%s)" % (self.pid, funcName, parameterString)
+    #
+    #     if parName:
+    #         command = ''.join((parName, ' = ', command))
+    #
+    #     project._appBase._startCommandBlock(command, quiet=quiet)
 
-        *params, values, and defaults are used by coreUtil.commandParameterString to set the function
-        parameter string - see the documentation of commandParameterString for details
-        """
-
-        # if not hasattr(self, 'blockindent'):
-        #   self.blockindent = 1
-        # getLogger().info('.'*self.blockindent+'>>>start_'+str(funcName))
-        # self.blockindent+=4
-
-        #CCPNINTERNAL
-
-        project = self._project
-
-        parameterString = coreUtil.commandParameterString(*params, values=values, defaults=defaults)
-
-        if self is project:
-            if propertySetter:
-                if parameterString:
-                    command = "project.%s = %s" % (funcName, parameterString)
-                else:
-                    command = "project.%s" % funcName
-            else:
-                command = "project.%s(%s)" % (funcName, parameterString)
-        else:
-            if propertySetter:
-                if parameterString:
-                    command = "project.getByPid('%s').%s = %s" % (self.pid, funcName, parameterString)
-                else:
-                    command = "project.getByPid('%s').%s" % (self.pid, funcName)
-            else:
-                command = "project.getByPid('%s').%s(%s)" % (self.pid, funcName, parameterString)
-
-        if parName:
-            command = ''.join((parName, ' = ', command))
-
-        project._appBase._startCommandBlock(command, quiet=quiet)
-
-    def _endCommandEchoBlock(self):
-        """End block for command echoing"""
-        # self.blockindent-=4
-        # if self.blockindent<0:
-        #   print ('****')
-        #   self.blockindent=0
-        # getLogger().info('..'+'.'*self.blockindent+'>>>end_')
-
-        self._project._appBase._endCommandBlock()
+    # def _endCommandEchoBlock(self):
+    #     """End block for command echoing"""
+    #     # self.blockindent-=4
+    #     # if self.blockindent<0:
+    #     #   print ('****')
+    #     #   self.blockindent=0
+    #     # getLogger().info('..'+'.'*self.blockindent+'>>>end_')
+    #
+    #     self._project._appBase._endCommandBlock()
 
 
 AbstractWrapperObject.getByPid.__annotations__['return'] = AbstractWrapperObject

@@ -381,7 +381,7 @@ class Peak(AbstractWrapperObject):
     def assignedNmrAtoms(self, value: Sequence):
 
         if not isinstance(value, Sequence):
-            raise ValueError("dimensionNmrAtoms must be set to a sequence of list/tuples")
+            raise ValueError("assignedNmrAtoms must be set to a sequence of list/tuples")
 
         isotopeCodes = tuple(None if x == '?' else x for x in self.peakList.spectrum.isotopeCodes)
 

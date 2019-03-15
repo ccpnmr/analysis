@@ -643,6 +643,12 @@ class PeakList(AbstractWrapperObject):
         singleValueTags = ['isSimulated', 'symbolColour', 'symbolStyle', 'textColour', 'textColour',
                            'title', 'comment']
 
+        targetSpectrum = self.project.getByPid(targetSpectrum) if isinstance(targetSpectrum, str) else targetSpectrum
+        if not targetSpectrum:
+            raise TypeError('targetSpectrum not defined')
+        if not isinstance(targetSpectrum, Spectrum):
+            raise TypeError('targetSpectrum is not of type Spectrum')
+
         dimensionCount = self.spectrum.dimensionCount
         if dimensionCount != targetSpectrum.dimensionCount:
             raise ValueError("Cannot copy %sD %s to %sD %s"
@@ -667,7 +673,7 @@ class PeakList(AbstractWrapperObject):
         return newPeakList
 
     @logCommand(get='self')
-    def subtractPeakLists(self, peakListIn: 'PeakList') -> 'PeakList':
+    def subtractPeakLists(self, peakList: 'PeakList') -> 'PeakList':
         """
         Subtracts peaks in peakList2 from peaks in peakList1, based on position,
         and puts those in a new peakList3.  Assumes a common spectrum for now.
@@ -682,7 +688,11 @@ class PeakList(AbstractWrapperObject):
                 else:
                     return peak
 
-        peakList2 = [self.project.getByPid(peak) if isinstance(peak, str) else peak for peak in peakListIn]
+        peakList = self.project.getByPid(peakList) if isinstance(peakList, str) else peakList
+        if not peakList:
+            raise TypeError('peakList not defined')
+        if not isinstance(peakList, PeakList):
+            raise TypeError('peakList is not of type PeakList')
 
         # with logCommandBlock(prefix='newPeakList=', get='self') as log:
         #     peakStr = '[' + ','.join(["'%s'" % peak.pid for peak in peakList2]) + ']'
@@ -691,12 +701,12 @@ class PeakList(AbstractWrapperObject):
         with undoBlock():
             spectrum = self.spectrum
 
-            assert spectrum is peakList2.spectrum, 'For now requires both peak lists to be in same spectrum'
+            assert spectrum is peakList.spectrum, 'For now requires both peak lists to be in same spectrum'
 
             # dataDims = spectrum.sortedDataDims()
             tolerances = self.spectrum.assignmentTolerances
 
-            peaks2 = peakList2.peaks
+            peaks2 = peakList.peaks
             peakList3 = spectrum.newPeakList()
 
             for peak1 in self.peaks:

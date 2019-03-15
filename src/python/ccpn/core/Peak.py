@@ -35,6 +35,7 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.Project import Project
 from ccpn.core.SpectrumReference import SpectrumReference
 from ccpn.core.PeakList import PeakList
+from ccpn.core.NmrAtom import NmrAtom
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 #from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr import Peak as LibPeak
@@ -299,6 +300,9 @@ class Peak(AbstractWrapperObject):
     @ccpNmrV3CoreSetter()
     def dimensionNmrAtoms(self, value: Sequence):
 
+        if not isinstance(value, Sequence):
+            raise ValueError("dimensionNmrAtoms must be set to a sequence of list/tuples")
+
         isotopeCodes = self.peakList.spectrum.isotopeCodes
 
         apiPeak = self._wrappedData
@@ -376,6 +380,9 @@ class Peak(AbstractWrapperObject):
     @ccpNmrV3CoreSetter()
     def assignedNmrAtoms(self, value: Sequence):
 
+        if not isinstance(value, Sequence):
+            raise ValueError("dimensionNmrAtoms must be set to a sequence of list/tuples")
+
         isotopeCodes = tuple(None if x == '?' else x for x in self.peakList.spectrum.isotopeCodes)
 
         apiPeak = self._wrappedData
@@ -389,13 +396,16 @@ class Peak(AbstractWrapperObject):
             resonances.append(ll)
             for ii, atom in enumerate(tt):
                 atom = self.getByPid(atom) if isinstance(atom, str) else atom
-                if atom is not None:
+                if isinstance(atom, NmrAtom):
                     resonance = atom._wrappedData
                     if isotopeCodes[ii] and resonance.isotopeCode not in (isotopeCodes[ii], '?'):
                         raise ValueError("NmrAtom %s, isotope %s, assigned to dimension %s must have isotope %s or '?'"
                                          % (atom, resonance.isotopeCode, ii + 1, isotopeCodes[ii]))
 
                     ll[ii] = resonance
+
+                elif atom is not None:
+                    raise TypeError('Error assigning NmrAtom %s to dimension %s' % (str(atom), ii+1))
 
         # set assignments
         apiPeak.assignByContributions(resonances)

@@ -243,14 +243,14 @@ class Multiplet(AbstractWrapperObject):
         self._wrappedData.limits = value
 
     @property
-    def pointlimits(self) -> List[Tuple[float, float]]:
-        """pointlimits (in dimension order) of the multiplet."""
+    def pointLimits(self) -> List[Tuple[float, float]]:
+        """pointLimits (in dimension order) of the multiplet."""
         return self._wrappedData.pointLimits
 
-    @pointlimits.setter
+    @pointLimits.setter
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
-    def pointlimits(self, value):
+    def pointLimits(self, value):
         self._wrappedData.pointLimits = value
 
     @property

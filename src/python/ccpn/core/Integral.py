@@ -253,7 +253,7 @@ class Integral(AbstractWrapperObject):
                             self.peak.volume = self.value
 
     @property
-    def pointlimits(self) -> List[Tuple[float, float]]:
+    def pointLimits(self) -> List[Tuple[float, float]]:
         return self._wrappedData.pointLimits
         # """Integration limits in points, per dimension, with lowest value first"""
         # result = []
@@ -264,10 +264,10 @@ class Integral(AbstractWrapperObject):
         # #
         # return result
 
-    @pointlimits.setter
+    @pointLimits.setter
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
-    def pointlimits(self, value):
+    def pointLimits(self, value):
         self._wrappedData.pointLimits = value
         # peakDims = self._wrappedData.sortedPeakDims()
         # if len(value) == len(peakDims):

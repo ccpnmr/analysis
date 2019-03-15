@@ -37,7 +37,7 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 # This text is being copied on the clipboard only. Is not the source of the image in the popup.
 # The image is in ccpn.ui.gui.widgets
 
-TEXT = ''' Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - 2017
+TEXT = ''' Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - 2019
 | 
             **Developed by:**
             Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister
@@ -59,7 +59,7 @@ class AboutPopup(CcpnDialog):
   def __init__(self, parent=None, title='About CcpNmr', **kwds):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
-    pathPNG = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'About_CcpNmr.png')
+    pathPNG = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'About_CcpNmr2019.png')
     self.label = Label(self, grid=(0, 0))
     self.label.setPixmap(QtGui.QPixmap(pathPNG))
 

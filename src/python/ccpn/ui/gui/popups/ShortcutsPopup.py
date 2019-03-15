@@ -61,8 +61,7 @@ class ShortcutsPopup(CcpnDialog):
                                      texts=['Cancel', 'Save', 'Save and Close'],
                                      callbacks=[self.close, self.save, self.saveAndQuit])
 
-        self.setStyleSheet('ScrollArea {background-color: #00092d}')
-        self.setStyleSheet('ScrollArea > QWidget {background-color: #00092d}')
+        self.scrollArea.setStyleSheet('ScrollArea { border: 0px; background: transparent; }')
 
         self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         self.setMinimumSize(400, 400)

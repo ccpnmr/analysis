@@ -709,6 +709,7 @@ class GLIntegralRegion(GLExternalRegion):
             newRegion.visible = False
             newRegion._pp = None
 
+        self.defineIndexVBO(enableVBO=True)
         newRegion._rebuildIntegral()
 
         return newRegion

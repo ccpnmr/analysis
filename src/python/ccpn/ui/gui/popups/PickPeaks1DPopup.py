@@ -44,6 +44,7 @@ from collections import OrderedDict
 from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.SpectraSelectionWidget import SpectraSelectionWidget
+from ccpn.ui.gui.widgets.Spacer import Spacer
 
 
 Estimated = 'Estimated'
@@ -90,6 +91,11 @@ class ExcludeRegions(Widget):
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = Frame(self, setLayout=True)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        self.scrollArea.setStyleSheet('ScrollArea { border: 0px; background: transparent; }')
+        self._spacer = Spacer(self.scrollAreaWidgetContents, 3, 3,
+                             QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
+                             grid=(10, 2), gridSpan=(1, 1))
+
         self.regioncount = 0
         self.excludedRegions = []
         self.excludedSolvents = []
@@ -99,6 +105,11 @@ class ExcludeRegions(Widget):
         '''   '''
 
         widgetList = []
+        # remove the old spacer
+        layout = self.scrollAreaWidgetContents.getLayout()
+        layout.removeItem(self._spacer)
+
+        # add the widgets for the solvents
         for solvent in sorted(self.solvents):
             solventValues = [(), ()]
             if pressed == ('%s' % solvent):
@@ -130,6 +141,11 @@ class ExcludeRegions(Widget):
         self.comboBoxes.append(widgetList)
         self.closebutton.clicked.connect(partial(self._deleteRegions, self.positions))
 
+        # add the spacer back at the end
+        self._spacer = Spacer(self.scrollAreaWidgetContents, 3, 3,
+                             QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
+                             grid=(layout.rowCount()+1, 2), gridSpan=(1, 1))
+
     def getSolventsAndValues(self):
         self.excludedSolvents = [x for x in self.excludedSolvents if len(x[0]) > 0]
         solventsAndValues = []
@@ -149,7 +165,7 @@ class ExcludeRegions(Widget):
         self.excludedSolvents = [x for x in self.excludedSolvents if len(x[0]) > 0]
         for item in self.excludedSolvents:
             solvent, widgets = item
-            try:  # try because widgets can be dinamically deleted
+            try:  # try because widgets can be dynamically deleted
                 self.values = [round(widget.value(), 2) for widget in widgets]
                 pairedValues = list(self._chunks(self.values, 2))
                 excludedRegions.append(pairedValues)
@@ -204,7 +220,7 @@ class PickPeak1DPopup(CcpnDialog):
     def _setMainLayout(self):
         self.mainLayout = QtWidgets.QGridLayout()
         self.setLayout(self.mainLayout)
-        self.resize(300, 400)
+        self.setFixedSize(470, 500)
 
     def _setTabs(self):
         self.tabWidget = QtWidgets.QTabWidget()

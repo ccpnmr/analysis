@@ -987,12 +987,16 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
         pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
 
+        if not obj.position or not obj.lineWidths:
+            getLogger().debug('Object %s contains undefined position' % str(obj.pid))
+            return
+
         p0 = (obj.position[pIndex[0]], obj.position[pIndex[1]])
         lineWidths = (obj.lineWidths[pIndex[0]], obj.lineWidths[pIndex[1]])
         frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
 
         if None in p0:
-            getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
+            getLogger().debug('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
             return
 
         if not pIndex:

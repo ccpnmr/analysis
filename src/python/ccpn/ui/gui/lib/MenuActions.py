@@ -542,12 +542,12 @@ class _openItemSpectrumDisplay(OpenItemABC):
 
         mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
 
-        # TODO:LUCA: the mainWindow.createSpectrumDisplay should do the reporting to console and log
-        # This routine can then be omitted and the call above replaced by the one remaining line
-        mainWindow.pythonConsole.writeConsoleCommand(
-                "application.createSpectrumDisplay(spectrum)", spectrum=spectrum)
-        getLogger().info('spectrum = project.getByPid(%r)' % spectrum.id)
-        getLogger().info('application.createSpectrumDisplay(spectrum)')
+        # # TODO:LUCA: the mainWindow.createSpectrumDisplay should do the reporting to console and log
+        # # This routine can then be omitted and the call above replaced by the one remaining line
+        # mainWindow.pythonConsole.writeConsoleCommand(
+        #         "application.createSpectrumDisplay(spectrum)", spectrum=spectrum)
+        # getLogger().info('spectrum = project.getByPid(%r)' % spectrum.id)
+        # getLogger().info('application.createSpectrumDisplay(spectrum)')
 
         return spectrumDisplay
 

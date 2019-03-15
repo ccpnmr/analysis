@@ -253,8 +253,8 @@ class SpectrumDisplay(AbstractWrapperObject):
         :param newIndex - tuple of int:
         """
         # TODO:ED this should really be in GuiSpectrumDisplay
-
-        defaults = collections.OrderedDict((('spectrumIndex', None),))
+        if not all(isinstance(val, int) for val in spectrumIndex):
+            raise ValueError("spectrum indexing values must be Int")
 
         with undoBlock():
 
@@ -277,7 +277,8 @@ class SpectrumDisplay(AbstractWrapperObject):
 
     @logCommand(get='self')
     def removeOrderedSpectrumView(self, ind):
-        defaults = collections.OrderedDict((('ind', None),))
+        if not isinstance(ind, int):
+            raise TypeError('ind %s is not of type Int' % str(ind))
 
         index = ind #.spectrumViews.index(spectrumView)
         with undoBlock():

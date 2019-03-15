@@ -30,7 +30,6 @@ from typing import Union, Tuple, Optional
 from functools import partial
 from ccpn.core.Residue import Residue
 from ccpn.core.NmrResidue import NmrResidue
-from ccpn.core.Peak import Peak
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
@@ -181,7 +180,7 @@ class NmrAtom(AbstractWrapperObject):
         return result
 
     @property
-    def assignedPeaks(self) -> Tuple[Peak]:
+    def assignedPeaks(self) -> Tuple['Peak']:
         """All Peaks assigned to the NmrAtom"""
         apiResonance = self._wrappedData
         apiPeaks = [x.peakDim.peak for x in apiResonance.peakDimContribs]

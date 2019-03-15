@@ -269,8 +269,14 @@ class Multiplet(AbstractWrapperObject):
     @ccpNmrV3CoreSetter()
     def peaks(self, ll: list):
         if ll:
-            toRemove = [pk for pk in self.peaks if pk not in ll]
-            toAdd = [pk for pk in ll if pk not in self.peaks]
+            pll = makeIterableList(ll)
+            pks = [self.project.getByPid(peak) if isinstance(peak, str) else peak for peak in pll]
+            for pp in pks:
+                if not isinstance(pp, Peak):
+                    raise TypeError('%s is not of type Peak' % pp)
+
+            toRemove = [pk for pk in self.peaks if pk not in pks]
+            toAdd = [pk for pk in pks if pk not in self.peaks]
             self.removePeaks(toRemove)
             self.addPeaks(toAdd)
 

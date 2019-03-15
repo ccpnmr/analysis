@@ -32,8 +32,7 @@ from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.util.StructureData import EnsembleData
 from ccpnmodel.ccpncore.api.ccp.molecule.MolStructure import Model as ApiModel
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
-    logCommandBlock, undoBlock
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, undoBlock
 from ccpn.util.Logging import getLogger
 
 
@@ -232,7 +231,6 @@ class Model(AbstractWrapperObject):
     # def comment(self, value: str):
     #     self._wrappedData.details = value
 
-    @logCommand(get='self')
     def clearData(self):
         """Remove all data for model by successively calling the deleteRow method
         """
@@ -240,9 +238,6 @@ class Model(AbstractWrapperObject):
         if data is not None:
 
             containingObject = data._containingObject  # supresses the creation of intermediate
-
-            from ccpn.core.lib.ContextManagers import logCommandBlock
-
             with undoBlock():
 
                 if 'modelNumber' in data.columns:

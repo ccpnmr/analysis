@@ -1404,6 +1404,8 @@ class GuiSpectrumDisplay(CcpnModule):
         """Display additional spectrum, with spectrum axes ordered according ton axisOrder
         """
         spectrum = self.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
+        if not isinstance(spectrum, Spectrum):
+            raise TypeError('spectrum is not of type Spectrum')
 
         with undoBlock():
             oldIndex = self.getOrderedSpectrumViewsIndex()

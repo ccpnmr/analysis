@@ -29,15 +29,13 @@ import collections
 import math
 import numbers
 import typing
-import copy
 import numpy
 import pandas as pd
 from ccpn.util import Sorting
 from ccpn.util.ListFromString import listFromString
-from json import dumps
 from functools import partial
-from ccpn.core.lib.ContextManagers import logCommandBlock, undoStackBlocking, undoBlock, notificationBlanking
-from ccpn.util.decorators import logCommand
+from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock, notificationBlanking
+# from ccpn.util.decorators import logCommand__Container
 
 # Pid.IDSEP - but we do not want to import from ccpn.core here
 IDSEP = '.'
@@ -544,7 +542,7 @@ class EnsembleData(pd.DataFrame):
 
                 self._finaliseStructureEnsemble('change')  # spawn a change event in StructureEnsemble
 
-    @logCommand(get='self')
+    # @logCommand__Container(get='self')
     def deleteSelectedRows(self, **kwargs):
         """
         Delete rows identified by selector.
@@ -740,7 +738,7 @@ class EnsembleData(pd.DataFrame):
 
                 self._finaliseStructureEnsemble('change')
 
-    @logCommand(get='self')
+    # @logCommand__Container(get='self')
     def deleteCol(self, columnName=None):  # ejb - , *args, **kwargs):
         """
         Delete a named column from the table, the columnName must be a string and exist in the table.
@@ -778,7 +776,7 @@ class EnsembleData(pd.DataFrame):
 
                 self._finaliseStructureEnsemble('change')
 
-    @logCommand(get='self')
+    # @logCommand__Container(get='self')
     def setValues(self, accessor: typing.Union[int, 'EnsembleData', pd.Series], **kwargs) -> None:
         """
         Allows you to easily set values (in place) for fields in the EnsembleData
@@ -985,7 +983,7 @@ class EnsembleData(pd.DataFrame):
 
         pass
 
-    @logCommand(get='self')
+    # @logCommand__Container(get='self')
     def ccpnSort(self, *columns: str):
         """Custom sort. Sorts mixed-type columns by type, sorting None and NaN at the start
 

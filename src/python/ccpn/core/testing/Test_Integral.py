@@ -25,6 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import numpy as np
 from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 
@@ -63,6 +64,10 @@ class IntegralListTest(WrapperTesting):
 
     def test_1dIntegral(self):
         spectrum = self.project.createDummySpectrum(axisCodes=('H'), name='H1D-tst')
+        # set some dummy information on the 1D spectrum
+        spectrum.positions = np.array([x for x in range(0, 10)], dtype=np.float32)
+        spectrum.intensities = np.array([x * 0.1 for x in range(0, 10)], dtype=np.float32)
+
         integralList = spectrum.newIntegralList()
         integral1 = integralList.newIntegral()
         integral2 = integralList.newIntegral(value=99., valueError=1., bias=7, slopes=(0.9,),

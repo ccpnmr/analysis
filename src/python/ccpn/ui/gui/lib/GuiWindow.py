@@ -232,7 +232,6 @@ class GuiWindow():
             peak.position = position
             peak.lineWidths = lineWidths
 
-    @logCommand(get='self')
     def add1DIntegral(self, peak=None):
         """Peak: take self.application.currentPeak as default
         """
@@ -286,7 +285,6 @@ class GuiWindow():
             else:
                 getLogger().warning('Current strip is not 1D')
 
-    @logCommand(get='self')
     def refitCurrentPeaks(self, singularMode=True):
         peaks = self.application.current.peaks
         if not peaks:
@@ -318,7 +316,6 @@ class GuiWindow():
                 peakLists = [peakList.peaks for spectrum in spectra for peakList in spectrum.peakLists]
                 self.application.current.peaks = [peak for peakList in peakLists for peak in peakList]
 
-    @logCommand(get='self')
     def addMultiplet(self):
         """add current peaks to a new multiplet"""
         strip = self.application.current.strip

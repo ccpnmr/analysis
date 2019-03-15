@@ -337,9 +337,12 @@ class Strip(AbstractWrapperObject):
     #     return result
 
     @logCommand(get='self')
-    def moveStrip(self, newIndex):
+    def moveStrip(self, newIndex: int):
         """Move strip to index newIndex in orderedStrips
         """
+        if not isinstance(newIndex, int):
+            raise TypeError('newIndex %s is not of type Int' % str(newIndex))
+
         currentIndex = self._wrappedData.index
         if currentIndex == newIndex:
             return
@@ -374,8 +377,9 @@ class Strip(AbstractWrapperObject):
         getLogger().debug('Strip.displaySpectrum>>> %s' % spectrum)
 
         spectrum = self.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
+        if not isinstance(spectrum, Spectrum):
+            raise TypeError('spectrum %s is not of type Spectrum' % str(spectrum))
 
-        # TODO:ED fix the ordering of the spectra
         dataSource = spectrum._wrappedData
         apiStrip = self._wrappedData
         if apiStrip.findFirstSpectrumView(dataSource=dataSource) is not None:
@@ -713,7 +717,8 @@ class Strip(AbstractWrapperObject):
                         selectedRegion = [[min(ss), max(ss)] for ss in selectedRegion]
                         newPeaks = peakList.pickPeaks1d(*selectedRegion, size=minDropFactor * 100)
 
-                    result.extend(newPeaks)
+                    if newPeaks:
+                        result.extend(newPeaks)
 
         return tuple(result)
 
@@ -737,6 +742,8 @@ def _copyStrip(self: SpectrumDisplay, strip: Strip, newIndex=None) -> Strip:
     """Make copy of strip in self, at position newIndex - or rightmost.
     """
     strip = self.getByPid(strip) if isinstance(strip, str) else strip
+    if not isinstance(strip, Strip):
+        raise TypeError('strip is not of type Strip')
 
     stripCount = self.stripCount
     if newIndex and newIndex >= stripCount:

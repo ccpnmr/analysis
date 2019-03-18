@@ -37,42 +37,60 @@ class RestraintListTest(WrapperTesting):
         newList = dataSet.newRestraintList('Distance')
         # Undo and redo all operations
         self.undo.undo()
+        self.assertEquals(len(dataSet.restraintLists), 0)
         self.undo.redo()
+        self.assertEquals(len(dataSet.restraintLists), 1)
+        self.assertEquals(dataSet.restraintLists[0].restraintType, 'Distance')
 
     def test_newDihedralRestraintList(self):
         dataSet = self.project.newDataSet()
         newList = dataSet.newRestraintList('Dihedral')
         # Undo and redo all operations
         self.undo.undo()
+        self.assertEquals(len(dataSet.restraintLists), 0)
         self.undo.redo()
+        self.assertEquals(len(dataSet.restraintLists), 1)
+        self.assertEquals(dataSet.restraintLists[0].restraintType, 'Dihedral')
 
     def test_newCsaRestraintList(self):
         dataSet = self.project.newDataSet()
         newList = dataSet.newRestraintList('Csa')
         # Undo and redo all operations
         self.undo.undo()
+        self.assertEquals(len(dataSet.restraintLists), 0)
         self.undo.redo()
+        self.assertEquals(len(dataSet.restraintLists), 1)
+        self.assertEquals(dataSet.restraintLists[0].restraintType, 'Csa')
 
     def test_newRdcRestraintList(self):
         dataSet = self.project.newDataSet()
         newList = dataSet.newRestraintList('Rdc')
         # Undo and redo all operations
         self.undo.undo()
+        self.assertEquals(len(dataSet.restraintLists), 0)
         self.undo.redo()
+        self.assertEquals(len(dataSet.restraintLists), 1)
+        self.assertEquals(dataSet.restraintLists[0].restraintType, 'Rdc')
 
     def test_newChemicalShiftRestraintList(self):
         dataSet = self.project.newDataSet()
         newList = dataSet.newRestraintList('ChemicalShift')
         # Undo and redo all operations
         self.undo.undo()
+        self.assertEquals(len(dataSet.restraintLists), 0)
         self.undo.redo()
+        self.assertEquals(len(dataSet.restraintLists), 1)
+        self.assertEquals(dataSet.restraintLists[0].restraintType, 'ChemicalShift')
 
     def test_newJCouplingRestraintList(self):
         dataSet = self.project.newDataSet()
         newList = dataSet.newRestraintList('JCoupling')
         # Undo and redo all operations
         self.undo.undo()
+        self.assertEquals(len(dataSet.restraintLists), 0)
         self.undo.redo()
+        self.assertEquals(len(dataSet.restraintLists), 1)
+        self.assertEquals(dataSet.restraintLists[0].restraintType, 'JCoupling')
 
     def test_renameDistanceRestraintList(self):
         dataSet = self.project.newDataSet()
@@ -87,6 +105,9 @@ class RestraintListTest(WrapperTesting):
         self.undo.undo()
         self.assertEqual(newList.name, 'Boom')
         self.undo.undo()
+        self.assertEquals(len(dataSet.restraintLists), 0)
         self.undo.redo()
+        self.assertEquals(len(dataSet.restraintLists), 1)
+        self.assertEqual(newList.name, 'Boom')
         self.undo.redo()
         self.assertEqual(newList.name, 'Chikka')

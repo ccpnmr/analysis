@@ -1401,7 +1401,7 @@ class Framework(NotifierBase):
     def _loadNefFile(self, path: str, makeNewProject=True) -> Project:
         """Load Project from NEF file at path, and do necessary setup"""
 
-        from ccpn.core.lib.ContextManagers import undoBlock
+        from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
 
         dataBlock = self.nefReader.getNefData(path)
 
@@ -1414,15 +1414,16 @@ class Framework(NotifierBase):
         # with suspendSideBarNotifications(project=self.project):
 
         with undoBlock():
-            with catchExceptions(application=self, errorStringTemplate='Error loading Nef file: %s'):
-                self.nefReader.importNewProject(self.project, dataBlock)
-            # try:
-            #     self.nefReader.importNewProject(self.project, dataBlock)
-            # except Exception as es:
-            #     getLogger().warning('Error loading Nef file: %s' % str(es))
-            #     if self._isInDebugMode:
-            #         raise es
-            # # finally:
+            with notificationEchoBlocking():
+                with catchExceptions(application=self, errorStringTemplate='Error loading Nef file: %s'):
+                    self.nefReader.importNewProject(self.project, dataBlock)
+                # try:
+                #     self.nefReader.importNewProject(self.project, dataBlock)
+                # except Exception as es:
+                #     getLogger().warning('Error loading Nef file: %s' % str(es))
+                #     if self._isInDebugMode:
+                #         raise es
+                # # finally:
 
         self.project._wrappedData.shiftAveraging = True
 
@@ -1432,7 +1433,7 @@ class Framework(NotifierBase):
     def _loadNMRStarFile(self, path: str, makeNewProject=True) -> Project:
         """Load Project from NEF file at path, and do necessary setup"""
 
-        from ccpn.core.lib.ContextManagers import undoBlock
+        from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
 
         dataBlock = self.nefReader.getNMRStarData(path)
 
@@ -1445,8 +1446,10 @@ class Framework(NotifierBase):
 
         # with suspendSideBarNotifications(project=self.project):
         with undoBlock():
-            with catchExceptions(application=self, errorStringTemplate='Error loading NMRStar file: %s'):
-                self.nefReader.importNewProject(self.project, dataBlock)
+            with notificationEchoBlocking():
+                with catchExceptions(application=self, errorStringTemplate='Error loading NMRStar file: %s'):
+                    self.nefReader.importNewProject(self.project, dataBlock)
+
         # with undoBlock():
         #     try:
         #         self.nefReader.importNewNMRStarProject(self.project, dataBlock)
@@ -1461,7 +1464,7 @@ class Framework(NotifierBase):
     def _loadSparkyProject(self, path: str, makeNewProject=True) -> Project:
         """Load Project from Sparky file at path, and do necessary setup"""
 
-        from ccpn.core.lib.ContextManagers import undoBlock
+        from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
 
         # read data files
         from ccpn.core.lib.CcpnSparkyIo import SPARKY_NAME
@@ -1478,8 +1481,10 @@ class Framework(NotifierBase):
 
         # with suspendSideBarNotifications(project=self.project):
         with undoBlock():
-            with catchExceptions(application=self, errorStringTemplate='Error loading Sparky file: %s'):
-                self.sparkyReader.importSparkyProject(self.project, dataBlock)
+            with notificationEchoBlocking():
+                with catchExceptions(application=self, errorStringTemplate='Error loading Sparky file: %s'):
+                    self.sparkyReader.importSparkyProject(self.project, dataBlock)
+
         # with undoBlock():
         #     try:
         #         # insert file into project

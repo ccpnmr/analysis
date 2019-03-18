@@ -141,7 +141,7 @@ class PeakCluster(AbstractWrapperObject):
         peakList = makeIterableList(peaks)
         pks = []
         for peak in peakList:
-            pks.append(self.project.getByPid(peak.pid) if isinstance(peak, str) else peak)
+            pks.append(self.project.getByPid(peak) if isinstance(peak, str) else peak)
 
         for pp in pks:
             if not isinstance(pp, Peak):
@@ -162,20 +162,20 @@ class PeakCluster(AbstractWrapperObject):
     def removePeaks(self, peaks: ['Peak'] = None):
         """
         Remove a peak or list of peaks from the peakCluster
-        The peaks must belong to the multiplet.
+        The peaks must belong to the peakCluster.
 
         :param peaks - single peak or list of peaks:
         """
         peakList = makeIterableList(peaks)
         pks = []
         for peak in peakList:
-            pks.append(self.project.getByPid(peak.pid) if isinstance(peak, str) else peak)
+            pks.append(self.project.getByPid(peak) if isinstance(peak, str) else peak)
 
         for pp in pks:
             if not isinstance(pp, Peak):
                 raise TypeError('%s is not of type Peak' % pp)
             if pp not in self.peaks:
-                raise ValueError('%s does not belong to multiplet: %s' % (pp.pid, self.pid))
+                raise ValueError('%s does not belong to peakCluster: %s' % (pp.pid, self.pid))
 
         # with logCommandBlock(get='self') as log:
         #     if pks:

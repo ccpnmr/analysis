@@ -220,13 +220,6 @@ class NmrAtom(AbstractWrapperObject):
         (or nmrChain.fetchNmrResidue(sequenceCode=sequenceCode) if residueType is None)
         """
 
-        # Get parameter string for console echo - before parameters are changed
-        defaults = collections.OrderedDict(
-                (('chainCode', None), ('sequenceCode', None),
-                 ('residueType', None), ('name', None), ('mergeToExisting', False)
-                 )
-                )
-
         oldPid = self.longPid
         clearUndo = False
         undo = self._apiResonance.root._undo
@@ -349,6 +342,7 @@ class NmrAtom(AbstractWrapperObject):
 
         # NB This is a VERY special case
         # - API code and notifiers will take care of resetting id and Pid
+        self._validateName(value=value, allowWhitespace=False, allowNone=True)
 
         with renameObject(self) as addUndoItem:
             oldName = self.name
@@ -357,8 +351,6 @@ class NmrAtom(AbstractWrapperObject):
                 self.deassign()
 
             else:
-                self._validateName(value=value, allowWhitespace=False)
-
                 isotopeCode = self._wrappedData.isotopeCode
                 newIsotopeCode = name2IsotopeCode(value)
                 if newIsotopeCode is not None:

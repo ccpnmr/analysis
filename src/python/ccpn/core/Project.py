@@ -865,7 +865,7 @@ class Project(AbstractWrapperObject):
 
     # Library functions
 
-    @logCommand(get='self')
+    @logCommand('project.')
     def exportNef(self, path: str = None,
                   overwriteExisting: bool = False,
                   skipPrefixes: typing.Sequence = (),

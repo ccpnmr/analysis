@@ -1235,7 +1235,8 @@ class Spectrum(AbstractWrapperObject):
         if self.scale == 0.0:
             getLogger().warning('Scaling "%s" by 0.0!' % self)
 
-        return self._apiDataSource.getPositionValue(position) * scale
+        position = self._apiDataSource.getPositionValue(position)
+        return self._apiDataSource.getPositionValue(position) * scale if position else None
 
     @cached(_SLICE1DDATACACHE, maxItems=1, debug=False)
     def _get1DSliceData(self, position, sliceDim: int):

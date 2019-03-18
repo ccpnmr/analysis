@@ -1181,26 +1181,27 @@ class NmrResidue(AbstractWrapperObject):
         # NBNB TODO - consider changing signature to sequenceCode, residueType
 
         # use noBlanking for the minute to ensure that the adjacent nmrResidues are notified
+        apiResonanceGroup = self._apiResonanceGroup
+        sequenceCode = residueType = None
+        if value:
+            if Pid.altCharacter in value:
+                raise ValueError("Character %s not allowed in ccpn.NmrResidue id: %s" %
+                                 (Pid.altCharacter, value))
+            ll = value.split(Pid.IDSEP, 1)
+            sequenceCode = ll[0] or None
+            if len(ll) > 1:
+                residueType = ll[1] or None
+
+        if sequenceCode:
+            # Check if name is not already used
+            partialId = '%s.%s.' % (self._parent._id, sequenceCode.translate(Pid.remapSeparators))
+            ll = self._project.getObjectsByPartialId(className=self.className, idStartsWith=partialId)
+            if ll and ll != [self]:
+                raise ValueError("Cannot rename %s to %s.%s - assignment already exists" % (self, self.nmrChain.id, value))
+
+        oldName = '.'.join((apiResonanceGroup.sequenceCode, apiResonanceGroup.residueType or ''))
+
         with renameObjectNoBlanking(self) as addUndoItem:
-            apiResonanceGroup = self._apiResonanceGroup
-            sequenceCode = residueType = None
-            if value:
-                if Pid.altCharacter in value:
-                    raise ValueError("Character %s not allowed in ccpn.NmrResidue id: %s" %
-                                     (Pid.altCharacter, value))
-                ll = value.split(Pid.IDSEP, 1)
-                sequenceCode = ll[0] or None
-                if len(ll) > 1:
-                    residueType = ll[1] or None
-
-            if sequenceCode:
-                # Check if name is not already used
-                partialId = '%s.%s.' % (self._parent._id, sequenceCode.translate(Pid.remapSeparators))
-                ll = self._project.getObjectsByPartialId(className=self.className, idStartsWith=partialId)
-                if ll and ll != [self]:
-                    raise ValueError("Cannot rename %s to %s.%s - assignment already exists" % (self, self.nmrChain.id, value))
-
-            oldName = '.'.join((apiResonanceGroup.sequenceCode, apiResonanceGroup.residueType or ''))
             apiResonanceGroup.sequenceCode = sequenceCode
             apiResonanceGroup.resetResidueType(residueType)
 

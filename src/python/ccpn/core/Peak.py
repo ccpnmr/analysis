@@ -40,7 +40,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 #from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr import Peak as LibPeak
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, undoBlock
 from ccpn.util.Logging import getLogger
 
 
@@ -500,6 +500,7 @@ class Peak(AbstractWrapperObject):
         """Whether peak is fully assigned."""
         return all(self.dimensionNmrAtoms)
 
+    @logCommand(get='self')
     def copyTo(self, targetPeakList: PeakList) -> 'Peak':
         """Make (and return) a copy of the Peak in targetPeakList."""
 
@@ -521,19 +522,20 @@ class Peak(AbstractWrapperObject):
             raise ValueError("%s axisCodes %s not compatible with target axisCodes %s"
                              % (self, peakList.spectrum.axisCodes, targetPeakList.spectrum.axisCodes))
 
-        params = dict((tag, getattr(self, tag)) for tag in singleValueTags)
-        for tag in dimensionValueTags:
-            value = getattr(self, tag)
-            params[tag] = [value[dimensionMapping[ii]] for ii in range(dimensionCount)]
-        newPeak = targetPeakList.newPeak(**params)
+        with undoBlock():
+            params = dict((tag, getattr(self, tag)) for tag in singleValueTags)
+            for tag in dimensionValueTags:
+                value = getattr(self, tag)
+                params[tag] = [value[dimensionMapping[ii]] for ii in range(dimensionCount)]
+            newPeak = targetPeakList.newPeak(**params)
 
-        assignments = []
-        for assignment in self.assignedNmrAtoms:
-            assignments.append([assignment[dimensionMapping[ii]] for ii in range(dimensionCount)])
-        if assignments:
-            newPeak.assignedNmrAtoms = assignments
-        #
-        return newPeak
+            assignments = []
+            for assignment in self.assignedNmrAtoms:
+                assignments.append([assignment[dimensionMapping[ii]] for ii in range(dimensionCount)])
+            if assignments:
+                newPeak.assignedNmrAtoms = assignments
+            #
+            return newPeak
 
     def reorderValues(self, values, newAxisCodeOrder):
         """Reorder values in spectrum dimension order to newAxisCodeOrder

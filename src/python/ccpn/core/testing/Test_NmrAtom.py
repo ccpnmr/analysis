@@ -68,6 +68,7 @@ class NmrAtomTest(WrapperTesting):
         self.assertEqual(atomCX.pid, 'NA:A.888.ARG.C@198')
         # Undo and redo all operations
         self.undo.undo()
+        self.assertEqual(atomCX.pid, 'NA:A.888.ARG.CZ')
         self.undo.redo()
         self.assertEqual(atomCX.pid, 'NA:A.888.ARG.C@198')
 
@@ -82,6 +83,7 @@ class NmrAtomTest(WrapperTesting):
         self.assertEqual(at0.id, '@-.101..HX')
         # Undo and redo all operations
         self.undo.undo()
+        self.assertEqual(at0.id, '@-.@89..HX')
         self.undo.redo()
         self.assertEqual(at0.id, '@-.101..HX')
         self.assertEqual(at1.id, 'X.101.VAL.NE')

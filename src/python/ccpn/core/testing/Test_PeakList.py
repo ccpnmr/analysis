@@ -33,6 +33,8 @@ class PeakListCreationTest(WrapperTesting):
     def setUp(self):
         with self.initialSetup():
             self.spectrum = self.project.createDummySpectrum('H')
+            self.spectrum1 = self.project.createDummySpectrum(('H', 'N'))
+            self.spectrum2 = self.project.createDummySpectrum(('H', 'N'))
 
     def test_newPeakList(self):
         self.assertEqual(len(self.spectrum.peakLists), 1)
@@ -54,6 +56,31 @@ class PeakListCreationTest(WrapperTesting):
         self.assertEqual(len(self.spectrum.peakLists), 2)
         self.assertIs(self.spectrum.peakLists[1], peakList)
 
+        peakList = self.spectrum1.newPeakList()
+        peakList1 = self.spectrum1.peakLists[0]
+        peakPos = [(0.1*xx, 0.1*xx) for xx in range(0, 5)]
+        peakList1Peaks = [peakList1.newPeak(ppmPositions=pk) for pk in peakPos]
+
+        peakList2 = self.spectrum2.peakLists[0]
+        peakList2Peaks = [peakList2.newPeak(ppmPositions=pk) for pk in peakPos]
+
+        peakList3 = self.spectrum1.peakLists[1]
+        peakList3Peaks = [peakList3.newPeak(ppmPositions=pk) for pk in peakPos]
+
+        peakList4 = peakList1.copyTo(self.spectrum2)
+        peakList5 = peakList2.copyTo(self.spectrum1)
+
+        with self.assertRaisesRegexp(ValueError, 'Cannot copy'):
+            peakList1.copyTo(self.spectrum)
+
+        with self.assertRaisesRegexp(TypeError, 'required positional argument'):
+            peakList1.copyTo()
+
+        with self.assertRaisesRegexp(TypeError, 'targetSpectrum is not of type Spectrum'):
+            peakList1.copyTo(12)
+
+        with self.assertRaisesRegexp(TypeError, 'targetSpectrum not defined'):
+            peakList1.copyTo('not defined')
 
 class PeakListTest2(WrapperTesting):
     # Path of project to load (None for new project

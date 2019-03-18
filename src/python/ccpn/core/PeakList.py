@@ -329,7 +329,7 @@ class PeakList(AbstractWrapperObject):
             apiPeaks = pickNewPeaks(self._apiPeakList, startPoint=startPoints, endPoint=endPoints,
                                     posLevel=posLevel, negLevel=negLevel, fitMethod=fitMethod,
                                     excludedRegions=excludedRegions, excludedDiagonalDims=excludedDiagonalDims,
-                                    excludedDiagonalTransform=excludedDiagonalTransform, minDropFactor=minDropFactor)
+                                    excludedDiagonalTransform=excludedDiagonalTransform, minDropfactor=minDropFactor)
 
         data2ObjDict = self._project._data2Obj
         result = [data2ObjDict[apiPeak] for apiPeak in apiPeaks]

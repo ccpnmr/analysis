@@ -44,6 +44,7 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.core.Peak import Peak
 from ccpn.core.NmrResidue import NmrResidue
 
+
 STRIPLABEL_CONNECTDIR = '_connectDir'
 STRIPLABEL_CONNECTNONE = 'none'
 SINGLECLICK = 'click'
@@ -81,7 +82,7 @@ class _StripLabel(Label):
         # disable any drop event callback's until explicitly defined later
         self.setDropEventCallback(None)
 
-    def _createDragEvent(self, mouseDict):           # event: QtGui.QMouseEvent):
+    def _createDragEvent(self, mouseDict):  # event: QtGui.QMouseEvent):
         """
         Re-implementation of the mouse press event to enable a NmrResidue label to be dragged as a json object
         containing its id and a modifier key to encode the direction to drop the strip.
@@ -147,19 +148,16 @@ class _StripLabel(Label):
         and allows changing of the cursor (cursor not changing properly in pyqt5) - ejb
         """
         if event.type() == QtCore.QEvent.MouseButtonPress:
-
             # process the single click event
             self._mousePressEvent(event)
             return True
 
         if event.type() == QtCore.QEvent.MouseButtonDblClick:
-
             # process the doubleClick event
             self._mouseButtonDblClick(event)
             return True
 
         if event.type() == QtCore.QEvent.MouseButtonRelease:
-
             # process the mouse release event
             self._mouseReleaseEvent(event)
             return True
@@ -259,7 +257,7 @@ class PlaneToolbar(ToolBar):
             self.prevPlaneButton = Button(self, '<', callback=partial(callbacks[0], i))
             self.prevPlaneButton.setFixedWidth(19)
             self.prevPlaneButton.setFixedHeight(19)
-            planeLabel = DoubleSpinbox(self, showButtons=False, objectName="PlaneToolbar_planeLabel"+str(i))
+            planeLabel = DoubleSpinbox(self, showButtons=False, objectName="PlaneToolbar_planeLabel" + str(i))
             # planeLabel.setFixedHeight(19)
 
             # force the minimum width of the planeLabel
@@ -302,12 +300,23 @@ class PlaneToolbar(ToolBar):
 
 STRIPCONNECT_LEFT = 'isLeft'
 STRIPCONNECT_RIGHT = 'isRight'
-STRIPCONNECT_NONE = 'none'
+STRIPCONNECT_NONE = 'noneConnect'
 STRIPCONNECT_DIRS = (STRIPCONNECT_NONE, STRIPCONNECT_LEFT, STRIPCONNECT_RIGHT)
+
 STRIPPOSITION_LEFT = 'l'
 STRIPPOSITION_CENTRE = 'c'
 STRIPPOSITION_RIGHT = 'r'
 STRIPPOSITIONS = (STRIPPOSITION_LEFT, STRIPPOSITION_CENTRE, STRIPPOSITION_RIGHT)
+
+STRIPDICT = 'stripHeaderDict'
+STRIPTEXT = 'stripText'
+STRIPOBJECT = 'stripObject'
+STRIPCONNECT = 'stripConnect'
+STRIPHEADERVISIBLE = 'stripHeaderVisible'
+STRIPENABLED = 'stripEnabled'
+STRIPTRUE = 1
+STRIPFALSE = 0
+STRIPSTOREINDEX = [STRIPTEXT, STRIPOBJECT, STRIPCONNECT, STRIPHEADERVISIBLE, STRIPENABLED]
 
 
 class StripHeader(Widget):
@@ -316,33 +325,45 @@ class StripHeader(Widget):
 
         self._parent = parent
         self.mainWindow = mainWindow
+        self.strip = strip
 
         self._labels = {}
 
-        for lab in STRIPPOSITIONS:
-            self._labels[lab] = _StripLabel(parent=self, mainWindow=mainWindow, strip=strip,
-                                            text='', spacing=(0, 0),
-                                            grid=(0, STRIPPOSITIONS.index(lab)))
+        for stripPos in STRIPPOSITIONS:
+            # read the current strip header values
+            headerDict = self.strip.getParameter(STRIPDICT, stripPos)
+            print('>>>', strip, headerDict)
+            # headerText = headerDict[STRIPTEXT] if headerDict and STRIPTEXT in headerDict else ''
+            # headerObject = headerDict[STRIPOBJECT] if headerDict and STRIPOBJECT in headerDict else ''
+            # headerConnect = headerDict[STRIPCONNECT] if headerDict and STRIPCONNECT in headerDict else STRIPCONNECT_NONE
+            # headerVisible = headerDict[STRIPHEADERVISIBLE] if headerDict and STRIPHEADERVISIBLE in headerDict else True
+            # headerEnabled = headerDict[STRIPENABLED] if headerDict and STRIPENABLED in headerDict else True
+
+            headerText = ''
+            self._labels[stripPos] = _StripLabel(parent=self, mainWindow=mainWindow, strip=strip,
+                                                 text=headerText, spacing=(0, 0),
+                                                 grid=(0, STRIPPOSITIONS.index(stripPos)))
 
             # ED: the only way I could find to cure the mis-aligned header
-            self._labels[lab].setStyleSheet('QLabel {'
-                                            'padding: 0; '
-                                            'margin: 0px 0px 0px 0px;'
-                                            'color:  %s;'
-                                            'background-color: %s;'
-                                            'border: 0 px;'
-                                            'font-family: %s;'
-                                            'font-size: %dpx;'
-                                            'qproperty-alignment: AlignCenter;'
-                                            '}' % (getColours()[STRIPHEADER_FOREGROUND],
-                                                   getColours()[STRIPHEADER_BACKGROUND],
-                                                   textFont.fontName,
-                                                   textFont.pointSize()))
+            self._labels[stripPos].setStyleSheet('QLabel {'
+                                                 'padding: 0; '
+                                                 'margin: 0px 0px 0px 0px;'
+                                                 'color:  %s;'
+                                                 'background-color: %s;'
+                                                 'border: 0 px;'
+                                                 'font-family: %s;'
+                                                 'font-size: %dpx;'
+                                                 'qproperty-alignment: AlignCenter;'
+                                                 '}' % (getColours()[STRIPHEADER_FOREGROUND],
+                                                        getColours()[STRIPHEADER_BACKGROUND],
+                                                        textFont.fontName,
+                                                        textFont.pointSize()))
 
-            self._labels[lab].obj = None
-            self._labels[lab]._connectDir = STRIPCONNECT_NONE
-            self._labels[lab].setFixedHeight(16)
-            self._labels[lab].setAlignment(QtCore.Qt.AlignAbsolute)
+            self._labels[stripPos].obj = None  # self.strip.project.getByPid(headerObject)
+            self._labels[stripPos]._connectDir = STRIPCONNECT_NONE  # headerConnect
+
+            self._labels[stripPos].setFixedHeight(16)
+            self._labels[stripPos].setAlignment(QtCore.Qt.AlignAbsolute)
 
         self._labels[STRIPPOSITION_LEFT].setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         self._labels[STRIPPOSITION_CENTRE].setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
@@ -350,15 +371,43 @@ class StripHeader(Widget):
 
         self.setFixedHeight(16)
 
+    def _setPositionParameter(self, stripPos, subParameterName, value):
+        """Set the item in the position dict
+        """
+        params = self.strip.getParameter(STRIPDICT, stripPos)
+        if not params:
+            params = {}
+        # params.update({subParameterName: value})
+        # params = {"name": 0}
+        # params[STRIPSTOREINDEX.index(subParameterName)] = value
+        # self.strip.setParameter(STRIPDICT, stripPos, params)
+
     def reset(self):
-        for lab in STRIPPOSITIONS:
-            self._labels[lab].setText('')
-            self._labels[lab].obj = None
-            self._labels[lab]._connectDir = STRIPCONNECT_NONE
+        for stripPos in STRIPPOSITIONS:
+            self._labels[stripPos].setText('')
+            self._labels[stripPos].obj = None
+            self._labels[stripPos]._connectDir = STRIPCONNECT_NONE
+
+            # clear the header store
+            params = {STRIPTEXT         : '',
+                      STRIPOBJECT       : None,
+                      STRIPCONNECT      : STRIPCONNECT_NONE,
+                      STRIPHEADERVISIBLE: True,
+                      STRIPENABLED      : True
+                      }
+
+            # params = ['', False, STRIPCONNECT_NONE, {1:2, 3:4}, STRIPTRUE]
+
+            self.strip.setParameter(STRIPDICT, stripPos, params)
 
     def setLabelObject(self, obj=None, position=STRIPPOSITION_CENTRE):
+        """Set the object attached to the strip and store its pid
+        """
+        # TODO:ED object pid may change
         if position in STRIPPOSITIONS:
             self._labels[position].obj = obj
+            # if obj and hasattr(obj, 'pid'):
+            #     self._setPositionParameter(position, STRIPOBJECT, str(obj.pid))
 
     def getLabelObject(self, position=STRIPPOSITION_CENTRE):
         if position in STRIPPOSITIONS:
@@ -366,7 +415,8 @@ class StripHeader(Widget):
 
     def setLabelText(self, text=None, position=STRIPPOSITION_CENTRE):
         if position in STRIPPOSITIONS:
-            self._labels[position].setText(text)
+            self._labels[position].setText(str(text))
+            self._setPositionParameter(position, STRIPTEXT, str(text))
 
     def getLabelText(self, position=STRIPPOSITION_CENTRE):
         if position in STRIPPOSITIONS:
@@ -382,21 +432,25 @@ class StripHeader(Widget):
         position = position[0]
         if position in STRIPPOSITIONS:
             self._labels[position].setVisible(doShow)
+            # self._setPositionParameter(position, STRIPHEADERVISIBLE, doShow)
 
     def hideLabel(self, position=STRIPPOSITION_CENTRE):
         "Hide the header label; convienience"
         if position in STRIPPOSITIONS:
             self._labels[position].setVisible(False)
+            # self._setPositionParameter(position, STRIPHEADERVISIBLE, False)
 
     def setLabelEnabled(self, position=STRIPPOSITION_CENTRE, enable: bool = True):
         """show / hide the header label"""
         if position in STRIPPOSITIONS:
             self._labels[position].setEnabled(enable)
+            # self._setPositionParameter(position, STRIPENABLED, enable)
 
     def setLabelConnectDir(self, position=STRIPPOSITION_CENTRE, connectDir: str = STRIPCONNECT_NONE):
         """set the connectDir attribute of the header label"""
         if position in STRIPPOSITIONS:
             self._labels[position]._connectDir = connectDir
+            # self._setPositionParameter(position, STRIPCONNECT, connectDir)
 
     def getLabelConnectDir(self, position=STRIPPOSITION_CENTRE):
         """set the connectDir attribute of the header label"""

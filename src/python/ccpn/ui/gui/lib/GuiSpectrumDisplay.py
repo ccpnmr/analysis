@@ -1495,46 +1495,10 @@ class GuiSpectrumDisplay(CcpnModule):
                         strip = self.strips[ii]
                         navigateToPeakInStrip(self, strip, pk)
 
-                        # newWidths = [0.2] * len(self.axisCodes)
-                        # pos = [None] * len(self.axisCodes)
-                        # mappedNewWidths = ['full'] * len(self.axisCodes)
-                        # newWidths = ['full'] * len(self.axisCodes)
-                        #
-                        # if widths == None:
-                        #     # set the width in case of nD (n>2)
-                        #     _widths = {'H': 0.3, 'C': 1.0, 'N': 1.0}
-                        #     _ac = strip.axisCodes[0]
-                        #     _w = _widths.setdefault(_ac[0], 1.0)
-                        #     newWidths[0] = _w
-                        #
-                        # indices = strip._getAxisCodeIndices(pk.peakList.spectrum)
-                        # for ind, ii in enumerate(indices):
-                        #     if ii < len(pos):
-                        #         pos[ii] = pk.position[ind]
-                        #         mappedNewWidths[ii] = newWidths[ind]
-                        #
-                        # navigateToPositionInStrip(strip, pos, self.axisCodes, widths=mappedNewWidths)
-                        # strip.header.reset()
-                        # strip.header.setLabelText(position='c', text=pk.pid)
-
                 elif nmrs:
                     for ii, nmr in enumerate(nmrs):
                         strip = self.strips[ii]
                         navigateToNmrResidueInStrip(self, strip, nmr, widths, markPositions)
-
-                        # newWidths = ['default'] * len(strip.axisCodes)
-                        # if widths == None:
-                        #     # set the width in case of nD (n>2)
-                        #     _widths = {'H': 0.3, 'C': 1.0, 'N': 1.0}
-                        #     _ac = strip.axisCodes[0]
-                        #     _w = _widths.setdefault(_ac[0], 1.0)
-                        #     newWidths = [_w, 'full']
-                        #
-                        # navigateToNmrAtomsInStrip(strip, nmr.nmrAtoms,
-                        #                           widths=newWidths, markPositions=markPositions, setNmrResidueLabel=False)
-                        #
-                        # strip.header.reset()
-                        # strip.header.setLabelText(position='c', text=nmr.pid)
 
                 # _undo._newItem(redoPartial=partial(_updateGl, self, []))
 

@@ -1295,7 +1295,6 @@ class GuiStrip(Frame):
         """
         return self._CcpnGLWidget._firstVisible
 
-
 # Notifiers:
 def _updateDisplayedMarks(data):
     """Callback when marks have changed - Create, Change, Delete; defined above.

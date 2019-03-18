@@ -260,21 +260,12 @@ class PeakList(AbstractWrapperObject):
     ###def pickPeaksNd(self, positions:Sequence[float]=None,
     def pickPeaksNd(self, regionToPick: Sequence[float] = None,
                     doPos: bool = True, doNeg: bool = True,
-                    fitMethod: str = PARABOLICMETHOD, excludedRegions=None,
+                    fitMethod: str = GAUSSIANMETHOD, excludedRegions=None,
                     excludedDiagonalDims=None, excludedDiagonalTransform=None,
                     minDropFactor: float = 0.1):
 
         # TODO NBNB Add doc string and put type annotation on all parameters
 
-        # regionToPick = [hRange, cRange, nRange] for 3D, for example
-
-        defaults = collections.OrderedDict(
-                ###( ('positions', None), ('doPos', True), ('doNeg', True),
-                (('regionToPick', None), ('doPos', True), ('doNeg', True),
-                 ('fitMethod', PARABOLICMETHOD), ('excludedRegions', None), ('excludedDiagonalDims', None),
-                 ('excludedDiagonalTransform', None), ('minDropFactor', 0.1)
-                 )
-                )
         startPoint = []
         endPoint = []
         spectrum = self.spectrum
@@ -338,14 +329,13 @@ class PeakList(AbstractWrapperObject):
 
         return result
 
+    @logCommand(get='self')
     def pickPeaks1d(self, dataRange, intensityRange=None, size: int = 3, mode: str = 'wrap') -> List['Peak']:
         """
         Pick 1D peaks from a dataRange
         """
 
-        self._project.suspendNotification()
-
-        try:
+        with undoBlock():
             if dataRange[0] < dataRange[1]:
                 dataRange[0], dataRange[1] = dataRange[1], dataRange[0]
             # code below assumes that dataRange[1] > dataRange[0]
@@ -372,9 +362,6 @@ class PeakList(AbstractWrapperObject):
                 height = selectedData[1][position]
                 if intensityRange is None or intensityRange[0] <= height <= intensityRange[1]:
                     peaks.append(self.newPeak(height=float(height), ppmPositions=peakPosition))
-
-        finally:
-            self._project.resumeNotification()
 
         return peaks
 
@@ -1043,8 +1030,8 @@ class PeakList(AbstractWrapperObject):
                         center = numpy.array(centerGuess)
 
                         position = center + startPointBufferActual
-                        peak = self._newPickedPeak(pointPositions=position, height=height,
-                                                   lineWidths=linewidth, fitMethod=fitMethod)
+                        peak = self.newPickedPeak(pointPositions=position, height=height,
+                                                  lineWidths=linewidth, fitMethod=fitMethod)
                         peaks.append(peak)
 
                     if fitMethod != PARABOLICMETHOD:
@@ -1299,7 +1286,7 @@ class PeakList(AbstractWrapperObject):
         return _newPeak(self, ppmPositions=ppmPositions, height=height, comment=comment, **kwds)
 
     @logCommand(get='self')
-    def _newPickedPeak(self, pointPositions: Sequence[float] = None, height: float = None,
+    def newPickedPeak(self, pointPositions: Sequence[float] = None, height: float = None,
                        lineWidths: Sequence[float] = (), fitMethod: str = PARABOLICMETHOD, **kwds):
         """Create a new Peak within a peakList from a picked peak
 

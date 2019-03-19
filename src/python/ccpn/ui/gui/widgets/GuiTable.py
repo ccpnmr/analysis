@@ -944,7 +944,7 @@ GuiTable::item::selected {
         self._rawData = data
 
     @contextmanager
-    def _quickTableUpdate(self, dataFrameObject, resize=True):
+    def _guiTableUpdate(self, dataFrameObject, resize=True):
         # keep the original sorting method
         sortOrder = self.horizontalHeader().sortIndicatorOrder()
         sortColumn = self.horizontalHeader().sortIndicatorSection()
@@ -1781,7 +1781,7 @@ GuiTable::item::selected {
                            'moduleParent'         : moduleParent
                            }
 
-        # add a cleaner id to the opened quickTable list
+        # add a cleaner id to the opened guiTable list
         self.moduleParent = moduleParent
         MODULEIDS[id(moduleParent)] = len(MODULEIDS)
         # print('>>>', MODULEIDS, moduleParent)
@@ -1935,7 +1935,7 @@ class GuiTableFrame(Frame):
                                               grid=(1, 0),
                                               hPolicy='expanding', vPolicy='expanding')
 
-        self.quickTable = GuiTable(self, *args, **kwargs)
+        self.guiTable = GuiTable(self, *args, **kwargs)
         self.searchWidget = None
 
 

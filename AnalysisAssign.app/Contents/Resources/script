@@ -38,4 +38,4 @@ source "${CCPNMR_TOP_DIR}"/bin/paths.sh
 "${ANACONDA3}"/bin/python -W ignore::DeprecationWarning "${ANALYSIS}" $*
 
 # wait for a few seconds before closing in case there are any error messages
-sleep 5s
+sleep 3s

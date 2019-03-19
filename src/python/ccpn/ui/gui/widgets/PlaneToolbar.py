@@ -375,6 +375,7 @@ class StripHeader(Widget):
         self._labels[STRIPPOSITION_RIGHT].setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
         self.setFixedHeight(16)
+        self.reset()
 
     def _setPositionParameter(self, stripPos, subParameterName, value):
         """Set the item in the position dict
@@ -417,6 +418,7 @@ class StripHeader(Widget):
     def reset(self):
         """Clear all header labels
         """
+        self.hide()
         for stripPos in STRIPPOSITIONS:
             self._labels[stripPos].setText('')
             self._labels[stripPos].obj = None
@@ -436,6 +438,7 @@ class StripHeader(Widget):
     def setLabelObject(self, obj=None, position=STRIPPOSITION_CENTRE):
         """Set the object attached to the header label at the given position and store its pid
         """
+        self.show()
         if position in STRIPPOSITIONS:
             self._labels[position].obj = obj
 
@@ -456,6 +459,7 @@ class StripHeader(Widget):
     def setLabelText(self, text=None, position=STRIPPOSITION_CENTRE):
         """Set the text for header label at the given position
         """
+        self.show()
         if position in STRIPPOSITIONS:
             self._labels[position].setText(str(text))
             self._setPositionParameter(position, STRIPTEXT, str(text))
@@ -481,6 +485,10 @@ class StripHeader(Widget):
     def setLabelVisible(self, position=STRIPPOSITION_CENTRE, visible: bool = True):
         """show/hide the header label at the given position
         """
+        if visible:
+            self.show()
+        else:
+            self.hide()
         if position in STRIPPOSITIONS:
             self._labels[position].setVisible(visible)
             self._setPositionParameter(position, STRIPVISIBLE, visible)

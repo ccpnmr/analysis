@@ -43,6 +43,8 @@ from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
 from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.core.Peak import Peak
 from ccpn.core.NmrResidue import NmrResidue
+from ccpn.core.lib.Notifiers import Notifier
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
 
 STRIPLABEL_CONNECTDIR = '_connectDir'
@@ -312,11 +314,11 @@ STRIPDICT = 'stripHeaderDict'
 STRIPTEXT = 'stripText'
 STRIPOBJECT = 'stripObject'
 STRIPCONNECT = 'stripConnect'
-STRIPHEADERVISIBLE = 'stripHeaderVisible'
+STRIPVISIBLE = 'stripVisible'
 STRIPENABLED = 'stripEnabled'
 STRIPTRUE = 1
 STRIPFALSE = 0
-STRIPSTOREINDEX = [STRIPTEXT, STRIPOBJECT, STRIPCONNECT, STRIPHEADERVISIBLE, STRIPENABLED]
+STRIPSTOREINDEX = [STRIPTEXT, STRIPOBJECT, STRIPCONNECT, STRIPVISIBLE, STRIPENABLED]
 
 
 class StripHeader(Widget):
@@ -331,12 +333,11 @@ class StripHeader(Widget):
 
         for stripPos in STRIPPOSITIONS:
             # read the current strip header values
-            headerDict = self.strip.getParameter(STRIPDICT, stripPos)
-            print('>>>', strip, headerDict)
             headerText = self._getPositionParameter(stripPos, STRIPTEXT, '')
+            # not sure this is required
             headerObject = self.strip.project.getByPid(self._getPositionParameter(stripPos, STRIPOBJECT, None))
             headerConnect = self._getPositionParameter(stripPos, STRIPCONNECT, STRIPCONNECT_NONE)
-            headerVisible = self._getPositionParameter(stripPos, STRIPHEADERVISIBLE, True)
+            headerVisible = self._getPositionParameter(stripPos, STRIPVISIBLE, True)
             headerEnabled = self._getPositionParameter(stripPos, STRIPENABLED, True)
 
             self._labels[stripPos] = _StripLabel(parent=self, mainWindow=mainWindow, strip=strip,
@@ -358,11 +359,16 @@ class StripHeader(Widget):
                                                         textFont.fontName,
                                                         textFont.pointSize()))
 
-            self._labels[stripPos].obj = None  # self.strip.project.getByPid(headerObject)
-            self._labels[stripPos]._connectDir = STRIPCONNECT_NONE  # headerConnect
-
+            self._labels[stripPos].obj = headerObject
+            self._labels[stripPos]._connectDir = headerConnect
             self._labels[stripPos].setFixedHeight(16)
             self._labels[stripPos].setAlignment(QtCore.Qt.AlignAbsolute)
+
+            self._labels[stripPos].setVisible(headerVisible)
+            self._labels[stripPos].setEnabled(headerEnabled)
+
+        # guiNotifiers are attached to the backboneAssignment module, not active on loading of project
+        # currently needs a doubleClick in the backboneAssignment table to start
 
         self._labels[STRIPPOSITION_LEFT].setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         self._labels[STRIPPOSITION_CENTRE].setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
@@ -389,7 +395,7 @@ class StripHeader(Widget):
         self.strip.setParameter(STRIPDICT, stripPos, params)
 
     def _getPositionParameter(self, stripPos, subParameterName, default):
-        """Set the item in the position dict
+        """Return the item from the position dict
         """
         params = self.strip.getParameter(STRIPDICT, stripPos)
         if params:
@@ -397,83 +403,146 @@ class StripHeader(Widget):
                 value = params.get(subParameterName)
 
                 # fix for bad characters in the XML
+                # Could ignore here, so that needs doubleClick in backboneAssignment to restart
                 if isinstance(value, str):
                     if 'MINUS' in value:
                         value = '<<<'
                     elif 'PLUS' in value:
                         value = '>>>'
+
                 return value
 
         return default
 
     def reset(self):
+        """Clear all header labels
+        """
         for stripPos in STRIPPOSITIONS:
             self._labels[stripPos].setText('')
             self._labels[stripPos].obj = None
             self._labels[stripPos]._connectDir = STRIPCONNECT_NONE
+            self._labels[stripPos].setVisible(True)
+            self._labels[stripPos].setEnabled(True)
 
             # clear the header store
-            params = {STRIPTEXT         : '',
-                      STRIPOBJECT       : None,
-                      STRIPCONNECT      : STRIPCONNECT_NONE,
-                      STRIPHEADERVISIBLE: True,
-                      STRIPENABLED      : True
+            params = {STRIPTEXT   : '',
+                      STRIPOBJECT : None,
+                      STRIPCONNECT: STRIPCONNECT_NONE,
+                      STRIPVISIBLE: True,
+                      STRIPENABLED: True
                       }
             self.strip.setParameter(STRIPDICT, stripPos, params)
 
     def setLabelObject(self, obj=None, position=STRIPPOSITION_CENTRE):
-        """Set the object attached to the strip and store its pid
+        """Set the object attached to the header label at the given position and store its pid
         """
-        # TODO:ED object pid may change
         if position in STRIPPOSITIONS:
             self._labels[position].obj = obj
-            # if obj and hasattr(obj, 'pid'):
-            #     self._setPositionParameter(position, STRIPOBJECT, str(obj.pid))
+
+            # SHOULD have a pid if an object
+            if obj and hasattr(obj, 'pid'):
+                self._setPositionParameter(position, STRIPOBJECT, str(obj.pid))
+        else:
+            raise ValueError('Error: %s is not a valid position' % str(position))
 
     def getLabelObject(self, position=STRIPPOSITION_CENTRE):
+        """Return the object attached to the header label at the given position
+        """
         if position in STRIPPOSITIONS:
             return self._labels[position].obj
+        else:
+            raise ValueError('Error: %s is not a valid position' % str(position))
 
     def setLabelText(self, text=None, position=STRIPPOSITION_CENTRE):
+        """Set the text for header label at the given position
+        """
         if position in STRIPPOSITIONS:
             self._labels[position].setText(str(text))
             self._setPositionParameter(position, STRIPTEXT, str(text))
+        else:
+            raise ValueError('Error: %s is not a valid position' % str(position))
 
     def getLabelText(self, position=STRIPPOSITION_CENTRE):
+        """Return the text for header label at the given position
+        """
         if position in STRIPPOSITIONS:
             return self._labels[position].text()
+        else:
+            raise ValueError('Error: %s is not a valid position' % str(position))
 
     def getLabel(self, position=STRIPPOSITION_CENTRE):
-        """Return the header label widget"""
+        """Return the header label widget at the given position
+        """
         if position in STRIPPOSITIONS:
             return self._labels[position]
+        else:
+            raise ValueError('Error: %s is not a valid position' % str(position))
 
-    def showLabel(self, position=STRIPPOSITION_CENTRE, doShow: bool = True):
-        """show / hide the header label"""
-        position = position[0]
+    def setLabelVisible(self, position=STRIPPOSITION_CENTRE, visible: bool = True):
+        """show/hide the header label at the given position
+        """
         if position in STRIPPOSITIONS:
-            self._labels[position].setVisible(doShow)
-            # self._setPositionParameter(position, STRIPHEADERVISIBLE, doShow)
+            self._labels[position].setVisible(visible)
+            self._setPositionParameter(position, STRIPVISIBLE, visible)
+        else:
+            raise ValueError('Error: %s is not a valid position' % str(position))
 
-    def hideLabel(self, position=STRIPPOSITION_CENTRE):
-        "Hide the header label; convienience"
+    def getLabelVisible(self, position=STRIPPOSITION_CENTRE):
+        """Return if the widget at the given position is visible
+        """
         if position in STRIPPOSITIONS:
-            self._labels[position].setVisible(False)
-            # self._setPositionParameter(position, STRIPHEADERVISIBLE, False)
+            return self._labels[position].isVisible()
+        else:
+            raise ValueError('Error: %s is not a valid position' % str(position))
 
     def setLabelEnabled(self, position=STRIPPOSITION_CENTRE, enable: bool = True):
-        """show / hide the header label"""
+        """Enable/disable the header label at the given position
+        """
         if position in STRIPPOSITIONS:
             self._labels[position].setEnabled(enable)
-            # self._setPositionParameter(position, STRIPENABLED, enable)
+            self._setPositionParameter(position, STRIPENABLED, enable)
+        else:
+            raise ValueError('Error: %s is not a valid position' % str(position))
+
+    def getLabelEnabled(self, position=STRIPPOSITION_CENTRE):
+        """Return if the widget at the given position is enabled
+        """
+        if position in STRIPPOSITIONS:
+            return self._labels[position].isEnabled()
+        else:
+            raise ValueError('Error: %s is not a valid position' % str(position))
 
     def setLabelConnectDir(self, position=STRIPPOSITION_CENTRE, connectDir: str = STRIPCONNECT_NONE):
-        """set the connectDir attribute of the header label"""
+        """set the connectDir attribute of the header label at the given position
+        """
         if position in STRIPPOSITIONS:
             self._labels[position]._connectDir = connectDir
-            # self._setPositionParameter(position, STRIPCONNECT, connectDir)
+            self._setPositionParameter(position, STRIPCONNECT, connectDir)
+        else:
+            raise ValueError('Error: %s is not a valid position' % str(position))
 
     def getLabelConnectDir(self, position=STRIPPOSITION_CENTRE):
-        """set the connectDir attribute of the header label"""
+        """Return the connectDir attribute of the header label at the given position
+        """
         if position in STRIPPOSITIONS:
             return self._labels[position]._connectDir
+        else:
+            raise ValueError('Error: %s is not a valid position' % str(position))
+
+    def processNotifier(self, data):
+        """Process the notifiers for the strip header
+        """
+        trigger = data[Notifier.TRIGGER]
+        obj = data[Notifier.OBJECT]
+
+        if trigger == 'rename':
+            oldPid = data[Notifier.OLDPID]
+
+            for stripPos in STRIPPOSITIONS:
+                # change the label text
+                if oldPid in self.getLabelText(stripPos):
+                    self.setLabelText(position=stripPos, text=str(obj.pid))
+
+                # change the object text
+                if self.getLabelObject(stripPos) is obj:
+                    self.setLabelObject(position=stripPos, obj=obj)

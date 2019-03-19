@@ -243,9 +243,7 @@ class GuiStrip(Frame):
     def _updateStripLabel(self, callbackDict):
         """Update the striplabel if it represented a NmrResidue that has changed its id.
         """
-        text = self.header.getLabelText(position='c')
-        if callbackDict['oldPid'] == text:
-            self.header.setLabelText(position='c', text=callbackDict['object'].pid)
+        self.header.processNotifier(callbackDict)
 
     def createMark(self):
         """Sets the marks at current position

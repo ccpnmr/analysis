@@ -1310,9 +1310,12 @@ class Project(AbstractWrapperObject):
         """
         from ccpn.ui._implementation.Mark import _newMark
 
-        return _newMark(self, colour=colour, positions=positions, axisCodes=axisCodes,
-                        style=style, units=units, labels=labels
-                        )
+        if not self.findMark(colour=colour, positions=positions, axisCodes=axisCodes, labels=labels):
+            return _newMark(self, colour=colour, positions=positions, axisCodes=axisCodes,
+                            style=style, units=units, labels=labels
+                            )
+        else:
+            getLogger().warning('Mark already exists')
 
     @logCommand('project.')
     def findMark(self, colour: str, positions: Sequence[float], axisCodes: Sequence, labels: Sequence[str] = ()):

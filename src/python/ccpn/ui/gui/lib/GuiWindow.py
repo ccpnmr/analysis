@@ -483,14 +483,12 @@ class GuiWindow():
                 #     log('markPositions')
                 with undoBlock():
                     # GWV 20181030: changed from atomName to id
-                    if not project.findMark(colour, [chemicalShift.value], [axisCode], labels=[atomId]):
-
-                        if colour:
-                            project.newMark(colour, [chemicalShift.value], [axisCode], labels=[atomId])
-                        else:
-                            # just use gray rather than checking colourScheme
-                            defaultColour = self.application.preferences.general.defaultMarksColour
-                            project.newMark(defaultColour, [chemicalShift.value], [atomId])
+                    if colour:
+                        project.newMark(colour, [chemicalShift.value], [axisCode], labels=[atomId])
+                    else:
+                        # just use gray rather than checking colourScheme
+                        defaultColour = self.application.preferences.general.defaultMarksColour
+                        project.newMark(defaultColour, [chemicalShift.value], [atomId])
 
     def toggleGridAll(self):
         """

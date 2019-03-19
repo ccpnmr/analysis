@@ -625,6 +625,19 @@ class Peak(AbstractWrapperObject):
         peaks = [self.project.getByPid(pid) for pid in pids if pid is not None]
         return peaks
 
+    def _getSNRatio(self, ratio=2.5):
+        from ccpn.core.PeakList import  estimateSNR_1D
+        spectrum = self._parent.spectrum
+        noiseLevel = spectrum.noiseLevel
+        negativeNoiseLevel = spectrum.negativeNoiseLevel
+        if noiseLevel is None:
+            getLogger().warning('Spectrum noise level not defined for %s' %spectrum.pid)
+            return None
+        if negativeNoiseLevel is None:
+            getLogger().warning('Spectrum negative noise level not defined %s' %spectrum.pid)
+            return None
+        snr = estimateSNR_1D(noiseLevels=[noiseLevel,negativeNoiseLevel], signalPoints=[self.height], ratio=ratio)
+        return snr[0]
     #===========================================================================================
     # new'Object' and other methods
     # Call appropriate routines in their respective locations

@@ -48,7 +48,7 @@ UseRegion = 'Calibration_region'
 EstimateNoiseThreshold = 'Estimate_Noise_Threshold'
 IncreaseBySTD = 'Add_STD'
 
-DefaultEstimateNoiseThreshold = False
+DefaultEstimateNoiseThreshold = True
 DefaultNoiseThreshold = [0, 0]
 DefaultCalibration_region = [14,12]
 DefaultIncreaseBySTD = 0.50
@@ -158,6 +158,7 @@ class NoiseThresholdPipe(SpectraPipe):
                     stdFactor = self._kwargs[IncreaseBySTD]
                     maxNL, minNL = _getNoiseThreshold(spectrum, roi, stdFactor)
                     spectrum.noiseLevel = maxNL
+                    spectrum.negativeNoiseLevel = minNL
                     self._kwargs.update({NoiseThreshold: [spectrum.noiseLevel, minNL]})
                 else:
                     spectrum.noiseLevel = max(self._kwargs[NoiseThreshold])

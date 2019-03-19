@@ -101,13 +101,13 @@ def _signalToNoiseFunc(noise, signal):
 #         else:
 #             return 1
 
-def estimateSignalRegion(y, noiseLevel=None):
+def estimateSignalRegion(y,  nlMax=None, nlMin=None):
     if y is None: return 0
-    if noiseLevel is None:
-        eMax, emin = estimateNoiseLevel1D(y)
-    eS = np.where(y >= eMax)
-    eSN = np.where(y <= emin)
-    eN = np.where((y < eMax) & (y > -emin))
+    if nlMax is None or nlMin is None:
+        nlMax, nlMin = estimateNoiseLevel1D(y)
+    eS = np.where(y >= nlMax)
+    eSN = np.where(y <= nlMin)
+    eN = np.where((y < nlMax) & (y > nlMin))
     estimatedSignalRegionPos = y[eS]
     estimatedSignalRegionNeg = y[eSN]
     estimatedSignalRegion = np.concatenate((estimatedSignalRegionPos, estimatedSignalRegionNeg))
@@ -152,6 +152,7 @@ def estimateSNR_1D(noiseLevels, signalPoints, ratio=2.5):
     if dd != 0 and dd is not None:
         snRatios = (ratio * pp) / dd
         return snRatios
+    return [None]*len(signalPoints)
 
 def estimateNoiseLevel1D(y, f=10, stdFactor = 0.5):
     """
@@ -674,7 +675,7 @@ class PeakList(AbstractWrapperObject):
     #
     #   return peaks
 
-    def peakFinder1D(self, maxNoiseLevel = None, ignoredRegions=[[20, 19]], negativePeaks=True):
+    def peakFinder1D(self, maxNoiseLevel = None,minNoiseLevel=None, ignoredRegions=[[20, 19]], negativePeaks=True):
         from ccpn.core.lib.peakUtils import peakdet, _getIntersectionPoints, _pairIntersectionPoints
         from scipy import signal
         from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar
@@ -685,7 +686,7 @@ class PeakList(AbstractWrapperObject):
             x, y = spectrum.positions, spectrum.intensities
             masked = _filtered1DArray(numpy.array([x, y]), ignoredRegions)
             filteredX, filteredY = masked[0], masked[1]
-            if maxNoiseLevel is None:
+            if maxNoiseLevel is None or minNoiseLevel is None:
                 maxNoiseLevel, minNoiseLevel = estimateNoiseLevel1D(filteredY)
 
 

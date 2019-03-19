@@ -102,6 +102,7 @@ class PeakPicker1DPipe(SpectraPipe):
         for spectrum in self.inputData:
             if len(spectrum.peakLists) > 0:
                 spectrum.peakLists[DefaultPeakListIndex].peakFinder1D(maxNoiseLevel=spectrum.noiseLevel,
+                                                                      minNoiseLevel=spectrum.negativeNoiseLevel,
                                                                       ignoredRegions=excludeRegions,
                                                                       )
             else:

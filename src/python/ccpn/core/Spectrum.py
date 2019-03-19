@@ -65,6 +65,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import numpy as np
 import os
+import operator
+import sys
 from typing import Sequence, Tuple, Optional
 from functools import partial
 from ccpn.util import Common as commonUtil
@@ -137,6 +139,9 @@ class Spectrum(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = Nmr.DataSource._metaclass.qualifiedName()
+
+    # Internal NameSpace
+    _AdditionalAttribute = 'AdditionalAttribute'
 
     _referenceSpectrumHit = None
     _snr = None
@@ -382,6 +387,20 @@ class Spectrum(AbstractWrapperObject):
     @noiseLevel.setter
     def noiseLevel(self, value: float):
         self._wrappedData.noiseLevel = value
+
+    @property
+    def negativeNoiseLevel(self) -> float:
+        """ Negative noise level value. Stored in Internal"""
+        propertyName = sys._getframe().f_code.co_name
+        value = self.getParameter(self._AdditionalAttribute, propertyName)
+        return value
+
+    @negativeNoiseLevel.setter
+    def negativeNoiseLevel(self, value):
+        """Stored in Internal """
+        propertyName = sys._getframe().f_code.co_name
+        self.setParameter(self._AdditionalAttribute, propertyName, value)
+
 
     @property
     def synonym(self) -> str:

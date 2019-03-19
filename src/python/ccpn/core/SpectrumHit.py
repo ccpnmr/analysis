@@ -352,6 +352,11 @@ class SpectrumHit(AbstractWrapperObject):
         heights = [p.height for p in peaks if p.height is not None]
         return heights
 
+    def _getHitSNR(self, peaks):
+        heights = [p._getSNRatio() for p in peaks if p._getSNRatio() is not None]
+        return heights
+
+
     def _getSingleScore(self, referencePeakList):
         ''' calculate as Total score but for the single reference spectrum'''
         peakHits = self._getReferencePeakHits(referencePeakList)

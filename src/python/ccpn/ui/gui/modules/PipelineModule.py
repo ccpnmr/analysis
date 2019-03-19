@@ -826,8 +826,8 @@ class GuiPipeline(CcpnModule, Pipeline):
                     elif isinstance(obj, SpectrumGroup):
                         self.inputData.update(obj.spectra)
                         self.spectrumGroups.update([obj])
-                    else:
-                        getLogger().warn('Check input data. Data not available.')
+                    # else:
+                    #     getLogger().warn('Check input data. Data not available.')
 
     def _updateInputDataFromNotifier(self, data):
         ''

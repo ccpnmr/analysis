@@ -71,6 +71,7 @@ from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlankin
 from ccpn.util.decorators import logCommand
 from ccpn.util.Common import makeIterableList
 from ccpn.core.lib import Undo
+from ccpn.ui.gui.widgets.MessageDialog import showMulti
 
 
 AXIS_WIDTH = 30
@@ -578,25 +579,45 @@ class GuiSpectrumDisplay(CcpnModule):
             self.current.strip = self.strips[0]
 
     def _handleNmrChains(self, nmrChains):
+        nmrResidues = []
         for chain in nmrChains:
-            self._handleNmrResidues(chain.nmrResidues)
+            nmrResidues += chain.nmrResidues
 
-    def _handleNmrResidues(self, nmrResidues):
-        if not self.current.peak:
+        # mark all nmrChains.nmrResidues.nmrAtoms to the window
+        self._handleNmrResidues(nmrResidues, showDialog=False)
+
+    def _handleNmrResidues(self, nmrResidues, showDialog=True):
+
+        if self.current.peaks and showDialog:
+            dialogResult = showMulti('nmrResidue', 'What do you want to do with the nmrResidues?',
+                               texts=['Cancel', 'Mark and Assign', 'Assign NmrResidues to current.peaks', 'Create Marks'])
+        else:
+            dialogResult = 'Mark'
+
+        # mark all nmrResidues.nmrAtoms to the window
+        if 'Mark' in dialogResult:
             for nmrResidue in nmrResidues:
                 self._createNmrResidueMarks(nmrResidue)
 
         # Assign nmrResidues atoms to peaks
-        if self.current.strip:
+        if self.current.strip and 'Assign' in dialogResult:
             _assignNmrResiduesToPeaks(peaks=self.current.peaks, nmrResidues=nmrResidues)
 
     def _handleNmrAtoms(self, nmrAtoms):
-        if not self.current.peak:
+
+        if self.current.peaks:
+            dialogResult = showMulti('nmrAtoms', 'What do you want to do with the nmrAtoms?',
+                               texts=['Cancel', 'Mark and Assign', 'Assign NmrAtoms to current.peaks', 'Create Marks'])
+        else:
+            dialogResult = 'Mark'
+
+        # mark all nmrAtoms to the window
+        if 'Mark' in dialogResult:
             for nmrAtom in nmrAtoms:
                 self._markNmrAtom(nmrAtom)
 
         # Assign nmrAtoms to peaks
-        if self.current.strip:
+        if self.current.strip and 'Assign' in dialogResult:
             _assignNmrAtomsToPeaks(nmrAtoms=nmrAtoms, peaks=self.current.peaks)
 
     def _processDragEnterEvent(self, data):

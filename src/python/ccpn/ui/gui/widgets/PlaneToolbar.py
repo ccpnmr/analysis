@@ -333,13 +333,12 @@ class StripHeader(Widget):
             # read the current strip header values
             headerDict = self.strip.getParameter(STRIPDICT, stripPos)
             print('>>>', strip, headerDict)
-            # headerText = headerDict[STRIPTEXT] if headerDict and STRIPTEXT in headerDict else ''
-            # headerObject = headerDict[STRIPOBJECT] if headerDict and STRIPOBJECT in headerDict else ''
-            # headerConnect = headerDict[STRIPCONNECT] if headerDict and STRIPCONNECT in headerDict else STRIPCONNECT_NONE
-            # headerVisible = headerDict[STRIPHEADERVISIBLE] if headerDict and STRIPHEADERVISIBLE in headerDict else True
-            # headerEnabled = headerDict[STRIPENABLED] if headerDict and STRIPENABLED in headerDict else True
+            headerText = self._getPositionParameter(stripPos, STRIPTEXT, '')
+            headerObject = self.strip.project.getByPid(self._getPositionParameter(stripPos, STRIPOBJECT, None))
+            headerConnect = self._getPositionParameter(stripPos, STRIPCONNECT, STRIPCONNECT_NONE)
+            headerVisible = self._getPositionParameter(stripPos, STRIPHEADERVISIBLE, True)
+            headerEnabled = self._getPositionParameter(stripPos, STRIPENABLED, True)
 
-            headerText = ''
             self._labels[stripPos] = _StripLabel(parent=self, mainWindow=mainWindow, strip=strip,
                                                  text=headerText, spacing=(0, 0),
                                                  grid=(0, STRIPPOSITIONS.index(stripPos)))
@@ -377,10 +376,35 @@ class StripHeader(Widget):
         params = self.strip.getParameter(STRIPDICT, stripPos)
         if not params:
             params = {}
-        # params.update({subParameterName: value})
-        # params = {"name": 0}
-        # params[STRIPSTOREINDEX.index(subParameterName)] = value
-        # self.strip.setParameter(STRIPDICT, stripPos, params)
+
+        # fix for bad characters in the XML
+        if isinstance(value, str):
+            if '<<<' in value:
+                value = 'MINUS'
+            elif '>>>' in value:
+                value = 'PLUS'
+
+        # currently writes directly into _ccpnInternal
+        params.update({subParameterName: value})
+        self.strip.setParameter(STRIPDICT, stripPos, params)
+
+    def _getPositionParameter(self, stripPos, subParameterName, default):
+        """Set the item in the position dict
+        """
+        params = self.strip.getParameter(STRIPDICT, stripPos)
+        if params:
+            if subParameterName in params:
+                value = params.get(subParameterName)
+
+                # fix for bad characters in the XML
+                if isinstance(value, str):
+                    if 'MINUS' in value:
+                        value = '<<<'
+                    elif 'PLUS' in value:
+                        value = '>>>'
+                return value
+
+        return default
 
     def reset(self):
         for stripPos in STRIPPOSITIONS:
@@ -395,9 +419,6 @@ class StripHeader(Widget):
                       STRIPHEADERVISIBLE: True,
                       STRIPENABLED      : True
                       }
-
-            # params = ['', False, STRIPCONNECT_NONE, {1:2, 3:4}, STRIPTRUE]
-
             self.strip.setParameter(STRIPDICT, stripPos, params)
 
     def setLabelObject(self, obj=None, position=STRIPPOSITION_CENTRE):

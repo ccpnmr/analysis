@@ -24,7 +24,7 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 
 #### GUI IMPORTS
-from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, commonWidgets
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.LinearRegionsPlot import TargetButtonSpinBoxes
@@ -36,6 +36,7 @@ from ccpn.ui.gui.widgets.Label import Label
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
+from ccpn.util.Logging import getLogger
 
 
 ########################################################################################################################
@@ -46,7 +47,7 @@ from ccpn.framework.lib.Pipe import SpectraPipe
 PipeName = 'Exclude Regions'
 Region = 'Region_'
 ExcludeRegions = 'Exclude_Regions'
-
+_STORE = '_storeCount'
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
@@ -79,19 +80,21 @@ class ExcludeRegionsGuiPipe(GuiPipe):
         self.excludeRegion1Label = Label(self.pipeFrame, text=Region + str(self.count), grid=(self.count, 0))
         setattr(self, Region + str(self.count), GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application,
                                                                         orientation='v', grid=(self.count, 1)))
-        self.count += 1
+        setattr(self, _STORE, Spinbox(self.pipeFrame, value=self.count, grid=(0, 0), hidden=True)) # used to store how many entries there are
 
     ############       Gui Callbacks      ###########
 
     def _addRegion(self):
+        """Also called upon restoring widget state """
+        self.count += 1
         self.excludeRegionLabel = Label(self.pipeFrame, text=Region + str(self.count), grid=(self.count, 0))
         setattr(self, Region + str(self.count), GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application,
                                                                         orientation='v', grid=(self.count, 1)))
-
         self.count += 1
+        getattr(self, _STORE).set(self.count)
 
     def _deleteRegions(self):
-        '''  delete the widget from layout. '''
+        """ delete the widget from layout. """
         positions = []
         for row in range(self.count):
             positions.append((row, 0))
@@ -111,10 +114,23 @@ class ExcludeRegionsGuiPipe(GuiPipe):
                 self.count -= 1
 
     def _closeBox(self):
-        'remove the lines from plotwidget if any'
+        """remove the lines from plotwidget if any"""
         for row in range(self.count - 1):
             self._deleteRegions()
         self.closeBox()
+
+    def restoreWidgetsState(self, **widgetsState):
+        """Restore the gui params.
+        overide the default function first to recreate the correct number of boxes. Then call the super to restore values.
+        """
+        count = 0
+        for variableName, value in widgetsState.items():
+            if variableName == _STORE:  # find the widget which stores the box count
+                count = value-1         # remove one as the first is always created as default on init
+        if count>1:                     # if more then the first, then create all the rest
+            for i in range(count):
+                self._addRegion()
+        super().restoreWidgetsState(**widgetsState)
 
 
 ########################################################################################################################

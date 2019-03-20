@@ -35,6 +35,7 @@ from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.framework.lib.Pipe import SpectraPipe
 from ccpn.pipes.lib._getNoiseLevel import _getNoiseLevelForPipe
 from ccpn.util.Logging import getLogger, _debug3
+from tqdm import tqdm
 
 
 ########################################################################################################################
@@ -92,14 +93,14 @@ class PeakPicker1DPipe(SpectraPipe):
         :param data:
         :return:
         '''
-
+        getLogger().info(self._startedInfo)
         if ExcludeRegions in self.pipeline._kwargs:
             excludeRegions = self.pipeline._kwargs[ExcludeRegions]
         else:
             self._kwargs.update({ExcludeRegions: DefaultExcludeRegions})
             excludeRegions = self._kwargs[ExcludeRegions]
 
-        for spectrum in self.inputData:
+        for spectrum in tqdm(self.inputData):
             if len(spectrum.peakLists) > 0:
                 spectrum.peakLists[DefaultPeakListIndex].peakFinder1D(maxNoiseLevel=spectrum.noiseLevel,
                                                                       minNoiseLevel=spectrum.negativeNoiseLevel,
@@ -107,7 +108,7 @@ class PeakPicker1DPipe(SpectraPipe):
                                                                       )
             else:
                 getLogger().warning('Error: PeakList not found for Spectrum: %s. Add a new PeakList first' % spectrum.pid)
-
+        getLogger().info(self._finishedInfo)
         return spectra
 
 

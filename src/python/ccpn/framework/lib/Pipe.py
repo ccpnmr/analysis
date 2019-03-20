@@ -59,6 +59,8 @@ class Pipe(ABC):
         self.spectrumGroups = None
         self.pipeline = None
         self.project = None
+        self._startedInfo = self.pipeName + ' has started'
+        self._finishedInfo = self.pipeName + ' has finished'
 
         if self.pipeline is not None:
             self.inputData = self.pipeline.inputData

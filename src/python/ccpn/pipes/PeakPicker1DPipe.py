@@ -35,7 +35,7 @@ from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.framework.lib.Pipe import SpectraPipe
 from ccpn.pipes.lib._getNoiseLevel import _getNoiseLevelForPipe
 from ccpn.util.Logging import getLogger, _debug3
-
+from tqdm import tqdm
 
 ########################################################################################################################
 ###   Attributes:
@@ -121,6 +121,7 @@ class PeakPicker1DPipe(SpectraPipe):
         :param data:
         :return:
         '''
+        getLogger().info(self._startedInfo)
         if NoiseThreshold not in self._kwargs:
             self._kwargs.update({NoiseThreshold: DefaultNoiseThreshold})
 
@@ -137,7 +138,7 @@ class PeakPicker1DPipe(SpectraPipe):
             self._kwargs.update({ExcludeRegions: DefaultExcludeRegions})
             excludeRegions = self._kwargs[ExcludeRegions]
 
-        for spectrum in self.inputData:
+        for spectrum in tqdm(self.inputData):
             noiseThreshold = _getNoiseLevelForPipe(cls=self, spectrum=spectrum, estimateNoiseThreshold_var=EstimateNoiseThreshold,
                                                    noiseThreshold_var=NoiseThreshold)
             if noiseThreshold:
@@ -155,7 +156,7 @@ class PeakPicker1DPipe(SpectraPipe):
                                                                              factor=noiseLevelFactor)
             else:
                 getLogger().warning('Error: PeakList not found. Add a new PeakList first')
-
+        getLogger().info(self._finishedInfo)
         return spectra
 
 PeakPicker1DPipe.register() # Registers the pipe in the pipeline

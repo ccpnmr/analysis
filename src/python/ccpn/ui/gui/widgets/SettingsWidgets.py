@@ -169,8 +169,9 @@ class SpectrumDisplaySettings(Widget):
         self.symbolThicknessData.setValue(int(symbolThickness))
         self.symbolThicknessData.valueChanged.connect(self._symbolsChanged)
 
-        row += 1
-        self.displaysWidget = SpectrumDisplaySelectionWidget(parent, mainWindow=self.mainWindow, grid=(row, 0), gridSpan=(1, 2), texts=[ALL], displayText=[])
+        # not needed anymore
+        # row += 1
+        # self.displaysWidget = SpectrumDisplaySelectionWidget(parent, mainWindow=self.mainWindow, grid=(row, 0), gridSpan=(1, 2), texts=[ALL], displayText=[])
 
         row += 1
         self._spacer = Spacer(parent, 5, 5,

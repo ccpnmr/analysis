@@ -57,6 +57,7 @@ class _StripLabel(Label):
     """
     Specific Label to be used in Strip displays
     """
+    DOUBLECLICKENABLED = False
 
     def __init__(self, parent, mainWindow, strip, text, dragKey=DropBase.PIDS, **kwds):
 
@@ -140,9 +141,6 @@ class _StripLabel(Label):
         # drag.targetChanged.connect(self._targetChanged)
         drag.exec_(QtCore.Qt.CopyAction)
 
-    def _targetChanged(self, widget):
-        pass
-
     def _eventFilter(self, obj, event):
         """
         Replace all the events with a single filter process
@@ -167,6 +165,8 @@ class _StripLabel(Label):
         return super(_StripLabel, self).eventFilter(obj, event)  # do the rest
 
     def _mousePressEvent(self, event):
+        """Handle mouse press event for single click and beginning of mouse drag event
+        """
         self._mousePressed = True
         if not self._lastClick:
             self._lastClick = SINGLECLICK
@@ -177,10 +177,15 @@ class _StripLabel(Label):
                                      partial(self._handleMouseClicked, mouseDict))
 
     def _mouseButtonDblClick(self, event):
+        """Handle mouse doubleCLick
+        """
         self._lastClick = DOUBLECLICK
-        self._processDoubleClick(self.text())
+        if self.DOUBLECLICKENABLED:
+            self._processDoubleClick(self.text())
 
     def _mouseReleaseEvent(self, event):
+        """Handle mouse release
+        """
         self._mousePressed = False
 
     def _handleMouseClicked(self, mouseDict):

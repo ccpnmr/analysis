@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from typing import Sequence, Tuple, List
+from typing import Sequence, Tuple, List, Any
 from functools import partial
 from ccpn.util import Common as commonUtil
 from ccpn.core.Peak import Peak
@@ -503,7 +503,7 @@ class Strip(AbstractWrapperObject):
     #     return False
 
     @logCommand(get='self')
-    def peakPickPosition(self, inPosition) -> Tuple[Peak]:
+    def peakPickPosition(self, inPosition) -> Tuple[Tuple[Peak, ...], Tuple[PeakList, ...]]:
         """Pick peak at position for all spectra currently displayed in strip.
         """
         _preferences = self.application.preferences.general
@@ -537,6 +537,9 @@ class Strip(AbstractWrapperObject):
                                 position[n] = inPosition[idx]
                         else:
                             position = inPosition
+
+                        peak = peakList.newPeak(ppmPositions=position, height=height)
+                        peak.height = spectrumView.spectrum.getHeight(ppmPositions=position)
                     else:
                         # 1d position with height
 
@@ -550,7 +553,7 @@ class Strip(AbstractWrapperObject):
                             height = spectrum.intensities[int(pp) - 1] + \
                                      frac * (spectrum.intensities[int(pp)] - spectrum.intensities[int(pp) - 1])
 
-                    peak = peakList.newPeak(ppmPositions=position, height=height)
+                        peak = peakList.newPeak(ppmPositions=position, height=height)
 
                     result.append(peak)
                     peakLists.append(peakList)

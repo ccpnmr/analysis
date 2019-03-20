@@ -1223,20 +1223,20 @@ class Spectrum(AbstractWrapperObject):
         pointPosition = tuple(ref[dim].valueToPoint(ppm) for dim, ppm in enumerate(ppmPositions))
         return self.getPositionValue(pointPosition)
 
-    def getPositionValue(self, position):
+    def getPositionValue(self, pointPosition):
         """Return the value nearest to the position given in points.
         """
-        if len(position) != self.dimensionCount:
-            raise ValueError("Length of %s does not match number of dimensions." % str(position))
-        if not all(isinstance(dimVal, (int, float)) for dimVal in position):
+        if len(pointPosition) != self.dimensionCount:
+            raise ValueError("Length of %s does not match number of dimensions." % str(pointPosition))
+        if not all(isinstance(dimVal, (int, float)) for dimVal in pointPosition):
             raise ValueError("position values must be floats.")
 
         scale = self.scale if self.scale is not None else 1.0
         if self.scale == 0.0:
             getLogger().warning('Scaling "%s" by 0.0!' % self)
 
-        position = self._apiDataSource.getPositionValue(position)
-        return self._apiDataSource.getPositionValue(position) * scale if position else None
+        pointPosition = self._apiDataSource.getPositionValue(pointPosition)
+        return pointPosition * scale if pointPosition else None
 
     @cached(_SLICE1DDATACACHE, maxItems=1, debug=False)
     def _get1DSliceData(self, position, sliceDim: int):

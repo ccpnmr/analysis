@@ -1281,8 +1281,9 @@ class PeakList(AbstractWrapperObject):
         """
         from ccpn.core.Peak import _newPeak  # imported here to avoid circular imports
 
-        if height is None and ppmPositions:
-            height = self.spectrum.getHeight(ppmPositions)
+        # height now called explicitly after creating new peak
+        # if height is None and ppmPositions:
+        #     height = self.spectrum.getHeight(ppmPositions)
         return _newPeak(self, ppmPositions=ppmPositions, height=height, comment=comment, **kwds)
 
     @logCommand(get='self')

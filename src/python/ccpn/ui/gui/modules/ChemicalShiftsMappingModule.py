@@ -135,6 +135,7 @@ from ccpn.core.lib.DataFrameObject import  DATAFRAME_OBJECT
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Project import Project
+from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar
 
 # Default values on init
 DefaultConcentration = 0.0
@@ -1414,45 +1415,44 @@ class ChemicalShiftsMapping(CcpnModule):
     vs = []
     # us = []
     u = DefaultConcentrationUnit
-    for spectrum in spectra:
+    with undoBlockWithoutSideBar():
+      for spectrum in spectra:
 
-      if spectrum.sample:
-        sampleComponent = spectrum.sample._fetchSampleComponent(name=spectrum.name)
-        v = sampleComponent.concentration
-        u = sampleComponent.concentrationUnit
-      else:
-        v = None
-        u = DefaultConcentrationUnit
+        if spectrum.sample:
+          sampleComponent = spectrum.sample._fetchSampleComponent(name=spectrum.name)
+          v = sampleComponent.concentration
+          u = sampleComponent.concentrationUnit
+        else:
+          v = None
+          u = DefaultConcentrationUnit
 
-      vs.append(v)
-      # us.append(u)
-      # this is unfortunate. We can select only one unit for all
+        vs.append(v)
+        # us.append(u)
+        # this is unfortunate. We can select only one unit for all
 
-    return vs, u
+      return vs, u
 
 
 
   def _addConcentrationsFromSpectra(self, spectra, concentrationValues, concentrationUnit):
     """
-    
-    :return: 
-    """""
-
     # add concentrations
+    """
 
-    for spectrum, value in zip(spectra, concentrationValues):
-      if not spectrum.sample:
-        sample = self.project.newSample(name=spectrum.name)
-        sample.spectra = [spectrum]
-        newSampleComponent = sample.newSampleComponent(name=spectrum.name)
-        newSampleComponent.concentration = value
-        newSampleComponent.concentrationUnit = concentrationUnit
+    with undoBlockWithoutSideBar():
+      for spectrum, value in zip(spectra, concentrationValues):
+        if not spectrum.sample:
+          sample = self.project.newSample(name=spectrum.name)
+          sample.spectra = [spectrum]
+          newSampleComponent = sample.newSampleComponent(name=spectrum.name)
+          newSampleComponent.concentration = value
+          newSampleComponent.concentrationUnit = concentrationUnit
 
-      else:
-        sample = spectrum.sample
-        newSampleComponent = sample._fetchSampleComponent(name=spectrum.name)
-        newSampleComponent.concentration = value
-        newSampleComponent.concentrationUnit = concentrationUnit
+        else:
+          sample = spectrum.sample
+          newSampleComponent = sample._fetchSampleComponent(name=spectrum.name)
+          newSampleComponent.concentration = value
+          newSampleComponent.concentrationUnit = concentrationUnit
 
   #############################################################
   ######   Updating widgets (plots and table) callbacks #######

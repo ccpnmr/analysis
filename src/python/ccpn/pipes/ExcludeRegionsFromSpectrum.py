@@ -79,7 +79,7 @@ class ExcludeRegionsGuiPipe(GuiPipe):
 
         self.excludeRegion1Label = Label(self.pipeFrame, text=Region + str(self.count), grid=(self.count, 0))
         setattr(self, Region + str(self.count), GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application,
-                                                                        orientation='v', grid=(self.count, 1)))
+                                                                        orientation='v', decimals=3, grid=(self.count, 1)))
         setattr(self, _STORE, Spinbox(self.pipeFrame, value=self.count, grid=(0, 0), hidden=True)) # used to store how many entries there are
 
     ############       Gui Callbacks      ###########
@@ -89,7 +89,7 @@ class ExcludeRegionsGuiPipe(GuiPipe):
         self.count += 1
         self.excludeRegionLabel = Label(self.pipeFrame, text=Region + str(self.count), grid=(self.count, 0))
         setattr(self, Region + str(self.count), GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application,
-                                                                        orientation='v', grid=(self.count, 1)))
+                                                                        decimals=3, orientation='v', grid=(self.count, 1)))
         self.count += 1
         getattr(self, _STORE).set(self.count)
 
@@ -112,6 +112,7 @@ class ExcludeRegionsGuiPipe(GuiPipe):
                                 w._turnOffPositionPicking()
                             w.deleteLater()
                 self.count -= 1
+        getattr(self, _STORE).set(self.count)
 
     def _closeBox(self):
         """remove the lines from plotwidget if any"""

@@ -132,9 +132,12 @@ class Window(AbstractWrapperObject):
         """
         from ccpn.ui._implementation.SpectrumDisplay import _createSpectrumDisplay
 
-        return _createSpectrumDisplay(self, spectrum, displayAxisCodes=displayAxisCodes, axisOrder=axisOrder,
+        display = _createSpectrumDisplay(self, spectrum, displayAxisCodes=displayAxisCodes, axisOrder=axisOrder,
                                       title=title, positions=positions, widths=widths, units=units,
                                       stripDirection=stripDirection, is1D=is1D, **kwds)
+        if not positions and not widths:
+            display.autoRange()
+        return display
 
 
 #=========================================================================================

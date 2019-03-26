@@ -409,8 +409,6 @@ class OpenItemABC():
     def _deleteItemObject(self, objs):
         """Delete items from the project.
         """
-        from ccpn.core.lib.ContextManagers import undoBlock
-
         try:
             with undoBlock():
                 for obj in objs:
@@ -583,6 +581,58 @@ class _openItemSpectrumGroupDisplay(OpenItemABC):
             spectrumDisplay.autoRange()
 
     openItemDirectMethod = _openSpectrumGroup
+
+
+class _openItemSpectrumInGroupDisplay(_openItemSpectrumDisplay):
+    """Modified class for spectra that are in sideBar under a spectrumGroup
+    """
+    def _openContextMenu(self, parentWidget, position, objs):
+        """Open a context menu.
+        """
+        contextMenu = Menu('', parentWidget, isFloatWidget=True)
+        if self.openAction:
+            contextMenu.addAction(self.contextMenuText, self.openAction)
+
+        spectra = [obj for obj in objs if isinstance(obj, Spectrum)]
+        if len(spectra) > 0:
+            contextMenu.addAction('Make SpectrumGroup From Selected',
+                                  partial(_raiseSpectrumGroupEditorPopup(useNone=True, editMode=False, defaultItems=spectra),
+                                          self.mainWindow, self.getObj(), self.node))
+
+            contextMenu.addAction('Remove from SpectrumGroup', partial(self._removeSpectrumObject, objs))
+            contextMenu.addSeparator()
+
+        contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
+        canBeCloned = True
+        for obj in objs:
+            if not hasattr(obj, 'clone'):  # TODO: possibly should check that is a method...
+                canBeCloned = False
+                break
+        if canBeCloned:
+            contextMenu.addAction('Clone', partial(self._cloneObject, objs))
+
+        contextMenu.move(position)
+        contextMenu.exec()
+
+    def _removeSpectrumObject(self, objs):
+        """Remove spectrum from spectrumGroup.
+        """
+        if not isinstance(objs, list):
+            return
+
+        try:
+            # get parent spectrumGroup from current node
+            specGroup = self.node._parent.obj
+            spectra = list(specGroup.spectra)
+
+            with undoBlock():
+                for obj in objs:
+                    if obj in spectra:
+                        spectra.remove(obj)
+                specGroup.spectra = tuple(spectra)
+
+        except Exception as es:
+            showWarning('Remove object from spectra', str(es))
 
 
 class _openItemStructureEnsembleTable(OpenItemABC):

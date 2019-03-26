@@ -107,6 +107,7 @@ class PreferencesPopup(CcpnDialog):
 
                 strip.symbolThickness = self.preferences.general.symbolThickness
                 strip.gridVisible = self.preferences.general.showGrid
+                strip._contourThickness = self.preferences.general.contourThickness
                 # strip.crosshairVisible = self.preferences.general.showCrosshair
 
         if self.preferences.general.colourScheme != self._oldColourScheme:
@@ -519,7 +520,7 @@ class PreferencesPopup(CcpnDialog):
                                    )
 
         row += 1
-        self.symbolSizePixelLabel = Label(parent, text="Symbol Size (pixel)", grid=(row, 0))
+        self.symbolSizePixelLabel = Label(parent, text="Symbol Size (pixels)", grid=(row, 0))
         self.symbolSizePixelData = DoubleSpinbox(parent, decimals=0, step=1,
                                               min=2, max=50, grid=(row, 1), hAlign='l')
         self.symbolSizePixelData.setMinimumWidth(LineEditsMinimumWidth)
@@ -528,13 +529,22 @@ class PreferencesPopup(CcpnDialog):
         self.symbolSizePixelData.editingFinished.connect(self._setSymbolSizePixel)
 
         row += 1
-        self.symbolThicknessLabel = Label(parent, text="Symbol Thickness (point)", grid=(row, 0))
+        self.symbolThicknessLabel = Label(parent, text="Symbol Thickness (points)", grid=(row, 0))
         self.symbolThicknessData = Spinbox(parent, step=1,
                                            min=1, max=20, grid=(row, 1), hAlign='l')
         self.symbolThicknessData.setMinimumWidth(LineEditsMinimumWidth)
         symbolThickness = self.preferences.general.symbolThickness
         self.symbolThicknessData.setValue(int(symbolThickness))
         self.symbolThicknessData.editingFinished.connect(self._setSymbolThickness)
+
+        row += 1
+        self.contourThicknessLabel = Label(parent, text="Contour Thickness (points)", grid=(row, 0))
+        self.contourThicknessData = Spinbox(parent, step=1,
+                                           min=1, max=20, grid=(row, 1), hAlign='l')
+        self.contourThicknessData.setMinimumWidth(LineEditsMinimumWidth)
+        contourThickness = self.preferences.general.contourThickness
+        self.contourThicknessData.setValue(int(contourThickness))
+        self.contourThicknessData.editingFinished.connect(self._setContourThickness)
 
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
@@ -806,6 +816,16 @@ class PreferencesPopup(CcpnDialog):
         except:
             return
         self.preferences.general.symbolThickness = symbolThickness
+
+    def _setContourThickness(self):
+        """
+        Set the Thickness of the peak contours (ppm)
+        """
+        try:
+            contourThickness = int(self.contourThicknessData.text())
+        except:
+            return
+        self.preferences.general.contourThickness = contourThickness
 
     def _toggleSpectralOptions(self, preference, checked):
         self.preferences.spectra[preference] = str(checked)

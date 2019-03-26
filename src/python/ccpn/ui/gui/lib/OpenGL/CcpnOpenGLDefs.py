@@ -119,6 +119,7 @@ GLFOREGROUND = 'foregroundColour'
 GLBACKGROUND = 'backgroundColour'
 GLBASETHICKNESS = 'baseThickness'
 GLSYMBOLTHICKNESS = 'symbolThickness'
+GLCONTOURTHICKNESS = 'contourThickness'
 
 LEFTBORDER = 1
 RIGHTBORDER = 1

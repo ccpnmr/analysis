@@ -25,6 +25,7 @@
         "symbolSizePixel": 9,
         "symbolType": 0,
         "symbolThickness": 2,
+        "contourThickness": 1.0,
         "zoomCentreType": 0,
         "zoomPercent": 5.0,
         "zoomXLimitApply": true,

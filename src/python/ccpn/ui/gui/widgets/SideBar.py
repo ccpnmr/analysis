@@ -86,7 +86,8 @@ from ccpn.ui.gui.lib.MenuActions import _openItemNoteTable, _openItemChemicalShi
     _openItemPeakListTable, _openItemChainTable, _openItemRestraintListTable, \
     _openItemSpectrumGroupDisplay, _openItemStructureEnsembleTable, _openItemDataSetTable, \
     _openItemSpectrumDisplay, _openItemSampleDisplay, _openItemComplexTable, _openItemResidueTable, \
-    _openItemSubstanceTable, _openItemSampleComponentTable, _openItemNmrResidueItem, _openItemNmrAtomItem
+    _openItemSubstanceTable, _openItemSampleComponentTable, _openItemNmrResidueItem, _openItemNmrAtomItem, \
+    _openItemSpectrumInGroupDisplay
 
 ALL_NOTIFIERS = [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME, Notifier.CHANGE]
 DEFAULT_NOTIFIERS = [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME]
@@ -802,7 +803,7 @@ class SideBarStructure(object):
                                       menuAction=_openItemSpectrumGroupDisplay(position='right', relativeTo=None),
                                       triggers=ALL_NOTIFIERS, isDraggable=True, children=[
                         SidebarClassSpectrumTreeItems(klass=Spectrum, callback=_raiseSpectrumPopup(),
-                                                      menuAction=_openItemSpectrumDisplay(position='right', relativeTo=None), isDraggable=True),
+                                                      menuAction=_openItemSpectrumInGroupDisplay(position='right', relativeTo=None), isDraggable=True),
                         ]),
                 ]),
 

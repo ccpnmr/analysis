@@ -68,7 +68,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXI
     GLMULTIPLETSYMBOLS, GLOTHERLINES, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLPAGETYPE, GLSELECTEDPIDS, \
     GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSPECTRUMDISPLAY, GLSTRIP, GLSTRIPLABELLING, GLTRACES, \
     GLWIDGET, GLPLOTBORDER, GLAXISLINES, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS, GLFOREGROUND, \
-    GLSHOWSPECTRAONPHASE
+    GLCONTOURTHICKNESS, GLSHOWSPECTRAONPHASE
 
 
 class ExportStripToFilePopup(ExportDialog):
@@ -205,7 +205,7 @@ class ExportStripToFilePopup(ExportDialog):
 
         # create a pulldown for the foreground (axes) colour
         row += 1
-        foregroundColourFrame = Frame(userFrame, grid=(row, 0), gridSpan=(1,3), setLayout=True, showBorder=False)
+        foregroundColourFrame = Frame(userFrame, grid=(row, 0), gridSpan=(1, 3), setLayout=True, showBorder=False)
         Label(foregroundColourFrame, text="Foreground Colour", vAlign='c', hAlign='l', grid=(0, 0))
         self.foregroundColourBox = PulldownList(foregroundColourFrame, vAlign='t', grid=(0, 1))
         self.foregroundColourButton = Button(foregroundColourFrame, vAlign='t', hAlign='l', grid=(0, 2), hPolicy='fixed',
@@ -231,7 +231,7 @@ class ExportStripToFilePopup(ExportDialog):
 
         # create a pulldown for the background colour
         row += 1
-        backgroundColourFrame = Frame(userFrame, grid=(row, 0), gridSpan=(1,3), setLayout=True, showBorder=False)
+        backgroundColourFrame = Frame(userFrame, grid=(row, 0), gridSpan=(1, 3), setLayout=True, showBorder=False)
         Label(backgroundColourFrame, text="Background Colour", vAlign='c', hAlign='l', grid=(0, 0))
         self.backgroundColourBox = PulldownList(backgroundColourFrame, vAlign='t', grid=(0, 1))
         self.backgroundColourButton = Button(backgroundColourFrame, vAlign='t', hAlign='l', grid=(0, 2), hPolicy='fixed',
@@ -258,19 +258,19 @@ class ExportStripToFilePopup(ExportDialog):
         row += 1
         self.baseThicknessBox = DoubleSpinBoxCompoundWidget(
                 userFrame, grid=(row, 0), gridSpan=(1, 3), hAlign='left',
-                labelText='Base Line Thickness',
+                labelText='Thickness Scale',
                 value=1.0,
-                decimals=1, step=0.1, range=(0.1, 10))
+                decimals=2, step=0.05, range=(0.01, 20))
         self.baseThicknessBox.setFixedHeight(25)
 
         row += 1
         # self.spacer = Spacer(userFrame, 5, 5,
         #                      QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
         #                      grid=(row, 0), gridSpan=(1, 1))
-        userFrame.addSpacer(0, 10, grid=(row,0))
+        userFrame.addSpacer(0, 10, grid=(row, 0))
 
         row += 1
-        self.treeView = PrintTreeCheckBoxes(userFrame, project=self.project, grid=(row, 0), gridSpan=(1,3))
+        self.treeView = PrintTreeCheckBoxes(userFrame, project=self.project, grid=(row, 0), gridSpan=(1, 3))
         if self.current.strip:
             self.objectPulldown.select(self.current.strip.id)
             self.strip = self.current.strip
@@ -546,20 +546,22 @@ class ExportStripToFilePopup(ExportDialog):
         backgroundColour = hexToRgbRatio(self.backgroundColour)
         baseThickness = self.baseThicknessBox.getValue()
         symbolThickness = self.application.preferences.general.symbolThickness
+        contourThickness = self.application.preferences.general.contourThickness
 
         if strip:
             # return the parameters
-            params = {GLFILENAME       : self.exitFilename,
-                      GLSPECTRUMDISPLAY: spectrumDisplay,
-                      GLSTRIP          : strip,
-                      GLWIDGET         : strip._CcpnGLWidget,
-                      GLPRINTTYPE      : prType,
-                      GLPAGETYPE       : pageType,
-                      GLFOREGROUND     : foregroundColour,
-                      GLBACKGROUND     : backgroundColour,
-                      GLBASETHICKNESS  : baseThickness,
-                      GLSYMBOLTHICKNESS: symbolThickness,
-                      GLSELECTEDPIDS   : self.treeView.getSelectedObjectsPids()
+            params = {GLFILENAME        : self.exitFilename,
+                      GLSPECTRUMDISPLAY : spectrumDisplay,
+                      GLSTRIP           : strip,
+                      GLWIDGET          : strip._CcpnGLWidget,
+                      GLPRINTTYPE       : prType,
+                      GLPAGETYPE        : pageType,
+                      GLFOREGROUND      : foregroundColour,
+                      GLBACKGROUND      : backgroundColour,
+                      GLBASETHICKNESS   : baseThickness,
+                      GLSYMBOLTHICKNESS : symbolThickness,
+                      GLCONTOURTHICKNESS: contourThickness,
+                      GLSELECTEDPIDS    : self.treeView.getSelectedObjectsPids()
                       }
             selectedList = self.treeView.getSelectedItems()
             for itemName in self.fullList:
@@ -588,12 +590,12 @@ class ExportStripToFilePopup(ExportDialog):
                     svgExport.writeSVGFile()
 
     def actionButtons(self):
-        self.buttonFrame.addSpacer(0, 10, grid=(0,1))
+        self.buttonFrame.addSpacer(0, 10, grid=(0, 1))
         self.buttons = ButtonList(self.buttonFrame, ['Close', 'Save', 'Save and Close'], [self._rejectDialog, self._saveDialog, self._acceptDialog],
                                   tipTexts=['Close the export dialog',
                                             'Export the strip to a file, dialog will remain open',
                                             'Export the strip and close the dialog'],
-                                  grid=(1, 0), gridSpan=(1,3))
+                                  grid=(1, 0), gridSpan=(1, 3))
 
     def _saveDialog(self, exitSaveFileName=None):
         """save button has been clicked

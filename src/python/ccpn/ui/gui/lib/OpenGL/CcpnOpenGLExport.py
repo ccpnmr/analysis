@@ -60,7 +60,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXI
     GLMULTIPLETSYMBOLS, GLOTHERLINES, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLSELECTEDPIDS, \
     GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSTRIP, GLSTRIPLABELLING, GLTRACES, GLWIDGET, GLPLOTBORDER, \
     GLPAGETYPE, GLSPECTRUMDISPLAY, GLAXISLINES, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS, \
-    GLFOREGROUND, GLSHOWSPECTRAONPHASE
+    GLCONTOURTHICKNESS, GLFOREGROUND, GLSHOWSPECTRAONPHASE
 from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPDF, EXPORTSVG, EXPORTTYPES, \
     PAGEPORTRAIT, PAGELANDSCAPE, PAGETYPES
 from ccpn.util.Logging import getLogger
@@ -124,6 +124,7 @@ class GLExporter():
 
         self.baseThickness = self.params[GLBASETHICKNESS]
         self.symbolThickness = self.params[GLSYMBOLTHICKNESS]
+        self.contourThickness = self.params[GLCONTOURTHICKNESS]
 
         # build all the sections of the pdf
         self.stripReports = []
@@ -400,7 +401,7 @@ class GLExporter():
                             if newLine:
                                 if colourPath not in colourGroups:
                                     colourGroups[colourPath] = {PDFLINES      : [],
-                                                                PDFSTROKEWIDTH: 0.5 * self.baseThickness,
+                                                                PDFSTROKEWIDTH: 0.5 * self.baseThickness * self.contourThickness,
                                                                 PDFSTROKECOLOR: colour, PDFSTROKELINECAP: 1}
                                 colourGroups[colourPath][PDFLINES].append(newLine)
 
@@ -423,7 +424,9 @@ class GLExporter():
                                                              PLOTWIDTH : self.displayScale * self.mainW,
                                                              PLOTHEIGHT: self.displayScale * self.mainH},
                                                     name='spectrumContours%s' % spectrumView.pid,
-                                                    mat=mat)
+                                                    mat=mat,
+                                                    lineWidth= 0.5 * self.baseThickness * self.contourThickness
+                                                    )
         self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='boundaries')
 
     def _addSpectrumBoundaries(self):

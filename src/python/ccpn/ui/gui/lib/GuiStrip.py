@@ -144,6 +144,7 @@ class GuiStrip(Frame):
             self.gridVisible = spectrumDisplay.strips[0].gridVisible
             self.crosshairVisible = spectrumDisplay.strips[0].crosshairVisible
             self.showSpectraOnPhasing = spectrumDisplay.strips[0].showSpectraOnPhasing
+            self._contourThickness = spectrumDisplay.strips[0]._contourThickness
 
             try:
                 self._CcpnGLWidget._axisLocked = spectrumDisplay.strips[0]._CcpnGLWidget._axisLocked
@@ -159,6 +160,7 @@ class GuiStrip(Frame):
             self.gridVisible = self.application.preferences.general.showGrid
             self.crosshairVisible = self.application.preferences.general.showCrosshair
             self.showSpectraOnPhasing = self.application.preferences.general.showSpectraOnPhasing
+            self._contourThickness = self.application.preferences.general.contourThickness
 
         self._storedPhasingData = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
         self.showActivePhaseTrace = True

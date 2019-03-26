@@ -2281,8 +2281,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self.enableTextClientState()
         self._setViewPortFontScale()
 
-        if self.strip.crosshairVisible:
-            self.drawMouseCoords()
+        # if self.strip.crosshairVisible:
+        self.drawMouseCoords()
 
         # make the overlay/axis solid
         currentShader.setBlendEnabled(0)
@@ -2418,7 +2418,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.buildSpectra()
 
-        GL.glLineWidth(1.0)
+        GL.glLineWidth(self.strip._contourThickness)
         GL.glDisable(GL.GL_BLEND)
 
         for spectrumView in self._ordering:  #self._ordering:                             # strip.spectrumViews:       #.orderedSpectrumViews():
@@ -2527,6 +2527,9 @@ class CcpnGLWidget(QOpenGLWidget):
                     GL.glVertex2d(fx1, fy1)
                     GL.glVertex2d(fx1, fy0)
                     GL.glEnd()
+
+        # reset lineWidth
+        GL.glLineWidth(1.0)
 
     def buildGrid(self):
         self.axisLabelling, self.labelsChanged = self._buildAxes(self.gridList[0], axisList=[0, 1],

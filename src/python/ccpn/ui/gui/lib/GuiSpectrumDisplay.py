@@ -599,9 +599,9 @@ class GuiSpectrumDisplay(CcpnModule):
 
     def _handleNmrResidues(self, nmrResidues, showDialog=True):
 
-        if self.current.peaks and showDialog:
+        if (self.current.peaks or self.current.multiplets) and showDialog:
             dialogResult = showMulti('nmrResidue', 'What do you want to do with the nmrResidues?',
-                               texts=['Cancel', 'Mark and Assign', 'Assign NmrResidues to current.peaks', 'Create Marks'])
+                               texts=['Cancel', 'Mark and Assign', 'Assign NmrResidues to current.peaks/multiplets', 'Create Marks'])
         else:
             dialogResult = 'Mark'
 
@@ -612,13 +612,17 @@ class GuiSpectrumDisplay(CcpnModule):
 
         # Assign nmrResidues atoms to peaks
         if self.current.strip and 'Assign' in dialogResult:
-            _assignNmrResiduesToPeaks(peaks=self.current.peaks, nmrResidues=nmrResidues)
+            peaks = set(self.current.peaks)
+            for mult in self.current.multiplets:
+                peaks = peaks | set(mult.peaks)
+            print(peaks)
+            _assignNmrResiduesToPeaks(peaks=list(peaks), nmrResidues=nmrResidues)
 
     def _handleNmrAtoms(self, nmrAtoms):
 
-        if self.current.peaks:
+        if (self.current.peaks or self.current.multiplets):
             dialogResult = showMulti('nmrAtoms', 'What do you want to do with the nmrAtoms?',
-                               texts=['Cancel', 'Mark and Assign', 'Assign NmrAtoms to current.peaks', 'Create Marks'])
+                               texts=['Cancel', 'Mark and Assign', 'Assign NmrAtoms to current.peaks/multiplets', 'Create Marks'])
         else:
             dialogResult = 'Mark'
 
@@ -629,7 +633,10 @@ class GuiSpectrumDisplay(CcpnModule):
 
         # Assign nmrAtoms to peaks
         if self.current.strip and 'Assign' in dialogResult:
-            _assignNmrAtomsToPeaks(nmrAtoms=nmrAtoms, peaks=self.current.peaks)
+            peaks = set(self.current.peaks)
+            for mult in self.current.multiplets:
+                peaks = peaks | set(mult.peaks)
+            _assignNmrAtomsToPeaks(nmrAtoms=nmrAtoms, peaks=list(peaks))
 
     def _processDragEnterEvent(self, data):
         pass

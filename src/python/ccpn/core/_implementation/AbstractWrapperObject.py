@@ -610,7 +610,8 @@ class AbstractWrapperObject(NotifierBase):
         objsToBeChecked.append(apiObject)
         while len(objsToBeChecked) > 0:
             obj = objsToBeChecked.pop()
-            obj._checkDelete(apiObjectlist, objsToBeChecked, linkCounter, topObjectsToCheck)  # This builds the list/set
+            if obj:
+                obj._checkDelete(apiObjectlist, objsToBeChecked, linkCounter, topObjectsToCheck)  # This builds the list/set
 
         for topObjectToCheck in topObjectsToCheck:
             if (not (topObjectToCheck.__dict__.get('isModifiable'))):

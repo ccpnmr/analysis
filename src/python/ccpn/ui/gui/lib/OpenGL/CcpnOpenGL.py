@@ -788,12 +788,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def _screenChanged(self, *args):
         screens = QApplication.screens()
-        if self.hasFocus():
-            # follow the mouse if has focus
-            screen = QApplication.desktop().screenNumber(QtGui.QCursor().pos())
-        else:
-            # otherwise follow the position of self
-            screen = QApplication.desktop().screenNumber(self)
+        screen = QApplication.desktop().screenNumber(QtGui.QCursor().pos())
         self._devicePixelRatio = screens[screen].devicePixelRatio()
         self.viewports._devicePixelRatio = self._devicePixelRatio
 

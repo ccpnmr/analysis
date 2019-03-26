@@ -64,6 +64,9 @@ def _getReferenceLevel(project, referenceSpectrum):
     :return:int  the hit level based on  how many experiment type the reference has appeared to be a hit.
     EG. STD only -- Grade:1
     EG. STD and Wlogsy -- Grade:2 etc
+
+    VERY SLOW
+
     '''
     experimentTypes = []
     levelHit = 1
@@ -105,16 +108,16 @@ def _norm(x):
     return z
 
 
-def _scoreHits(deltas):
-    """score = median(deltas) * len(deltas). The Smaller the better
+def _scoreHits(vv):
+    """score = median(deltas) * len(deltas).
     if len(deltas) <=2 than is only the min
     """
-    d = abs(np.array(deltas))
+    d = abs(np.array(vv))
     c = len(d)
     if c <=2:
         return np.min(d)
     D = np.median(d)
-    s = D/c
+    s = D*c
     return s
 
 class SpectrumHit(AbstractWrapperObject):
@@ -148,6 +151,7 @@ class SpectrumHit(AbstractWrapperObject):
 
     # link To a reference Spectrum #LM needed for screening hit analysis
     _linkedReferenceSpectra = []
+    _peakListsHit = []
 
     # CCPN properties
     @property
@@ -274,9 +278,10 @@ class SpectrumHit(AbstractWrapperObject):
     @concentrationUnit.setter
     def concentrationUnit(self, value: str):
         if value not in Constants.concentrationUnits:
-            self._project._logger.warning(
-                    "Setting unsupported value %s for SpectrumHit.concentrationUnit."
-                    % value)
+            if value is not None:
+                self._project._logger.warning(
+                        "Setting unsupported value %s for SpectrumHit.concentrationUnit."
+                        % value)
         self._wrappedData.concentrationUnit = value
 
     # @property
@@ -320,9 +325,10 @@ class SpectrumHit(AbstractWrapperObject):
     def _getPeakHits(self):
         ''' get the peaks marked as peakHits'''
         simulatedPeakLists = [pl for pl in self._parent.peakLists if pl.isSimulated and pl.title == SpectrumHitPeakList]
+        self._peakListsHit = simulatedPeakLists
         if len(simulatedPeakLists) > 0:
             pp = [p for p in simulatedPeakLists[-1].peaks if p is not None]
-            return pp
+            return list(set(pp))
         else:
             return []
 
@@ -334,15 +340,29 @@ class SpectrumHit(AbstractWrapperObject):
             for linkedPeak in p._linkedPeaks:
                 if linkedPeak in referencePeaks:
                     referencePeakHits.append(p)
-        return referencePeakHits
+        return list(set(referencePeakHits))
 
     def _getDeltaPositions(self, referencePeakList):
-        deltas = [(lp.position[0] - p.position[0])
+        deltas = [round(lp.position[0] - p.position[0],3)
                   for p in self._getPeakHits() for lp in p._linkedPeaks
                   if len(p.position) > 0 and len(lp.position) > 0
                   if lp in referencePeakList.peaks]
         deltas = makeIterableList(deltas)
         return deltas
+
+    def _getDeltaPositionsFromPeaks(self,referencePeakList, hitsPeaks):
+        deltas = [round(lp.position[0] - p.position[0],3)
+                  for p in hitsPeaks for lp in p._linkedPeaks
+                  if len(p.position) > 0 and len(lp.position) > 0
+                  if lp in referencePeakList.peaks]
+        deltas = makeIterableList(deltas)
+        return deltas
+
+    def _deleteLinkedPeakLists(self):
+        """ remove the linked peakList"""
+        if len(self._peakListsHit):
+            self.project.deleteObjects(*self._peakListsHit)
+
 
     def _scoreByIntesities(self, peaks):
         heights = [p.height for p in peaks if p.height is not None]
@@ -353,8 +373,8 @@ class SpectrumHit(AbstractWrapperObject):
         return heights
 
     def _getHitSNR(self, peaks):
-        heights = [p._getSNRatio() for p in peaks if p._getSNRatio() is not None]
-        return heights
+        snr = [p._getSNRatio() for p in peaks if p._getSNRatio() is not None]
+        return snr
 
 
     def _getSingleScore(self, referencePeakList):
@@ -452,9 +472,10 @@ def _newSpectrumHit(self: Spectrum, substanceName: str, pointNumber: int = 0,
     """
 
     if concentrationUnit not in Constants.concentrationUnits:
-        self._project._logger.warning(
-                "Unsupported value %s for SpectrumHit.concentrationUnit."
-                % concentrationUnit)
+        if concentrationUnit is not None:
+            self._project._logger.warning(
+                    "Unsupported value %s for SpectrumHit.concentrationUnit."
+                    % concentrationUnit)
 
     if pseudoDimension is not None:
         if not pseudoDimensionNumber:

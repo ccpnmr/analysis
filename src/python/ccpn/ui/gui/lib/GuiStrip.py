@@ -166,7 +166,7 @@ class GuiStrip(Frame):
         self.showActivePhaseTrace = True
 
         try:
-            self._CcpnGLWidget.gridVisible = self.application.preferences.general.showGrid
+            self._CcpnGLWidget.gridVisible = self.gridVisible       # self.application.preferences.general.showGrid
             # set the axis units from the current settings
             self._CcpnGLWidget.xUnits = settings[AXISXUNITS]
             self._CcpnGLWidget.yUnits = settings[AXISYUNITS]

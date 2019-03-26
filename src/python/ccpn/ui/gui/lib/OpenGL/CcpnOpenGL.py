@@ -290,8 +290,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self._dottedCursorVisible = None
 
         self.gridList = []
-        self._gridVisible = True
-        self._crossHairVisible = True
+        self._gridVisible = self._preferences.showGrid
+        self._crossHairVisible = self._preferences.showCrosshair
         self._axesVisible = True
         self._axisLocked = False
         self._showSpectraOnPhasing = False
@@ -316,7 +316,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self._setColourScheme()
 
-        self._gridVisible = self._preferences.showGrid
         self._updateHTrace = False
         self._updateVTrace = False
         self._lastTracePoint = {}  # [-1, -1]
@@ -2281,7 +2280,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.enableTextClientState()
         self._setViewPortFontScale()
 
-        # if self.strip.crosshairVisible:
+        # if self._crossHairVisible:
         self.drawMouseCoords()
 
         # make the overlay/axis solid
@@ -2564,7 +2563,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         GL.glEnable(GL.GL_BLEND)
 
-        if self.strip.gridVisible:
+        if self._gridVisible:
             self.viewports.setViewport(self._currentView)
             self.gridList[0].drawIndexVBO(enableVBO=True)
 
@@ -2997,7 +2996,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # draw the cursors
         # need to change to VBOs
 
-        if self.strip.crosshairVisible:  # and (not self._updateHTrace or not self._updateVTrace):
+        if self._crossHairVisible:  # and (not self._updateHTrace or not self._updateVTrace):
             GL.glBegin(GL.GL_LINES)
 
             # map the cursor to the ratio coordinates
@@ -4772,7 +4771,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self.current.cursorPosition = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
             # only need to redraw if we can see the cursor
-            if self.strip.crosshairVisible:  # or self._updateVTrace or self._updateHTrace:
+            if self._crossHairVisible:  # or self._updateVTrace or self._updateHTrace:
                 # if self._updateVTrace or self._updateHTrace:
                 #   self.updateTraces()
                 self.update()
@@ -5117,8 +5116,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # set the checkboxes to the correct settings
         strip.toolbarAction.setChecked(strip.spectrumDisplay.spectrumUtilToolBar.isVisible())
-        strip.crosshairAction.setChecked(self.crossHairVisible)
-        strip.gridAction.setChecked(self.gridVisible)
+        strip.crosshairAction.setChecked(self._crossHairVisible)
+        strip.gridAction.setChecked(self._gridVisible)
         if hasattr(strip, 'lastAxisOnlyCheckBox'):
             strip.lastAxisOnlyCheckBox.setChecked(strip.spectrumDisplay.lastAxisOnly)
 

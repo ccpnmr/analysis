@@ -107,7 +107,7 @@ class PreferencesPopup(CcpnDialog):
 
                 strip.symbolThickness = self.preferences.general.symbolThickness
                 strip.gridVisible = self.preferences.general.showGrid
-                strip.crosshairVisible = self.preferences.general.showCrosshair
+                # strip.crosshairVisible = self.preferences.general.showCrosshair
 
         if self.preferences.general.colourScheme != self._oldColourScheme:
             setColourScheme(self.preferences.general.colourScheme)

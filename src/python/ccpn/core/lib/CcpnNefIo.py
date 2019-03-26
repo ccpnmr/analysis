@@ -1773,7 +1773,7 @@ class CcpnNefWriter:
     def spectrum2Nef(self, spectrum: Spectrum) -> StarIo.NmrSaveFrame:
         """Convert spectrum to NEF saveframes - one per peaklist
 
-    Will create a peakList if none are present"""
+        Will create a peakList if none are present"""
 
         result = []
 
@@ -1789,8 +1789,8 @@ class CcpnNefWriter:
     def peakList2Nef(self, peakList: PeakList, exportCompleteSpectrum: bool = True
                      ) -> StarIo.NmrSaveFrame:
         """Convert PeakList to CCPN NEF saveframe.
-    Used for all spectrum export, as there is one frame per PeakList
-    """
+        Used for all spectrum export, as there is one frame per PeakList
+        """
 
         spectrum = peakList.spectrum
 
@@ -4288,13 +4288,13 @@ def createSpectrum(project: Project, spectrumName: str, spectrumParameters: dict
                    dimensionData: dict, transferData: Sequence[Tuple] = None):
     """Get or create spectrum using dictionaries of attributes, such as read in from NEF.
 
-  :param spectrumParameters keyword-value dictionary of attribute to set on resulting spectrum
+    :param spectrumParameters keyword-value dictionary of attribute to set on resulting spectrum
 
-  :params Dictionary of keyword:list parameters, with per-dimension parameters.
-  Either 'axisCodes' or 'isotopeCodes' must be present and fully populated.
-  A number of other dimensionData are
-  treated specially (see below)
-  """
+    :params Dictionary of keyword:list parameters, with per-dimension parameters.
+    Either 'axisCodes' or 'isotopeCodes' must be present and fully populated.
+    A number of other dimensionData are
+    treated specially (see below)
+    """
 
     spectrum = project.getSpectrum(spectrumName)
     if spectrum is None:

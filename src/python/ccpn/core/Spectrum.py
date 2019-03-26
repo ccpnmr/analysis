@@ -441,7 +441,8 @@ class Spectrum(AbstractWrapperObject):
 
     @experimentName.setter
     def experimentName(self, value):
-        self._wrappedData.experiment.name = value
+        # force to a string
+        self._wrappedData.experiment.name = str(value)
 
     @property
     def filePath(self) -> Optional[str]:

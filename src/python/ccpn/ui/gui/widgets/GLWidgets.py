@@ -452,7 +452,7 @@ class Gui1dWidget(CcpnGLWidget):
         # make the list of ordered spectrumViews
         self._ordering = self.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
 
-        self._ordering = [specView for specView in self._ordering if specView.spectrum.isValidPath]
+        self._ordering = [specView for specView in self._ordering]
 
         for specView in tuple(self._spectrumSettings.keys()):
             if specView not in self._ordering:

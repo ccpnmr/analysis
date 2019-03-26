@@ -72,7 +72,7 @@ from PyQt5.QtCore import pyqtSlot
 
 
 class GLTargetButtonSpinBoxes(Widget):
-    def __init__(self, parent, application=None, orientation='v', GLWidget=None, values=None, step=None,
+    def __init__(self, parent, application=None, orientation='v', GLWidget=None, values=None, step=None, decimals=None,
                  colour=None, brush=None, movable=True, bounds=None, **kwds):
         super().__init__(parent, setLayout=True, **kwds)
 
@@ -102,9 +102,9 @@ class GLTargetButtonSpinBoxes(Widget):
         self.values = values or [0, 0]
         self.bounds = bounds or [-1e10, 1e10]
         self.pointBox1 = DoubleSpinbox(self, value=self.values[0], step=step, max=self.bounds[1], min=self.bounds[0],
-                                       grid=(0, 1), hAlign='l', vAlign='l')
+                                       decimals=decimals, grid=(0, 1), hAlign='l', vAlign='l')
         self.pointBox2 = DoubleSpinbox(self, value=self.values[1], step=step, max=self.bounds[1], min=self.bounds[0],
-                                       grid=(0, 2), hAlign='l', vAlign='l')
+                                       decimals=decimals, grid=(0, 2), hAlign='l', vAlign='l')
         self.spinBoxes.append(self.pointBox1)
         self.spinBoxes.append(self.pointBox2)
 
@@ -184,6 +184,11 @@ class GLTargetButtonSpinBoxes(Widget):
                 self.GLlinearRegions.valuesChanged.connect(self._lineMoved)
             else:
                 self.GLlinearRegions.setVisible(True)
+
+    def _setVisible(self, aBool):
+        if self.GLWidget:
+            if self.GLlinearRegions:
+                self.GLlinearRegions.setVisible(aBool)
 
     def _turnOffPositionPicking(self):
         # if self.plotWidget is not None:

@@ -86,6 +86,7 @@ class Base(DropBase):
               # keywords for adding to parent
               grid=(None, None), gridSpan=(1, 1), stretch=(0, 0),
               hAlign=None, vAlign=None,
+              hidden= False,
 
               # keywords related to dropable properties
               acceptDrops=False,
@@ -96,6 +97,7 @@ class Base(DropBase):
 
         :param tipText:  add tiptext to widget
         :param grid:     insert widget at (row,col) of parent layout (if available)
+        :param hidden:   hide widget upon creation
         :param gridSpan: extend widget over (rows,cols); default (1,1)
         :param stretch:  stretch factor (row,col) of widget; default (0, 0)
         :param hAlign:   horizontal alignment: (l, left, r, right, c, center, centre)
@@ -147,6 +149,7 @@ class Base(DropBase):
         self._col = grid[0]
         self._row = grid[1]
         self._grid = grid
+        self.__hidden = hidden
         if not isFloatWidget and (grid[0] is not None or grid[1] is not None):
             self._addToParent(grid=grid, gridSpan=gridSpan, stretch=stretch,
                               hAlign=hAlign, vAlign=vAlign)
@@ -222,6 +225,8 @@ class Base(DropBase):
             self._col = col
             self._row = row
             layout.addWidget(self, row, col, rowSpan, colSpan, QtCore.Qt.Alignment(align))
+            if self.__hidden:
+                self.hide()
 
     @staticmethod
     def _getRowCol(layout, grid):

@@ -502,16 +502,26 @@ class ExportStripToFilePopup(ExportDialog):
 
     def _changePrintType(self):
         selected = self.exportType.get()
-        lastPath = os.path.splitext(self.saveText.text())[0]
+        lastPath = self.saveText.text().strip()
         if selected == EXPORTPDF:
+            if not lastPath.endswith(EXPORTPDFEXTENSION):
+                # remove other extension
+                if lastPath.endswith(EXPORTSVGEXTENSION):
+                    lastPath = os.path.splitext(lastPath)[0]
+                lastPath += EXPORTPDFEXTENSION
             self._dialogFilter = EXPORTPDFFILTER
             self.updateDialog()
-            self.updateFilename(lastPath + EXPORTPDFEXTENSION)
+            self.updateFilename(lastPath)
 
         elif selected == EXPORTSVG:
+            if not lastPath.endswith(EXPORTSVGEXTENSION):
+                # remove other extension
+                if lastPath.endswith(EXPORTPDFEXTENSION):
+                    lastPath = os.path.splitext(lastPath)[0]
+                lastPath += EXPORTSVGEXTENSION
             self._dialogFilter = EXPORTSVGFILTER
             self.updateDialog()
-            self.updateFilename(lastPath + EXPORTSVGEXTENSION)
+            self.updateFilename(lastPath)
 
     def buildParameters(self):
         """build parameters dict from the user widgets, to be passed to the export method.
@@ -600,7 +610,19 @@ class ExportStripToFilePopup(ExportDialog):
     def _saveDialog(self, exitSaveFileName=None):
         """save button has been clicked
         """
-        self.exitFilename = self.saveText.text().strip()  # strip the trailing whitespace
+        # self.exitFilename = self.saveText.text().strip()  # strip the trailing whitespace
+
+        selected = self.exportType.get()
+        lastPath = self.saveText.text().strip()
+        if selected == EXPORTPDF:
+            if not lastPath.endswith(EXPORTPDFEXTENSION):
+                lastPath += EXPORTPDFEXTENSION
+        elif selected == EXPORTSVG:
+            if not lastPath.endswith(EXPORTSVGEXTENSION):
+                lastPath += EXPORTSVGEXTENSION
+
+        self.saveText.setText(lastPath)
+        self.exitFilename = lastPath
 
         if self.pathEdited is False:
             # user has not changed the path so we can accept()

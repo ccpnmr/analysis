@@ -91,7 +91,7 @@ class ExportNefPopup(ExportDialog):
                   'pidList': self.newList}
         return params
 
-    def exportToFile(selfself, filename=None, params=None):
+    def exportToFile(self, filename=None, params=None):
         """Export to file
         :param filename: filename to export
         :param params: dict - user defined paramters for export

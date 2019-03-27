@@ -189,7 +189,7 @@ class ExportDialog(CcpnDialog):
         params = {'filename': self.exitFilename}
         return params
 
-    def exportToFile(selfself, filename=None, params=None):
+    def exportToFile(self, filename=None, params=None):
         """Export to file
         To be overridden when sub-classed by user
 

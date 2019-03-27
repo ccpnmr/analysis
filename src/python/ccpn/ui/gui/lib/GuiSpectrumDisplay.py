@@ -899,18 +899,26 @@ class GuiSpectrumDisplay(CcpnModule):
 
             # clear the layout and rebuild
             _widgets = []
+
             while layout.count():
                 _widgets.append(layout.takeAt(0).widget())
             _widgets.remove(strip)
+
             strip.hide()
             strip.setParent(None)  # set widget parent to None to hide,
             # was previously handled by addWidget to tempStore
 
             if spectrumDisplay.stripDirection == 'Y':
                 for m, widgStrip in enumerate(_widgets):  # build layout again
+
+                # for widgStrip in self.orderedStrips:
+                #     # get the new index from the strip
+                #     m = widgStrip.stripIndex()
+
                     layout.addWidget(widgStrip, 0, m)
                     layout.setColumnStretch(m, 1)
                     layout.setColumnStretch(m + 1, 0)
+
             elif spectrumDisplay.stripDirection == 'X':
                 for m, widgStrip in enumerate(_widgets):  # build layout again
                     layout.addWidget(widgStrip, m, 0)
@@ -983,7 +991,7 @@ class GuiSpectrumDisplay(CcpnModule):
         with undoBlock():
             with undoStackBlocking() as addUndoItem:
                 # retrieve list of created items from the api
-                # strangely, this modifies _wrappedData.orderedStrips
+                # strangely, this modifies _wrappedData.orderedStrips, and removes the boundStrip
                 apiObjectsCreated = strip._getApiObjectTree()
 
                 index = strip.stripIndex()

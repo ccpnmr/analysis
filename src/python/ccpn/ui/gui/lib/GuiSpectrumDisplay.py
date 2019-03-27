@@ -316,15 +316,23 @@ class GuiSpectrumDisplay(CcpnModule):
     #     if self._spectrumViewNotifier:
     #         self._spectrumViewNotifier.unRegister()
 
-    def showAllStripHeaders(self):
-        """Convenience to show headers of all strips"""
+    def showAllStripHeaders(self, handle=None):
+        """Convenience to show headers of all strips
+        """
         for strip in self.strips:
-            strip.header.show()
+            strip.header.headerVisible = True
+            if handle:
+                strip.header.handle = handle
 
-    def hideAllStripHeaders(self):
-        """Convenience to hide headers of all strips"""
+    def hideAllStripHeaders(self, handle=None):
+        """Convenience to hide headers of all strips
+        """
         for strip in self.strips:
-            strip.header.hide()
+            # only hide the strips that match the handle or hide all if None
+            if handle is None:
+                strip.header.headerVisible = False
+            elif strip.header.handle == handle:
+                strip.header.headerVisible = False
 
     def _spectrumViewChanged(self, data):
         """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame
@@ -539,6 +547,7 @@ class GuiSpectrumDisplay(CcpnModule):
         navigateToPositionInStrip(strip, pos, self.axisCodes, widths=mappedNewWidths)
         strip.header.reset()
         strip.header.setLabelText(position='c', text=peak.pid)
+        strip.header.headerVisible = True
 
     def _handleStrip(self, moveStrip, dropStrip):
         """Move a strip within a spectrumDisplay by dragging the strip label to another strip

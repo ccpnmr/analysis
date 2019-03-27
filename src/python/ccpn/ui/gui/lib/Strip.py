@@ -245,6 +245,7 @@ def navigateToNmrAtomsInStrip(strip: GuiStrip, nmrAtoms: typing.List[NmrAtom], w
     if setNmrResidueLabel and nmrAtoms:
         # set the centre strip header label
         strip.header.setLabelText(position='c', text=nmrAtoms[0].nmrResidue.pid)
+        strip.header.headerVisible = True
 
     # redraw the contours
     strip._updateVisibility()

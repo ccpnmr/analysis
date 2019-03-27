@@ -324,6 +324,8 @@ STRIPENABLED = 'stripEnabled'
 STRIPTRUE = 1
 STRIPFALSE = 0
 STRIPSTOREINDEX = [STRIPTEXT, STRIPOBJECT, STRIPCONNECT, STRIPVISIBLE, STRIPENABLED]
+STRIPHEADERVISIBLE = 'stripHeaderVisible'
+STRIPHANDLE = 'stripHandle'
 
 
 class StripHeader(Widget):
@@ -372,6 +374,10 @@ class StripHeader(Widget):
             self._labels[stripPos].setVisible(headerVisible)
             self._labels[stripPos].setEnabled(headerEnabled)
 
+        # get the visible state of the header
+        headerVisible = self.strip.getParameter(STRIPDICT, STRIPHEADERVISIBLE)
+        self.setVisible(headerVisible if headerVisible is not None else True)
+
         # guiNotifiers are attached to the backboneAssignment module, not active on loading of project
         # currently needs a doubleClick in the backboneAssignment table to start
 
@@ -380,7 +386,7 @@ class StripHeader(Widget):
         self._labels[STRIPPOSITION_RIGHT].setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
         self.setFixedHeight(16)
-        self.reset()
+        # self.reset()
 
     def _setPositionParameter(self, stripPos, subParameterName, value):
         """Set the item in the position dict
@@ -439,6 +445,8 @@ class StripHeader(Widget):
                       STRIPENABLED: True
                       }
             self.strip.setParameter(STRIPDICT, stripPos, params)
+        self.strip.setParameter(STRIPDICT, STRIPHANDLE, None)
+        self.strip.setParameter(STRIPDICT, STRIPHEADERVISIBLE, False)
 
     def setLabelObject(self, obj=None, position=STRIPPOSITION_CENTRE):
         """Set the object attached to the header label at the given position and store its pid
@@ -490,11 +498,11 @@ class StripHeader(Widget):
     def setLabelVisible(self, position=STRIPPOSITION_CENTRE, visible: bool = True):
         """show/hide the header label at the given position
         """
-        if visible:
-            self.show()
-        else:
-            self.hide()
         if position in STRIPPOSITIONS:
+            if visible:
+                self.show()
+            else:
+                self.hide()
             self._labels[position].setVisible(visible)
             self._setPositionParameter(position, STRIPVISIBLE, visible)
         else:
@@ -559,3 +567,20 @@ class StripHeader(Widget):
                 # change the object text
                 if self.getLabelObject(stripPos) is obj:
                     self.setLabelObject(position=stripPos, obj=obj)
+
+    @property
+    def headerVisible(self):
+        return self.strip.getParameter(STRIPDICT, STRIPHEADERVISIBLE)
+
+    @headerVisible.setter
+    def headerVisible(self, visible):
+        self.setVisible(visible)
+        self.strip.setParameter(STRIPDICT, STRIPHEADERVISIBLE, visible)
+
+    @property
+    def handle(self):
+        return self.strip.getParameter(STRIPDICT, STRIPHANDLE)
+
+    @handle.setter
+    def handle(self, handle):
+        self.strip.setParameter(STRIPDICT, STRIPHANDLE, handle)

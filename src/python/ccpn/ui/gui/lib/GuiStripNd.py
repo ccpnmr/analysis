@@ -138,8 +138,8 @@ class GuiStripNd(GuiStrip):
     
         :param spectrumDisplay: spectrumDisplay instance
         """
-        #print('GuiStripNd>>', self.spectrumDisplay)
-        super().__init__(spectrumDisplay, useOpenGL=True)
+
+        super().__init__(spectrumDisplay)
 
         # the scene knows which items are in it but they are stored as a list and the below give fast access from API object to QGraphicsItem
         ###self.peakLayerDict = {}  # peakList --> peakLayer
@@ -244,7 +244,7 @@ class GuiStripNd(GuiStrip):
     #   toolBarItems = [
     #      # type,      action name             icon                      tooltip/name                shortcut  active  checked,    callback,                             method
     #     (tType.item, 'ToolBar',               'toolbarAction',          '',                         'TB',     True,   True,       self.spectrumDisplay.toggleToolbar,   'toolbarAction'),
-    #     (tType.item, 'Crosshair',             'crossHairAction',        '',                         'CH',     True,   True,       self.spectrumDisplay.toggleCrossHair,                'crossHairAction'),
+    #     (tType.item, 'Crosshair',             'crosshairAction',        '',                         'CH',     True,   True,       self.spectrumDisplay.toggleCrosshair,                'crosshairAction'),
     #     (tType.item, 'Grid',                  'gridAction',             '',                         'GS',     True,   True,       self.spectrumDisplay.toggleGrid,                      'gridAction'),
     #     (tType.item, 'Share Y Axis',          '',                       '',                         'TA',     True,   True,       self._toggleLastAxisOnly, 'lastAxisOnlyCheckBox'),
     #     (tType.actn, 'Cycle Peak Labels', 'icons/preferences-desktop-font', 'Cycle Peak Labelling Types', 'PL', True,  True,      self.cyclePeakLabelling, ''),
@@ -311,7 +311,7 @@ class GuiStripNd(GuiStrip):
     #   #   self.connect(spectrumDisplayAction, QtCore.SIGNAL('triggered()'), receiver)
     #   #   self.navigateToMenu.addAction(spectrumDisplay)
     #
-    #   self.crossHairAction.setChecked(self.crossHairIsVisible)
+    #   self.crosshairAction.setChecked(self.crosshairIsVisible)
     #   self.gridAction.setChecked(self.gridIsVisible)
     #   self.lastAxisOnlyCheckBox.setChecked(self.spectrumDisplay.lastAxisOnly)
     #
@@ -375,7 +375,7 @@ class GuiStripNd(GuiStrip):
     #   #   self.connect(spectrumDisplayAction, QtCore.SIGNAL('triggered()'), receiver)
     #   #   self.navigateToMenu.addAction(spectrumDisplay)
     #
-    #   # self.crossHairAction.setChecked(self.crossHairIsVisible)
+    #   # self.crosshairAction.setChecked(self.crosshairIsVisible)
     #   # self.gridAction.setChecked(self.gridIsVisible)
     #   # self.lastAxisOnlyCheckBox.setChecked(self.spectrumDisplay.lastAxisOnly)
     #

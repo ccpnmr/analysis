@@ -1385,11 +1385,11 @@ class GuiSpectrumDisplay(CcpnModule):
         except:
             getLogger().warning('Error zooming out')
 
-    def toggleCrossHair(self):
+    def toggleCrosshair(self):
         """Toggles whether cross hair is displayed in all strips of spectrum display.
         """
         for strip in self.strips:
-            strip._toggleCrossHair()
+            strip._toggleCrosshair()
 
     def toggleGrid(self):
         """Toggles whether grid is displayed in all strips of spectrum display.

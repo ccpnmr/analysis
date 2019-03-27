@@ -64,7 +64,7 @@ class GuiWindow():
         # return
 
         context = QtCore.Qt.WidgetWithChildrenShortcut
-        addShortCut("c, h", self, self.toggleCrossHairAll, context=context)
+        addShortCut("c, h", self, self.toggleCrosshairAll, context=context)
         addShortCut("g, s", self, self.toggleGridAll, context=context)
         addShortCut("Del", self, partial(self.deleteSelectedItems), context=context)
         addShortCut("m, k", self, self.createMark, context=context)
@@ -415,20 +415,20 @@ class GuiWindow():
         # self.application.current.peaks = []
         self.application.current.clearPeaks()
 
-    def toggleCrossHairAll(self):
+    def toggleCrosshairAll(self):
         """
         Toggles whether crosshairs are displayed in all windows.
         """
         for window in self.project.windows:
-            window.toggleCrossHair()
+            window.toggleCrosshair()
 
-    def toggleCrossHair(self):
+    def toggleCrosshair(self):
         """
-        Toggles whether crosshairs are displayed in all spectrum di
+        Toggles whether crosshairs are displayed in all spectrum displays
         """
         # toggle crosshairs for the spectrum displays in this window
         for spectrumDisplay in self.spectrumDisplays:
-            spectrumDisplay.toggleCrossHair()
+            spectrumDisplay.toggleCrosshair()
 
     def createMark(self):
         """

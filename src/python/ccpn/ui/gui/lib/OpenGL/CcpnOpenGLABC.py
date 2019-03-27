@@ -258,7 +258,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
 
         self.gridList = []
         self._gridVisible = True
-        self._crossHairVisible = True
+        self._crosshairVisible = True
         self._axesVisible = True
         self._axisLocked = False
         self._showSpectraOnPhasing = False

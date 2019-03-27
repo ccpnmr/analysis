@@ -291,7 +291,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.gridList = []
         self._gridVisible = self._preferences.showGrid
-        self._crossHairVisible = self._preferences.showCrosshair
+        self._crosshairVisible = self._preferences.showCrosshair
         self._axesVisible = True
         self._axisLocked = False
         self._showSpectraOnPhasing = False
@@ -2280,7 +2280,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.enableTextClientState()
         self._setViewPortFontScale()
 
-        # if self._crossHairVisible:
+        # if self._crosshairVisible:
         self.drawMouseCoords()
 
         # make the overlay/axis solid
@@ -2996,7 +2996,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # draw the cursors
         # need to change to VBOs
 
-        if self._crossHairVisible:  # and (not self._updateHTrace or not self._updateVTrace):
+        if self._crosshairVisible:  # and (not self._updateHTrace or not self._updateVTrace):
             GL.glBegin(GL.GL_LINES)
 
             # map the cursor to the ratio coordinates
@@ -3250,16 +3250,16 @@ class CcpnGLWidget(QOpenGLWidget):
         self.update()
 
     @property
-    def crossHairVisible(self):
-        return self._crossHairVisible
+    def crosshairVisible(self):
+        return self._crosshairVisible
 
-    @crossHairVisible.setter
-    def crossHairVisible(self, visible):
-        self._crossHairVisible = visible
+    @crosshairVisible.setter
+    def crosshairVisible(self, visible):
+        self._crosshairVisible = visible
         self.update()
 
-    def toggleCrossHair(self):
-        self._crossHairVisible = not self._crossHairVisible
+    def toggleCrosshair(self):
+        self._crosshairVisible = not self._crosshairVisible
         self.update()
 
     @property
@@ -4771,7 +4771,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self.current.cursorPosition = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
             # only need to redraw if we can see the cursor
-            if self._crossHairVisible:  # or self._updateVTrace or self._updateHTrace:
+            if self._crosshairVisible:  # or self._updateVTrace or self._updateHTrace:
                 # if self._updateVTrace or self._updateHTrace:
                 #   self.updateTraces()
                 self.update()
@@ -5116,7 +5116,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # set the checkboxes to the correct settings
         strip.toolbarAction.setChecked(strip.spectrumDisplay.spectrumUtilToolBar.isVisible())
-        strip.crosshairAction.setChecked(self._crossHairVisible)
+        strip.crosshairAction.setChecked(self._crosshairVisible)
         strip.gridAction.setChecked(self._gridVisible)
         if hasattr(strip, 'lastAxisOnlyCheckBox'):
             strip.lastAxisOnlyCheckBox.setChecked(strip.spectrumDisplay.lastAxisOnly)

@@ -61,7 +61,7 @@ PhasingMenu = 'PhasingMenu'
 class GuiStrip(Frame):
     # inherits NotifierBase
 
-    def __init__(self, spectrumDisplay, useOpenGL=False):
+    def __init__(self, spectrumDisplay):
         """
         Basic strip class; used in StripNd and Strip1d
 
@@ -88,24 +88,18 @@ class GuiStrip(Frame):
         self.header = StripHeader(parent=self, mainWindow=self.mainWindow, strip=self,
                                   grid=(0, 0), gridSpan=(1, 2), setLayout=True, spacing=(0, 0))
 
-        self._useCcpnGL = True
-        # TODO: ED comment out the block below to return to normal
-        if self._useCcpnGL:
-            # self.plotWidget.hide()
+        if spectrumDisplay.is1D:
+            from ccpn.ui.gui.widgets.GLWidgets import Gui1dWidget as CcpnGLWidget
+        else:
+            from ccpn.ui.gui.widgets.GLWidgets import GuiNdWidget as CcpnGLWidget
 
-            if spectrumDisplay.is1D:
-                from ccpn.ui.gui.widgets.GLWidgets import Gui1dWidget as CcpnGLWidget
-            else:
-                from ccpn.ui.gui.widgets.GLWidgets import GuiNdWidget as CcpnGLWidget
+        self._CcpnGLWidget = CcpnGLWidget(strip=self, mainWindow=self.mainWindow)
+        self.getLayout().addWidget(self._CcpnGLWidget, 1, 0)
+        self._CcpnGLWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
+                                         QtWidgets.QSizePolicy.MinimumExpanding)
 
-            self._CcpnGLWidget = CcpnGLWidget(strip=self, mainWindow=self.mainWindow)
-            self.getLayout().addWidget(self._CcpnGLWidget, 1, 0)  # (3,0) if not hiding plotWidget
-            self._CcpnGLWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
-                                             QtWidgets.QSizePolicy.MinimumExpanding)
-
-            # set the ID label in the new widget
-            self._CcpnGLWidget.setStripID('.'.join(self.id.split('.')))
-            self._CcpnGLWidget.gridVisible = self.application.preferences.general.showGrid
+        # set the ID label in the new widget
+        self._CcpnGLWidget.setStripID('.'.join(self.id.split('.')))
 
         # Widgets for toolbar; items will be added by GuiStripNd (eg. the Z/A-plane boxes)
         # and GuiStrip1d; will be hidden for 2D's by GuiSpectrumView
@@ -113,8 +107,8 @@ class GuiStrip(Frame):
                                           hPolicy='expanding',
                                           grid=(2, 0), spacing=(5, 5))
 
-        self.viewStripMenu = None  # = self.plotItem.vb
-        self._showCrossHair()
+        self.viewStripMenu = None
+        # self._showCrosshair()
         self.storedZooms = []
         self.beingUpdated = False
 
@@ -130,13 +124,15 @@ class GuiStrip(Frame):
                               IntegralMenu : None
                               }
 
-        self.navigateToPeakMenu = None  #set from context menu and in CcpnOpenGL rightClick
-        self.navigateToCursorMenu = None  #set from context menu and in CcpnOpenGL rightClick
+        self.navigateToPeakMenu = None      #set from context menu and in CcpnOpenGL rightClick
+        self.navigateToCursorMenu = None    #set from context menu and in CcpnOpenGL rightClick
         self._isPhasingOn = False
 
         # set peakLabelling to the default from preferences or strip to the left
         settings = spectrumDisplay.getSettings()
         if len(spectrumDisplay.strips) > 1:
+
+            # copy the values form the first strip
             self.peakLabelling = spectrumDisplay.strips[0].peakLabelling
             self.symbolType = spectrumDisplay.strips[0].symbolType
             self._symbolSize = spectrumDisplay.strips[0].symbolSize
@@ -146,12 +142,11 @@ class GuiStrip(Frame):
             self.showSpectraOnPhasing = spectrumDisplay.strips[0].showSpectraOnPhasing
             self._contourThickness = spectrumDisplay.strips[0]._contourThickness
 
-            try:
-                self._CcpnGLWidget._axisLocked = spectrumDisplay.strips[0]._CcpnGLWidget._axisLocked
-            except Exception as es:
-                getLogger().debugGL('OpenGL widget not instantiated')
+            self._CcpnGLWidget._axisLocked = spectrumDisplay.strips[0]._CcpnGLWidget._axisLocked
 
         else:
+
+            # get the values from the preferences
             self.peakLabelling = self.application.preferences.general.annotationType
             self.symbolType = self.application.preferences.general.symbolType
             self._symbolSize = self.application.preferences.general.symbolSizePixel
@@ -165,19 +160,15 @@ class GuiStrip(Frame):
         self._storedPhasingData = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
         self.showActivePhaseTrace = True
 
-        try:
-            self._CcpnGLWidget.gridVisible = self.gridVisible       # self.application.preferences.general.showGrid
-            # set the axis units from the current settings
-            self._CcpnGLWidget.xUnits = settings[AXISXUNITS]
-            self._CcpnGLWidget.yUnits = settings[AXISYUNITS]
-            self._CcpnGLWidget.axisLocked = settings[AXISLOCKASPECTRATIO]
-        except Exception as es:
-            getLogger().debugGL('OpenGL widget not instantiated')
+        # set the axis units from the current settings
+        self._CcpnGLWidget.xUnits = settings[AXISXUNITS]
+        self._CcpnGLWidget.yUnits = settings[AXISYUNITS]
+        self._CcpnGLWidget.axisLocked = settings[AXISLOCKASPECTRATIO]
 
         # initialise the notifiers
         self.setStripNotifiers()
 
-        # respond to values changed in the containing spectrumDispaly settings widget
+        # respond to values changed in the containing spectrumDisplay settings widget
         self.spectrumDisplay._spectrumDisplaySettings.symbolsChanged.connect(self._symbolsChangedInSettings)
 
     def setStripNotifiers(self):
@@ -212,22 +203,62 @@ class GuiStrip(Frame):
         return self._CcpnGLWidget.viewRange()
 
     @property
-    def gridIsVisible(self):
+    def gridVisible(self):
         """True if grid is visible.
         """
-        try:
-            return self._CcpnGLWidget.gridVisible
-        except Exception as es:
-            getLogger().debugGL('OpenGL widget not instantiated')
+        return self._CcpnGLWidget.gridVisible
+
+    @gridVisible.setter
+    def gridVisible(self, visible):
+        """set the grid visibility
+        """
+        self._CcpnGLWidget.gridVisible = visible
+        if hasattr(self, 'gridAction'):
+            self.gridAction.setChecked(visible)
+
+    def toggleGrid(self):
+        """Toggles whether grid is visible in the strip.
+        """
+        self._CcpnGLWidget.gridVisible = not self._CcpnGLWidget.gridVisible
+        self.gridAction.setChecked(self._CcpnGLWidget.gridVisible)
 
     @property
-    def crossHairIsVisible(self):
+    def crosshairVisible(self):
         """True if crosshair is visible.
         """
-        try:
-            return self._CcpnGLWidget.crossHairVisible
-        except Exception as es:
-            getLogger().debugGL('OpenGL widget not instantiated')
+        return self._CcpnGLWidget.crosshairVisible
+
+    @crosshairVisible.setter
+    def crosshairVisible(self, visible):
+        """set the crosshairVisible visibility
+        """
+        self._CcpnGLWidget.crosshairVisible = visible
+        if hasattr(self, 'crosshairAction'):
+            self.crosshairAction.setChecked(visible)
+
+    def _toggleCrosshair(self):
+        """Toggles whether crosshair is visible.
+        """
+        self._CcpnGLWidget.crosshairVisible = not self._CcpnGLWidget.crosshairVisible
+        self.crosshairAction.setChecked(self._CcpnGLWidget.crosshairVisible)
+
+    def _showCrosshair(self):
+        """Displays crosshair in strip.
+        """
+        self._CcpnGLWidget.crosshairVisible = True
+        self.crosshairAction.setChecked(True)
+
+    def _hideCrosshair(self):
+        """Hides crosshair in strip.
+        """
+        self._CcpnGLWidget.crosshairVisible = False
+        self.crosshairAction.setChecked(False)
+
+    def _crosshairCode(self, axisCode):
+        """Determines what axisCodes are compatible as far as drawing crosshair is concerned
+        TBD: the naive approach below should be improved
+        """
+        return axisCode  #if axisCode[0].isupper() else axisCode
 
     @property
     def pythonConsole(self):
@@ -682,33 +713,6 @@ class GuiStrip(Frame):
         except:
             getLogger().debugGL('OpenGL widget not instantiated', spectrumDisplay=self.spectrumDisplay, strip=self)
 
-    def _toggleCrossHair(self):
-        """Toggles whether crosshair is visible.
-        """
-        try:
-            self.crosshairVisible = not self.crosshairVisible
-            self._CcpnGLWidget.crossHairVisible = self.crosshairVisible
-        except:
-            getLogger().debugGL('OpenGL widget not instantiated')
-
-    def _showCrossHair(self):
-        """Displays crosshair in strip.
-        """
-        try:
-            self.crosshairVisible = True
-            self._CcpnGLWidget.crossHairVisible = True
-        except:
-            getLogger().debugGL('OpenGL widget not instantiated')
-
-    def _hideCrossHair(self):
-        """Hides crosshair in strip.
-        """
-        try:
-            self.crosshairVisible = False
-            self._CcpnGLWidget.crossHairVisible = False
-        except:
-            getLogger().debugGL('OpenGL widget not instantiated')
-
     def _toggleShowActivePhaseTrace(self):
         """Toggles whether the active phasing trace is visible.
         """
@@ -742,15 +746,6 @@ class GuiStrip(Frame):
         try:
             self.showSpectraOnPhasing = False
             self._CcpnGLWidget.showSpectraOnPhasing = False
-        except:
-            getLogger().debugGL('OpenGL widget not instantiated')
-
-    def toggleGrid(self):
-        """Toggles whether grid is visible in the strip.
-        """
-        try:
-            self.gridVisible = not self.gridVisible
-            self._CcpnGLWidget.gridVisible = self.gridVisible
         except:
             getLogger().debugGL('OpenGL widget not instantiated')
 
@@ -880,12 +875,6 @@ class GuiStrip(Frame):
     def symbolThickness(self, value):
         self._symbolThickness = value
         self._emitSymbolChanged()
-
-    def _crosshairCode(self, axisCode):
-        """Determines what axisCodes are compatible as far as drawing crosshair is concerned
-        TBD: the naive approach below should be improved
-        """
-        return axisCode  #if axisCode[0].isupper() else axisCode
 
     def _createMarkAtPosition(self, positions, axisCodes):
         try:

@@ -93,11 +93,11 @@ def _toolBarItem(strip):
                     checkable=True, checked=True, shortcut='TB', stripMethodName='toolbarAction')
 
 
-def _crossHairItem(strip):
+def _crosshairItem(strip):
     return _SCMitem(name='Crosshair',
-                    typeItem=ItemTypes.get(ITEM), toolTip='CrossHair Action',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Crosshair Action',
                     checkable=True, checked=True, shortcut='CH',
-                    callback=strip.spectrumDisplay.toggleCrossHair, stripMethodName='crosshairAction')
+                    callback=strip.spectrumDisplay.toggleCrosshair, stripMethodName='crosshairAction')
 
 
 def _gridItem(strip):
@@ -424,7 +424,7 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
     """
     items = [
         _toolBarItem(guiStrip1d),
-        _crossHairItem(guiStrip1d),
+        _crosshairItem(guiStrip1d),
         _gridItem(guiStrip1d),
         _cyclePeakLabelsItem(guiStrip1d),
         _separator(),
@@ -538,7 +538,7 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
     """
     items = [
         _toolBarItem(guiStripNd),
-        _crossHairItem(guiStripNd),
+        _crosshairItem(guiStripNd),
         _gridItem(guiStripNd),
         _shareYAxisItem(guiStripNd),
         _cyclePeakLabelsItem(guiStripNd),

@@ -130,7 +130,7 @@ class GuiStrip1d(GuiStrip):
         # self.plotWidget.plotItem.setAcceptDrops(True)
         self.spectrumIndex = 0
         self.peakItems = {}
-        # self._hideCrossHair()
+        # self._hideCrosshair()
         self.calibrateX1DWidgets = None
         self.calibrateY1DWidgets = None
         self.offsetWidget = None

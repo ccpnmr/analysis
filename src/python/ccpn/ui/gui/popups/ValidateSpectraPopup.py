@@ -40,9 +40,14 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
+from ccpn.ui.gui.widgets.Splitter import Splitter
 
 
 LINEEDITSMINIMUMWIDTH = 195
+VALIDROWCOLOUR = QtGui.QColor('palegreen')
+ACCEPTROWCOLOUR =  QtGui.QColor('darkseagreen')
+REJECTROWCOLOUR = QtGui.QColor('orange')
+INVALIDROWCOLOUR = QtGui.QColor('lightpink')
 
 
 class SpectrumValidator(QtGui.QValidator):
@@ -62,19 +67,19 @@ class SpectrumValidator(QtGui.QValidator):
 
         if os.path.exists(filePath):
             if filePath == self.spectrum.filePath:
-                palette.setColor(QtGui.QPalette.Base, self.baseColour)
+                palette.setColor(QtGui.QPalette.Base, VALIDROWCOLOUR)
             else:
                 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 
                 dataType, subType, usePath = ioFormats.analyseUrl(filePath)
                 if dataType == 'Spectrum':
-                    palette.setColor(QtGui.QPalette.Base, QtGui.QColor('palegreen'))
+                    palette.setColor(QtGui.QPalette.Base, VALIDROWCOLOUR)
                 else:
-                    palette.setColor(QtGui.QPalette.Base, QtGui.QColor('orange'))
+                    palette.setColor(QtGui.QPalette.Base, INVALIDROWCOLOUR)
 
             state = QtGui.QValidator.Acceptable
         else:
-            palette.setColor(QtGui.QPalette.Base, QtGui.QColor('lightpink'))
+            palette.setColor(QtGui.QPalette.Base, INVALIDROWCOLOUR)
             state = QtGui.QValidator.Intermediate
         self.parent().setPalette(palette)
 
@@ -106,22 +111,36 @@ class DataUrlValidator(QtGui.QValidator):
         palette = self.parent().palette()
 
         if os.path.isdir(filePath):
-            if filePath == self.dataUrl.url.dataLocation:
-                palette.setColor(QtGui.QPalette.Base, self.baseColour)
+
+            # ed's original
+            # if filePath == self.dataUrl.url.dataLocation:
+            #     palette.setColor(QtGui.QPalette.Base, self.baseColour)
+            #     # palette.setColor(QtGui.QPalette.Base, VALIDROWCOLOUR)
+            # else:
+            #
+            #     # validate dataStores
+            #     localStores = [store for store in self.dataUrl.sortedDataStores()]
+            #     for store in self.dataUrl.sortedDataStores():
+            #         if not os.path.exists(os.path.join(filePath, store.path)):
+            #             palette.setColor(QtGui.QPalette.Base, INVALIDROWCOLOUR)
+            #             break
+            #
+            #     else:
+            #         palette.setColor(QtGui.QPalette.Base, VALIDROWCOLOUR)       # self.baseColour)
+
+            # validate dataStores
+            localStores = [store for store in self.dataUrl.sortedDataStores()]
+            for store in self.dataUrl.sortedDataStores():
+                if not os.path.exists(os.path.join(filePath, store.path)):
+                    palette.setColor(QtGui.QPalette.Base, INVALIDROWCOLOUR)
+                    break
+
             else:
+                palette.setColor(QtGui.QPalette.Base, self.baseColour)
 
-                # validate dataStores
-                localStores = [store for store in self.dataUrl.sortedDataStores()]
-                for store in self.dataUrl.sortedDataStores():
-                    if not os.path.exists(os.path.join(filePath, store.path)):
-                        palette.setColor(QtGui.QPalette.Base, QtGui.QColor('orange'))
-                        break
-
-                else:
-                    palette.setColor(QtGui.QPalette.Base, QtGui.QColor('palegreen'))
             state = QtGui.QValidator.Acceptable
         else:
-            palette.setColor(QtGui.QPalette.Base, QtGui.QColor('lightpink'))
+            palette.setColor(QtGui.QPalette.Base, INVALIDROWCOLOUR)
             state = QtGui.QValidator.Intermediate
         self.parent().setPalette(palette)
 
@@ -176,7 +195,8 @@ class ValidateSpectraPopup(CcpnDialog):
         self.dataUrlScrollAreaWidgetContents.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         self.dataUrlScrollArea.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         self.dataUrlScrollArea.setStyleSheet("""ScrollArea { border: 0px; }""")
-        self.dataUrlScrollArea.setFixedHeight(120)
+        # self.dataUrlScrollArea.setFixedHeight(120)
+        row += 1
 
         # populate the widget with a list of spectrum buttons and filepath buttons
         scrollRow = 0
@@ -188,6 +208,12 @@ class ValidateSpectraPopup(CcpnDialog):
 
         self.allUrls = [dataUrl for store in self.project._wrappedData.memopsRoot.sortedDataLocationStores()
                         for dataUrl in store.sortedDataUrls() if dataUrl.name not in ('insideData', 'alongsideData')]
+
+        urls = self._findDataUrl('remoteData')
+        for url in urls:
+            label = self._addUrl(self.dataUrlScrollAreaWidgetContents, url, urlList=self.dataUrlData, scrollRow=scrollRow, enabled=True)
+            label.setText('$DATA (user datapath)')
+            scrollRow += 1
 
         urls = self._findDataUrl('insideData')
         for url in urls:
@@ -201,17 +227,15 @@ class ValidateSpectraPopup(CcpnDialog):
             label.setText('$ALONGSIDE')
             scrollRow += 1
 
-        urls = self._findDataUrl('remoteData')
-        for url in urls:
-            label = self._addUrl(self.dataUrlScrollAreaWidgetContents, url, urlList=self.dataUrlData, scrollRow=scrollRow, enabled=True)
-            label.setText('$DATA (user datapath)')
-            scrollRow += 1
-
         otherUrls = [dataUrl for store in self.project._wrappedData.memopsRoot.sortedDataLocationStores()
                      for dataUrl in store.sortedDataUrls() if dataUrl.name not in ('insideData', 'alongsideData', 'remoteData')]
 
         for url in otherUrls:
-            self._addUrl(self.dataUrlScrollAreaWidgetContents, url, urlList=self.dataUrlData, scrollRow=scrollRow, enabled=True)
+            # only show the urls that contain spectra
+            if url.sortedDataStores():
+                self._addUrl(self.dataUrlScrollAreaWidgetContents, url, urlList=self.dataUrlData, scrollRow=scrollRow, enabled=True)
+            else:
+                self._addUrl(self.dataUrlScrollAreaWidgetContents, url, urlList=self.dataUrlData, scrollRow=scrollRow, enabled=False)
             scrollRow += 1
 
         # finalise the spectrumScrollArea
@@ -220,11 +244,14 @@ class ValidateSpectraPopup(CcpnDialog):
                grid=(scrollRow, 1), gridSpan=(1, 1))
         row += 1
 
-        HLine(self, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
-        row += 1
+        self._spectrumFrame = Frame(self, setLayout=True, grid=(row, 0), gridSpan=(1, 3), showBorder=False)
 
-        self.buttonFrame = Frame(self, setLayout=True, showBorder=False, fShape='noFrame',
-                                 grid=(row, 0), gridSpan=(1, 3),
+        specRow = 0
+        HLine(self._spectrumFrame, grid=(specRow, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
+        specRow += 1
+
+        self.buttonFrame = Frame(self._spectrumFrame, setLayout=True, showBorder=False, fShape='noFrame',
+                                 grid=(specRow, 0), gridSpan=(1, 3),
                                  vAlign='top', hAlign='left')
         self.showValidLabel = Label(self.buttonFrame, text="Show spectra: ", vAlign='t', grid=(0, 0), bold=True)
         self.showValid = RadioButtons(self.buttonFrame, texts=['valid', 'invalid', 'all'],
@@ -234,13 +261,13 @@ class ValidateSpectraPopup(CcpnDialog):
                                       grid=(0, 1), hAlign='l',
                                       tipTexts=None,
                                       )
-        row += 1
+        specRow += 1
 
-        self.addSpacer(0,10, grid=(row,0))
-        row += 1
+        self._spectrumFrame.addSpacer(5,10, grid=(specRow,0))
+        specRow += 1
 
         # set up a scroll area
-        self.spectrumScrollArea = ScrollArea(self, setLayout=True, grid=(row, 0), gridSpan=(1, 3))
+        self.spectrumScrollArea = ScrollArea(self._spectrumFrame, setLayout=True, grid=(specRow, 0), gridSpan=(1, 3))
         self.spectrumScrollArea.setWidgetResizable(True)
         self.spectrumScrollAreaWidgetContents = Frame(self, setLayout=True, showBorder=False)
         self.spectrumScrollArea.setWidget(self.spectrumScrollAreaWidgetContents)
@@ -267,17 +294,33 @@ class ValidateSpectraPopup(CcpnDialog):
             pathData = LineEdit(self.spectrumScrollAreaWidgetContents, textAlignment='left', grid=(scrollRow, 1))
             pathData.setValidator(SpectrumValidator(parent=pathData, spectrum=spectrum))
             pathButton = Button(self.spectrumScrollAreaWidgetContents, grid=(scrollRow, 2), callback=partial(self._getSpectrumFile, spectrum),
-                                icon='icons/applications-system')
+                                icon='icons/directory')
 
             self.spectrumData[spectrum] = (pathData, pathButton, pathLabel)
             self._setPathData(spectrum)
-            pathData.editingFinished.connect(partial(self._setSpectrumPath, spectrum))
+
+            # pathData.editingFinished.connect(partial(self._setSpectrumPath, spectrum))
+            pathData.textEdited.connect(partial(self._setSpectrumPath, spectrum))
+
             scrollRow += 1
 
         # finalise the spectrumScrollArea
         Spacer(self.spectrumScrollAreaWidgetContents, 2, 2,
                QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(scrollRow, 1), gridSpan=(1, 1))
+        row += 1
+
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        row = 1
+        self.splitter = Splitter(self, grid=(row, 0), setLayout=True, horizontal=False, gridSpan=(1,3))
+        self.splitter.addWidget(self.dataUrlScrollArea)
+        self.splitter.addWidget(self._spectrumFrame)
+        self.getLayout().addWidget(self.splitter, row, 0, 1, 3)
+        # self.splitter.setStretchFactor(0, 5)
+        # self.splitter.setStretchFactor(1, 1)
+        self.splitter.setChildrenCollapsible(False)
+        self.splitter.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         row += 1
 
         # add exit buttons
@@ -291,18 +334,31 @@ class ValidateSpectraPopup(CcpnDialog):
         # self.setFixedWidth(self.sizeHint().width()+24)
 
     def _addUrl(self, widget, dataUrl, urlList, scrollRow, enabled=True):
+        """add a url row to the frame
+        """
         urlLabel = Label(widget, text=dataUrl.name, grid=(scrollRow, 0))
         urlData = LineEdit(widget, textAlignment='left', grid=(scrollRow, 1))
-        urlData.setValidator(DataUrlValidator(parent=urlData, dataUrl=dataUrl))
+
+        if enabled:
+            urlData.setValidator(DataUrlValidator(parent=urlData, dataUrl=dataUrl))
+        else:
+            # set to italic/grey
+            oldFont = urlData.font()
+            oldFont.setItalic(True)
+            urlData.setFont(oldFont)
+
         urlButton = Button(widget, grid=(scrollRow, 2), callback=partial(self._getDataUrlDialog, dataUrl),
-                           icon='icons/applications-system')
+                           icon='icons/directory')
 
         urlList[dataUrl] = (urlData, None, urlLabel)
         self._setUrlData(dataUrl)
         urlData.setEnabled(enabled)
         urlButton.setEnabled(enabled)
         urlButton.setVisible(enabled)
-        urlData.editingFinished.connect(partial(self._setDataUrlPath, dataUrl))
+
+        # urlData.editingFinished.connect(partial(self._setDataUrlPath, dataUrl))
+        urlData.textEdited.connect(partial(self._setDataUrlPath, dataUrl))
+
         return urlLabel
 
     def _getDataUrlDialog(self, dataUrl):
@@ -346,7 +402,10 @@ class ValidateSpectraPopup(CcpnDialog):
         """
         urlData, urlButton, urlLabel = self.dataUrlData[dataUrl]
         urlData.setText(dataUrl.url.dataLocation)
-        urlData.validator().resetCheck()
+        # if urlData.validator:
+        valid = urlData.validator()
+        if valid and hasattr(valid, 'resetCheck'):
+            urlData.validator().resetCheck()
 
     def _getSpectrumFile(self, spectrum):
         """Get the path from the widget and call the open dialog.
@@ -362,20 +421,20 @@ class ValidateSpectraPopup(CcpnDialog):
             if len(directory) > 0:
                 newFilePath = directory[0]
 
-                if spectrum.filePath != newFilePath:
+                # if spectrum.filePath != newFilePath:
 
-                    from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
+                from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 
-                    dataType, subType, usePath = ioFormats.analyseUrl(newFilePath)
-                    if dataType == 'Spectrum':
-                        spectrum.filePath = newFilePath
+                dataType, subType, usePath = ioFormats.analyseUrl(newFilePath)
+                if dataType == 'Spectrum':
+                    spectrum.filePath = newFilePath
 
-                    else:
-                        getLogger().warning('Not a spectrum file: %s - (%s, %s)' % (newFilePath, dataType, subType))
+                # else:
+                #     getLogger().warning('Not a spectrum file: %s - (%s, %s)' % (newFilePath, dataType, subType))
 
-                    # set the widget text
-                    # self._setPathData(spectrum)
-                    self._validateAll()
+                # set the widget text
+                # self._setPathData(spectrum)
+                self._validateAll()
 
     def _setPathData(self, spectrum):
         """Set the pathData widgets from the spectrum.
@@ -408,18 +467,19 @@ class ValidateSpectraPopup(CcpnDialog):
             pathData, pathButton, pathLabel = self.spectrumData[spectrum]
             newFilePath = ccpnUtil.expandDollarFilePath(self.project, spectrum, pathData.text().strip())
 
-            if spectrum.filePath != newFilePath:
+            # if spectrum.filePath != newFilePath:
 
-                from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
+            from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 
-                dataType, subType, usePath = ioFormats.analyseUrl(newFilePath)
-                if dataType == 'Spectrum':
-                    spectrum.filePath = newFilePath
-                else:
-                    getLogger().warning('Not a spectrum file: %s - (%s, %s)' % (newFilePath, dataType, subType))
+            dataType, subType, usePath = ioFormats.analyseUrl(newFilePath)
+            if dataType == 'Spectrum':
+                spectrum.filePath = newFilePath
 
-                # set the widget text
-                # self._setPathData(spectrum)
+            # else:
+            #     getLogger().warning('Not a spectrum file: %s - (%s, %s)' % (newFilePath, dataType, subType))
+
+            # set the widget text
+            # self._setPathData(spectrum)
 
     def _toggleValid(self):
         ind = self.showValid.getIndex()

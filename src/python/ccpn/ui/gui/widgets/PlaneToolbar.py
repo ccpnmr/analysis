@@ -45,6 +45,7 @@ from ccpn.core.Peak import Peak
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+from ccpn.ui.gui.widgets.Menu import Menu
 
 
 STRIPLABEL_CONNECTDIR = '_connectDir'
@@ -187,6 +188,8 @@ class _StripLabel(Label):
         """Handle mouse release
         """
         self._mousePressed = False
+        if event.button() == QtCore.Qt.RightButton:
+            self._rightButtonPressed(event)
 
     def _handleMouseClicked(self, mouseDict):
         """handle a single mouse event, but ignore double click events
@@ -211,6 +214,44 @@ class _StripLabel(Label):
 
                     elif isinstance(obj, NmrResidue):
                         navigateToNmrResidueInStrip(specDisplay, specDisplay.strips[0], obj)
+
+    def _rightButtonPressed(self, event):
+        """Handle pressing the right mouse button
+        """
+        menu = self._createContextMenu(self)
+        if menu:
+            menu.move(event.globalPos().x(), event.globalPos().y() + 10)
+            menu.exec()
+
+    def _createContextMenu(self, button: QtWidgets.QToolButton):
+        """Creates a context menu to close headers.
+        """
+        contextMenu = Menu('', self, isFloatWidget=True)
+
+        contextMenu.addSeparator()
+        contextMenu.addAction('Close', self._closeStrip)
+        contextMenu.addAction('Close in SpectrumDisplay', self._closeSpectrumDisplay)
+        contextMenu.addAction('Close All', self._closeAll)
+        return contextMenu
+
+    def _closeStrip(self):
+        """Close header in this strip
+        """
+        self.strip.header.reset()
+
+    def _closeSpectrumDisplay(self):
+        """Close all headers in this spectrumDisplay
+        """
+        for strip in self.spectrumDisplay.strips:
+            strip.header.reset()
+
+    def _closeAll(self):
+        """Close all headers in all spectrumDisplays
+        """
+        displays = self.mainWindow.spectrumDisplays
+        for display in displays:
+            for strip in display.strips:
+                strip.header.reset()
 
 
 #TODO:GEERTEN: complete this and replace
@@ -386,7 +427,10 @@ class StripHeader(Widget):
         self._labels[STRIPPOSITION_RIGHT].setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
         self.setFixedHeight(16)
-        # self.reset()
+        # self.eventFilter = self._eventFilter
+        # self.installEventFilter(self)
+
+        # self.reset()          # reset if backboneAssignment controls all headers
 
     def _setPositionParameter(self, stripPos, subParameterName, value):
         """Set the item in the position dict

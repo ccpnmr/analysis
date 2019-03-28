@@ -274,6 +274,7 @@ class ValidateSpectraPopup(CcpnDialog):
         self.spectrumScrollAreaWidgetContents.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         self.spectrumScrollArea.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         self.spectrumScrollArea.setStyleSheet("""ScrollArea { border: 0px; }""")
+        specRow += 1
 
         if not self.spectra:
             self.spectra = self.project.spectra
@@ -308,7 +309,9 @@ class ValidateSpectraPopup(CcpnDialog):
         Spacer(self.spectrumScrollAreaWidgetContents, 2, 2,
                QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(scrollRow, 1), gridSpan=(1, 1))
-        row += 1
+
+        self._spectrumFrame.addSpacer(5,10, grid=(specRow,0))
+        specRow += 1
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -324,8 +327,8 @@ class ValidateSpectraPopup(CcpnDialog):
         row += 1
 
         # add exit buttons
-        self.applyButtons = ButtonList(self, texts=['Close', 'Apply'],
-                                       callbacks=[self._closeButton, self._apply],
+        self.applyButtons = ButtonList(self, texts=['Close'],
+                                       callbacks=[self._closeButton],
                                        tipTexts=[''], direction='h',
                                        hAlign='r', grid=(row, 0), gridSpan=(1, 3))
 

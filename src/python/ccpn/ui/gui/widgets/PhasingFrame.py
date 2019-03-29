@@ -127,6 +127,16 @@ class PhasingFrame(Frame):
         for dd, pivot in enumerate(pivotList):
             self.values[directionTexts[dd]]['pivot'] = pivot
 
+    def setPivotValue(self, value):
+        """set the pivot value
+        """
+        # disable the feedback from the spinbox
+        self.pivotEntry.blockSignals(True)
+        self.pivotEntry.setValue(value)
+        self.updateValues()
+        self.pivotEntry.blockSignals(False)
+        self.doCallback()
+
     def _apply(self):
         if self.applyCallback:
             self.applyCallback(self.values)
@@ -166,10 +176,6 @@ class PhasingFrame(Frame):
     def setPh1(self, value):
         # self.phLabel1.setText(str(value))
         self.coarseSlider1.setValue(value)
-        self.updateValues()
-        self.doCallback()
-
-    def setPivotValue(self):
         self.updateValues()
         self.doCallback()
 

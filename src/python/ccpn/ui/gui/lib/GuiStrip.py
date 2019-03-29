@@ -617,6 +617,7 @@ class GuiStrip(Frame):
                 self._CcpnGLWidget.updateHTrace = False
                 self._CcpnGLWidget.updateVTrace = True
 
+        # connect to the value in the GLwidget
         self.pivotLine.valuesChanged.connect(self._newPositionLineCallback)
         self.pivotLine.setValue(self._newPosition)
         phasingFrame.pivotEntry.valueChanged.connect(self._newPositionPivotCallback)
@@ -634,10 +635,13 @@ class GuiStrip(Frame):
         if not self.isDeleted:
             phasingFrame = self.spectrumDisplay.phasingFrame
             self._newPosition = self.pivotLine.values  # [0]
-            phasingFrame.pivotEntry.setValue(self._newPosition)
+
+            # disables feedback from the spinbox as event is spawned from the GLwidget
+            phasingFrame.setPivotValue(self._newPosition)
 
     def _newPositionPivotCallback(self, value):
         self._newPosition = value
+
         self.pivotLine.setValue(value)
 
     def turnOffPhasing(self):

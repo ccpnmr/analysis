@@ -2417,7 +2417,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.buildSpectra()
 
-        GL.glLineWidth(self.strip._contourThickness)
+        # use the _devicePixelRatio for retina displays
+        GL.glLineWidth(self.strip._contourThickness * self.viewports._devicePixelRatio)
         GL.glDisable(GL.GL_BLEND)
 
         for spectrumView in self._ordering:  #self._ordering:                             # strip.spectrumViews:       #.orderedSpectrumViews():

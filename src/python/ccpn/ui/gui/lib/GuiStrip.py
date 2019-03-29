@@ -94,6 +94,7 @@ class GuiStrip(Frame):
             from ccpn.ui.gui.widgets.GLWidgets import GuiNdWidget as CcpnGLWidget
 
         self._CcpnGLWidget = CcpnGLWidget(strip=self, mainWindow=self.mainWindow)
+
         self.getLayout().addWidget(self._CcpnGLWidget, 1, 0)
         self._CcpnGLWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
                                          QtWidgets.QSizePolicy.MinimumExpanding)

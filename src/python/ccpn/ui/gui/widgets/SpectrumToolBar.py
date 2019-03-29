@@ -43,6 +43,8 @@ from ccpn.core.MultipletList import MultipletList
 from ccpn.ui.gui.lib.GuiSpectrumView import _spectrumViewHasChanged
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 
+TOOLBAR_EXTENSIONNAME = 'qt_toolbar_ext_button'
+
 
 class SpectrumToolBar(ToolBar):
 
@@ -56,6 +58,12 @@ class SpectrumToolBar(ToolBar):
         self.installEventFilter(self)
         self.setMouseTracking(True)
         self._spectrumToolBarBlockingLevel = 0
+
+        for child in self.children():
+            if child.objectName() == TOOLBAR_EXTENSIONNAME:
+                self._extButton = child
+
+        self._firstButton = 0
 
     @property
     def isBlocked(self):
@@ -209,108 +217,11 @@ class SpectrumToolBar(ToolBar):
             popup.exec_()
             popup.raise_()
 
-    # old to be deleted
-    # def _createContextMenuOld(self, button:QtWidgets.QToolButton):
-    #   """
-    #   Creates a context menu containing a command to delete the spectrum from the display and its
-    #   button from the toolbar.
-    #   """
-    #   if not button:
-    #     return None
-    #   contextMenu = Menu('', self, isFloatWidget=True)
-    #   plMenu =  contextMenu.addMenu('PeakList')
-    #   ilMenu =  contextMenu.addMenu('IntegralList')
-    #   mlMenu =  contextMenu.addMenu('MultipletList')
-    #
-    #   peakListViews = self.widget.peakListViews
-    #   integralListViews = self.widget.integralListViews
-    #   multipletListViews = self.widget.multipletListViews
-    #
-    #   action = button.actions()[0]
-    #   # keys = [key for key, value in self.widget.spectrumActionDict.items() if value is action]
-    #   # if not keys: # if you click on >> button which shows more spectra
-    #   #   return None
-    #   # key = keys[0]
-    #
-    #   plMenu.setEnabled(len(peakListViews)>0)
-    #   plMenu.addAction('Show All', partial(self._setVisibleAllFromList,True, plMenu, peakListViews))
-    #   plMenu.addAction('Hide All', partial(self._setVisibleAllFromList,False, plMenu, peakListViews))
-    #   plMenu.addSeparator()
-    #   for peakListView in peakListViews:
-    #     # if peakListView.spectrumView._apiDataSource == key:
-    #       if peakListView.peakList:
-    #         action = plMenu.addAction(peakListView.peakList.pid)
-    #         action.setCheckable(True)
-    #         if peakListView.isVisible():
-    #           action.setChecked(True)
-    #         # else:
-    #         #   allPlAction.setChecked(False)
-    #         action.toggled.connect(peakListView.setVisible)
-    #         # TODO:ED check this is okay for each spectrum
-    #         action.toggled.connect(partial(self._updateVisiblePeakLists, peakListView.spectrumView))
-    #
-    #
-    #   ilMenu.setEnabled(len(integralListViews)>0)
-    #   ilMenu.addAction('Show All', partial(self._setVisibleAllFromList,True, ilMenu, integralListViews))
-    #   ilMenu.addAction('Hide All', partial(self._setVisibleAllFromList,False, ilMenu, integralListViews))
-    #   ilMenu.addSeparator()
-    #   for integralListView in integralListViews:
-    #     # if integralListView.spectrumView._apiDataSource == key:
-    #       if integralListView.integralList:
-    #         action = ilMenu.addAction(integralListView.integralList.pid)
-    #         action.setCheckable(True)
-    #         if integralListView.isVisible():
-    #           action.setChecked(True)
-    #         # else:
-    #         #   allPlAction.setChecked(False)
-    #         action.toggled.connect(integralListView.setVisible)
-    #
-    #         # TODO:ED check this is okay for each spectrum
-    #         action.toggled.connect(partial(self._updateVisibleIntegralLists, integralListView.spectrumView))
-    #
-    #   mlMenu.setEnabled(len(multipletListViews)>0)
-    #   mlMenu.addAction('Show All', partial(self._setVisibleAllFromList,True, mlMenu, multipletListViews))
-    #   mlMenu.addAction('Hide All', partial(self._setVisibleAllFromList,False, mlMenu, multipletListViews))
-    #   mlMenu.addSeparator()
-    #   for multipletListView in multipletListViews:
-    #     # if multipletListView.spectrumView._apiDataSource == key:
-    #       if multipletListView.multipletList:
-    #         action = mlMenu.addAction(multipletListView.multipletList.pid)
-    #         action.setCheckable(True)
-    #         if multipletListView.isVisible():
-    #           action.setChecked(True)
-    #         # else:
-    #         #   allPlAction.setChecked(False)
-    #         action.toggled.connect(multipletListView.setVisible)
-    #
-    #         # TODO:ED check this is okay for each spectrum
-    #         action.toggled.connect(partial(self._updateVisibleMultipletLists, multipletListView.spectrumView))
-    #
-    #   contextMenu.addSeparator()
-    #   contextMenu.addAction('Remove Spectrum', partial(self._removeSpectrum, button))
-    #   return contextMenu
-
     def _updateGl(self, ):
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
         GLSignals = GLNotifier(parent=self)
         GLSignals.emitPaintEvent()
-
-    # Triplicated Code?
-    # def _updateVisiblePeakLists(self, spectrumView=None, visible=True):
-    #   from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-    #   GLSignals = GLNotifier(parent=self)
-    #   GLSignals.emitPaintEvent()
-    #
-    # def _updateVisibleIntegralLists(self, spectrumView=None, visible=True):
-    #   from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-    #   GLSignals = GLNotifier(parent=self)
-    #   GLSignals.emitPaintEvent()
-    #
-    # def _updateVisibleMultipletLists(self, spectrumView=None, visible=True):
-    #   from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-    #   GLSignals = GLNotifier(parent=self)
-    #   GLSignals.emitPaintEvent()
 
     def _getSpectrumViewFromButton(self, button):
         spvs = []
@@ -322,36 +233,13 @@ class SpectrumToolBar(ToolBar):
         if len(spvs) == 1:
             return spvs[0]
 
-    # def _allPeakLists(self, contextMenu, button):
-    #   key = [key for key, value in self.widget.spectrumActionDict.items() if value == button.actions()[0]][0]
-    #   for peakListView in self.widget.peakListViews:
-    #     if peakListView.spectrumView._apiDataSource == key:
-    #       for action in contextMenu.actions():
-    #         if action is not self.sender():
-    #           if not action.isChecked():
-    #             action.setChecked(True)
-    #             action.toggled.connect(peakListView.setVisible)
-    #   self._updateVisiblePeakLists()
-    #
-    # def _noPeakLists(self, contextMenu, button):
-    #   key = [key for key, value in self.widget.spectrumActionDict.items() if value == button.actions()[0]][0]
-    #   for peakListView in self.widget.peakListViews:
-    #     if peakListView.spectrumView._apiDataSource == key:
-    #       for action in contextMenu.actions():
-    #         if action is not self.sender():
-    #           if action.isChecked():
-    #             action.setChecked(False)
-    #             action.toggled.connect(peakListView.setVisible)
-    #   self._updateVisiblePeakLists()
-
     def _setVisibleAllFromList(self, abool, menu, views):
-        '''
-
+        """
         :param abool: T or F
         :param menu:
         :param views: any of Views obj _pluralLinkName
         :return:
-        '''
+        """
         if views:
             for view in views:
                 view.setVisible(abool)
@@ -461,6 +349,9 @@ class SpectrumToolBar(ToolBar):
             if event.button() == QtCore.Qt.MiddleButton:
                 self._dragButton(event)
 
+        elif event.type() == QtCore.QEvent.Resize:
+            self._processToolBarExtension()
+
         return super(SpectrumToolBar, self).eventFilter(obj, event)  # do the rest
 
     def _toolbarAddSpectrum(self, data):
@@ -554,3 +445,23 @@ class SpectrumToolBar(ToolBar):
                         widget.setIconSize(QtCore.QSize(120, 10))
                         self._setSizes(act)
         self.update()
+
+    def _processToolBarExtension(self):
+        # paint event sets visibility of actions...
+        return
+
+        # self.removeChild(self._extButton)
+        # return
+        #
+        # # can hide the widgets inside a temporary frame if needed
+        # self._extButton.setParent(None)
+        # return
+        #
+        # if self._extButton.isVisible():
+        #     # toolbar does not fit, so need to process the buttons
+        #
+        #     actionList = self.actions()
+        #     if len(actionList) > 2:
+        #         for action in actionList[:2]:
+        #             widget = self.widgetForAction(action)
+        #             # widget.setParent(None)

@@ -195,27 +195,45 @@ class GuiSpectrumDisplay(CcpnModule):
         stripRow = 2
         phasingRow = 3
 
+        # self._widgetScrollArea = ScrollArea(parent=self.qtParent, scrollBarPolicies=('asNeeded', 'never'),
+        #                                     grid=(spectrumRow, 0), gridSpan=(1,7))
+        # self._widgetScrollArea.setWidgetResizable(True)
+        #
         # self._spectrumFrame = Frame(parent=self.qtParent, setLayout=True,
-        #                             grid=(spectrumRow, 0), gridSpan=(1, 6))
+        #                             grid=(spectrumRow, 0), gridSpan=(1, 7))
+        # self.spectrumToolBar = SpectrumToolBar(parent=self._spectrumFrame, widget=self, grid=(0,0))
+        #
+        # self._widgetScrollArea.setWidget(self._spectrumFrame)
+        # self._widgetScrollArea.setFixedHeight(30)
+        # self._spectrumFrame.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Ignored)
+        # # self.spectrumToolBar.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+        # self.spectrumToolBar.setFixedSize(self.spectrumToolBar.sizeHint())
+
+        # self._spectrumFrame = Frame(parent=self.qtParent, setLayout=True,
+        #                             grid=(spectrumRow, 0), gridSpan=(1, 7))
         #
         # self._leftButton = Button(parent=self._spectrumFrame, vAlign='c', hAlign='l', grid=(0, 0),
         #                          icon='icons/yellow-arrow-left')
         #
         # self.spectrumToolBar = SpectrumToolBar(parent=self._spectrumFrame, widget=self,
         #                                        grid=(0, 1))
+        # self.spectrumToolBar.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         #
-        # self._rightButton = Button(parent=self._spectrumFrame, vAlign='c', hAlign='l', grid=(0, 2), hPolicy='expanding',
-        #                          icon='icons/yellow-arrow-right')
         # self._spacer = Spacer(self._spectrumFrame, 2, 2,
-        #                       QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed, grid=(0, 3), gridSpan=(1,1))
-
+        #                       QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed, grid=(0, 2))
+        #
+        # self._rightButton = Button(parent=self._spectrumFrame, grid=(0, 3),
+        #                          icon='icons/yellow-arrow-right')
+        #
+        #
         self.spectrumToolBar = SpectrumToolBar(parent=self.qtParent, widget=self,
-                                               grid=(spectrumRow, 0), gridSpan=(1, 6))
+                                               grid=(spectrumRow, 0), gridSpan=(1, 7))
         self.spectrumToolBar.setFixedHeight(30)
+
 
         # spectrumGroupsToolBar
         self.spectrumGroupToolBar = SpectrumGroupToolBar(parent=self.qtParent, spectrumDisplay=self,
-                                                         grid=(spectrumRow, 0), gridSpan=(1, 6))
+                                                         grid=(spectrumRow, 0), gridSpan=(1, 7))
         self.spectrumGroupToolBar.setFixedHeight(30)
         self.spectrumGroupToolBar.hide()
 

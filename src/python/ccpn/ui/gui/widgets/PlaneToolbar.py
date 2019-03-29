@@ -379,13 +379,14 @@ class StripHeader(Widget):
 
         self._labels = {}
 
+        labelsVisible = False
         for stripPos in STRIPPOSITIONS:
             # read the current strip header values
             headerText = self._getPositionParameter(stripPos, STRIPTEXT, '')
             # not sure this is required
             headerObject = self.strip.project.getByPid(self._getPositionParameter(stripPos, STRIPOBJECT, None))
             headerConnect = self._getPositionParameter(stripPos, STRIPCONNECT, STRIPCONNECT_NONE)
-            headerVisible = self._getPositionParameter(stripPos, STRIPVISIBLE, True)
+            headerVisible = self._getPositionParameter(stripPos, STRIPVISIBLE, False)
             headerEnabled = self._getPositionParameter(stripPos, STRIPENABLED, True)
 
             self._labels[stripPos] = _StripLabel(parent=self, mainWindow=mainWindow, strip=strip,
@@ -413,11 +414,12 @@ class StripHeader(Widget):
             self._labels[stripPos].setAlignment(QtCore.Qt.AlignAbsolute)
 
             self._labels[stripPos].setVisible(headerVisible)
+            labelsVisible = labelsVisible or headerVisible
             self._labels[stripPos].setEnabled(headerEnabled)
 
         # get the visible state of the header
         headerVisible = self.strip.getParameter(STRIPDICT, STRIPHEADERVISIBLE)
-        self.setVisible(headerVisible if headerVisible is not None else True)
+        self.setVisible(headerVisible if headerVisible is not None else labelsVisible)
 
         # guiNotifiers are attached to the backboneAssignment module, not active on loading of project
         # currently needs a doubleClick in the backboneAssignment table to start

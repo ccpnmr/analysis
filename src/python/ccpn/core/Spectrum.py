@@ -442,6 +442,8 @@ class Spectrum(AbstractWrapperObject):
     @experimentName.setter
     def experimentName(self, value):
         # force to a string
+        # because: reading from .nef files extracts the name from the end of the experiment_type in nef reader
+        #           which is not wrapped with quotes, so defaults to an int if it can?
         self._wrappedData.experiment.name = str(value)
 
     @property

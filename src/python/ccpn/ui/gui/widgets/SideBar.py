@@ -979,6 +979,8 @@ class SideBarStructure(object):
                     node._storeExpandedStates()
                 else:
                     self._sidebarData._storeExpandedStates()
+
+            # add toolbar blocking here as well
         self._sidebarBlockingLevel += 1
 
     def decreaseSidebarBlocking(self, node=None, withSideBarUpdate=True):

@@ -1137,7 +1137,7 @@ class Framework(NotifierBase):
             ("Archive", self.archiveProject, [('enabled', False)]),
             ("Restore From Archive...", self.restoreFromArchive, [('enabled', False)]),
             (),
-            ("Preferences...", self.showApplicationPreferences),
+            ("Preferences...", self.showApplicationPreferences, [('shortcut', '⌃,')]),
             (),
             ("Quit", self._closeEvent, [('shortcut', '⌃q')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ]
@@ -1160,7 +1160,7 @@ class Framework(NotifierBase):
             (),
             ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj')]),
             (),
-            ("Print to File...", self.showPrintSpectrumDisplayPopup, [('shortcut', 'pr')]),
+            ("Print to File...", self.showPrintSpectrumDisplayPopup, [('shortcut', '⌃p')]),
             ]
                    ))
 

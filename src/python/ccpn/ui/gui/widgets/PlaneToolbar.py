@@ -229,8 +229,8 @@ class _StripLabel(Label):
         contextMenu = Menu('', self, isFloatWidget=True)
 
         contextMenu.addSeparator()
-        contextMenu.addAction('Close', self._closeStrip)
-        contextMenu.addAction('Close in SpectrumDisplay', self._closeSpectrumDisplay)
+        contextMenu.addAction('Close Strip Header', self._closeStrip)
+        contextMenu.addAction('Close All Strip Headers in SpectrumDisplay', self._closeSpectrumDisplay)
         contextMenu.addAction('Close All', self._closeAll)
         return contextMenu
 

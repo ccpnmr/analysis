@@ -86,6 +86,11 @@ class PeakTableModule(CcpnModule):
 
         self.installMaximiseEventHandler(self._maximise, self._closeModule)
 
+    @property
+    def _dataFrame(self):
+        if self.peakListTable._dataFrameObject:
+            return self.peakListTable._dataFrameObject.dataFrame
+
     def _maximise(self):
         """
         Maximise the attached table

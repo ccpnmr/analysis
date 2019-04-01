@@ -47,6 +47,7 @@ from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, logComm
 
 from ccpn.util.Logging import getLogger
 
+
 GAUSSIANMETHOD = 'gaussian'
 LORENTZIANMETHOD = 'lorentzian'
 PARABOLICMETHOD = 'parabolic'
@@ -778,19 +779,20 @@ class PeakList(AbstractWrapperObject):
                         excludedDiagonalDims=None, excludedDiagonalTransform=None):
 
         with undoBlock():
-            self._pickPeaksRegion(regionToPick=regionToPick,
-                        doPos=doPos, doNeg=doNeg,
-                        minLinewidth=minLinewidth, exclusionBuffer=exclusionBuffer,
-                        minDropFactor=minDropFactor, checkAllAdjacent=checkAllAdjacent,
-                        fitMethod=fitMethod, excludedRegions=excludedRegions,
-                        excludedDiagonalDims=excludedDiagonalDims, excludedDiagonalTransform=excludedDiagonalTransform)
+            peaks = self._pickPeaksRegion(regionToPick=regionToPick,
+                                         doPos=doPos, doNeg=doNeg,
+                                         minLinewidth=minLinewidth, exclusionBuffer=exclusionBuffer,
+                                         minDropFactor=minDropFactor, checkAllAdjacent=checkAllAdjacent,
+                                         fitMethod=fitMethod, excludedRegions=excludedRegions,
+                                         excludedDiagonalDims=excludedDiagonalDims, excludedDiagonalTransform=excludedDiagonalTransform)
+        return peaks
 
     def _pickPeaksRegion(self, regionToPick: dict = {},
-                        doPos: bool = True, doNeg: bool = True,
-                        minLinewidth=None, exclusionBuffer=None,
-                        minDropFactor: float = 0.1, checkAllAdjacent: bool = True,
-                        fitMethod: str = PARABOLICMETHOD, excludedRegions=None,
-                        excludedDiagonalDims=None, excludedDiagonalTransform=None):
+                         doPos: bool = True, doNeg: bool = True,
+                         minLinewidth=None, exclusionBuffer=None,
+                         minDropFactor: float = 0.1, checkAllAdjacent: bool = True,
+                         fitMethod: str = PARABOLICMETHOD, excludedRegions=None,
+                         excludedDiagonalDims=None, excludedDiagonalTransform=None):
         """Pick peaks in the region defined by the regionToPick dict.
 
         Axis limits are passed in as a dict containing the axis codes and the required limits.
@@ -1169,7 +1171,7 @@ class PeakList(AbstractWrapperObject):
                     updatePeaksArray = updatePeaksArray.reshape((1, numDim))
                     updatePeaksArray = updatePeaksArray.astype('float32')
                 else:
-                    pk = pk-firstArray
+                    pk = pk - firstArray
                     pk = pk.reshape((1, numDim))
                     pk = pk.astype('float32')
                     updatePeaksArray = numpy.append(updatePeaksArray, pk, axis=0)
@@ -1219,7 +1221,7 @@ class PeakList(AbstractWrapperObject):
                 for i, peakDim in enumerate(peakDims):
                     # peakDim.position = position[i] + 1  # API position starts at 1
 
-                    newPos = min(max(center[i], 0.5), dataArray.shape[i]-1.5)
+                    newPos = min(max(center[i], 0.5), dataArray.shape[i] - 1.5)
 
                     # ignore if out of range
                     if abs(newPos - center[i]) < 1e-9:
@@ -1288,7 +1290,7 @@ class PeakList(AbstractWrapperObject):
 
     @logCommand(get='self')
     def newPickedPeak(self, pointPositions: Sequence[float] = None, height: float = None,
-                       lineWidths: Sequence[float] = (), fitMethod: str = PARABOLICMETHOD, **kwds):
+                      lineWidths: Sequence[float] = (), fitMethod: str = PARABOLICMETHOD, **kwds):
         """Create a new Peak within a peakList from a picked peak
 
         See the Peak class for details.

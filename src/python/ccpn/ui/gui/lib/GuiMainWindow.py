@@ -290,7 +290,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self.pythonConsole = IpythonConsole(self)
 
         # create the sidebar
-        self.sideBar = SideBar(parent=self)
+        self._sideBarFrame = Frame(self, setLayout=True) # in this frame is inserted the search widget
+        self.sideBar = SideBar(self._sideBarFrame, mainWindow=self, grid=(0,0))
 
         # self.sideBar = SideBar(parent=self)
         #
@@ -303,7 +304,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self._horizontalSplitter = Splitter(horizontal=True)
         # self._horizontalSplitter.addWidget(self._sidebarSplitter)
 
-        self._horizontalSplitter.addWidget(self.sideBar)
+        self._horizontalSplitter.addWidget(self._sideBarFrame)
         self._horizontalSplitter.addWidget(self.moduleArea)
         self.setCentralWidget(self._horizontalSplitter)
 
@@ -365,8 +366,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             elif len(action) == 3:
                 kwDict = dict(action[2])
                 for k, v in kwDict.items():
-                    if hasattr(action[1],'__name__') and not isinstance(v, bool):
-                        print(action[1].__name__, v)
                     if (k == 'shortcut') and v.startswith('⌃'):  # Unicode U+2303, NOT the carrot on your keyboard.
                         kwDict[k] = QKeySequence('Ctrl+{}'.format(v[1:]))
                 menuAction = Action(self, action[0], callback=action[1], **kwDict)
@@ -579,7 +578,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         visible = moduleSize.width() != 0 and moduleSize.height() != 0 and self.sideBar.isVisible()
         modulesMenu.addAction(Action(modulesMenu, text='Sidebar',
                                      checkable=True, checked=visible,
-                                     callback=partial(self._showSideBarModule, self.sideBar, self, visible)))
+                                     callback=partial(self._showSideBarModule, self._sideBarFrame, self, visible)))
 
         for module in self.moduleArea.ccpnModules:
             moduleSize = module.size()

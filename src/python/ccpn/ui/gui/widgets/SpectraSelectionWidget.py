@@ -61,6 +61,7 @@ class SpectraSelectionWidget(Widget):
 
     def _setWidgets(self):
         i = 0
+        self.selectSpectraOption = None
         if len(self.project.spectra) > 0:
             self.selectSpectraOption = RadioButtons(self,
                                                     texts=['Spectra', 'Groups'],
@@ -107,11 +108,12 @@ class SpectraSelectionWidget(Widget):
                 self.allSGCheckBoxes.append(self.spectrumGroupCheckBox)
 
     def _toggleAll(self, select=True):
-        if self.selectSpectraOption.getIndex() == 0:
-            checkBoxes = self.allSpectraCheckBoxes
-        else:
-            checkBoxes = self.allSGCheckBoxes
-        tt = [checkBox.setChecked(select) for checkBox in checkBoxes]
+        if self.selectSpectraOption:
+            if self.selectSpectraOption.getIndex() == 0:
+                checkBoxes = self.allSpectraCheckBoxes
+            else:
+                checkBoxes = self.allSGCheckBoxes
+            tt = [checkBox.setChecked(select) for checkBox in checkBoxes]
 
 
     def _getSelectedSpectra(self):
@@ -144,8 +146,9 @@ class SpectraSelectionWidget(Widget):
         tt = [checkBox.setChecked(True) for checkBox in checkBoxes]
 
     def showSpectraOption(self):
-        sel = [(sbox.show(), gbox.hide()) if self.selectSpectraOption.getIndex() == 0 else (sbox.hide(), gbox.show())
-               for gbox in self.allSGCheckBoxes for sbox in self.allSpectraCheckBoxes]
+        if self.selectSpectraOption:
+            sel = [(sbox.show(), gbox.hide()) if self.selectSpectraOption.getIndex() == 0 else (sbox.hide(), gbox.show())
+                   for gbox in self.allSGCheckBoxes for sbox in self.allSpectraCheckBoxes]
 
     def _selectFromDisplay(self):
         """ Select spectra from current strip"""

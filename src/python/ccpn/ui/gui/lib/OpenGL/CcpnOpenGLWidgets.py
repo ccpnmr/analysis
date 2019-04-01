@@ -460,10 +460,10 @@ class GLExternalRegion(GLVertexArray):
 
         return
 
-        for reg in self._regions:
-            if reg._integralArea.renderMode == GLRENDERMODE_REBUILD:
-                reg._integralArea.renderMode = GLRENDERMODE_DRAW
-                reg._rebuildIntegral()
+        # for reg in self._regions:
+        #     if reg._integralArea.renderMode == GLRENDERMODE_REBUILD:
+        #         reg._integralArea.renderMode = GLRENDERMODE_DRAW
+        #         reg._rebuildIntegral()
 
     def _rescale(self):
         vertices = self.numVertices

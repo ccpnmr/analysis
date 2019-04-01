@@ -25,15 +25,12 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets, QtCore
-
-from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
-from ccpn.core.lib.ContextManagers import undoBlockManager
+from ccpn.ui.gui.popups.Dialog import CcpnDialog
+from ccpn.core.lib.ContextManagers import undoBlock
 
 
 class SetupNmrResiduesPopup(CcpnDialog):
@@ -58,7 +55,7 @@ class SetupNmrResiduesPopup(CcpnDialog):
                                     callbacks=[self.reject, self._setupNmrResidues])
 
     def _setupNmrResidues(self):
-        with undoBlockManager():
+        with undoBlock():
             peakList = self.project.getByPid(self.peakListPulldown.currentText())
             nmrChain = self.project.getByPid(self.nmrChainPulldown.currentText())
             keepAssignments = self.assignmentCheckBox.isChecked()  #This option is broken.

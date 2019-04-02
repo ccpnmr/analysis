@@ -1213,6 +1213,18 @@ class GuiStrip(Frame):
         if not layout:  # should always exist but play safe:
             return
 
+
+        # need to put the new 'replace' layout here
+
+        # # remember info and replace the layout
+        # margins = layout.getContentsMargins()
+        # space = layout.spacing()
+        # QtWidgets.QWidget().setLayout(layout)
+        # layout = QtWidgets.QGridLayout()
+        # spectrumDisplay.stripFrame.setLayout(layout)
+        # layout.setContentsMargins(*margins)
+        # layout.setSpacing(space)
+
         for r in range(layout.rowCount()):
             items = []
             if spectrumDisplay.stripDirection == 'Y':

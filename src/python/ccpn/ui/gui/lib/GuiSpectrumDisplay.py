@@ -918,7 +918,7 @@ class GuiSpectrumDisplay(CcpnModule):
         """Remove the current strip from the layout
         CCPN Internal
         """
-        layout = spectrumDisplay.stripFrame.layout()
+        layout = spectrumDisplay.stripFrame.getLayout()
 
         if layout and layout.count() > 1:
             spectrumDisplay.stripFrame.blockSignals(True)
@@ -931,9 +931,22 @@ class GuiSpectrumDisplay(CcpnModule):
                 _widgets.append(layout.takeAt(0).widget())
             _widgets.remove(strip)
 
+            # layout = QtWidgets.QGridLayout()
+            # spectrumDisplay.stripFrame.setLayout(layout)
+
             strip.hide()
             strip.setParent(None)  # set widget parent to None to hide,
             # was previously handled by addWidget to tempStore
+
+            # remember info and replace the layout
+            margins = layout.getContentsMargins()
+            space = layout.spacing()
+            QtWidgets.QWidget().setLayout(layout)
+            layout = QtWidgets.QGridLayout()
+            spectrumDisplay.stripFrame.setLayout(layout)
+            layout.setContentsMargins(*margins)
+            layout.setSpacing(space)
+
 
             if spectrumDisplay.stripDirection == 'Y':
                 for m, widgStrip in enumerate(_widgets):  # build layout again
@@ -944,7 +957,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
                     layout.addWidget(widgStrip, 0, m)
                     layout.setColumnStretch(m, 1)
-                    layout.setColumnStretch(m + 1, 0)
+                    # layout.setColumnStretch(m + 1, 0)
 
             elif spectrumDisplay.stripDirection == 'X':
                 for m, widgStrip in enumerate(_widgets):  # build layout again
@@ -973,14 +986,24 @@ class GuiSpectrumDisplay(CcpnModule):
             _widgets.insert(currentIndex, strip)
             strip.show()
 
+            # remember info and replace the layout
+            margins = layout.getContentsMargins()
+            space = layout.spacing()
+            QtWidgets.QWidget().setLayout(layout)
+            layout = QtWidgets.QGridLayout()
+            spectrumDisplay.stripFrame.setLayout(layout)
+            layout.setContentsMargins(*margins)
+            layout.setSpacing(space)
+
             if spectrumDisplay.stripDirection == 'Y':
                 for m, widgStrip in enumerate(_widgets):  # build layout again
                     layout.addWidget(widgStrip, 0, m)
-                    layout.setColumnStretch(m, 1)
+                    # layout.setColumnStretch(m, 1)
+
             elif spectrumDisplay.stripDirection == 'X':
                 for m, widgStrip in enumerate(_widgets):  # build layout again
                     layout.addWidget(widgStrip, m, 0)
-                layout.setColumnStretch(0, 1)
+                # layout.setColumnStretch(0, 1)
 
             # put ccpnStrip back into strips using the api
             # if self not in ccpnStrip.spectrumDisplay.strips:
@@ -1213,6 +1236,8 @@ class GuiSpectrumDisplay(CcpnModule):
                 #             )
 
                 with notificationBlanking():
+
+                    # inserts the strip into the stripFrame here
                     result = self.strips[index]._clone()
                     if not isinstance(result, GuiStrip):
                         raise RuntimeError('Expected an object of class %s, obtained %s' % (GuiStrip, result.__class__))
@@ -1242,7 +1267,7 @@ class GuiSpectrumDisplay(CcpnModule):
                 addUndoItem(redo=partial(self._redrawAxes, index))
 
             # do axis redrawing
-            self._redrawAxes(index)
+            self._redrawAxes(index)         # this might be getting confused with the ordering
 
         return result
 

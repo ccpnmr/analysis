@@ -1225,11 +1225,13 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
                                                    axisB=self.axisB, axisT=self.axisT,
                                                    axisL=self.axisL, axisR=self.axisR)
-            elif key == QtCore.Qt.Key_Plus:
+
+            elif key == QtCore.Qt.Key_Plus or key == QtCore.Qt.Key_Equal:            # Plus:
                 self.zoomIn()
             elif key == QtCore.Qt.Key_Minus:
                 self.zoomOut()
 
+            self._testAxisLimits(setLimits=True)
             self._rescaleAllAxes()
 
     def _moveAxes(self, delta=(0.0, 0.0)):

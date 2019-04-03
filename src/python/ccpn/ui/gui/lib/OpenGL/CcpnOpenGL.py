@@ -73,6 +73,7 @@ import json
 import re
 import time
 import numpy as np
+from functools import partial
 # from threading import Thread
 # from queue import Queue
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -149,6 +150,8 @@ UNITS_PPM = 'ppm'
 UNITS_HZ = 'Hz'
 UNITS_POINT = 'point'
 UNITS = [UNITS_PPM, UNITS_HZ, UNITS_POINT]
+SINGLECLICK = 'click'
+DOUBLECLICK = 'doubleClick'
 
 removeTrailingZero = re.compile(r'^(\d*[\d.]*?)\.?0*$')
 
@@ -276,6 +279,10 @@ class CcpnGLWidget(QOpenGLWidget):
         self._isCTRL = ''
         self._isALT = ''
         self._isMETA = ''
+
+        self._lastClick = None
+        self._mousePressed = False
+        self._draggingLabel = False
 
         self.buildMarks = True
         self._marksList = None
@@ -1649,12 +1656,12 @@ class CcpnGLWidget(QOpenGLWidget):
             if (minDiff < button[2]) and (maxDiff < button[3]):
                 return True
 
-    def _dragStrip(self, event: QtGui.QMouseEvent):
+    def _dragStrip(self, mouseDict):     #, event: QtGui.QMouseEvent):
         """
         Re-implementation of the mouse press event to enable a NmrResidue label to be dragged as a json object
         containing its id and a modifier key to encode the direction to drop the strip.
         """
-        event.accept()
+        # event.accept()
         mimeData = QtCore.QMimeData()
         # create the dataDict
         dataDict = {DropBase.PIDS: [self.strip.pid]}
@@ -1662,7 +1669,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # dataDict[STRIPLABEL_CONNECTDIR] = connectDir
 
         # update the dataDict with all mouseEvents﻿{"controlRightMouse": false, "text": "NR:@-.@27.", "leftMouse": true, "controlShiftMiddleMouse": false, "middleMouse": false, "controlMiddleMouse": false, "controlShiftLeftMouse": false, "controlShiftRightMouse": false, "shiftMiddleMouse": false, "_connectDir": "isRight", "controlLeftMouse": false, "rightMouse": false, "shiftLeftMouse": false, "shiftRightMouse": false}
-        dataDict.update(getMouseEventDict(event))
+        dataDict.update(mouseDict)
         # convert into json
         itemData = json.dumps(dataDict)
 
@@ -1695,7 +1702,7 @@ class CcpnGLWidget(QOpenGLWidget):
         drag.setPixmap(pixmap)
 
         # drag.setHotSpot(event.pos())
-        drag.setHotSpot(QtCore.QPoint(dragLabel.width() / 2, dragLabel.height() / 2))
+        drag.setHotSpot(QtCore.QPoint(dragLabel.width() // 2, dragLabel.height() // 2))
 
         # drag.targetChanged.connect(self._targetChanged)
         drag.exec_(QtCore.Qt.CopyAction)
@@ -1827,7 +1834,29 @@ class CcpnGLWidget(QOpenGLWidget):
             # if integralPressed:
             #   break
 
+    def _mousePressedEvent(self, ev):
+        """Handle mouse press event for single click and beginning of mouse drag event
+        when dragging strip label
+        """
+        self._draggingLabel = True
+        if not self._lastClick:
+            self._lastClick = SINGLECLICK
+
+        if self._lastClick == SINGLECLICK:
+            mouseDict = getMouseEventDict(ev)
+            QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval(),
+                                     partial(self._handleMouseClicked, mouseDict, ev))
+
+    def _handleMouseClicked(self, mouseDict, ev):
+        """handle a single mouse event, but ignore double click events for dragging strip label
+        """
+        self._draggingLabel = False
+        if self._lastClick == SINGLECLICK and self._mousePressed:
+            self._dragStrip(mouseDict)
+        self._lastClick = None
+
     def mousePressEvent(self, ev):
+        self._mousePressed = True
         self.lastPos = ev.pos()
 
         mx = ev.pos().x()
@@ -1850,24 +1879,33 @@ class CcpnGLWidget(QOpenGLWidget):
         # if not self.mousePressInRegion(self._externalRegions._regions):
         #   self.mousePressInIntegralLists()
 
-        self.mousePressInCornerButtons(mx, my)
         if self.mousePressInLabel(mx, my, top):
-            self._dragStrip(ev)
+            # self._dragStrip(ev)
+            self._mousePressedEvent(ev)
 
-        # check for dragging of infinite lines, region boundaries, integrals
-        self.mousePressInfiniteLine(self._infiniteLines)
+        else:
+            # check if the corner buttons have been pressed
+            self.mousePressInCornerButtons(mx, my)
 
-        while len(self._dragRegions) > 1:
-            self._dragRegions.pop()
+            # check for dragging of infinite lines, region boundaries, integrals
+            self.mousePressInfiniteLine(self._infiniteLines)
 
-        if not self._dragRegions:
-            if not self.mousePressInRegion(self._externalRegions._regions):
-                self.mousePressInIntegralLists()
+            while len(self._dragRegions) > 1:
+                self._dragRegions.pop()
+
+            if not self._dragRegions:
+                if not self.mousePressInRegion(self._externalRegions._regions):
+                    self.mousePressInIntegralLists()
 
         self.current.strip = self.strip
         self.update()
 
+    def mouseDoubleClickEvent(self, ev):
+        self._lastClick = DOUBLECLICK
+
     def mouseReleaseEvent(self, ev):
+
+        self._mousePressed = False
         self._clearAndUpdate()
 
         mx = ev.pos().x()
@@ -1954,6 +1992,8 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.strip.isDeleted:
             return
         if not self._ordering:  # strip.spectrumViews:
+            return
+        if self._draggingLabel:
             return
 
         if abs(self.axisL - self.axisR) < 1.0e-6 or abs(self.axisT - self.axisB) < 1.0e-6:

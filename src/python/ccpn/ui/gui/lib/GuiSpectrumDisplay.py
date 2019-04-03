@@ -927,18 +927,15 @@ class GuiSpectrumDisplay(CcpnModule):
             # clear the layout and rebuild
             _widgets = []
 
+            # need to be removed if not using QObjectCleanupHandler before creating new layout
             while layout.count():
                 _widgets.append(layout.takeAt(0).widget())
             _widgets.remove(strip)
-
-            # layout = QtWidgets.QGridLayout()
-            # spectrumDisplay.stripFrame.setLayout(layout)
-
             strip.hide()
             strip.setParent(None)  # set widget parent to None to hide,
             # was previously handled by addWidget to tempStore
 
-            # remember info and replace the layout
+            # remember necessary layout info and create a new layout - ensures clean for new widgets
             margins = layout.getContentsMargins()
             space = layout.spacing()
             QtWidgets.QWidget().setLayout(layout)
@@ -947,22 +944,18 @@ class GuiSpectrumDisplay(CcpnModule):
             layout.setContentsMargins(*margins)
             layout.setSpacing(space)
 
-
+            # reinsert strips in new order - reset minimum widths
             if spectrumDisplay.stripDirection == 'Y':
-                for m, widgStrip in enumerate(_widgets):  # build layout again
 
-                # for widgStrip in self.orderedStrips:
-                #     # get the new index from the strip
-                #     m = widgStrip.stripIndex()
-
+                # horizontal strip layout
+                for m, widgStrip in enumerate(_widgets):
                     layout.addWidget(widgStrip, 0, m)
-                    layout.setColumnStretch(m, 1)
-                    # layout.setColumnStretch(m + 1, 0)
 
             elif spectrumDisplay.stripDirection == 'X':
-                for m, widgStrip in enumerate(_widgets):  # build layout again
+
+                # vertical strip layout
+                for m, widgStrip in enumerate(_widgets):
                     layout.addWidget(widgStrip, m, 0)
-                layout.setColumnStretch(0, 1)
 
             spectrumDisplay.stripFrame.setUpdatesEnabled(True)
             spectrumDisplay.stripFrame.blockSignals(False)
@@ -980,13 +973,14 @@ class GuiSpectrumDisplay(CcpnModule):
             spectrumDisplay.stripFrame.blockSignals(True)
 
             # clear the layout and rebuild
+            # need to be removed if not using QObjectCleanupHandler before creating new layout
             _widgets = []
             while layout.count():
                 _widgets.append(layout.takeAt(0).widget())
             _widgets.insert(currentIndex, strip)
             strip.show()
 
-            # remember info and replace the layout
+            # remember necessary layout info and create a new layout - ensures clean for new widgets
             margins = layout.getContentsMargins()
             space = layout.spacing()
             QtWidgets.QWidget().setLayout(layout)
@@ -995,15 +989,18 @@ class GuiSpectrumDisplay(CcpnModule):
             layout.setContentsMargins(*margins)
             layout.setSpacing(space)
 
+            # reinsert strips in new order - reset minimum widths
             if spectrumDisplay.stripDirection == 'Y':
-                for m, widgStrip in enumerate(_widgets):  # build layout again
+
+                # horizontal strip layout
+                for m, widgStrip in enumerate(_widgets):
                     layout.addWidget(widgStrip, 0, m)
-                    # layout.setColumnStretch(m, 1)
 
             elif spectrumDisplay.stripDirection == 'X':
-                for m, widgStrip in enumerate(_widgets):  # build layout again
+
+                # vertical strip layout
+                for m, widgStrip in enumerate(_widgets):
                     layout.addWidget(widgStrip, m, 0)
-                # layout.setColumnStretch(0, 1)
 
             # put ccpnStrip back into strips using the api
             # if self not in ccpnStrip.spectrumDisplay.strips:
@@ -1033,7 +1030,7 @@ class GuiSpectrumDisplay(CcpnModule):
                         % (strip.pid, self.pid))
             return
 
-        if len(self.orderedStrips) == 1:
+        if self.stripCount == 1:
             showWarning('Delete strip', 'Last strip of SpectrumDisplay "%s" cannot be removed' \
                         % (self.pid,))
             return
@@ -1117,33 +1114,17 @@ class GuiSpectrumDisplay(CcpnModule):
     def showAxes(self, strips=None, stretchValue=False, widths=True):
         # use the strips as they are ordered in the model
         currentStrips = self.orderedStrips
-        # currentStrips = strips if strips else self.strips
 
         if currentStrips:
             if self.lastAxisOnly:
                 for ss in currentStrips[:-1]:
-                    # ss.plotWidget.plotItem.axes['right']['item'].hide()
-                    try:
-                        ss._CcpnGLWidget.setRightAxisVisible(axisVisible=False)
-                    except Exception as es:
-                        getLogger().debugGL('OpenGL widget not instantiated', strip=ss, error=es)
-
-                        # currentStrips[-1].plotWidget.plotItem.axes['right']['item'].show()
-
-                try:
-                    currentStrips[-1]._CcpnGLWidget.setRightAxisVisible(axisVisible=True)
-                except Exception as es:
-                    getLogger().debugGL('OpenGL widget not instantiated', strip=currentStrips[-1], error=es)
+                    ss._CcpnGLWidget.setRightAxisVisible(axisVisible=False)
+                currentStrips[-1]._CcpnGLWidget.setRightAxisVisible(axisVisible=True)
 
             else:
                 for ss in self.strips:
-                    # ss.plotWidget.plotItem.axes['right']['item'].show()
-                    try:
-                        ss._CcpnGLWidget.setRightAxisVisible(axisVisible=True)
-                    except Exception as es:
-                        getLogger().debugGL('OpenGL widget not instantiated', strip=ss, error=es)
+                    ss._CcpnGLWidget.setRightAxisVisible(axisVisible=True)
 
-            # self.setColumnStretches(True)
             self.setColumnStretches(stretchValue=stretchValue, widths=widths)
 
     def increaseTraceScale(self):
@@ -1288,10 +1269,10 @@ class GuiSpectrumDisplay(CcpnModule):
             AXIS_WIDTH = 1
             AXIS_PADDING = 5
             if self.strips:
-                firstStripWidth = thisLayoutWidth / (len(self.strips))
+                firstStripWidth = thisLayoutWidth / self.stripCount
                 AXIS_WIDTH = self.orderedStrips[0]._CcpnGLWidget.AXIS_MARGINRIGHT
             else:
-                firstStripWidth = thisLayout.itemAt(0).widget().width()
+                firstStripWidth = thisLayoutWidth
 
             if minimumWidth:
                 firstStripWidth = max(firstStripWidth, minimumWidth)
@@ -1307,7 +1288,7 @@ class GuiSpectrumDisplay(CcpnModule):
                 for col in range(0, maxCol + 1):
                     if widths and thisLayout.itemAt(col):
                         thisLayout.itemAt(col).widget().setMinimumWidth(firstStripWidth)
-                    thisLayout.setColumnStretch(col, 1 if stretchValue else 0)
+                    thisLayout.setColumnStretch(col, 1 if stretchValue else 1)
 
                 if minimumWidth:
                     self.stripFrame.setMinimumWidth((firstStripWidth + 5) * len(self.orderedStrips) - 5)
@@ -1315,14 +1296,15 @@ class GuiSpectrumDisplay(CcpnModule):
                     self.stripFrame.setMinimumWidth(self.stripFrame.minimumSizeHint().width())
 
             else:
-                maxCol = 0
-                for wid in self.orderedStrips:
-                    index = thisLayout.indexOf(wid)
-                    if index >= 0:
-                        row, column, cols, rows = thisLayout.getItemPosition(index)
-                        maxCol = max(maxCol, column)
+                # maxCol = 0
+                # for wid in self.orderedStrips:
+                #     index = thisLayout.indexOf(wid)
+                #     if index >= 0:
+                #         row, column, cols, rows = thisLayout.getItemPosition(index)
+                #         maxCol = max(maxCol, column)
 
                 # set the correct widths for the strips
+                maxCol = thisLayout.count()-1
                 leftWidth = scaleFactor * (thisLayoutWidth - AXIS_WIDTH - (maxCol * AXIS_PADDING)) / (maxCol + 1)
 
                 if minimumWidth:
@@ -1330,20 +1312,33 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 endWidth = leftWidth + AXIS_WIDTH
 
-                # set the widths and column stretches
-                for wid in self.orderedStrips:
-                    index = thisLayout.indexOf(wid)
-                    if index >= 0:
-                        row, column, cols, rows = thisLayout.getItemPosition(index)
+                # set the minimum widths and stretch values for the strips
+                for column in range(thisLayout.count()):
+                    thisLayout.setColumnStretch(column, leftWidth if stretchValue else 1)
+                    if widths:
+                        wid = thisLayout.itemAt(column).widget()
+                        wid.setMinimumWidth(leftWidth)
 
-                        if column == maxCol:
-                            thisLayout.setColumnStretch(column, endWidth if stretchValue else 0)
-                            if widths:
-                                wid.setMinimumWidth(endWidth)
-                        else:
-                            thisLayout.setColumnStretch(column, leftWidth if stretchValue else 0)
-                            if widths:
-                                wid.setMinimumWidth(leftWidth)
+                thisLayout.setColumnStretch(maxCol, endWidth if stretchValue else 1)
+                if widths:
+                    wid = thisLayout.itemAt(maxCol).widget()
+                    wid.setMinimumWidth(endWidth)
+
+
+                # # set the widths and column stretches
+                # for wid in self.orderedStrips:
+                #     index = thisLayout.indexOf(wid)
+                #     if index >= 0:
+                #         row, column, cols, rows = thisLayout.getItemPosition(index)
+                #
+                #         if column == maxCol:
+                #             thisLayout.setColumnStretch(column, endWidth if stretchValue else 1)
+                #             if widths:
+                #                 wid.setMinimumWidth(endWidth)
+                #         else:
+                #             thisLayout.setColumnStretch(column, leftWidth if stretchValue else 1)
+                #             if widths:
+                #                 wid.setMinimumWidth(leftWidth)
 
                 # fix the width of the stripFrame
                 if minimumWidth:

@@ -1195,17 +1195,17 @@ class GuiStrip(Frame):
         with undoBlock():
             with undoStackBlocking() as addUndoItem:
                 # needs to be first as it uses currentOrdering
-                addUndoItem(undo=partial(self._resetStripLayout, newIndex, currentIndex))
+                addUndoItem(undo=partial(self._moveToStripLayout, newIndex, currentIndex))
 
             self._wrappedData.moveTo(newIndex)
             # reorder the strips in the layout
-            self._resetStripLayout(currentIndex, newIndex)
+            self._moveToStripLayout(currentIndex, newIndex)
 
             # add undo item to reorder the strips in the layout
             with undoStackBlocking() as addUndoItem:
-                addUndoItem(redo=partial(self._resetStripLayout, currentIndex, newIndex))
+                addUndoItem(redo=partial(self._moveToStripLayout, currentIndex, newIndex))
 
-    def _resetStripLayout(self, currentIndex, newIndex):
+    def _moveToStripLayout(self, currentIndex, newIndex):
         # management of Qt layout
         # TBD: need to soup up below with extra loop when have tiles
         spectrumDisplay = self.spectrumDisplay
@@ -1213,57 +1213,41 @@ class GuiStrip(Frame):
         if not layout:  # should always exist but play safe:
             return
 
+        # remove old widgets - this needs to done otherwise the layout swap destroys all children, and remember minimum widths
+        _oldWidgets = []
+        minWidths = []
+        while layout.count():
+            wid = layout.takeAt(0).widget()
+            _oldWidgets.append(wid)
+            minWidths.append(wid.minimumWidth())
 
-        # need to put the new 'replace' layout here
+        # get the new strip order
+        _widgets = list(spectrumDisplay.orderedStrips)
 
-        # # remember info and replace the layout
-        # margins = layout.getContentsMargins()
-        # space = layout.spacing()
-        # QtWidgets.QWidget().setLayout(layout)
-        # layout = QtWidgets.QGridLayout()
-        # spectrumDisplay.stripFrame.setLayout(layout)
-        # layout.setContentsMargins(*margins)
-        # layout.setSpacing(space)
+        # remember necessary layout info and create a new layout - ensures clean for new widgets
+        margins = layout.getContentsMargins()
+        space = layout.spacing()
+        QtWidgets.QWidget().setLayout(layout)
+        layout = QtWidgets.QGridLayout()
+        spectrumDisplay.stripFrame.setLayout(layout)
+        layout.setContentsMargins(*margins)
+        layout.setSpacing(space)
 
-        for r in range(layout.rowCount()):
-            items = []
-            if spectrumDisplay.stripDirection == 'Y':
-                if currentIndex < newIndex:
-                    for n in range(currentIndex, newIndex + 1):
-                        item = layout.itemAtPosition(r, n)
-                        items.append(item)
-                        layout.removeItem(item)
-                    items = items[1:] + [items[0]]
-                    for m, item in enumerate(items):
-                        layout.addItem(item, r, m + currentIndex, )
-                else:
-                    for n in range(newIndex, currentIndex + 1):
-                        item = layout.itemAtPosition(r, n)
-                        items.append(item)
-                        layout.removeItem(item)
-                    items = [items[-1]] + items[:-1]
-                    for m, item in enumerate(items):
-                        layout.addItem(item, r, m + newIndex, )
+        # reinsert strips in new order - reset minimum widths
+        if spectrumDisplay.stripDirection == 'Y':
 
-            elif spectrumDisplay.stripDirection == 'X':
-                if currentIndex < newIndex:
-                    for n in range(currentIndex, newIndex + 1):
-                        item = layout.itemAtPosition(n, 0)
-                        items.append(item)
-                        layout.removeItem(item)
-                    items = items[1:] + [items[0]]
-                    for m, item in enumerate(items):
-                        layout.addItem(item, m + currentIndex, 0)
-                else:
-                    for n in range(newIndex, currentIndex + 1):
-                        item = layout.itemAtPosition(n, 0)
-                        items.append(item)
-                        layout.removeItem(item)
-                    items = [items[-1]] + items[:-1]
-                    for m, item in enumerate(items):
-                        layout.addItem(item, m + newIndex, 0)
+            # horizontal strip layout
+            for m, widgStrip in enumerate(_widgets):
+                layout.addWidget(widgStrip, 0, m)
+                widgStrip.setMinimumWidth(minWidths[m])
 
-        # rebuild the axes for each strip
+        elif spectrumDisplay.stripDirection == 'X':
+
+            # vertical strip layout
+            for m, widgStrip in enumerate(_widgets):
+                layout.addWidget(widgStrip, m, 0)
+
+        # rebuild the axes for strips
         self.spectrumDisplay.showAxes(stretchValue=True, widths=False)
 
     def navigateToPosition(self, positions: typing.List[float],

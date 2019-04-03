@@ -1404,6 +1404,42 @@ class GuiSpectrumDisplay(CcpnModule):
         except:
             getLogger().warning('Error storing zoom')
 
+    def _previousZoom(self):
+        """Changes to the previous zoom of current strip."""
+        try:
+            if not self.strips:
+                showWarning('Previous Zoom', 'SpectrumDisplay "%s" does not contain any strips' \
+                            % self.pid)
+                return
+
+            if self.current.strip not in self.strips:
+                strip = self.strips[0]
+            else:
+                strip = self.current.strip
+
+            strip._previousZoom()
+
+        except:
+            getLogger().warning('Error changing to previous zoom')
+
+    def _nextZoom(self):
+        """Changes to the next zoom of current strip."""
+        try:
+            if not self.strips:
+                showWarning('Next Zoom', 'SpectrumDisplay "%s" does not contain any strips' \
+                            % self.pid)
+                return
+
+            if self.current.strip not in self.strips:
+                strip = self.strips[0]
+            else:
+                strip = self.current.strip
+
+            strip._nextZoom()
+
+        except:
+            getLogger().warning('Error changing to next zoom')
+
     def _zoomIn(self):
         """zoom in to the current strip."""
         try:

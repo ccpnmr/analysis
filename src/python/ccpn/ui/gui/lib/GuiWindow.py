@@ -99,6 +99,8 @@ class GuiWindow():
         addShortCut("s, e", self, self.snapCurrentPeaksToExtremum, context=context)
         addShortCut("z, s", self, self.storeZoom, context=context)
         addShortCut("z, r", self, self.restoreZoom, context=context)
+        addShortCut("z, p", self, self.previousZoom, context=context)
+        addShortCut("z, n", self, self.nextZoom, context=context)
         addShortCut("z, i", self, self.zoomIn, context=context)
         addShortCut("z, o", self, self.zoomOut, context=context)
         addShortCut("p, l", self, self.cyclePeakLabelling, context=context)
@@ -583,6 +585,24 @@ class GuiWindow():
         """
         if self.current.strip:
             self.current.strip.spectrumDisplay._restoreZoom()
+        else:
+            getLogger().warning('No current strip. Select a strip first.')
+
+    def previousZoom(self):
+        """
+        change to the previous stored zoom
+        """
+        if self.current.strip:
+            self.current.strip.spectrumDisplay._previousZoom()
+        else:
+            getLogger().warning('No current strip. Select a strip first.')
+
+    def nextZoom(self):
+        """
+        change to the next stored zoom
+        """
+        if self.current.strip:
+            self.current.strip.spectrumDisplay._nextZoom()
         else:
             getLogger().warning('No current strip. Select a strip first.')
 

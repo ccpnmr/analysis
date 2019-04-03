@@ -259,6 +259,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisT = 1.0
         self.axisB = -1.0
         self.storedZooms = []
+        self._currentZoom = 0
 
         self.base = None
         self.spectrumValues = []
@@ -1342,9 +1343,6 @@ class CcpnGLWidget(QOpenGLWidget):
             self.axisT = max(y1, y2)
         self._rescaleYAxis()
 
-    def storeZoom(self):
-        self.storedZooms.append((self.axisL, self.axisR, self.axisB, self.axisT))
-
     def resetXZoom(self):
         self._resetAxisRange(xAxis=True, yAxis=False)
         self._rescaleXAxis()
@@ -1353,13 +1351,52 @@ class CcpnGLWidget(QOpenGLWidget):
         self._resetAxisRange(xAxis=False, yAxis=True)
         self._rescaleYAxis()
 
+    def storeZoom(self):
+        """Store the current axis values to the zoom stack
+        Sets this to the top of the stack, removing everything after
+        """
+        self._currentZoom += 1
+        self.storedZooms = self.storedZooms[:self._currentZoom-1]
+        self.storedZooms.append((self.axisL, self.axisR, self.axisB, self.axisT))
+
     def restoreZoom(self):
+        """Restore zoom to the last stored zoom
+        """
         if self.storedZooms:
-            restoredZooms = self.storedZooms.pop()
+            # restoredZooms = self.storedZooms.pop()
+
+            # get the top of the stack
+            self._currentZoom = len(self.storedZooms)
+            restoredZooms = self.storedZooms[self._currentZoom-1]
             self.axisL, self.axisR, self.axisB, self.axisT = restoredZooms[0], restoredZooms[1], restoredZooms[2], \
                                                              restoredZooms[3]
         else:
             self._resetAxisRange()
+
+        # use this because it rescales all the symbols
+        self._rescaleXAxis()
+
+    def previousZoom(self):
+        """Move to the previous stored zoom
+        """
+        if self._currentZoom > 1:
+            self._currentZoom -= 1
+        restoredZooms = self.storedZooms[self._currentZoom-1]
+        self.axisL, self.axisR, self.axisB, self.axisT = restoredZooms[0], restoredZooms[1], restoredZooms[2], \
+                                                         restoredZooms[3]
+
+        # use this because it rescales all the symbols
+        self._rescaleXAxis()
+
+
+    def nextZoom(self):
+        """Move to the next stored zoom
+        """
+        if self._currentZoom < len(self.storedZooms):
+            self._currentZoom += 1
+        restoredZooms = self.storedZooms[self._currentZoom-1]
+        self.axisL, self.axisR, self.axisB, self.axisT = restoredZooms[0], restoredZooms[1], restoredZooms[2], \
+                                                         restoredZooms[3]
 
         # use this because it rescales all the symbols
         self._rescaleXAxis()

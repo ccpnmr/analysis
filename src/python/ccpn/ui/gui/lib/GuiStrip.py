@@ -1043,6 +1043,22 @@ class GuiStrip(Frame):
         except:
             getLogger().debugGL('OpenGL widget not instantiated')
 
+    def _previousZoom(self):
+        """Changes to the previous zoom for the strip.
+        """
+        try:
+            self._CcpnGLWidget.previousZoom()
+        except:
+            getLogger().debugGL('OpenGL widget not instantiated')
+
+    def _nextZoom(self):
+        """Changes to the next zoom for the strip.
+        """
+        try:
+            self._CcpnGLWidget.nextZoom()
+        except:
+            getLogger().debugGL('OpenGL widget not instantiated')
+
     def _setZoomPopup(self):
         from ccpn.ui.gui.popups.ZoomPopup import ZoomPopup
 

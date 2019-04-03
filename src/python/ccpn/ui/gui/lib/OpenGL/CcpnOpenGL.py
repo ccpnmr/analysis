@@ -1838,22 +1838,34 @@ class CcpnGLWidget(QOpenGLWidget):
         """Handle mouse press event for single click and beginning of mouse drag event
         when dragging strip label
         """
-        self._draggingLabel = True
         if not self._lastClick:
             self._lastClick = SINGLECLICK
 
         if self._lastClick == SINGLECLICK:
+            self._draggingLabel = True
             mouseDict = getMouseEventDict(ev)
-            QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval(),
+
+            # set up a singleshot event, but a bit quicker than the normal interval (which seems a little long)
+            QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval() // 2,
                                      partial(self._handleMouseClicked, mouseDict, ev))
+
+        elif self._lastClick == DOUBLECLICK:
+
+            # reset the doubleClick history
+            self._lastClick = None
+            self._mousePressed = False
+            self._draggingLabel = False
 
     def _handleMouseClicked(self, mouseDict, ev):
         """handle a single mouse event, but ignore double click events for dragging strip label
         """
-        self._draggingLabel = False
         if self._lastClick == SINGLECLICK and self._mousePressed:
             self._dragStrip(mouseDict)
+
+        # reset the doubleClick history
         self._lastClick = None
+        self._mousePressed = False
+        self._draggingLabel = False
 
     def mousePressEvent(self, ev):
         self._mousePressed = True
@@ -1906,6 +1918,8 @@ class CcpnGLWidget(QOpenGLWidget):
     def mouseReleaseEvent(self, ev):
 
         self._mousePressed = False
+        self._draggingLabel = False
+
         self._clearAndUpdate()
 
         mx = ev.pos().x()

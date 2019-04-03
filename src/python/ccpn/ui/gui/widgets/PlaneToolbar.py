@@ -174,8 +174,13 @@ class _StripLabel(Label):
 
         if self._lastClick == SINGLECLICK:
             mouseDict = getMouseEventDict(event)
-            QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval(),
+
+            # set up a singleshot event, but a bit quicker than the normal interval (which seems a little long)
+            QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval() // 2,
                                      partial(self._handleMouseClicked, mouseDict))
+
+        elif self._lastClick == DOUBLECLICK:
+            self._lastClick = None
 
     def _mouseButtonDblClick(self, event):
         """Handle mouse doubleCLick

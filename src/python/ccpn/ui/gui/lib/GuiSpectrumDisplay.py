@@ -29,6 +29,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from PyQt5 import QtWidgets, QtCore
 from functools import partial
+from copy import deepcopy
+
 from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
@@ -1218,11 +1220,18 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 with notificationBlanking():
 
+                    # get the visibility of strip to be copied
+                    copyVisible = self.strips[index].header.headerVisible
+
                     # inserts the strip into the stripFrame here
                     result = self.strips[index]._clone()
                     if not isinstance(result, GuiStrip):
                         raise RuntimeError('Expected an object of class %s, obtained %s' % (GuiStrip, result.__class__))
                 result._finaliseAction('create')
+
+                # copy the strip Header if needed
+                result.header.headerVisible = copyVisible if copyVisible is not None else False
+                result.header.setLabelVisible(visible=copyVisible if copyVisible is not None else False)
 
                 # retrieve list of created items from the api
                 # strangely, this modifies _wrappedData.orderedStrips

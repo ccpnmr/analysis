@@ -944,6 +944,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                axisL=self.axisL, axisR=self.axisR)
 
             self._rescaleAllAxes()
+            self._storeZoomHistory()
 
         elif self.between(mx, ba[0], ba[2]) and self.between(my, ba[1], ba[3]):
 
@@ -974,6 +975,8 @@ class CcpnGLWidget(QOpenGLWidget):
                                                  axisL=self.axisL, axisR=self.axisR)
 
                 self._rescaleXAxis()
+                self._storeZoomHistory()
+
             else:
                 mby = 0.5 * (self.axisT + self.axisB)
 
@@ -989,6 +992,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                    axisL=self.axisL, axisR=self.axisR)
 
                 self._rescaleAllAxes()
+                self._storeZoomHistory()
 
         elif self.between(mx, ra[0], ra[2]) and self.between(my, ra[1], ra[3]):
 
@@ -1019,6 +1023,8 @@ class CcpnGLWidget(QOpenGLWidget):
                                                  axisL=self.axisL, axisR=self.axisR)
 
                 self._rescaleYAxis()
+                self._storeZoomHistory()
+
             else:
                 mbx = 0.5 * (self.axisR + self.axisL)
 
@@ -1034,6 +1040,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                    axisL=self.axisL, axisR=self.axisR)
 
                 self._rescaleAllAxes()
+                self._storeZoomHistory()
 
         event.accept()
 
@@ -1238,8 +1245,13 @@ class CcpnGLWidget(QOpenGLWidget):
             elif key == QtCore.Qt.Key_Minus:
                 self.zoomOut()
 
+            else:
+                # not a movement key
+                return
+
             self._testAxisLimits(setLimits=True)
             self._rescaleAllAxes()
+            self._storeZoomHistory()
 
     def _moveAxes(self, delta=(0.0, 0.0)):
         """Implements Arrows up,down, left, right to pan the spectrum """
@@ -2248,7 +2260,6 @@ class CcpnGLWidget(QOpenGLWidget):
                                                        axisL=self.axisL, axisR=self.axisR)
                     self._selectionMode = 0
                     self._rescaleAllAxes()
-
                     self._storeZoomHistory()
 
         elif event.buttons() & Qt.MiddleButton:

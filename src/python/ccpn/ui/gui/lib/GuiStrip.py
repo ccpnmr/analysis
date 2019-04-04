@@ -99,6 +99,14 @@ class GuiStrip(Frame):
         self._CcpnGLWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
                                          QtWidgets.QSizePolicy.MinimumExpanding)
 
+
+
+        # # test to see if a single axis widget can be added
+        # from ccpn.ui.gui.widgets.GLWidgets import GuiNdWidgetAxis
+        # self._CcpnGLWidgetAxis = GuiNdWidgetAxis(strip=self, mainWindow=self.mainWindow)
+        # self.getLayout().addWidget(self._CcpnGLWidgetAxis, 1, 1)
+
+
         # set the ID label in the new widget
         self._CcpnGLWidget.setStripID('.'.join(self.id.split('.')))
 

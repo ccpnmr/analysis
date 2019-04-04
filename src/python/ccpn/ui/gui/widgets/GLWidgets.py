@@ -182,7 +182,8 @@ class GuiNdWidget(CcpnGLWidget):
         visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
 
         # set the first visible, or the first in the ordered list
-        self._firstVisible = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[0].isDeleted else None
+        self._firstVisible = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[
+            0].isDeleted else None
         self.visiblePlaneList = {}
         for visibleSpecView in self._ordering:
             self.visiblePlaneList[visibleSpecView] = visibleSpecView._getVisiblePlaneList(self._firstVisible)
@@ -465,10 +466,73 @@ class Gui1dWidget(CcpnGLWidget):
         visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
 
         # set the first visible, or the first in the ordered list
-        self._firstVisible = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[0].isDeleted else None
+        self._firstVisible = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[
+            0].isDeleted else None
 
         # update the labelling lists
         self._GLPeaks.setListViews(self._ordering)
         self._GLIntegrals.setListViews(self._ordering)
         self._GLMultiplets.setListViews(self._ordering)
 
+
+class Gui1dWidgetAxis(Gui1dWidget):
+    pass
+
+
+class GuiNdWidgetAxis(Gui1dWidget):
+    """Testing a widget that only contains a right axis
+    """
+
+    def paintGL(self):
+        w = self.w
+        h = self.h
+        GL.glClear(GL.GL_COLOR_BUFFER_BIT)
+        currentShader = self.globalGL._shaderProgram1.makeCurrent()
+
+        if self._blankDisplay:
+            return
+
+        if self.strip.isDeleted:
+            return
+
+        # check whether the visible spectra list needs updating
+        if self._visibleSpectrumViewsChange:
+            self._visibleSpectrumViewsChange = False
+            self._updateVisibleSpectrumViews()
+
+        # if there are no spectra then skip the paintGL event
+        if not self._ordering:
+            return
+
+        # stop notifiers interfering with paint event
+        self.project.blankNotification()
+
+        # start with the grid mapped to (0..1, 0..1) to remove zoom errors here
+        currentShader.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
+        currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+
+        # draw the grid components
+        self.drawGrid()
+
+        currentShader = self.globalGL._shaderProgramTex.makeCurrent()
+        self.enableTexture()
+        self.enableTextClientState()
+        self._setViewPortFontScale()
+
+        # make the overlay/axis solid
+        currentShader.setBlendEnabled(0)
+        self.drawAxisLabels()
+        currentShader.setBlendEnabled(1)
+
+        self.disableTextClientState()
+        self.disableTexture()
+
+        # use the current viewport matrix to display the last bit of the axes
+        currentShader = self.globalGL._shaderProgram1.makeCurrent()
+        currentShader.setProjectionAxes(self._uVMatrix, 0, w - self.AXIS_MARGINRIGHT, -1, h - self.AXIS_MARGINBOTTOM,
+                                        -1.0, 1.0)
+
+        self.viewports.setViewport(self._currentView)
+
+        # re-enable notifiers
+        self.project.unblankNotification()

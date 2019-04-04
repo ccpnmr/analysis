@@ -2069,14 +2069,13 @@ class CcpnGLWidget(QOpenGLWidget):
         # translate from screen (0..w, 0..h) to NDC (-1..1, -1..1) to axes (axisL, axisR, axisT, axisB)
         self.cursorCoordinate = self.mouseTransform.dot([self._mouseX, self._mouseY, 0.0, 1.0])
 
-        currentPos = self.current.cursorPosition
-        try:
-            mouseMovedDict = self.current.mouseMovedDict
-        except:
-            # initialise a new mouse moved dict
-            mouseMovedDict = {'strip'           : self.strip,
-                              AXIS_MATCHATOMTYPE: {},
-                              AXIS_FULLATOMNAME : {}}  #     dict(strip=self.strip)   #strip)
+        # try:
+        #     mouseMovedDict = self.current.mouseMovedDict
+        # except:
+        #     # initialise a new mouse moved dict
+        mouseMovedDict = {'strip'           : self.strip,
+                          AXIS_MATCHATOMTYPE: {},
+                          AXIS_FULLATOMNAME : {}}  #     dict(strip=self.strip)   #strip)
 
         xPos = yPos = 0
         for n, axisCode in enumerate(self._axisCodes):
@@ -3083,8 +3082,8 @@ class CcpnGLWidget(QOpenGLWidget):
             mark.drawTextArrayVBO(enableVBO=True)
 
     def _scaleAxisToRatio(self, values):
-        return [(values[0] - self.axisL) / (self.axisR - self.axisL),
-                (values[1] - self.axisB) / (self.axisT - self.axisB)]
+        return [((values[0] - self.axisL) / (self.axisR - self.axisL)) if values[0] is not None else None,
+                ((values[1] - self.axisB) / (self.axisT - self.axisB)) if values[1] is not None else None]
 
     def drawCursors(self):
         # draw the cursors
@@ -3096,7 +3095,7 @@ class CcpnGLWidget(QOpenGLWidget):
             # map the cursor to the ratio coordinates
             newCoords = self._scaleAxisToRatio(self.cursorCoordinate[0:2])
 
-            if getCurrentMouseMode() == PICK:
+            if getCurrentMouseMode() == PICK and self.underMouse():
                 GL.glColor4f(*self.mousePickColour)
 
                 # x = self.pixelX * 8
@@ -3133,10 +3132,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
             phasingFrame = self.spectrumDisplay.phasingFrame
             if not phasingFrame.isVisible():
-                if not self._updateVTrace:
+                if not self._updateVTrace and newCoords[0] is not None:
                     GL.glVertex2d(newCoords[0], 1.0)
                     GL.glVertex2d(newCoords[0], 0.0)
-                if not self._updateHTrace:
+                if not self._updateHTrace and newCoords[1] is not None:
                     GL.glVertex2d(0.0, newCoords[1])
                     GL.glVertex2d(1.0, newCoords[1])
 
@@ -4848,26 +4847,27 @@ class CcpnGLWidget(QOpenGLWidget):
 
             mouseMovedDict = aDict[GLNotifier.GLMOUSEMOVEDDICT]
 
-            currentPos = self.current.cursorPosition
-
-            if self._preferences.matchAxisCode == AXIS_MATCHATOMTYPE:
-                for n, axis in enumerate(self._axisOrder[:2]):
-                    for ax in mouseMovedDict[AXIS_MATCHATOMTYPE].keys():
-                        if ax and axis and ax[0] == axis[0]:
-                            self.cursorCoordinate[n] = mouseMovedDict[AXIS_MATCHATOMTYPE][ax]
-                            break
-            elif self._preferences.matchAxisCode == AXIS_FULLATOMNAME:
-                for n, axis in enumerate(self._axisOrder[:2]):
-                    for ax in mouseMovedDict[AXIS_FULLATOMNAME].keys():
-                        if axis in mouseMovedDict[AXIS_FULLATOMNAME].keys():
-                            self.cursorCoordinate[n] = mouseMovedDict[AXIS_FULLATOMNAME][axis]
-
-            self.current.cursorPosition = (self.cursorCoordinate[0], self.cursorCoordinate[1])
-
-            # only need to redraw if we can see the cursor
             if self._crosshairVisible:  # or self._updateVTrace or self._updateHTrace:
-                # if self._updateVTrace or self._updateHTrace:
-                #   self.updateTraces()
+
+                self.cursorCoordinate = [None, None]
+
+                if self._preferences.matchAxisCode == AXIS_MATCHATOMTYPE:
+                    for n, axis in enumerate(self._axisOrder[:2]):
+                        for ax in mouseMovedDict[AXIS_MATCHATOMTYPE].keys():
+                            if ax and axis and ax[0] == axis[0]:
+                                self.cursorCoordinate[n] = mouseMovedDict[AXIS_MATCHATOMTYPE][ax]
+                                break
+                elif self._preferences.matchAxisCode == AXIS_FULLATOMNAME:
+                    for n, axis in enumerate(self._axisOrder[:2]):
+                        for ax in mouseMovedDict[AXIS_FULLATOMNAME].keys():
+                            if axis in mouseMovedDict[AXIS_FULLATOMNAME].keys():
+                                self.cursorCoordinate[n] = mouseMovedDict[AXIS_FULLATOMNAME][axis]
+
+                self.current.cursorPosition = (self.cursorCoordinate[0], self.cursorCoordinate[1])
+
+                # only need to redraw if we can see the cursor
+                    # if self._updateVTrace or self._updateHTrace:
+                    #   self.updateTraces()
                 self.update()
 
     @pyqtSlot(dict)

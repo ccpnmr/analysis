@@ -104,7 +104,6 @@ from ccpn.ui.gui.lib.mouseEvents import \
     middleMouse, shiftMiddleMouse, rightMouse, shiftRightMouse, controlRightMouse, PICK
 
 
-
 # from ccpn.core.lib.Notifiers import Notifier
 
 try:
@@ -136,7 +135,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import GLExporter
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
 # from ccpn.util.Common import makeIterableList
 from typing import Tuple
-from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE
+from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE, AXIS_ACTIVEAXES
 from ccpn.ui.gui.guiSettings import textFont, getColours, STRIPHEADER_BACKGROUND, \
     STRIPHEADER_FOREGROUND, GUINMRRESIDUE
 
@@ -152,6 +151,10 @@ UNITS_POINT = 'point'
 UNITS = [UNITS_PPM, UNITS_HZ, UNITS_POINT]
 SINGLECLICK = 'click'
 DOUBLECLICK = 'doubleClick'
+
+ZOOMTIMERDELAY = 4
+ZOOMMAXSTORE = 1
+ZOOMHISTORYSTORE = 10
 
 removeTrailingZero = re.compile(r'^(\d*[\d.]*?)\.?0*$')
 
@@ -260,6 +263,10 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisB = -1.0
         self.storedZooms = []
         self._currentZoom = 0
+        self._zoomHistory = [None] * ZOOMHISTORYSTORE
+        self._zoomHistoryCurrent = 0
+        self._zoomHistoryHead = 0
+        self._zoomTimerLast = time.time()
 
         self.base = None
         self.spectrumValues = []
@@ -1226,7 +1233,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                    axisB=self.axisB, axisT=self.axisT,
                                                    axisL=self.axisL, axisR=self.axisR)
 
-            elif key == QtCore.Qt.Key_Plus or key == QtCore.Qt.Key_Equal:            # Plus:
+            elif key == QtCore.Qt.Key_Plus or key == QtCore.Qt.Key_Equal:  # Plus:
                 self.zoomIn()
             elif key == QtCore.Qt.Key_Minus:
                 self.zoomOut()
@@ -1353,12 +1360,72 @@ class CcpnGLWidget(QOpenGLWidget):
         self._resetAxisRange(xAxis=False, yAxis=True)
         self._rescaleYAxis()
 
+    def _storeZoomHistory(self):
+        """Store the current axis state to the zoom history
+        """
+        currentAxis = (self.axisL, self.axisR, self.axisB, self.axisT)
+
+        # store the current value if current zoom has not been set
+        if self._zoomHistory[self._zoomHistoryHead] is None:
+            self._zoomHistory[self._zoomHistoryHead] = currentAxis
+
+        if self._widthsChangedEnough(currentAxis, self._zoomHistory[self._zoomHistoryHead], tol=1e-8):
+
+            for stored in self.storedZooms:
+                if not self._widthsChangedEnough(currentAxis, self._zoomHistory[self._zoomHistoryHead], tol=1e-8):
+                    break
+            else:
+                currentTime = time.time()
+                if currentTime - self._zoomTimerLast < ZOOMTIMERDELAY:
+
+                    # still on the current zoom item - write new value
+                    self._zoomHistory[self._zoomHistoryHead] = currentAxis
+
+                else:
+
+                    # increment the head of the zoom history
+                    self._zoomHistoryHead = (self._zoomHistoryHead + 1) % len(self._zoomHistory)
+                    self._zoomHistory[self._zoomHistoryHead] = currentAxis
+                    self._zoomHistoryCurrent = self._zoomHistoryHead
+
+                # reset the timer so you have to wait another 5 seconds
+                self._zoomTimerLast = currentTime
+
+    def previousZoom(self):
+        """Move to the previous stored zoom
+        """
+        previousZoomPtr = (self._zoomHistoryCurrent - 1) % len(self._zoomHistory)
+
+        if self._zoomHistoryHead != previousZoomPtr and self._zoomHistory[previousZoomPtr] is not None:
+            self._zoomHistoryCurrent = previousZoomPtr
+
+        restoredZooms = self._zoomHistory[self._zoomHistoryCurrent]
+        self.axisL, self.axisR, self.axisB, self.axisT = restoredZooms[0], restoredZooms[1], restoredZooms[2], \
+                                                         restoredZooms[3]
+
+        # use this because it rescales all the symbols
+        self._rescaleXAxis()
+
+    def nextZoom(self):
+        """Move to the next stored zoom
+        """
+        if self._zoomHistoryHead != self._zoomHistoryCurrent:
+            self._zoomHistoryCurrent = (self._zoomHistoryCurrent + 1) % len(self._zoomHistory)
+
+        restoredZooms = self._zoomHistory[self._zoomHistoryCurrent]
+        self.axisL, self.axisR, self.axisB, self.axisT = restoredZooms[0], restoredZooms[1], restoredZooms[2], \
+                                                         restoredZooms[3]
+
+        # use this because it rescales all the symbols
+        self._rescaleXAxis()
+
     def storeZoom(self):
         """Store the current axis values to the zoom stack
         Sets this to the top of the stack, removing everything after
         """
-        self._currentZoom += 1
-        self.storedZooms = self.storedZooms[:self._currentZoom-1]
+        if self._currentZoom < ZOOMMAXSTORE:
+            self._currentZoom += 1
+        self.storedZooms = self.storedZooms[:self._currentZoom - 1]
         self.storedZooms.append((self.axisL, self.axisR, self.axisB, self.axisT))
 
     def restoreZoom(self):
@@ -1369,39 +1436,40 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # get the top of the stack
             self._currentZoom = len(self.storedZooms)
-            restoredZooms = self.storedZooms[self._currentZoom-1]
+            restoredZooms = self.storedZooms[self._currentZoom - 1]
             self.axisL, self.axisR, self.axisB, self.axisT = restoredZooms[0], restoredZooms[1], restoredZooms[2], \
                                                              restoredZooms[3]
         else:
             self._resetAxisRange()
 
-        # use this because it rescales all the symbols
-        self._rescaleXAxis()
-
-    def previousZoom(self):
-        """Move to the previous stored zoom
-        """
-        if self._currentZoom > 1:
-            self._currentZoom -= 1
-        restoredZooms = self.storedZooms[self._currentZoom-1]
-        self.axisL, self.axisR, self.axisB, self.axisT = restoredZooms[0], restoredZooms[1], restoredZooms[2], \
-                                                         restoredZooms[3]
+        self._zoomHistoryCurrent = self._zoomHistoryHead
 
         # use this because it rescales all the symbols
         self._rescaleXAxis()
 
-
-    def nextZoom(self):
-        """Move to the next stored zoom
-        """
-        if self._currentZoom < len(self.storedZooms):
-            self._currentZoom += 1
-        restoredZooms = self.storedZooms[self._currentZoom-1]
-        self.axisL, self.axisR, self.axisB, self.axisT = restoredZooms[0], restoredZooms[1], restoredZooms[2], \
-                                                         restoredZooms[3]
-
-        # use this because it rescales all the symbols
-        self._rescaleXAxis()
+    # def previousZoom(self):
+    #     """Move to the previous stored zoom
+    #     """
+    #     if self._currentZoom > 1:
+    #         self._currentZoom -= 1
+    #     restoredZooms = self.storedZooms[self._currentZoom - 1]
+    #     self.axisL, self.axisR, self.axisB, self.axisT = restoredZooms[0], restoredZooms[1], restoredZooms[2], \
+    #                                                      restoredZooms[3]
+    #
+    #     # use this because it rescales all the symbols
+    #     self._rescaleXAxis()
+    #
+    # def nextZoom(self):
+    #     """Move to the next stored zoom
+    #     """
+    #     if self._currentZoom < len(self.storedZooms):
+    #         self._currentZoom += 1
+    #     restoredZooms = self.storedZooms[self._currentZoom - 1]
+    #     self.axisL, self.axisR, self.axisB, self.axisT = restoredZooms[0], restoredZooms[1], restoredZooms[2], \
+    #                                                      restoredZooms[3]
+    #
+    #     # use this because it rescales all the symbols
+    #     self._rescaleXAxis()
 
     def resetZoom(self):
         self._resetAxisRange()
@@ -1695,7 +1763,7 @@ class CcpnGLWidget(QOpenGLWidget):
             if (minDiff < button[2]) and (maxDiff < button[3]):
                 return True
 
-    def _dragStrip(self, mouseDict):     #, event: QtGui.QMouseEvent):
+    def _dragStrip(self, mouseDict):  #, event: QtGui.QMouseEvent):
         """
         Re-implementation of the mouse press event to enable a NmrResidue label to be dragged as a json object
         containing its id and a modifier key to encode the direction to drop the strip.
@@ -2069,26 +2137,32 @@ class CcpnGLWidget(QOpenGLWidget):
         # translate from screen (0..w, 0..h) to NDC (-1..1, -1..1) to axes (axisL, axisR, axisT, axisB)
         self.cursorCoordinate = self.mouseTransform.dot([self._mouseX, self._mouseY, 0.0, 1.0])
 
-        # try:
-        #     mouseMovedDict = self.current.mouseMovedDict
-        # except:
-        #     # initialise a new mouse moved dict
-        mouseMovedDict = {'strip'           : self.strip,
-                          AXIS_MATCHATOMTYPE: {},
-                          AXIS_FULLATOMNAME : {}}  #     dict(strip=self.strip)   #strip)
+        try:
+            mouseMovedDict = self.current.mouseMovedDict
+        except:
+            # initialise a new mouse moved dict
+            mouseMovedDict = {'strip'           : self.strip,
+                              AXIS_MATCHATOMTYPE: {},
+                              AXIS_FULLATOMNAME : {}}  #     dict(strip=self.strip)   #strip)
 
         xPos = yPos = 0
+        activeOther = []
         for n, axisCode in enumerate(self._axisCodes):
             if n == 0:
                 xPos = pos = self.cursorCoordinate[0]
+                activeX = axisCode[0]
             elif n == 1:
                 yPos = pos = self.cursorCoordinate[1]
+                activeY = axisCode[0]
             else:
-                pos = self._orderedAxes[n].position if n in self._orderedAxes else 0
+                pos = self._orderedAxes[n].position  # if n in self._orderedAxes else 0
+                activeOther.append(axisCode[0])
 
             # populate the mouse moved dict
             mouseMovedDict[AXIS_MATCHATOMTYPE][axisCode[0]] = pos
             mouseMovedDict[AXIS_FULLATOMNAME][axisCode] = pos
+
+        mouseMovedDict[AXIS_ACTIVEAXES] = (activeX, activeY) + tuple(activeOther)
 
         self.current.cursorPosition = (xPos, yPos)
         self.current.mouseMovedDict = mouseMovedDict
@@ -2174,6 +2248,8 @@ class CcpnGLWidget(QOpenGLWidget):
                                                        axisL=self.axisL, axisR=self.axisR)
                     self._selectionMode = 0
                     self._rescaleAllAxes()
+
+                    self._storeZoomHistory()
 
         elif event.buttons() & Qt.MiddleButton:
             if self._isSHIFT == '' and self._isCTRL == '' and self._isALT == '' and self._isMETA == '':
@@ -2865,17 +2941,17 @@ class CcpnGLWidget(QOpenGLWidget):
                 orientation = 'v'
 
         newInfiniteLine = GLInfiniteLine(self.strip, self._regionList,
-                                                  values=values,
-                                                  axisCode=axisCode,
-                                                  orientation=orientation,
-                                                  brush=brush,
-                                                  colour=colour,
-                                                  movable=movable,
-                                                  visible=visible,
-                                                  bounds=bounds,
-                                                  obj=obj,
-                                                  lineStyle=lineStyle,
-                                                  lineWidth=lineWidth)
+                                         values=values,
+                                         axisCode=axisCode,
+                                         orientation=orientation,
+                                         brush=brush,
+                                         colour=colour,
+                                         movable=movable,
+                                         visible=visible,
+                                         bounds=bounds,
+                                         obj=obj,
+                                         lineStyle=lineStyle,
+                                         lineWidth=lineWidth)
         self._infiniteLines.append(newInfiniteLine)
 
         self.update()
@@ -2946,15 +3022,15 @@ class CcpnGLWidget(QOpenGLWidget):
                 orientation = 'v'
 
         newRegion = GLRegion(self.strip, self._regionList,
-                                      values=values,
-                                      axisCode=axisCode,
-                                      orientation=orientation,
-                                      brush=brush,
-                                      colour=colour,
-                                      movable=movable,
-                                      visible=visible,
-                                      bounds=bounds,
-                                      obj=obj)
+                             values=values,
+                             axisCode=axisCode,
+                             orientation=orientation,
+                             brush=brush,
+                             colour=colour,
+                             movable=movable,
+                             visible=visible,
+                             bounds=bounds,
+                             obj=obj)
         self._regions.append(newRegion)
 
         self._regionList.renderMode = GLRENDERMODE_REBUILD
@@ -3034,12 +3110,12 @@ class CcpnGLWidget(QOpenGLWidget):
                         label = rr.label if rr.label else rr.axisCode
 
                         newMarkString = GLString(text=label,
-                                                             font=self.globalGL.glSmallFont,
-                                                             x=textX,
-                                                             y=textY,
-                                                             color=(colR, colG, colB, 1.0),
-                                                             GLContext=self,
-                                                             obj=None)
+                                                 font=self.globalGL.glSmallFont,
+                                                 x=textX,
+                                                 y=textY,
+                                                 color=(colR, colG, colB, 1.0),
+                                                 GLContext=self,
+                                                 obj=None)
                         # this is in the attribs
                         newMarkString.axisIndex = axisIndex
                         newMarkString.axisPosition = pos
@@ -3451,7 +3527,7 @@ class CcpnGLWidget(QOpenGLWidget):
         def valueToRatio(val, x0, x1):
             return (val - x0) / (x1 - x0)
 
-        if refresh or self._widthsChangedEnough(self.cursorCoordinate, self._mouseCoords, tol=1e-10):
+        if refresh or self._widthsChangedEnough(self.cursorCoordinate[:2], self._mouseCoords[:2], tol=1e-8):
 
             if not self._drawDeltaOffset:
                 self._startCoordinate = self.cursorCoordinate
@@ -3618,7 +3694,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                 obj=None)
 
     def drawMouseCoords(self):
-        if self.underMouse():                               # and self.mouseString:
+        if self.underMouse():  # and self.mouseString:
             self.buildMouseCoords()
             # draw the mouse coordinates to the screen
             self.mouseString.drawTextArrayVBO(enableVBO=True)
@@ -3664,6 +3740,8 @@ class CcpnGLWidget(QOpenGLWidget):
             GL.glDisable(GL.GL_BLEND)
 
     def drawMouseMoveLine(self):
+        """Draw the line for the middleMouse dragging of peaks
+        """
         if self._drawMouseMoveLine:
             GL.glColor4f(*self.mouseMoveLineColour)
             GL.glBegin(GL.GL_LINES)
@@ -3692,7 +3770,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # print('>>>_getSliceData', pointInt, points)
         data = np.array(spectrumView.spectrum._getSliceDataFromPlane(pointInt,
-                                                            xDim=planeDims[0], yDim=planeDims[1], sliceDim=sliceDim))
+                                                                     xDim=planeDims[0], yDim=planeDims[1], sliceDim=sliceDim))
         return data
 
     def _newStaticHTraceData(self, spectrumView, tracesDict,
@@ -3717,16 +3795,16 @@ class CcpnGLWidget(QOpenGLWidget):
             colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
             hSpectrum = GLVertexArray(numLists=1,
-                                            renderMode=GLRENDERMODE_RESCALE,
-                                            blendMode=False,
-                                            drawMode=GL.GL_LINE_STRIP,
-                                            dimension=2,
-                                            GLContext=self)
+                                      renderMode=GLRENDERMODE_RESCALE,
+                                      blendMode=False,
+                                      drawMode=GL.GL_LINE_STRIP,
+                                      dimension=2,
+                                      GLContext=self)
             tracesDict.append(hSpectrum)
 
             # add extra vertices to give a horizontal line across the trace
             xLen = x.size
-            x = np.append(x, (x[xLen-1], x[0]))
+            x = np.append(x, (x[xLen - 1], x[0]))
             # y = np.append(y, (positionPixel[1], positionPixel[1]))
 
             numVertices = len(x)
@@ -3741,7 +3819,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # change to colour of the last 2 points to the spectrum colour
             colLen = hSpectrum.colors.size
-            hSpectrum.colors[colLen-8:colLen] = (colR, colG, colB, 1.0, colR, colG, colB, 1.0)
+            hSpectrum.colors[colLen - 8:colLen] = (colR, colG, colB, 1.0, colR, colG, colB, 1.0)
 
             # store the pre-phase data
             hSpectrum.data = data
@@ -3775,16 +3853,16 @@ class CcpnGLWidget(QOpenGLWidget):
             colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
             vSpectrum = GLVertexArray(numLists=1,
-                                            renderMode=GLRENDERMODE_RESCALE,
-                                            blendMode=False,
-                                            drawMode=GL.GL_LINE_STRIP,
-                                            dimension=2,
-                                            GLContext=self)
+                                      renderMode=GLRENDERMODE_RESCALE,
+                                      blendMode=False,
+                                      drawMode=GL.GL_LINE_STRIP,
+                                      dimension=2,
+                                      GLContext=self)
             tracesDict.append(vSpectrum)
 
             # add extra vertices to give a horizontal line across the trace
             yLen = y.size
-            y = np.append(y, (y[yLen-1], y[0]))
+            y = np.append(y, (y[yLen - 1], y[0]))
             # x = np.append(x, (positionPixel[0], positionPixel[0]))
 
             numVertices = len(y)
@@ -3799,7 +3877,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # change to colour of the last 2 points to the spectrum colour
             colLen = vSpectrum.colors.size
-            vSpectrum.colors[colLen-8:colLen] = (colR, colG, colB, 1.0, colR, colG, colB, 1.0)
+            vSpectrum.colors[colLen - 8:colLen] = (colR, colG, colB, 1.0, colR, colG, colB, 1.0)
 
             # store the pre-phase data
             vSpectrum.data = data
@@ -3853,7 +3931,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # add extra vertices to give a horizontal line across the trace
             xLen = x.size
-            x = np.append(x, (x[xLen-1], x[0]))
+            x = np.append(x, (x[xLen - 1], x[0]))
             y = np.append(y, (positionPixel[1], positionPixel[1]))
 
             numVertices = len(x)
@@ -3913,7 +3991,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # add extra vertices to give a vertical line across the trace
             yLen = y.size
-            y = np.append(y, (y[yLen-1], y[0]))
+            y = np.append(y, (y[yLen - 1], y[0]))
             x = np.append(x, (positionPixel[0], positionPixel[0]))
 
             numVertices = len(x)
@@ -3947,7 +4025,7 @@ class CcpnGLWidget(QOpenGLWidget):
         point = [int(p + 0.5) for p in point]
 
         # get the correct ordering for horizontal/vertical
-        axisCodes = [a.code for a in spectrumView.strip.axes]                       # [0:2]
+        axisCodes = [a.code for a in spectrumView.strip.axes]  # [0:2]
         planeDims = spectrumView.spectrum.getByAxisCodes('indices', axisCodes)
 
         if point[planeDims[0]] >= xNumPoints or point[planeDims[1]] >= yNumPoints:
@@ -4008,7 +4086,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 ref = spectrumView.spectrum.mainSpectrumReferences
 
                 # get the correct axis ordering for the refDims
-                axisCodes = [a.code for a in spectrumView.strip.axes]                               # [0:2]
+                axisCodes = [a.code for a in spectrumView.strip.axes]  # [0:2]
                 planeDims = spectrumView.spectrum.getByAxisCodes('indices', axisCodes)
 
                 # rounds the wrong way when point values are adjusted from negative
@@ -4071,7 +4149,7 @@ class CcpnGLWidget(QOpenGLWidget):
                         = spectrumView._getTraceParams(position)
 
                     # get the correct axis ordering for the refDims
-                    axisCodes = [a.code for a in spectrumView.strip.axes]                   # [0:2]
+                    axisCodes = [a.code for a in spectrumView.strip.axes]  # [0:2]
                     planeDims = spectrumView.spectrum.getByAxisCodes('indices', axisCodes)
 
                     # rounds the wrong way when point values are adjusted from negative
@@ -4423,7 +4501,7 @@ class CcpnGLWidget(QOpenGLWidget):
             # check if a number ends in an even digit
             val = '%.0f' % (ll[3] / ll[4])
             valLen = len(val)
-            if val[valLen-1] in '02468':
+            if val[valLen - 1] in '02468':
                 return True
 
         def valueToRatio(val, x0, x1):
@@ -4431,7 +4509,12 @@ class CcpnGLWidget(QOpenGLWidget):
 
         labelling = {'0': [], '1': []}
         labelsChanged = False
-        scaleBounds = (self.w, self.h)
+
+        # check if the width is too small to draw too many grid levels
+        if self._drawRightAxis:
+            scaleBounds = (self.w - self.AXIS_MARGINRIGHT, self.h)
+        else:
+            scaleBounds = (self.w, self.h)
 
         if gridGLList.renderMode == GLRENDERMODE_REBUILD:
 
@@ -4681,9 +4764,16 @@ class CcpnGLWidget(QOpenGLWidget):
     def _widthsChangedEnough(self, r1, r2, tol=1e-5):
         # r1 = sorted(r1)
         # r2 = sorted(r2)
-        minDiff = abs(r1[0] - r2[0])
-        maxDiff = abs(r1[1] - r2[1])
-        return (minDiff > tol) or (maxDiff > tol)
+        # minDiff = abs(r1[0] - r2[0])
+        # maxDiff = abs(r1[1] - r2[1])
+        # return (minDiff > tol) or (maxDiff > tol)
+
+        if len(r1) != len(r2):
+            raise ValueError('WidthsChanged must be the same length')
+
+        for ii in zip(r1, r2):
+            if abs(ii[0] - ii[1]) > tol:
+                return True
 
     @pyqtSlot(dict)
     def _glXAxisChanged(self, aDict):
@@ -4849,25 +4939,29 @@ class CcpnGLWidget(QOpenGLWidget):
 
             if self._crosshairVisible:  # or self._updateVTrace or self._updateHTrace:
 
-                self.cursorCoordinate = [None, None]
-
                 if self._preferences.matchAxisCode == AXIS_MATCHATOMTYPE:
                     for n, axis in enumerate(self._axisOrder[:2]):
                         for ax in mouseMovedDict[AXIS_MATCHATOMTYPE].keys():
-                            if ax and axis and ax[0] == axis[0]:
+                            if ax and axis and ax[0] == axis[0] and axis[0] in mouseMovedDict[AXIS_ACTIVEAXES]:
                                 self.cursorCoordinate[n] = mouseMovedDict[AXIS_MATCHATOMTYPE][ax]
                                 break
+                        else:
+                            self.cursorCoordinate[n] = None
+
                 elif self._preferences.matchAxisCode == AXIS_FULLATOMNAME:
                     for n, axis in enumerate(self._axisOrder[:2]):
                         for ax in mouseMovedDict[AXIS_FULLATOMNAME].keys():
                             if axis in mouseMovedDict[AXIS_FULLATOMNAME].keys():
                                 self.cursorCoordinate[n] = mouseMovedDict[AXIS_FULLATOMNAME][axis]
+                                break
+                        else:
+                            self.cursorCoordinate[n] = None
 
                 self.current.cursorPosition = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
                 # only need to redraw if we can see the cursor
-                    # if self._updateVTrace or self._updateHTrace:
-                    #   self.updateTraces()
+                # if self._updateVTrace or self._updateHTrace:
+                #   self.updateTraces()
                 self.update()
 
     @pyqtSlot(dict)
@@ -5592,7 +5686,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         outputList = subjectPolygon
         cLen = len(clipPolygon)
-        cp1 = clipPolygon[cLen-1]
+        cp1 = clipPolygon[cLen - 1]
 
         for clipVertex in clipPolygon:
             cp2 = clipVertex
@@ -5602,7 +5696,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 break
 
             ilLen = len(inputList)
-            s = inputList[ilLen-1]
+            s = inputList[ilLen - 1]
 
             for subjectVertex in inputList:
                 e = subjectVertex
@@ -5643,7 +5737,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         outputList = subjectPolygon
         cLen = len(clipPolygon)
-        cp1 = clipPolygon[cLen-1]
+        cp1 = clipPolygon[cLen - 1]
 
         for clipVertex in clipPolygon:
             cp2 = clipVertex
@@ -5653,7 +5747,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 break
 
             ilLen = len(inputList)
-            s = inputList[ilLen-1]
+            s = inputList[ilLen - 1]
             e = inputList[0]
             if inside(e):
                 outputList.append(e)

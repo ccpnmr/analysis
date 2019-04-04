@@ -33,6 +33,7 @@ from collections import OrderedDict
 
 AXIS_MATCHATOMTYPE = 0
 AXIS_FULLATOMNAME = 1
+AXIS_ACTIVEAXES = 'activeAxes'
 
 POSINFINITY = float('Infinity')
 NEGINFINITY = float('-Infinity')

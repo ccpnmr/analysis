@@ -65,6 +65,8 @@ class GLNotifier(QtWidgets.QWidget):
     GLINTEGRALLISTLABELS = 'glUpdateIntegralListLabels'
     GLMULTIPLETLISTS = 'glUpdateMultipletLists'
     GLMULTIPLETLISTLABELS = 'glUpdateMultipletListLabels'
+
+    GLUPDATEPIVOT = 'updatePivot'
     GLPREFERENCES = 'glPreferences'
     GLGRID = 'glUpdateGrid'
     GLAXES = 'glUpdateAxes'

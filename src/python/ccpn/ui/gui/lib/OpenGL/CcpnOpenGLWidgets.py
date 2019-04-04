@@ -93,6 +93,7 @@ class GLRegion(QtWidgets.QWidget):
 
         # create a notifier for updating
         self.GLSignals = GLNotifier(parent=None)
+        self._valuesChangedEnabled = True
 
     # def _mouseDrag(self, values):
     #     self.valuesChanged.emit(list(values))
@@ -109,7 +110,8 @@ class GLRegion(QtWidgets.QWidget):
         except Exception as es:
             pass
 
-        self.valuesChanged.emit(list(values))
+        if self._valuesChangedEnabled:
+            self.valuesChanged.emit(list(values))
 
         # change the limits in the integral object
         if self._object and not self._object.isDeleted:
@@ -118,9 +120,12 @@ class GLRegion(QtWidgets.QWidget):
         # emit notifiers to repaint the GL windows
         self.GLSignals.emitPaintEvent()
 
-    def setValue(self, val):
+    def setValue(self, val, emitValuesChanged=True):
         # use the region to simulate an infinite line - calls setter above
+        oldValue = self._valuesChangedEnabled
+        self._valuesChangedEnabled = emitValuesChanged
         self.values = (val, val)
+        self._valuesChangedEnabled = oldValue
 
     @property
     def axisCode(self):
@@ -301,7 +306,8 @@ class GLInfiniteLine(GLRegion):
         except Exception as es:
             pass
 
-        self.valuesChanged.emit(value)
+        if self._valuesChangedEnabled:
+            self.valuesChanged.emit(value)
 
         # change the limits in the integral object
         if self._object and not self._object.isDeleted:
@@ -310,10 +316,12 @@ class GLInfiniteLine(GLRegion):
         # emit notifiers to repaint the GL windows
         self.GLSignals.emitPaintEvent()
 
-    def setValue(self, val):
+    def setValue(self, val, emitValuesChanged=True):
         # use the region to simulate an infinite line - calls setter above
-        # raise RuntimeError('Deprecated, please us values = <value>')
+        oldValue = self._valuesChangedEnabled
+        self._valuesChangedEnabled = emitValuesChanged
         self.values = val
+        self._valuesChangedEnabled = oldValue
 
 
 class GLExternalRegion(GLVertexArray):

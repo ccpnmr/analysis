@@ -79,7 +79,7 @@ class GuiStrip(Frame):
 
         getLogger().debug('GuiStrip>>> spectrumDisplay: %s' % self.spectrumDisplay)
         super().__init__(parent=spectrumDisplay.stripFrame, setLayout=True, showBorder=False,
-                         spacing=(0,0), acceptDrops=True  #, hPolicy='expanding', vPolicy='expanding' ##'minimal'
+                         spacing=(0, 0), acceptDrops=True  #, hPolicy='expanding', vPolicy='expanding' ##'minimal'
                          )
 
         self.setMinimumWidth(150)
@@ -125,8 +125,8 @@ class GuiStrip(Frame):
                               IntegralMenu : None
                               }
 
-        self.navigateToPeakMenu = None      #set from context menu and in CcpnOpenGL rightClick
-        self.navigateToCursorMenu = None    #set from context menu and in CcpnOpenGL rightClick
+        self.navigateToPeakMenu = None  #set from context menu and in CcpnOpenGL rightClick
+        self.navigateToCursorMenu = None  #set from context menu and in CcpnOpenGL rightClick
         self._isPhasingOn = False
 
         # set peakLabelling to the default from preferences or strip to the left
@@ -160,6 +160,7 @@ class GuiStrip(Frame):
 
         self._storedPhasingData = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
         self.showActivePhaseTrace = True
+        self.pivotLine = None
 
         # set the axis units from the current settings
         self._CcpnGLWidget.xUnits = settings[AXISXUNITS]
@@ -417,10 +418,10 @@ class GuiStrip(Frame):
                                     toolTip = 'Show cursor in strip %s at Peak position %s' % (str(strip.id), str([round(x, 3) for x in position]))
                                     if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 3:
                                         self.markInPeakMenu.addItem(text=strip.pid,
-                                                                        callback=partial(self._createMarkAtPosition,
-                                                                                         positions=self.current.peak.position,
-                                                                                         axisCodes=self.current.peak.axisCodes),
-                                                                        toolTip=toolTip)
+                                                                    callback=partial(self._createMarkAtPosition,
+                                                                                     positions=self.current.peak.position,
+                                                                                     axisCodes=self.current.peak.axisCodes),
+                                                                    toolTip=toolTip)
                                 self.markInPeakMenu.addSeparator()
                     else:
                         self.markInPeakMenu.setEnabled(False)
@@ -445,9 +446,9 @@ class GuiStrip(Frame):
                                 toolTip = 'Show cursor in strip %s at Cursor position %s' % (str(strip.id), str([round(x, 3) for x in position]))
                                 if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 3:
                                     self.markInCursorMenu.addItem(text=strip.pid,
-                                                                    callback=partial(self._createMarkAtPosition,
-                                                                                     positions=position, axisCodes=currentStrip.axisCodes, ),
-                                                                    toolTip=toolTip)
+                                                                  callback=partial(self._createMarkAtPosition,
+                                                                                   positions=position, axisCodes=currentStrip.axisCodes, ),
+                                                                  toolTip=toolTip)
                             self.markInCursorMenu.addSeparator()
                 else:
                     self.markInCursorMenu.setEnabled(False)
@@ -639,9 +640,26 @@ class GuiStrip(Frame):
             # disables feedback from the spinbox as event is spawned from the GLwidget
             phasingFrame.setPivotValue(self._newPosition)
 
-    def _newPositionPivotCallback(self, value):
-        self._newPosition = value
+            spectrumDisplay = self.spectrumDisplay
+            for strip in spectrumDisplay.strips:
+                if strip != self:
 
+                    # set the pivotPosition in the other strips
+                    strip._updatePivotLine(self._newPosition)
+
+    def _updatePivotLine(self, newPosition):
+        """Respond to changes in the other strips
+        """
+        if not self.isDeleted and self.pivotLine:
+            self._newPosition = newPosition
+
+            # don't emit a signal when changing - stops feedback loop
+            self.pivotLine.setValue(newPosition, emitValuesChanged=False)
+
+    def _newPositionPivotCallback(self, value):
+        """Respond to change in value in the spinBox
+        """
+        self._newPosition = value
         self.pivotLine.setValue(value)
 
     def turnOffPhasing(self):
@@ -1299,6 +1317,7 @@ class GuiStrip(Frame):
         """return the first visible spectrum in the strip, or the first if none are visible.
         """
         return self._CcpnGLWidget._firstVisible
+
 
 # Notifiers:
 def _updateDisplayedMarks(data):

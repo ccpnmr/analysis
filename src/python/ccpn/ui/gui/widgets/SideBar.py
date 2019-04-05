@@ -1160,7 +1160,9 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
                         v = strip._getInitialOffset()
                         strip.setStackingMode(True)
 
-    def keyPressEvent(self, event):
+    def _keyPressEvent(self, event):
+        """This functionality is under testing. Used for quickly display spectra via key press on
+        sidebar on large datasets """
         if event.key() == QtCore.Qt.Key_Up:
             super().keyPressEvent(event)
             self._displaySelectedSpectrum()

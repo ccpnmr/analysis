@@ -814,7 +814,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # must be set here to catch the change of screen
         # self._devicePixelRatio = QApplication.primaryScreen().devicePixelRatio()   #.instance().devicePixelRatio()
         # self.viewports._devicePixelRatio = self._devicePixelRatio
-        # self._screenChanged()
+        self._screenChanged()
 
         self.w = w
         self.h = h

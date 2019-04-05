@@ -2733,27 +2733,48 @@ class Framework(NotifierBase):
 
     def showUpdatePopup(self):
         from ccpn.framework.update.UpdatePopup import UpdatePopup
+        from ccpn.util import Url
 
-        if not self.updatePopup:
-            self.updatePopup = UpdatePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-        self.updatePopup.show()
-        self.updatePopup.exec_()
+        # check valid internet connection first
+        if Url.checkInternetConnection():
+            if not self.updatePopup:
+                self.updatePopup = UpdatePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+            self.updatePopup.show()
+            self.updatePopup.exec_()
+
+        else:
+            MessageDialog.showWarning('Check For Updates',
+                                      'Could not connect to the update server, please check your internet connection.')
 
     def showFeedbackPopup(self):
         from ccpn.ui.gui.popups.FeedbackPopup import FeedbackPopup
+        from ccpn.util import Url
 
-        if not self.feedbackPopup:
-            self.feedbackPopup = FeedbackPopup(parent=self.ui.mainWindow)
-        self.feedbackPopup.show()
-        self.feedbackPopup.raise_()
+        # check valid internet connection first
+        if Url.checkInternetConnection():
+            if not self.feedbackPopup:
+                self.feedbackPopup = FeedbackPopup(parent=self.ui.mainWindow)
+            self.feedbackPopup.show()
+            self.feedbackPopup.raise_()
+
+        else:
+            MessageDialog.showWarning('Submit Feedback',
+                                      'Could not connect to the server, please check your internet connection.')
 
     def showSubmitMacroPopup(self):
         from ccpn.ui.gui.popups.SubmitMacroPopup import SubmitMacroPopup
+        from ccpn.util import Url
 
-        if not self.submitMacroPopup:
-            self.submitMacroPopup = SubmitMacroPopup(parent=self.ui.mainWindow)
-        self.submitMacroPopup.show()
-        self.submitMacroPopup.raise_()
+        # check valid internet connection first
+        if Url.checkInternetConnection():
+            if not self.submitMacroPopup:
+                self.submitMacroPopup = SubmitMacroPopup(parent=self.ui.mainWindow)
+            self.submitMacroPopup.show()
+            self.submitMacroPopup.raise_()
+
+        else:
+            MessageDialog.showWarning('Submit Macro',
+                                      'Could not connect to the server, please check your internet connection.')
 
     def showLicense(self):
         from ccpn.framework.PathsAndUrls import licensePath

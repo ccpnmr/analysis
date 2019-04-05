@@ -161,7 +161,7 @@ def _fetchGraceFile(application):
     """
     :return: grace filepath used as time stamp
     """
-    msg = 'If you are modifying this file means you are a computer savvy! Please register and contribute to the project.'
+    msg = 'If you are modifying this file it means you are a computer savvy! Please register and contribute to the project.'
     v = application.applicationVersion
     f = 'grace.json'
     path = os.path.join(userPreferencesDirectory,v+f)

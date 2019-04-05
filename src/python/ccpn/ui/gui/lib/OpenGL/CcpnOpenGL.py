@@ -1226,9 +1226,7 @@ class CcpnGLWidget(QOpenGLWidget):
             elif key == QtCore.Qt.Key_Up:
                 self.axisT += moveFactor * dy
                 self.axisB += moveFactor * dy
-                self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
-                                                   axisB=self.axisB, axisT=self.axisT,
-                                                   axisL=self.axisL, axisR=self.axisR)
+
             elif key == QtCore.Qt.Key_Right:
                 self.axisL += moveFactor * dx
                 self.axisR += moveFactor * dx
@@ -1236,20 +1234,30 @@ class CcpnGLWidget(QOpenGLWidget):
             elif key == QtCore.Qt.Key_Down:
                 self.axisT -= moveFactor * dy
                 self.axisB -= moveFactor * dy
-                self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
-                                                   axisB=self.axisB, axisT=self.axisT,
-                                                   axisL=self.axisL, axisR=self.axisR)
 
             elif key == QtCore.Qt.Key_Plus or key == QtCore.Qt.Key_Equal:  # Plus:
+                self._testAxisLimits()
+                if self._minReached:
+                    return
+
                 self.zoomIn()
+
             elif key == QtCore.Qt.Key_Minus:
+                self._testAxisLimits()
+                if self._maxReached:
+                    return
+
                 self.zoomOut()
 
             else:
                 # not a movement key
                 return
 
-            self._testAxisLimits(setLimits=True)
+            self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
+                                               axisB=self.axisB, axisT=self.axisT,
+                                               axisL=self.axisL, axisR=self.axisR)
+
+            # self._testAxisLimits(setLimits=True)
             self._rescaleAllAxes()
             self._storeZoomHistory()
 

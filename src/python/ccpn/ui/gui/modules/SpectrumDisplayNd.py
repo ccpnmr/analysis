@@ -97,8 +97,8 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
             ('/1.4', 'icons/contour-base-down', 'Lower Contour Base Level', True, self.lowerContourBase),
             ('Store Zoom', 'icons/zoom-store', 'Store Zoom', True, self._storeZoom),
             ('Restore Zoom', 'icons/zoom-restore', 'Restore Zoom', True, self._restoreZoom),
-            ('Previous Zoom', 'icons/chevron-left', 'Previous Zoom', True, self._previousZoom),
-            ('Next Zoom', 'icons/chevron-right', 'Next Zoom', True, self._nextZoom),
+            ('Undo Zoom', 'icons/zoom-undo', 'Previous Zoom', True, self._previousZoom),
+            ('Redo Zoom', 'icons/zoom-redo', 'Next Zoom', True, self._nextZoom),
             ]
 
         for aName, icon, tooltip, active, callback in toolBarItemsForBoth + toolBarItemsForNd:

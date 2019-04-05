@@ -1379,111 +1379,64 @@ class GuiSpectrumDisplay(CcpnModule):
     def _restoreZoom(self):
         """Restores last saved zoom of current strip.
         """
-        try:
-            if not self.strips:
-                showWarning('Restore Zoom', 'SpectrumDisplay "%s" does not contain any strips' \
-                            % self.pid)
-                return
+        if not self.strips:
+            showWarning('Restore Zoom', 'SpectrumDisplay "%s" does not contain any strips' \
+                        % self.pid)
+            return
 
-            if self.current.strip not in self.strips:
-                strip = self.strips[0]
-            else:
-                strip = self.current.strip
-
+        for strip in self.strips:
             strip._restoreZoom()
 
-        except Exception as ex:
-            getLogger().warning('Error restoring zoom')
 
     def _storeZoom(self):
         """Saves zoomed region of current strip."""
-        try:
-            if not self.strips:
-                showWarning('Restore Zoom', 'SpectrumDisplay "%s" does not contain any strips' \
-                            % self.pid)
-                return
+        if not self.strips:
+            showWarning('Store Zoom', 'SpectrumDisplay "%s" does not contain any strips' \
+                        % self.pid)
+            return
 
-            if self.current.strip not in self.strips:
-                strip = self.strips[0]
-            else:
-                strip = self.current.strip
-
+        for strip in self.strips:
             strip._storeZoom()
-
-        except:
-            getLogger().warning('Error storing zoom')
 
     def _previousZoom(self):
         """Changes to the previous zoom of current strip."""
-        try:
-            if not self.strips:
-                showWarning('Previous Zoom', 'SpectrumDisplay "%s" does not contain any strips' \
-                            % self.pid)
-                return
+        if not self.strips:
+            showWarning('Undo Zoom', 'SpectrumDisplay "%s" does not contain any strips' \
+                        % self.pid)
+            return
 
-            if self.current.strip not in self.strips:
-                strip = self.strips[0]
-            else:
-                strip = self.current.strip
-
+        for strip in self.strips:
             strip._previousZoom()
-
-        except:
-            getLogger().warning('Error changing to previous zoom')
 
     def _nextZoom(self):
         """Changes to the next zoom of current strip."""
-        try:
-            if not self.strips:
-                showWarning('Next Zoom', 'SpectrumDisplay "%s" does not contain any strips' \
-                            % self.pid)
-                return
+        if not self.strips:
+            showWarning('Redo Zoom', 'SpectrumDisplay "%s" does not contain any strips' \
+                        % self.pid)
+            return
 
-            if self.current.strip not in self.strips:
-                strip = self.strips[0]
-            else:
-                strip = self.current.strip
-
+        for strip in self.strips:
             strip._nextZoom()
-
-        except:
-            getLogger().warning('Error changing to next zoom')
 
     def _zoomIn(self):
         """zoom in to the current strip."""
-        try:
-            if not self.strips:
-                showWarning('Restore Zoom', 'SpectrumDisplay "%s" does not contain any strips' \
-                            % self.pid)
-                return
+        if not self.strips:
+            showWarning('Restore Zoom', 'SpectrumDisplay "%s" does not contain any strips' \
+                        % self.pid)
+            return
 
-            if self.current.strip not in self.strips:
-                strip = self.strips[0]
-            else:
-                strip = self.current.strip
-
+        for strip in self.strips:
             strip._zoomIn()
-
-        except:
-            getLogger().warning('Error zooming in')
 
     def _zoomOut(self):
         """zoom out of current strip."""
-        try:
-            if not self.strips:
-                showWarning('Restore Zoom', 'SpectrumDisplay "%s" does not contain any strips' \
-                            % self.pid)
-                return
+        if not self.strips:
+            showWarning('Restore Zoom', 'SpectrumDisplay "%s" does not contain any strips' \
+                        % self.pid)
+            return
 
-            if self.current.strip not in self.strips:
-                strip = self.strips[0]
-            else:
-                strip = self.current.strip
-
+        for strip in self.strips:
             strip._zoomOut()
-
-        except:
-            getLogger().warning('Error zooming out')
 
     def toggleCrosshair(self):
         """Toggles whether cross hair is displayed in all strips of spectrum display.

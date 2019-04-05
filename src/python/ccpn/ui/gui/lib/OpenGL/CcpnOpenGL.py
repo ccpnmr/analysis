@@ -1676,6 +1676,9 @@ class CcpnGLWidget(QOpenGLWidget):
             self.initialiseAxes(self.strip)
             self.initialiseTraces()
 
+            # check that the screen device pixel ratio is correct
+            self._screenChanged()
+
     def _setColourScheme(self):
         """Update colours from colourScheme
         """

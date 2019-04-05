@@ -50,6 +50,8 @@ from ccpn.util.decorators import logCommand
 
 
 STRIPLABEL_ISPLUS = 'stripLabel_isPlus'
+STRIPMINIMUMWIDTH = 100
+STRIPPLOTMINIMUMWIDTH = 100
 
 DefaultMenu = 'DefaultMenu'
 PeakMenu = 'PeakMenu'

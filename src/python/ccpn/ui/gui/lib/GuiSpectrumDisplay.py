@@ -1113,7 +1113,7 @@ class GuiSpectrumDisplay(CcpnModule):
     def setLastAxisOnly(self, lastAxisOnly: bool = True):
         self.lastAxisOnly = lastAxisOnly
 
-    def showAxes(self, strips=None, stretchValue=False, widths=True):
+    def showAxes(self, strips=None, stretchValue=False, widths=True, minimumWidth=None):
         # use the strips as they are ordered in the model
         currentStrips = self.orderedStrips
 
@@ -1127,7 +1127,7 @@ class GuiSpectrumDisplay(CcpnModule):
                 for ss in self.strips:
                     ss._CcpnGLWidget.setRightAxisVisible(axisVisible=True)
 
-            self.setColumnStretches(stretchValue=stretchValue, widths=widths)
+            self.setColumnStretches(stretchValue=stretchValue, widths=widths, minimumWidth=minimumWidth)
 
     def increaseTraceScale(self):
         # self.mainWindow.traceScaleUp(self.mainWindow)

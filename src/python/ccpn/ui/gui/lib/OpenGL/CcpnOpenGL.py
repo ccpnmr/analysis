@@ -4811,6 +4811,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.axisL = mid - diff
                 self.axisR = mid + diff
                 self._rescaleXAxis()
+                self._storeZoomHistory()
 
     @pyqtSlot(dict)
     def _glAxisLockChanged(self, aDict):
@@ -4918,6 +4919,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.axisB = axisB
                 self.axisT = axisT
                 self._rescaleYAxis()
+                self._storeZoomHistory()
 
     @pyqtSlot(dict)
     def _glAllAxesChanged(self, aDict):
@@ -4944,6 +4946,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.axisB = axisB
                 self.axisT = axisT
                 self._rescaleAllAxes()
+                self._storeZoomHistory()
 
     @pyqtSlot(dict)
     def _glMouseMoved(self, aDict):

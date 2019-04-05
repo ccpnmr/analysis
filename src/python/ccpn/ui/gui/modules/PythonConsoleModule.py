@@ -64,6 +64,7 @@ class PythonConsoleModule(CcpnModule):
 
         # make the widget visible, it is hidden when first instantiated
         self.pythonConsoleWidget.show()
+        self.pythonConsoleWidget.textEditor.show()
 
     def _toggleTextEditor(self, value):
         if value:

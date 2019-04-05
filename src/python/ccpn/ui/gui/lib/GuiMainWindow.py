@@ -285,13 +285,15 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                           'mainWindow' : self,
                           'project'    : self.application.project,
                           'loadProject': self.application.loadProject,
-                          'newProject' : self.application.newProject,
+                          # 'newProject' : self.application.newProject,
+                          'info'       : getLogger().info,
+                          'warning'    : getLogger().warning,
                           }
         self.pythonConsole = IpythonConsole(self)
 
         # create the sidebar
-        self._sideBarFrame = Frame(self, setLayout=True) # in this frame is inserted the search widget
-        self.sideBar = SideBar(self._sideBarFrame, mainWindow=self, grid=(0,0))
+        self._sideBarFrame = Frame(self, setLayout=True)  # in this frame is inserted the search widget
+        self.sideBar = SideBar(self._sideBarFrame, mainWindow=self, grid=(0, 0))
 
         # self.sideBar = SideBar(parent=self)
         #

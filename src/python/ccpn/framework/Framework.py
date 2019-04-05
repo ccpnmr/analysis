@@ -1258,6 +1258,7 @@ class Framework(NotifierBase):
                                                                ('enabled', False)]),
             ("Show Issues...", self.showIssuesList),
             ("Check for Updates...", self.showUpdatePopup),
+            ("Register...", self.showRegisterPopup),
             (),
             ("Submit Feedback...", self.showFeedbackPopup),
             ("Submit Macro...", self.showSubmitMacroPopup)
@@ -2732,6 +2733,8 @@ class Framework(NotifierBase):
         webbrowser.open(tutorials)
 
     def showUpdatePopup(self):
+        """Open the update popup
+        """
         from ccpn.framework.update.UpdatePopup import UpdatePopup
         from ccpn.util import Url
 
@@ -2746,7 +2749,14 @@ class Framework(NotifierBase):
             MessageDialog.showWarning('Check For Updates',
                                       'Could not connect to the update server, please check your internet connection.')
 
+    def showRegisterPopup(self):
+        """Open the registration popup
+        """
+        self.ui._registerDetails()
+
     def showFeedbackPopup(self):
+        """Open the submit feedback popup
+        """
         from ccpn.ui.gui.popups.FeedbackPopup import FeedbackPopup
         from ccpn.util import Url
 
@@ -2762,6 +2772,8 @@ class Framework(NotifierBase):
                                       'Could not connect to the server, please check your internet connection.')
 
     def showSubmitMacroPopup(self):
+        """Open the submit macro popup
+        """
         from ccpn.ui.gui.popups.SubmitMacroPopup import SubmitMacroPopup
         from ccpn.util import Url
 

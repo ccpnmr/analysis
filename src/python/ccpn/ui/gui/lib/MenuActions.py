@@ -61,7 +61,7 @@ from ccpn.ui.gui.popups.SamplePropertiesPopup import SamplePropertiesPopup
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 from ccpn.ui.gui.popups.StructureEnsemblePopup import StructureEnsemblePopup
 from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
-from ccpn.core.lib.ContextManagers import undoBlock
+from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
 
 class CreateNewObjectABC():
     """
@@ -662,13 +662,22 @@ OpenObjAction = {
 
 
 def _openItemObject(mainWindow, objs, **kwds):
+    if len(objs) > 0:
+        with undoBlock():
+            if len(objs) > 5:
+                getLogger().info('Opening items...')
+                with notificationEchoBlocking():
+                    _openItemObjects(mainWindow, objs, **kwds)
+            else:
+                _openItemObjects(mainWindow, objs, **kwds)
+
+def _openItemObjects(mainWindow, objs, **kwds):
     """
     Abstract routine to activate a module to display objs
     Builds on OpenObjAction dict, generated below, which defines the handling for the various
     obj classes
     """
     spectrumDisplay = None
-
     for obj in objs:
         if obj:
             try:

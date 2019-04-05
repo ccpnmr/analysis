@@ -69,7 +69,7 @@ from ccpn.ui._implementation.IntegralListView import IntegralListView
 from ccpn.ui._implementation.MultipletListView import MultipletListView
 from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySettings
 from ccpn.ui._implementation.SpectrumView import SpectrumView
-from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, BlankedPartial, undoBlock
+from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, BlankedPartial, undoBlock, notificationEchoBlocking
 from ccpn.util.decorators import logCommand
 from ccpn.util.Common import makeIterableList
 from ccpn.core.lib import Undo
@@ -462,7 +462,13 @@ class GuiSpectrumDisplay(CcpnModule):
         pids = data.get(DropBase.PIDS, [])
         if pids:
             if len(pids) > 0:
-                self._handlePids(pids, theObject)
+                with undoBlock():
+                    getLogger().info('Handling pids')
+                    if len(pids) > 5:
+                        with notificationEchoBlocking():
+                            self._handlePids(pids, theObject)
+                    else:
+                        self._handlePids(pids, theObject)
 
     def _handlePids(self, pids, strip=None):
         "handle a; return True in case it is a Spectrum or a SpectrumGroup"

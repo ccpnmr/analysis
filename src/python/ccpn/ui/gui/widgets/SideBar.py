@@ -1255,13 +1255,6 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
             self.selectPid(obj.pid)
         else:
             showWarning('Search', 'Not found')
-        """Select the item in the sideBar with the given pid.
-        """
-        item = self._sidebarData.findChildNode(pid)
-        if item and item.widget:
-            self.setCurrentItem(item.widget)
-            self.setFocus()
-
 #------------------------------------------------------------------------------------------------------------------
 # Emulate V3 objects
 #------------------------------------------------------------------------------------------------------------------

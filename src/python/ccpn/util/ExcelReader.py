@@ -28,7 +28,7 @@ from os.path import isfile, join
 import pathlib
 import pandas as pd
 from ccpn.util.Logging import getLogger, _debug3
-from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar
+from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
 
 
 ################################       Excel Headers Warning      ######################################################
@@ -124,14 +124,16 @@ class ExcelReader(object):
         self.dataframes = self._getDataFrameFromSheets(self.sheets)
 
         with undoBlockWithoutSideBar():
-            self.substancesDicts = self._createSubstancesDataFrames(self.dataframes)
-            self.samplesDicts = self._createSamplesDataDicts(self.dataframes)
-            self.spectrumGroups = self._createSpectrumGroups(self.dataframes)
+            getLogger().info('Loading Excel File...')
+            with notificationEchoBlocking():
+                self.substancesDicts = self._createSubstancesDataFrames(self.dataframes)
+                self.samplesDicts = self._createSamplesDataDicts(self.dataframes)
+                self.spectrumGroups = self._createSpectrumGroups(self.dataframes)
 
-            self._dispatchAttrsToObjs(self.substancesDicts)
-            self._loadSpectraForSheet(self.substancesDicts)
-            self._dispatchAttrsToObjs(self.samplesDicts)
-            self._loadSpectraForSheet(self.samplesDicts)
+                self._dispatchAttrsToObjs(self.substancesDicts)
+                self._loadSpectraForSheet(self.substancesDicts)
+                self._dispatchAttrsToObjs(self.samplesDicts)
+                self._loadSpectraForSheet(self.samplesDicts)
 
     ######################################################################################################################
     ######################                  PARSE EXCEL                     ##############################################

@@ -726,6 +726,37 @@ def undoStackBlocking(application=None):
 
 
 @contextmanager
+def undoStackUnblocking(application=None):
+    """
+    Temporarily release the undoStack (for newObject)
+    """
+
+    # get the current application
+    if not application:
+        application = getApplication()
+    if application is None:
+        raise RuntimeError('Error getting application')
+
+    undo = application._getUndo()
+    if undo is None:
+        raise RuntimeError("Unable to get the application's undo stack")
+    _undoStack = []
+
+    undo.decreaseBlocking()
+
+    try:
+        # transfer control to the calling function
+        yield
+
+    except AttributeError as es:
+        raise es
+
+    finally:
+        # clean up after blocking undo items
+        undo.increaseBlocking()
+
+
+@contextmanager
 def waypointBlocking(application=None):
     """
     Block addition of new waypoints

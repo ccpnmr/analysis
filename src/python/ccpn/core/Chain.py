@@ -37,10 +37,10 @@ from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Chain as ApiChain
 from ccpnmodel.ccpncore.api.ccp.molecule import Molecule
 from ccpnmodel.ccpncore.api.ccp.lims import Sample
 from ccpn.core.lib import Pid
-from typing import Tuple, Optional, Union, Sequence
+from typing import Tuple, Optional, Union, Sequence, Iterable
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
-    logCommandBlock, renameObject, undoBlock
+    renameObject, undoBlock, undoStackBlocking, undoStackUnblocking
 from ccpn.util.Logging import getLogger
 
 
@@ -171,7 +171,7 @@ class Chain(AbstractWrapperObject):
         if apiMolSystem.findFirstChain(code=shortName) is not None:
             raise ValueError("Project already has one Chain with shortName %s" % shortName)
 
-        topObjectParameters = {'code': shortName,
+        topObjectParameters = {'code'            : shortName,
                                'pdbOneLetterCode': shortName[0]}
 
         # with logCommandBlock(prefix='newChain=', get='self') as log:
@@ -315,6 +315,8 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
     See the Chain class for details.
 
     :param Sequence sequence: string of one-letter codes or sequence of residue types
+                                E.g. 'HMRQPPLVT' or ('HMRQPPLVT',) 
+                                or ('ala', 'ala', 'ala')
     :param str compoundName: name of new Substance (e.g. 'Lysozyme') Defaults to 'Molecule_n
     :param str molType: molType ('protein','DNA', 'RNA'). Needed only if sequence is a string.
     :param int startNumber: number of first residue in sequence
@@ -324,6 +326,32 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
     :param serial: optional serial number.
     :return: a new Chain instance.
     """
+
+    # check sequence is valid first
+    # either string, or list/tuple of strings
+    # list must all be 3 chars long if more than 1 element in list
+    if sequence and len(sequence) == 1 and not isinstance(sequence, str):
+        sequence = sequence[0]
+        if not isinstance(sequence, str):
+            raise TypeError('sequence is not a valid string: %s' % str(sequence))
+        elif not sequence.isalpha():
+            raise TypeError('sequence contains bad characters: %s' % str(sequence))
+        sequence = sequence.upper()
+
+    if not isinstance(sequence, str) and isinstance(sequence, Iterable):
+        # iterate through all elements
+        newSeq = []
+        for s in sequence:
+
+            if not isinstance(s, str):
+                raise TypeError('sequence element is not a valid string: %s' % str(s))
+            elif len(s) != 3:
+                raise TypeError('sequence elements must be 3 characters: %s' % str(s))
+            elif not s.isalpha():
+                raise TypeError('sequence element contains bad characters: %s' % str(s))
+
+            newSeq.append(s.upper())
+        sequence = tuple(newSeq)
 
     apiMolSystem = self._wrappedData.molSystem
     if not shortName:
@@ -352,12 +380,32 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
                                             isCyclic=isCyclic, comment=comment)
 
     apiMolecule = substance._apiSubstance.molecule
+
+    if substance:
+        # NEED TO CONNECT THIS TO THE CHAIN! otherwise doesn't get deleted and is blocked by newObject
+        # HACK HACK
+        oldBlockLevel = self.project._undo._undoItemBlockingLevel
+        self.project._undo.decreaseBlocking()
+
+        # notifiers are blocked as well!
+
+        with undoStackBlocking() as addUndoItem:
+            addUndoItem(undo=substance._apiSubstance.molecule.delete,
+                        redo=partial(self.createPolymerSubstance, sequence=sequence, name=name,
+                                     startNumber=startNumber, molType=molType,
+                                     isCyclic=isCyclic, comment=comment))
+
+        self.project._undo.increaseBlocking()
+
     apiMolecule.isFinalised = True
     newApiChain = apiMolSystem.newChain(molecule=apiMolecule, code=shortName, role=role,
                                         details=comment)
 
     result = self._project._data2Obj[newApiChain]
     if result is None:
+        if substance:
+            # clean up and remove the created substance
+            substance.delete()
         raise RuntimeError('Unable to generate new Chain item')
 
     if serial is not None:

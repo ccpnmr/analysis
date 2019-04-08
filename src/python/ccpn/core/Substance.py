@@ -864,7 +864,7 @@ def _createPolymerSubstance(self: Project, sequence: typing.Sequence[str], name:
         raise ValueError("Substance %s.%s already exists" % (name, labelling))
 
     elif apiNmrProject.root.findFirstMolecule(name=name) is not None:
-        raise ValueError("Molecule name %s is already in use for API Molecule")
+        raise ValueError("Molecule name %s is already in use for API Molecule" % name)
 
     if labelling is not None:
         if not isinstance(labelling, str):

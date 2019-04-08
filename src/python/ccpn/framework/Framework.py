@@ -750,7 +750,6 @@ class Framework(NotifierBase):
 
                 else:
                     # spectra are grouped
-                    print('>>>Grouped')
                     specViews = strip.spectrumViews
 
                     for iSV, spectrumView in enumerate(spectrumDisplay.orderedSpectrumViews(specViews)):

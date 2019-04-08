@@ -61,7 +61,7 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
         # .mainWindow, .current and .application are set by GuiSpectrumDisplay
         # .project is set by the wrapper
 
-        self.isGrouped = False
+        # self.isGrouped = False
 
         #TODO: have SpectrumToolbar own and maintain this
         self.spectrumActionDict = {}  # apiDataSource --> toolbar action (i.e. button); used in SpectrumToolBar

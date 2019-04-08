@@ -29,6 +29,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from functools import partial
 from ccpn.ui.gui.widgets.Menu import Menu
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 
 
 class SpectrumGroupToolBar(ToolBar):
@@ -36,17 +37,52 @@ class SpectrumGroupToolBar(ToolBar):
         super().__init__(parent=parent, **kwds)
         self.spectrumDisplay = spectrumDisplay
         self._project = self.spectrumDisplay.project
-        self._spectrumGroups = []
+
+        # self._spectrumGroups = []
+
+    # def _getSpectrumGroups(self):
+    #     from ccpn.ui.gui.lib.GuiSpectrumDisplay import SPECTRUMGROUPS, SPECTRUMGROUPLIST
+    #
+    #     _spectrumGroups = AbstractWrapperObject.getParameter(self.spectrumDisplay,
+    #                                                          SPECTRUMGROUPS, SPECTRUMGROUPLIST)
+    #     if _spectrumGroups is not None:
+    #         return _spectrumGroups
+    #
+    #     AbstractWrapperObject.setParameter(self.spectrumDisplay,
+    #                                        SPECTRUMGROUPS, SPECTRUMGROUPLIST, ())
+    #     return ()
+    #
+    # def _setSpectrumGroups(self, groups):
+    #     from ccpn.ui.gui.lib.GuiSpectrumDisplay import SPECTRUMGROUPS, SPECTRUMGROUPLIST
+    #
+    #     AbstractWrapperObject.setParameter(self.spectrumDisplay,
+    #                                        SPECTRUMGROUPS, SPECTRUMGROUPLIST, groups)
 
     def _addAction(self, spectrumGroup):
-        if spectrumGroup not in self._spectrumGroups:
-            self._spectrumGroups.append(spectrumGroup)
+
+        _spectrumGroups = self.spectrumDisplay._getSpectrumGroups()
+
+        if spectrumGroup.pid not in _spectrumGroups:
+            # _spectrumGroups.append(spectrumGroup)
+            _spectrumGroups += (spectrumGroup.pid,)
 
             action = self.addAction(spectrumGroup.pid, partial(self._toggleSpectrumGroup, spectrumGroup))
             action.setCheckable(True)
             action.setChecked(True)
             action.setToolTip(spectrumGroup.name)
+            action.setObjectName(spectrumGroup.pid)
             self._setupButton(action, spectrumGroup)
+
+            self.spectrumDisplay._setSpectrumGroups(_spectrumGroups)
+
+    def _forceAddAction(self, spectrumGroup):
+
+        action = self.addAction(spectrumGroup.pid, partial(self._toggleSpectrumGroup, spectrumGroup))
+        action.setCheckable(True)
+        action.setChecked(True)
+        action.setToolTip(spectrumGroup.name)
+        action.setObjectName(spectrumGroup.pid)
+        self._setupButton(action, spectrumGroup)
 
     def _setupButton(self, action, spectrumGroup):
         widget = self.widgetForAction(action)

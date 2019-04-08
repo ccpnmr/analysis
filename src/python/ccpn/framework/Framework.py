@@ -737,13 +737,32 @@ class Framework(NotifierBase):
                 stripIndex = strips.index(strip)
                 spectrumDisplay.stripFrame.layout().addWidget(strip, 0, si)  #stripIndex)
 
-                specViews = strip.spectrumViews
-                # for iSV, spectrumView in enumerate(strip.orderedSpectrumViews(includeDeleted=False)):
+                if not spectrumDisplay.isGrouped:
 
-                for iSV, spectrumView in enumerate(spectrumDisplay.orderedSpectrumViews(specViews)):
-                    _createdSpectrumView({Notifier.OBJECT: spectrumView})
-                    # for peakList in spectrumView.spectrum.peakLists:
-                    #     strip.showPeaks(peakList)
+                    # spectra are not grouped
+                    specViews = strip.spectrumViews
+                    # for iSV, spectrumView in enumerate(strip.orderedSpectrumViews(includeDeleted=False)):
+
+                    for iSV, spectrumView in enumerate(spectrumDisplay.orderedSpectrumViews(specViews)):
+                        _createdSpectrumView({Notifier.OBJECT: spectrumView})
+                        # for peakList in spectrumView.spectrum.peakLists:
+                        #     strip.showPeaks(peakList)
+
+                else:
+                    # spectra are grouped
+                    print('>>>Grouped')
+                    specViews = strip.spectrumViews
+
+                    for iSV, spectrumView in enumerate(spectrumDisplay.orderedSpectrumViews(specViews)):
+                        _createdSpectrumView({Notifier.OBJECT: spectrumView})
+
+                    spectrumDisplay.spectrumToolBar.hide()
+                    spectrumDisplay.spectrumGroupToolBar.show()
+
+                    _spectrumGroups = [project.getByPid(pid) for pid in spectrumDisplay._getSpectrumGroups()]
+
+                    for group in _spectrumGroups:
+                        spectrumDisplay.spectrumGroupToolBar._forceAddAction(group)
 
             # some of the strips may not be instantiated at this point
             # resize the stripFrame to the spectrumDisplay - ready for first resize event

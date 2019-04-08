@@ -1126,61 +1126,174 @@ class GuiStrip(Frame):
         pass  # GWV: poor soultion self.spectrumDisplay._resetRemoveStripAction()
 
     def _moveToNextSpectrumView(self):
-        # spectrumViews = self.orderedSpectrumViews()
-        spectrumViews = self.spectrumDisplay.orderedSpectrumViews(self.spectrumViews)
-        countSpvs = len(spectrumViews)
-        if countSpvs > 0:
-            visibleSpectrumViews = [i for i in spectrumViews if i.isVisible()]
-            if len(visibleSpectrumViews) > 0:
-                currentIndex = spectrumViews.index(visibleSpectrumViews[-1])
-                if countSpvs > currentIndex + 1:
-                    for visibleSpectrumView in visibleSpectrumViews:
-                        visibleSpectrumView.setVisible(False)
-                    spectrumViews[currentIndex + 1].setVisible(True)
-                elif countSpvs == currentIndex + 1:  #starts again from the first
-                    for visibleSpectrumView in visibleSpectrumViews:
-                        visibleSpectrumView.setVisible(False)
-                    spectrumViews[0].setVisible(True)
+
+        if not self.spectrumDisplay.isGrouped:
+
+            # cycle through the spectrumViews
+            spectrumViews = self.spectrumDisplay.orderedSpectrumViews(self.spectrumViews)
+            countSpvs = len(spectrumViews)
+            if countSpvs > 0:
+                visibleSpectrumViews = [i for i in spectrumViews if i.isVisible()]
+                if len(visibleSpectrumViews) > 0:
+                    currentIndex = spectrumViews.index(visibleSpectrumViews[-1])
+                    if countSpvs > currentIndex + 1:
+                        for visibleSpectrumView in visibleSpectrumViews:
+                            visibleSpectrumView.setVisible(False)
+                        spectrumViews[currentIndex + 1].setVisible(True)
+                    elif countSpvs == currentIndex + 1:  #starts again from the first
+                        for visibleSpectrumView in visibleSpectrumViews:
+                            visibleSpectrumView.setVisible(False)
+                        spectrumViews[0].setVisible(True)
+                else:
+                    spectrumViews[-1].setVisible(True)  #starts the loop again if none is selected
             else:
-                spectrumViews[-1].setVisible(True)  #starts the loop again if none is selected
+                MessageDialog.showWarning('Unable to select spectrum', 'Select a SpectrumDisplay with active spectra first')
+
         else:
-            MessageDialog.showWarning('Unable to select spectrum', 'Select a SpectrumDisplay with active spectra first')
+            # cycle through the spectrumGroups
+            spectrumViews = self.spectrumDisplay.orderedSpectrumViews(self.spectrumViews)
+
+            actions = self.spectrumDisplay.spectrumGroupToolBar.actions()
+            if not actions:
+                return
+
+            visibleGroups = [(act, self.project.getByPid(act.objectName())) for act in actions if act.isChecked()]
+
+            countSpvs = len(actions)
+
+            if visibleGroups:
+
+                # get the last group in the toolbar buttons
+                lastAct, lastObj = visibleGroups[-1]
+                nextInd = (actions.index(lastAct) + 1) % len(actions)
+                nextAct, nextObj = actions[nextInd], self.project.getByPid(actions[nextInd].objectName())
+
+                # uncheck/check the toolbar buttons
+                for action, obj in visibleGroups:
+                    action.setChecked(False)
+                nextAct.setChecked(True)
+
+                if nextObj:
+                    # set the associated spectrumViews as visible
+                    for specView in spectrumViews:
+                        specView.setVisible(specView.spectrum in nextObj.spectra)
+
+            elif actions:
+
+                # nothing visible so set the first toolbar button
+                currentGroup = self.project.getByPid(actions[0].objectName())
+                if currentGroup:
+                    for specView in spectrumViews:
+                        specView.setVisible(specView.spectrum in currentGroup.spectra)
+                actions[0].setChecked(True)
 
     def _moveToPreviousSpectrumView(self):
-        # spectrumViews = self.orderedSpectrumViews()
-        spectrumViews = self.spectrumDisplay.orderedSpectrumViews(self.spectrumViews)
-        countSpvs = len(spectrumViews)
-        if countSpvs > 0:
-            visibleSpectrumViews = [i for i in spectrumViews if i.isVisible()]
-            if len(visibleSpectrumViews) > 0:
-                currentIndex = spectrumViews.index(visibleSpectrumViews[0])
-                # if countSpvs > currentIndex + 1:
-                for visibleSpectrumView in visibleSpectrumViews:
-                    visibleSpectrumView.setVisible(False)
-                spectrumViews[currentIndex - 1].setVisible(True)
+
+        if not self.spectrumDisplay.isGrouped:
+
+            # spectrumViews = self.orderedSpectrumViews()
+            spectrumViews = self.spectrumDisplay.orderedSpectrumViews(self.spectrumViews)
+            countSpvs = len(spectrumViews)
+            if countSpvs > 0:
+                visibleSpectrumViews = [i for i in spectrumViews if i.isVisible()]
+                if len(visibleSpectrumViews) > 0:
+                    currentIndex = spectrumViews.index(visibleSpectrumViews[0])
+                    # if countSpvs > currentIndex + 1:
+                    for visibleSpectrumView in visibleSpectrumViews:
+                        visibleSpectrumView.setVisible(False)
+                    spectrumViews[currentIndex - 1].setVisible(True)
+                else:
+                    spectrumViews[-1].setVisible(True)  # starts the loop again if none is selected
+
             else:
-                spectrumViews[-1].setVisible(True)  # starts the loop again if none is selected
+                MessageDialog.showWarning('Unable to select spectrum', 'Select a SpectrumDisplay with active spectra first')
 
         else:
-            MessageDialog.showWarning('Unable to select spectrum', 'Select a SpectrumDisplay with active spectra first')
+            # cycle through the spectrumGroups
+            spectrumViews = self.spectrumDisplay.orderedSpectrumViews(self.spectrumViews)
+
+            actions = self.spectrumDisplay.spectrumGroupToolBar.actions()
+            if not actions:
+                return
+
+            visibleGroups = [(act, self.project.getByPid(act.objectName())) for act in actions if act.isChecked()]
+
+            countSpvs = len(actions)
+
+            if visibleGroups:
+
+                # get the first group in the toolbar buttons
+                lastAct, lastObj = visibleGroups[0]
+                nextInd = (actions.index(lastAct) - 1) % len(actions)
+                nextAct, nextObj = actions[nextInd], self.project.getByPid(actions[nextInd].objectName())
+
+                # uncheck/check the toolbar buttons
+                for action, obj in visibleGroups:
+                    action.setChecked(False)
+                nextAct.setChecked(True)
+
+                if nextObj:
+                    # set the associated spectrumViews as visible
+                    for specView in spectrumViews:
+                        specView.setVisible(specView.spectrum in nextObj.spectra)
+
+            elif actions:
+
+                # nothing visible so set the last toolbar button
+                currentGroup = self.project.getByPid(actions[-1].objectName())
+                if currentGroup:
+                    for specView in spectrumViews:
+                        specView.setVisible(specView.spectrum in currentGroup.spectra)
+                actions[-1].setChecked(True)
 
     def _showAllSpectrumViews(self, value: bool = True):
+
+        # turn on/off all spectrumViews
         # spectrumViews = self.orderedSpectrumViews()
         spectrumViews = self.spectrumDisplay.orderedSpectrumViews(self.spectrumViews)
         for sp in spectrumViews:
             sp.setVisible(value)
 
-    def _invertSelectedSpectra(self):
-        # spectrumViews = self.orderedSpectrumViews()
-        spectrumViews = self.spectrumDisplay.orderedSpectrumViews(self.spectrumViews)
-        countSpvs = len(spectrumViews)
-        if countSpvs > 0:
+        if self.spectrumDisplay.isGrouped:
+            # turn on/off all toolbar buttons
+            actions = self.spectrumDisplay.spectrumGroupToolBar.actions()
+            for action in actions:
+                action.setChecked(value)
 
-            visibleSpectrumViews = [i.isVisible() for i in spectrumViews]
-            if any(visibleSpectrumViews):
-                changeState = [i.setVisible(not i.isVisible()) for i in spectrumViews]
-            else:
-                self._showAllSpectrumViews(True)
+    def _invertSelectedSpectra(self):
+
+        if not self.spectrumDisplay.isGrouped:
+            # spectrumViews = self.orderedSpectrumViews()
+            spectrumViews = self.spectrumDisplay.orderedSpectrumViews(self.spectrumViews)
+            countSpvs = len(spectrumViews)
+            if countSpvs > 0:
+
+                visibleSpectrumViews = [i.isVisible() for i in spectrumViews]
+                if any(visibleSpectrumViews):
+                    changeState = [i.setVisible(not i.isVisible()) for i in spectrumViews]
+                else:
+                    self._showAllSpectrumViews(True)
+
+        else:
+
+            actions = self.spectrumDisplay.spectrumGroupToolBar.actions()
+            spectra = set()
+            for action in actions:
+
+                # toggle the visibility of the toolbar buttons
+                newVisible = not action.isChecked()
+                action.setChecked(newVisible)
+                obj = self.project.getByPid(action.objectName())
+
+                if newVisible and obj:
+                    for spec in obj.spectra:
+                        spectra.add(spec)
+
+            # set the visibility of the spectrumViews
+            spectrumViews = self.spectrumDisplay.orderedSpectrumViews(self.spectrumViews)
+            for specView in spectrumViews:
+                specView.setVisible(specView.spectrum in spectra)
+
 
     def report(self):
         """Generate a drawing object that can be added to reports

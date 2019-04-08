@@ -74,10 +74,13 @@ from ccpn.util.decorators import logCommand
 from ccpn.util.Common import makeIterableList
 from ccpn.core.lib import Undo
 from ccpn.ui.gui.widgets.MessageDialog import showMulti
-
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 
 AXIS_WIDTH = 30
 AXISUNITS = ['ppm', 'Hz', 'points']
+SPECTRUMGROUPS = 'spectrumGroups'
+SPECTRUMISGROUPED = 'spectrumIsGrouped'
+SPECTRUMGROUPLIST = 'spectrumGroupList'
 
 
 class GuiSpectrumDisplay(CcpnModule):
@@ -401,6 +404,44 @@ class GuiSpectrumDisplay(CcpnModule):
 
         GLSignals = GLNotifier(parent=None)
         GLSignals.emitPaintEvent()
+
+    @property
+    def isGrouped(self):
+        """Return whether the spectrumDisplay contains grouped spectra
+        """
+        # Using AbstractWrapperObject because there seems to already be a setParameter
+        # belonging to spectrumDisplay
+        # TODO:ED check this out
+        grouped = AbstractWrapperObject.getParameter(self, SPECTRUMGROUPS, SPECTRUMISGROUPED)
+        if grouped is not None:
+            return grouped
+
+        # set default to False
+        AbstractWrapperObject.setParameter(self, SPECTRUMGROUPS, SPECTRUMISGROUPED, False)
+        return False
+
+    @isGrouped.setter
+    def isGrouped(self, grouped):
+        """Set whether the spectrumDisplay contains grouped spectra
+        """
+        AbstractWrapperObject.setParameter(self, SPECTRUMGROUPS, SPECTRUMISGROUPED, grouped)
+
+    def _getSpectrumGroups(self):
+        """Return the groups contained in the spectrumDisplay
+        """
+        # Using AbstractWrapperObject because there seems to already be a setParameter
+        # belonging to spectrumDisplay
+        _spectrumGroups = AbstractWrapperObject.getParameter(self, SPECTRUMGROUPS, SPECTRUMGROUPLIST)
+        if _spectrumGroups is not None:
+            return _spectrumGroups
+
+        AbstractWrapperObject.setParameter(self, SPECTRUMGROUPS, SPECTRUMGROUPLIST, ())
+        return ()
+
+    def _setSpectrumGroups(self, groups):
+        """Set the groups in the spectrumDisplay
+        """
+        AbstractWrapperObject.setParameter(self, SPECTRUMGROUPS, SPECTRUMGROUPLIST, groups)
 
     def getSettings(self):
         """get the settings dict from the settingsWidget

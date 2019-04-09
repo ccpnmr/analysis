@@ -1206,10 +1206,10 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         """Removes the specified item from the sidebar and deletes it from the project.
         NB, the clean-up of the side bar is done through notifiers
         """
-        from ccpn.core.lib.ContextManagers import undoBlockManager
+        from ccpn.core.lib.ContextManagers import undoBlock
 
         try:
-            with undoBlockManager():
+            with undoBlock():
                 for obj in objs:
                     if obj:
                         # just delete the object

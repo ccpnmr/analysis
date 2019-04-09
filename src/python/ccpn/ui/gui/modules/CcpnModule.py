@@ -76,7 +76,7 @@ from ccpn.ui.gui.widgets.PulldownListsForObjects import _PulldownABC
 
 from ccpn.core.lib.Notifiers import Notifier, NotifierBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
-from ccpn.core.lib.ContextManagers import undoBlockManager
+from ccpn.core.lib.ContextManagers import undoBlock
 
 
 CommonWidgets = {
@@ -801,7 +801,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                 pids = data[DropBase.PIDS]
                 objs = [self.mainWindow.project.getByPid(pid) for pid in pids]
 
-                with undoBlockManager():
+                with undoBlock():
                     _openItemObject(self.mainWindow, objs, position=self.dropArea, relativeTo=self)
 
                 event.accept()

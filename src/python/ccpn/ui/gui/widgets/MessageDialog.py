@@ -68,16 +68,20 @@ class MessageDialog(QtWidgets.QMessageBox):
         # self.resize(300, 100)  #GWV:  Does not seem to do anything
         # Adapted from best solution so far from: http://apocalyptech.com/linux/qt/qmessagebox/
         layout = self.layout()
+
         item = layout.itemAtPosition(0, 2)
-        widget = item.widget()
-        # GWV: setting font of basicText widget
-        widget.setFont(messageFontBold)
-        # GWV: setting font and width of message
+        if item:
+            widget = item.widget()
+            # GWV: setting font of basicText widget
+            widget.setFont(messageFontBold)
+            # GWV: setting font and width of message
+
         item = layout.itemAtPosition(1, 2)
-        widget = item.widget()
-        # GWV: Estimating minimumwidth
-        widget.setMinimumWidth(max(len(message) * 5, 200))
-        widget.setFont(messageFont)
+        if item:
+            widget = item.widget()
+            # GWV: Estimating minimumwidth
+            widget.setMinimumWidth(max(len(message) * 5, 200))
+            widget.setFont(messageFont)
 
         # textEdit = self.findChild(QtGui.QTextEdit)
         # textEdit.setFont(messageFont)

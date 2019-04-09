@@ -40,7 +40,7 @@ from ccpn.core.lib import Pid
 from typing import Tuple, Optional, Union, Sequence, Iterable
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
-    renameObject, undoBlock, undoStackBlocking, undoStackUnblocking
+    renameObject, undoBlock, undoStackBlocking
 from ccpn.util.Logging import getLogger
 
 
@@ -302,8 +302,19 @@ class Chain(AbstractWrapperObject):
 
 #=========================================================================================
 
-
 @newObject(Chain)
+def _newApiChain(self: Project, apiMolecule, shortName, role, comment):
+    apiMolSystem = self._wrappedData.molSystem
+    apiMolecule.isFinalised = True
+    newApiChain = apiMolSystem.newChain(molecule=apiMolecule, code=shortName, role=role,
+                                        details=comment)
+
+
+    result = self._project._data2Obj[newApiChain]
+
+    return result
+
+# @newObject(Chain)
 def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundName: str = None,
                  startNumber: int = 1, molType: str = None, isCyclic: bool = False,
                  shortName: str = None, role: str = None, comment: str = None,
@@ -361,7 +372,7 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
 
     previous = self._project.getChain(shortName.translate(Pid.remapSeparators))
     if previous is not None:
-        raise ValueError("%s already exists" % previous.longPid)
+        raise ValueError("'%s' already exists" % previous.longPid)
 
     apiRefComponentStore = self._apiNmrProject.sampleStore.refSampleComponentStore
     if compoundName is None:
@@ -372,8 +383,9 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
         name = compoundName
     else:
         raise ValueError(
-                "Substance named %s already exists. Try Substance.createChain function instead?"
+                "Substance '%s' already exists. Try Substance.createChain function instead?"
                 % compoundName)
+
 
     substance = self.createPolymerSubstance(sequence=sequence, name=name,
                                             startNumber=startNumber, molType=molType,
@@ -381,28 +393,10 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
 
     apiMolecule = substance._apiSubstance.molecule
 
-    if substance:
-        # NEED TO CONNECT THIS TO THE CHAIN! otherwise doesn't get deleted and is blocked by newObject
-        # HACK HACK
-        oldBlockLevel = self.project._undo._undoItemBlockingLevel
-        self.project._undo.decreaseBlocking()
+    try:
+        result = _newApiChain(self, apiMolecule, shortName, role, comment)
 
-        # notifiers are blocked as well!
-
-        with undoStackBlocking() as addUndoItem:
-            addUndoItem(undo=substance._apiSubstance.molecule.delete,
-                        redo=partial(self.createPolymerSubstance, sequence=sequence, name=name,
-                                     startNumber=startNumber, molType=molType,
-                                     isCyclic=isCyclic, comment=comment))
-
-        self.project._undo.increaseBlocking()
-
-    apiMolecule.isFinalised = True
-    newApiChain = apiMolSystem.newChain(molecule=apiMolecule, code=shortName, role=role,
-                                        details=comment)
-
-    result = self._project._data2Obj[newApiChain]
-    if result is None:
+    except Exception as es:
         if substance:
             # clean up and remove the created substance
             substance.delete()
@@ -418,6 +412,7 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
     for residue in result.residues:
         # Necessary as CCPN V2 default protonation states do not match tne NEF / V3 standard
         residue.resetVariantToDefault()
+
 
     return result
 

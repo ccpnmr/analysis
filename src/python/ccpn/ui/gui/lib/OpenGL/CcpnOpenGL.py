@@ -141,7 +141,7 @@ from ccpn.ui.gui.guiSettings import textFont, getColours, STRIPHEADER_BACKGROUND
 
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
-from ccpn.core.lib.ContextManagers import undoBlockManager
+from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.util.decorators import profile
 
 
@@ -1291,7 +1291,7 @@ class CcpnGLWidget(QOpenGLWidget):
         if type(event) == QtGui.QKeyEvent:
             if event.key() in moveDict:
 
-                with undoBlockManager():
+                with undoBlock():
                     for peak in self.current.peaks:
                         self._movePeak(peak, moveDict.get(event.key()))
 
@@ -5494,7 +5494,7 @@ class CcpnGLWidget(QOpenGLWidget):
             for peak in peaks:
                 peak.startPosition = peak.position
 
-            with undoBlockManager():
+            with undoBlock():
                 for peak in peaks:
                     self._movePeak(peak, deltaPosition)
 

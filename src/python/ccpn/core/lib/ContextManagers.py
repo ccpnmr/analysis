@@ -26,23 +26,12 @@ __date__ = "$Date: 2018-12-20 15:44:34 +0000 (Thu, December 20, 2018) $"
 #=========================================================================================
 
 import sys
-from contextlib import contextmanager
-import functools
-import itertools
-import operator
-import typing
 import decorator
 from contextlib import contextmanager
 from collections import Iterable
 from functools import partial
 from inspect import signature, Parameter
-
-from collections import OrderedDict
-from ccpn.core import _importOrder
-# from ccpn.core.lib import CcpnSorting
 from ccpn.core.lib import Util as coreUtil
-from ccpn.util import Common as commonUtil
-from ccpn.core.lib import Pid
 from ccpn.util.Logging import getLogger
 from ccpn.framework.Application import getApplication
 
@@ -146,6 +135,7 @@ def undoBlock(application=None):
             undo.decreaseWaypointBlocking()
 
         getLogger().debug2('_exitUndoBlock: echoBlocking=%s' % application._echoBlocking)
+
 
 @contextmanager
 def undoBlockWithoutSideBar(application=None):
@@ -414,7 +404,7 @@ def logCommandBlock(prefix='', get=None, isProperty=False, showArguments=[], log
                         if v.default is Parameter.empty
                         or k in showArguments
                         or k in kwargs]
-                        # or (k in fr1.f_locals and (repr(fr1.f_locals[k]) != repr(v.default)))]
+                # or (k in fr1.f_locals and (repr(fr1.f_locals[k]) != repr(v.default)))]
             else:
                 sig1 = {}
 
@@ -484,52 +474,52 @@ def catchExceptions(application=None, errorStringTemplate='Error: "%s"', popupAs
             raise es
 
 
-@contextmanager
-def undoBlockManager(application=None, undoBlockOnly=False):
-    """Wrap all the contained operations into a single undo/redo event.
-    """
-
-    # get the current application
-    if not application:
-        application = getApplication()
-    if application is None:
-        raise RuntimeError('Error getting application')
-
-    undo = application._getUndo()
-    if undo is not None:  # ejb - changed from if undo:
-        undo.newWaypoint()  # DO NOT CHANGE
-        undo.increaseWaypointBlocking()
-
-    logger = getLogger()
-    logger.debug3('_enterUndoBlock')
-
-    try:
-        # transfer control to the calling function
-        if undoBlockOnly:
-            yield
-        else:
-            # transfer control to the calling function, with sidebar blocking
-            with sidebarBlocking(application=application):
-                yield  # undo._blocked if undo is not None else False
-
-    except AttributeError as es:
-        raise
-
-    finally:
-        # clean up the undo block
-        if undo is not None:
-            undo.decreaseWaypointBlocking()
-
-        logger.debug3('_exitUndoBlock')
-
-    # with suspendSidebar():
-    #     yield  # undo._blocked if undo is not None else False
-    #
-    # # clean up the undo block
-    # if undo is not None:
-    #     undo.decreaseWaypointBlocking()
-    #
-    # logger.debug2('_exitUndoBlock')
+# @contextmanager
+# def undoBlockManager(application=None, undoBlockOnly=False):
+#     """Wrap all the contained operations into a single undo/redo event.
+#     """
+#
+#     # get the current application
+#     if not application:
+#         application = getApplication()
+#     if application is None:
+#         raise RuntimeError('Error getting application')
+#
+#     undo = application._getUndo()
+#     if undo is not None:  # ejb - changed from if undo:
+#         undo.newWaypoint()  # DO NOT CHANGE
+#         undo.increaseWaypointBlocking()
+#
+#     logger = getLogger()
+#     logger.debug3('_enterUndoBlock')
+#
+#     try:
+#         # transfer control to the calling function
+#         if undoBlockOnly:
+#             yield
+#         else:
+#             # transfer control to the calling function, with sidebar blocking
+#             with sidebarBlocking(application=application):
+#                 yield  # undo._blocked if undo is not None else False
+#
+#     except Exception as es:
+#         raise
+#
+#     finally:
+#         # clean up the undo block
+#         if undo is not None:
+#             undo.decreaseWaypointBlocking()
+#
+#         logger.debug3('_exitUndoBlock')
+#
+#     # with suspendSidebar():
+#     #     yield  # undo._blocked if undo is not None else False
+#     #
+#     # # clean up the undo block
+#     # if undo is not None:
+#     #     undo.decreaseWaypointBlocking()
+#     #
+#     # logger.debug2('_exitUndoBlock')
 
 
 @contextmanager
@@ -614,6 +604,7 @@ def notificationBlanking(application=None):
     finally:
         # clean up after blocking notifications
         application.project.unblankNotification()
+
 
 @contextmanager
 def notificationEchoBlocking(application=None):
@@ -725,35 +716,35 @@ def undoStackBlocking(application=None):
             undo._newItem(undoPartial=item[0], redoPartial=item[1])
 
 
-@contextmanager
-def undoStackUnblocking(application=None):
-    """
-    Temporarily release the undoStack (for newObject)
-    """
-
-    # get the current application
-    if not application:
-        application = getApplication()
-    if application is None:
-        raise RuntimeError('Error getting application')
-
-    undo = application._getUndo()
-    if undo is None:
-        raise RuntimeError("Unable to get the application's undo stack")
-    _undoStack = []
-
-    undo.decreaseBlocking()
-
-    try:
-        # transfer control to the calling function
-        yield
-
-    except AttributeError as es:
-        raise es
-
-    finally:
-        # clean up after blocking undo items
-        undo.increaseBlocking()
+# @contextmanager
+# def undoStackUnblocking(application=None):
+#     """
+#     Temporarily release the undoStack (for newObject)
+#     """
+#
+#     # get the current application
+#     if not application:
+#         application = getApplication()
+#     if application is None:
+#         raise RuntimeError('Error getting application')
+#
+#     undo = application._getUndo()
+#     if undo is None:
+#         raise RuntimeError("Unable to get the application's undo stack")
+#     _undoStack = []
+#
+#     undo.decreaseBlocking()
+#
+#     try:
+#         # transfer control to the calling function
+#         yield
+#
+#     except AttributeError as es:
+#         raise es
+#
+#     finally:
+#         # clean up after blocking undo items
+#         undo.increaseBlocking()
 
 
 @contextmanager
@@ -788,45 +779,45 @@ def waypointBlocking(application=None):
         undo.decreaseWaypointBlocking()
 
 
-@contextmanager
-def deleteBlockManager(application=None, deleteBlockOnly=False):
-    """
-    Wrap all the following calls with a single undo/redo method.
-    """
-
-    # get the application
-    if not application:
-        application = getApplication()
-    if application is None:
-        raise RuntimeError('Error getting application')
-
-    undo = application._getUndo()
-
-    if undo is not None:  # ejb - changed from if undo:
-        undo.newWaypoint()  # DO NOT CHANGE
-        undo.increaseWaypointBlocking()
-
-    logger = getLogger()
-    logger.debug2('_enterDeleteBlock')
-
-    try:
-        # transfer control to the calling function
-        if deleteBlockOnly:
-            yield
-        else:
-            # transfer control to the calling function, with sidebar blocking
-            with sidebarBlocking(application=application):
-                yield  # undo._blocked if undo is not None else False
-
-    except AttributeError as es:
-        raise es
-
-    finally:
-        # clean up the undo block
-        if undo is not None:
-            undo.decreaseWaypointBlocking()
-
-        logger.debug2('_exitDeleteBlock')
+# @contextmanager
+# def deleteBlockManager(application=None, deleteBlockOnly=False):
+#     """
+#     Wrap all the following calls with a single undo/redo method.
+#     """
+#
+#     # get the application
+#     if not application:
+#         application = getApplication()
+#     if application is None:
+#         raise RuntimeError('Error getting application')
+#
+#     undo = application._getUndo()
+#
+#     if undo is not None:  # ejb - changed from if undo:
+#         undo.newWaypoint()  # DO NOT CHANGE
+#         undo.increaseWaypointBlocking()
+#
+#     logger = getLogger()
+#     logger.debug2('_enterDeleteBlock')
+#
+#     try:
+#         # transfer control to the calling function
+#         if deleteBlockOnly:
+#             yield
+#         else:
+#             # transfer control to the calling function, with sidebar blocking
+#             with sidebarBlocking(application=application):
+#                 yield  # undo._blocked if undo is not None else False
+#
+#     except AttributeError as es:
+#         raise es
+#
+#     finally:
+#         # clean up the undo block
+#         if undo is not None:
+#             undo.decreaseWaypointBlocking()
+#
+#         logger.debug2('_exitDeleteBlock')
 
 
 CURRENT_ATTRIBUTE_NAME = '_currentAttributeName'

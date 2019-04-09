@@ -32,7 +32,7 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.core.lib.ContextManagers import undoBlockManager
+from ccpn.core.lib.ContextManagers import undoBlock
 
 
 class CopyPeakListPopup(CcpnDialog):
@@ -76,7 +76,7 @@ class CopyPeakListPopup(CcpnDialog):
         self.mainLayout.addWidget(self.okCancelButtons, 2, 1)
 
     def _okButton(self):
-        with undoBlockManager():
+        with undoBlock():
             self.sourcePeakList = self.project.getByPid(self.sourcePeakListPullDown.getText())
             self.targetSpectrum = self.project.getByPid(self.targetSpectraPullDown.getText())
             self._copyPeakListToSpectrum()

@@ -88,10 +88,10 @@ class DeleteItemsPopup(CcpnDialog):
         undo = self.project._undo
         oldUndo = undo.numItems()
 
-        from ccpn.core.lib.ContextManagers import undoBlockManager, undoStackBlocking
+        from ccpn.core.lib.ContextManagers import undoBlock, undoStackBlocking
         from functools import partial
 
-        with undoBlockManager():
+        with undoBlock():
             try:
                 for delItem in self.deleteList:
                     if delItem[2].isChecked():

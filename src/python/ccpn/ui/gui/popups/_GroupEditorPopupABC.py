@@ -41,7 +41,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.PulldownListsForObjects import SpectrumGroupPulldown
 
 from ccpn.util.Logging import getLogger
-from ccpn.core.lib.ContextManagers import undoBlockManager
+from ccpn.core.lib.ContextManagers import undoBlock
 
 class _LeftListWidget(ListWidget):
     """Subclassed for dropEvent"""
@@ -387,7 +387,7 @@ class _GroupEditorPopupABC(CcpnDialog):
             showWarning(str(self.windowTitle()), msg)
             return False
 
-        with undoBlockManager():
+        with undoBlock():
             try:
                 if self.editMode:
                     # edit mode

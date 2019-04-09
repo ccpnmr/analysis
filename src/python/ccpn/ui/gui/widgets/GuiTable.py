@@ -72,7 +72,7 @@ from collections import OrderedDict
 from ccpn.util.Logging import getLogger
 from types import SimpleNamespace
 from contextlib import contextmanager
-from ccpn.core.lib.ContextManagers import undoBlockManager
+from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.core.lib.Util import getParentObjectFromPid
 
 
@@ -878,7 +878,7 @@ GuiTable::item::selected {
                 if hasattr(selected[0], 'project'):
                     thisProject = selected[0].project
 
-                    with undoBlockManager():
+                    with undoBlock():
                         # echo [sI.pid for sI in selected])
                         for obj in selected:
                             if hasattr(obj, 'pid'):

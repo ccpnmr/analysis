@@ -39,7 +39,7 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
 from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import PROTEIN_ATOM_NAMES
 from ccpn.util.Common import isotopeCode2Nucleus
 from ccpn.util.Logging import getLogger
-from ccpn.core.lib.ContextManagers import undoBlockManager
+from ccpn.core.lib.ContextManagers import undoBlock
 
 
 ###from ccpn.framework.Framework import createFramework  # see note below
@@ -123,7 +123,7 @@ class NmrAtomPopup(CcpnDialog):
         applyAccept = False
         oldUndoItems = self.project._undo.numItems()
 
-        with undoBlockManager():
+        with undoBlock():
             if self.nmrAtom.name != self.nmrAtomNamePulldown.currentText():
                 self.nmrAtom.rename(self.nmrAtomNamePulldown.currentText())
 

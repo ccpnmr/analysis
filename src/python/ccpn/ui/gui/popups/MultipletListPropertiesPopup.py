@@ -175,9 +175,9 @@ class MultipletListPropertiesPopup(CcpnDialog):
 
         GLSignals = GLNotifier(parent=self)
 
-        from ccpn.core.lib.ContextManagers import undoBlockManager
+        from ccpn.core.lib.ContextManagers import undoBlock
 
-        with undoBlockManager():
+        with undoBlock():
             try:
                 self._changeColours()
                 self._setAttributes()

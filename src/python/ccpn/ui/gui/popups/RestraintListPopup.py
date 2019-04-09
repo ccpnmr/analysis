@@ -75,9 +75,9 @@ class RestraintListPopup(CcpnDialog):
         The apply button has been clicked
         Define an undo block for setting the properties of the object
         """
-        from ccpn.core.lib.ContextManagers import undoBlockManager
-        with undoBlockManager():
+        from ccpn.core.lib.ContextManagers import undoBlock
 
+        with undoBlock():
             try:
                 name = self.nameText.text()
                 if self.editMode:

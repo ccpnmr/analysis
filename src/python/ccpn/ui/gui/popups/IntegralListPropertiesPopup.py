@@ -123,11 +123,11 @@ class IntegralListPropertiesPopup(CcpnDialog):
         oldUndo = self.project._undo.numItems()
 
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-        from ccpn.core.lib.ContextManagers import undoBlockManager
+        from ccpn.core.lib.ContextManagers import undoBlock
 
         GLSignals = GLNotifier(parent=self)
 
-        with undoBlockManager():
+        with undoBlock():
             try:
                 self._changeColours()
 

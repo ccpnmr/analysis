@@ -373,9 +373,9 @@ class SampleComponentPopup(CcpnDialog):
         applyAccept = False
         oldUndo = self.project._undo.numItems()
 
-        from ccpn.core.lib.ContextManagers import undoBlockManager
+        from ccpn.core.lib.ContextManagers import undoBlock
 
-        with undoBlockManager():
+        with undoBlock():
             try:
                 if self.newSampleComponentToCreate:
                     self.sampleComponent = self.sample.newSampleComponent(

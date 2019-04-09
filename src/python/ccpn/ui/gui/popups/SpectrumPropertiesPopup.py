@@ -53,7 +53,7 @@ from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
 from ccpn.util.OrderedSet import OrderedSet
-from ccpn.core.lib.ContextManagers import logCommandBlock, undoStackBlocking, undoBlockManager
+from ccpn.core.lib.ContextManagers import logCommandBlock, undoStackBlocking, undoBlock
 from ccpn.ui.gui.popups.ValidateSpectraPopup import SpectrumValidator
 
 
@@ -159,7 +159,7 @@ class SpectrumPropertiesPopup(CcpnDialog):
 
         GLSignals = GLNotifier(parent=self)
 
-        with undoBlockManager():
+        with undoBlock():
             spectrumList = []
             for t in tabs:
                 if t is not None:
@@ -1286,7 +1286,7 @@ class SpectrumDisplayPropertiesPopupNd(CcpnDialog):
 
         GLSignals = GLNotifier(parent=self)
 
-        with undoBlockManager():
+        with undoBlock():
             spectrumList = []
             for t in tabs:
                 if t is not None:
@@ -1420,7 +1420,7 @@ class SpectrumDisplayPropertiesPopup1d(CcpnDialog):
 
         GLSignals = GLNotifier(parent=self)
 
-        with undoBlockManager():
+        with undoBlock():
             spectrumList = []
             for t in tabs:
                 if t is not None:

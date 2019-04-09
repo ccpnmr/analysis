@@ -588,9 +588,9 @@ class SubstancePropertiesPopup(CcpnDialog):
         applyAccept = False
         oldUndo = self.project._undo.numItems()
 
-        from ccpn.core.lib.ContextManagers import undoBlockManager
+        from ccpn.core.lib.ContextManagers import undoBlock
 
-        with undoBlockManager():
+        with undoBlock():
             try:
                 # dependent on whether the popup is called as createNew or editExisting
                 if self.createNewSubstance:

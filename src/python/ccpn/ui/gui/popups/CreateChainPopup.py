@@ -27,6 +27,7 @@ __date__ = "$Date: 2017-07-04 15:21:16 +0000 (Tue, July 04, 2017) $"
 
 import string
 from PyQt5 import QtGui, QtWidgets
+from collections import Iterable
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
@@ -38,7 +39,7 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
 from ccpn.ui.gui.widgets.ListWidget import ListWidgetSelector
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.util.Logging import getLogger
-from collections import Iterable
+from ccpn.core.lib.ContextManagers import undoBlock
 
 
 def _nextChainCode(project):
@@ -173,12 +174,10 @@ class CreateChainPopup(CcpnDialog):
           If anything has been added to the undo queue then remove it with application.undo()
           repopulate the popup widgets
         """
-        applyAccept = False
         oldUndo = self.project._undo.numItems()
 
-        from ccpn.core.lib.ContextManagers import undoBlockManager
-
-        with undoBlockManager():
+        with undoBlock():
+            applyAccept = False
             try:
                 self._createSequence()
 

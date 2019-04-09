@@ -343,9 +343,9 @@ class SamplePropertiesPopup(CcpnDialog):
         applyAccept = False
         oldUndoItems = self.project._undo.numItems()
 
-        from ccpn.core.lib.ContextManagers import undoBlockManager
+        from ccpn.core.lib.ContextManagers import undoBlock
 
-        with undoBlockManager():
+        with undoBlock():
             try:
                 for property, value in self._getCallBacksDict().items():
                     property(value)

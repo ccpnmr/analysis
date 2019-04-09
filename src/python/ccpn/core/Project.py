@@ -52,8 +52,7 @@ from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 from ccpnmodel.ccpncore.lib.Io import Pdb as pdbIo
 # from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
-    logCommandBlock, undoStackBlocking, notificationBlanking, undoBlock, deleteBlockManager, undoBlockManager, undoBlockWithoutSideBar
+from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, undoBlock, undoBlockWithoutSideBar
 from ccpn.util.Logging import getLogger
 
 
@@ -1222,7 +1221,7 @@ class Project(AbstractWrapperObject):
 
         elif subType == ioFormats.EXCEL:
             # with suspendSideBarNotifications(self, 'ExcelReader', quiet=False):
-            with undoBlockManager():
+            with undoBlock():
                 ExcelReader(project=self, excelPath=path)
 
     def _uniqueSubstanceName(self, name: str = None, defaultName: str = 'Molecule') -> str:

@@ -37,7 +37,7 @@ from ccpn.core.lib.SpectrumLib import _calibrateX1D
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-from ccpn.core.lib.ContextManagers import undoBlockManager
+from ccpn.core.lib.ContextManagers import undoBlock
 
 
 OP = 'Calibrate X - Original Position: '
@@ -185,7 +185,7 @@ class CalibrateX1DWidgets(Frame):
     def _apply(self):
         applyAccept = False
 
-        with undoBlockManager():
+        with undoBlock():
             _undo = self.project._undo
             oldUndo = _undo.numItems()
             fromPos = self.originalPosition

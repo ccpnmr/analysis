@@ -147,6 +147,12 @@ class Undo(deque):
         self._blocked = False  # Block/unblock switch - internal use only
         self._undoItemBlockingLevel = 0  # Blocking level - modify with increase/decreaseBlocking only
         self._waypointBlockingLevel = 0  # Waypoint blocking - modify with increase/decreaseWaypointBlocking/ only
+
+        # self._checkNewItemAddedAfterWaypoint = False
+        # self._newWaypointAdded = False
+        # self._newItemAdded = False
+        # self._lastWaypoints = {}
+
         if maxWaypoints:
             self.newWaypoint()  # DO NOT CHANGE THIS ONE
         deque.__init__(self)
@@ -224,6 +230,32 @@ class Undo(deque):
         if self.waypointBlocking:
             self._waypointBlockingLevel -= 1
 
+    # def _undoNewWaypoint(self):
+    #     """Remove new waypoint if nothing has been added to the stack
+    #     """
+    #     if self._lastWaypoints:
+    #         print('>>>removing redundant waypoint')
+    #         self.waypoints = self._lastWaypoints['waypoints']
+    #         self.nextIndex = self._lastWaypoints['nextIndex']
+    #
+    #         while self._lastWaypoints['popLeft']:
+    #             _popLeftItem = self._lastWaypoints['popLeft'].pop()
+    #             self.insert(0, _popLeftItem)
+    #
+    #         # remove to get rid of any memory leaks
+    #         self._lastWaypoints = {}
+    #
+    # def _checkWaypoints(self):
+    #     """Check whether we can rollback the undo stack
+    #     """
+    #     if self._blocked:
+    #         return
+    #
+    #     if self._newItemAdded:
+    #         print('>>>_checkWaypoints - new items have been added to the waypoint')
+    #     else:
+    #         self._undoNewWaypoint()
+
     def newWaypoint(self):
         """Start new waypoint"""
         if self.maxWaypoints < 1:
@@ -240,6 +272,14 @@ class Undo(deque):
         elif waypoints and waypoints[-1] == self.nextIndex - 1:  # don't need to add a new waypoint
             return  # if is the same as the last one
 
+        # print('>>> logging lastNewWaypoint')
+        # # remember the last waypoint list
+        # self._lastWaypoints = {'waypoints'           : list(waypoints),
+        #                        'nextIndex'           : self.nextIndex,
+        #                        'exceededMaxWaypoints': False,
+        #                        'popLeft'             : []}
+        # self._newItemAdded = False
+
         waypoints.append(self.nextIndex - 1)  # add the new waypoint to the end
 
         # if the list is too big then cull the first item
@@ -248,7 +288,12 @@ class Undo(deque):
             nRemove = waypoints[0]
             self.nextIndex -= nRemove
             for ii in range(nRemove):
-                self.popleft()
+                _popLeftItem = self.popleft()
+
+            #     # remember for empty undo items stacking
+            #     self._lastWaypoints['popLeft'].append(_popLeftItem)
+            # self._lastWaypoints['exceededMaxWaypoints'] = True
+
             del waypoints[0]
             for ii, junk in enumerate(waypoints):
                 waypoints[ii] -= nRemove
@@ -280,6 +325,10 @@ class Undo(deque):
 
         # add new undo/redo methods
         self.append((undoPartial, redoPartial))
+
+        # if self._checkNewItemAddedAfterWaypoint:
+        #     self._newItemAdded = True
+        #     self._checkNewItemAddedAfterWaypoint = False
 
         # fix waypoints:
         ll = self.waypoints
@@ -330,6 +379,10 @@ class Undo(deque):
         else:
             redoCall = self._wrappedPartial(redoMethod, *redoArgs, **redoKwargs)
         self.append((undoCall, redoCall))
+
+        # if self._checkNewItemAddedAfterWaypoint:
+        #     self._newItemAdded = True
+        #     self._checkNewItemAddedAfterWaypoint = False
 
         # fix waypoints:
         ll = self.waypoints

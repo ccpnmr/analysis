@@ -87,6 +87,14 @@ def echoCommand(obj, funcName, *params, values=None, defaults=None,
         getLogger().debug2('_exitEchoCommand')
 
 
+def _resumeNotification(application):
+    """A check here because resume Notification can cause fatal errors
+    """
+    try:
+        application.project.resumeNotification()
+    except Exception as es:
+        getLogger().warn('*** ERROR: in resume Notification - %s' % str(es))
+
 @contextmanager
 def undoBlock(application=None):
     """Wrap all the contained operations into a single undo/redo event.
@@ -98,35 +106,28 @@ def undoBlock(application=None):
     if application is None:
         raise RuntimeError('Error getting application')
 
+    getLogger().debug2('_enterUndoBlock: echoBlocking=%s' % application._echoBlocking)
+
     # get the undo stack
     undo = application._getUndo()
+
     if undo is not None:
         undo.newWaypoint()  # DO NOT CHANGE
         undo.increaseWaypointBlocking()
 
-    # if not application.project._blockSideBar and not undo._blocked:
     if application.ui and application.ui.mainWindow:
         sidebar = application.ui.mainWindow.sideBar
         sidebar.increaseSidebarBlocking()
 
-    # if not application._echoBlocking:
-    # application._increaseNotificationBlocking()
     application.project.suspendNotification()
-
-    getLogger().debug2('_enterUndoBlock')
 
     try:
         # transfer control to the calling function
         yield
-        application.project.resumeNotification()
 
     finally:
-        # application._decreaseNotificationBlocking()
-        # if not application._echoBlocking:
-        # application.project.resumeNotification()
+        _resumeNotification(application)
 
-        # if undo is not None:
-        # if not application.project._blockSideBar and not undo._blocked:
         if application.ui and application.ui.mainWindow:
             sidebar = application.ui.mainWindow.sideBar
             sidebar.decreaseSidebarBlocking()
@@ -148,6 +149,8 @@ def undoBlockWithoutSideBar(application=None):
     if application is None:
         raise RuntimeError('Error getting application')
 
+    getLogger().debug2('_enterUndoBlockWithoutSideBar: echoBlocking=%s' % application._echoBlocking)
+
     # get the undo stack
     undo = application._getUndo()
     if undo is not None:
@@ -159,21 +162,14 @@ def undoBlockWithoutSideBar(application=None):
         sidebar = application.ui.mainWindow.sideBar
         sidebar.increaseSidebarBlocking(withSideBarUpdate=False)
 
-    # application._increaseNotificationBlocking()
-    # if not application._echoBlocking:
     application.project.suspendNotification()
-
-    getLogger().debug2('_enterUndoBlockWithoutSideBar')
 
     try:
         # transfer control to the calling function
         yield
-        application.project.resumeNotification()
 
     finally:
-        # if not application._echoBlocking:
-        #     application.project.resumeNotification()
-        # application._decreaseNotificationBlocking()
+        _resumeNotification(application)
 
         # if not application.project._blockSideBar and not undo._blocked:
         if application.ui and application.ui.mainWindow:
@@ -183,7 +179,7 @@ def undoBlockWithoutSideBar(application=None):
         if undo is not None:
             undo.decreaseWaypointBlocking()
 
-        getLogger().debug2('_exitUndoBlock: echoBlocking=%s' % application._echoBlocking)
+        getLogger().debug2('_enterUndoBlockWithoutSideBar: echoBlocking=%s' % application._echoBlocking)
 
 
 # @contextmanager

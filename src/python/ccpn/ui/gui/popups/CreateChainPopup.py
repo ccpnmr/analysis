@@ -121,16 +121,16 @@ class CreateChainPopup(CcpnDialog):
         if isinstance(seq, str):
             seq = seq.split()
 
-        # trap rogue spaces and lower case residues entered by 3-letter code
-        if seq and len(seq) == 1 and not isinstance(seq, str):
-            seq = seq[0]
-        elif not isinstance(seq, str) and isinstance(seq, Iterable):
-            newSeq = []
-            for s in seq:
-                newSeq.append(s.upper())
-            seq = tuple(newSeq)
-        else:
-            seq.strip('\n')
+        # # trap rogue spaces and lower case residues entered by 3-letter code
+        # if seq and len(seq) == 1 and not isinstance(seq, str):
+        #     seq = seq[0]
+        # elif not isinstance(seq, str) and isinstance(seq, Iterable):
+        #     newSeq = []
+        #     for s in seq:
+        #         newSeq.append(s.upper())
+        #     seq = tuple(newSeq)
+        # else:
+        #     seq.strip('\n')
 
         self.project.createChain(sequence=seq, compoundName=self.moleculeName,
                                  startNumber=self.sequenceStart, shortName=self.chainCode,
@@ -176,14 +176,14 @@ class CreateChainPopup(CcpnDialog):
         """
         oldUndo = self.project._undo.numItems()
 
-        with undoBlock():
-            applyAccept = False
-            try:
-                self._createSequence()
+        # with undoBlock():
+        applyAccept = False
+        try:
+            self._createSequence()
 
-                applyAccept = True
-            except Exception as es:
-                showWarning(str(self.windowTitle()), str(es))
+            applyAccept = True
+        except Exception as es:
+            showWarning(str(self.windowTitle()), str(es))
 
         if applyAccept is False:
             # should only undo if something new has been added to the undo deque

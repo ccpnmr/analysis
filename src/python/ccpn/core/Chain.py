@@ -315,6 +315,7 @@ def _newApiChain(self: Project, apiMolecule, shortName, role, comment):
     return result
 
 # @newObject(Chain)
+@undoBlock()
 def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundName: str = None,
                  startNumber: int = 1, molType: str = None, isCyclic: bool = False,
                  shortName: str = None, role: str = None, comment: str = None,
@@ -341,28 +342,50 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
     # check sequence is valid first
     # either string, or list/tuple of strings
     # list must all be 3 chars long if more than 1 element in list
-    if sequence and len(sequence) == 1 and not isinstance(sequence, str):
-        sequence = sequence[0]
-        if not isinstance(sequence, str):
-            raise TypeError('sequence is not a valid string: %s' % str(sequence))
-        elif not sequence.isalpha():
+    if not sequence:
+        raise TypeError('sequence must be defined')
+
+    if isinstance(sequence, str):
+
+        # alpha string
+        if not sequence.isalpha():
             raise TypeError('sequence contains bad characters: %s' % str(sequence))
+
         sequence = sequence.upper()
 
-    if not isinstance(sequence, str) and isinstance(sequence, Iterable):
-        # iterate through all elements
-        newSeq = []
-        for s in sequence:
+    elif isinstance(sequence, Iterable):
 
-            if not isinstance(s, str):
-                raise TypeError('sequence element is not a valid string: %s' % str(s))
-            elif len(s) != 3:
-                raise TypeError('sequence elements must be 3 characters: %s' % str(s))
-            elif not s.isalpha():
-                raise TypeError('sequence element contains bad characters: %s' % str(s))
+        # iterable
+        if len(sequence) == 1:
 
-            newSeq.append(s.upper())
-        sequence = tuple(newSeq)
+            # single element in a list
+            sequence = sequence[0]
+            if not isinstance(sequence, str):
+                raise TypeError('sequence is not a valid string: %s' % str(sequence))
+            elif not sequence.isalpha():
+                raise TypeError('sequence contains bad characters: %s' % str(sequence))
+
+            sequence = sequence.upper()
+
+        elif len(sequence) > 1:
+            # iterate through all elements
+            newSeq = []
+            for s in sequence:
+
+                if not isinstance(s, str):
+                    raise TypeError('sequence element is not a valid string: %s' % str(s))
+                elif len(s) != 3:
+                    raise TypeError('sequence elements must be 3 characters: %s' % str(s))
+                elif not s.isalpha():
+                    raise TypeError('sequence element contains bad characters: %s' % str(s))
+
+                newSeq.append(s.upper())
+            sequence = tuple(newSeq)
+
+        else:
+            raise TypeError('sequence is not a valid string: %s' % str(sequence))
+    else:
+        raise TypeError('sequence is not a valid string: %s' % str(sequence))
 
     apiMolSystem = self._wrappedData.molSystem
     if not shortName:
@@ -385,7 +408,6 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
         raise ValueError(
                 "Substance '%s' already exists. Try Substance.createChain function instead?"
                 % compoundName)
-
 
     substance = self.createPolymerSubstance(sequence=sequence, name=name,
                                             startNumber=startNumber, molType=molType,
@@ -412,7 +434,6 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
     for residue in result.residues:
         # Necessary as CCPN V2 default protonation states do not match tne NEF / V3 standard
         residue.resetVariantToDefault()
-
 
     return result
 

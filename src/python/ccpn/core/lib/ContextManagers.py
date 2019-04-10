@@ -106,7 +106,7 @@ def undoBlock(application=None):
     if application is None:
         raise RuntimeError('Error getting application')
 
-    getLogger().debug2('_enterUndoBlock: echoBlocking=%s' % application._echoBlocking)
+    getLogger().debug2('_enterUndoBlock')
 
     # get the undo stack
     undo = application._getUndo()
@@ -149,7 +149,7 @@ def undoBlockWithoutSideBar(application=None):
     if application is None:
         raise RuntimeError('Error getting application')
 
-    getLogger().debug2('_enterUndoBlockWithoutSideBar: echoBlocking=%s' % application._echoBlocking)
+    getLogger().debug2('_enterUndoBlockWithoutSideBar')
 
     # get the undo stack
     undo = application._getUndo()

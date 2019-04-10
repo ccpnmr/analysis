@@ -174,10 +174,9 @@ class CreateChainPopup(CcpnDialog):
           If anything has been added to the undo queue then remove it with application.undo()
           repopulate the popup widgets
         """
+        applyAccept = False
         oldUndo = self.project._undo.numItems()
 
-        # with undoBlock():
-        applyAccept = False
         try:
             self._createSequence()
 

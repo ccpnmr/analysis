@@ -149,3 +149,13 @@ SYMBOLSIZE = 'symbolSize'
 SYMBOLTHICKNESS = 'symbolThickness'
 
 STRINGSCALE = 0.7
+
+PEAKLABEL_MINIMAL = 'peaklabelMinimal'
+PEAKLABEL_SHORT = 'peaklabelShort'
+PEAKLABEL_FULL = 'peaklabelFull'
+PEAKLABEL_PID = 'peaklabelPid'
+
+PEAKSYMBOL_CROSS = 'peakSymbolCross'
+PEAKSYMBOL_LINEWIDTH = 'peakSymbolLineWidth'
+PEAKSYMBOL_FILLEDLINEWIDTH = 'peakSymbolFilledLineWidth'
+PEAKSYMBOL_PLUS = 'peakSymbolPlus'

@@ -27,11 +27,16 @@ __date__ = "$Date: 2017-03-22 15:13:45 +0000 (Wed, March 22, 2017) $"
 
 from PyQt5 import QtCore, QtGui
 from ccpn.ui.gui.lib.GuiListView import GuiListViewABC
-
+from ccpn.util.OrderedSet import OrderedSet
 
 NULL_RECT = QtCore.QRectF()
 IDENTITY = QtGui.QTransform()
 IDENTITY.reset()
+
+
+def _getPeakAnnotationMinimal(peak):
+    text = 'TEMP'
+    return text
 
 
 def _getPeakAnnotation(peak):
@@ -54,14 +59,15 @@ def _getPeakAnnotation(peak):
 
             else:
                 for item in pdNA[dimension]:
-                    label = item.nmrResidue.id + item.name
+                    label = '.'.join((item.nmrResidue.id, item.name))
+                    # label = item.nmrResidue.id + '.' + item.name
                     peakLabel.append(label)
 
     text = ', '.join(peakLabel)
     return text
 
 
-def _getScreenPeakAnnotation(peak, useShortCode=False):
+def _getScreenPeakAnnotation(peak, useShortCode=False, useMinimalCode=False):
     def chainLabel(item):
         try:
             chainLabel = item.nmrResidue.nmrChain.id
@@ -94,9 +100,17 @@ def _getScreenPeakAnnotation(peak, useShortCode=False):
                 if all(x == peakNmrResidues[0] for x in peakNmrResidues):
                     for item in pdNA[dimension]:
                         if len(peakLabel) > 0 and useShortCode:
+
+                            if useMinimalCode:
+                                continue
+
                             label = item.name
                         else:
-                            label = chainLabel(item) + shortCode(item) + item.nmrResidue.sequenceCode + item.name
+                            if useMinimalCode:
+                                label = shortCode(item) + item.nmrResidue.sequenceCode
+                            else:
+                                label = chainLabel(item) + shortCode(item) + item.nmrResidue.sequenceCode + item.name
+
                         peakLabel.append(label)
 
                 else:
@@ -115,10 +129,21 @@ def _getScreenPeakAnnotation(peak, useShortCode=False):
                         try:
                             for item in thispdNA:
                                 if len(resLabel) > 0 and useShortCode:
+
+                                    if useMinimalCode:
+                                        continue
+
                                     label = item.name
                                 else:
-                                    label = chainLabel(item) + shortCode(item) + item.nmrResidue.sequenceCode + item.name
+                                    if useMinimalCode:
+                                        label = shortCode(item) + item.nmrResidue.sequenceCode
+                                    else:
+                                        label = chainLabel(item) + shortCode(item) + item.nmrResidue.sequenceCode + item.name
                                 resLabel.append(label)
+
+                            if useMinimalCode:
+                                resLabel = list(OrderedSet(resLabel))
+
                         except:
                             resLabel.append('-')
 
@@ -133,6 +158,9 @@ def _getScreenPeakAnnotation(peak, useShortCode=False):
                 peakLabel.append(peak.id)
             else:
                 peakLabel.append('_')
+
+    if useMinimalCode:
+        peakLabel = list(OrderedSet(peakLabel))
 
     text = ', '.join(peakLabel)
     return text

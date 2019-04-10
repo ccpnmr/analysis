@@ -386,10 +386,10 @@ class ChemicalShiftsMapping(CcpnModule):
     self.spectraSelectionWidget = SpectraSelectionWidget(self.scrollAreaWidgetContents, mainWindow=self.mainWindow,
                                                          grid=(i, 1), gridSpan=(1, 2))
     if len(self.project.spectra) > 0:
-      self._checkSpectraWithPeakListsOnly()
       self._addSettingsWAttr(self.spectraSelectionWidget.selectSpectraOption.radioButtons)
       self._addSettingsWAttr(self.spectraSelectionWidget.allSpectraCheckBoxes)
       self._addSettingsWAttr(self.spectraSelectionWidget.allSGCheckBoxes)
+      self._checkSpectraWithPeakListsOnly()
 
     i += 1
     self.concentrationLabel = Label(self.scrollAreaWidgetContents, text='Concentrations', grid=(i, 0), vAlign='t')

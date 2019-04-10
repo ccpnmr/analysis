@@ -64,7 +64,8 @@ from ccpn.util import Logging
 
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 from ccpn.core.Peak import Peak
-
+from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtWidgets import QApplication
 
 #from ccpn.util.Logging import getLogger
 #from collections import OrderedDict
@@ -155,6 +156,28 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     #     return True
     #
     #   return False
+
+    #     # install handler to resize when moving between displays
+    #     self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
+    #
+    # @pyqtSlot()
+    # def _screenChangedEvent(self, *args):
+    #     self._screenChanged(*args)
+    #     self.update()
+    #
+    # def _screenChanged(self, *args):
+    #     screens = QApplication.screens()
+    #     # screen = QApplication.desktop().screenNumber(QtGui.QCursor().pos())
+    #
+    #     if self.hasFocus():
+    #         # follow the mouse if has focus
+    #         screen = QApplication.desktop().screenNumber(QtGui.QCursor().pos())
+    #     else:
+    #         # otherwise follow the position of self
+    #         screen = QApplication.desktop().screenNumber(self)
+    #
+    #     self._devicePixelRatio = screens[screen].devicePixelRatio()
+    #     # self.viewports._devicePixelRatio = self._devicePixelRatio
 
     @property
     def modules(self):

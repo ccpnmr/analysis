@@ -803,6 +803,14 @@ class CcpnGLWidget(QOpenGLWidget):
     def _screenChanged(self, *args):
         screens = QApplication.screens()
         screen = QApplication.desktop().screenNumber(QtGui.QCursor().pos())
+
+        # if self.hasFocus():
+        #     # follow the mouse if has focus
+        #     screen = QApplication.desktop().screenNumber(QtGui.QCursor().pos())
+        # else:
+        #     # otherwise follow the position of self
+        #     screen = QApplication.desktop().screenNumber(self)
+
         self._devicePixelRatio = screens[screen].devicePixelRatio()
         self.viewports._devicePixelRatio = self._devicePixelRatio
 
@@ -1609,8 +1617,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.viewports = GLViewports()
         # self._devicePixelRatio = QApplication.instance().devicePixelRatio()
-        self._screenChanged()
-        self.viewports.setDevicePixelRatio(self._devicePixelRatio)
+        # self._screenChanged()
+        # self.viewports.setDevicePixelRatio(self._devicePixelRatio)
 
         # define the main viewports
         self.viewports.addViewport(GLDefs.MAINVIEW, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a'),
@@ -1676,8 +1684,8 @@ class CcpnGLWidget(QOpenGLWidget):
             self.initialiseAxes(self.strip)
             self.initialiseTraces()
 
-            # check that the screen device pixel ratio is correct
-            self._screenChanged()
+        # check that the screen device pixel ratio is correct
+        self._screenChanged()
 
     def _setColourScheme(self):
         """Update colours from colourScheme

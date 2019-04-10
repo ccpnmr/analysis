@@ -229,9 +229,6 @@ class CcpnGLWidget(QOpenGLWidget):
         self.GLSignals.glAxisLockChanged.connect(self._glAxisLockChanged)
         self.GLSignals.glAxisUnitsChanged.connect(self._glAxisUnitsChanged)
 
-        # install handler to resize when moving between displays
-        self.mainWindow.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
-
     def _initialiseAll(self):
         """Initialise all attributes for the display
         """
@@ -253,7 +250,6 @@ class CcpnGLWidget(QOpenGLWidget):
         self.symbolX = 1.0
         self.symbolY = 1.0
 
-        self._devicePixelRatio = 1.0  # set in the initialiseGL routine
         self.peakWidthPixels = 16
 
         # set initial axis limits - should be changed by strip.display..
@@ -795,24 +791,12 @@ class CcpnGLWidget(QOpenGLWidget):
         self._maxY = max(self._maxY, fy0)
         self._minY = min(self._minY, fy1)
 
-    @pyqtSlot()
-    def _screenChangedEvent(self, *args):
-        self._screenChanged(*args)
+    def refreshDevicePixelRatio(self):
+        """refresh the devicePixelRatio for the viewports
+        """
+        # control for changing screens has now been moved to mainWindow so only one signal is needed
+        self.viewports._devicePixelRatio = self.devicePixelRatio()
         self.update()
-
-    def _screenChanged(self, *args):
-        screens = QApplication.screens()
-        screen = QApplication.desktop().screenNumber(QtGui.QCursor().pos())
-
-        # if self.hasFocus():
-        #     # follow the mouse if has focus
-        #     screen = QApplication.desktop().screenNumber(QtGui.QCursor().pos())
-        # else:
-        #     # otherwise follow the position of self
-        #     screen = QApplication.desktop().screenNumber(self)
-
-        self._devicePixelRatio = screens[screen].devicePixelRatio()
-        self.viewports._devicePixelRatio = self._devicePixelRatio
 
     def _getValidAspectRatio(self, axisCode):
         va = [ax for ax in self._preferences.aspectRatios.keys() if ax.upper()[0] == axisCode.upper()[0]]
@@ -820,9 +804,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def resizeGL(self, w, h):
         # must be set here to catch the change of screen
-        # self._devicePixelRatio = QApplication.primaryScreen().devicePixelRatio()   #.instance().devicePixelRatio()
-        # self.viewports._devicePixelRatio = self._devicePixelRatio
-        self._screenChanged()
+        self.refreshDevicePixelRatio()
 
         self.w = w
         self.h = h
@@ -1616,9 +1598,6 @@ class CcpnGLWidget(QOpenGLWidget):
                                            GLContext=self)
 
         self.viewports = GLViewports()
-        # self._devicePixelRatio = QApplication.instance().devicePixelRatio()
-        # self._screenChanged()
-        # self.viewports.setDevicePixelRatio(self._devicePixelRatio)
 
         # define the main viewports
         self.viewports.addViewport(GLDefs.MAINVIEW, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a'),
@@ -1685,7 +1664,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self.initialiseTraces()
 
         # check that the screen device pixel ratio is correct
-        self._screenChanged()
+        self.refreshDevicePixelRatio()
 
     def _setColourScheme(self):
         """Update colours from colourScheme

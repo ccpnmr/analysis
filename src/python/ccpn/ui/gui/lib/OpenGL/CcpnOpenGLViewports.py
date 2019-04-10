@@ -82,7 +82,7 @@ class GLViewports(object):
                           int((b - 1) * self._devicePixelRatio),
                           int(wi * self._devicePixelRatio),
                           int(he * self._devicePixelRatio))
-            # w-thisView[3]-thisView[1], h-thisView[4]-thisView[2])
+
         else:
             raise RuntimeError('Error: viewport %s does not exist' % name)
 
@@ -106,6 +106,6 @@ class GLViewports(object):
             he = setVal(thisView[4], w, h, 0)
 
             return (l, b, wi, he)
-            # w-thisView[3]-thisView[1], h-thisView[4]-thisView[2])
+
         else:
             raise RuntimeError('Error: viewport %s does not exist' % name)

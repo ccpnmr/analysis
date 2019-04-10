@@ -345,6 +345,11 @@ class GuiStrip(Frame):
         """
         self._CcpnGLWidget._processMultipletNotifier(data)
 
+    def refreshDevicePixelRatio(self):
+        """Set the devicePixel ratio in the GL window
+        """
+        self._CcpnGLWidget.refreshDevicePixelRatio()
+
     def _checkMenuItems(self):
         """Update the menu check boxes from the strip
         Subclass if options needed, e.g. stackSpectra item

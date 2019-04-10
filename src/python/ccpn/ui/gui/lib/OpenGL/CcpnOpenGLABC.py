@@ -196,9 +196,6 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         self.GLSignals = GLNotifier(parent=self)
         self.GLSignals.glEvent.connect(self._glEvent)
 
-        # install handler to resize when moving between displays
-        self.mainWindow.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
-
     def _initialiseAll(self):
         """Initialise all attributes for the display
         """
@@ -214,8 +211,6 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         self.pixelY = 1.0
         self.deltaX = 1.0
         self.deltaY = 1.0
-
-        self._devicePixelRatio = 1.0  # set in the initialiseGL routine
 
         # set initial axis limits - should be changed by strip.display..
         self.axisL = -1.0
@@ -334,24 +329,14 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         self._ordering = []
         self.glReady = True
 
-    def close(self):
-        self.GLSignals.glEvent.disconnect()
-
-    @pyqtSlot()
-    def _screenChangedEvent(self, *args):
-        self._screenChanged(*args)
+    def refreshDevicePixelRatio(self):
+        """refresh the devicePixelRatio for the viewports
+        """
+        self.viewports._devicePixelRatio = self.devicePixelRatio()
         self.update()
 
-    def _screenChanged(self, *args):
-        screens = QApplication.screens()
-        if self.hasFocus():
-            # follow the mouse if has focus
-            screen = QApplication.desktop().screenNumber(QtGui.QCursor().pos())
-        else:
-            # otherwise follow the position of self
-            screen = QApplication.desktop().screenNumber(self)
-        self._devicePixelRatio = screens[screen].devicePixelRatio()
-        self.viewports._devicePixelRatio = self._devicePixelRatio
+    def close(self):
+        self.GLSignals.glEvent.disconnect()
 
     def resetRangeLimits(self, allLimits=True):
         # reset zoom limits for the display

@@ -157,27 +157,20 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     #
     #   return False
 
-    #     # install handler to resize when moving between displays
-    #     self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
-    #
-    # @pyqtSlot()
-    # def _screenChangedEvent(self, *args):
-    #     self._screenChanged(*args)
-    #     self.update()
-    #
-    # def _screenChanged(self, *args):
-    #     screens = QApplication.screens()
-    #     # screen = QApplication.desktop().screenNumber(QtGui.QCursor().pos())
-    #
-    #     if self.hasFocus():
-    #         # follow the mouse if has focus
-    #         screen = QApplication.desktop().screenNumber(QtGui.QCursor().pos())
-    #     else:
-    #         # otherwise follow the position of self
-    #         screen = QApplication.desktop().screenNumber(self)
-    #
-    #     self._devicePixelRatio = screens[screen].devicePixelRatio()
-    #     # self.viewports._devicePixelRatio = self._devicePixelRatio
+        # install handler to resize when moving between displays
+        self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
+
+    @pyqtSlot()
+    def _screenChangedEvent(self, *args):
+        self._screenChanged(*args)
+        self.update()
+
+    def _screenChanged(self, *args):
+        getLogger().debug2('mainWindow screenchanged')
+        project = self.application.project
+        for spectrumDisplay in project.spectrumDisplays:
+            for strip in spectrumDisplay.strips:
+                strip.refreshDevicePixelRatio()
 
     @property
     def modules(self):

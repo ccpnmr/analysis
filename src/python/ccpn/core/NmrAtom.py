@@ -330,6 +330,9 @@ class NmrAtom(AbstractWrapperObject):
             for cs in self.chemicalShifts:
                 cs._finaliseAction(action=action)
 
+    def _setIsotopeCode(self, value):
+        self._wrappedData.isotopeCode = value
+
     @logCommand(get='self')
     def rename(self, value: str = None):
         """Rename the NmrAtom, changing its name, Pid, and internal representation."""
@@ -355,10 +358,17 @@ class NmrAtom(AbstractWrapperObject):
                     elif newIsotopeCode != isotopeCode:
                         raise ValueError("Cannot rename %s type NmrAtom to %s" % (isotopeCode, value))
 
-                self._wrappedData.name = value
+                try:
+                    self._wrappedData.name = value
+                except Exception as es:
+                    raise ValueError("Cannot rename %s type NmrAtom to %s" % (isotopeCode, value))
+
+            addUndoItem(redo=partial(self._setIsotopeCode, newIsotopeCode))
 
             addUndoItem(undo=partial(self.rename, oldName),
                         redo=partial(self.rename, value))
+
+            addUndoItem(undo=partial(self._setIsotopeCode, isotopeCode))
 
     #=========================================================================================
     # CCPN functions

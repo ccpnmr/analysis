@@ -124,26 +124,32 @@ class NmrAtomPopup(CcpnDialog):
         oldUndoItems = self.project._undo.numItems()
 
         with undoBlock():
-            if self.nmrAtom.name != self.nmrAtomNamePulldown.currentText():
-                self.nmrAtom.rename(self.nmrAtomNamePulldown.currentText())
+            try:
+                if self.nmrAtom.name != self.nmrAtomNamePulldown.currentText():
+                    self.nmrAtom.rename(self.nmrAtomNamePulldown.currentText())
 
-            if self.nmrAtom.nmrResidue.id != self.nmrResiduePulldown.currentText():
-                nmrResidue = self.project.getByPid('NR:%s' % self.nmrResiduePulldown.currentText())
+                if self.nmrAtom.nmrResidue.id != self.nmrResiduePulldown.currentText():
+                    nmrResidue = self.project.getByPid('NR:%s' % self.nmrResiduePulldown.currentText())
 
-                if not self.mergeBox.isChecked() and self.project.getByPid('NA:%s.%s' %
-                                                                           (nmrResidue.id, self.nmrAtomNamePulldown.currentText())):
-                    showWarning('Merge must be selected', 'Cannot re-assign NmrAtom to an existing '
-                                                          'NmrAtom of another NmrResidue without merging')
+                    if not self.mergeBox.isChecked() and self.project.getByPid('NA:%s.%s' %
+                                                                               (nmrResidue.id, self.nmrAtomNamePulldown.currentText())):
+                        showWarning('Merge must be selected', 'Cannot re-assign NmrAtom to an existing '
+                                                              'NmrAtom of another NmrResidue without merging')
 
-                else:
-                    self.nmrAtom.assignTo(chainCode=nmrResidue.nmrChain.shortName,
-                                          sequenceCode=nmrResidue.sequenceCode,
-                                          residueType=nmrResidue.residueType,
-                                          mergeToExisting=self.mergeBox.isChecked())
+                    else:
+                        self.nmrAtom.assignTo(chainCode=nmrResidue.nmrChain.shortName,
+                                              sequenceCode=nmrResidue.sequenceCode,
+                                              residueType=nmrResidue.residueType,
+                                              mergeToExisting=self.mergeBox.isChecked())
 
-                self.nmrAtomLabel.setText("NmrAtom: %s" % self.nmrAtom.id)
+                    self.nmrAtomLabel.setText("NmrAtom: %s" % self.nmrAtom.id)
 
-            applyAccept = True
+                applyAccept = True
+
+            except Exception as es:
+                showWarning(str(self.windowTitle()), str(es))
+                if self.application._isInDebugMode:
+                    raise es
 
         if applyAccept is False:
             # should only undo if something new has been added to the undo deque

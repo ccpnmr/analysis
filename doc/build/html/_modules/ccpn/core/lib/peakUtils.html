@@ -50,18 +50,18 @@
 <span></span><span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:32 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -74,7 +74,8 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
-
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">curve_fit</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
 
 <span class="n">POSITIONS</span> <span class="o">=</span> <span class="s1">&#39;positions&#39;</span>
 <span class="n">HEIGHT</span> <span class="o">=</span> <span class="s1">&#39;height&#39;</span>
@@ -88,6 +89,15 @@
 <span class="n">N</span> <span class="o">=</span> <span class="s1">&#39;N&#39;</span>
 <span class="n">C</span> <span class="o">=</span> <span class="s1">&#39;C&#39;</span>
 <span class="n">DefaultAtomWeights</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="n">H</span><span class="p">,</span> <span class="mf">7.00</span><span class="p">),</span> <span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mf">1.00</span><span class="p">),</span> <span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="mf">4.00</span><span class="p">),</span> <span class="p">(</span><span class="n">OTHER</span><span class="p">,</span> <span class="mf">1.00</span><span class="p">)))</span>
+
+
+<div class="viewcode-block" id="Dictlist"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.peakUtils.Dictlist">[docs]</a><span class="k">class</span> <span class="nc">Dictlist</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">Dictlist</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="getMultipletPosition"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.peakUtils.getMultipletPosition">[docs]</a><span class="k">def</span> <span class="nf">getMultipletPosition</span><span class="p">(</span><span class="n">multiplet</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;ppm&#39;</span><span class="p">):</span>
@@ -185,7 +195,7 @@
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">NaN</span><span class="p">,</span> <span class="n">Inf</span><span class="p">,</span> <span class="n">arange</span><span class="p">,</span> <span class="n">isscalar</span><span class="p">,</span> <span class="n">asarray</span><span class="p">,</span> <span class="n">array</span>
 
 
-<div class="viewcode-block" id="peakdet"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.peakUtils.peakdet">[docs]</a><span class="k">def</span> <span class="nf">peakdet</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">delta</span><span class="p">):</span>
+<div class="viewcode-block" id="peakdet"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.peakUtils.peakdet">[docs]</a><span class="k">def</span> <span class="nf">peakdet</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">negative</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converted from MATLAB script at http://billauer.co.il/peakdet.html</span>
 <span class="sd">    % Eli Billauer, 3.4.05 (Explicitly not copyrighted).</span>
@@ -210,7 +220,9 @@
             <span class="n">mn</span> <span class="o">=</span> <span class="n">this</span>
             <span class="n">mnpos</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">lookformax</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">this</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">mx</span> <span class="o">-</span> <span class="n">delta</span><span class="p">:</span>  <span class="c1">#changed to abs for STDs test</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">negative</span><span class="p">:</span> <span class="c1"># just positives</span>
+                <span class="n">this</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">this</span> <span class="o">&lt;</span> <span class="n">mx</span> <span class="o">-</span> <span class="n">delta</span><span class="p">:</span>
                 <span class="n">maxtab</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="nb">float</span><span class="p">(</span><span class="n">mxpos</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">mx</span><span class="p">)))</span>
                 <span class="n">mn</span> <span class="o">=</span> <span class="n">this</span>
                 <span class="n">mnpos</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
@@ -316,6 +328,9 @@
 <span class="k">def</span> <span class="nf">__filterPeaksBySelectedNmrAtomOption</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">nmrAtomsNames</span><span class="p">,</span> <span class="n">spectra</span><span class="p">):</span>
     <span class="n">peaks</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">nmrAtoms</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">peakLists</span> <span class="o">=</span> <span class="p">[</span><span class="n">sp</span><span class="o">.</span><span class="n">peakLists</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">peakLists</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;No PeakList for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sp</span><span class="p">)</span>
+                 <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">]</span>  <span class="c1"># take only the last peakList if more then 1</span>
     <span class="k">for</span> <span class="n">nmrAtomName</span> <span class="ow">in</span> <span class="n">nmrAtomsNames</span><span class="p">:</span>
         <span class="n">nmrAtom</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">getNmrAtom</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">nmrAtomName</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">nmrAtom</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
@@ -326,8 +341,10 @@
         <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">assignedPeaks</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">nmrAtomsNames</span><span class="p">:</span>
-                    <span class="n">filteredPeaks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peak</span><span class="p">)</span>
-                    <span class="n">nmrAtomsNamesAvailable</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span> <span class="ow">in</span> <span class="n">peakLists</span><span class="p">:</span>
+                        <span class="n">filteredPeaks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peak</span><span class="p">)</span>
+                        <span class="n">nmrAtomsNamesAvailable</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">filteredPeaks</span><span class="p">)))</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectra</span><span class="p">):</span>  <span class="c1"># deals when a residue is assigned to multiple peaks</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">nmrAtomsNamesAvailable</span><span class="p">)))</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">nmrAtomsNames</span><span class="p">):</span>
             <span class="n">peaks</span> <span class="o">+=</span> <span class="n">filteredPeaks</span>
@@ -342,7 +359,29 @@
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nmrAtomsNames</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">nmrAtomsNames</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">assignedNmrAtoms</span><span class="p">:</span>
                         <span class="n">peaks</span> <span class="o">+=</span> <span class="p">[</span><span class="n">peak</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">peaks</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">OrderedDict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">peaks</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="getNmrResiduePeakHeight"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.peakUtils.getNmrResiduePeakHeight">[docs]</a><span class="k">def</span> <span class="nf">getNmrResiduePeakHeight</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">nmrAtomsNames</span><span class="p">,</span> <span class="n">spectra</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">    :param nmrResidue:</span>
+<span class="sd">    :param nmrAtomsNames: nmr Atoms to compare. str &#39;H&#39;, &#39;N&#39;, &#39;CA&#39; etc</span>
+<span class="sd">    :param spectra: compare peaks only from given spectra</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">heights</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectra</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">peaks</span> <span class="o">=</span> <span class="n">__filterPeaksBySelectedNmrAtomOption</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">nmrAtomsNames</span><span class="p">,</span> <span class="n">spectra</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">peaks</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
+                <span class="n">heights</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">heights</span></div>
+
 
 
 <div class="viewcode-block" id="getNmrResidueDeltas"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.peakUtils.getNmrResidueDeltas">[docs]</a><span class="k">def</span> <span class="nf">getNmrResidueDeltas</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">nmrAtomsNames</span><span class="p">,</span> <span class="n">spectra</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">POSITIONS</span><span class="p">,</span> <span class="n">atomWeights</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -381,11 +420,11 @@
                             <span class="n">deltas</span> <span class="o">+=</span> <span class="p">[</span><span class="n">delta</span><span class="p">]</span>
 
                     <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">VOLUME</span><span class="p">:</span>
-                        <span class="n">delta1Atoms</span> <span class="o">=</span> <span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">volume</span> <span class="o">-</span> <span class="nb">list</span><span class="p">(</span><span class="n">peaks</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">volume</span><span class="p">)</span>
+                        <span class="n">delta1Atoms</span> <span class="o">=</span> <span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">volume</span> <span class="o">/</span> <span class="nb">list</span><span class="p">(</span><span class="n">peaks</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">volume</span><span class="p">)</span>
                         <span class="n">deltas</span> <span class="o">+=</span> <span class="p">[((</span><span class="n">delta1Atoms</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">,</span> <span class="p">]</span>
 
                     <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">HEIGHT</span><span class="p">:</span>
-                        <span class="n">delta1Atoms</span> <span class="o">=</span> <span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">height</span> <span class="o">-</span> <span class="nb">list</span><span class="p">(</span><span class="n">peaks</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
+                        <span class="n">delta1Atoms</span> <span class="o">=</span> <span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">height</span> <span class="o">/</span> <span class="nb">list</span><span class="p">(</span><span class="n">peaks</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
                         <span class="n">deltas</span> <span class="o">+=</span> <span class="p">[((</span><span class="n">delta1Atoms</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">,</span> <span class="p">]</span>
 
                     <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">LINEWIDTHS</span><span class="p">:</span>
@@ -409,6 +448,150 @@
     <span class="k">if</span> <span class="n">deltas</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">in</span> <span class="n">deltas</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">deltas</span><span class="p">)),</span> <span class="mi">3</span><span class="p">)</span>
     <span class="k">return</span></div>
+
+<span class="k">def</span> <span class="nf">_getKd</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">param</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">bindingUnscaled</span><span class="p">,</span> <span class="n">bmax</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">yScaled</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="n">bmax</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">paramScaled</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">yScaled</span><span class="p">)</span>
+        <span class="n">kd</span><span class="p">,</span> <span class="n">bmax</span> <span class="o">=</span>  <span class="n">paramScaled</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Impossible to estimate Kd values. </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span><span class="n">err</span><span class="p">)</span>
+        <span class="n">kd</span><span class="p">,</span> <span class="n">bmax</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">kd</span>
+
+
+<div class="viewcode-block" id="oneSiteBindingCurve"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.peakUtils.oneSiteBindingCurve">[docs]</a><span class="k">def</span> <span class="nf">oneSiteBindingCurve</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">kd</span><span class="p">,</span> <span class="n">bmax</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">bmax</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">kd</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="exponenial_func"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.peakUtils.exponenial_func">[docs]</a><span class="k">def</span> <span class="nf">exponenial_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">a</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">b</span><span class="o">*</span><span class="n">x</span><span class="p">)</span></div>
+
+<span class="k">def</span> <span class="nf">_fit1SiteBindCurve</span><span class="p">(</span><span class="n">bindingCurves</span><span class="p">,</span> <span class="n">aFunc</span><span class="o">=</span><span class="n">oneSiteBindingCurve</span><span class="p">,</span> <span class="n">xfStep</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">xfPercent</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param bindingCurves: DataFrame as: Columns -&gt; float or int.</span>
+<span class="sd">                                                  Used as xs points (e.g. concentration/time/etc value)</span>
+<span class="sd">                                        rows    -&gt; float or int.</span>
+<span class="sd">                                                  Used as ys points (e.g. Deltadelta in ppm)</span>
+<span class="sd">                                                  the actual curve points</span>
+<span class="sd">                                        index   -&gt; obj. E.g. nmrResidue obj. used as identifier for the curve origin</span>
+
+<span class="sd">                                        | index          |    1   |   2   |</span>
+<span class="sd">                                        |----------------+--------|-------|</span>
+<span class="sd">                                        | obj1           |    1.0 |   1.1 |</span>
+<span class="sd">                                        | obj2           |    2.0 |   1.2 |</span>
+
+<span class="sd">    :param aFunc:  Default: oneSiteBindingCurve.</span>
+<span class="sd">    :param xfStep: number of x points for generating the fitted curve.</span>
+<span class="sd">    :param xfPercent: percent to add to max X value of the fitted curve, so to have a longer curve after the last</span>
+<span class="sd">                    experimental value.</span>
+
+<span class="sd">    :return: tuple of parameters for plotting fitted curves.</span>
+<span class="sd">             x_atHalf_Y: the x value for half of Y. Used as estimated  kd</span>
+<span class="sd">             xs: array of xs. Original xs points from the dataFrame columns</span>
+<span class="sd">             yScaled: array of yScaled. Scaled to have values 0 to 1</span>
+<span class="sd">             xf: array of x point for the new fitted curve. A range from 0 to max of xs.</span>
+<span class="sd">             yf: array the fitted curve</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">curve_fit</span>
+    <span class="kn">from</span> <span class="nn">ccpn.util.Common</span> <span class="kn">import</span> <span class="n">percentage</span>
+    <span class="n">errorValue</span> <span class="o">=</span> <span class="p">(</span><span class="bp">None</span><span class="p">,)</span><span class="o">*</span><span class="mi">6</span>
+    <span class="k">if</span> <span class="n">aFunc</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">aFunc</span><span class="p">):</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Error. Fitting curve </span><span class="si">%s</span><span class="s2"> is not callable&quot;</span> <span class="o">%</span> <span class="n">aFunc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">errorValue</span>
+    <span class="k">if</span> <span class="n">bindingCurves</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Error. Binding curves not found&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">errorValue</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">bindingCurves</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">ys</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>  <span class="c1">#puts all y values in a single 1d array.</span>
+    <span class="n">xss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span> <span class="o">*</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="n">xss</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>  <span class="c1"># #puts all x values in a 1d array preserving the original y positions (order=&#39;F&#39;).</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">errorValue</span> <span class="c1">#not enough datapoints</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">param</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="n">aFunc</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">)</span>
+        <span class="n">xhalfUnscaled</span><span class="p">,</span> <span class="n">bMaxUnscaled</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">yScaled</span> <span class="o">=</span> <span class="n">ys</span> <span class="o">/</span> <span class="n">bMaxUnscaled</span>  <span class="c1">#scales y to have values 0-1</span>
+        <span class="n">paramScaled</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="n">aFunc</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">yScaled</span><span class="p">)</span>
+
+        <span class="n">xfRange</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
+        <span class="n">xfPerc</span> <span class="o">=</span> <span class="n">percentage</span><span class="p">(</span><span class="n">xfPercent</span><span class="p">,</span> <span class="n">xfRange</span><span class="p">)</span>
+        <span class="n">xfMax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span> <span class="o">+</span> <span class="n">xfPerc</span>
+        <span class="n">xf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">xfMax</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">xfStep</span><span class="p">)</span>
+        <span class="n">yf</span> <span class="o">=</span> <span class="n">aFunc</span><span class="p">(</span><span class="n">xf</span><span class="p">,</span> <span class="o">*</span><span class="n">paramScaled</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">x_atHalf_Y</span><span class="p">,</span> <span class="n">bmax</span> <span class="o">=</span> <span class="n">paramScaled</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">x_atHalf_Y</span><span class="p">,</span> <span class="n">bmax</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">yScaled</span><span class="p">,</span> <span class="n">xf</span><span class="p">,</span> <span class="n">yf</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Impossible to estimate Kd value </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">errorValue</span>
+
+
+
+
+
+
+<span class="k">def</span> <span class="nf">_fitExpDecayCurve</span><span class="p">(</span><span class="n">bindingCurves</span><span class="p">,</span> <span class="n">aFunc</span><span class="o">=</span><span class="n">exponenial_func</span><span class="p">,</span> <span class="n">xfStep</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">xfPercent</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">p0</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param TODO</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span> <span class="nn">ccpn.util.Common</span> <span class="kn">import</span> <span class="n">percentage</span>
+    <span class="n">errorValue</span> <span class="o">=</span> <span class="p">(</span><span class="bp">None</span><span class="p">,)</span><span class="o">*</span><span class="mi">6</span>
+    <span class="k">if</span> <span class="n">aFunc</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">aFunc</span><span class="p">):</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Error. Fitting curve </span><span class="si">%s</span><span class="s2"> is not callable&quot;</span> <span class="o">%</span> <span class="n">aFunc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">errorValue</span>
+    <span class="k">if</span> <span class="n">bindingCurves</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Error. Binding curves not found&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">errorValue</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">bindingCurves</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">ys</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>  <span class="c1">#puts all y values in a single 1d array.</span>
+    <span class="n">xss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span> <span class="o">*</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="n">xss</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>  <span class="c1"># #puts all x values in a 1d array preserving the original y positions (order=&#39;F&#39;).</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">errorValue</span> <span class="c1">#not enough datapoints</span>
+    <span class="k">try</span><span class="p">:</span>
+
+        <span class="n">popt</span><span class="p">,</span> <span class="n">pcov</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="n">aFunc</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">p0</span><span class="o">=</span><span class="n">p0</span><span class="p">)</span>
+        <span class="n">xfRange</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
+        <span class="n">xfPerc</span> <span class="o">=</span> <span class="n">percentage</span><span class="p">(</span><span class="n">xfPercent</span><span class="p">,</span> <span class="n">xfRange</span><span class="p">)</span>
+        <span class="n">xfMax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span> <span class="o">+</span> <span class="n">xfPerc</span>
+        <span class="n">xf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">xfMax</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">xfStep</span><span class="p">)</span>
+        <span class="n">yf</span> <span class="o">=</span> <span class="n">aFunc</span><span class="p">(</span><span class="n">xf</span><span class="p">,</span> <span class="o">*</span><span class="n">popt</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">xf</span><span class="p">,</span> <span class="n">yf</span><span class="p">,</span> <span class="o">*</span><span class="n">popt</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Impossible to estimate Kd value </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">errorValue</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </pre></div>
 
           </div>

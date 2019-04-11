@@ -27,13 +27,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 
 from typing import Optional, List
-import collections
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import CalculationStep as ApiCalculationStep
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.DataSet import DataSet
-from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
-from ccpn.util.Logging import getLogger
+from ccpn.core.lib.ContextManagers import newObject
 
 
 class CalculationStep(AbstractWrapperObject):

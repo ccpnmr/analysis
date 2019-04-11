@@ -78,7 +78,8 @@
 <dl class="function">
 <dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.calculateOverlapCount">
 <code class="descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="descname">calculateOverlapCount</code><span class="sig-paren">(</span><em>compoundA</em>, <em>mixture</em>, <em>minimalOverlap</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#calculateOverlapCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.calculateOverlapCount" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>called from score single sampleComponent and sample</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.calculateTotalScore">
@@ -88,21 +89,6 @@
 <dl class="function">
 <dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.findBestMixtures">
 <code class="descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="descname">findBestMixtures</code><span class="sig-paren">(</span><em>mixturesSteps</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#findBestMixtures"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.findBestMixtures" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.generatePeakPositions">
-<code class="descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="descname">generatePeakPositions</code><span class="sig-paren">(</span><em>numberOfPeaks</em>, <em>ppmStart</em>, <em>ppmEnd</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#generatePeakPositions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.generatePeakPositions" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.generateSimpleCompounds">
-<code class="descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="descname">generateSimpleCompounds</code><span class="sig-paren">(</span><em>numb</em>, <em>numberOfPeaks</em>, <em>ppmStart</em>, <em>ppmEnd</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#generateSimpleCompounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.generateSimpleCompounds" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.getAllOverlappedPositions">
-<code class="descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="descname">getAllOverlappedPositions</code><span class="sig-paren">(</span><em>mixtures</em>, <em>minDist</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#getAllOverlappedPositions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.getAllOverlappedPositions" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -116,14 +102,10 @@
 <dd></dd></dl>
 
 <dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.getMixtureInfo">
-<code class="descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="descname">getMixtureInfo</code><span class="sig-paren">(</span><em>mixture</em>, <em>minDist</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#getMixtureInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.getMixtureInfo" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
 <dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.getOverlappedCount">
 <code class="descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="descname">getOverlappedCount</code><span class="sig-paren">(</span><em>mixtureCompounds</em>, <em>minDist=0.01</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#getOverlappedCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.getOverlappedCount" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>called from score single sample</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.getProbability">
@@ -137,7 +119,7 @@
 
 <dl class="function">
 <dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.iterateAnnealing">
-<code class="descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="descname">iterateAnnealing</code><span class="sig-paren">(</span><em>mixtures</em>, <em>startTemp=1000</em>, <em>finalTemp=0.01</em>, <em>maxSteps=1000</em>, <em>tempK=200</em>, <em>coolingMethod='linear'</em>, <em>nIterations=1</em>, <em>minDistance=0.01</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#iterateAnnealing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.iterateAnnealing" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="descname">iterateAnnealing</code><span class="sig-paren">(</span><em>mixtures</em>, <em>startTemp=1000</em>, <em>finalTemp=0.01</em>, <em>maxSteps=1000</em>, <em>tempK=200</em>, <em>coolingMethod='linear'</em>, <em>nIterations=1</em>, <em>minDistance=0.01</em>, <em>minTotalScore=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#iterateAnnealing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.iterateAnnealing" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -161,14 +143,21 @@
 <dd></dd></dl>
 
 <dl class="function">
+<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.scoreCompound_OLD">
+<code class="descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="descname">scoreCompound_OLD</code><span class="sig-paren">(</span><em>compoundA</em>, <em>compoundB</em>, <em>minDist</em>, <em>scalingFactor=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#scoreCompound_OLD"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.scoreCompound_OLD" title="Permalink to this definition">¶</a></dt>
+<dd><p>OLD slow keep for backup</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.scoreMixture">
 <code class="descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="descname">scoreMixture</code><span class="sig-paren">(</span><em>mixture</em>, <em>minDist</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#scoreMixture"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.scoreMixture" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.showScoresPerMixture">
-<code class="descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="descname">showScoresPerMixture</code><span class="sig-paren">(</span><em>mixtures</em>, <em>minDistance</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#showScoresPerMixture"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.showScoresPerMixture" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.scoreMixture_">
+<code class="descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="descname">scoreMixture_</code><span class="sig-paren">(</span><em>mixture</em>, <em>minDist</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#scoreMixture_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.scoreMixture_" title="Permalink to this definition">¶</a></dt>
+<dd><p>for refactoring</p>
+</dd></dl>
 
 </div>
 </div>

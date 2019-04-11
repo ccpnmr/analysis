@@ -50,18 +50,18 @@
 <span></span><span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Luca Mureddu $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:39 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -78,10 +78,11 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.GLLinearRegionsPlot</span> <span class="kn">import</span> <span class="n">GLTargetButtonSpinBoxes</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CheckBox</span> <span class="kn">import</span> <span class="n">CheckBox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.DoubleSpinbox</span> <span class="kn">import</span> <span class="n">DoubleSpinbox</span>
 
 <span class="c1">#### NON GUI IMPORTS</span>
 <span class="kn">from</span> <span class="nn">ccpn.framework.lib.Pipe</span> <span class="kn">import</span> <span class="n">SpectraPipe</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.lib.SpectrumLib</span> <span class="kn">import</span> <span class="n">_oldEstimateNoiseLevel1D</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.PeakList</span> <span class="kn">import</span> <span class="n">_filterROI1Darray</span><span class="p">,</span> <span class="n">estimateNoiseLevel1D</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
 
@@ -92,19 +93,27 @@
 
 <span class="n">PipeName</span> <span class="o">=</span> <span class="s1">&#39;Noise Threshold&#39;</span>
 <span class="n">NoiseThreshold</span> <span class="o">=</span> <span class="s1">&#39;Noise_Threshold&#39;</span>
+<span class="n">UseRegion</span> <span class="o">=</span> <span class="s1">&#39;Calibration_region&#39;</span>
 <span class="n">EstimateNoiseThreshold</span> <span class="o">=</span> <span class="s1">&#39;Estimate_Noise_Threshold&#39;</span>
-<span class="n">DefaultEstimateNoiseThreshold</span> <span class="o">=</span> <span class="bp">False</span>
-<span class="n">DefaultNoiseThreshold</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">IncreaseBySTD</span> <span class="o">=</span> <span class="s1">&#39;Add_STD&#39;</span>
 
+<span class="n">DefaultEstimateNoiseThreshold</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">DefaultNoiseThreshold</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">DefaultCalibration_region</span> <span class="o">=</span> <span class="p">[</span><span class="mi">14</span><span class="p">,</span><span class="mi">12</span><span class="p">]</span>
+<span class="n">DefaultIncreaseBySTD</span> <span class="o">=</span> <span class="mf">0.50</span>
 
 <span class="c1">########################################################################################################################</span>
 <span class="c1">##########################################      ALGORITHM       ########################################################</span>
 <span class="c1">########################################################################################################################</span>
 
-<span class="k">def</span> <span class="nf">_getNoiseThreshold</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_getNoiseThreshold</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">roi</span><span class="p">,</span> <span class="n">stdFactor</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">spectrum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">positions</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">intensities</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_oldEstimateNoiseLevel1D</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="n">factor</span><span class="p">)</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span><span class="n">spectrum</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">intensities</span>
+        <span class="n">xRoi</span><span class="p">,</span> <span class="n">yRoi</span> <span class="o">=</span> <span class="n">_filterROI1Darray</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">roi</span><span class="p">)</span>
+        <span class="n">maxNL</span><span class="p">,</span> <span class="n">minNL</span> <span class="o">=</span> <span class="n">estimateNoiseLevel1D</span><span class="p">(</span><span class="n">yRoi</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">stdFactor</span><span class="o">=</span><span class="n">stdFactor</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">maxNL</span><span class="p">,</span> <span class="n">minNL</span>
+
+
 
 
 <span class="c1">########################################################################################################################</span>
@@ -120,27 +129,50 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">NoiseThresholdGuiPipe</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
         <span class="n">GuiPipe</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">estimateNoiseThresholdLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">EstimateNoiseThreshold</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="n">i</span><span class="o">=</span><span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimateNoiseThresholdLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">EstimateNoiseThreshold</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
         <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">EstimateNoiseThreshold</span><span class="p">,</span>
-                <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="n">DefaultEstimateNoiseThreshold</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_manageButtons</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+                <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="n">DefaultEstimateNoiseThreshold</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_manageButtons</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1"># auto noise widgets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">noiseThresholdLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">UseRegion</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">UseRegion</span><span class="p">,</span>
+                <span class="n">GLTargetButtonSpinBoxes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span>
+                                        <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">DefaultCalibration_region</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">noiseThresholdLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">NoiseThreshold</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addError</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">IncreaseBySTD</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">IncreaseBySTD</span><span class="p">,</span>
+                <span class="n">DoubleSpinbox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">DefaultIncreaseBySTD</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                              <span class="n">step</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">showButtons</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+
+        <span class="c1"># manual noise widgets</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">noiseThresholdLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">NoiseThreshold</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
         <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NoiseThreshold</span><span class="p">,</span> <span class="n">GLTargetButtonSpinBoxes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span>
-                                                              <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+                                                              <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_manageButtons</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_manageButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">checkBox</span> <span class="o">=</span> <span class="n">_getWidgetByAtt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">EstimateNoiseThreshold</span><span class="p">)</span>
         <span class="n">noiseThreshold</span> <span class="o">=</span> <span class="n">_getWidgetByAtt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NoiseThreshold</span><span class="p">)</span>
+        <span class="n">calibrRegion</span> <span class="o">=</span> <span class="n">_getWidgetByAtt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">UseRegion</span><span class="p">)</span>
+        <span class="n">addStd</span> <span class="o">=</span> <span class="n">_getWidgetByAtt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">IncreaseBySTD</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">checkBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
             <span class="n">noiseThreshold</span><span class="o">.</span><span class="n">setDisabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">calibrRegion</span><span class="o">.</span><span class="n">setDisabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">addStd</span><span class="o">.</span><span class="n">setDisabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
         <span class="k">else</span><span class="p">:</span>
             <span class="n">noiseThreshold</span><span class="o">.</span><span class="n">setDisabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">calibrRegion</span><span class="o">.</span><span class="n">setDisabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">addStd</span><span class="o">.</span><span class="n">setDisabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_closeBox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="s1">&#39;remove the lines from plotwidget if any&#39;</span>
         <span class="n">_getWidgetByAtt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NoiseThreshold</span><span class="p">)</span><span class="o">.</span><span class="n">_turnOffPositionPicking</span><span class="p">()</span>
+        <span class="n">_getWidgetByAtt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">UseRegion</span><span class="p">)</span><span class="o">.</span><span class="n">_turnOffPositionPicking</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">closeBox</span><span class="p">()</span></div>
 
 
@@ -155,7 +187,9 @@
 
     <span class="n">_kwargs</span> <span class="o">=</span> <span class="p">{</span>
         <span class="n">EstimateNoiseThreshold</span><span class="p">:</span> <span class="n">DefaultEstimateNoiseThreshold</span><span class="p">,</span>
-        <span class="n">NoiseThreshold</span><span class="p">:</span> <span class="n">DefaultNoiseThreshold</span>
+        <span class="n">NoiseThreshold</span>        <span class="p">:</span> <span class="n">DefaultNoiseThreshold</span><span class="p">,</span>
+        <span class="n">UseRegion</span>             <span class="p">:</span> <span class="n">DefaultCalibration_region</span><span class="p">,</span>
+        <span class="n">IncreaseBySTD</span>         <span class="p">:</span> <span class="n">DefaultIncreaseBySTD</span><span class="p">,</span>
         <span class="p">}</span>
 
 <div class="viewcode-block" id="NoiseThresholdPipe.runPipe"><a class="viewcode-back" href="../../../ccpn/ccpn.pipes.html#ccpn.pipes.NoiseThresholdPipe.NoiseThresholdPipe.runPipe">[docs]</a>    <span class="k">def</span> <span class="nf">runPipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra</span><span class="p">):</span>
@@ -169,8 +203,12 @@
         <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">spectrum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">EstimateNoiseThreshold</span><span class="p">]:</span>
-                    <span class="n">spectrum</span><span class="o">.</span><span class="n">noiseLevel</span> <span class="o">=</span> <span class="n">_getNoiseThreshold</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">NoiseThreshold</span><span class="p">:</span> <span class="p">[</span><span class="n">spectrum</span><span class="o">.</span><span class="n">noiseLevel</span><span class="p">,</span> <span class="o">-</span><span class="n">spectrum</span><span class="o">.</span><span class="n">noiseLevel</span><span class="p">]})</span>
+                    <span class="n">roi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">UseRegion</span><span class="p">]</span>
+                    <span class="n">stdFactor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">IncreaseBySTD</span><span class="p">]</span>
+                    <span class="n">maxNL</span><span class="p">,</span> <span class="n">minNL</span> <span class="o">=</span> <span class="n">_getNoiseThreshold</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">roi</span><span class="p">,</span> <span class="n">stdFactor</span><span class="p">)</span>
+                    <span class="n">spectrum</span><span class="o">.</span><span class="n">noiseLevel</span> <span class="o">=</span> <span class="n">maxNL</span>
+                    <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeNoiseLevel</span> <span class="o">=</span> <span class="n">minNL</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">NoiseThreshold</span><span class="p">:</span> <span class="p">[</span><span class="n">spectrum</span><span class="o">.</span><span class="n">noiseLevel</span><span class="p">,</span> <span class="n">minNL</span><span class="p">]})</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">spectrum</span><span class="o">.</span><span class="n">noiseLevel</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">NoiseThreshold</span><span class="p">])</span>
 

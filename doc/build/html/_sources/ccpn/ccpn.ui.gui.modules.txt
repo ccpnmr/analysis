@@ -113,6 +113,14 @@ ccpn.ui.gui.modules.PluginModule module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.modules.PyMolUtil module
+------------------------------------
+
+.. automodule:: ccpn.ui.gui.modules.PyMolUtil
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.modules.PythonConsoleModule module
 ----------------------------------------------
 

@@ -96,18 +96,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:53 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -127,16 +127,16 @@
 <div class="viewcode-block" id="Frame"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Frame.Frame">[docs]</a><span class="k">class</span> <span class="nc">Frame</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
     <span class="n">FRAME_DICT</span> <span class="o">=</span> <span class="p">{</span>
         <span class="c1"># Shadow</span>
-        <span class="s1">&#39;plain&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Plain</span><span class="p">,</span>
-        <span class="s1">&#39;raised&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Raised</span><span class="p">,</span>
-        <span class="s1">&#39;sunken&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Sunken</span><span class="p">,</span>
+        <span class="s1">&#39;plain&#39;</span>      <span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Plain</span><span class="p">,</span>
+        <span class="s1">&#39;raised&#39;</span>     <span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Raised</span><span class="p">,</span>
+        <span class="s1">&#39;sunken&#39;</span>     <span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Sunken</span><span class="p">,</span>
         <span class="c1"># Shapes</span>
-        <span class="s1">&#39;noFrame&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">NoFrame</span><span class="p">,</span>
-        <span class="s1">&#39;box&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Box</span><span class="p">,</span>
-        <span class="s1">&#39;panel&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Panel</span><span class="p">,</span>
+        <span class="s1">&#39;noFrame&#39;</span>    <span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">NoFrame</span><span class="p">,</span>
+        <span class="s1">&#39;box&#39;</span>        <span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Box</span><span class="p">,</span>
+        <span class="s1">&#39;panel&#39;</span>      <span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Panel</span><span class="p">,</span>
         <span class="s1">&#39;styledPanel&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">StyledPanel</span><span class="p">,</span>
-        <span class="s1">&#39;hLine&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">HLine</span><span class="p">,</span>
-        <span class="s1">&#39;vLine&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">VLine</span><span class="p">,</span>
+        <span class="s1">&#39;hLine&#39;</span>      <span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">HLine</span><span class="p">,</span>
+        <span class="s1">&#39;vLine&#39;</span>      <span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">VLine</span><span class="p">,</span>
         <span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">showBorder</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">fShape</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fShadow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
@@ -192,6 +192,7 @@
     <span class="c1"># def dragMoveEvent(self, ev):</span>
     <span class="c1">#     print(&#39;&gt;&gt;&gt;dragMoveEvent Frame&#39;, repr(self))</span>
     <span class="c1">#     # self._thisparent.dragMoveEvent(ev)</span>
+
 
 <div class="viewcode-block" id="ScrollableFrame"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Frame.ScrollableFrame">[docs]</a><span class="k">class</span> <span class="nc">ScrollableFrame</span><span class="p">(</span><span class="n">Frame</span><span class="p">):</span>
     <span class="s2">&quot;A scrollable frame&quot;</span>

@@ -162,18 +162,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:33:01 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -234,28 +234,28 @@
 
 <span class="c1"># Options corresponding to the supported parser modes: &#39;standard&#39;, &#39;lenient&#39;, &#39;strict&#39;, and &#39;IUCr&#39;</span>
 <span class="n">_parserModeOptions</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;lenient&#39;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s1">&#39;enforceSaveFrameStop&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
-        <span class="s1">&#39;enforceLoopStop&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
-        <span class="s1">&#39;padIncompleteLoops&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+    <span class="s1">&#39;lenient&#39;</span> <span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;enforceSaveFrameStop&#39;</span>     <span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+        <span class="s1">&#39;enforceLoopStop&#39;</span>          <span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+        <span class="s1">&#39;padIncompleteLoops&#39;</span>       <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
         <span class="s1">&#39;allowSquareBracketStrings&#39;</span><span class="p">:</span> <span class="bp">True</span>
         <span class="p">},</span>
-    <span class="s1">&#39;strict&#39;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s1">&#39;enforceSaveFrameStop&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
-        <span class="s1">&#39;enforceLoopStop&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
-        <span class="s1">&#39;padIncompleteLoops&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="s1">&#39;strict&#39;</span>  <span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;enforceSaveFrameStop&#39;</span>     <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="s1">&#39;enforceLoopStop&#39;</span>          <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="s1">&#39;padIncompleteLoops&#39;</span>       <span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
         <span class="s1">&#39;allowSquareBracketStrings&#39;</span><span class="p">:</span> <span class="bp">False</span>
         <span class="p">},</span>
     <span class="s1">&#39;standard&#39;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s1">&#39;enforceSaveFrameStop&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
-        <span class="s1">&#39;enforceLoopStop&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
-        <span class="s1">&#39;padIncompleteLoops&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+        <span class="s1">&#39;enforceSaveFrameStop&#39;</span>     <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="s1">&#39;enforceLoopStop&#39;</span>          <span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+        <span class="s1">&#39;padIncompleteLoops&#39;</span>       <span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
         <span class="s1">&#39;allowSquareBracketStrings&#39;</span><span class="p">:</span> <span class="bp">True</span>
         <span class="p">},</span>
-    <span class="s1">&#39;IUCr&#39;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s1">&#39;enforceSaveFrameStop&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
-        <span class="s1">&#39;enforceLoopStop&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
-        <span class="s1">&#39;padIncompleteLoops&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="s1">&#39;IUCr&#39;</span>    <span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;enforceSaveFrameStop&#39;</span>     <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="s1">&#39;enforceLoopStop&#39;</span>          <span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+        <span class="s1">&#39;padIncompleteLoops&#39;</span>       <span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
         <span class="s1">&#39;allowSquareBracketStrings&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">},</span>
     <span class="p">}</span>
 
@@ -287,7 +287,8 @@
 <div class="viewcode-block" id="parseFile"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.parseFile">[docs]</a><span class="k">def</span> <span class="nf">parseFile</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;load generic STAR file and parse the contents&quot;&quot;&quot;</span>
 
-    <span class="n">text</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">parse</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span></div>
 
 

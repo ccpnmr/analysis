@@ -485,7 +485,7 @@ def arPLS_Implementation(y, lambdaValue=5.e4, maxValue=1e6, minValue=-1e6, iterm
 
 def lowess(x, y):
     '''
-     LOWESS (Locally Weighted Scatterplot Smoothing)
+    LOWESS (Locally Weighted Scatterplot Smoothing).
     A lowess function that outs smoothed estimates of endog
     at the given exog values from points (exog, endog)
     To use this, you need to install statsmodels in your miniconda:

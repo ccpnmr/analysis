@@ -53,18 +53,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:28 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -74,7 +74,6 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.IntegralList</span> <span class="kn">import</span> <span class="n">IntegralList</span>
@@ -108,6 +107,9 @@
     <span class="c1">#: Name of plural link to instances of class</span>
     <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s1">&#39;integrals&#39;</span>
 
+    <span class="c1"># the attribute name used by current</span>
+    <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="s1">&#39;integrals&#39;</span>
+
     <span class="c1">#: List of child classes.</span>
     <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -117,9 +119,6 @@
     <span class="n">_baseline</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="n">_linkedPeakNotifier</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="n">_linkedPeaks</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-
-    <span class="c1"># the attribute name used by current</span>
-    <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="s1">&#39;integrals&#39;</span>
 
     <span class="c1"># CCPN properties</span>
     <span class="nd">@property</span>
@@ -228,14 +227,14 @@
     <span class="k">def</span> <span class="nf">annotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">annotation</span> <span class="o">=</span> <span class="n">value</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Free-form text comment&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span>
-
-    <span class="nd">@comment.setter</span>
-    <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="c1"># @property</span>
+    <span class="c1"># def comment(self) -&gt; Optional[str]:</span>
+    <span class="c1">#     &quot;&quot;&quot;Free-form text comment&quot;&quot;&quot;</span>
+    <span class="c1">#     return self._wrappedData.details</span>
+    <span class="c1">#</span>
+    <span class="c1"># @comment.setter</span>
+    <span class="c1"># def comment(self, value: str):</span>
+    <span class="c1">#     self._wrappedData.details = value</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">axisCodes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
@@ -287,19 +286,22 @@
 
         <span class="k">if</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span><span class="p">):</span>
-                <span class="n">limits</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+                <span class="n">limits</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">ii</span> <span class="k">else</span> <span class="p">()</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">limits</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="n">limit1</span><span class="p">,</span> <span class="n">limit2</span> <span class="o">=</span> <span class="n">limits</span>
-                    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">integralList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">positions</span>
-                    <span class="n">index01</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="n">limit2</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">limit1</span><span class="p">))</span>
-                    <span class="n">values</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">intensities</span><span class="p">[</span><span class="n">index01</span><span class="p">]</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">trapz</span><span class="p">(</span><span class="n">values</span><span class="p">))</span>
-                    <span class="c1"># set to the attached peak if any</span>
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">peak</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">peak</span><span class="o">.</span><span class="n">volume</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
+
+                    <span class="k">if</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">intensities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">intensities</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">limit1</span><span class="p">,</span> <span class="n">limit2</span> <span class="o">=</span> <span class="n">limits</span>
+                        <span class="n">x</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">positions</span>
+                        <span class="n">index01</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="n">limit2</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">limit1</span><span class="p">))</span>
+                        <span class="n">values</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">intensities</span><span class="p">[</span><span class="n">index01</span><span class="p">]</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">trapz</span><span class="p">(</span><span class="n">values</span><span class="p">))</span>
+
+                        <span class="c1"># small change, only calculate if there is a peak</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">peak</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">peak</span><span class="o">.</span><span class="n">volume</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">pointlimits</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+    <span class="k">def</span> <span class="nf">pointLimits</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">pointLimits</span>
         <span class="c1"># &quot;&quot;&quot;Integration limits in points, per dimension, with lowest value first&quot;&quot;&quot;</span>
         <span class="c1"># result = []</span>
@@ -310,10 +312,10 @@
         <span class="c1"># #</span>
         <span class="c1"># return result</span>
 
-    <span class="nd">@pointlimits.setter</span>
+    <span class="nd">@pointLimits.setter</span>
     <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
     <span class="nd">@ccpNmrV3CoreSetter</span><span class="p">()</span>
-    <span class="k">def</span> <span class="nf">pointlimits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">pointLimits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">pointLimits</span> <span class="o">=</span> <span class="n">value</span>
         <span class="c1"># peakDims = self._wrappedData.sortedPeakDims()</span>
         <span class="c1"># if len(value) == len(peakDims):</span>
@@ -352,19 +354,21 @@
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">baseline</span><span class="p">:</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">baseline</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">xRegion</span><span class="p">])</span>
+                        <span class="k">return</span> <span class="p">(</span><span class="n">baseline</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="n">xRegion</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">xRegion</span><span class="p">])</span>
                     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
                         <span class="c1"># TODO:Luca check empty list error</span>
                         <span class="k">pass</span>
                 <span class="c1"># should be just one for 1D</span>
-                <span class="k">return</span> <span class="p">(</span><span class="n">baseline</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="n">xRegion</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">xRegion</span><span class="p">])</span>
+        <span class="k">return</span> <span class="bp">None</span>
 
     <span class="c1">#=========================================================================================</span>
-    <span class="c1"># Connections to parents:</span>
+    <span class="c1"># CCPN functions</span>
     <span class="c1">#=========================================================================================</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">peak</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;The peak attached to the integral&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;The peak attached to the integral.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">peak</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">peak</span> <span class="k">else</span> <span class="bp">None</span>
 
     <span class="nd">@peak.setter</span>
@@ -376,6 +380,8 @@
 <span class="sd">        :param peak: single peak</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">spectrum</span>
+        <span class="n">peak</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">peak</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">peak</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">peak</span>
+
         <span class="k">if</span> <span class="n">peak</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">peak</span><span class="p">,</span> <span class="n">Peak</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> is not of type Peak&#39;</span> <span class="o">%</span> <span class="n">peak</span><span class="p">)</span>
@@ -384,8 +390,15 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">peak</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="k">if</span> <span class="n">peak</span> <span class="k">else</span> <span class="bp">None</span></div>
 
-<span class="c1">#=========================================================================================</span>
+    <span class="c1">#===========================================================================================</span>
+    <span class="c1"># new&#39;Object&#39; and other methods</span>
+    <span class="c1"># Call appropriate routines in their respective locations</span>
+    <span class="c1">#===========================================================================================</span>
 
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Connections to parents:</span>
+<span class="c1">#=========================================================================================</span>
 
 <span class="nd">@newObject</span><span class="p">(</span><span class="n">Integral</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">_newIntegral</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">IntegralList</span><span class="p">,</span>
@@ -396,7 +409,8 @@
                  <span class="n">pointLimits</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(),</span> <span class="n">serial</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Integral</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Create new Integral within IntegralList</span>
 
-<span class="sd">    :param self:</span>
+<span class="sd">    See the Integral class for details.</span>
+
 <span class="sd">    :param value:</span>
 <span class="sd">    :param valueError:</span>
 <span class="sd">    :param bias:</span>
@@ -408,10 +422,8 @@
 <span class="sd">    :param limits:</span>
 <span class="sd">    :param slopes:</span>
 <span class="sd">    :param pointLimits:</span>
-
-<span class="sd">    :return new integral instance</span>
+<span class="sd">    :return a new Integral instance.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1">#EJB 20181128: minor refactoring</span>
 
     <span class="n">dd</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;volume&#39;</span><span class="p">:</span> <span class="n">value</span><span class="p">,</span> <span class="s1">&#39;volumeError&#39;</span><span class="p">:</span> <span class="n">valueError</span><span class="p">,</span> <span class="s1">&#39;offset&#39;</span><span class="p">:</span> <span class="n">offset</span><span class="p">,</span> <span class="s1">&#39;slopes&#39;</span><span class="p">:</span> <span class="n">slopes</span><span class="p">,</span>
           <span class="s1">&#39;figOfMerit&#39;</span><span class="p">:</span> <span class="n">figureOfMerit</span><span class="p">,</span> <span class="s1">&#39;constraintWeight&#39;</span><span class="p">:</span> <span class="n">constraintWeight</span><span class="p">,</span>
@@ -425,7 +437,7 @@
     <span class="n">apiIntegral</span> <span class="o">=</span> <span class="n">apiParent</span><span class="o">.</span><span class="n">newIntegral</span><span class="p">(</span><span class="o">**</span><span class="n">dd</span><span class="p">)</span>
     <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">apiIntegral</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Unable to generate new IntegralList item&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Unable to generate new Integral item&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>

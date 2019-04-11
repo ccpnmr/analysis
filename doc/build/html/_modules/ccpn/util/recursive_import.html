@@ -47,10 +47,7 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.util.recursive_import</h1><div class="highlight"><pre>
-<span></span><span class="c1">#=========================================================================================</span>
-<span class="c1"># Licence, Reference and Credits</span>
-<span class="c1">#=========================================================================================</span>
-<span class="c1">#!/usr/bin/env python</span>
+<span></span><span class="ch">#!/usr/bin/env python</span>
 
 <span class="sd">&quot;&quot;&quot;python-recursive-import-test [&lt;options&gt;] [&lt;dir&gt; ...]</span>
 
@@ -62,20 +59,21 @@
 <span class="sd">codebases, and allows more flexibility.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;Revision: 1.10 &quot;</span>
-
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:59 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -115,7 +113,8 @@
                 <span class="n">packroot</span> <span class="o">=</span> <span class="n">dirname</span><span class="p">(</span><span class="n">packroot</span><span class="p">)</span>
 
             <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">pyfiles</span><span class="p">:</span>
-                <span class="k">yield</span> <span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">packroot</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">:],</span> <span class="n">fn</span><span class="p">)</span></div>
+                <span class="k">yield</span> <span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">packroot</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:],</span> <span class="n">fn</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="filename2module"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.recursive_import.filename2module">[docs]</a><span class="k">def</span> <span class="nf">filename2module</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -124,17 +123,18 @@
     <span class="k">if</span> <span class="n">basename</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;__init__.py&#39;</span><span class="p">:</span>
         <span class="n">fn</span> <span class="o">=</span> <span class="n">dirname</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;\.py$&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">fn</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">))</span></div>
-    
+
 
 <div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.recursive_import.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
     <span class="kn">import</span> <span class="nn">optparse</span>
+
     <span class="n">parser</span> <span class="o">=</span> <span class="n">optparse</span><span class="o">.</span><span class="n">OptionParser</span><span class="p">(</span><span class="n">__doc__</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
     <span class="n">opts</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
 
     <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">find_pyfiles</span><span class="p">(</span><span class="n">args</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,)):</span>
         <span class="n">modname</span> <span class="o">=</span> <span class="n">filename2module</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
         <span class="k">print</span><span class="p">(</span><span class="s2">&quot;import </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">modname</span><span class="p">)</span>
-        <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span> <span class="p">(</span><span class="s1">&#39;python&#39;</span><span class="p">,</span> <span class="s1">&#39;-c&#39;</span><span class="p">,</span> <span class="s1">&#39;import </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">modname</span><span class="p">)</span> <span class="p">)</span></div>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">((</span><span class="s1">&#39;python&#39;</span><span class="p">,</span> <span class="s1">&#39;-c&#39;</span><span class="p">,</span> <span class="s1">&#39;import </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">modname</span><span class="p">))</span></div>
 
 
 <span class="c1">##############################################################################</span>
@@ -146,38 +146,38 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">dn</span> <span class="o">=</span> <span class="n">packroot</span> <span class="o">=</span> <span class="n">abspath</span><span class="p">(</span><span class="n">topDirectory</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">dn</span><span class="p">,</span> <span class="n">followlinks</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
-      <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">ignoreDirs</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-          <span class="n">dirs</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
-          <span class="k">print</span><span class="p">(</span><span class="s2">&quot;test skipping:  </span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">root</span><span class="p">,</span><span class="n">r</span><span class="p">))</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-          <span class="k">pass</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">ignoreDirs</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">dirs</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;test skipping:  </span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">r</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">pass</span>
 
-      <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">fn</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.py&#39;</span><span class="p">):</span>
-          <span class="k">if</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">ignoreFiles</span><span class="p">:</span>
-            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;test skipping:  </span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">root</span><span class="p">,</span><span class="n">fn</span><span class="p">))</span>
-          <span class="k">else</span><span class="p">:</span>
-            <span class="k">yield</span> <span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">packroot</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">:],</span> <span class="n">fn</span><span class="p">)</span></div>
+        <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">fn</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.py&#39;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">ignoreFiles</span><span class="p">:</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;test skipping:  </span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">fn</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">packroot</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:],</span> <span class="n">fn</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="importAllPyfiles"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.recursive_import.importAllPyfiles">[docs]</a><span class="k">def</span> <span class="nf">importAllPyfiles</span><span class="p">(</span><span class="n">topDirectory</span><span class="p">,</span> <span class="n">ignoreDirs</span><span class="o">=</span><span class="p">(),</span><span class="n">ignoreFiles</span><span class="o">=</span><span class="p">(),</span> <span class="n">addToSysPath</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Test import all python files in a directory tree.</span>
-<span class="sd">  topDirectory must be (intended to be) on the Python path&quot;&quot;&quot;</span>
 
-  <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">find_all_pyfiles</span><span class="p">(</span><span class="n">topDirectory</span><span class="p">,</span> <span class="n">ignoreDirs</span><span class="o">=</span><span class="n">ignoreDirs</span><span class="p">,</span> <span class="n">ignoreFiles</span><span class="o">=</span><span class="n">ignoreFiles</span><span class="p">):</span>
-    <span class="n">modname</span> <span class="o">=</span> <span class="n">filename2module</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;test import </span><span class="si">%s</span><span class="s2"> :&quot;</span> <span class="o">%</span> <span class="n">modname</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">addToSysPath</span><span class="p">:</span>
-      <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span> <span class="p">(</span><span class="s1">&#39;python&#39;</span><span class="p">,</span><span class="s1">&#39;-t&#39;</span><span class="p">,</span> <span class="s1">&#39;-c&#39;</span><span class="p">,</span>
-                        <span class="s1">&#39;import sys; sys.path.append(&quot;</span><span class="si">%s</span><span class="s1">&quot;); import </span><span class="si">%s</span><span class="s1">&#39;</span>
-                        <span class="o">%</span> <span class="p">(</span><span class="n">addToSysPath</span><span class="p">,</span> <span class="n">modname</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span> <span class="p">(</span><span class="s1">&#39;python&#39;</span><span class="p">,</span> <span class="s1">&#39;-t&#39;</span><span class="p">,</span> <span class="s1">&#39;-c&#39;</span><span class="p">,</span> <span class="s1">&#39;import </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">modname</span><span class="p">)</span> <span class="p">)</span></div>
+<div class="viewcode-block" id="importAllPyfiles"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.recursive_import.importAllPyfiles">[docs]</a><span class="k">def</span> <span class="nf">importAllPyfiles</span><span class="p">(</span><span class="n">topDirectory</span><span class="p">,</span> <span class="n">ignoreDirs</span><span class="o">=</span><span class="p">(),</span> <span class="n">ignoreFiles</span><span class="o">=</span><span class="p">(),</span> <span class="n">addToSysPath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Test import all python files in a directory tree.</span>
+<span class="sd">    topDirectory must be (intended to be) on the Python path&quot;&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">find_all_pyfiles</span><span class="p">(</span><span class="n">topDirectory</span><span class="p">,</span> <span class="n">ignoreDirs</span><span class="o">=</span><span class="n">ignoreDirs</span><span class="p">,</span> <span class="n">ignoreFiles</span><span class="o">=</span><span class="n">ignoreFiles</span><span class="p">):</span>
+        <span class="n">modname</span> <span class="o">=</span> <span class="n">filename2module</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;test import </span><span class="si">%s</span><span class="s2"> :&quot;</span> <span class="o">%</span> <span class="n">modname</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">addToSysPath</span><span class="p">:</span>
+            <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">((</span><span class="s1">&#39;python&#39;</span><span class="p">,</span> <span class="s1">&#39;-t&#39;</span><span class="p">,</span> <span class="s1">&#39;-c&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;import sys; sys.path.append(&quot;</span><span class="si">%s</span><span class="s1">&quot;); import </span><span class="si">%s</span><span class="s1">&#39;</span>
+                             <span class="o">%</span> <span class="p">(</span><span class="n">addToSysPath</span><span class="p">,</span> <span class="n">modname</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">((</span><span class="s1">&#39;python&#39;</span><span class="p">,</span> <span class="s1">&#39;-t&#39;</span><span class="p">,</span> <span class="s1">&#39;-c&#39;</span><span class="p">,</span> <span class="s1">&#39;import </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">modname</span><span class="p">))</span></div>
 
 
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="n">main</span><span class="p">()</span>
-
 </pre></div>
 
           </div>

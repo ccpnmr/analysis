@@ -53,18 +53,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:29 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -85,6 +85,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.core.NmrResidue</span> <span class="kn">import</span> <span class="n">NmrResidue</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CustomExportDialog</span> <span class="kn">import</span> <span class="n">CustomExportDialog</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Menu</span> <span class="kn">import</span> <span class="n">Menu</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
 
 <span class="n">current</span> <span class="o">=</span> <span class="p">[]</span>
@@ -296,13 +297,28 @@
         <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">viewRange</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewRange</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setRange</span><span class="p">(</span><span class="n">xRange</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lastRange</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-    <span class="k">def</span> <span class="nf">_updateSelectionBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">p2</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_getLimits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">p2</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">childGroup</span><span class="o">.</span><span class="n">mapRectFromParent</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">topLeft</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span><span class="o">.</span><span class="n">resetTransform</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="n">r</span><span class="o">.</span><span class="n">height</span><span class="p">())</span>
+        <span class="n">minX</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">topLeft</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">()</span>
+        <span class="n">minY</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">topLeft</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">()</span>
+        <span class="n">maxX</span> <span class="o">=</span> <span class="n">minX</span> <span class="o">+</span> <span class="n">r</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
+        <span class="n">maxY</span> <span class="o">=</span> <span class="n">minY</span> <span class="o">+</span> <span class="n">r</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">minX</span><span class="p">,</span> <span class="n">maxX</span><span class="p">,</span> <span class="n">minY</span><span class="p">,</span> <span class="n">maxY</span>
+
+    <span class="k">def</span> <span class="nf">_updateSelectionBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">,</span> <span class="n">p1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">p2</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Updates drawing of selection box as mouse is moved.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">r</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">)</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">childGroup</span><span class="o">.</span><span class="n">mapRectFromParent</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">topLeft</span><span class="p">())</span>
+        <span class="c1"># print(&#39;PPP&#39;,dir(self.mapToParent(ev.buttonDownPos())))</span>
+
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapRectFromParent</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mapToParent</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">buttonDownPos</span><span class="p">()))</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span><span class="o">.</span><span class="n">resetTransform</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="n">r</span><span class="o">.</span><span class="n">height</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
@@ -324,54 +340,42 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">xStartPosition</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapSceneToView</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">buttonDownPos</span><span class="p">())</span><span class="o">.</span><span class="n">x</span><span class="p">()</span>
-        <span class="n">xEndPosition</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapSceneToView</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span><span class="o">.</span><span class="n">x</span><span class="p">()</span>
-        <span class="n">yStartPosition</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapSceneToView</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">buttonDownPos</span><span class="p">())</span><span class="o">.</span><span class="n">y</span><span class="p">()</span>
-        <span class="n">yEndPosition</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapSceneToView</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span><span class="o">.</span><span class="n">y</span><span class="p">()</span>
-
+        <span class="n">selected</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">leftMouse</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
             <span class="c1"># Left-drag: Panning of the view</span>
             <span class="n">pg</span><span class="o">.</span><span class="n">ViewBox</span><span class="o">.</span><span class="n">mouseDragEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">controlLeftMouse</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_updateSelectionBox</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">buttonDownPos</span><span class="p">(),</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
-            <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">label</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">childGroup</span><span class="o">.</span><span class="n">childItems</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">CustomLabel</span><span class="p">)]</span>
-            <span class="c1"># Control(Cmd)+left drag: selects label</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">())</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">xStartPosition</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">xEndPosition</span><span class="p">)):</span>
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inYRange</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">(),</span> <span class="n">yEndPosition</span><span class="p">,</span> <span class="n">yStartPosition</span><span class="p">,</span> <span class="p">):</span>
-                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                            <span class="n">obj</span> <span class="o">=</span> <span class="n">label</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">()))</span>
-                            <span class="k">if</span> <span class="n">obj</span><span class="p">:</span>
-                                <span class="k">try</span><span class="p">:</span>
-                                    <span class="n">addObjToCurrent</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="p">,</span> <span class="s1">&#39;add&#39;</span> <span class="o">+</span> <span class="n">obj</span><span class="o">.</span><span class="n">className</span><span class="p">)</span>
-                                    <span class="n">addObjToCurrent</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-                                <span class="k">except</span><span class="p">:</span>
-                                    <span class="k">pass</span>
-
-                        <span class="c1"># self.application.current.addNmrresidue(label.data(int(label.pos().x())))</span>
-                        <span class="c1"># label.setSelected(True)</span>
-
+            <span class="bp">self</span><span class="o">.</span><span class="n">_updateSelectionBox</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">buttonDownPos</span><span class="p">(),</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
             <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">event</span><span class="o">.</span><span class="n">isFinish</span><span class="p">():</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_updateSelectionBox</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">buttonDownPos</span><span class="p">(),</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
-            <span class="c1">#   self._resetBoxes()</span>
-            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_updateSelectionBox</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">buttonDownPos</span><span class="p">(),</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
+
+            <span class="k">else</span><span class="p">:</span>  <span class="c1">## the event is finished.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_updateSelectionBox</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">buttonDownPos</span><span class="p">(),</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
+                <span class="n">minX</span><span class="p">,</span> <span class="n">maxX</span><span class="p">,</span> <span class="n">minY</span><span class="p">,</span> <span class="n">maxY</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getLimits</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">buttonDownPos</span><span class="p">(),</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
+                <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">label</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">childGroup</span><span class="o">.</span><span class="n">childItems</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">CustomLabel</span><span class="p">)]</span>
+                <span class="c1"># Control(Cmd)+left drag: selects label</span>
+                <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">())</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">minX</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">maxX</span><span class="p">)):</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inYRange</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">(),</span> <span class="n">minY</span><span class="p">,</span> <span class="n">maxY</span><span class="p">,</span> <span class="p">):</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                                <span class="n">obj</span> <span class="o">=</span> <span class="n">label</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">()))</span>
+                                <span class="n">selected</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
                 <span class="bp">self</span><span class="o">.</span><span class="n">_resetBoxes</span><span class="p">()</span>
-        <span class="c1">#</span>
-        <span class="c1"># elif middleMouse(event) or \</span>
-        <span class="c1">#     shiftLeftMouse(event) or shiftMiddleMouse(event) \</span>
-        <span class="c1">#     or shiftRightMouse(event):</span>
-        <span class="c1">#   event.accept()</span>
-        <span class="c1">#   if not event.isFinish():</span>
-        <span class="c1">#     self._resetBoxes()</span>
-        <span class="c1">#     self.updateScaleBox(event.buttonDownPos(), event.pos())</span>
-        <span class="c1">#   else:</span>
-        <span class="c1">#     self._resetBoxes()</span>
-        <span class="c1">#</span>
+
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_resetBoxes</span><span class="p">()</span>
-            <span class="n">event</span><span class="o">.</span><span class="n">ignore</span><span class="p">()</span></div>
+            <span class="n">event</span><span class="o">.</span><span class="n">ignore</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">selected</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">currentSelected</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="p">,</span> <span class="n">selected</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_pluralLinkName</span><span class="p">)</span>
+                <span class="n">selected</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">currentSelected</span><span class="p">)</span>
+                <span class="n">currentObjs</span> <span class="o">=</span> <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="p">,</span> <span class="n">selected</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_pluralLinkName</span><span class="p">,</span> <span class="n">selected</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">updateSelectionFromCurrent</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Error in setting current objects. &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="CustomViewBox.inYRange"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.BarGraph.CustomViewBox.inYRange">[docs]</a>    <span class="k">def</span> <span class="nf">inYRange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">yValue</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">y2</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">round</span><span class="p">(</span><span class="n">y1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">round</span><span class="p">(</span><span class="n">yValue</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">round</span><span class="p">(</span><span class="n">y2</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
@@ -381,14 +385,13 @@
 <div class="viewcode-block" id="CustomViewBox.getLabels"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.BarGraph.CustomViewBox.getLabels">[docs]</a>    <span class="k">def</span> <span class="nf">getLabels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">label</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">childGroup</span><span class="o">.</span><span class="n">childItems</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">CustomLabel</span><span class="p">)]</span></div>
 
-<div class="viewcode-block" id="CustomViewBox.updateSelectionFromCurrent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.BarGraph.CustomViewBox.updateSelectionFromCurrent">[docs]</a>    <span class="k">def</span> <span class="nf">updateSelectionFromCurrent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current</span><span class="p">):</span>
+<div class="viewcode-block" id="CustomViewBox.updateSelectionFromCurrent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.BarGraph.CustomViewBox.updateSelectionFromCurrent">[docs]</a>    <span class="k">def</span> <span class="nf">updateSelectionFromCurrent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLabels</span><span class="p">():</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLabels</span><span class="p">():</span>
-                    <span class="k">for</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                            <span class="k">if</span> <span class="n">label</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">)):</span>
-                                <span class="n">label</span><span class="o">.</span><span class="n">setSelected</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span></div>
+            <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLabels</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">label</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">)):</span>
+                            <span class="n">label</span><span class="o">.</span><span class="n">setSelected</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="CustomViewBox.upDateSelections"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.BarGraph.CustomViewBox.upDateSelections">[docs]</a>    <span class="k">def</span> <span class="nf">upDateSelections</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">positions</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLabels</span><span class="p">():</span>

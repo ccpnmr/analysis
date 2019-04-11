@@ -81,13 +81,8 @@
 <li class="toctree-l4"><a class="reference internal" href="ccpn.AnalysisMetabolomics.ui.gui.html#subpackages">Subpackages</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="ccpn.AnalysisMetabolomics.ui.gui.modules.html">ccpn.AnalysisMetabolomics.ui.gui.modules package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="ccpn.AnalysisMetabolomics.ui.gui.modules.html#submodules">Submodules</a></li>
-<li class="toctree-l6"><a class="reference internal" href="ccpn.AnalysisMetabolomics.ui.gui.modules.html#module-ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule">ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="ccpn.AnalysisMetabolomics.ui.gui.modules.html#module-ccpn.AnalysisMetabolomics.ui.gui.modules.MetaboliteFinder">ccpn.AnalysisMetabolomics.ui.gui.modules.MetaboliteFinder module</a></li>
-</ul>
-</li>
-<li class="toctree-l5"><a class="reference internal" href="ccpn.AnalysisMetabolomics.ui.gui.widgets.html">ccpn.AnalysisMetabolomics.ui.gui.widgets package</a><ul>
-<li class="toctree-l6"><a class="reference internal" href="ccpn.AnalysisMetabolomics.ui.gui.widgets.html#submodules">Submodules</a></li>
-<li class="toctree-l6"><a class="reference internal" href="ccpn.AnalysisMetabolomics.ui.gui.widgets.html#module-ccpn.AnalysisMetabolomics.ui.gui.widgets.PcaWidget">ccpn.AnalysisMetabolomics.ui.gui.widgets.PcaWidget module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="ccpn.AnalysisMetabolomics.ui.gui.modules.html#module-ccpn.AnalysisMetabolomics.ui.gui.modules.PcaModule">ccpn.AnalysisMetabolomics.ui.gui.modules.PcaModule module</a></li>
 </ul>
 </li>
 </ul>
@@ -119,7 +114,9 @@
 <dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.AnalysisMetabolomics.Metabolomics.showDecompositionModule">
 <code class="descname">showDecompositionModule</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/AnalysisMetabolomics.html#Metabolomics.showDecompositionModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.AnalysisMetabolomics.Metabolomics.showDecompositionModule" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Opens the PCA module. if you need to get the PCA module or the Decomposition base class:
+get the specific instance from the current ccpnModules. This allows to have multiple PCA modules at the same time</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.AnalysisMetabolomics.Metabolomics.showMetabolomicsPipeline">
@@ -131,120 +128,6 @@
 </div>
 <div class="section" id="module-ccpn.AnalysisMetabolomics.Decomposition">
 <span id="ccpn-analysismetabolomics-decomposition-module"></span><h2>ccpn.AnalysisMetabolomics.Decomposition module<a class="headerlink" href="#module-ccpn.AnalysisMetabolomics.Decomposition" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="ccpn.AnalysisMetabolomics.Decomposition.Decomposition">
-<em class="property">class </em><code class="descclassname">ccpn.AnalysisMetabolomics.Decomposition.</code><code class="descname">Decomposition</code><span class="sig-paren">(</span><em>application</em>, <em>presenter=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/Decomposition.html#Decomposition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Decomposition.Decomposition" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<dl class="method">
-<dt id="ccpn.AnalysisMetabolomics.Decomposition.Decomposition.buildSourceData">
-<code class="descname">buildSourceData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/Decomposition.html#Decomposition.buildSourceData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.buildSourceData" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.AnalysisMetabolomics.Decomposition.Decomposition.center">
-<code class="descname">center</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/Decomposition.html#Decomposition.center"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.center" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.AnalysisMetabolomics.Decomposition.Decomposition.centering">
-<code class="descname">centering</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.centering" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>mutable</em> -</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.AnalysisMetabolomics.Decomposition.Decomposition.decompose">
-<code class="descname">decompose</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/Decomposition.html#Decomposition.decompose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.decompose" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.AnalysisMetabolomics.Decomposition.Decomposition.getSourceData">
-<code class="descname">getSourceData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/Decomposition.html#Decomposition.getSourceData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.getSourceData" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.AnalysisMetabolomics.Decomposition.Decomposition.getSpectrumGroups">
-<code class="descname">getSpectrumGroups</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/Decomposition.html#Decomposition.getSpectrumGroups"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.getSpectrumGroups" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.AnalysisMetabolomics.Decomposition.Decomposition.loadings">
-<code class="descname">loadings</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.loadings" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>immutable</em> -</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.AnalysisMetabolomics.Decomposition.Decomposition.method">
-<code class="descname">method</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.method" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>mutable</em> -</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.AnalysisMetabolomics.Decomposition.Decomposition.normalization">
-<code class="descname">normalization</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.normalization" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>mutable</em> -</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.AnalysisMetabolomics.Decomposition.Decomposition.normalize">
-<code class="descname">normalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/Decomposition.html#Decomposition.normalize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.normalize" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.AnalysisMetabolomics.Decomposition.Decomposition.presenter">
-<code class="descname">presenter</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.presenter" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>mutable</em> -</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.AnalysisMetabolomics.Decomposition.Decomposition.refreshSourceDataOptions">
-<code class="descname">refreshSourceDataOptions</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/Decomposition.html#Decomposition.refreshSourceDataOptions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.refreshSourceDataOptions" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.AnalysisMetabolomics.Decomposition.Decomposition.refreshSpectrumGroupFilter">
-<code class="descname">refreshSpectrumGroupFilter</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/Decomposition.html#Decomposition.refreshSpectrumGroupFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.refreshSpectrumGroupFilter" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.AnalysisMetabolomics.Decomposition.Decomposition.registerNotifiers">
-<code class="descname">registerNotifiers</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/Decomposition.html#Decomposition.registerNotifiers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.registerNotifiers" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.AnalysisMetabolomics.Decomposition.Decomposition.saveLoadingsToSpectra">
-<code class="descname">saveLoadingsToSpectra</code><span class="sig-paren">(</span><em>prefix='test_pca'</em>, <em>descale=True</em>, <em>components=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/Decomposition.html#Decomposition.saveLoadingsToSpectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.saveLoadingsToSpectra" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.AnalysisMetabolomics.Decomposition.Decomposition.scale">
-<code class="descname">scale</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/Decomposition.html#Decomposition.scale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.scale" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.AnalysisMetabolomics.Decomposition.Decomposition.scaling">
-<code class="descname">scaling</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.scaling" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>mutable</em> -</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.AnalysisMetabolomics.Decomposition.Decomposition.scores">
-<code class="descname">scores</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.scores" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>immutable</em> -</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.AnalysisMetabolomics.Decomposition.Decomposition.setAvailablePlotData">
-<code class="descname">setAvailablePlotData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/Decomposition.html#Decomposition.setAvailablePlotData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.setAvailablePlotData" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.AnalysisMetabolomics.Decomposition.Decomposition.sources">
-<code class="descname">sources</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.sources" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>mutable</em> -</p>
-</dd></dl>
-
-</dd></dl>
-
 </div>
 <div class="section" id="module-ccpn.AnalysisMetabolomics.IntegralAssignment">
 <span id="ccpn-analysismetabolomics-integralassignment-module"></span><h2>ccpn.AnalysisMetabolomics.IntegralAssignment module<a class="headerlink" href="#module-ccpn.AnalysisMetabolomics.IntegralAssignment" title="Permalink to this headline">¶</a></h2>

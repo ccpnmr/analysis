@@ -33,6 +33,14 @@ ccpn.ui.gui.lib.GuiIntegralListView module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.lib.GuiListView module
+----------------------------------
+
+.. automodule:: ccpn.ui.gui.lib.GuiListView
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.lib.GuiMainWindow module
 ------------------------------------
 
@@ -133,6 +141,14 @@ ccpn.ui.gui.lib.GuiWindow module
 --------------------------------
 
 .. automodule:: ccpn.ui.gui.lib.GuiWindow
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.lib.MenuActions module
+----------------------------------
+
+.. automodule:: ccpn.ui.gui.lib.MenuActions
     :members:
     :undoc-members:
     :show-inheritance:

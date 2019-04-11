@@ -52,18 +52,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:29 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -76,10 +76,11 @@
 <span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">typing</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
 <span class="kn">import</span> <span class="nn">operator</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.util.Common</span> <span class="kn">import</span> <span class="n">_traverse</span><span class="p">,</span> <span class="n">_getChildren</span>
 <span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
@@ -98,11 +99,10 @@
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.Io</span> <span class="kn">import</span> <span class="n">Formats</span> <span class="k">as</span> <span class="n">ioFormats</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.Io</span> <span class="kn">import</span> <span class="n">Fasta</span> <span class="k">as</span> <span class="n">fastaIo</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.Io</span> <span class="kn">import</span> <span class="n">Pdb</span> <span class="k">as</span> <span class="n">pdbIo</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.guiDecorators</span> <span class="kn">import</span> <span class="n">suspendSideBarNotifications</span>
-
-<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
-
+<span class="c1"># from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.decorators</span> <span class="kn">import</span> <span class="n">logCommand</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">undoStackBlocking</span><span class="p">,</span> <span class="n">notificationBlanking</span><span class="p">,</span> <span class="n">undoBlock</span><span class="p">,</span> <span class="n">undoBlockWithoutSideBar</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
 
 <span class="c1"># TODO These should be merged with the sams constants in CcpnNefIo</span>
@@ -130,8 +130,9 @@
 <span class="sd">    There are eleven top-level data objects directly within a project, of which seven have child</span>
 <span class="sd">    objects of their own, namely Spectrum, Sample, Chain, NmrChain, ChemicalShiftList, DataSet</span>
 <span class="sd">    and StructureEnsemble. The child data objects are organised in a logical hierarchy; for example,</span>
-<span class="sd">    a Spectrum has PeakLists, which in turn, are made up of Peaks, whereas a Chain is made up of</span>
-<span class="sd">    -Residues, which are made up of Atoms. &quot;&quot;&quot;</span>
+<span class="sd">    a Spectrum has PeakLists, which in turn, are made up of Peaks, whereas a Chain is made up of Residues,</span>
+<span class="sd">    which are made up of Atoms.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1">#: Short class name, for PID.</span>
     <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;PR&#39;</span>
@@ -350,29 +351,13 @@
 <div class="viewcode-block" id="Project.deleteObjects"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.deleteObjects">[docs]</a>    <span class="k">def</span> <span class="nf">deleteObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">objs</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">Pid</span><span class="o">.</span><span class="n">Pid</span><span class="p">,</span> <span class="n">AbstractWrapperObject</span><span class="p">]]):</span>
         <span class="sd">&quot;&quot;&quot;Delete one or more objects, given as either objects or Pids</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="n">getByPid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getByPid</span>
-
         <span class="n">objs</span> <span class="o">=</span> <span class="p">[</span><span class="n">getByPid</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">objs</span><span class="p">]</span>
-        <span class="n">apiObjs</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">objs</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_startDeleteCommandBlock</span><span class="p">(</span><span class="o">*</span><span class="n">apiObjs</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
+
+        <span class="k">with</span> <span class="n">undoBlockWithoutSideBar</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objs</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">obj</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">obj</span><span class="o">.</span><span class="n">isDeleted</span><span class="p">:</span>
-                    <span class="c1"># If statement in case deleting one obj triggers the deletion of another</span>
-
-                    <span class="c1"># if the object is a Spectrum then delete peak/integralLists</span>
-                    <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">pid</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;SP&#39;</span><span class="p">):</span>
-                        <span class="k">for</span> <span class="n">peakList</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">peakLists</span><span class="p">:</span>
-                            <span class="n">peakList</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
-                        <span class="k">for</span> <span class="n">integralList</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">integralLists</span><span class="p">:</span>
-                            <span class="n">integralList</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
-                        <span class="k">for</span> <span class="n">multipletList</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">multipletLists</span><span class="p">:</span>
-                            <span class="n">multipletList</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
-                    <span class="n">obj</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
-
-        <span class="k">finally</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_endDeleteCommandBlock</span><span class="p">(</span><span class="o">*</span><span class="n">apiObjs</span><span class="p">)</span></div>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span></div>
 
     <span class="c1"># def renameObject(self, objectOrPid:typing.Union[str,AbstractWrapperObject], newName:str):</span>
     <span class="c1">#   &quot;&quot;&quot;Rename object indicated by objectOrPid to name newName</span>
@@ -494,11 +479,14 @@
         <span class="c1">#</span>
         <span class="k">return</span> <span class="n">result</span>
 
-    <span class="c1">#</span>
+
+  <span class="c1">#===========================================================================================</span>
     <span class="c1">#  Notifiers system</span>
     <span class="c1">#</span>
 
     <span class="c1"># Old, API-level functions:</span>
+  <span class="c1">#</span>
+  <span class="c1">#===========================================================================================</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_setupApiNotifier</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">apiClassOrName</span><span class="p">,</span> <span class="n">apiFuncName</span><span class="p">,</span> <span class="n">parameterDict</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -577,7 +565,12 @@
             <span class="n">tt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activeNotifiers</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
             <span class="n">Notifiers</span><span class="o">.</span><span class="n">unregisterNotify</span><span class="p">(</span><span class="o">*</span><span class="n">tt</span><span class="p">)</span>
 
+  <span class="c1">#===========================================================================================</span>
+  <span class="c1">#  Notifiers system</span>
+  <span class="c1">#</span>
     <span class="c1"># New notifier system (Free for use in application code):</span>
+  <span class="c1">#</span>
+  <span class="c1">#===========================================================================================</span>
 
 <div class="viewcode-block" id="Project.registerNotifier"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.registerNotifier">[docs]</a>    <span class="k">def</span> <span class="nf">registerNotifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">className</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="bp">None</span><span class="p">],</span>
                          <span class="n">parameterDict</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{},</span> <span class="n">onceOnly</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="bp">None</span><span class="p">]:</span>
@@ -650,26 +643,26 @@
         <span class="k">return</span> <span class="n">notifier</span></div>
 
     <span class="c1">#GWV 20181123</span>
-  <span class="c1"># def duplicateNotifier(self,  className:str, target:str,</span>
-  <span class="c1">#                       notifier:typing.Callable[..., None]):</span>
-  <span class="c1">#   &quot;&quot;&quot;register copy of notifier for a new className and target.</span>
-  <span class="c1">#   Intended for onceOnly=True notifiers. It is up to the user to make sure the calling</span>
-  <span class="c1">#   interface matches the action&quot;&quot;&quot;</span>
-  <span class="c1">#   if target in self._notifierActions:</span>
-  <span class="c1">#</span>
-  <span class="c1">#     tt = (className, target)</span>
-  <span class="c1">#   else:</span>
-  <span class="c1">#     # This is right, it just looks strange. But if target is not an action it is</span>
-  <span class="c1">#     # another className, and if so the names must be sorted.</span>
-  <span class="c1">#     tt = tuple(sorted([className, target]))</span>
-  <span class="c1">#</span>
-  <span class="c1">#   for od in self._context2Notifiers.values():</span>
-  <span class="c1">#     onceOnly = od.get(notifier)</span>
-  <span class="c1">#     if onceOnly is not None:</span>
-  <span class="c1">#       self._context2Notifiers.setdefault(tt, OrderedDict())[notifier] = onceOnly</span>
-  <span class="c1">#       break</span>
-  <span class="c1">#   else:</span>
-  <span class="c1">#     raise ValueError(&quot;Unknown notifier: %s&quot; % notifier)</span>
+    <span class="c1"># def duplicateNotifier(self,  className:str, target:str,</span>
+    <span class="c1">#                       notifier:typing.Callable[..., None]):</span>
+    <span class="c1">#   &quot;&quot;&quot;register copy of notifier for a new className and target.</span>
+    <span class="c1">#   Intended for onceOnly=True notifiers. It is up to the user to make sure the calling</span>
+    <span class="c1">#   interface matches the action&quot;&quot;&quot;</span>
+    <span class="c1">#   if target in self._notifierActions:</span>
+    <span class="c1">#</span>
+    <span class="c1">#     tt = (className, target)</span>
+    <span class="c1">#   else:</span>
+    <span class="c1">#     # This is right, it just looks strange. But if target is not an action it is</span>
+    <span class="c1">#     # another className, and if so the names must be sorted.</span>
+    <span class="c1">#     tt = tuple(sorted([className, target]))</span>
+    <span class="c1">#</span>
+    <span class="c1">#   for od in self._context2Notifiers.values():</span>
+    <span class="c1">#     onceOnly = od.get(notifier)</span>
+    <span class="c1">#     if onceOnly is not None:</span>
+    <span class="c1">#       self._context2Notifiers.setdefault(tt, OrderedDict())[notifier] = onceOnly</span>
+    <span class="c1">#       break</span>
+    <span class="c1">#   else:</span>
+    <span class="c1">#     raise ValueError(&quot;Unknown notifier: %s&quot; % notifier)</span>
 
 <div class="viewcode-block" id="Project.unRegisterNotifier"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.unRegisterNotifier">[docs]</a>    <span class="k">def</span> <span class="nf">unRegisterNotifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">className</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">notifier</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="bp">None</span><span class="p">]):</span>
         <span class="sd">&quot;&quot;&quot;Unregister the notifier from this className, and target&quot;&quot;&quot;</span>
@@ -766,36 +759,18 @@
             <span class="n">undo</span><span class="o">.</span><span class="n">newWaypoint</span><span class="p">()</span>  <span class="c1"># DO NOT CHANGE THIS</span>
             <span class="n">undo</span><span class="o">.</span><span class="n">increaseWaypointBlocking</span><span class="p">()</span>
 
-            <span class="c1"># TODO:ED check this!</span>
             <span class="c1"># self.suspendNotification()</span>
-
-        <span class="c1"># if not self._appBase._echoBlocking:</span>
-        <span class="c1">#</span>
-        <span class="c1">#     getDataObj = self._data2Obj.get</span>
-        <span class="c1">#     ll = [getDataObj(x) for x in allWrappedData]</span>
-        <span class="c1">#     ss = &#39;, &#39;.join(repr(x.pid) for x in ll if x is not None)</span>
-        <span class="c1">#     if not ss:</span>
-        <span class="c1">#         raise ValueError(&quot;No object for deletion recognised among API objects: %s&quot;</span>
-        <span class="c1">#                          % allWrappedData)</span>
-        <span class="c1">#     command = &quot;project.deleteObjects(%s)&quot; % ss</span>
-        <span class="c1">#     # echo command strings</span>
-        <span class="c1">#     self._appBase.ui.echoCommands((command,))</span>
-        <span class="c1">#</span>
-        <span class="c1"># self._appBase._echoBlocking += 1</span>
 
     <span class="k">def</span> <span class="nf">_endDeleteCommandBlock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">dummyWrappedData</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;End block for delete command echoing</span>
 
-<span class="sd">        MUST be paired with _startDeleteCommandBlock call - use try ... finally to ensure both are called&quot;&quot;&quot;</span>
+<span class="sd">        MUST be paired with _startDeleteCommandBlock call - use try ... finally to ensure both are called</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">undo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_undo</span>
         <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="c1"># TODO:ED check this!</span>
+
             <span class="c1"># self.resumeNotification()</span>
             <span class="n">undo</span><span class="o">.</span><span class="n">decreaseWaypointBlocking</span><span class="p">()</span>
-
-        <span class="c1"># if self._appBase._echoBlocking &gt; 0:</span>
-        <span class="c1">#     # If statement should always be True, but to avoid weird behaviour in error situations we check</span>
-        <span class="c1">#     self._appBase._echoBlocking -= 1</span>
 
     <span class="k">def</span> <span class="nf">_newApiObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">,</span> <span class="n">cls</span><span class="p">:</span> <span class="n">AbstractWrapperObject</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create new wrapper object of class cls, associated with wrappedData.</span>
@@ -937,20 +912,20 @@
 
     <span class="c1"># Library functions</span>
 
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="s1">&#39;project.&#39;</span><span class="p">)</span>
 <div class="viewcode-block" id="Project.exportNef"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.exportNef">[docs]</a>    <span class="k">def</span> <span class="nf">exportNef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
                   <span class="n">overwriteExisting</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
-                  <span class="n">skipPrefixes</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span> <span class="o">=</span> <span class="p">(),</span>
+                  <span class="n">skipPrefixes</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
                   <span class="n">expandSelection</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
-                  <span class="n">pidList</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+                  <span class="n">pidList</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Export selected contents of the project to a Nef file.</span>
 
-<span class="sd">          skipPrefixes: ( &#39;ccpn&#39;, ..., &lt;str&gt; )</span>
-<span class="sd">          expandSelection: &lt;bool&gt; }</span>
+<span class="sd">        skipPrefixes: ( &#39;ccpn&#39;, ..., &lt;str&gt; )</span>
+<span class="sd">        expandSelection: &lt;bool&gt;</span>
 
-<span class="sd">          Include &#39;ccpn&#39; in the skipPrefixes list will exclude ccpn specific items from the file</span>
-<span class="sd">          expandSelection = True  will include all data from the project, this may not be data that</span>
-<span class="sd">                                  is not defined in the Nef standard.</span>
+<span class="sd">        Include &#39;ccpn&#39; in the skipPrefixes list will exclude ccpn specific items from the file</span>
+<span class="sd">        expandSelection = True; will include all data from the project, this may not be data that is not defined in the Nef standard.</span>
 
 <span class="sd">        PidList is a list of &lt;str&gt;, e.g. &#39;NC:@-&#39;, obtained from the objects to be included.</span>
 <span class="sd">        The Nef file may also contain further dependent items associated with the pidList.</span>
@@ -961,35 +936,14 @@
 <span class="sd">        :param pidList: a list of pids</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">CcpnNefIo</span>
-        <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
 
-        <span class="n">defaults</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="s1">&#39;path&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-                                <span class="p">(</span><span class="s1">&#39;overwriteExisting&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-                                <span class="p">(</span><span class="s1">&#39;skipPrefixes&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-                                <span class="p">(</span><span class="s1">&#39;expandSelection&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-                                <span class="p">(</span><span class="s1">&#39;pidList&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)))</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;exportNef&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">)</span>
-        <span class="n">undo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_undo</span>
-        <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">undo</span><span class="o">.</span><span class="n">increaseBlocking</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">blankNotification</span><span class="p">()</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
-            <span class="n">CcpnNefIo</span><span class="o">.</span><span class="n">exportNef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span>
-                                <span class="n">overwriteExisting</span><span class="o">=</span><span class="n">overwriteExisting</span><span class="p">,</span>
-                                <span class="n">skipPrefixes</span><span class="o">=</span><span class="n">skipPrefixes</span><span class="p">,</span>
-                                <span class="n">expandSelection</span><span class="o">=</span><span class="n">expandSelection</span><span class="p">,</span>
-                                <span class="n">pidList</span><span class="o">=</span><span class="n">pidList</span><span class="p">)</span>
-            <span class="n">t2</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
-            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Exported NEF file, time = </span><span class="si">%.2f</span><span class="s1">s&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">t2</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
-
-        <span class="k">finally</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">unblankNotification</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="n">undo</span><span class="o">.</span><span class="n">decreaseBlocking</span><span class="p">()</span></div>
+        <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
+            <span class="k">with</span> <span class="n">notificationBlanking</span><span class="p">():</span>
+                <span class="n">CcpnNefIo</span><span class="o">.</span><span class="n">exportNef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span>
+                                    <span class="n">overwriteExisting</span><span class="o">=</span><span class="n">overwriteExisting</span><span class="p">,</span>
+                                    <span class="n">skipPrefixes</span><span class="o">=</span><span class="n">skipPrefixes</span><span class="p">,</span>
+                                    <span class="n">expandSelection</span><span class="o">=</span><span class="n">expandSelection</span><span class="p">,</span>
+                                    <span class="n">pidList</span><span class="o">=</span><span class="n">pidList</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_convertToDataBlock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skipPrefixes</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span> <span class="o">=</span> <span class="p">(),</span>
                             <span class="n">expandSelection</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
@@ -1013,31 +967,14 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">CcpnNefIo</span>
 
-        <span class="n">defaults</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="s1">&#39;skipPrefixes&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-                                <span class="p">(</span><span class="s1">&#39;expandSelection&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-                                <span class="p">(</span><span class="s1">&#39;pidList&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)))</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;exportNef&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">)</span>
-        <span class="n">undo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_undo</span>
-        <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">undo</span><span class="o">.</span><span class="n">increaseBlocking</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">blankNotification</span><span class="p">()</span>
-
-        <span class="n">dataBlock</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="n">newPath</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
-            <span class="n">dataBlock</span> <span class="o">=</span> <span class="n">CcpnNefIo</span><span class="o">.</span><span class="n">convertToDataBlock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skipPrefixes</span><span class="o">=</span><span class="n">skipPrefixes</span><span class="p">,</span>
-                                                     <span class="n">expandSelection</span><span class="o">=</span><span class="n">expandSelection</span><span class="p">,</span>
-                                                     <span class="n">pidList</span><span class="o">=</span><span class="n">pidList</span><span class="p">)</span>
-            <span class="n">t2</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
-            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;File to dataBlock, time = </span><span class="si">%.2f</span><span class="s1">s&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">t2</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
-
-        <span class="k">finally</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">unblankNotification</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="n">undo</span><span class="o">.</span><span class="n">decreaseBlocking</span><span class="p">()</span>
+        <span class="k">with</span> <span class="n">undoStackBlocking</span><span class="p">():</span>
+            <span class="k">with</span> <span class="n">notificationBlanking</span><span class="p">():</span>
+                <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+                <span class="n">dataBlock</span> <span class="o">=</span> <span class="n">CcpnNefIo</span><span class="o">.</span><span class="n">convertToDataBlock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skipPrefixes</span><span class="o">=</span><span class="n">skipPrefixes</span><span class="p">,</span>
+                                                         <span class="n">expandSelection</span><span class="o">=</span><span class="n">expandSelection</span><span class="p">,</span>
+                                                         <span class="n">pidList</span><span class="o">=</span><span class="n">pidList</span><span class="p">)</span>
+                <span class="n">t2</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+                <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;File to dataBlock, time = </span><span class="si">%.2f</span><span class="s1">s&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">t2</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="n">dataBlock</span>
 
@@ -1046,27 +983,12 @@
         <span class="c1"># Export the modified dataBlock to file</span>
         <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">CcpnNefIo</span>
 
-        <span class="n">defaults</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="s1">&#39;dataBlock&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-                                <span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-                                <span class="p">(</span><span class="s1">&#39;overwriteExisting&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)))</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;writeDataBlockToFile&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">)</span>
-        <span class="n">undo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_undo</span>
-        <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">undo</span><span class="o">.</span><span class="n">increaseBlocking</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">blankNotification</span><span class="p">()</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
-            <span class="n">CcpnNefIo</span><span class="o">.</span><span class="n">writeDataBlock</span><span class="p">(</span><span class="n">dataBlock</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">overwriteExisting</span><span class="o">=</span><span class="n">overwriteExisting</span><span class="p">)</span>
-            <span class="n">t2</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
-            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Exporting dataBlock to file, time = </span><span class="si">%.2f</span><span class="s1">s&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">t2</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
-
-        <span class="k">finally</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">unblankNotification</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="n">undo</span><span class="o">.</span><span class="n">decreaseBlocking</span><span class="p">()</span>
+        <span class="k">with</span> <span class="n">undoStackBlocking</span><span class="p">():</span>
+            <span class="k">with</span> <span class="n">notificationBlanking</span><span class="p">():</span>
+                <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+                <span class="n">CcpnNefIo</span><span class="o">.</span><span class="n">writeDataBlock</span><span class="p">(</span><span class="n">dataBlock</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">overwriteExisting</span><span class="o">=</span><span class="n">overwriteExisting</span><span class="p">)</span>
+                <span class="n">t2</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+                <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Exporting dataBlock to file, time = </span><span class="si">%.2f</span><span class="s1">s&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">t2</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
 
 <div class="viewcode-block" id="Project.recurseAnalyseUrl"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.recurseAnalyseUrl">[docs]</a>    <span class="k">def</span> <span class="nf">recurseAnalyseUrl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filePath</span><span class="p">,</span> <span class="n">includeUndefined</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Recurse through the given path to find valid data that can be loaded</span>
@@ -1148,7 +1070,9 @@
         <span class="c1">#TODO:RASMUS: Replace prints by logger calls</span>
         <span class="c1">#TODO:RASMUS: Fix all return types; define properly first</span>
         <span class="k">if</span> <span class="n">dataType</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Skipping: file data type not recognised for </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">usePath</span><span class="p">)</span>
+            <span class="c1"># print(&quot;Skipping: file data type not recognised for %s&quot; % usePath)</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Skipping: file data type not recognised for </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">usePath</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Skipping: file data type not recognised for </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">usePath</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">None</span>
 
         <span class="k">elif</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;Dirs&#39;</span><span class="p">:</span>
@@ -1159,7 +1083,9 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">usePath</span><span class="p">):</span>
-            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Skipping: no file found at </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">usePath</span><span class="p">)</span>
+            <span class="c1"># print(&quot;Skipping: no file found at %s&quot; % usePath)</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Skipping: no file found at </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">usePath</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Skipping: no file found at </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">usePath</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">[]</span>
 
         <span class="k">elif</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;Text&#39;</span><span class="p">:</span>
@@ -1196,7 +1122,8 @@
             <span class="k">elif</span> <span class="n">funcname</span> <span class="o">==</span> <span class="s1">&#39;_loadSpectrum&#39;</span><span class="p">:</span>
                 <span class="c1"># NBNB TBD #TODO:RASMUS:FIXME check if loadSpectrum should start with underscore</span>
                 <span class="c1"># (NB referred to elsewhere</span>
-                <span class="k">with</span> <span class="n">suspendSideBarNotifications</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;loadData&#39;</span><span class="p">,</span> <span class="n">usePath</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+                <span class="c1"># with suspendSideBarNotifications(self, &#39;loadData&#39;, usePath, quiet=False):</span>
+                <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
                     <span class="n">thisSpec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadSpectrum</span><span class="p">(</span><span class="n">usePath</span><span class="p">,</span> <span class="n">subType</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">thisSpec</span>
 
@@ -1204,7 +1131,8 @@
                 <span class="n">pids</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">funcname</span><span class="p">)(</span><span class="n">usePath</span><span class="p">,</span> <span class="n">subType</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">pids</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Skipping: project has no function </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">funcname</span><span class="p">)</span>
+                <span class="c1"># print(&quot;Skipping: project has no function %s&quot; % funcname)</span>
+                <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Skipping: project has no function </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">funcname</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="p">[]</span></div>
 
@@ -1326,6 +1254,10 @@
                     <span class="c1"># spectrum.sliceColour = autoCorrectHexColour(spectrum.sliceColour,</span>
                     <span class="c1">#                                                       getColours()[CCPNGLWIDGET_HEXBACKGROUND])</span>
 
+            <span class="c1"># if there are no peakLists then create a new one - taken from Spectrum _spectrumMakeFirstPeakList notifier</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">:</span>
+                <span class="n">spectrum</span><span class="o">.</span><span class="n">newPeakList</span><span class="p">()</span>
+
             <span class="k">return</span> <span class="p">[</span><span class="n">spectrum</span><span class="p">]</span></div>
 
     <span class="k">def</span> <span class="nf">_loadLookupFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">subType</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="p">):</span>
@@ -1336,7 +1268,8 @@
             <span class="c1"># readCsv(self, path=path)</span>
 
         <span class="k">elif</span> <span class="n">subType</span> <span class="o">==</span> <span class="n">ioFormats</span><span class="o">.</span><span class="n">EXCEL</span><span class="p">:</span>
-            <span class="k">with</span> <span class="n">suspendSideBarNotifications</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;ExcelReader&#39;</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+            <span class="c1"># with suspendSideBarNotifications(self, &#39;ExcelReader&#39;, quiet=False):</span>
+            <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
                 <span class="n">ExcelReader</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">excelPath</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_uniqueSubstanceName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">defaultName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Molecule&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -1382,13 +1315,30 @@
         <span class="c1">#</span>
         <span class="k">return</span> <span class="n">result</span></div>
 
+<div class="viewcode-block" id="Project.getObjectsById"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.getObjectsById">[docs]</a>    <span class="k">def</span> <span class="nf">getObjectsById</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">className</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                       <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">AbstractWrapperObject</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;get objects from class name / shortName and the start of the ID.</span>
+
+<span class="sd">        The function does NOT interrogate the API level, which makes it faster in a</span>
+<span class="sd">        number fo cases, e.g. for NmrResidues&quot;&quot;&quot;</span>
+
+        <span class="n">dd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pid2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">className</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dd</span><span class="p">:</span>
+            <span class="c1"># NB the _pid2Obj entry is set in the object init.</span>
+            <span class="c1"># The relevant dictionary may therefore be missing if no object has yet been created</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">dd</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="nb">id</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="c1">#</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
     <span class="c1">#===========================================================================================</span>
     <span class="c1"># new&#39;Object&#39; and other methods</span>
     <span class="c1"># Call appropriate routines in their respective locations</span>
     <span class="c1">#===========================================================================================</span>
 
-    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
-<div class="viewcode-block" id="Project.newMark"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.newMark">[docs]</a>    <span class="k">def</span> <span class="nf">newMark</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">colour</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">positions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">axisCodes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span>
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="s1">&#39;project.&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="Project.newMark"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.newMark">[docs]</a>    <span class="k">def</span> <span class="nf">newMark</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">colour</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">positions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">axisCodes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                 <span class="n">style</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;simple&#39;</span><span class="p">,</span> <span class="n">units</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span> <span class="n">labels</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">()):</span>
         <span class="sd">&quot;&quot;&quot;Create new Mark</span>
 
@@ -1405,9 +1355,31 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">ccpn.ui._implementation.Mark</span> <span class="kn">import</span> <span class="n">_newMark</span>
-        <span class="k">return</span> <span class="n">_newMark</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="n">colour</span><span class="p">,</span> <span class="n">positions</span><span class="o">=</span><span class="n">positions</span><span class="p">,</span> <span class="n">axisCodes</span><span class="o">=</span><span class="n">axisCodes</span><span class="p">,</span>
-                        <span class="n">style</span><span class="o">=</span><span class="n">style</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span>
-                        <span class="p">)</span></div>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">findMark</span><span class="p">(</span><span class="n">colour</span><span class="o">=</span><span class="n">colour</span><span class="p">,</span> <span class="n">positions</span><span class="o">=</span><span class="n">positions</span><span class="p">,</span> <span class="n">axisCodes</span><span class="o">=</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">_newMark</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="n">colour</span><span class="p">,</span> <span class="n">positions</span><span class="o">=</span><span class="n">positions</span><span class="p">,</span> <span class="n">axisCodes</span><span class="o">=</span><span class="n">axisCodes</span><span class="p">,</span>
+                            <span class="n">style</span><span class="o">=</span><span class="n">style</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span>
+                            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Mark already exists&#39;</span><span class="p">)</span></div>
+
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="s1">&#39;project.&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="Project.findMark"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.findMark">[docs]</a>    <span class="k">def</span> <span class="nf">findMark</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">colour</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">positions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">axisCodes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">labels</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">()):</span>
+        <span class="sd">&quot;&quot;&quot;Find existing Mark</span>
+
+<span class="sd">        :param str colour: Mark colour</span>
+<span class="sd">        :param tuple/list positions: Position in unit (default ppm) of all lines in the mark</span>
+<span class="sd">        :param tuple/list axisCodes: Axis codes for all lines in the mark</span>
+<span class="sd">        :param str style: Mark drawing style (dashed line etc.) default: full line (&#39;simple&#39;)</span>
+<span class="sd">        :param tuple/list units: Axis units for all lines in the mark, Default: all ppm</span>
+<span class="sd">        :param tuple/list labels: Ruler labels for all lines in the mark. Default: None</span>
+
+<span class="sd">        :return Mark instance</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.ui._implementation.Mark</span> <span class="kn">import</span> <span class="n">_findMark</span>
+
+        <span class="k">return</span> <span class="n">_findMark</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="n">colour</span><span class="p">,</span> <span class="n">positions</span><span class="o">=</span><span class="n">positions</span><span class="p">,</span> <span class="n">axisCodes</span><span class="o">=</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span></div>
 
     <span class="c1"># GWV 20181127: not used</span>
     <span class="c1"># def _newSimpleMark(self, colour: str, position: float, axisCode: str, style: str = &#39;simple&#39;,</span>
@@ -1427,24 +1399,419 @@
     <span class="c1">#     &quot;&quot;&quot;</span>
     <span class="c1">#     pass</span>
 
-    <span class="k">def</span> <span class="nf">newSpectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="s1">&#39;project.&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="Project.newSpectrum"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.newSpectrum">[docs]</a>    <span class="k">def</span> <span class="nf">newSpectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Creation of new Spectrum NOT IMPLEMENTED.</span>
-<span class="sd">        Use Project.loadData or Project.createDummySpectrum instead</span>
-
-<span class="sd">        Inserted later ccpn.Core.Spectrum</span>
+<span class="sd">        Use Project.loadData or Project.createDummySpectrum instead.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.Spectrum</span> <span class="kn">import</span> <span class="n">_newSpectrum</span>
 
-    <span class="k">def</span> <span class="nf">createDummySpectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axisCodes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                             <span class="n">chemicalShiftList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Make dummy spectrum from isotopeCodes list - without data and with</span>
-<span class="sd">        default parameters</span>
+        <span class="k">return</span> <span class="n">_newSpectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
 
-<span class="sd">        return Spectrum instance</span>
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="s1">&#39;project.&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="Project.createDummySpectrum"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.createDummySpectrum">[docs]</a>    <span class="k">def</span> <span class="nf">createDummySpectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axisCodes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                            <span class="n">chemicalShiftList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make dummy spectrum from isotopeCodes list - without data and with default parameters.</span>
 
-<span class="sd">        Inserted later ccpn.Core.Spectrum</span>
+<span class="sd">        :param axisCodes:</span>
+<span class="sd">        :param name:</span>
+<span class="sd">        :param chemicalShiftList:</span>
+<span class="sd">        :return: a new Spectrum instance.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
+
+        <span class="kn">from</span> <span class="nn">ccpn.core.Spectrum</span> <span class="kn">import</span> <span class="n">_createDummySpectrum</span>
+
+        <span class="k">return</span> <span class="n">_createDummySpectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axisCodes</span><span class="o">=</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                                    <span class="n">chemicalShiftList</span><span class="o">=</span><span class="n">chemicalShiftList</span><span class="p">)</span></div>
+
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="s1">&#39;project.&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="Project.newNmrChain"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.newNmrChain">[docs]</a>    <span class="k">def</span> <span class="nf">newNmrChain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shortName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">isConnected</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;?&#39;</span><span class="p">,</span>
+                    <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create new NmrChain. Setting isConnected=True produces a connected NmrChain.</span>
+
+<span class="sd">        :param str shortName: shortName for new nmrChain (optional, defaults to &#39;@ijk&#39; or &#39;#ijk&#39;,  ijk positive integer</span>
+<span class="sd">        :param bool isConnected: (default to False) If true the NmrChain is a connected stretch. This can NOT be changed later</span>
+<span class="sd">        :param str label: Modifiable NmrChain identifier that does not change with reassignment. Defaults to &#39;@ijk&#39;/&#39;#ijk&#39;</span>
+<span class="sd">        :param str comment: comment for new nmrChain (optional)</span>
+<span class="sd">        :return: a new NmrChain instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.NmrChain</span> <span class="kn">import</span> <span class="n">_newNmrChain</span>
+
+        <span class="k">return</span> <span class="n">_newNmrChain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shortName</span><span class="o">=</span><span class="n">shortName</span><span class="p">,</span> <span class="n">isConnected</span><span class="o">=</span><span class="n">isConnected</span><span class="p">,</span>
+                            <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span></div>
+
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="s1">&#39;project&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="Project.fetchNmrChain"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.fetchNmrChain">[docs]</a>    <span class="k">def</span> <span class="nf">fetchNmrChain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shortName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fetch chain with given shortName; If none exists call newNmrChain to make one first</span>
+
+<span class="sd">        If shortName is None returns a new NmrChain with name starting with &#39;@&#39;</span>
+
+<span class="sd">        :param shortName: string name of required nmrAtom</span>
+<span class="sd">        :return: an NmrChain instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.NmrChain</span> <span class="kn">import</span> <span class="n">_fetchNmrChain</span>
+
+        <span class="k">return</span> <span class="n">_fetchNmrChain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shortName</span><span class="o">=</span><span class="n">shortName</span><span class="p">)</span></div>
+
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="s1">&#39;project.&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="Project.produceNmrAtom"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.produceNmrAtom">[docs]</a>    <span class="k">def</span> <span class="nf">produceNmrAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atomId</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">chainCode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                       <span class="n">sequenceCode</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                       <span class="n">residueType</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get chainCode, sequenceCode, residueType and atomName from dot-separated atomId or Pid</span>
+<span class="sd">            or explicit parameters, and find or create an NmrAtom that matches</span>
+<span class="sd">            Empty chainCode gets NmrChain:@- ; empty sequenceCode get a new NmrResidue</span>
+
+<span class="sd">        :param atomId:</span>
+<span class="sd">        :param chainCode:</span>
+<span class="sd">        :param sequenceCode:</span>
+<span class="sd">        :param residueType:</span>
+<span class="sd">        :param name: new or existing nmrAtom, matching parameters</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.NmrAtom</span> <span class="kn">import</span> <span class="n">_produceNmrAtom</span>
+
+        <span class="k">return</span> <span class="n">_produceNmrAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atomId</span><span class="o">=</span><span class="n">atomId</span><span class="p">,</span> <span class="n">chainCode</span><span class="o">=</span><span class="n">chainCode</span><span class="p">,</span>
+                               <span class="n">sequenceCode</span><span class="o">=</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="o">=</span><span class="n">residueType</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
+
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="s1">&#39;project.&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="Project.newNote"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.newNote">[docs]</a>    <span class="k">def</span> <span class="nf">newNote</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create new Note.</span>
+
+<span class="sd">        See the Note class for details.</span>
+
+<span class="sd">        Optional keyword arguments can be passed in; see Note._newNote for details.</span>
+
+<span class="sd">        :param name: name for the note.</span>
+<span class="sd">        :param text: contents of the note.</span>
+<span class="sd">        :return: a new Note instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.Note</span> <span class="kn">import</span> <span class="n">_newNote</span>
+
+        <span class="k">return</span> <span class="n">_newNote</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span></div>
+
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="s1">&#39;project.&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="Project.newWindow"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.newWindow">[docs]</a>    <span class="k">def</span> <span class="nf">newWindow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(),</span> <span class="n">size</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(),</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create new child Window.</span>
+
+<span class="sd">        See the Window class for details.</span>
+
+<span class="sd">        Optional keyword arguments can be passed in; see Window._newWindow for details.</span>
+
+<span class="sd">        :param str title: window  title (optional, defaults to &#39;W1&#39;, &#39;W2&#39;, &#39;W3&#39;, ...</span>
+<span class="sd">        :param tuple position: x,y position for new window in integer pixels.</span>
+<span class="sd">        :param tuple size: x,y size for new window in integer pixels.</span>
+<span class="sd">        :return: a new Window instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.ui._implementation.Window</span> <span class="kn">import</span> <span class="n">_newWindow</span>
+
+        <span class="k">return</span> <span class="n">_newWindow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span></div>
+
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="s1">&#39;project.&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="Project.newStructureEnsemble"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.newStructureEnsemble">[docs]</a>    <span class="k">def</span> <span class="nf">newStructureEnsemble</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create new StructureEnsemble.</span>
+
+<span class="sd">        See the StructureEnsemble class for details.</span>
+
+<span class="sd">        Optional keyword arguments can be passed in; see StructureEnsemble._newStructureEnsemble for details.</span>
+
+<span class="sd">        :param name: new name for the StructureEnsemble.</span>
+<span class="sd">        :param data: Pandas dataframe.</span>
+<span class="sd">        :param comment: optional comment string</span>
+<span class="sd">        :return: a new StructureEnsemble instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.StructureEnsemble</span> <span class="kn">import</span> <span class="n">_newStructureEnsemble</span>
+
+        <span class="k">return</span> <span class="n">_newStructureEnsemble</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span></div>
+
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="s1">&#39;project.&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="Project.newPeakCluster"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.newPeakCluster">[docs]</a>    <span class="k">def</span> <span class="nf">newPeakCluster</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peaks</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="s1">&#39;Peak&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="s1">&#39;PeakCluster&#39;</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Create new PeakCluster.</span>
+
+<span class="sd">        See the PeakCluster class for details.</span>
+
+<span class="sd">        Optional keyword arguments can be passed in; see PeakCluster._newPeakCluster for details.</span>
+
+<span class="sd">        :param peaks: optional list of peaks as objects or pids.</span>
+<span class="sd">        :return: a new PeakCluster instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.PeakCluster</span> <span class="kn">import</span> <span class="n">_newPeakCluster</span>
+
+        <span class="k">return</span> <span class="n">_newPeakCluster</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peaks</span><span class="o">=</span><span class="n">peaks</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span></div>
+
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="s1">&#39;project.&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="Project.newSample"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.newSample">[docs]</a>    <span class="k">def</span> <span class="nf">newSample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">pH</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">ionicStrength</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                  <span class="n">amount</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">amountUnit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">isVirtual</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="n">isHazardous</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                  <span class="n">creationDate</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">batchIdentifier</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">plateIdentifier</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                  <span class="n">rowNumber</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">columnNumber</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create new Sample.</span>
+
+<span class="sd">        See the Sample class for details.</span>
+
+<span class="sd">        Optional keyword arguments can be passed in; see Sample._newSample for details.</span>
+
+<span class="sd">        :param name:</span>
+<span class="sd">        :param pH:</span>
+<span class="sd">        :param ionicStrength:</span>
+<span class="sd">        :param amount:</span>
+<span class="sd">        :param amountUnit:</span>
+<span class="sd">        :param isVirtual:</span>
+<span class="sd">        :param isHazardous:</span>
+<span class="sd">        :param creationDate:</span>
+<span class="sd">        :param batchIdentifier:</span>
+<span class="sd">        :param plateIdentifier:</span>
+<span class="sd">        :param rowNumber:</span>
+<span class="sd">        :param columnNumber:</span>
+<span class="sd">        :param comment:</span>
+<span class="sd">        :param serial: optional serial number.</span>
+<span class="sd">        :return: a new Sample instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.Sample</span> <span class="kn">import</span> <span class="n">_newSample</span>
+
+        <span class="k">return</span> <span class="n">_newSample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">pH</span><span class="o">=</span><span class="n">pH</span><span class="p">,</span> <span class="n">ionicStrength</span><span class="o">=</span><span class="n">ionicStrength</span><span class="p">,</span>
+                          <span class="n">amount</span><span class="o">=</span><span class="n">amount</span><span class="p">,</span> <span class="n">amountUnit</span><span class="o">=</span><span class="n">amountUnit</span><span class="p">,</span> <span class="n">isVirtual</span><span class="o">=</span><span class="n">isVirtual</span><span class="p">,</span> <span class="n">isHazardous</span><span class="o">=</span><span class="n">isHazardous</span><span class="p">,</span>
+                          <span class="n">creationDate</span><span class="o">=</span><span class="n">creationDate</span><span class="p">,</span> <span class="n">batchIdentifier</span><span class="o">=</span><span class="n">batchIdentifier</span><span class="p">,</span> <span class="n">plateIdentifier</span><span class="o">=</span><span class="n">plateIdentifier</span><span class="p">,</span>
+                          <span class="n">rowNumber</span><span class="o">=</span><span class="n">rowNumber</span><span class="p">,</span> <span class="n">columnNumber</span><span class="o">=</span><span class="n">columnNumber</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span></div>
+
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="s1">&#39;project.&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="Project.newDataSet"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.newDataSet">[docs]</a>    <span class="k">def</span> <span class="nf">newDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">programName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">programVersion</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                   <span class="n">dataPath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">creationDate</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                   <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create new DataSet</span>
+
+<span class="sd">        See the DataSet class for details.</span>
+
+<span class="sd">        Optional keyword arguments can be passed in; see DataSet._newDataSet for details.</span>
+
+<span class="sd">        :param title:</span>
+<span class="sd">        :param programName:</span>
+<span class="sd">        :param programVersion:</span>
+<span class="sd">        :param dataPath:</span>
+<span class="sd">        :param creationDate:</span>
+<span class="sd">        :param uuid:</span>
+<span class="sd">        :param comment:</span>
+<span class="sd">        :return: a new DataSet instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.DataSet</span> <span class="kn">import</span> <span class="n">_newDataSet</span>
+
+        <span class="k">return</span> <span class="n">_newDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">programName</span><span class="o">=</span><span class="n">programName</span><span class="p">,</span> <span class="n">programVersion</span><span class="o">=</span><span class="n">programVersion</span><span class="p">,</span>
+                           <span class="n">dataPath</span><span class="o">=</span><span class="n">dataPath</span><span class="p">,</span> <span class="n">creationDate</span><span class="o">=</span><span class="n">creationDate</span><span class="p">,</span> <span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span></div>
+
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="s1">&#39;project.&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="Project.newSpectrumDisplay"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.newSpectrumDisplay">[docs]</a>    <span class="k">def</span> <span class="nf">newSpectrumDisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axisCodes</span><span class="p">:</span> <span class="p">(</span><span class="nb">str</span><span class="p">,),</span> <span class="n">stripDirection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span>
+                           <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                           <span class="n">independentStrips</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create new SpectrumDisplay</span>
+
+<span class="sd">        See the SpectrumDisplay class for details.</span>
+
+<span class="sd">        Optional keyword arguments can be passed in; see SpectrumDisplay._newSpectrumDisplay for details.</span>
+
+<span class="sd">        :param axisCodes:</span>
+<span class="sd">        :param stripDirection:</span>
+<span class="sd">        :param title:</span>
+<span class="sd">        :param window:</span>
+<span class="sd">        :param comment:</span>
+<span class="sd">        :param independentStrips:</span>
+<span class="sd">        :param nmrResidue:</span>
+<span class="sd">        :param serial: optional serial number.</span>
+<span class="sd">        :return: a new SpectrumDisplay instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.ui._implementation.SpectrumDisplay</span> <span class="kn">import</span> <span class="n">_newSpectrumDisplay</span>
+
+        <span class="k">return</span> <span class="n">_newSpectrumDisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axisCodes</span><span class="o">=</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">stripDirection</span><span class="o">=</span><span class="n">stripDirection</span><span class="p">,</span>
+                                   <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">,</span> <span class="n">independentStrips</span><span class="o">=</span><span class="n">independentStrips</span><span class="p">,</span>
+                                   <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span></div>
+
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="s1">&#39;project.&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="Project.newSpectrumGroup"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.newSpectrumGroup">[docs]</a>    <span class="k">def</span> <span class="nf">newSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">spectra</span><span class="o">=</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create new SpectrumGroup</span>
+
+<span class="sd">        See the SpectrumGroup class for details.</span>
+
+<span class="sd">        Optional keyword arguments can be passed in; see SpectrumGroup._newSpectrumGroup for details.</span>
+
+<span class="sd">        :param name: name for the new SpectrumGroup</span>
+<span class="sd">        :param spectra: optional list of spectra as objects or pids</span>
+<span class="sd">        :return: a new SpectrumGroup instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.SpectrumGroup</span> <span class="kn">import</span> <span class="n">_newSpectrumGroup</span>
+
+        <span class="k">return</span> <span class="n">_newSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">spectra</span><span class="o">=</span><span class="n">spectra</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span></div>
+
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="s1">&#39;project.&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="Project.createChain"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.createChain">[docs]</a>    <span class="k">def</span> <span class="nf">createChain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">compoundName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                    <span class="n">startNumber</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">molType</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">isCyclic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+                    <span class="n">shortName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">role</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create new chain from sequence of residue codes, using default variants.</span>
+
+<span class="sd">        Automatically creates the corresponding polymer Substance if the compoundName is not already taken</span>
+
+<span class="sd">        See the Chain class for details.</span>
+
+<span class="sd">        Optional keyword arguments can be passed in; see Chain._createChain for details.</span>
+
+<span class="sd">        :param Sequence sequence: string of one-letter codes or sequence of residue types</span>
+<span class="sd">        :param str compoundName: name of new Substance (e.g. &#39;Lysozyme&#39;) Defaults to &#39;Molecule_n</span>
+<span class="sd">        :param str molType: molType (&#39;protein&#39;,&#39;DNA&#39;, &#39;RNA&#39;). Needed only if sequence is a string.</span>
+<span class="sd">        :param int startNumber: number of first residue in sequence</span>
+<span class="sd">        :param str shortName: shortName for new chain (optional)</span>
+<span class="sd">        :param str role: role for new chain (optional)</span>
+<span class="sd">        :param str comment: comment for new chain (optional)</span>
+<span class="sd">        :return: a new Chain instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.Chain</span> <span class="kn">import</span> <span class="n">_createChain</span>
+
+        <span class="k">return</span> <span class="n">_createChain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="o">=</span><span class="n">sequence</span><span class="p">,</span> <span class="n">compoundName</span><span class="o">=</span><span class="n">compoundName</span><span class="p">,</span>
+                            <span class="n">startNumber</span><span class="o">=</span><span class="n">startNumber</span><span class="p">,</span> <span class="n">molType</span><span class="o">=</span><span class="n">molType</span><span class="p">,</span> <span class="n">isCyclic</span><span class="o">=</span><span class="n">isCyclic</span><span class="p">,</span>
+                            <span class="n">shortName</span><span class="o">=</span><span class="n">shortName</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="n">role</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span></div>
+
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="s1">&#39;project.&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="Project.newSubstance"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.newSubstance">[docs]</a>    <span class="k">def</span> <span class="nf">newSubstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">labelling</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">substanceType</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Molecule&#39;</span><span class="p">,</span>
+                     <span class="n">userCode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">smiles</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">inChi</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">casNumber</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                     <span class="n">empiricalFormula</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">molecularMass</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                     <span class="n">synonyms</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span> <span class="n">atomCount</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">bondCount</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                     <span class="n">ringCount</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">hBondDonorCount</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">hBondAcceptorCount</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                     <span class="n">polarSurfaceArea</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">logPartitionCoefficient</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create new substance WITHOUT storing the sequence internally</span>
+<span class="sd">        (and hence not suitable for making chains). SubstanceType defaults to &#39;Molecule&#39;.</span>
+
+<span class="sd">        ADVANCED alternatives are &#39;Cell&#39; and &#39;Material&#39;</span>
+
+<span class="sd">        See the Substance class for details.</span>
+
+<span class="sd">        Optional keyword arguments can be passed in; see Substance._newSubstance for details.</span>
+
+<span class="sd">        :param name:</span>
+<span class="sd">        :param labelling:</span>
+<span class="sd">        :param substanceType:</span>
+<span class="sd">        :param userCode:</span>
+<span class="sd">        :param smiles:</span>
+<span class="sd">        :param inChi:</span>
+<span class="sd">        :param casNumber:</span>
+<span class="sd">        :param empiricalFormula:</span>
+<span class="sd">        :param molecularMass:</span>
+<span class="sd">        :param comment:</span>
+<span class="sd">        :param synonyms:</span>
+<span class="sd">        :param atomCount:</span>
+<span class="sd">        :param bondCount:</span>
+<span class="sd">        :param ringCount:</span>
+<span class="sd">        :param hBondDonorCount:</span>
+<span class="sd">        :param hBondAcceptorCount:</span>
+<span class="sd">        :param polarSurfaceArea:</span>
+<span class="sd">        :param logPartitionCoefficient:</span>
+<span class="sd">        :return: a new Substance instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.Substance</span> <span class="kn">import</span> <span class="n">_newSubstance</span>
+
+        <span class="k">return</span> <span class="n">_newSubstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">labelling</span><span class="o">=</span><span class="n">labelling</span><span class="p">,</span> <span class="n">substanceType</span><span class="o">=</span><span class="n">substanceType</span><span class="p">,</span>
+                             <span class="n">userCode</span><span class="o">=</span><span class="n">userCode</span><span class="p">,</span> <span class="n">smiles</span><span class="o">=</span><span class="n">smiles</span><span class="p">,</span> <span class="n">inChi</span><span class="o">=</span><span class="n">inChi</span><span class="p">,</span> <span class="n">casNumber</span><span class="o">=</span><span class="n">casNumber</span><span class="p">,</span>
+                             <span class="n">empiricalFormula</span><span class="o">=</span><span class="n">empiricalFormula</span><span class="p">,</span> <span class="n">molecularMass</span><span class="o">=</span><span class="n">molecularMass</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">,</span>
+                             <span class="n">synonyms</span><span class="o">=</span><span class="n">synonyms</span><span class="p">,</span> <span class="n">atomCount</span><span class="o">=</span><span class="n">atomCount</span><span class="p">,</span> <span class="n">bondCount</span><span class="o">=</span><span class="n">bondCount</span><span class="p">,</span>
+                             <span class="n">ringCount</span><span class="o">=</span><span class="n">ringCount</span><span class="p">,</span> <span class="n">hBondDonorCount</span><span class="o">=</span><span class="n">hBondDonorCount</span><span class="p">,</span> <span class="n">hBondAcceptorCount</span><span class="o">=</span><span class="n">hBondAcceptorCount</span><span class="p">,</span>
+                             <span class="n">polarSurfaceArea</span><span class="o">=</span><span class="n">polarSurfaceArea</span><span class="p">,</span> <span class="n">logPartitionCoefficient</span><span class="o">=</span><span class="n">logPartitionCoefficient</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span></div>
+
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="s1">&#39;project.&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="Project.fetchNefSubstance"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.fetchNefSubstance">[docs]</a>    <span class="k">def</span> <span class="nf">fetchNefSubstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fetch Substance that matches sequence of NEF rows and/or name</span>
+
+<span class="sd">        See the Substance class for details.</span>
+
+<span class="sd">        Optional keyword arguments can be passed in; see Substance._fetchNefSubstance for details.</span>
+
+<span class="sd">        :param self:</span>
+<span class="sd">        :param sequence:</span>
+<span class="sd">        :param name:</span>
+<span class="sd">        :return: a new Nef Substance instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.Substance</span> <span class="kn">import</span> <span class="n">_fetchNefSubstance</span>
+
+        <span class="k">return</span> <span class="n">_fetchNefSubstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="o">=</span><span class="n">sequence</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span></div>
+
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="s1">&#39;project.&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="Project.createPolymerSubstance"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.createPolymerSubstance">[docs]</a>    <span class="k">def</span> <span class="nf">createPolymerSubstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                               <span class="n">labelling</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">userCode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">smiles</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                               <span class="n">synonyms</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span> <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                               <span class="n">startNumber</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">molType</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">isCyclic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+                               <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Make new Substance from sequence of residue codes, using default linking and variants</span>
+
+<span class="sd">        NB: For more complex substances, you must use advanced, API-level commands.</span>
+
+<span class="sd">        See the Substance class for details.</span>
+
+<span class="sd">        Optional keyword arguments can be passed in; see Substance._fetchNefSubstance for details.</span>
+
+<span class="sd">        :param Sequence sequence: string of one-letter codes or sequence of residueNames</span>
+<span class="sd">        :param str name: name of new substance</span>
+<span class="sd">        :param str labelling: labelling for new substance. Optional - None means &#39;natural abundance&#39;</span>
+<span class="sd">        :param str userCode: user code for new substance (optional)</span>
+<span class="sd">        :param str smiles: smiles string for new substance (optional)</span>
+<span class="sd">        :param Sequence[str] synonyms: synonyms for Substance name</span>
+<span class="sd">        :param str comment: comment for new substance (optional)</span>
+<span class="sd">        :param int startNumber: number of first residue in sequence</span>
+<span class="sd">        :param str molType: molType (&#39;protein&#39;,&#39;DNA&#39;, &#39;RNA&#39;). Required only if sequence is a string.</span>
+<span class="sd">        :param bool isCyclic: Should substance created be cyclic?</span>
+<span class="sd">        :return: a new Substance instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.Substance</span> <span class="kn">import</span> <span class="n">_createPolymerSubstance</span>
+
+        <span class="k">return</span> <span class="n">_createPolymerSubstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="o">=</span><span class="n">sequence</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                                       <span class="n">labelling</span><span class="o">=</span><span class="n">labelling</span><span class="p">,</span> <span class="n">userCode</span><span class="o">=</span><span class="n">userCode</span><span class="p">,</span> <span class="n">smiles</span><span class="o">=</span><span class="n">smiles</span><span class="p">,</span>
+                                       <span class="n">synonyms</span><span class="o">=</span><span class="n">synonyms</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">,</span>
+                                       <span class="n">startNumber</span><span class="o">=</span><span class="n">startNumber</span><span class="p">,</span> <span class="n">molType</span><span class="o">=</span><span class="n">molType</span><span class="p">,</span> <span class="n">isCyclic</span><span class="o">=</span><span class="n">isCyclic</span><span class="p">,</span>
+                                       <span class="o">**</span><span class="n">kwds</span><span class="p">)</span></div>
+
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="s1">&#39;project.&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="Project.fetchSubstance"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.fetchSubstance">[docs]</a>    <span class="k">def</span> <span class="nf">fetchSubstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">labelling</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get or create Substance with given name and labelling.</span>
+
+<span class="sd">        See the Substance class for details.</span>
+
+<span class="sd">        :param self:</span>
+<span class="sd">        :param name:</span>
+<span class="sd">        :param labelling:</span>
+<span class="sd">        :return: new or existing Substance instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.Substance</span> <span class="kn">import</span> <span class="n">_fetchSubstance</span>
+
+        <span class="k">return</span> <span class="n">_fetchSubstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">labelling</span><span class="o">=</span><span class="n">labelling</span><span class="p">)</span></div>
+
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="s1">&#39;project.&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="Project.newComplex"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.newComplex">[docs]</a>    <span class="k">def</span> <span class="nf">newComplex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">chains</span><span class="o">=</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create new Complex.</span>
+
+<span class="sd">        See the Complex class for details.</span>
+
+<span class="sd">        Optional keyword arguments can be passed in; see Complex._newComplex for details.</span>
+
+<span class="sd">        :param name:</span>
+<span class="sd">        :param chains:</span>
+<span class="sd">        :return: a new Complex instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.Complex</span> <span class="kn">import</span> <span class="n">_newComplex</span>
+
+        <span class="k">return</span> <span class="n">_newComplex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">chains</span><span class="o">=</span><span class="n">chains</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span></div>
+
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="s1">&#39;project.&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="Project.newChemicalShiftList"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.newChemicalShiftList">[docs]</a>    <span class="k">def</span> <span class="nf">newChemicalShiftList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;ppm&#39;</span><span class="p">,</span> <span class="n">autoUpdate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+                             <span class="n">isSimulated</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create new ChemicalShiftList.</span>
+
+<span class="sd">        See the ChemicalShiftList class for details.</span>
+
+<span class="sd">        :param name:</span>
+<span class="sd">        :param unit:</span>
+<span class="sd">        :param autoUpdate:</span>
+<span class="sd">        :param isSimulated:</span>
+<span class="sd">        :param comment:</span>
+<span class="sd">        :param serial: optional serial number.</span>
+<span class="sd">        :return: a new ChemicalShiftList instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.ChemicalShiftList</span> <span class="kn">import</span> <span class="n">_newChemicalShiftList</span>
+
+        <span class="k">return</span> <span class="n">_newChemicalShiftList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span> <span class="n">autoUpdate</span><span class="o">=</span><span class="n">autoUpdate</span><span class="p">,</span>
+                                     <span class="n">isSimulated</span><span class="o">=</span><span class="n">isSimulated</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>

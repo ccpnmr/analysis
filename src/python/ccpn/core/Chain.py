@@ -375,7 +375,7 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
                 if not isinstance(s, str):
                     raise TypeError('sequence element is not a valid string: %s' % str(s))
                 elif len(s) != 3:
-                    raise TypeError('sequence elements must be 3 characters: %s' % str(s))
+                    raise TypeError('sequence elements must be 3 characters each, e.g., "ala ala ala"\nor sequence must be a single string, try removing spaces and return characters: %s' % str(s))
                 elif not s.isalpha():
                     raise TypeError('sequence element contains bad characters: %s' % str(s))
 

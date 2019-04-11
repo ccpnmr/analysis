@@ -53,18 +53,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:41 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -76,6 +76,7 @@
 
 <span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
 
+
 <span class="c1"># This only works when we have a QtApp instance working; hence it need to go somewhere else.</span>
 <span class="c1">#from ccpn.framework.PathsAndUrls import fontsPath</span>
 <span class="c1">#QtGui.QFontDatabase.addApplicationFont(os.path.join(fontsPath, &#39;open-sans/OpenSans-Regular.ttf&#39;))</span>
@@ -83,29 +84,28 @@
 
 <div class="viewcode-block" id="Font"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Font.Font">[docs]</a><span class="k">class</span> <span class="nc">Font</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="p">):</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fontName</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">italic</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">underline</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">strikeout</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Initialise the font fontName</span>
-<span class="sd">    :param fontName: font name</span>
-<span class="sd">    :param size: size of font</span>
-<span class="sd">    :param bold (optional): make font bold</span>
-<span class="sd">    :param italic (optional):make fint italic</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fontName</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">italic</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">underline</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">strikeout</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialise the font fontName</span>
+<span class="sd">        :param fontName: font name</span>
+<span class="sd">        :param size: size of font</span>
+<span class="sd">        :param bold (optional): make font bold</span>
+<span class="sd">        :param italic (optional):make fint italic</span>
 
-<span class="sd">     to retrieve:</span>
-<span class="sd">     self.fontName -&gt; fontName</span>
-<span class="sd">     QFont methods:</span>
-<span class="sd">     self.pointSize() -&gt; size</span>
-<span class="sd">     self.italic() -&gt; italic</span>
-<span class="sd">     self.bold() -&gt; bold</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">         to retrieve:</span>
+<span class="sd">         self.fontName -&gt; fontName</span>
+<span class="sd">         QFont methods:</span>
+<span class="sd">         self.pointSize() -&gt; size</span>
+<span class="sd">         self.italic() -&gt; italic</span>
+<span class="sd">         self.bold() -&gt; bold</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fontName</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">fontName</span> <span class="o">=</span> <span class="n">fontName</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setBold</span><span class="p">(</span><span class="n">bold</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setItalic</span><span class="p">(</span><span class="n">italic</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setUnderline</span><span class="p">(</span><span class="n">underline</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setStrikeOut</span><span class="p">(</span><span class="n">strikeout</span><span class="p">)</span></div>
-
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fontName</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fontName</span> <span class="o">=</span> <span class="n">fontName</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setBold</span><span class="p">(</span><span class="n">bold</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setItalic</span><span class="p">(</span><span class="n">italic</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setUnderline</span><span class="p">(</span><span class="n">underline</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setStrikeOut</span><span class="p">(</span><span class="n">strikeout</span><span class="p">)</span></div>
 </pre></div>
 
           </div>

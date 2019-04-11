@@ -25,7 +25,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import collections
 import typing
 from functools import partial
 from ccpn.core.NmrChain import NmrChain
@@ -37,8 +36,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGro
 from ccpnmodel.ccpncore.lib.Constants import defaultNmrChainCode
 from ccpn.core import _importOrder
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, renameObject, \
-    ccpNmrV3CoreSetter, logCommandBlock, renameObjectNoBlanking, undoBlock
+from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, renameObjectNoBlanking, undoBlock
 from ccpn.util.Logging import getLogger
 
 
@@ -60,7 +58,7 @@ class NmrResidue(AbstractWrapperObject):
     NmrResidue i-1 relative to NmrResidue @5.@185.ALA would be named @5.@185-1.VAL. Reassigning
     NR:@5.@185.ALA to NR:B.do1.ALA or NR:B.125.THR, would cause the offset NmrResidue
     to be reassigned to NR:B.do1-1.VAL or NR:B.125-1.VAL, respectively. Offsets can be any integer
-    (including '+0'.
+    (including '+0').
 
     NmrResidues that are not offset can be linked into consecutive stretches by putting them
     into connected NmrChains (see NmrChain).

@@ -53,18 +53,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:51 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -89,216 +89,215 @@
 
 <div class="viewcode-block" id="ButtonList"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ButtonList.ButtonList">[docs]</a><span class="k">class</span> <span class="nc">ButtonList</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">callbacks</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">icons</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-               <span class="n">tipTexts</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="n">commands</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">images</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">callbacks</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">icons</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">tipTexts</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="n">commands</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">images</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
 
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>     <span class="c1"># ejb - added setLayout</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>  <span class="c1"># ejb - added setLayout</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">buttonNames</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttonNames</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="k">if</span> <span class="n">commands</span><span class="p">:</span>
-      <span class="k">print</span><span class="p">(</span><span class="s2">&quot;qtgui.ButtonList.commands is deprecated; use .callbacks&quot;</span><span class="p">)</span>
-      <span class="n">callbacks</span> <span class="o">=</span> <span class="n">commands</span>
+        <span class="k">if</span> <span class="n">commands</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;qtgui.ButtonList.commands is deprecated; use .callbacks&quot;</span><span class="p">)</span>
+            <span class="n">callbacks</span> <span class="o">=</span> <span class="n">commands</span>
 
-    <span class="k">if</span> <span class="n">images</span><span class="p">:</span>
-      <span class="k">print</span><span class="p">(</span><span class="s2">&quot;qtgui.ButtonList.images is deprecated; use .icons&quot;</span><span class="p">)</span>
-      <span class="n">icons</span> <span class="o">=</span> <span class="n">images</span>
+        <span class="k">if</span> <span class="n">images</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;qtgui.ButtonList.images is deprecated; use .icons&quot;</span><span class="p">)</span>
+            <span class="n">icons</span> <span class="o">=</span> <span class="n">images</span>
 
-    <span class="k">if</span> <span class="n">texts</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">texts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">texts</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">texts</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">if</span> <span class="n">callbacks</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">callbacks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">callbacks</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">callbacks</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">texts</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">callbacks</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">texts</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">callbacks</span><span class="p">)</span>
 
-    <span class="n">direction</span> <span class="o">=</span> <span class="n">direction</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">direction</span> <span class="o">=</span> <span class="n">direction</span>
-    
-    <span class="k">if</span> <span class="n">tipTexts</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">tipTexts</span> <span class="o">=</span> <span class="p">[]</span>
-      
-    <span class="k">if</span> <span class="n">icons</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">icons</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">direction</span> <span class="o">=</span> <span class="n">direction</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">direction</span> <span class="o">=</span> <span class="n">direction</span>
 
-    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">tipTexts</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">texts</span><span class="p">):</span>
-      <span class="n">tipTexts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>  
+        <span class="k">if</span> <span class="n">tipTexts</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">tipTexts</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">icons</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">texts</span><span class="p">):</span>
-      <span class="n">icons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>  
+        <span class="k">if</span> <span class="n">icons</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">icons</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">addButtons</span><span class="p">(</span><span class="n">texts</span><span class="p">,</span> <span class="n">callbacks</span><span class="p">,</span> <span class="n">icons</span><span class="p">,</span> <span class="n">tipTexts</span><span class="p">)</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">tipTexts</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">texts</span><span class="p">):</span>
+            <span class="n">tipTexts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
 
-    <span class="c1"># set focus always on the last button (which is usually the ok, or run button)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-      <span class="n">lastButton</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-      <span class="n">lastButton</span><span class="o">.</span><span class="n">setFocus</span><span class="p">()</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">icons</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">texts</span><span class="p">):</span>
+            <span class="n">icons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addButtons</span><span class="p">(</span><span class="n">texts</span><span class="p">,</span> <span class="n">callbacks</span><span class="p">,</span> <span class="n">icons</span><span class="p">,</span> <span class="n">tipTexts</span><span class="p">)</span>
 
+        <span class="c1"># set focus always on the last button (which is usually the ok, or run button)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">lastButton</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">lastButton</span><span class="o">.</span><span class="n">setFocus</span><span class="p">()</span>
 
-<div class="viewcode-block" id="ButtonList.addButtons"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ButtonList.ButtonList.addButtons">[docs]</a>  <span class="k">def</span> <span class="nf">addButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="p">,</span> <span class="n">callbacks</span><span class="p">,</span> <span class="n">icons</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tipTexts</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-  
-    <span class="k">if</span> <span class="n">tipTexts</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">tipTexts</span> <span class="o">=</span> <span class="p">[]</span>
-      
-    <span class="k">if</span> <span class="n">icons</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">icons</span> <span class="o">=</span> <span class="p">[]</span>
+<div class="viewcode-block" id="ButtonList.addButtons"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ButtonList.ButtonList.addButtons">[docs]</a>    <span class="k">def</span> <span class="nf">addButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="p">,</span> <span class="n">callbacks</span><span class="p">,</span> <span class="n">icons</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tipTexts</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
 
-    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">tipTexts</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">texts</span><span class="p">):</span>
-      <span class="n">tipTexts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>  
+        <span class="k">if</span> <span class="n">tipTexts</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">tipTexts</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">icons</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">texts</span><span class="p">):</span>
-      <span class="n">icons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>  
-    
-    <span class="n">j</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">icons</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">icons</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">text</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">texts</span><span class="p">):</span>
-      <span class="k">if</span> <span class="s1">&#39;h&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">direction</span><span class="p">:</span>
-        <span class="n">grid</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">i</span><span class="o">+</span><span class="n">j</span><span class="p">)</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">grid</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="n">j</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
-        
-      <span class="n">button</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">callbacks</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">icons</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                      <span class="n">tipText</span><span class="o">=</span><span class="n">tipTexts</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">)</span>
-      <span class="c1"># button.setMinimumWidth(20)</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">tipTexts</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">texts</span><span class="p">):</span>
+            <span class="n">tipTexts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
 
-      <span class="n">width</span> <span class="o">=</span> <span class="n">button</span><span class="o">.</span><span class="n">fontMetrics</span><span class="p">()</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">(</span><span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">width</span><span class="p">()</span> <span class="o">+</span> <span class="mi">7</span>
-      <span class="n">button</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="n">width</span><span class="o">*</span><span class="mf">1.5</span><span class="p">)</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">icons</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">texts</span><span class="p">):</span>
+            <span class="n">icons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
 
-      <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">button</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">buttonNames</span><span class="p">[</span><span class="n">text</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span><span class="o">+</span><span class="n">j</span></div>
+        <span class="n">j</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">)</span>
 
-<div class="viewcode-block" id="ButtonList.setButtonEnabled"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ButtonList.ButtonList.setButtonEnabled">[docs]</a>  <span class="k">def</span> <span class="nf">setButtonEnabled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buttonName</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">enable</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Enable/Disable a button by name</span>
-<span class="sd">    :param buttonName(str) - name of the button:</span>
-<span class="sd">    :param enable(bool) - True or False:</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">buttonName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">buttonNames</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">buttonNames</span><span class="p">[</span><span class="n">buttonName</span><span class="p">]]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">enable</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Button </span><span class="si">%s</span><span class="s1"> not found in the list&#39;</span> <span class="o">%</span> <span class="n">buttonName</span><span class="p">)</span></div>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">text</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">texts</span><span class="p">):</span>
+            <span class="k">if</span> <span class="s1">&#39;h&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">direction</span><span class="p">:</span>
+                <span class="n">grid</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="n">j</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">grid</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="n">j</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
-<div class="viewcode-block" id="ButtonList.setButtonVisible"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ButtonList.ButtonList.setButtonVisible">[docs]</a>  <span class="k">def</span> <span class="nf">setButtonVisible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buttonName</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">visible</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Show/hide a button by name</span>
-<span class="sd">    :param buttonName(str) - name of the button:</span>
-<span class="sd">    :param visible(bool) - True or False:</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">buttonName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">buttonNames</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-      <span class="k">if</span> <span class="n">visible</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">buttonNames</span><span class="p">[</span><span class="n">buttonName</span><span class="p">]]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">buttonNames</span><span class="p">[</span><span class="n">buttonName</span><span class="p">]]</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Button </span><span class="si">%s</span><span class="s1"> not found in the list&#39;</span> <span class="o">%</span> <span class="n">buttonName</span><span class="p">)</span></div></div>
+            <span class="n">button</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">callbacks</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">icons</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                            <span class="n">tipText</span><span class="o">=</span><span class="n">tipTexts</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">)</span>
+            <span class="c1"># button.setMinimumWidth(20)</span>
+
+            <span class="n">width</span> <span class="o">=</span> <span class="n">button</span><span class="o">.</span><span class="n">fontMetrics</span><span class="p">()</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">(</span><span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">width</span><span class="p">()</span> <span class="o">+</span> <span class="mi">7</span>
+            <span class="n">button</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="n">width</span> <span class="o">*</span> <span class="mf">1.5</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">button</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">buttonNames</span><span class="p">[</span><span class="n">text</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">j</span></div>
+
+<div class="viewcode-block" id="ButtonList.setButtonEnabled"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ButtonList.ButtonList.setButtonEnabled">[docs]</a>    <span class="k">def</span> <span class="nf">setButtonEnabled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buttonName</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">enable</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Enable/Disable a button by name</span>
+<span class="sd">        :param buttonName(str) - name of the button:</span>
+<span class="sd">        :param enable(bool) - True or False:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">buttonName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">buttonNames</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">buttonNames</span><span class="p">[</span><span class="n">buttonName</span><span class="p">]]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">enable</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Button </span><span class="si">%s</span><span class="s1"> not found in the list&#39;</span> <span class="o">%</span> <span class="n">buttonName</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ButtonList.setButtonVisible"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ButtonList.ButtonList.setButtonVisible">[docs]</a>    <span class="k">def</span> <span class="nf">setButtonVisible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buttonName</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">visible</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Show/hide a button by name</span>
+<span class="sd">        :param buttonName(str) - name of the button:</span>
+<span class="sd">        :param visible(bool) - True or False:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">buttonName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">buttonNames</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">visible</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">buttonNames</span><span class="p">[</span><span class="n">buttonName</span><span class="p">]]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">buttonNames</span><span class="p">[</span><span class="n">buttonName</span><span class="p">]]</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Button </span><span class="si">%s</span><span class="s1"> not found in the list&#39;</span> <span class="o">%</span> <span class="n">buttonName</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="UtilityButtonList"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ButtonList.UtilityButtonList">[docs]</a><span class="k">class</span> <span class="nc">UtilityButtonList</span><span class="p">(</span><span class="n">ButtonList</span><span class="p">):</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span>
-               <span class="n">webBrowser</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">helpUrl</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">helpMsg</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-               <span class="n">doClone</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doHelp</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doClose</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-               <span class="n">cloneText</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">helpText</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">closeText</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-               <span class="n">cloneCmd</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">helpCmd</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">closeCmd</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-               <span class="n">cloneTip</span><span class="o">=</span><span class="s1">&#39;Duplicate window&#39;</span><span class="p">,</span> <span class="n">helpTip</span><span class="o">=</span><span class="s1">&#39;Show help&#39;</span><span class="p">,</span> <span class="n">closeTip</span><span class="o">=</span><span class="s1">&#39;Close window&#39;</span><span class="p">,</span>
-               <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
-    
-    <span class="n">ButtonList</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
-    
-    <span class="bp">self</span><span class="o">.</span><span class="n">helpUrl</span> <span class="o">=</span> <span class="n">helpUrl</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">helpMsg</span> <span class="o">=</span> <span class="n">helpMsg</span>
-    
-    <span class="bp">self</span><span class="o">.</span><span class="n">popup</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">window</span><span class="p">()</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">popup</span><span class="p">,</span> <span class="n">BasePopup</span><span class="p">):</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">popup</span> <span class="o">=</span> <span class="bp">None</span>
-   
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">popup</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">webBrowser</span><span class="p">:</span>
-      <span class="n">webBrowser</span> <span class="o">=</span> <span class="n">WebBrowser</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">popup</span><span class="p">)</span>
- 
-    <span class="bp">self</span><span class="o">.</span><span class="n">webBrowser</span> <span class="o">=</span> <span class="n">webBrowser</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span>
+                 <span class="n">webBrowser</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">helpUrl</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">helpMsg</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">doClone</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doHelp</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doClose</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                 <span class="n">cloneText</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">helpText</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">closeText</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">cloneCmd</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">helpCmd</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">closeCmd</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">cloneTip</span><span class="o">=</span><span class="s1">&#39;Duplicate window&#39;</span><span class="p">,</span> <span class="n">helpTip</span><span class="o">=</span><span class="s1">&#39;Show help&#39;</span><span class="p">,</span> <span class="n">closeTip</span><span class="o">=</span><span class="s1">&#39;Close window&#39;</span><span class="p">,</span>
+                 <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
 
-    <span class="n">_callbacks</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">_texts</span>    <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">_icons</span>   <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">_tipTexts</span> <span class="o">=</span> <span class="p">[]</span>
-    
-    <span class="n">_doActions</span> <span class="o">=</span> <span class="p">[(</span><span class="n">doClone</span><span class="p">,</span> <span class="n">cloneCmd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">duplicatePopup</span><span class="p">,</span> <span class="n">cloneText</span><span class="p">,</span> <span class="s1">&#39;icons/window-duplicate.png&#39;</span><span class="p">,</span> <span class="n">cloneTip</span><span class="p">),</span>
-                  <span class="p">(</span><span class="n">doHelp</span><span class="p">,</span>   <span class="n">helpCmd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">launchHelp</span><span class="p">,</span> <span class="n">helpText</span><span class="p">,</span>  <span class="s1">&#39;icons/system-help.png&#39;</span><span class="p">,</span>       <span class="n">helpTip</span><span class="p">),</span>
-                  <span class="p">(</span><span class="n">doClose</span><span class="p">,</span> <span class="n">closeCmd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">closePopup</span><span class="p">,</span> <span class="n">closeText</span><span class="p">,</span> <span class="s1">&#39;icons/window-close.png&#39;</span><span class="p">,</span>     <span class="n">closeTip</span><span class="p">),]</span>
-    
-    <span class="k">for</span> <span class="n">doAction</span><span class="p">,</span> <span class="n">userCmd</span><span class="p">,</span> <span class="n">defaultCmd</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">tipText</span> <span class="ow">in</span> <span class="n">_doActions</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">doAction</span><span class="p">:</span>
-        <span class="n">_callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">userCmd</span> <span class="ow">or</span> <span class="n">defaultCmd</span><span class="p">)</span>
-        <span class="n">_tipTexts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tipText</span><span class="p">)</span>
-        <span class="n">_texts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
-        
-        <span class="k">if</span> <span class="n">image</span><span class="p">:</span>
-          <span class="n">icon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+        <span class="n">ButtonList</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">helpUrl</span> <span class="o">=</span> <span class="n">helpUrl</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helpMsg</span> <span class="o">=</span> <span class="n">helpMsg</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">popup</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">window</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">popup</span><span class="p">,</span> <span class="n">BasePopup</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">popup</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">popup</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">webBrowser</span><span class="p">:</span>
+            <span class="n">webBrowser</span> <span class="o">=</span> <span class="n">WebBrowser</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">popup</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">webBrowser</span> <span class="o">=</span> <span class="n">webBrowser</span>
+
+        <span class="n">_callbacks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">_texts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">_icons</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">_tipTexts</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">_doActions</span> <span class="o">=</span> <span class="p">[(</span><span class="n">doClone</span><span class="p">,</span> <span class="n">cloneCmd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">duplicatePopup</span><span class="p">,</span> <span class="n">cloneText</span><span class="p">,</span> <span class="s1">&#39;icons/window-duplicate.png&#39;</span><span class="p">,</span> <span class="n">cloneTip</span><span class="p">),</span>
+                      <span class="p">(</span><span class="n">doHelp</span><span class="p">,</span> <span class="n">helpCmd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">launchHelp</span><span class="p">,</span> <span class="n">helpText</span><span class="p">,</span> <span class="s1">&#39;icons/system-help.png&#39;</span><span class="p">,</span> <span class="n">helpTip</span><span class="p">),</span>
+                      <span class="p">(</span><span class="n">doClose</span><span class="p">,</span> <span class="n">closeCmd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">closePopup</span><span class="p">,</span> <span class="n">closeText</span><span class="p">,</span> <span class="s1">&#39;icons/window-close.png&#39;</span><span class="p">,</span> <span class="n">closeTip</span><span class="p">),</span> <span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">doAction</span><span class="p">,</span> <span class="n">userCmd</span><span class="p">,</span> <span class="n">defaultCmd</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">tipText</span> <span class="ow">in</span> <span class="n">_doActions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">doAction</span><span class="p">:</span>
+                <span class="n">_callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">userCmd</span> <span class="ow">or</span> <span class="n">defaultCmd</span><span class="p">)</span>
+                <span class="n">_tipTexts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tipText</span><span class="p">)</span>
+                <span class="n">_texts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">image</span><span class="p">:</span>
+                    <span class="n">icon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">icon</span> <span class="o">=</span> <span class="bp">None</span>
+
+                <span class="n">_icons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">icon</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">addButtons</span><span class="p">(</span><span class="n">_texts</span><span class="p">,</span> <span class="n">_callbacks</span><span class="p">,</span> <span class="n">_icons</span><span class="p">,</span> <span class="n">_tipTexts</span><span class="p">)</span>
+
+<div class="viewcode-block" id="UtilityButtonList.duplicatePopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ButtonList.UtilityButtonList.duplicatePopup">[docs]</a>    <span class="k">def</span> <span class="nf">duplicatePopup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">popup</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">newPopup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popup</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">popup</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+                <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getGeometry</span><span class="p">()</span>
+                <span class="n">newPopup</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">25</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="mi">25</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="UtilityButtonList.launchHelp"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ButtonList.UtilityButtonList.launchHelp">[docs]</a>    <span class="k">def</span> <span class="nf">launchHelp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">helpUrl</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">webBrowser</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">webBrowser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">helpUrl</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">popup</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.WebView</span> <span class="kn">import</span> <span class="n">WebViewPopup</span>
+
+            <span class="n">popup</span> <span class="o">=</span> <span class="n">WebViewPopup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">popup</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">helpMsg</span> <span class="ow">or</span> <span class="n">ccpnUrl</span> <span class="o">+</span> <span class="s1">&#39;/documentation&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="UtilityButtonList.closePopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ButtonList.UtilityButtonList.closePopup">[docs]</a>    <span class="k">def</span> <span class="nf">closePopup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">popup</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">popup</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
         <span class="k">else</span><span class="p">:</span>
-          <span class="n">icon</span> <span class="o">=</span> <span class="bp">None</span>  
-        
-        <span class="n">_icons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">icon</span><span class="p">)</span>       
+            <span class="bp">self</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span></div></div>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">addButtons</span><span class="p">(</span><span class="n">_texts</span><span class="p">,</span> <span class="n">_callbacks</span><span class="p">,</span> <span class="n">_icons</span><span class="p">,</span> <span class="n">_tipTexts</span><span class="p">)</span>
-
-<div class="viewcode-block" id="UtilityButtonList.duplicatePopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ButtonList.UtilityButtonList.duplicatePopup">[docs]</a>  <span class="k">def</span> <span class="nf">duplicatePopup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-     
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">popup</span><span class="p">:</span>
-      <span class="k">try</span><span class="p">:</span>
-        <span class="n">newPopup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popup</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">popup</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
-        <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getGeometry</span><span class="p">()</span>
-        <span class="n">newPopup</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="mi">25</span><span class="p">,</span> <span class="n">y</span><span class="o">+</span><span class="mi">25</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
-      
-      <span class="k">except</span><span class="p">:</span>
-        <span class="k">pass</span></div>
-  
-<div class="viewcode-block" id="UtilityButtonList.launchHelp"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ButtonList.UtilityButtonList.launchHelp">[docs]</a>  <span class="k">def</span> <span class="nf">launchHelp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-  
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">helpUrl</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">webBrowser</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">webBrowser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">helpUrl</span><span class="p">)</span>
-      
-    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">popup</span><span class="p">:</span>
-      <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.WebView</span> <span class="kn">import</span> <span class="n">WebViewPopup</span>
-      <span class="n">popup</span> <span class="o">=</span> <span class="n">WebViewPopup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">popup</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">helpMsg</span> <span class="ow">or</span> <span class="n">ccpnUrl</span> <span class="o">+</span> <span class="s1">&#39;/documentation&#39;</span><span class="p">)</span></div>
-  
-<div class="viewcode-block" id="UtilityButtonList.closePopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ButtonList.UtilityButtonList.closePopup">[docs]</a>  <span class="k">def</span> <span class="nf">closePopup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-  
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">popup</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">popup</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-      
-    <span class="k">else</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>  </div></div>
-  
 
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Application</span> <span class="kn">import</span> <span class="n">TestApplication</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.BasePopup</span> <span class="kn">import</span> <span class="n">BasePopup</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>
 
-  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Application</span> <span class="kn">import</span> <span class="n">TestApplication</span>
-  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.BasePopup</span> <span class="kn">import</span> <span class="n">BasePopup</span>
-  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>
 
-  <span class="k">def</span> <span class="nf">callback</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
-    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;callback&#39;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">callback</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;callback&#39;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
 
-  <span class="n">texts</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;abc&#39;</span><span class="p">,</span> <span class="s1">&#39;def&#39;</span><span class="p">,</span> <span class="s1">&#39;ghi&#39;</span><span class="p">]</span>
-  <span class="n">callbacks</span> <span class="o">=</span> <span class="p">[</span><span class="k">lambda</span> <span class="n">t</span><span class="o">=</span><span class="n">text</span><span class="p">:</span> <span class="n">callback</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">texts</span><span class="p">]</span>
-  <span class="n">icons</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;icons/applications-system.png&#39;</span><span class="p">]</span>
 
-  <span class="n">app</span> <span class="o">=</span> <span class="n">TestApplication</span><span class="p">()</span>
-  <span class="n">popup</span> <span class="o">=</span> <span class="n">CcpnDialog</span><span class="p">(</span><span class="n">windowTitle</span><span class="o">=</span><span class="s1">&#39;Test ButtonList&#39;</span><span class="p">)</span>
+    <span class="n">texts</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;abc&#39;</span><span class="p">,</span> <span class="s1">&#39;def&#39;</span><span class="p">,</span> <span class="s1">&#39;ghi&#39;</span><span class="p">]</span>
+    <span class="n">callbacks</span> <span class="o">=</span> <span class="p">[</span><span class="k">lambda</span> <span class="n">t</span><span class="o">=</span><span class="n">text</span><span class="p">:</span> <span class="n">callback</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">texts</span><span class="p">]</span>
+    <span class="n">icons</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;icons/applications-system.png&#39;</span><span class="p">]</span>
 
-  <span class="c1"># popup.setSize(200,200)</span>
-  <span class="n">popup</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span><span class="mi">200</span><span class="p">,</span><span class="mi">200</span><span class="p">,</span><span class="mi">200</span><span class="p">)</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">TestApplication</span><span class="p">()</span>
+    <span class="n">popup</span> <span class="o">=</span> <span class="n">CcpnDialog</span><span class="p">(</span><span class="n">windowTitle</span><span class="o">=</span><span class="s1">&#39;Test ButtonList&#39;</span><span class="p">)</span>
 
-  <span class="n">buttons</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">popup</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="n">texts</span><span class="p">,</span> <span class="n">callbacks</span><span class="o">=</span><span class="n">callbacks</span><span class="p">,</span> <span class="n">icons</span><span class="o">=</span><span class="n">icons</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
-  <span class="c1"># utils = UtilityButtonList(parent=popup, texts=texts, callbacks=callbacks, helpUrl=ccpnUrl+&quot;/software&quot;)</span>
+    <span class="c1"># popup.setSize(200,200)</span>
+    <span class="n">popup</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
 
-  <span class="n">popup</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-  <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+    <span class="n">buttons</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">popup</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="n">texts</span><span class="p">,</span> <span class="n">callbacks</span><span class="o">=</span><span class="n">callbacks</span><span class="p">,</span> <span class="n">icons</span><span class="o">=</span><span class="n">icons</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="c1"># utils = UtilityButtonList(parent=popup, texts=texts, callbacks=callbacks, helpUrl=ccpnUrl+&quot;/software&quot;)</span>
 
-  <span class="n">app</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">popup</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
 
+    <span class="n">app</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 </pre></div>
 
           </div>

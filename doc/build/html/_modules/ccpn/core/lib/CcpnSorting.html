@@ -52,116 +52,118 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:31 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
+
 <span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span>  <span class="n">Sorting</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Sorting</span>
+
+
 <span class="n">SPLITONDOTS</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;([.])&quot;</span><span class="p">)</span>
 
 <span class="n">_keyCache</span> <span class="o">=</span> <span class="p">{}</span>
 
+
 <span class="c1">#</span>
-<div class="viewcode-block" id="stringSortKey"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnSorting.stringSortKey">[docs]</a><span class="k">def</span> <span class="nf">stringSortKey</span><span class="p">(</span><span class="n">key</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
-  <span class="sd">&quot;&quot;&quot;Sort key for strings.</span>
+<div class="viewcode-block" id="stringSortKey"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnSorting.stringSortKey">[docs]</a><span class="k">def</span> <span class="nf">stringSortKey</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Sort key for strings.</span>
 
-<span class="sd">  Usage: sorted(aList, key=stringSortKey) or aList.sort(key=stringSortKey)</span>
+<span class="sd">    Usage: sorted(aList, key=stringSortKey) or aList.sort(key=stringSortKey)</span>
 
-<span class="sd">  Custom CCPN version of stringSortKey that sorts Pids on their individual components.</span>
+<span class="sd">    Custom CCPN version of stringSortKey that sorts Pids on their individual components.</span>
 
-<span class="sd">  Advanced:</span>
+<span class="sd">    Advanced:</span>
 
-<span class="sd">  Splits on embedded dots before further processing, and</span>
-<span class="sd">  Returns an alternating tuple of (possibly empty) strings interspersed with (float,string) tuples,</span>
-<span class="sd">  where the float is the converted value of the substring.</span>
-<span class="sd">  First and last element are always strings.</span>
+<span class="sd">    Splits on embedded dots before further processing, and</span>
+<span class="sd">    Returns an alternating tuple of (possibly empty) strings interspersed with (float,string) tuples,</span>
+<span class="sd">    where the float is the converted value of the substring.</span>
+<span class="sd">    First and last element are always strings.</span>
 
-<span class="sd">  If the entire string evaluates to a float, the result is (&#39;&#39;, &#39;(floatVal, stringVal), &#39;&#39;)</span>
+<span class="sd">    If the entire string evaluates to a float, the result is (&#39;&#39;, &#39;(floatVal, stringVal), &#39;&#39;)</span>
 
-<span class="sd">  Otherwise the numeric tuples are (intVal, subStringVal).</span>
-<span class="sd">  Substrings recognised as integers are an optional series of &#39; &#39;,</span>
-<span class="sd">  an optional sign, and a series of digits - or REGEX &#39;[ ]*[+-]?\d+&#39;</span>
-<span class="sd">  For this type the key tuple is extended by (0,&#39;&#39;),</span>
-<span class="sd">  # so that end-of-key sorts as 0 rather thn coming first.</span>
+<span class="sd">    Otherwise the numeric tuples are (intVal, subStringVal).</span>
+<span class="sd">    Substrings recognised as integers are an optional series of &#39; &#39;,</span>
+<span class="sd">    an optional sign, and a series of digits - or REGEX &#39;[ ]*[+-]?\d+&#39;</span>
+<span class="sd">    For this type the key tuple is extended by (0,&#39;&#39;),</span>
+<span class="sd">    # so that end-of-key sorts as 0 rather thn coming first.</span>
 
-<span class="sd">  Example of sorting order</span>
-<span class="sd">  [&#39;&#39;, &#39;NaN&#39;, &#39;-1&#39;, &#39;-1A&#39;, &#39;0.0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;15&#39;, &#39;3.2e12&#39;, &#39;Inf&#39;,</span>
-<span class="sd">  &#39;Ahh&#39;, &#39;b&#39;,  &#39;b2&#39;, &#39;b12&#39;, &#39;bb&#39;, &#39;ciao&#39;] &quot;&quot;&quot;</span>
+<span class="sd">    Example of sorting order</span>
+<span class="sd">    [&#39;&#39;, &#39;NaN&#39;, &#39;-1&#39;, &#39;-1A&#39;, &#39;0.0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;15&#39;, &#39;3.2e12&#39;, &#39;Inf&#39;,</span>
+<span class="sd">    &#39;Ahh&#39;, &#39;b&#39;,  &#39;b2&#39;, &#39;b12&#39;, &#39;bb&#39;, &#39;ciao&#39;] &quot;&quot;&quot;</span>
 
-  <span class="n">keyEnd</span> <span class="o">=</span> <span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">),</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">keyEnd</span> <span class="o">=</span> <span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
 
-  <span class="k">global</span> <span class="n">_keyCache</span>
-  <span class="n">result</span> <span class="o">=</span> <span class="n">_keyCache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">global</span> <span class="n">_keyCache</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">_keyCache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 
-  <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-    <span class="n">tt</span> <span class="o">=</span> <span class="n">Sorting</span><span class="o">.</span><span class="n">_floatStringKey</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">tt</span><span class="p">:</span>
-      <span class="c1"># Read as floating point number if possible</span>
-      <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">tt</span><span class="p">,)</span>
-    <span class="k">elif</span> <span class="s1">&#39;.&#39;</span>  <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
-      <span class="c1"># Otherwise treat dot (&#39;.&#39;) as a field separator</span>
-      <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="n">Sorting</span><span class="o">.</span><span class="n">_numericSplitString</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">SPLITONDOTS</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>
-      <span class="c1"># result = tuple(x if x[-1] else x + keyEnd for x in ll)</span>
-      <span class="n">result</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">keyEnd</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="c1"># Simple string</span>
-      <span class="n">result</span> <span class="o">=</span> <span class="n">Sorting</span><span class="o">.</span><span class="n">_numericSplitString</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-      <span class="c1"># if len(result) &gt; 1 and result[-1] == &#39;&#39;:</span>
-      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="c1"># String ended with a numeric field. Add keyEnd so that this sorts as 0</span>
-        <span class="c1"># against keys where the next field is also numeric</span>
-        <span class="n">result</span> <span class="o">+=</span> <span class="n">keyEnd</span>
-      <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">result</span><span class="p">,)</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">tt</span> <span class="o">=</span> <span class="n">Sorting</span><span class="o">.</span><span class="n">_floatStringKey</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">tt</span><span class="p">:</span>
+            <span class="c1"># Read as floating point number if possible</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">tt</span><span class="p">,)</span>
+        <span class="k">elif</span> <span class="s1">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
+            <span class="c1"># Otherwise treat dot (&#39;.&#39;) as a field separator</span>
+            <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="n">Sorting</span><span class="o">.</span><span class="n">_numericSplitString</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">SPLITONDOTS</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>
+            <span class="c1"># result = tuple(x if x[-1] else x + keyEnd for x in ll)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">keyEnd</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Simple string</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">Sorting</span><span class="o">.</span><span class="n">_numericSplitString</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="c1"># if len(result) &gt; 1 and result[-1] == &#39;&#39;:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c1"># String ended with a numeric field. Add keyEnd so that this sorts as 0</span>
+                <span class="c1"># against keys where the next field is also numeric</span>
+                <span class="n">result</span> <span class="o">+=</span> <span class="n">keyEnd</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">result</span><span class="p">,)</span>
+        <span class="c1">#</span>
+        <span class="n">_keyCache</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span>
     <span class="c1">#</span>
-    <span class="n">_keyCache</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span>
-  <span class="c1">#</span>
-  <span class="k">return</span> <span class="n">result</span></div>
+    <span class="k">return</span> <span class="n">result</span></div>
 
 
 <span class="k">def</span> <span class="nf">_ccpnOrderedKey</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Special case sorting key for CCPN - groups CCPN AbstractWrapperObjects together</span>
-<span class="sd">  before sorting by class name&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Special case sorting key for CCPN - groups CCPN AbstractWrapperObjects together</span>
+<span class="sd">    before sorting by class name&quot;&quot;&quot;</span>
 
-  <span class="c1"># import here to avoid circular imports</span>
-  <span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
+    <span class="c1"># import here to avoid circular imports</span>
+    <span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
 
-  <span class="n">cls</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">__class__</span>
+    <span class="n">cls</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">__class__</span>
 
-  <span class="n">ordering</span> <span class="o">=</span> <span class="mi">0</span>
-  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">AbstractWrapperObject</span><span class="p">):</span>
-    <span class="n">ordering</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-  <span class="c1">#</span>
-  <span class="k">return</span> <span class="p">(</span><span class="n">ordering</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="nb">id</span><span class="p">(</span><span class="n">cls</span><span class="p">),</span> <span class="n">key</span><span class="p">)</span>
+    <span class="n">ordering</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">AbstractWrapperObject</span><span class="p">):</span>
+        <span class="n">ordering</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">ordering</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="nb">id</span><span class="p">(</span><span class="n">cls</span><span class="p">),</span> <span class="n">key</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="universalSortKey"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnSorting.universalSortKey">[docs]</a><span class="k">def</span> <span class="nf">universalSortKey</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Custom universalSortKey, used to sort a list of mixed-type Python objects.</span>
+    <span class="sd">&quot;&quot;&quot;Custom universalSortKey, used to sort a list of mixed-type Python objects.</span>
 
-<span class="sd">  Usage: sorted(aList, key=universalSortKey) or aList.sort(key=universalSortKey)</span>
+<span class="sd">    Usage: sorted(aList, key=universalSortKey) or aList.sort(key=universalSortKey)</span>
 
-<span class="sd">  Uses the local stringSortKey variant for strings and</span>
-<span class="sd">  CCPN WrapperObjects sorted together&quot;&quot;&quot;</span>
-  <span class="k">return</span> <span class="n">Sorting</span><span class="o">.</span><span class="n">universalSortKey</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">_stringOrderingHook</span><span class="o">=</span><span class="n">stringSortKey</span><span class="p">,</span>
-                                  <span class="n">_orderedKeyHook</span><span class="o">=</span><span class="n">_ccpnOrderedKey</span><span class="p">)</span></div>
+<span class="sd">    Uses the local stringSortKey variant for strings and</span>
+<span class="sd">    CCPN WrapperObjects sorted together&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Sorting</span><span class="o">.</span><span class="n">universalSortKey</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">_stringOrderingHook</span><span class="o">=</span><span class="n">stringSortKey</span><span class="p">,</span>
+                                    <span class="n">_orderedKeyHook</span><span class="o">=</span><span class="n">_ccpnOrderedKey</span><span class="p">)</span></div>
 </pre></div>
 
           </div>

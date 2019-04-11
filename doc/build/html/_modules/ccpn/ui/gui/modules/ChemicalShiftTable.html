@@ -55,18 +55,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:43 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -83,7 +83,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.core.lib.Notifiers</span> <span class="kn">import</span> <span class="n">Notifier</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownListsForObjects</span> <span class="kn">import</span> <span class="n">ChemicalShiftListPulldown</span>
 <span class="c1"># from ccpn.ui.gui.widgets.Table import ObjectTable, Column</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.QuickTable</span> <span class="kn">import</span> <span class="n">QuickTable</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.GuiTable</span> <span class="kn">import</span> <span class="n">GuiTable</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Column</span> <span class="kn">import</span> <span class="n">Column</span><span class="p">,</span> <span class="n">ColumnClass</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Spacer</span> <span class="kn">import</span> <span class="n">Spacer</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.ChemicalShiftList</span> <span class="kn">import</span> <span class="n">ChemicalShiftList</span>
@@ -111,7 +111,8 @@
     <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;ChemicalShiftTableModule&#39;</span>
 
     <span class="c1"># we are subclassing this Module, hence some more arguments to the init</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Chemical Shift Table&#39;</span><span class="p">,</span> <span class="n">chemicalShiftList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Chemical Shift Table&#39;</span><span class="p">,</span>
+                 <span class="n">chemicalShiftList</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selectFirstItem</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialise the Module widgets</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -180,10 +181,11 @@
                                                      <span class="n">moduleParent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
                                                      <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
                                                      <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-        <span class="c1"># settingsWidget</span>
 
         <span class="k">if</span> <span class="n">chemicalShiftList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">selectChemicalShiftList</span><span class="p">(</span><span class="n">chemicalShiftList</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">selectFirstItem</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftTable</span><span class="o">.</span><span class="n">_chemicalShiftListPulldown</span><span class="o">.</span><span class="n">selectFirstItem</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">installMaximiseEventHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_maximise</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">)</span>
 
@@ -231,7 +233,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">()</span></div></div>
 
 
-<div class="viewcode-block" id="ChemicalShiftTable"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftTable.ChemicalShiftTable">[docs]</a><span class="k">class</span> <span class="nc">ChemicalShiftTable</span><span class="p">(</span><span class="n">QuickTable</span><span class="p">):</span>
+<div class="viewcode-block" id="ChemicalShiftTable"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftTable.ChemicalShiftTable">[docs]</a><span class="k">class</span> <span class="nc">ChemicalShiftTable</span><span class="p">(</span><span class="n">GuiTable</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class to present a NmrResidue Table and a NmrChain pulldown list, wrapped in a Widget</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -295,7 +297,7 @@
                              <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span>
                              <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_chemicalShiftListPulldown</span> <span class="o">=</span> <span class="n">ChemicalShiftListPulldown</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">,</span>
-                                                                    <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                                                    <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                                                                     <span class="c1"># first NmrChain in project (if present)</span>
                                                                     <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">minimumWidths</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
                                                                     <span class="n">showSelectName</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
@@ -362,8 +364,9 @@
 <span class="sd">        Manually select a ChemicalShiftList from the pullDown</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">chemicalShiftList</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;select: No ChemicalShiftList selected&#39;</span><span class="p">)</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;select: No ChemicalShiftList selected&#39;</span><span class="p">)</span>
+            <span class="c1"># logger.warning(&#39;select: No ChemicalShiftList selected&#39;)</span>
+            <span class="c1"># raise ValueError(&#39;select: No ChemicalShiftList selected&#39;)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_chemicalShiftListPulldown</span><span class="o">.</span><span class="n">selectFirstItem</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">chemicalShiftList</span><span class="p">,</span> <span class="n">ChemicalShiftList</span><span class="p">):</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;select: Object is not of type ChemicalShiftList&#39;</span><span class="p">)</span>

@@ -71,20 +71,21 @@
 <span class="sd">                            different applications</span>
 <span class="sd">                            May be used with -f and -b</span>
 
-<span class="sd">    -k, --keep              Keep existing .txt files. New files are appended with &#39;(n)&#39; before</span>
-<span class="sd">                            the extension, where n is the next available number. </span>
-<span class="sd">      </span>
 <span class="sd">    -f inFile1 inFile2, --file inFile1 inFile2</span>
 <span class="sd">                            Compare two Nef files and print the results to the</span>
 <span class="sd">                            screen</span>
-
-<span class="sd">    -s, --screen            Output batch processing to screen, default is to .txt files</span>
-<span class="sd">                            may be used with -b</span>
 
 <span class="sd">    -b inDir1 inDir2 outDir, --block inDir1 inDir2 outDir</span>
 <span class="sd">                            compare Nef files common to directories</span>
 <span class="sd">                            inDir1 and inDir2. Write output *.txt for each</span>
 <span class="sd">                            file into the outDir directory.</span>
+
+<span class="sd">    -s, --screen            Output batch processing to screen, default is to .txt files</span>
+<span class="sd">                            may be used with -b</span>
+
+<span class="sd">    -k, --keep              Keep existing .txt files. New files are appended with &#39;(n)&#39; before</span>
+<span class="sd">                            the extension, where n is the next available number.</span>
+
 
 <span class="sd">Details of the contents of Nef files can be found in GenericStarParser</span>
 <span class="sd">The general structure of a Nef file is:</span>
@@ -160,18 +161,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:33:01 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -252,15 +253,15 @@
     <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s1">&#39;Compare the contents of Nef files&#39;</span><span class="p">,</span> <span class="n">prog</span><span class="o">=</span><span class="s1">&#39;compareNef&#39;</span><span class="p">,</span> <span class="n">usage</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(prog)s</span><span class="s1"> [options]&#39;</span><span class="p">,</span>
                                      <span class="n">formatter_class</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">RawDescriptionHelpFormatter</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-H&#39;</span><span class="p">,</span> <span class="s1">&#39;--Help&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;Help&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Show detailed help&#39;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-s&#39;</span><span class="p">,</span> <span class="s1">&#39;--screen&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;Screen&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Output batch processing to screen&#39;</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-i&#39;</span><span class="p">,</span> <span class="s1">&#39;--ignoreblockname&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;ignoreBlockName&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Ignore the blockname when comparing two Nef files&#39;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-k&#39;</span><span class="p">,</span> <span class="s1">&#39;--keep&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;keepExisting&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
                         <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Ignore the blockname when comparing two Nef files&#39;</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-f&#39;</span><span class="p">,</span> <span class="s1">&#39;--file&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;inFiles&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;inFile1&#39;</span><span class="p">,</span> <span class="s1">&#39;inFile2&#39;</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                         <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Compare two Nef files and print the results to the screen&#39;</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-b&#39;</span><span class="p">,</span> <span class="s1">&#39;--block&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;blockDirs&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;inDir1&#39;</span><span class="p">,</span> <span class="s1">&#39;inDir2&#39;</span><span class="p">,</span> <span class="s1">&#39;outDir&#39;</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                         <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Batch mode: compare the contents of two directories&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-s&#39;</span><span class="p">,</span> <span class="s1">&#39;--screen&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;Screen&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Output batch processing to screen&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-k&#39;</span><span class="p">,</span> <span class="s1">&#39;--keep&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;keepExisting&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Keep existing .txt files. New files are appended with &quot;(n)&quot;&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">parser</span></div>
 
@@ -847,28 +848,46 @@
     <span class="k">for</span> <span class="n">fl</span> <span class="ow">in</span> <span class="n">inFileList</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">fl</span> <span class="ow">in</span> <span class="n">outFileList</span><span class="p">:</span>
 
-            <span class="n">outFileName</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">outDir</span><span class="p">,</span> <span class="n">fl</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.txt&#39;</span><span class="p">)</span>
-            <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Batch processing </span><span class="si">%s</span><span class="s1"> &gt; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fl</span><span class="p">,</span> <span class="n">outFileName</span><span class="p">))</span>
+            <span class="c1"># outFileName = join(outDir, fl[:-4] + &#39;.txt&#39;)</span>
+            <span class="c1"># print(&#39;Batch processing %s &gt; %s&#39; % (fl, outFileName))</span>
 
+            <span class="c1"># keep the old output stream</span>
             <span class="n">stdOriginal</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span>
 
             <span class="n">nefList</span> <span class="o">=</span> <span class="n">compareNefFiles</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">inDir1</span><span class="p">,</span> <span class="n">fl</span><span class="p">),</span> <span class="n">join</span><span class="p">(</span><span class="n">inDir2</span><span class="p">,</span> <span class="n">fl</span><span class="p">))</span>
 
             <span class="k">if</span> <span class="n">commandLineArguments</span><span class="o">.</span><span class="n">Screen</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+
+                <span class="c1"># strip the .nef from the end</span>
+                <span class="n">outFileName</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">outDir</span><span class="p">,</span> <span class="n">fl</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.txt&#39;</span><span class="p">)</span>
+                <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Batch processing </span><span class="si">%s</span><span class="s1"> &gt; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fl</span><span class="p">,</span> <span class="n">outFileName</span><span class="p">))</span>
+
                 <span class="n">printCompareList</span><span class="p">(</span><span class="n">nefList</span><span class="p">,</span> <span class="n">join</span><span class="p">(</span><span class="n">inDir1</span><span class="p">,</span> <span class="n">fl</span><span class="p">),</span> <span class="n">join</span><span class="p">(</span><span class="n">inDir2</span><span class="p">,</span> <span class="n">fl</span><span class="p">))</span>
 
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">commandLineArguments</span><span class="o">.</span><span class="n">keepExisting</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
-                    <span class="n">openType</span> <span class="o">=</span> <span class="n">safeOpen</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">openType</span> <span class="o">=</span> <span class="nb">open</span>
+                <span class="c1"># strip the .nef from the end</span>
+                <span class="n">outFileName</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">outDir</span><span class="p">,</span> <span class="n">fl</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.txt&#39;</span><span class="p">)</span>
 
-                <span class="k">with</span> <span class="n">openType</span><span class="p">(</span><span class="n">outFileName</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outLog</span><span class="p">:</span>
-                    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">outLog</span>
-                    <span class="k">print</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">inDir1</span><span class="p">,</span> <span class="n">fl</span><span class="p">))</span>
-                    <span class="k">print</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">inDir2</span><span class="p">,</span> <span class="n">fl</span><span class="p">))</span>
-                    <span class="n">printCompareList</span><span class="p">(</span><span class="n">nefList</span><span class="p">,</span> <span class="n">join</span><span class="p">(</span><span class="n">inDir1</span><span class="p">,</span> <span class="n">fl</span><span class="p">),</span> <span class="n">join</span><span class="p">(</span><span class="n">inDir2</span><span class="p">,</span> <span class="n">fl</span><span class="p">))</span>
-                    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">stdOriginal</span></div>
+                <span class="k">if</span> <span class="n">commandLineArguments</span><span class="o">.</span><span class="n">keepExisting</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+
+                    <span class="k">with</span> <span class="n">safeOpen</span><span class="p">(</span><span class="n">outFileName</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="p">(</span><span class="n">outLog</span><span class="p">,</span> <span class="n">safeFileName</span><span class="p">):</span>
+                        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Batch processing </span><span class="si">%s</span><span class="s1"> &gt; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fl</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">safeFileName</span><span class="p">)))</span>
+
+                        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">outLog</span>
+                        <span class="k">print</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">inDir1</span><span class="p">,</span> <span class="n">fl</span><span class="p">))</span>
+                        <span class="k">print</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">inDir2</span><span class="p">,</span> <span class="n">fl</span><span class="p">))</span>
+                        <span class="n">printCompareList</span><span class="p">(</span><span class="n">nefList</span><span class="p">,</span> <span class="n">join</span><span class="p">(</span><span class="n">inDir1</span><span class="p">,</span> <span class="n">fl</span><span class="p">),</span> <span class="n">join</span><span class="p">(</span><span class="n">inDir2</span><span class="p">,</span> <span class="n">fl</span><span class="p">))</span>
+                        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">stdOriginal</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Batch processing </span><span class="si">%s</span><span class="s1"> &gt; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fl</span><span class="p">,</span> <span class="n">outFileName</span><span class="p">))</span>
+
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outFileName</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outLog</span><span class="p">:</span>
+                        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">outLog</span>
+                        <span class="k">print</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">inDir1</span><span class="p">,</span> <span class="n">fl</span><span class="p">))</span>
+                        <span class="k">print</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">inDir2</span><span class="p">,</span> <span class="n">fl</span><span class="p">))</span>
+                        <span class="n">printCompareList</span><span class="p">(</span><span class="n">nefList</span><span class="p">,</span> <span class="n">join</span><span class="p">(</span><span class="n">inDir1</span><span class="p">,</span> <span class="n">fl</span><span class="p">),</span> <span class="n">join</span><span class="p">(</span><span class="n">inDir2</span><span class="p">,</span> <span class="n">fl</span><span class="p">))</span>
+                        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">stdOriginal</span></div>
 
 
 <span class="c1">#=========================================================================================</span>
@@ -956,20 +975,21 @@
 <span class="s2">                              different applications</span>
 <span class="s2">                              May be used with -f and -b</span>
 <span class="s2">                              </span>
-<span class="s2">      -k, --keep              Keep existing .txt files. New files are appended with &#39;(n)&#39; before</span>
-<span class="s2">                              the extension, where n is the next available number. </span>
-<span class="s2">      </span>
 <span class="s2">      -f inFile1 inFile2, --file inFile1 inFile2</span>
 <span class="s2">                              Compare two Nef files and print the results to the</span>
 <span class="s2">                              screen</span>
-<span class="s2">                              </span>
-<span class="s2">      -s, --screen            Output batch processing to screen, default is to .txt files</span>
-<span class="s2">                              may be used with -b</span>
 <span class="s2">                              </span>
 <span class="s2">      -b inDir1 inDir2 outDir, --block inDir1 inDir2 outDir</span>
 <span class="s2">                              compare Nef files common to directories</span>
 <span class="s2">                              inDir1 and inDir2. Write output *.txt for each</span>
 <span class="s2">                              file into the outDir directory.</span>
+
+<span class="s2">      -s, --screen            Output batch processing to screen, default is to .txt files</span>
+<span class="s2">                              may be used with -b</span>
+<span class="s2">                              </span>
+<span class="s2">      -k, --keep              Keep existing .txt files. New files are appended with &#39;(n)&#39; before</span>
+<span class="s2">                              the extension, where n is the next available number. </span>
+<span class="s2">      </span>
 <span class="s2">                          </span>
 <span class="s2">    Searches through all objects: dataExtents, dataBlocks, saveFrames and Loops within the files.</span>
 <span class="s2">    Comparisons are made for all data structures that have the same name.</span>

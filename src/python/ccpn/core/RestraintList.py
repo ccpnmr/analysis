@@ -24,23 +24,18 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import operator
-import collections
-from typing import Sequence
+from typing import Sequence, Union
 from functools import partial
 from ccpn.core.lib import Pid
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.DataSet import DataSet
 from ccpnmodel.ccpncore.lib import Constants as coreConstants
-from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import AbstractConstraintList as ApiAbstractConstraintList
 from ccpn.util.Tensor import Tensor
 
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
-    logCommandBlock, renameObject
-from ccpn.util.Logging import getLogger
+from ccpn.core.lib.ContextManagers import newObject, renameObject
 
 
 class RestraintList(AbstractWrapperObject):
@@ -281,20 +276,20 @@ class RestraintList(AbstractWrapperObject):
 
     @logCommand(get='self')
     def newRestraint(self, figureOfMerit: float = None, comment: str = None,
-                      peaks: Sequence = (), vectorLength: float = None, **kwds):
+                      peaks: Sequence[Union['Peak', str]] = (), vectorLength: float = None, **kwds):
         """Create new Restraint within RestraintList.
 
         ADVANCED: Note that you just create at least one RestraintContribution afterwards in order to
         have valid data. Use the simpler createSimpleRestraint instead, unless you have specific
-        reasons for needing newRestraint
+        reasons for needing newRestraint.
 
         See the Restraint class for details.
 
         Optional keyword arguments can be passed in; see Restraint._newRestraint for details.
 
         :param figureOfMerit:
-        :param comment:
-        :param peaks:
+        :param comment: optional comment string
+        :param peaks: optional list of peaks as objects or pids
         :param vectorLength:
         :return: a new Restraint instance.
         """

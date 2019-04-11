@@ -53,23 +53,21 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:58 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
@@ -79,36 +77,37 @@
 <span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
 
-<div class="viewcode-block" id="minimumStepPath"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Graph.minimumStepPath">[docs]</a><span class="k">def</span> <span class="nf">minimumStepPath</span><span class="p">(</span><span class="n">graph</span><span class="p">:</span><span class="nb">dict</span><span class="p">,</span> <span class="n">startNode</span><span class="p">,</span> <span class="n">endNode</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span><span class="nb">dict</span><span class="p">]:</span>
-  <span class="sd">&quot;&quot;&quot; Minimum-step-path by breadth-first traversal, inspired by Dijkstras algorithm</span>
-<span class="sd">  Each edge has the same weight; among paths of the same length</span>
-<span class="sd">  the function selects the first encountered. Breadth-first search guarantees that</span>
-<span class="sd">  the paths with fewest steps are encountered first.</span>
 
-<span class="sd">  Input:</span>
-<span class="sd">  graph is given in form {node:{node:edgeInfo}}</span>
-<span class="sd">  nodes can be any object that can be used as a dictionary key</span>
+<div class="viewcode-block" id="minimumStepPath"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Graph.minimumStepPath">[docs]</a><span class="k">def</span> <span class="nf">minimumStepPath</span><span class="p">(</span><span class="n">graph</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">startNode</span><span class="p">,</span> <span class="n">endNode</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot; Minimum-step-path by breadth-first traversal, inspired by Dijkstras algorithm</span>
+<span class="sd">    Each edge has the same weight; among paths of the same length</span>
+<span class="sd">    the function selects the first encountered. Breadth-first search guarantees that</span>
+<span class="sd">    the paths with fewest steps are encountered first.</span>
 
-<span class="sd">  Output:</span>
-<span class="sd">  (costDict, predecessorDict) tuple, where</span>
-<span class="sd">  costDict is {node:Tuple[edgeInfo, ...]}, with the edgeInfo along the path from start to node</span>
-<span class="sd">  predecessorDict is {node:predecessor} the predecessor of node in the shortest path from start</span>
-<span class="sd">  &quot;&quot;&quot;</span>
-  <span class="n">costDict</span> <span class="o">=</span> <span class="p">{</span><span class="n">startNode</span><span class="p">:</span><span class="nb">tuple</span><span class="p">()}</span>
-  <span class="n">predecessorDict</span> <span class="o">=</span> <span class="p">{}</span>
-  <span class="n">traversal</span> <span class="o">=</span> <span class="p">[</span><span class="n">startNode</span><span class="p">]</span>
+<span class="sd">    Input:</span>
+<span class="sd">    graph is given in form {node:{node:edgeInfo}}</span>
+<span class="sd">    nodes can be any object that can be used as a dictionary key</span>
 
-  <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">traversal</span><span class="p">:</span>
-    <span class="n">cost</span> <span class="o">=</span> <span class="n">costDict</span><span class="p">[</span><span class="n">node</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">node</span> <span class="o">==</span> <span class="n">endNode</span><span class="p">:</span>
-      <span class="k">break</span>
-    <span class="k">for</span> <span class="n">node2</span><span class="p">,</span> <span class="n">edgeInfo</span> <span class="ow">in</span> <span class="n">graph</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-      <span class="k">if</span> <span class="n">node2</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">traversal</span><span class="p">:</span>
-        <span class="n">costDict</span><span class="p">[</span><span class="n">node2</span><span class="p">]</span> <span class="o">=</span> <span class="n">cost</span> <span class="o">+</span> <span class="p">(</span><span class="n">edgeInfo</span><span class="p">,)</span>
-        <span class="n">predecessorDict</span><span class="p">[</span><span class="n">node2</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span>
-        <span class="n">traversal</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">node2</span><span class="p">))</span>
-  <span class="c1">#</span>
-  <span class="k">return</span> <span class="n">costDict</span><span class="p">,</span> <span class="n">predecessorDict</span></div>
+<span class="sd">    Output:</span>
+<span class="sd">    (costDict, predecessorDict) tuple, where</span>
+<span class="sd">    costDict is {node:Tuple[edgeInfo, ...]}, with the edgeInfo along the path from start to node</span>
+<span class="sd">    predecessorDict is {node:predecessor} the predecessor of node in the shortest path from start</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">costDict</span> <span class="o">=</span> <span class="p">{</span><span class="n">startNode</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">()}</span>
+    <span class="n">predecessorDict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">traversal</span> <span class="o">=</span> <span class="p">[</span><span class="n">startNode</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">traversal</span><span class="p">:</span>
+        <span class="n">cost</span> <span class="o">=</span> <span class="n">costDict</span><span class="p">[</span><span class="n">node</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">node</span> <span class="o">==</span> <span class="n">endNode</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="k">for</span> <span class="n">node2</span><span class="p">,</span> <span class="n">edgeInfo</span> <span class="ow">in</span> <span class="n">graph</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">node2</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">traversal</span><span class="p">:</span>
+                <span class="n">costDict</span><span class="p">[</span><span class="n">node2</span><span class="p">]</span> <span class="o">=</span> <span class="n">cost</span> <span class="o">+</span> <span class="p">(</span><span class="n">edgeInfo</span><span class="p">,)</span>
+                <span class="n">predecessorDict</span><span class="p">[</span><span class="n">node2</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span>
+                <span class="n">traversal</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">node2</span><span class="p">))</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">costDict</span><span class="p">,</span> <span class="n">predecessorDict</span></div>
 </pre></div>
 
           </div>

@@ -25,8 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from typing import Sequence, Tuple, List, Any
-from functools import partial
+from typing import Sequence, Tuple, List
 from ccpn.util import Common as commonUtil
 from ccpn.core.Peak import Peak
 from ccpn.core.Spectrum import Spectrum
@@ -35,11 +34,8 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundStrip as ApiBoundStrip
 from ccpn.util.Logging import getLogger
-from collections import OrderedDict
-from ccpn.core.lib.OrderedSpectrumViews import OrderedSpectrumViews
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import undoBlock, logCommandBlock, undoStackBlocking, notificationBlanking, \
-    newObject, deleteObject
+from ccpn.core.lib.ContextManagers import undoBlock, newObject
 
 
 # SV_TITLE = '_Strip'

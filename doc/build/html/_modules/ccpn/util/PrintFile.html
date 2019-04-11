@@ -53,18 +53,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:59 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -78,41 +78,40 @@
 
 
 <div class="viewcode-block" id="PrintFile"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.PrintFile.PrintFile">[docs]</a><span class="k">class</span> <span class="nc">PrintFile</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-  
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">xCount</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">yCount</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">800</span><span class="p">):</span>
-    
-    <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">xCount</span> <span class="o">=</span> <span class="n">xCount</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">yCount</span> <span class="o">=</span> <span class="n">yCount</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">width</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">height</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">xNumber</span> <span class="o">=</span> <span class="bp">None</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">yNumber</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">xCount</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">yCount</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">800</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xCount</span> <span class="o">=</span> <span class="n">xCount</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yCount</span> <span class="o">=</span> <span class="n">yCount</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">height</span>
 
-  <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;wt&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xNumber</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yNumber</span> <span class="o">=</span> <span class="bp">None</span>
 
-    <span class="k">return</span> <span class="bp">self</span>
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;wt&#39;</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span>
 
-  <span class="nd">@abstractmethod</span>
-<div class="viewcode-block" id="PrintFile.startRegion"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.PrintFile.PrintFile.startRegion">[docs]</a>  <span class="k">def</span> <span class="nf">startRegion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xOutputRegion</span><span class="p">,</span> <span class="n">yOutputRegion</span><span class="p">,</span> <span class="n">xNumber</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">yNumber</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-    <span class="k">pass</span></div>
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-  <span class="nd">@abstractmethod</span>
-<div class="viewcode-block" id="PrintFile.writeLine"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.PrintFile.PrintFile.writeLine">[docs]</a>  <span class="k">def</span> <span class="nf">writeLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="s1">&#39;#000000&#39;</span><span class="p">):</span>
-    <span class="k">pass</span></div>
+    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="PrintFile.startRegion"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.PrintFile.PrintFile.startRegion">[docs]</a>    <span class="k">def</span> <span class="nf">startRegion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xOutputRegion</span><span class="p">,</span> <span class="n">yOutputRegion</span><span class="p">,</span> <span class="n">xNumber</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">yNumber</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="k">pass</span></div>
 
-  <span class="nd">@abstractmethod</span>
-<div class="viewcode-block" id="PrintFile.writePolyline"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.PrintFile.PrintFile.writePolyline">[docs]</a>  <span class="k">def</span> <span class="nf">writePolyline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polyline</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="s1">&#39;#000000&#39;</span><span class="p">):</span>
-    <span class="k">pass</span></div>
+    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="PrintFile.writeLine"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.PrintFile.PrintFile.writeLine">[docs]</a>    <span class="k">def</span> <span class="nf">writeLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="s1">&#39;#000000&#39;</span><span class="p">):</span>
+        <span class="k">pass</span></div>
 
-  <span class="nd">@abstractmethod</span>
-<div class="viewcode-block" id="PrintFile.writeText"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.PrintFile.PrintFile.writeText">[docs]</a>  <span class="k">def</span> <span class="nf">writeText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="s1">&#39;#000000&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">fontfamily</span><span class="o">=</span><span class="s1">&#39;Verdana&#39;</span><span class="p">):</span>
-    <span class="k">pass</span></div></div>
+    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="PrintFile.writePolyline"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.PrintFile.PrintFile.writePolyline">[docs]</a>    <span class="k">def</span> <span class="nf">writePolyline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polyline</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="s1">&#39;#000000&#39;</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="PrintFile.writeText"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.PrintFile.PrintFile.writeText">[docs]</a>    <span class="k">def</span> <span class="nf">writeText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="s1">&#39;#000000&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">fontfamily</span><span class="o">=</span><span class="s1">&#39;Verdana&#39;</span><span class="p">):</span>
+        <span class="k">pass</span></div></div>
 </pre></div>
 
           </div>

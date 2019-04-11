@@ -25,9 +25,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-
-import decimal
+from PyQt5 import QtWidgets
 from functools import partial
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
@@ -37,15 +35,14 @@ from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from collections import OrderedDict
-from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.SpectraSelectionWidget import SpectraSelectionWidget
 from ccpn.ui.gui.widgets.MessageDialog import _stoppableProgressBar
-from ccpn.core.lib.ContextManagers import logCommandBlock, notificationEchoBlocking
+from ccpn.core.lib.ContextManagers import notificationEchoBlocking
 from ccpn.ui.gui.widgets.Spacer import Spacer
 
 

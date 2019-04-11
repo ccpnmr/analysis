@@ -307,7 +307,7 @@ class Pid(str):
         parts[1:] = idparts
 
         if newType is not None:
-            parts[0] = type
+            parts[0] = newType
 
         return Pid.new(*parts)
 

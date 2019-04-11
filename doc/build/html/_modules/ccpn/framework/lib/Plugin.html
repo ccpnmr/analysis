@@ -50,18 +50,18 @@
 <span></span><span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:37 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -77,124 +77,118 @@
 
 
 <div class="viewcode-block" id="NoUI"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.lib.html#ccpn.framework.lib.Plugin.NoUI">[docs]</a><span class="k">class</span> <span class="nc">NoUI</span><span class="p">:</span>
-<div class="viewcode-block" id="NoUI.issueMessage"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.lib.html#ccpn.framework.lib.Plugin.NoUI.issueMessage">[docs]</a>  <span class="k">def</span> <span class="nf">issueMessage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
-    <span class="k">print</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div></div>
+<div class="viewcode-block" id="NoUI.issueMessage"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.lib.html#ccpn.framework.lib.Plugin.NoUI.issueMessage">[docs]</a>    <span class="k">def</span> <span class="nf">issueMessage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="Plugin"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.lib.html#ccpn.framework.lib.Plugin.Plugin">[docs]</a><span class="k">class</span> <span class="nc">Plugin</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-  <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">  Plugin base class.</span>
-
-<span class="sd">  For Autogeneration of Gui:</span>
-<span class="sd">  In order to genenerate a (crude) gui, you&#39;ll need to populate the params and settings class variables.</span>
-<span class="sd">    First, make it an iterable:</span>
-<span class="sd">      params = []</span>
-<span class="sd">    Now, add variables in the order you want the input boxes to show up.</span>
-<span class="sd">    Every variable is declared in a mapping (generally a dictionary) with two required keys:</span>
-<span class="sd">      &#39;variable&#39; : The keyward parameter that will be used when the function is called.</span>
-<span class="sd">      &#39;value&#39; : the possible values.  See below.</span>
-<span class="sd">    In addition to the required keys, several optional keys can be used:</span>
-<span class="sd">      label : the label used.  If this is left out, the variable name will be used instead.</span>
-<span class="sd">      default : the default value</span>
-<span class="sd">      stepsize : the stepsize for spinboxes.  If you include this for non-spinboxes it will be ignored</span>
-
-<span class="sd">    The &#39;value&#39; entry:</span>
-<span class="sd">      The type of widget generated is controled by the value of this entry,</span>
-<span class="sd">      if the value is an iterable, the type of widget is controlled by the first item in the iterable</span>
-<span class="sd">      strings are not considered iterables here.</span>
-<span class="sd">        value type                       : type of widget</span>
-<span class="sd">        string                           : LineEdit</span>
-<span class="sd">        boolean                          : Checkbox</span>
-<span class="sd">        Iterable(strings)                : PulldownList</span>
-<span class="sd">        Iterable(int, int)               : Spinbox</span>
-<span class="sd">        Iterable(float, float)           : DoubleSpinbox</span>
-<span class="sd">        Iterable(Iterables(str, object)) : PulldownList where the object is passed instead of the string</span>
-
-<span class="sd">  &#39;&#39;&#39;</span>
-
-
-  <span class="n">guiModule</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># Specify subclass of CcpnModule here OR</span>
-  <span class="n">params</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># Populate this to have an auto-generated gui</span>
-  <span class="n">settings</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># Break out the settings into another variable so pipelines are portable</span>
-  <span class="n">widgetsState</span> <span class="o">=</span> <span class="bp">None</span>
-  <span class="n">UiPlugin</span> <span class="o">=</span> <span class="bp">False</span>
-
-  <span class="nd">@property</span>
-  <span class="nd">@abstractmethod</span>
-  <span class="k">def</span> <span class="nf">PLUGINNAME</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="nb">str</span><span class="p">()</span>
-
-  <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Plugin.register"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.lib.html#ccpn.framework.lib.Plugin.Plugin.register">[docs]</a>  <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    method to register the pipe in the loaded pipes to appear in the pipeline</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">ccpn.plugins</span> <span class="kn">import</span> <span class="n">loadedPlugins</span>
-    <span class="n">loadedPlugins</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span></div>
-
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">guiModule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">guiModule</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">params</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">settings</span>
-
-    <span class="k">if</span> <span class="n">application</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">application</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">preferences</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">undo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">undo</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">redo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">redo</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">ui</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ui</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
-      <span class="k">try</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
-      <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-        <span class="k">pass</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">customizeSetup</span><span class="p">()</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span> <span class="o">=</span> <span class="n">NoUI</span><span class="p">()</span>
-
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">package</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">PLUGINNAME</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;...&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">PLUGINNAME</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;...&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">localInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">pth</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">path</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">pth</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
-    <span class="n">pth</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pth</span><span class="p">,</span> <span class="s1">&#39;plugins&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">package</span><span class="p">)</span>
-    <span class="k">if</span> <span class="s1">&#39;...&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">PLUGINNAME</span><span class="p">:</span>
-      <span class="n">pth</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pth</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">pth</span><span class="p">):</span>
-      <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">pth</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">pth</span>
-
-
-<div class="viewcode-block" id="Plugin.customizeSetup"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.lib.html#ccpn.framework.lib.Plugin.Plugin.customizeSetup">[docs]</a>  <span class="k">def</span> <span class="nf">customizeSetup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Override this method to customize the UI auto-generation attributes</span>
+<span class="sd">    Plugin base class.</span>
+
+<span class="sd">    For Autogeneration of Gui:</span>
+<span class="sd">    In order to genenerate a (crude) gui, you&#39;ll need to populate the params and settings class variables.</span>
+<span class="sd">      First, make it an iterable:</span>
+<span class="sd">        params = []</span>
+<span class="sd">      Now, add variables in the order you want the input boxes to show up.</span>
+<span class="sd">      Every variable is declared in a mapping (generally a dictionary) with two required keys:</span>
+<span class="sd">        &#39;variable&#39; : The keyward parameter that will be used when the function is called.</span>
+<span class="sd">        &#39;value&#39; : the possible values.  See below.</span>
+<span class="sd">      In addition to the required keys, several optional keys can be used:</span>
+<span class="sd">        label : the label used.  If this is left out, the variable name will be used instead.</span>
+<span class="sd">        default : the default value</span>
+<span class="sd">        stepsize : the stepsize for spinboxes.  If you include this for non-spinboxes it will be ignored</span>
+
+<span class="sd">      The &#39;value&#39; entry:</span>
+<span class="sd">        The type of widget generated is controled by the value of this entry,</span>
+<span class="sd">        if the value is an iterable, the type of widget is controlled by the first item in the iterable</span>
+<span class="sd">        strings are not considered iterables here.</span>
+<span class="sd">          value type                       : type of widget</span>
+<span class="sd">          string                           : LineEdit</span>
+<span class="sd">          boolean                          : Checkbox</span>
+<span class="sd">          Iterable(strings)                : PulldownList</span>
+<span class="sd">          Iterable(int, int)               : Spinbox</span>
+<span class="sd">          Iterable(float, float)           : DoubleSpinbox</span>
+<span class="sd">          Iterable(Iterables(str, object)) : PulldownList where the object is passed instead of the string</span>
+
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">pass</span></div>
 
+    <span class="n">guiModule</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># Specify subclass of CcpnModule here OR</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># Populate this to have an auto-generated gui</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># Break out the settings into another variable so pipelines are portable</span>
+    <span class="n">widgetsState</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">UiPlugin</span> <span class="o">=</span> <span class="bp">False</span>
 
-<div class="viewcode-block" id="Plugin.run"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.lib.html#ccpn.framework.lib.Plugin.Plugin.run">[docs]</a>  <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    This is the method that automatically gets called for No-UI and Auto-generated UI plugins.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">pass</span></div>
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">PLUGINNAME</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">()</span>
 
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Plugin.register"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.lib.html#ccpn.framework.lib.Plugin.Plugin.register">[docs]</a>    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        method to register the pipe in the loaded pipes to appear in the pipeline</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.plugins</span> <span class="kn">import</span> <span class="n">loadedPlugins</span>
 
-<div class="viewcode-block" id="Plugin.cleanup"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.lib.html#ccpn.framework.lib.Plugin.Plugin.cleanup">[docs]</a>  <span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">pass</span></div></div>
+        <span class="n">loadedPlugins</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">guiModule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">guiModule</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">settings</span>
+
+        <span class="k">if</span> <span class="n">application</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">application</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">preferences</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">undo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">undo</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">redo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">redo</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ui</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">customizeSetup</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span> <span class="o">=</span> <span class="n">NoUI</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">package</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">PLUGINNAME</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;...&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">PLUGINNAME</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;...&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">localInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">pth</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">path</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pth</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+        <span class="n">pth</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pth</span><span class="p">,</span> <span class="s1">&#39;plugins&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">package</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;...&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">PLUGINNAME</span><span class="p">:</span>
+            <span class="n">pth</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pth</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">pth</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">pth</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pth</span>
+
+<div class="viewcode-block" id="Plugin.customizeSetup"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.lib.html#ccpn.framework.lib.Plugin.Plugin.customizeSetup">[docs]</a>    <span class="k">def</span> <span class="nf">customizeSetup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Override this method to customize the UI auto-generation attributes</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Plugin.run"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.lib.html#ccpn.framework.lib.Plugin.Plugin.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        This is the method that automatically gets called for No-UI and Auto-generated UI plugins.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Plugin.cleanup"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.lib.html#ccpn.framework.lib.Plugin.Plugin.cleanup">[docs]</a>    <span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div></div>
 </pre></div>
 
           </div>

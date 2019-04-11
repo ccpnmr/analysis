@@ -260,16 +260,16 @@ def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None
                                   showSequentialResidues=False, markPositions=True):
     """
     Navigate in to nmrResidue in strip[stripIndex] of display, with optionally-1, +1 residues in
-    strips[stripIndex-1] and strips[stripIndex+1]
+    strips[stripIndex-1] and strips[stripIndex+1].
     return list of strips
 
-    :param nmrResidue:
-    :param display:
+    :param nmrResidue: nmrResidue to display
+    :param display: target spectrumDisplay for nmrResidue
     :param stripIndex: location of strip in display (assumed 0 if connected and showSequentialResidues)
     :param widths: ignored (for now)
     :param showSequentialResidues: boolean selecting if sequential strips are displayed
     :param markPositions: boolean selecting if marks are displayed
-    :return list of strips
+    :return: list of strips
     """
 
     getLogger().debug('display=%r, nmrResidue=%r, showSequentialResidues=%s, markPositions=%s' %

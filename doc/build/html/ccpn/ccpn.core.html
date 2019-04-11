@@ -499,13 +499,6 @@ serial number of CalculationStep, used in Pid and to identify the CalculationSte
 </dd></dl>
 
 <dl class="attribute">
-<dt id="ccpn.core.Chain.Chain.comment">
-<code class="descname">comment</code><a class="headerlink" href="#ccpn.core.Chain.Chain.comment" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>mutable</em> - 
-Free-form text comment.</p>
-</dd></dl>
-
-<dl class="attribute">
 <dt id="ccpn.core.Chain.Chain.complexes">
 <code class="descname">complexes</code><a class="headerlink" href="#ccpn.core.Chain.Chain.complexes" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>Tuple[ccpn.core.Complex.Complex, ...]</em>, <em>mutable</em> - 
@@ -548,8 +541,8 @@ True if this is a cyclic polymer.</p>
 <dl class="attribute">
 <dt id="ccpn.core.Chain.Chain.name">
 <code class="descname">name</code><a class="headerlink" href="#ccpn.core.Chain.Chain.name" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>immutable</em> - 
-Short name of chemical compound (e.g. &#8216;Lysozyme&#8217;) making up Chain</p>
+<dd><p>- <em>str</em>, <em>mutable</em> - 
+short form of name</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -612,7 +605,7 @@ SampleComponents matching to Chain (based on chain.compoundName)</p>
 <dl class="attribute">
 <dt id="ccpn.core.Chain.Chain.shortName">
 <code class="descname">shortName</code><a class="headerlink" href="#ccpn.core.Chain.Chain.shortName" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>immutable</em> - 
+<dd><p>- <em>str</em>, <em>mutable</em> - 
 short form of name</p>
 </dd></dl>
 
@@ -648,13 +641,6 @@ ChemicalShiftList containing ChemicalShift.</p>
 <dt id="ccpn.core.ChemicalShift.ChemicalShift.className">
 <code class="descname">className</code><em class="property"> = 'ChemicalShift'</em><a class="headerlink" href="#ccpn.core.ChemicalShift.ChemicalShift.className" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.ChemicalShift.ChemicalShift.comment">
-<code class="descname">comment</code><a class="headerlink" href="#ccpn.core.ChemicalShift.ChemicalShift.comment" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>mutable</em> - 
-Free-form text comment</p>
-</dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.ChemicalShift.ChemicalShift.figureOfMerit">
@@ -721,13 +707,6 @@ Automatically update Chemical Shifts from assigned peaks - True/False</p>
 <code class="descname">className</code><em class="property"> = 'ChemicalShiftList'</em><a class="headerlink" href="#ccpn.core.ChemicalShiftList.ChemicalShiftList.className" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
-<dt id="ccpn.core.ChemicalShiftList.ChemicalShiftList.comment">
-<code class="descname">comment</code><a class="headerlink" href="#ccpn.core.ChemicalShiftList.ChemicalShiftList.comment" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>mutable</em> - 
-Free-form text comment</p>
-</dd></dl>
-
 <dl class="method">
 <dt id="ccpn.core.ChemicalShiftList.ChemicalShiftList.getChemicalShift">
 <code class="descname">getChemicalShift</code><span class="sig-paren">(</span><em>relativeId: str</em><span class="sig-paren">)</span> &rarr; ccpn.core.ChemicalShift.ChemicalShift<a class="headerlink" href="#ccpn.core.ChemicalShiftList.ChemicalShiftList.getChemicalShift" title="Permalink to this definition">¶</a></dt>
@@ -744,14 +723,34 @@ True if the ChemicalShiftList is simulated.</p>
 <dl class="attribute">
 <dt id="ccpn.core.ChemicalShiftList.ChemicalShiftList.name">
 <code class="descname">name</code><a class="headerlink" href="#ccpn.core.ChemicalShiftList.ChemicalShiftList.name" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>immutable</em> - 
+<dd><p>- <em>str</em>, <em>mutable</em> - 
 name of ChemicalShiftList.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.ChemicalShiftList.ChemicalShiftList.newChemicalShift">
-<code class="descname">newChemicalShift</code><span class="sig-paren">(</span><em>value: float</em>, <em>nmrAtom: ccpn.core.NmrAtom.NmrAtom</em>, <em>valueError: float = 0.0</em>, <em>figureOfMerit: float = 1.0</em>, <em>comment: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.ChemicalShift.ChemicalShift<a class="headerlink" href="#ccpn.core.ChemicalShiftList.ChemicalShiftList.newChemicalShift" title="Permalink to this definition">¶</a></dt>
+<code class="descname">newChemicalShift</code><span class="sig-paren">(</span><em>value: float</em>, <em>nmrAtom</em>, <em>valueError: float = 0.0</em>, <em>figureOfMerit: float = 1.0</em>, <em>comment: str = None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/ChemicalShiftList.html#ChemicalShiftList.newChemicalShift"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.ChemicalShiftList.ChemicalShiftList.newChemicalShift" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new ChemicalShift within ChemicalShiftList.</p>
+<p>See the ChemicalShift class for details.</p>
+<p>Optional keyword arguments can be passed in; see Peak._newPeak for details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>value</strong> &#8211; </li>
+<li><strong>nmrAtom</strong> &#8211; nmrAtom as object or pid</li>
+<li><strong>valueError</strong> &#8211; </li>
+<li><strong>figureOfMerit</strong> &#8211; </li>
+<li><strong>comment</strong> &#8211; optional comment string</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new ChemicalShift instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -813,14 +812,14 @@ Chains that make up Complex.</p>
 <dl class="attribute">
 <dt id="ccpn.core.Complex.Complex.name">
 <code class="descname">name</code><a class="headerlink" href="#ccpn.core.Complex.Complex.name" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>immutable</em> - 
+<dd><p>- <em>str</em>, <em>mutable</em> - 
 Name of Complex, part of identifier</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.Complex.Complex.rename">
 <code class="descname">rename</code><span class="sig-paren">(</span><em>value: str</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Complex.html#Complex.rename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Complex.Complex.rename" title="Permalink to this definition">¶</a></dt>
-<dd><p>Rename Complex, changing its name and Pid</p>
+<dd><p>Rename Complex, changing its name and Pid.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -893,7 +892,7 @@ DataSet containing Data.</p>
 <dl class="attribute">
 <dt id="ccpn.core.Data.Data.name">
 <code class="descname">name</code><a class="headerlink" href="#ccpn.core.Data.Data.name" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>immutable</em> - 
+<dd><p>- <em>str</em>, <em>mutable</em> - 
 name of Data object, used in Pid and to identify the Data object.</p>
 </dd></dl>
 
@@ -913,7 +912,7 @@ or pandas DataFrame, Series, or Panel</p>
 <dl class="method">
 <dt id="ccpn.core.Data.Data.rename">
 <code class="descname">rename</code><span class="sig-paren">(</span><em>value: str</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Data.html#Data.rename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Data.Data.rename" title="Permalink to this definition">¶</a></dt>
-<dd><p>Rename Data, changing its nmme and Pid</p>
+<dd><p>Rename Data, changing its name and Pid.</p>
 </dd></dl>
 
 <dl class="method">
@@ -957,13 +956,6 @@ data history and file loads.</p>
 <dt id="ccpn.core.DataSet.DataSet.className">
 <code class="descname">className</code><em class="property"> = 'DataSet'</em><a class="headerlink" href="#ccpn.core.DataSet.DataSet.className" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.DataSet.DataSet.comment">
-<code class="descname">comment</code><a class="headerlink" href="#ccpn.core.DataSet.DataSet.comment" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>mutable</em> - 
-Free-form text comment</p>
-</dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.DataSet.DataSet.creationDate">
@@ -1024,22 +1016,98 @@ NB there can be more than one, because the DataSet may result from
 multiple calculations that do not have intermediate DataSets stored</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="ccpn.core.DataSet.DataSet.name">
+<code class="descname">name</code><a class="headerlink" href="#ccpn.core.DataSet.DataSet.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>str</em>, <em>mutable</em> - 
+Title of DataSet.</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="ccpn.core.DataSet.DataSet.newCalculationStep">
-<code class="descname">newCalculationStep</code><span class="sig-paren">(</span><em>programName: str = None</em>, <em>programVersion: str = None</em>, <em>scriptName: str = None</em>, <em>script: str = None</em>, <em>inputDataUuid: str = None</em>, <em>outputDataUuid: str = None</em>, <em>inputDataSet: ccpn.core.DataSet.DataSet = None</em>, <em>outputDataSet: ccpn.core.DataSet.DataSet = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.CalculationStep.CalculationStep<a class="headerlink" href="#ccpn.core.DataSet.DataSet.newCalculationStep" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create new CalculationStep within DataSet</p>
+<code class="descname">newCalculationStep</code><span class="sig-paren">(</span><em>programName: str = None</em>, <em>programVersion: str = None</em>, <em>scriptName: str = None</em>, <em>script: str = None</em>, <em>inputDataUuid: str = None</em>, <em>outputDataUuid: str = None</em>, <em>inputDataSet=None</em>, <em>outputDataSet=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/DataSet.html#DataSet.newCalculationStep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.DataSet.DataSet.newCalculationStep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new CalculationStep within DataSet.</p>
+<p>See the CalculationStep class for details.</p>
+<p>Optional keyword arguments can be passed in; see CalculationStep._newCalculationStep for details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>programName</strong> &#8211; </li>
+<li><strong>programVersion</strong> &#8211; </li>
+<li><strong>scriptName</strong> &#8211; </li>
+<li><strong>script</strong> &#8211; </li>
+<li><strong>inputDataUuid</strong> &#8211; </li>
+<li><strong>outputDataUuid</strong> &#8211; </li>
+<li><strong>inputDataSet</strong> &#8211; </li>
+<li><strong>outputDataSet</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new CalculationStep instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.DataSet.DataSet.newData">
-<code class="descname">newData</code><span class="sig-paren">(</span><em>name: str</em>, <em>attachedObjectPid: str = None</em>, <em>attachedObject: ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.Data.Data<a class="headerlink" href="#ccpn.core.DataSet.DataSet.newData" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create new Data within DataSet</p>
+<code class="descname">newData</code><span class="sig-paren">(</span><em>name: str</em>, <em>attachedObjectPid: str = None</em>, <em>attachedObject: ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject = None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/DataSet.html#DataSet.newData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.DataSet.DataSet.newData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new Data within DataSet.</p>
+<p>See the Data class for details.</p>
+<p>Optional keyword arguments can be passed in; see Data._newData for details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> &#8211; </li>
+<li><strong>attachedObjectPid</strong> &#8211; </li>
+<li><strong>attachedObject</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new Data instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.DataSet.DataSet.newRestraintList">
-<code class="descname">newRestraintList</code><span class="sig-paren">(</span><em>restraintType</em>, <em>name: str = None</em>, <em>origin: str = None</em>, <em>comment: str = None</em>, <em>unit: str = None</em>, <em>potentialType: str = 'unknown'</em>, <em>tensorMagnitude: float = 0.0</em>, <em>tensorRhombicity: float = 0.0</em>, <em>tensorIsotropicValue: float = 0.0</em>, <em>tensorChainCode: str = None</em>, <em>tensorSequenceCode: str = None</em>, <em>tensorResidueType: str = None</em>, <em>serial=None</em>, <em>restraintItemLength=None</em><span class="sig-paren">)</span> &rarr; ccpn.core.RestraintList.RestraintList<a class="headerlink" href="#ccpn.core.DataSet.DataSet.newRestraintList" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create new RestraintList of type restraintType within DataSet</p>
+<code class="descname">newRestraintList</code><span class="sig-paren">(</span><em>restraintType</em>, <em>name: str = None</em>, <em>origin: str = None</em>, <em>comment: str = None</em>, <em>unit: str = None</em>, <em>potentialType: str = 'unknown'</em>, <em>tensorMagnitude: float = 0.0</em>, <em>tensorRhombicity: float = 0.0</em>, <em>tensorIsotropicValue: float = 0.0</em>, <em>tensorChainCode: str = None</em>, <em>tensorSequenceCode: str = None</em>, <em>tensorResidueType: str = None</em>, <em>restraintItemLength=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/DataSet.html#DataSet.newRestraintList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.DataSet.DataSet.newRestraintList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new RestraintList of type restraintType within DataSet.</p>
+<p>See the RestraintList class for details.</p>
+<p>Optional keyword arguments can be passed in; see RestraintList._newRestraintList for details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>restraintType</strong> &#8211; </li>
+<li><strong>name</strong> &#8211; </li>
+<li><strong>origin</strong> &#8211; </li>
+<li><strong>comment</strong> &#8211; </li>
+<li><strong>unit</strong> &#8211; </li>
+<li><strong>potentialType</strong> &#8211; </li>
+<li><strong>tensorMagnitude</strong> &#8211; </li>
+<li><strong>tensorRhombicity</strong> &#8211; </li>
+<li><strong>tensorIsotropicValue</strong> &#8211; </li>
+<li><strong>tensorChainCode</strong> &#8211; </li>
+<li><strong>tensorSequenceCode</strong> &#8211; </li>
+<li><strong>tensorResidueType</strong> &#8211; </li>
+<li><strong>restraintItemLength</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new RestraintList instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -1061,6 +1129,13 @@ Name of program performing the calculation</p>
 <code class="descname">programVersion</code><a class="headerlink" href="#ccpn.core.DataSet.DataSet.programVersion" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>str=None</em>, <em>mutable</em> - 
 Version of program performing the calculation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.DataSet.DataSet.rename">
+<code class="descname">rename</code><span class="sig-paren">(</span><em>value: str</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/DataSet.html#DataSet.rename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.DataSet.DataSet.rename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rename DataSet, changing its name and Pid.
+NB, the serial remains immutable.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -1098,7 +1173,7 @@ serial number of DataSet, used in Pid and to identify the DataSet.</p>
 <dt id="ccpn.core.DataSet.DataSet.title">
 <code class="descname">title</code><a class="headerlink" href="#ccpn.core.DataSet.DataSet.title" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>str</em>, <em>mutable</em> - 
-Title of DataSet (not used in PID).</p>
+Title of DataSet.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -1147,13 +1222,6 @@ Baseplane offset used in calculating integral value</p>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ccpn.core.Integral.Integral.comment">
-<code class="descname">comment</code><a class="headerlink" href="#ccpn.core.Integral.Integral.comment" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str=None</em>, <em>mutable</em> - 
-Free-form text comment</p>
-</dd></dl>
-
-<dl class="attribute">
 <dt id="ccpn.core.Integral.Integral.constraintWeight">
 <code class="descname">constraintWeight</code><a class="headerlink" href="#ccpn.core.Integral.Integral.constraintWeight" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>float=None</em>, <em>mutable</em> - 
@@ -1191,12 +1259,12 @@ offset of Integral</p>
 <dt id="ccpn.core.Integral.Integral.peak">
 <code class="descname">peak</code><a class="headerlink" href="#ccpn.core.Integral.Integral.peak" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>mutable</em> - 
-The peak attached to the integral</p>
+The peak attached to the integral.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="ccpn.core.Integral.Integral.pointlimits">
-<code class="descname">pointlimits</code><a class="headerlink" href="#ccpn.core.Integral.Integral.pointlimits" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.core.Integral.Integral.pointLimits">
+<code class="descname">pointLimits</code><a class="headerlink" href="#ccpn.core.Integral.Integral.pointLimits" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>List[Tuple[float, float]]</em>, <em>mutable</em> -</p>
 </dd></dl>
 
@@ -1258,13 +1326,6 @@ noiseThreshold: value used to calculate the intersectingLine to get the peak lim
 <code class="descname">className</code><em class="property"> = 'IntegralList'</em><a class="headerlink" href="#ccpn.core.IntegralList.IntegralList.className" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
-<dt id="ccpn.core.IntegralList.IntegralList.comment">
-<code class="descname">comment</code><a class="headerlink" href="#ccpn.core.IntegralList.IntegralList.comment" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>mutable</em> - 
-Free-form text comment.</p>
-</dd></dl>
-
 <dl class="method">
 <dt id="ccpn.core.IntegralList.IntegralList.getIntegral">
 <code class="descname">getIntegral</code><span class="sig-paren">(</span><em>relativeId: str</em><span class="sig-paren">)</span> &rarr; ccpn.core.Integral.Integral<a class="headerlink" href="#ccpn.core.IntegralList.IntegralList.getIntegral" title="Permalink to this definition">¶</a></dt>
@@ -1287,22 +1348,24 @@ IntegralListViews showing Spectrum</p>
 <dl class="method">
 <dt id="ccpn.core.IntegralList.IntegralList.newIntegral">
 <code class="descname">newIntegral</code><span class="sig-paren">(</span><em>value: List[] = None</em>, <em>comment: str = None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/IntegralList.html#IntegralList.newIntegral"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.IntegralList.IntegralList.newIntegral" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a new integral within an IntegralList</p>
-<p>See the Integral class for details</p>
+<dd><p>Create a new integral within an IntegralList.</p>
+<p>See the Integral class for details.</p>
+<p>Optional keyword arguments can be passed in; see Integral._newIntegral for details.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>value</strong> &#8211; (min, max) values in ppm for the integral</li>
 <li><strong>comment</strong> &#8211; optional comment string</li>
 </ul>
 </td>
 </tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new Integral instance</p>
+</td>
+</tr>
 </tbody>
 </table>
-<p>:return Integral instance</p>
-<p>optional keyword arguments can be passed in; see Integral._newIntegral for details.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -1376,17 +1439,16 @@ known to not suffer from chained assignment.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="ccpn.core.Model.Model.comment">
-<code class="descname">comment</code><a class="headerlink" href="#ccpn.core.Model.Model.comment" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>mutable</em> - 
-Free-form text comment</p>
-</dd></dl>
-
-<dl class="attribute">
 <dt id="ccpn.core.Model.Model.data">
 <code class="descname">data</code><a class="headerlink" href="#ccpn.core.Model.Model.data" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>ccpn.core.Model.ModelData</em>, <em>immutable</em> - 
 Model data pandas object - a view on the data in the StructureEnsemble.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Model.Model.delete">
+<code class="descname">delete</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Model.html#Model.delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Model.Model.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete should notify structureEnsemble of a delete.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -1426,7 +1488,7 @@ StructureEnsemble containing Model.</p>
 <p>Once created, a ModelData object <em>should</em> behave exactly like an Ensemble.
 If it doesn&#8217;t, please report it as a bug.</p>
 <p>Note that ModelData objects are only valid when linked to an existing StructureEnsemble
-and that self._modelNumber must match</p>
+and that self._modelNumber must match.</p>
 </dd></dl>
 
 </div>
@@ -1445,13 +1507,13 @@ list of all possible assignment combinations (assignedNmrAtoms)</p>
 <dl class="method">
 <dt id="ccpn.core.Multiplet.Multiplet.addPeaks">
 <code class="descname">addPeaks</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Multiplet.html#Multiplet.addPeaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Multiplet.Multiplet.addPeaks" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add a peak or list of peaks to the Multiplet
+<dd><p>Add a peak or list of peaks to the Multiplet.
 The peaks must belong to the spectrum containing the multipletList.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>- single peak or list of peaks</strong> (<a class="reference internal" href="#ccpn.core.Multiplet.Multiplet.peaks" title="ccpn.core.Multiplet.Multiplet.peaks"><em>peaks</em></a>) &#8211; </td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>peaks</strong> &#8211; single peak or list of peaks as objects or pids.</td>
 </tr>
 </tbody>
 </table>
@@ -1483,13 +1545,6 @@ i.e. the width of the area that should be considered for integration, fitting, e
 <dt id="ccpn.core.Multiplet.Multiplet.className">
 <code class="descname">className</code><em class="property"> = 'Multiplet'</em><a class="headerlink" href="#ccpn.core.Multiplet.Multiplet.className" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.Multiplet.Multiplet.comment">
-<code class="descname">comment</code><a class="headerlink" href="#ccpn.core.Multiplet.Multiplet.comment" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str=None</em>, <em>mutable</em> - 
-Free-form text comment.</p>
-</dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Multiplet.Multiplet.constraintWeight">
@@ -1562,10 +1617,10 @@ List of peaks attached to the multiplet.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="ccpn.core.Multiplet.Multiplet.pointlimits">
-<code class="descname">pointlimits</code><a class="headerlink" href="#ccpn.core.Multiplet.Multiplet.pointlimits" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.core.Multiplet.Multiplet.pointLimits">
+<code class="descname">pointLimits</code><a class="headerlink" href="#ccpn.core.Multiplet.Multiplet.pointLimits" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>List[Tuple[float, float]]</em>, <em>mutable</em> - 
-pointlimits (in dimension order) of the multiplet.</p>
+pointLimits (in dimension order) of the multiplet.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -1582,16 +1637,23 @@ Peak position in ppm (or other relevant unit) in dimension order calculated as C
 Peak position error in ppm (or other relevant unit).</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="ccpn.core.Multiplet.Multiplet.ppmPositions">
+<code class="descname">ppmPositions</code><a class="headerlink" href="#ccpn.core.Multiplet.Multiplet.ppmPositions" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>Tuple[float, ...]=None</em>, <em>immutable</em> - 
+Peak position in ppm (or other relevant unit) in dimension order calculated as Center Of Mass.</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="ccpn.core.Multiplet.Multiplet.removePeaks">
 <code class="descname">removePeaks</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Multiplet.html#Multiplet.removePeaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Multiplet.Multiplet.removePeaks" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove a peak or list of peaks from the Multiplet
+<dd><p>Remove a peak or list of peaks from the Multiplet.
 The peaks must belong to the multiplet.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>- single peak or list of peaks</strong> (<a class="reference internal" href="#ccpn.core.Multiplet.Multiplet.peaks" title="ccpn.core.Multiplet.Multiplet.peaks"><em>peaks</em></a>) &#8211; </td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>peaks</strong> &#8211; single peak or list of peaks as objects or pids</td>
 </tr>
 </tbody>
 </table>
@@ -1652,13 +1714,6 @@ list of all possible assignment combinations (assignedNmrAtoms)</p>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ccpn.core.MultipletList.MultipletList.comment">
-<code class="descname">comment</code><a class="headerlink" href="#ccpn.core.MultipletList.MultipletList.comment" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>mutable</em> - 
-Free-form text comment</p>
-</dd></dl>
-
-<dl class="attribute">
 <dt id="ccpn.core.MultipletList.MultipletList.dataType">
 <code class="descname">dataType</code><a class="headerlink" href="#ccpn.core.MultipletList.MultipletList.dataType" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>str</em>, <em>mutable</em> - 
@@ -1701,7 +1756,9 @@ MultipletListViews showing Spectrum</p>
 <dl class="method">
 <dt id="ccpn.core.MultipletList.MultipletList.newMultiplet">
 <code class="descname">newMultiplet</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/MultipletList.html#MultipletList.newMultiplet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.MultipletList.MultipletList.newMultiplet" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a new Multiplet within a multipletList</p>
+<dd><p>Create a new Multiplet within a multipletList.</p>
+<p>See the Multiplet class for details.</p>
+<p>Optional keyword arguments can be passed in; see Multiplet._newMultiplet for details.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1712,12 +1769,11 @@ MultipletListViews showing Spectrum</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">new multiplet instance.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new Multiplet instance.</p>
 </td>
 </tr>
 </tbody>
 </table>
-<p>optional keyword arguments can be passed in; see Multiplet._newMultiplet for details.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -1799,14 +1855,15 @@ for NmrAtom NR:A.121.ALA.HA calling with sequenceCode=124 will assign to
 <dl class="attribute">
 <dt id="ccpn.core.NmrAtom.NmrAtom.assignedPeaks">
 <code class="descname">assignedPeaks</code><a class="headerlink" href="#ccpn.core.NmrAtom.NmrAtom.assignedPeaks" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>Tuple[ccpn.core.Peak.Peak]</em>, <em>immutable</em> - 
+<dd><p>- <em>Tuple[Peak]</em>, <em>immutable</em> - 
 All Peaks assigned to the NmrAtom</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="attribute">
 <dt id="ccpn.core.NmrAtom.NmrAtom.atom">
-<code class="descname">atom</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/NmrAtom.html#NmrAtom.atom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.NmrAtom.NmrAtom.atom" title="Permalink to this definition">¶</a></dt>
-<dd><p>Atom to which NmrAtom is assigned. NB resetting the atom will rename the NmrAtom</p>
+<code class="descname">atom</code><a class="headerlink" href="#ccpn.core.NmrAtom.NmrAtom.atom" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>&#8216;Atom&#8217;</em>, <em>immutable</em> - 
+Atom to which NmrAtom is assigned. NB resetting the atom will rename the NmrAtom</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -1829,13 +1886,6 @@ Returns ChemicalShift objects connected to NmrAtom</p>
 <code class="descname">className</code><em class="property"> = 'NmrAtom'</em><a class="headerlink" href="#ccpn.core.NmrAtom.NmrAtom.className" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
-<dt id="ccpn.core.NmrAtom.NmrAtom.comment">
-<code class="descname">comment</code><a class="headerlink" href="#ccpn.core.NmrAtom.NmrAtom.comment" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>mutable</em> - 
-Free-form text comment</p>
-</dd></dl>
-
 <dl class="method">
 <dt id="ccpn.core.NmrAtom.NmrAtom.deassign">
 <code class="descname">deassign</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/NmrAtom.html#NmrAtom.deassign"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.NmrAtom.NmrAtom.deassign" title="Permalink to this definition">¶</a></dt>
@@ -1853,7 +1903,7 @@ and cannot be changed later</p>
 <dl class="attribute">
 <dt id="ccpn.core.NmrAtom.NmrAtom.name">
 <code class="descname">name</code><a class="headerlink" href="#ccpn.core.NmrAtom.NmrAtom.name" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>immutable</em> - 
+<dd><p>- <em>str</em>, <em>mutable</em> - 
 Atom name string (e.g. &#8216;HA&#8217;)</p>
 </dd></dl>
 
@@ -1930,13 +1980,6 @@ Chain to which NmrChain is assigned</p>
 <code class="descname">className</code><em class="property"> = 'NmrChain'</em><a class="headerlink" href="#ccpn.core.NmrChain.NmrChain.className" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
-<dt id="ccpn.core.NmrChain.NmrChain.comment">
-<code class="descname">comment</code><a class="headerlink" href="#ccpn.core.NmrChain.NmrChain.comment" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>mutable</em> - 
-Free-form text comment</p>
-</dd></dl>
-
 <dl class="method">
 <dt id="ccpn.core.NmrChain.NmrChain.deassign">
 <code class="descname">deassign</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/NmrChain.html#NmrChain.deassign"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.NmrChain.NmrChain.deassign" title="Permalink to this definition">¶</a></dt>
@@ -1945,11 +1988,26 @@ Free-form text comment</p>
 
 <dl class="method">
 <dt id="ccpn.core.NmrChain.NmrChain.fetchNmrResidue">
-<code class="descname">fetchNmrResidue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.core.NmrChain.NmrChain.fetchNmrResidue" title="Permalink to this definition">¶</a></dt>
+<code class="descname">fetchNmrResidue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/NmrChain.html#NmrChain.fetchNmrResidue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.NmrChain.NmrChain.fetchNmrResidue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fetch NmrResidue with sequenceCode=sequenceCode and residueType=residueType,
 creating it if necessary.</p>
-<p>if sequenceCode is None will create a new NmrResidue</p>
-<p>if bool(residueType)  is False will return any existing NmrResidue that matches the sequenceCode</p>
+<p>if sequenceCode is None will create a new NmrResidue.</p>
+<p>if bool(residueType)  is False will return any existing NmrResidue that matches the sequenceCode.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sequenceCode</strong> &#8211; </li>
+<li><strong>residueType</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">an NmrResidue instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -1987,11 +2045,37 @@ NmrResidues belonging to NmrChain that are NOT defined relative to another NmrRe
 (sequenceCode ending in &#8216;-1&#8217;, &#8216;+1&#8217;, etc.) For connected NmrChains in sequential order, otherwise sorted by assignment</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="ccpn.core.NmrChain.NmrChain.name">
+<code class="descname">name</code><a class="headerlink" href="#ccpn.core.NmrChain.NmrChain.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>str</em>, <em>mutable</em> - 
+short form of name, used in Pid and to identify the NmrChain
+Names of the form &#8216;&#64;ijk&#8217; and &#8216;#ijk&#8217; (where ijk is an integers)
+are reserved and cannot be set. They can be obtained by the deassign command.
+Connected NmrChains (isConnected == True) always have canonical names of the form &#8216;#ijk&#8217;</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="ccpn.core.NmrChain.NmrChain.newNmrResidue">
-<code class="descname">newNmrResidue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.core.NmrChain.NmrChain.newNmrResidue" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create new NmrResidue within NmrChain.
-If NmrChain is connected, append the new NmrResidue to the end of the stretch.</p>
+<code class="descname">newNmrResidue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/NmrChain.html#NmrChain.newNmrResidue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.NmrChain.NmrChain.newNmrResidue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new NmrResidue within NmrChain.</p>
+<p>If NmrChain is connected, append the new NmrResidue to the end of the stretch.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sequenceCode</strong> &#8211; </li>
+<li><strong>residueType</strong> &#8211; </li>
+<li><strong>comment</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new NmrResidue instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -2060,7 +2144,8 @@ Connected NmrChains (isConnected == True) always have canonical names of the for
 </div>
 <div class="section" id="ccpn-core-nmrresidue-module">
 <h2>ccpn.core.NmrResidue module<a class="headerlink" href="#ccpn-core-nmrresidue-module" title="Permalink to this headline">¶</a></h2>
-<span class="target" id="module-ccpn.core.NmrResidue"></span><dl class="class">
+<span class="target" id="module-ccpn.core.NmrResidue"></span><p>Module documentation here</p>
+<dl class="class">
 <dt id="ccpn.core.NmrResidue.NmrResidue">
 <em class="property">class </em><code class="descclassname">ccpn.core.NmrResidue.</code><code class="descname">NmrResidue</code><a class="reference internal" href="../_modules/ccpn/core/NmrResidue.html#NmrResidue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.NmrResidue.NmrResidue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
@@ -2075,17 +2160,14 @@ Setting the NmrResidue sequenceCode to None will revert to this default name.</p
 NmrResidue i-1 relative to NmrResidue &#64;5.&#64;185.ALA would be named &#64;5.&#64;185-1.VAL. Reassigning
 NR:&#64;5.&#64;185.ALA to NR:B.do1.ALA or NR:B.125.THR, would cause the offset NmrResidue
 to be reassigned to NR:B.do1-1.VAL or NR:B.125-1.VAL, respectively. Offsets can be any integer
-(including &#8216;+0&#8217;.</p>
+(including &#8216;+0&#8217;).</p>
 <p>NmrResidues that are not offset can be linked into consecutive stretches by putting them
 into connected NmrChains (see NmrChain).</p>
 <p>NmrResidue objects behave in there different ways when sorted:</p>
 <blockquote>
 <div><ul class="simple">
 <li>If they are assigned to a Residue they sort like the Residue, in sequential order</li>
-<li>If they belong to a connected NmrChain, they sort by the order they appear in the</li>
-</ul>
-<p>NmrChain.</p>
-<ul class="simple">
+<li>If they belong to a connected NmrChain, they sort by the order they appear in the NmrChain.</li>
 <li>In other 4cases they sort by creation order.</li>
 <li>Offset NmrResidues in all cases sort alongside their main NmrResidue, by offset.</li>
 </ul>
@@ -2115,13 +2197,6 @@ will cause an error. Use moveToNmrChain(newNmrChainOrPid) instead</p>
 <code class="descname">className</code><em class="property"> = 'NmrResidue'</em><a class="headerlink" href="#ccpn.core.NmrResidue.NmrResidue.className" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
-<dt id="ccpn.core.NmrResidue.NmrResidue.comment">
-<code class="descname">comment</code><a class="headerlink" href="#ccpn.core.NmrResidue.NmrResidue.comment" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>mutable</em> - 
-Free-form text comment</p>
-</dd></dl>
-
 <dl class="method">
 <dt id="ccpn.core.NmrResidue.NmrResidue.connectNext">
 <code class="descname">connectNext</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/NmrResidue.html#NmrResidue.connectNext"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.NmrResidue.NmrResidue.connectNext" title="Permalink to this definition">¶</a></dt>
@@ -2134,7 +2209,7 @@ will get back a &#8216;value&#8217; stretch with a new shortName</p>
 
 <dl class="method">
 <dt id="ccpn.core.NmrResidue.NmrResidue.connectPrevious">
-<code class="descname">connectPrevious</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span> &rarr; ccpn.core.NmrChain.NmrChain<a class="reference internal" href="../_modules/ccpn/core/NmrResidue.html#NmrResidue.connectPrevious"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.NmrResidue.NmrResidue.connectPrevious" title="Permalink to this definition">¶</a></dt>
+<code class="descname">connectPrevious</code><span class="sig-paren">(</span><em>nmrResidue=None</em><span class="sig-paren">)</span> &rarr; ccpn.core.NmrChain.NmrChain<a class="reference internal" href="../_modules/ccpn/core/NmrResidue.html#NmrResidue.connectPrevious"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.NmrResidue.NmrResidue.connectPrevious" title="Permalink to this definition">¶</a></dt>
 <dd><p>Connect free end of self to free end of previous residue in sequence,
 and return resulting connected NmrChain</p>
 <p>Raises error if self is assigned, or if either self or value is offset.</p>
@@ -2152,6 +2227,12 @@ will get back a &#8216;value&#8217; stretch with a new shortName</p>
 <dt id="ccpn.core.NmrResidue.NmrResidue.deassignNmrChain">
 <code class="descname">deassignNmrChain</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/NmrResidue.html#NmrResidue.deassignNmrChain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.NmrResidue.NmrResidue.deassignNmrChain" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.NmrResidue.NmrResidue.delete">
+<code class="descname">delete</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/NmrResidue.html#NmrResidue.delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.NmrResidue.NmrResidue.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete routine to check whether the item can be deleted otherwise raise api error.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.NmrResidue.NmrResidue.disconnect">
@@ -2175,8 +2256,18 @@ will get back a &#8216;value&#8217; stretch with a new shortName</p>
 
 <dl class="method">
 <dt id="ccpn.core.NmrResidue.NmrResidue.fetchNmrAtom">
-<code class="descname">fetchNmrAtom</code><span class="sig-paren">(</span><em>name: str</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.core.NmrResidue.NmrResidue.fetchNmrAtom" title="Permalink to this definition">¶</a></dt>
+<code class="descname">fetchNmrAtom</code><span class="sig-paren">(</span><em>name: str</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/NmrResidue.html#NmrResidue.fetchNmrAtom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.NmrResidue.NmrResidue.fetchNmrAtom" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fetch NmrAtom with name=name, creating it if necessary</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> &#8211; string name for new nmrAto if created</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new or existing nmrAtom</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -2212,9 +2303,28 @@ then renamed; consider moving to temporary chain first.</p>
 
 <dl class="method">
 <dt id="ccpn.core.NmrResidue.NmrResidue.newNmrAtom">
-<code class="descname">newNmrAtom</code><span class="sig-paren">(</span><em>name: str = None</em>, <em>isotopeCode: str = None</em>, <em>comment: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.NmrAtom.NmrAtom<a class="headerlink" href="#ccpn.core.NmrResidue.NmrResidue.newNmrAtom" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create new NmrAtom within NmrResidue. If name is None, use default name
-(of form e.g. <a class="reference external" href="mailto:'H&#37;&#52;&#48;211">'H<span>&#64;</span>211</a>&#8216;, <a class="reference external" href="mailto:'N&#37;&#52;&#48;45">'N<span>&#64;</span>45</a>&#8216;, ...)</p>
+<code class="descname">newNmrAtom</code><span class="sig-paren">(</span><em>name: str = None</em>, <em>isotopeCode: str = None</em>, <em>comment: str = None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/NmrResidue.html#NmrResidue.newNmrAtom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.NmrResidue.NmrResidue.newNmrAtom" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Create new NmrAtom within NmrResidue. If name is None, use default name</dt>
+<dd>(of form e.g. <a class="reference external" href="mailto:'H&#37;&#52;&#48;211">'H<span>&#64;</span>211</a>&#8216;, <a class="reference external" href="mailto:'N&#37;&#52;&#48;45">'N<span>&#64;</span>45</a>&#8216;, ...)</dd>
+</dl>
+<p>See the NmrAtom class for details</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> &#8211; string name of the new nmrAtom</li>
+<li><strong>isotopeCode</strong> &#8211; isotope code</li>
+<li><strong>comment</strong> &#8211; optional string comment</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new NmrAtom instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -2375,7 +2485,7 @@ Note last modification time</p>
 <dl class="attribute">
 <dt id="ccpn.core.Note.Note.name">
 <code class="descname">name</code><a class="headerlink" href="#ccpn.core.Note.Note.name" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>immutable</em> - 
+<dd><p>- <em>str</em>, <em>mutable</em> - 
 Name of note, part of identifier</p>
 </dd></dl>
 
@@ -2423,8 +2533,16 @@ either as a list of assignments for each dimension (dimensionNmrAtoms) or as a
 list of all possible assignment combinations (assignedNmrAtoms)</p>
 <dl class="method">
 <dt id="ccpn.core.Peak.Peak.addAssignment">
-<code class="descname">addAssignment</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Peak.html#Peak.addAssignment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Peak.Peak.addAssignment" title="Permalink to this definition">¶</a></dt>
+<code class="descname">addAssignment</code><span class="sig-paren">(</span><em>value: Sequence[]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Peak.html#Peak.addAssignment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Peak.Peak.addAssignment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a peak assignment - a list of one NmrAtom or Pid for each dimension</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.Peak.Peak.aliasing">
+<code class="descname">aliasing</code><a class="headerlink" href="#ccpn.core.Peak.Peak.aliasing" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>Tuple[float=None, ...]</em>, <em>mutable</em> - 
+Aliasing for the peak in each dimension.
+Defined as integer number of spectralWidths added or subtracted along each dimension</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -2520,16 +2638,9 @@ i.e. the width of the area that should be considered for integration, fitting, e
 <code class="descname">className</code><em class="property"> = 'Peak'</em><a class="headerlink" href="#ccpn.core.Peak.Peak.className" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
-<dt id="ccpn.core.Peak.Peak.comment">
-<code class="descname">comment</code><a class="headerlink" href="#ccpn.core.Peak.Peak.comment" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str=None</em>, <em>mutable</em> - 
-Free-form text comment.</p>
-</dd></dl>
-
 <dl class="method">
 <dt id="ccpn.core.Peak.Peak.copyTo">
-<code class="descname">copyTo</code><span class="sig-paren">(</span><em>targetPeakList: ccpn.core.PeakList.PeakList</em><span class="sig-paren">)</span> &rarr; ccpn.core.Peak.Peak<a class="reference internal" href="../_modules/ccpn/core/Peak.html#Peak.copyTo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Peak.Peak.copyTo" title="Permalink to this definition">¶</a></dt>
+<code class="descname">copyTo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Peak.html#Peak.copyTo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Peak.Peak.copyTo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make (and return) a copy of the Peak in targetPeakList.</p>
 </dd></dl>
 
@@ -2648,6 +2759,13 @@ Peak position in ppm (or other relevant unit) in dimension order.</p>
 Peak position error in ppm (or other relevant unit).</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="ccpn.core.Peak.Peak.ppmPositions">
+<code class="descname">ppmPositions</code><a class="headerlink" href="#ccpn.core.Peak.Peak.ppmPositions" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>Tuple[float, ...]</em>, <em>mutable</em> - 
+Peak position in ppm (or other relevant unit) in dimension order.</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="ccpn.core.Peak.Peak.reorderValues">
 <code class="descname">reorderValues</code><span class="sig-paren">(</span><em>values</em>, <em>newAxisCodeOrder</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Peak.html#Peak.reorderValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Peak.Peak.reorderValues" title="Permalink to this definition">¶</a></dt>
@@ -2671,7 +2789,7 @@ serial number of Peak, used in Pid and to identify the Peak.</p>
 
 <dl class="method">
 <dt id="ccpn.core.Peak.Peak.setInAxisOrder">
-<code class="descname">setInAxisOrder</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Peak.html#Peak.setInAxisOrder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Peak.Peak.setInAxisOrder" title="Permalink to this definition">¶</a></dt>
+<code class="descname">setInAxisOrder</code><span class="sig-paren">(</span><em>attributeName: str</em>, <em>values: Sequence[]</em>, <em>axisCodes: Sequence[] = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Peak.html#Peak.setInAxisOrder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Peak.Peak.setInAxisOrder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set attributeName from values in order defined by axisCodes
 (default order if None)</p>
 </dd></dl>
@@ -2684,7 +2802,7 @@ serial number of Peak, used in Pid and to identify the Peak.</p>
 
 <dl class="method">
 <dt id="ccpn.core.Peak.Peak.snapToExtremum">
-<code class="descname">snapToExtremum</code><span class="sig-paren">(</span><em>halfBoxSearchWidth: int = 2</em>, <em>halfBoxFitWidth: int = 2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Peak.html#Peak.snapToExtremum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Peak.Peak.snapToExtremum" title="Permalink to this definition">¶</a></dt>
+<code class="descname">snapToExtremum</code><span class="sig-paren">(</span><em>halfBoxSearchWidth: int = 4</em>, <em>halfBoxFitWidth: int = 2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Peak.html#Peak.snapToExtremum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Peak.Peak.snapToExtremum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Snap the Peak to the closest local extrema, if within range.</p>
 </dd></dl>
 
@@ -2711,22 +2829,22 @@ volume error of Peak.</p>
 <dt id="ccpn.core.PeakCluster.PeakCluster">
 <em class="property">class </em><code class="descclassname">ccpn.core.PeakCluster.</code><code class="descname">PeakCluster</code><a class="reference internal" href="../_modules/ccpn/core/PeakCluster.html#PeakCluster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakCluster.PeakCluster" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
-<p>PeakCluster object, holding position, intensity, and assignment information</p>
+<p>PeakCluster object, holding position, intensity, and assignment information.</p>
 <p>Measurements that require more than one NmrAtom for an individual assignment
 (such as  splittings, J-couplings, MQ dimensions, reduced-dimensionality
 experiments etc.) are not supported (yet). Assignments can be viewed and set
 either as a list of assignments for each dimension (dimensionNmrAtoms) or as a
-list of all possible assignment combinations (assignedNmrAtoms)</p>
+list of all possible assignment combinations (assignedNmrAtoms).</p>
 <dl class="method">
 <dt id="ccpn.core.PeakCluster.PeakCluster.addPeaks">
 <code class="descname">addPeaks</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakCluster.html#PeakCluster.addPeaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakCluster.PeakCluster.addPeaks" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add a peak or list of peaks to the peakCluster
+<dd><p>Add a peak or list of peaks to the peakCluster.
 The peaks must belong to the spectrum containing the multipletList.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>- single peak or list of peaks</strong> (<a class="reference internal" href="#ccpn.core.Multiplet.Multiplet.peaks" title="ccpn.core.Multiplet.Multiplet.peaks"><em>peaks</em></a>) &#8211; </td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>peaks</strong> &#8211; single peak or list of peaks, as objects or pid strings.</td>
 </tr>
 </tbody>
 </table>
@@ -2754,7 +2872,7 @@ return number of peaks in the peakCluster</p>
 <dl class="attribute">
 <dt id="ccpn.core.PeakCluster.PeakCluster.peakClusterParent">
 <code class="descname">peakClusterParent</code><a class="headerlink" href="#ccpn.core.PeakCluster.PeakCluster.peakClusterParent" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>ccpn.core.Project.Project=None</em>, <em>immutable</em> - 
+<dd><p>- <em>Project=None</em>, <em>immutable</em> - 
 parent containing peakCluster.</p>
 </dd></dl>
 
@@ -2768,13 +2886,13 @@ List of peaks attached to the peakCluster</p>
 <dl class="method">
 <dt id="ccpn.core.PeakCluster.PeakCluster.removePeaks">
 <code class="descname">removePeaks</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakCluster.html#PeakCluster.removePeaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakCluster.PeakCluster.removePeaks" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove a peak or list of peaks from the peakCluster
-The peaks must belong to the multiplet.</p>
+<dd><p>Remove a peak or list of peaks from the peakCluster.
+The peaks must belong to the peakCluster.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>- single peak or list of peaks</strong> (<a class="reference internal" href="#ccpn.core.Multiplet.Multiplet.peaks" title="ccpn.core.Multiplet.Multiplet.peaks"><em>peaks</em></a>) &#8211; </td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>peaks</strong> &#8211; single peak or list of peaks, as objects or pid strings.</td>
 </tr>
 </tbody>
 </table>
@@ -2816,18 +2934,18 @@ ChemicalShiftList associated with PeakList.</p>
 <code class="descname">className</code><em class="property"> = 'PeakList'</em><a class="headerlink" href="#ccpn.core.PeakList.PeakList.className" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
-<dt id="ccpn.core.PeakList.PeakList.comment">
-<code class="descname">comment</code><a class="headerlink" href="#ccpn.core.PeakList.PeakList.comment" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>mutable</em> - 
-Free-form text comment</p>
+<dl class="method">
+<dt id="ccpn.core.PeakList.PeakList.copyTo">
+<code class="descname">copyTo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.copyTo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.copyTo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make (and return) a copy of the PeakList attached to targetSpectrum.</p>
+<p>Peaklist attributes can be passed in as keyword arguments</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="ccpn.core.PeakList.PeakList.copyTo">
-<code class="descname">copyTo</code><span class="sig-paren">(</span><em>targetSpectrum: ccpn.core.Spectrum.Spectrum</em>, <em>**kwargs</em><span class="sig-paren">)</span> &rarr; ccpn.core.PeakList.PeakList<a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.copyTo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.copyTo" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make (and return) a copy of the PeakList attached to targetSpectrum</p>
-<p>Peaklist attributes can be passed in as keyword arguments</p>
+<dt id="ccpn.core.PeakList.PeakList.fitExistingPeaks">
+<code class="descname">fitExistingPeaks</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.fitExistingPeaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.fitExistingPeaks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Refit the current selected peaks.
+Must be called with opeaks that belong to this peakList</p>
 </dd></dl>
 
 <dl class="method">
@@ -2846,31 +2964,59 @@ True if this PeakList is simulated.</p>
 <dl class="method">
 <dt id="ccpn.core.PeakList.PeakList.newPeak">
 <code class="descname">newPeak</code><span class="sig-paren">(</span><em>ppmPositions: Sequence[] = ()</em>, <em>height: float = None</em>, <em>comment: str = None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.newPeak"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.newPeak" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a new Peak within a peakList</p>
-<p>See the Peak class for details</p>
+<dd><p>Create a new Peak within a peakList.</p>
+<p>See the Peak class for details.</p>
+<p>Optional keyword arguments can be passed in; see Peak._newPeak for details.</p>
+<p>NB you must create the peak before you can assign it. The assignment attributes are:
+- assignments (assignedNmrAtoms) - A tuple of all (e.g.) assignment triplets for a 3D spectrum
+- assignmentsByDimensions (dimensionNmrAtoms) - A tuple of tuples of assignments, one for each dimension</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>ppmPositions</strong> &#8211; peak position in ppm for each dimension (related attributes: positionError, pointPosition)</li>
 <li><strong>height</strong> &#8211; height of the peak (related attributes: volume, volumeError, lineWidths)</li>
 <li><strong>comment</strong> &#8211; optional comment string</li>
 </ul>
 </td>
 </tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new Peak instance.</p>
+</td>
+</tr>
 </tbody>
 </table>
-<p>:return peak instance</p>
-<p>optional keyword arguments can be passed in; see Peak._newPeak for details.</p>
-<p>NB you must create the peak before you can assign it. The assignment attributes are:
-- assignments (assignedNmrAtoms) - A tuple of all (e.g.) assignment triplets for a 3D spectrum
-- assignmentsByDimensions (dimensionNmrAtoms) - A tuple of tuples of assignments, one for each dimension</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.PeakList.PeakList.newPickedPeak">
+<code class="descname">newPickedPeak</code><span class="sig-paren">(</span><em>pointPositions: Sequence[] = None</em>, <em>height: float = None</em>, <em>lineWidths: Sequence[] = ()</em>, <em>fitMethod: str = 'parabolic'</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.newPickedPeak"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.newPickedPeak" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new Peak within a peakList from a picked peak</p>
+<p>See the Peak class for details.</p>
+<p>Optional keyword arguments can be passed in; see Peak._newPickedPeak for details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>height</strong> &#8211; height of the peak (related attributes: volume, volumeError, lineWidths)</li>
+<li><strong>pointPositions</strong> &#8211; peak position in points for each dimension (related attributes: positionError, pointPosition)</li>
+<li><strong>fitMethod</strong> &#8211; type of curve fitting</li>
+<li><strong>lineWidths</strong> &#8211; </li>
+<li><strong>serial</strong> &#8211; optional serial number.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new Peak instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.PeakList.PeakList.peakFinder1D">
-<code class="descname">peakFinder1D</code><span class="sig-paren">(</span><em>deltaFactor=1.5, ignoredRegions=[[20, 19]], negativePeaks=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.peakFinder1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.peakFinder1D" title="Permalink to this definition">¶</a></dt>
+<code class="descname">peakFinder1D</code><span class="sig-paren">(</span><em>maxNoiseLevel=None, minNoiseLevel=None, ignoredRegions=[[20, 19]], negativePeaks=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.peakFinder1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.peakFinder1D" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -2895,17 +3041,17 @@ PeakListViews showing Spectrum</p>
 <dl class="method">
 <dt id="ccpn.core.PeakList.PeakList.pickPeaks1dFiltered">
 <code class="descname">pickPeaks1dFiltered</code><span class="sig-paren">(</span><em>size: int = 9</em>, <em>mode: str = 'wrap'</em>, <em>factor=2</em>, <em>excludeRegions=None</em>, <em>positiveNoiseThreshold=None</em>, <em>negativeNoiseThreshold=None</em>, <em>negativePeaks=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.pickPeaks1dFiltered"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.pickPeaks1dFiltered" title="Permalink to this definition">¶</a></dt>
-<dd><p>Pick 1D peaks form data in  self.spectrum</p>
+<dd><p>Pick 1D peaks from data in self.spectrum.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.PeakList.PeakList.pickPeaksNd">
-<code class="descname">pickPeaksNd</code><span class="sig-paren">(</span><em>regionToPick: Sequence[] = None</em>, <em>doPos: bool = True</em>, <em>doNeg: bool = True</em>, <em>fitMethod: str = 'gaussian'</em>, <em>excludedRegions=None</em>, <em>excludedDiagonalDims=None</em>, <em>excludedDiagonalTransform=None</em>, <em>minDropfactor: float = 0.1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.pickPeaksNd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.pickPeaksNd" title="Permalink to this definition">¶</a></dt>
+<code class="descname">pickPeaksNd</code><span class="sig-paren">(</span><em>regionToPick: Sequence[] = None</em>, <em>doPos: bool = True</em>, <em>doNeg: bool = True</em>, <em>fitMethod: str = 'gaussian'</em>, <em>excludedRegions=None</em>, <em>excludedDiagonalDims=None</em>, <em>excludedDiagonalTransform=None</em>, <em>minDropFactor: float = 0.1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.pickPeaksNd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.pickPeaksNd" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="ccpn.core.PeakList.PeakList.refit">
-<code class="descname">refit</code><span class="sig-paren">(</span><em>method: str = 'gaussian'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.refit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.refit" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.core.PeakList.PeakList.pickPeaksRegion">
+<code class="descname">pickPeaksRegion</code><span class="sig-paren">(</span><em>regionToPick: dict = {}</em>, <em>doPos: bool = True</em>, <em>doNeg: bool = True</em>, <em>minLinewidth=None</em>, <em>exclusionBuffer=None</em>, <em>minDropFactor: float = 0.1</em>, <em>checkAllAdjacent: bool = True</em>, <em>fitMethod: str = 'parabolic'</em>, <em>excludedRegions=None</em>, <em>excludedDiagonalDims=None</em>, <em>excludedDiagonalTransform=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.pickPeaksRegion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.pickPeaksRegion" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2942,7 +3088,7 @@ Spectrum containing Peaklist.</p>
 
 <dl class="method">
 <dt id="ccpn.core.PeakList.PeakList.subtractPeakLists">
-<code class="descname">subtractPeakLists</code><span class="sig-paren">(</span><em>peakList2: ccpn.core.PeakList.PeakList</em><span class="sig-paren">)</span> &rarr; ccpn.core.PeakList.PeakList<a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.subtractPeakLists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.subtractPeakLists" title="Permalink to this definition">¶</a></dt>
+<code class="descname">subtractPeakLists</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.subtractPeakLists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.subtractPeakLists" title="Permalink to this definition">¶</a></dt>
 <dd><p>Subtracts peaks in peakList2 from peaks in peakList1, based on position,
 and puts those in a new peakList3.  Assumes a common spectrum for now.</p>
 </dd></dl>
@@ -2977,6 +3123,54 @@ title of PeakList (not used in PID).</p>
 
 </dd></dl>
 
+<dl class="function">
+<dt id="ccpn.core.PeakList.estimateNoiseLevel1D">
+<code class="descclassname">ccpn.core.PeakList.</code><code class="descname">estimateNoiseLevel1D</code><span class="sig-paren">(</span><em>y</em>, <em>f=10</em>, <em>stdFactor=0.5</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#estimateNoiseLevel1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.estimateNoiseLevel1D" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>y</strong> &#8211; the y region of the spectrum.</li>
+<li><strong>f</strong> &#8211; percentage of the spectrum to use. If given a portion known to be just noise, set it to 100.</li>
+<li><strong>increaseBySTD</strong> &#8211; increase the estimated by the STD for the y region</li>
+<li><strong>stdFactor</strong> &#8211; 0 to don&#8217;t adjust the initial guess.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">(float, float) of estimated noise threshold  as max and min</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.PeakList.estimateSNR_1D">
+<code class="descclassname">ccpn.core.PeakList.</code><code class="descname">estimateSNR_1D</code><span class="sig-paren">(</span><em>noiseLevels</em>, <em>signalPoints</em>, <em>ratio=2.5</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#estimateSNR_1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.estimateSNR_1D" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>noiseLevels</strong> &#8211; (max, min) floats</li>
+<li><strong>signalPoints</strong> &#8211; iterable of floats estimated to be signal or peak heights</li>
+<li><strong>ratio</strong> &#8211; default 2.5</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">array of snr for each point compared to the delta noise level</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.PeakList.estimateSignalRegion">
+<code class="descclassname">ccpn.core.PeakList.</code><code class="descname">estimateSignalRegion</code><span class="sig-paren">(</span><em>y</em>, <em>nlMax=None</em>, <em>nlMin=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#estimateSignalRegion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.estimateSignalRegion" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </div>
 <div class="section" id="ccpn-core-project-module">
 <h2>ccpn.core.Project module<a class="headerlink" href="#ccpn-core-project-module" title="Permalink to this headline">¶</a></h2>
@@ -2989,8 +3183,8 @@ navigating between them.</p>
 <p>There are eleven top-level data objects directly within a project, of which seven have child
 objects of their own, namely Spectrum, Sample, Chain, NmrChain, ChemicalShiftList, DataSet
 and StructureEnsemble. The child data objects are organised in a logical hierarchy; for example,
-a Spectrum has PeakLists, which in turn, are made up of Peaks, whereas a Chain is made up of
--Residues, which are made up of Atoms.</p>
+a Spectrum has PeakLists, which in turn, are made up of Peaks, whereas a Chain is made up of Residues,
+which are made up of Atoms.</p>
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.application">
 <code class="descname">application</code><a class="headerlink" href="#ccpn.core.Project.Project.application" title="Permalink to this definition">¶</a></dt>
@@ -3076,14 +3270,16 @@ so that command echoing (_startCommandBLock) does not set waypoints</p>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.createChain">
-<code class="descname">createChain</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.core.Project.Project.createChain" title="Permalink to this definition">¶</a></dt>
+<code class="descname">createChain</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.createChain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.createChain" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new chain from sequence of residue codes, using default variants.</p>
 <p>Automatically creates the corresponding polymer Substance if the compoundName is not already taken</p>
+<p>See the Chain class for details.</p>
+<p>Optional keyword arguments can be passed in; see Chain._createChain for details.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>sequence</strong> (<em>Sequence</em>) &#8211; string of one-letter codes or sequence of residue types</li>
 <li><strong>compoundName</strong> (<a class="reference internal" href="ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.str" title="ccpn.core.lib.Pid.Pid.str"><em>str</em></a>) &#8211; name of new Substance (e.g. &#8216;Lysozyme&#8217;) Defaults to &#8216;Molecule_n</li>
 <li><strong>molType</strong> (<a class="reference internal" href="ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.str" title="ccpn.core.lib.Pid.Pid.str"><em>str</em></a>) &#8211; molType (&#8216;protein&#8217;,&#8217;DNA&#8217;, &#8216;RNA&#8217;). Needed only if sequence is a string.</li>
@@ -3094,26 +3290,47 @@ so that command echoing (_startCommandBLock) does not set waypoints</p>
 </ul>
 </td>
 </tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new Chain instance.</p>
+</td>
+</tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.createDummySpectrum">
-<code class="descname">createDummySpectrum</code><span class="sig-paren">(</span><em>axisCodes: Sequence[]</em>, <em>name=None</em>, <em>chemicalShiftList=None</em><span class="sig-paren">)</span> &rarr; ccpn.core.Spectrum.Spectrum<a class="headerlink" href="#ccpn.core.Project.Project.createDummySpectrum" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make dummy spectrum from isotopeCodes list - without data and with default parameters</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.Project.Project.createPolymerSubstance">
-<code class="descname">createPolymerSubstance</code><span class="sig-paren">(</span><em>sequence: Sequence[]</em>, <em>name: str</em>, <em>labelling: str = None</em>, <em>userCode: str = None</em>, <em>smiles: str = None</em>, <em>synonyms: Sequence[] = ()</em>, <em>comment: str = None</em>, <em>startNumber: int = 1</em>, <em>molType: str = None</em>, <em>isCyclic: bool = False</em><span class="sig-paren">)</span> &rarr; ccpn.core.Substance.Substance<a class="headerlink" href="#ccpn.core.Project.Project.createPolymerSubstance" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make new Substance from sequence of residue codes, using default linking and variants</p>
-<p>NB: For more complex substances, you must use advanced, API-level commands.</p>
+<code class="descname">createDummySpectrum</code><span class="sig-paren">(</span><em>axisCodes: Sequence[]</em>, <em>name=None</em>, <em>chemicalShiftList=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.createDummySpectrum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.createDummySpectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make dummy spectrum from isotopeCodes list - without data and with default parameters.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>axisCodes</strong> &#8211; </li>
+<li><strong>name</strong> &#8211; </li>
+<li><strong>chemicalShiftList</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new Spectrum instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Project.Project.createPolymerSubstance">
+<code class="descname">createPolymerSubstance</code><span class="sig-paren">(</span><em>sequence: Sequence[]</em>, <em>name: str</em>, <em>labelling: str = None</em>, <em>userCode: str = None</em>, <em>smiles: str = None</em>, <em>synonyms: Sequence[] = ()</em>, <em>comment: str = None</em>, <em>startNumber: int = 1</em>, <em>molType: str = None</em>, <em>isCyclic: bool = False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.createPolymerSubstance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.createPolymerSubstance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make new Substance from sequence of residue codes, using default linking and variants</p>
+<p>NB: For more complex substances, you must use advanced, API-level commands.</p>
+<p>See the Substance class for details.</p>
+<p>Optional keyword arguments can be passed in; see Substance._fetchNefSubstance for details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>sequence</strong> (<em>Sequence</em>) &#8211; string of one-letter codes or sequence of residueNames</li>
 <li><strong>name</strong> (<a class="reference internal" href="ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.str" title="ccpn.core.lib.Pid.Pid.str"><em>str</em></a>) &#8211; name of new substance</li>
 <li><strong>labelling</strong> (<a class="reference internal" href="ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.str" title="ccpn.core.lib.Pid.Pid.str"><em>str</em></a>) &#8211; labelling for new substance. Optional - None means &#8216;natural abundance&#8217;</li>
@@ -3125,6 +3342,9 @@ so that command echoing (_startCommandBLock) does not set waypoints</p>
 <li><strong>molType</strong> (<a class="reference internal" href="ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.str" title="ccpn.core.lib.Pid.Pid.str"><em>str</em></a>) &#8211; molType (&#8216;protein&#8217;,&#8217;DNA&#8217;, &#8216;RNA&#8217;). Required only if sequence is a string.</li>
 <li><strong>isCyclic</strong> (<em>bool</em>) &#8211; Should substance created be cyclic?</li>
 </ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new Substance instance.</p>
 </td>
 </tr>
 </tbody>
@@ -3158,16 +3378,12 @@ and return the result</p>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.exportNef">
-<code class="descname">exportNef</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.exportNef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.exportNef" title="Permalink to this definition">¶</a></dt>
+<code class="descname">exportNef</code><span class="sig-paren">(</span><em>path: str = None</em>, <em>overwriteExisting: bool = False</em>, <em>skipPrefixes: Sequence[] = ()</em>, <em>expandSelection: bool = True</em>, <em>pidList: Sequence[] = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.exportNef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.exportNef" title="Permalink to this definition">¶</a></dt>
 <dd><p>Export selected contents of the project to a Nef file.</p>
-<blockquote>
-<div><p>skipPrefixes: ( &#8216;ccpn&#8217;, ..., &lt;str&gt; )
-expandSelection: &lt;bool&gt; }</p>
+<p>skipPrefixes: ( &#8216;ccpn&#8217;, ..., &lt;str&gt; )
+expandSelection: &lt;bool&gt;</p>
 <p>Include &#8216;ccpn&#8217; in the skipPrefixes list will exclude ccpn specific items from the file
-expandSelection = True  will include all data from the project, this may not be data that</p>
-<blockquote>
-<div>is not defined in the Nef standard.</div></blockquote>
-</div></blockquote>
+expandSelection = True; will include all data from the project, this may not be data that is not defined in the Nef standard.</p>
 <p>PidList is a list of &lt;str&gt;, e.g. &#8216;NC:&#64;-&#8216;, obtained from the objects to be included.
 The Nef file may also contain further dependent items associated with the pidList.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -3188,21 +3404,89 @@ The Nef file may also contain further dependent items associated with the pidLis
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.fetchNefSubstance">
-<code class="descname">fetchNefSubstance</code><span class="sig-paren">(</span><em>sequence: Sequence[]</em>, <em>name: str = None</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.core.Project.Project.fetchNefSubstance" title="Permalink to this definition">¶</a></dt>
+<code class="descname">fetchNefSubstance</code><span class="sig-paren">(</span><em>sequence: Sequence[]</em>, <em>name: str = None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.fetchNefSubstance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.fetchNefSubstance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fetch Substance that matches sequence of NEF rows and/or name</p>
+<p>See the Substance class for details.</p>
+<p>Optional keyword arguments can be passed in; see Substance._fetchNefSubstance for details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>self</strong> &#8211; </li>
+<li><strong>sequence</strong> &#8211; </li>
+<li><strong>name</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new Nef Substance instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.fetchNmrChain">
-<code class="descname">fetchNmrChain</code><span class="sig-paren">(</span><em>shortName: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.NmrChain.NmrChain<a class="headerlink" href="#ccpn.core.Project.Project.fetchNmrChain" title="Permalink to this definition">¶</a></dt>
+<code class="descname">fetchNmrChain</code><span class="sig-paren">(</span><em>shortName: str = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.fetchNmrChain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.fetchNmrChain" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fetch chain with given shortName; If none exists call newNmrChain to make one first</p>
 <p>If shortName is None returns a new NmrChain with name starting with &#8216;&#64;&#8217;</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>shortName</strong> &#8211; string name of required nmrAtom</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">an NmrChain instance.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.fetchSubstance">
-<code class="descname">fetchSubstance</code><span class="sig-paren">(</span><em>name: str</em>, <em>labelling: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.Substance.Substance<a class="headerlink" href="#ccpn.core.Project.Project.fetchSubstance" title="Permalink to this definition">¶</a></dt>
-<dd><p>get or create Substance with given name and labelling.</p>
+<code class="descname">fetchSubstance</code><span class="sig-paren">(</span><em>name: str</em>, <em>labelling: str = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.fetchSubstance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.fetchSubstance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get or create Substance with given name and labelling.</p>
+<p>See the Substance class for details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>self</strong> &#8211; </li>
+<li><strong>name</strong> &#8211; </li>
+<li><strong>labelling</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">new or existing Substance instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Project.Project.findMark">
+<code class="descname">findMark</code><span class="sig-paren">(</span><em>colour: str</em>, <em>positions: Sequence[]</em>, <em>axisCodes: Sequence[]</em>, <em>labels: Sequence[] = ()</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.findMark"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.findMark" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find existing Mark</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>colour</strong> (<a class="reference internal" href="ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.str" title="ccpn.core.lib.Pid.Pid.str"><em>str</em></a>) &#8211; Mark colour</li>
+<li><strong>positions</strong> (<em>tuple/list</em>) &#8211; Position in unit (default ppm) of all lines in the mark</li>
+<li><strong>axisCodes</strong> (<em>tuple/list</em>) &#8211; Axis codes for all lines in the mark</li>
+<li><strong>style</strong> (<a class="reference internal" href="ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.str" title="ccpn.core.lib.Pid.Pid.str"><em>str</em></a>) &#8211; Mark drawing style (dashed line etc.) default: full line (&#8216;simple&#8217;)</li>
+<li><strong>units</strong> (<em>tuple/list</em>) &#8211; Axis units for all lines in the mark, Default: all ppm</li>
+<li><strong>labels</strong> (<em>tuple/list</em>) &#8211; Ruler labels for all lines in the mark. Default: None</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>:return Mark instance</p>
 </dd></dl>
 
 <dl class="method">
@@ -3329,6 +3613,14 @@ The Nef file may also contain further dependent items associated with the pidLis
 <dt id="ccpn.core.Project.Project.getNote">
 <code class="descname">getNote</code><span class="sig-paren">(</span><em>relativeId: str</em><span class="sig-paren">)</span> &rarr; ccpn.core.Note.Note<a class="headerlink" href="#ccpn.core.Project.Project.getNote" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get contained &#8216;ccpn.core.Note.Note object by relative ID</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Project.Project.getObjectsById">
+<code class="descname">getObjectsById</code><span class="sig-paren">(</span><em>className: str</em>, <em>id: str</em><span class="sig-paren">)</span> &rarr; List[]<a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.getObjectsById"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.getObjectsById" title="Permalink to this definition">¶</a></dt>
+<dd><p>get objects from class name / shortName and the start of the ID.</p>
+<p>The function does NOT interrogate the API level, which makes it faster in a
+number fo cases, e.g. for NmrResidues</p>
 </dd></dl>
 
 <dl class="method">
@@ -3541,25 +3833,84 @@ name of Project</p>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.newChemicalShiftList">
-<code class="descname">newChemicalShiftList</code><span class="sig-paren">(</span><em>name: str = None</em>, <em>unit: str = 'ppm'</em>, <em>autoUpdate: bool = True</em>, <em>isSimulated: bool = False</em>, <em>serial: int = None</em>, <em>comment: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.ChemicalShiftList.ChemicalShiftList<a class="headerlink" href="#ccpn.core.Project.Project.newChemicalShiftList" title="Permalink to this definition">¶</a></dt>
+<code class="descname">newChemicalShiftList</code><span class="sig-paren">(</span><em>name: str = None</em>, <em>unit: str = 'ppm'</em>, <em>autoUpdate: bool = True</em>, <em>isSimulated: bool = False</em>, <em>comment: str = None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.newChemicalShiftList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.newChemicalShiftList" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new ChemicalShiftList.</p>
+<p>See the ChemicalShiftList class for details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> &#8211; </li>
+<li><strong>unit</strong> &#8211; </li>
+<li><strong>autoUpdate</strong> &#8211; </li>
+<li><strong>isSimulated</strong> &#8211; </li>
+<li><strong>comment</strong> &#8211; </li>
+<li><strong>serial</strong> &#8211; optional serial number.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new ChemicalShiftList instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.newComplex">
-<code class="descname">newComplex</code><span class="sig-paren">(</span><em>name: str</em>, <em>chains=()</em><span class="sig-paren">)</span> &rarr; ccpn.core.Complex.Complex<a class="headerlink" href="#ccpn.core.Project.Project.newComplex" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create new Complex</p>
+<code class="descname">newComplex</code><span class="sig-paren">(</span><em>name: str</em>, <em>chains=()</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.newComplex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.newComplex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new Complex.</p>
+<p>See the Complex class for details.</p>
+<p>Optional keyword arguments can be passed in; see Complex._newComplex for details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> &#8211; </li>
+<li><strong>chains</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new Complex instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.newDataSet">
-<code class="descname">newDataSet</code><span class="sig-paren">(</span><em>title: str = None</em>, <em>programName: str = None</em>, <em>programVersion: str = None</em>, <em>dataPath: str = None</em>, <em>creationDate: datetime.datetime = None</em>, <em>uuid: str = None</em>, <em>comment: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.DataSet.DataSet<a class="headerlink" href="#ccpn.core.Project.Project.newDataSet" title="Permalink to this definition">¶</a></dt>
+<code class="descname">newDataSet</code><span class="sig-paren">(</span><em>title: str = None</em>, <em>programName: str = None</em>, <em>programVersion: str = None</em>, <em>dataPath: str = None</em>, <em>creationDate: datetime.datetime = None</em>, <em>uuid: str = None</em>, <em>comment: str = None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.newDataSet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.newDataSet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new DataSet</p>
+<p>See the DataSet class for details.</p>
+<p>Optional keyword arguments can be passed in; see DataSet._newDataSet for details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>title</strong> &#8211; </li>
+<li><strong>programName</strong> &#8211; </li>
+<li><strong>programVersion</strong> &#8211; </li>
+<li><strong>dataPath</strong> &#8211; </li>
+<li><strong>creationDate</strong> &#8211; </li>
+<li><strong>uuid</strong> &#8211; </li>
+<li><strong>comment</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new DataSet instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.newMark">
-<code class="descname">newMark</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.newMark"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.newMark" title="Permalink to this definition">¶</a></dt>
+<code class="descname">newMark</code><span class="sig-paren">(</span><em>colour: str</em>, <em>positions: Sequence[]</em>, <em>axisCodes: Sequence[]</em>, <em>style: str = 'simple'</em>, <em>units: Sequence[] = ()</em>, <em>labels: Sequence[] = ()</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.newMark"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.newMark" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new Mark</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -3583,18 +3934,21 @@ name of Project</p>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.newNmrChain">
-<code class="descname">newNmrChain</code><span class="sig-paren">(</span><em>shortName: str = None</em>, <em>isConnected: bool = False</em>, <em>label: str = '?'</em>, <em>comment: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.NmrChain.NmrChain<a class="headerlink" href="#ccpn.core.Project.Project.newNmrChain" title="Permalink to this definition">¶</a></dt>
+<code class="descname">newNmrChain</code><span class="sig-paren">(</span><em>shortName: str = None</em>, <em>isConnected: bool = False</em>, <em>label: str = '?'</em>, <em>comment: str = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.newNmrChain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.newNmrChain" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new NmrChain. Setting isConnected=True produces a connected NmrChain.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>shortName</strong> (<a class="reference internal" href="ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.str" title="ccpn.core.lib.Pid.Pid.str"><em>str</em></a>) &#8211; shortName for new nmrChain (optional, defaults to <a class="reference external" href="mailto:'&#37;&#52;&#48;ijk">'<span>&#64;</span>ijk</a>&#8216; or &#8216;#ijk&#8217;,  ijk positive integer</li>
 <li><strong>isConnected</strong> (<em>bool</em>) &#8211; (default to False) If true the NmrChain is a connected stretch. This can NOT be changed later</li>
 <li><strong>label</strong> (<a class="reference internal" href="ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.str" title="ccpn.core.lib.Pid.Pid.str"><em>str</em></a>) &#8211; Modifiable NmrChain identifier that does not change with reassignment. Defaults to <a class="reference external" href="mailto:'&#37;&#52;&#48;ijk'/'#ijk">'<span>&#64;</span>ijk'/'#ijk</a>&#8216;</li>
 <li><strong>comment</strong> (<a class="reference internal" href="ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.str" title="ccpn.core.lib.Pid.Pid.str"><em>str</em></a>) &#8211; comment for new nmrChain (optional)</li>
 </ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new NmrChain instance.</p>
 </td>
 </tr>
 </tbody>
@@ -3603,52 +3957,202 @@ name of Project</p>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.newNote">
-<code class="descname">newNote</code><span class="sig-paren">(</span><em>name: str = 'Note'</em>, <em>text: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.Note.Note<a class="headerlink" href="#ccpn.core.Project.Project.newNote" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create new Note</p>
+<code class="descname">newNote</code><span class="sig-paren">(</span><em>name: str = None</em>, <em>text: str = None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.newNote"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.newNote" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new Note.</p>
+<p>See the Note class for details.</p>
+<p>Optional keyword arguments can be passed in; see Note._newNote for details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> &#8211; name for the note.</li>
+<li><strong>text</strong> &#8211; contents of the note.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new Note instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.newPeakCluster">
-<code class="descname">newPeakCluster</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.core.Project.Project.newPeakCluster" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create new PeakCluster within peakClusterList</p>
+<code class="descname">newPeakCluster</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.newPeakCluster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.newPeakCluster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new PeakCluster.</p>
+<p>See the PeakCluster class for details.</p>
+<p>Optional keyword arguments can be passed in; see PeakCluster._newPeakCluster for details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>peaks</strong> &#8211; optional list of peaks as objects or pids.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a new PeakCluster instance.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.newSample">
-<code class="descname">newSample</code><span class="sig-paren">(</span><em>name: str = None</em>, <em>pH: float = None</em>, <em>ionicStrength: float = None</em>, <em>amount: float = None</em>, <em>amountUnit: str = None</em>, <em>isVirtual: bool = False</em>, <em>isHazardous: bool = None</em>, <em>creationDate: datetime.datetime = None</em>, <em>batchIdentifier: str = None</em>, <em>plateIdentifier: str = None</em>, <em>rowNumber: int = None</em>, <em>columnNumber: int = None</em>, <em>comment: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.Sample.Sample<a class="headerlink" href="#ccpn.core.Project.Project.newSample" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create new Sample</p>
+<code class="descname">newSample</code><span class="sig-paren">(</span><em>name: str = None</em>, <em>pH: float = None</em>, <em>ionicStrength: float = None</em>, <em>amount: float = None</em>, <em>amountUnit: str = None</em>, <em>isVirtual: bool = False</em>, <em>isHazardous: bool = None</em>, <em>creationDate: datetime.datetime = None</em>, <em>batchIdentifier: str = None</em>, <em>plateIdentifier: str = None</em>, <em>rowNumber: int = None</em>, <em>columnNumber: int = None</em>, <em>comment: str = None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.newSample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.newSample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new Sample.</p>
+<p>See the Sample class for details.</p>
+<p>Optional keyword arguments can be passed in; see Sample._newSample for details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> &#8211; </li>
+<li><strong>pH</strong> &#8211; </li>
+<li><strong>ionicStrength</strong> &#8211; </li>
+<li><strong>amount</strong> &#8211; </li>
+<li><strong>amountUnit</strong> &#8211; </li>
+<li><strong>isVirtual</strong> &#8211; </li>
+<li><strong>isHazardous</strong> &#8211; </li>
+<li><strong>creationDate</strong> &#8211; </li>
+<li><strong>batchIdentifier</strong> &#8211; </li>
+<li><strong>plateIdentifier</strong> &#8211; </li>
+<li><strong>rowNumber</strong> &#8211; </li>
+<li><strong>columnNumber</strong> &#8211; </li>
+<li><strong>comment</strong> &#8211; </li>
+<li><strong>serial</strong> &#8211; optional serial number.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new Sample instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.newSpectrum">
-<code class="descname">newSpectrum</code><span class="sig-paren">(</span><em>name: str</em><span class="sig-paren">)</span> &rarr; ccpn.core.Spectrum.Spectrum<a class="headerlink" href="#ccpn.core.Project.Project.newSpectrum" title="Permalink to this definition">¶</a></dt>
+<code class="descname">newSpectrum</code><span class="sig-paren">(</span><em>name: str</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.newSpectrum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.newSpectrum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creation of new Spectrum NOT IMPLEMENTED.
-Use Project.loadData or Project.createDummySpectrum instead</p>
+Use Project.loadData or Project.createDummySpectrum instead.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.newSpectrumDisplay">
-<code class="descname">newSpectrumDisplay</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.core.Project.Project.newSpectrumDisplay" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">newSpectrumDisplay</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.newSpectrumDisplay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.newSpectrumDisplay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new SpectrumDisplay</p>
+<p>See the SpectrumDisplay class for details.</p>
+<p>Optional keyword arguments can be passed in; see SpectrumDisplay._newSpectrumDisplay for details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>axisCodes</strong> &#8211; </li>
+<li><strong>stripDirection</strong> &#8211; </li>
+<li><strong>title</strong> &#8211; </li>
+<li><strong>window</strong> &#8211; </li>
+<li><strong>comment</strong> &#8211; </li>
+<li><strong>independentStrips</strong> &#8211; </li>
+<li><strong>nmrResidue</strong> &#8211; </li>
+<li><strong>serial</strong> &#8211; optional serial number.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new SpectrumDisplay instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.newSpectrumGroup">
-<code class="descname">newSpectrumGroup</code><span class="sig-paren">(</span><em>name: str</em>, <em>spectra=()</em><span class="sig-paren">)</span> &rarr; ccpn.core.SpectrumGroup.SpectrumGroup<a class="headerlink" href="#ccpn.core.Project.Project.newSpectrumGroup" title="Permalink to this definition">¶</a></dt>
+<code class="descname">newSpectrumGroup</code><span class="sig-paren">(</span><em>name: str</em>, <em>spectra=()</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.newSpectrumGroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.newSpectrumGroup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new SpectrumGroup</p>
+<p>See the SpectrumGroup class for details.</p>
+<p>Optional keyword arguments can be passed in; see SpectrumGroup._newSpectrumGroup for details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> &#8211; name for the new SpectrumGroup</li>
+<li><strong>spectra</strong> &#8211; optional list of spectra as objects or pids</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new SpectrumGroup instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.newStructureEnsemble">
-<code class="descname">newStructureEnsemble</code><span class="sig-paren">(</span><em>serial: int = None</em>, <em>name: str = None</em>, <em>data: ccpn.util.StructureData.EnsembleData = None</em>, <em>comment: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.StructureEnsemble.StructureEnsemble<a class="headerlink" href="#ccpn.core.Project.Project.newStructureEnsemble" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create new StructureEnsemble</p>
+<code class="descname">newStructureEnsemble</code><span class="sig-paren">(</span><em>name: str = None</em>, <em>data=None</em>, <em>comment: str = None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.newStructureEnsemble"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.newStructureEnsemble" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new StructureEnsemble.</p>
+<p>See the StructureEnsemble class for details.</p>
+<p>Optional keyword arguments can be passed in; see StructureEnsemble._newStructureEnsemble for details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> &#8211; new name for the StructureEnsemble.</li>
+<li><strong>data</strong> &#8211; Pandas dataframe.</li>
+<li><strong>comment</strong> &#8211; optional comment string</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new StructureEnsemble instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.newSubstance">
-<code class="descname">newSubstance</code><span class="sig-paren">(</span><em>name: str = None</em>, <em>labelling: str = None</em>, <em>substanceType: str = 'Molecule'</em>, <em>userCode: str = None</em>, <em>smiles: str = None</em>, <em>inChi: str = None</em>, <em>casNumber: str = None</em>, <em>empiricalFormula: str = None</em>, <em>molecularMass: float = None</em>, <em>comment: str = None</em>, <em>synonyms: Sequence[] = ()</em>, <em>atomCount: int = 0</em>, <em>bondCount: int = 0</em>, <em>ringCount: int = 0</em>, <em>hBondDonorCount: int = 0</em>, <em>hBondAcceptorCount: int = 0</em>, <em>polarSurfaceArea: float = None</em>, <em>logPartitionCoefficient: float = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.Substance.Substance<a class="headerlink" href="#ccpn.core.Project.Project.newSubstance" title="Permalink to this definition">¶</a></dt>
+<code class="descname">newSubstance</code><span class="sig-paren">(</span><em>name: str = None</em>, <em>labelling: str = None</em>, <em>substanceType: str = 'Molecule'</em>, <em>userCode: str = None</em>, <em>smiles: str = None</em>, <em>inChi: str = None</em>, <em>casNumber: str = None</em>, <em>empiricalFormula: str = None</em>, <em>molecularMass: float = None</em>, <em>comment: str = None</em>, <em>synonyms: Sequence[] = ()</em>, <em>atomCount: int = 0</em>, <em>bondCount: int = 0</em>, <em>ringCount: int = 0</em>, <em>hBondDonorCount: int = 0</em>, <em>hBondAcceptorCount: int = 0</em>, <em>polarSurfaceArea: float = None</em>, <em>logPartitionCoefficient: float = None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.newSubstance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.newSubstance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new substance WITHOUT storing the sequence internally
 (and hence not suitable for making chains). SubstanceType defaults to &#8216;Molecule&#8217;.</p>
 <p>ADVANCED alternatives are &#8216;Cell&#8217; and &#8216;Material&#8217;</p>
+<p>See the Substance class for details.</p>
+<p>Optional keyword arguments can be passed in; see Substance._newSubstance for details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> &#8211; </li>
+<li><strong>labelling</strong> &#8211; </li>
+<li><strong>substanceType</strong> &#8211; </li>
+<li><strong>userCode</strong> &#8211; </li>
+<li><strong>smiles</strong> &#8211; </li>
+<li><strong>inChi</strong> &#8211; </li>
+<li><strong>casNumber</strong> &#8211; </li>
+<li><strong>empiricalFormula</strong> &#8211; </li>
+<li><strong>molecularMass</strong> &#8211; </li>
+<li><strong>comment</strong> &#8211; </li>
+<li><strong>synonyms</strong> &#8211; </li>
+<li><strong>atomCount</strong> &#8211; </li>
+<li><strong>bondCount</strong> &#8211; </li>
+<li><strong>ringCount</strong> &#8211; </li>
+<li><strong>hBondDonorCount</strong> &#8211; </li>
+<li><strong>hBondAcceptorCount</strong> &#8211; </li>
+<li><strong>polarSurfaceArea</strong> &#8211; </li>
+<li><strong>logPartitionCoefficient</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new Substance instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -3659,17 +4163,22 @@ Use Project.loadData or Project.createDummySpectrum instead</p>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.newWindow">
-<code class="descname">newWindow</code><span class="sig-paren">(</span><em>title: str = None</em>, <em>position: tuple = ()</em>, <em>size: tuple = ()</em><span class="sig-paren">)</span> &rarr; ccpn.ui._implementation.Window.Window<a class="headerlink" href="#ccpn.core.Project.Project.newWindow" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create new child Window</p>
+<code class="descname">newWindow</code><span class="sig-paren">(</span><em>title: str = None</em>, <em>position: tuple = ()</em>, <em>size: tuple = ()</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.newWindow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.newWindow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new child Window.</p>
+<p>See the Window class for details.</p>
+<p>Optional keyword arguments can be passed in; see Window._newWindow for details.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>title</strong> (<a class="reference internal" href="ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.str" title="ccpn.core.lib.Pid.Pid.str"><em>str</em></a>) &#8211; window  title (optional, defaults to &#8216;W1&#8217;, &#8216;W2&#8217;, &#8216;W3&#8217;, ...</li>
-<li><strong>size</strong> (<em>tuple</em>) &#8211; x,y size for new window in integer pixels</li>
-<li><strong>position</strong> (<em>tuple</em>) &#8211; x,y position for new window in integer pixels</li>
+<li><strong>position</strong> (<em>tuple</em>) &#8211; x,y position for new window in integer pixels.</li>
+<li><strong>size</strong> (<em>tuple</em>) &#8211; x,y size for new window in integer pixels.</li>
 </ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new Window instance.</p>
 </td>
 </tr>
 </tbody>
@@ -3729,6 +4238,34 @@ path to directory containing Project</p>
 <dt id="ccpn.core.Project.Project.peaks">
 <code class="descname">peaks</code><a class="headerlink" href="#ccpn.core.Project.Project.peaks" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>(&#8216;ccpn.core.Peak.Peak,)</em>  - contained Peak objects in creation order. This may differ from the standard sorting order</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Project.Project.produceNmrAtom">
+<code class="descname">produceNmrAtom</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.produceNmrAtom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.produceNmrAtom" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Get chainCode, sequenceCode, residueType and atomName from dot-separated atomId or Pid</dt>
+<dd>or explicit parameters, and find or create an NmrAtom that matches
+Empty chainCode gets NmrChain:&#64;- ; empty sequenceCode get a new NmrResidue</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>atomId</strong> &#8211; </li>
+<li><strong>chainCode</strong> &#8211; </li>
+<li><strong>sequenceCode</strong> &#8211; </li>
+<li><strong>residueType</strong> &#8211; </li>
+<li><strong>name</strong> &#8211; new or existing nmrAtom, matching parameters</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -3988,13 +4525,6 @@ unit for transformed data using the reference (most commonly &#8216;ppm&#8217;)<
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ccpn.core.PseudoDimension.PseudoDimension.comment">
-<code class="descname">comment</code><a class="headerlink" href="#ccpn.core.PseudoDimension.PseudoDimension.comment" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>mutable</em> - 
-Free-form text comment</p>
-</dd></dl>
-
-<dl class="attribute">
 <dt id="ccpn.core.PseudoDimension.PseudoDimension.dimension">
 <code class="descname">dimension</code><a class="headerlink" href="#ccpn.core.PseudoDimension.PseudoDimension.dimension" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>int</em>, <em>immutable</em> - 
@@ -4092,13 +4622,6 @@ Chain containing residue.</p>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ccpn.core.Residue.Residue.comment">
-<code class="descname">comment</code><a class="headerlink" href="#ccpn.core.Residue.Residue.comment" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>mutable</em> - 
-Free-form text comment</p>
-</dd></dl>
-
-<dl class="attribute">
 <dt id="ccpn.core.Residue.Residue.configuration">
 <code class="descname">configuration</code><a class="headerlink" href="#ccpn.core.Residue.Residue.configuration" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>str=None</em>, <em>mutable</em> - 
@@ -4152,15 +4675,32 @@ unknown residue or to a cap, so that the linear polymer chain does not continue.
 
 <dl class="method">
 <dt id="ccpn.core.Residue.Residue.newAtom">
-<code class="descname">newAtom</code><span class="sig-paren">(</span><em>name: str</em>, <em>elementSymbol: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.Atom.Atom<a class="headerlink" href="#ccpn.core.Residue.Residue.newAtom" title="Permalink to this definition">¶</a></dt>
+<code class="descname">newAtom</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Residue.html#Residue.newAtom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Residue.Residue.newAtom" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new Atom within Residue. If elementSymbol is None, it is derived from the name</p>
+<p>See the Atom class for details.</p>
+<p>Optional keyword arguments can be passed in; see Atom._newAtom for details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> &#8211; </li>
+<li><strong>elementSymbol</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new Atom instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Residue.Residue.nextResidue">
 <code class="descname">nextResidue</code><a class="headerlink" href="#ccpn.core.Residue.Residue.nextResidue" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>&#8216;Residue&#8217;</em>, <em>immutable</em> - 
-Next sequentially connected Residue</p>
+<dd><p>- <em>Residue=None</em>, <em>immutable</em> - 
+Next residue in sequence, if any, otherwise None</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -4175,8 +4715,8 @@ So no notifiers on the link - notify on the NmrResidue rename instead.</p>
 <dl class="attribute">
 <dt id="ccpn.core.Residue.Residue.previousResidue">
 <code class="descname">previousResidue</code><a class="headerlink" href="#ccpn.core.Residue.Residue.previousResidue" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>&#8216;Residue&#8217;</em>, <em>immutable</em> - 
-Previous sequentially connected Residue</p>
+<dd><p>- <em>Residue=None</em>, <em>immutable</em> - 
+Previous residue in sequence, if any,otherwise None</p>
 </dd></dl>
 
 <dl class="method">
@@ -4265,13 +4805,6 @@ parabolic to linear potential</p>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ccpn.core.Restraint.Restraint.comment">
-<code class="descname">comment</code><a class="headerlink" href="#ccpn.core.Restraint.Restraint.comment" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>mutable</em> - 
-Free-form text comment</p>
-</dd></dl>
-
-<dl class="attribute">
 <dt id="ccpn.core.Restraint.Restraint.error">
 <code class="descname">error</code><a class="headerlink" href="#ccpn.core.Restraint.Restraint.error" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>float</em>, <em>mutable</em> - 
@@ -4300,8 +4833,35 @@ lowerLimit of restraint - consensus of all contributions or None</p>
 
 <dl class="method">
 <dt id="ccpn.core.Restraint.Restraint.newRestraintContribution">
-<code class="descname">newRestraintContribution</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.core.Restraint.Restraint.newRestraintContribution" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create new RestraintContribution within Restraint</p>
+<code class="descname">newRestraintContribution</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Restraint.html#Restraint.newRestraintContribution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Restraint.Restraint.newRestraintContribution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new RestraintContribution within Restraint.</p>
+<p>See the RestraintContribution class for details.</p>
+<p>Optional keyword arguments can be passed in; see RestraintContribution._newRestraintContribution for details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>targetValue</strong> &#8211; </li>
+<li><strong>error</strong> &#8211; </li>
+<li><strong>weight</strong> &#8211; </li>
+<li><strong>upperLimit</strong> &#8211; </li>
+<li><strong>lowerLimit</strong> &#8211; </li>
+<li><strong>additionalUpperLimit</strong> &#8211; </li>
+<li><strong>additionalLowerLimit</strong> &#8211; </li>
+<li><strong>scale</strong> &#8211; </li>
+<li><strong>isDistanceDependent</strong> &#8211; </li>
+<li><strong>combinationId</strong> &#8211; </li>
+<li><strong>restraintItems</strong> &#8211; </li>
+<li><strong>serial</strong> &#8211; optional serial number.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new RestraintContribution instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -4365,16 +4925,6 @@ Reference vector length, where applicable. (Mainly?) for Rdc</p>
 weight of restraint - consensus of all contributions or None</p>
 </dd></dl>
 
-</dd></dl>
-
-<dl class="function">
-<dt id="ccpn.core.Restraint.createSimpleRestraint">
-<code class="descclassname">ccpn.core.Restraint.</code><code class="descname">createSimpleRestraint</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Restraint.html#createSimpleRestraint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Restraint.createSimpleRestraint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a Restraint with a single RestraintContribution within the RestraintList.
-The function takes all the information needed and creates the RestraintContribution as
-well as the Restraint proper.</p>
-<p>This function should be used routinely, unless there is a need to create more complex
-Restraints.</p>
 </dd></dl>
 
 </div>
@@ -4534,21 +5084,42 @@ measurements or derived values (Rdc, J coupling, T1, T2, Chemical Shift, ...)</p
 <code class="descname">className</code><em class="property"> = 'RestraintList'</em><a class="headerlink" href="#ccpn.core.RestraintList.RestraintList.className" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
-<dt id="ccpn.core.RestraintList.RestraintList.comment">
-<code class="descname">comment</code><a class="headerlink" href="#ccpn.core.RestraintList.RestraintList.comment" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>mutable</em> - 
-Free-form text comment</p>
-</dd></dl>
-
 <dl class="method">
 <dt id="ccpn.core.RestraintList.RestraintList.createSimpleRestraint">
-<code class="descname">createSimpleRestraint</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.core.RestraintList.RestraintList.createSimpleRestraint" title="Permalink to this definition">¶</a></dt>
+<code class="descname">createSimpleRestraint</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/RestraintList.html#RestraintList.createSimpleRestraint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.RestraintList.RestraintList.createSimpleRestraint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a Restraint with a single RestraintContribution within the RestraintList.
 The function takes all the information needed and creates the RestraintContribution as
 well as the Restraint proper.</p>
 <p>This function should be used routinely, unless there is a need to create more complex
 Restraints.</p>
+<p>See the Restraint class for details.</p>
+<p>Optional keyword arguments can be passed in; see Restraint._createSimpleRestraint for details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>comment</strong> &#8211; </li>
+<li><strong>figureOfMerit</strong> &#8211; </li>
+<li><strong>peaks</strong> &#8211; </li>
+<li><strong>targetValue</strong> &#8211; </li>
+<li><strong>error</strong> &#8211; </li>
+<li><strong>weight</strong> &#8211; </li>
+<li><strong>upperLimit</strong> &#8211; </li>
+<li><strong>lowerLimit</strong> &#8211; </li>
+<li><strong>additionalUpperLimit</strong> &#8211; </li>
+<li><strong>additionalLowerLimit</strong> &#8211; </li>
+<li><strong>scale</strong> &#8211; </li>
+<li><strong>vectorLength</strong> &#8211; </li>
+<li><strong>restraintItems</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new simple Restraint instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -4582,17 +5153,36 @@ Freely settable for now - precise enumerations will eventually be introduced.</p
 <dl class="attribute">
 <dt id="ccpn.core.RestraintList.RestraintList.name">
 <code class="descname">name</code><a class="headerlink" href="#ccpn.core.RestraintList.RestraintList.name" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>immutable</em> - 
+<dd><p>- <em>str</em>, <em>mutable</em> - 
 name of Restraint List</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.RestraintList.RestraintList.newRestraint">
-<code class="descname">newRestraint</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.core.RestraintList.RestraintList.newRestraint" title="Permalink to this definition">¶</a></dt>
+<code class="descname">newRestraint</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/RestraintList.html#RestraintList.newRestraint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.RestraintList.RestraintList.newRestraint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new Restraint within RestraintList.</p>
 <p>ADVANCED: Note that you just create at least one RestraintContribution afterwards in order to
 have valid data. Use the simpler createSimpleRestraint instead, unless you have specific
-reasons for needing newRestraint</p>
+reasons for needing newRestraint.</p>
+<p>See the Restraint class for details.</p>
+<p>Optional keyword arguments can be passed in; see Restraint._newRestraint for details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>figureOfMerit</strong> &#8211; </li>
+<li><strong>comment</strong> &#8211; optional comment string</li>
+<li><strong>peaks</strong> &#8211; optional list of peaks as objects or pids</li>
+<li><strong>vectorLength</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new Restraint instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -4614,7 +5204,7 @@ Potential type for restraints</p>
 <dl class="method">
 <dt id="ccpn.core.RestraintList.RestraintList.rename">
 <code class="descname">rename</code><span class="sig-paren">(</span><em>value: str</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/RestraintList.html#RestraintList.rename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.RestraintList.RestraintList.rename" title="Permalink to this definition">¶</a></dt>
-<dd><p>rename RestraintList, changing its name and Pid.</p>
+<dd><p>Rename RestraintList, changing its name and Pid.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -4638,6 +5228,11 @@ Restraint type.</p>
 <p>Recommended types are Distance, Rdc, JCoupling, ChemicalShift, Csa, Dihedral, T1, T2, ...
 Freely settable for now - further enumerations will eventually be introduced.</p>
 </dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.RestraintList.RestraintList.restraintTypes">
+<code class="descname">restraintTypes</code><em class="property"> = ('Distance', 'Dihedral', 'Rdc', 'JCoupling', 'ChemicalShift', 'Csa', 'T1', 'T2', 'T1rho', 'pKa')</em><a class="headerlink" href="#ccpn.core.RestraintList.RestraintList.restraintTypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.RestraintList.RestraintList.restraints">
@@ -4760,13 +5355,6 @@ Column number on plate</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="ccpn.core.Sample.Sample.comment">
-<code class="descname">comment</code><a class="headerlink" href="#ccpn.core.Sample.Sample.comment" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>mutable</em> - 
-Free-form text comment</p>
-</dd></dl>
-
-<dl class="attribute">
 <dt id="ccpn.core.Sample.Sample.creationDate">
 <code class="descname">creationDate</code><a class="headerlink" href="#ccpn.core.Sample.Sample.creationDate" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>datetime.datetime</em>, <em>mutable</em> - 
@@ -4804,15 +5392,33 @@ Virtual samples serve as templates and may not be linked to Spectra</p>
 <dl class="attribute">
 <dt id="ccpn.core.Sample.Sample.name">
 <code class="descname">name</code><a class="headerlink" href="#ccpn.core.Sample.Sample.name" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>immutable</em> - 
+<dd><p>- <em>str</em>, <em>mutable</em> - 
 actual sample name</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.Sample.Sample.newSampleComponent">
-<code class="descname">newSampleComponent</code><span class="sig-paren">(</span><em>name: str = None</em>, <em>labelling: str = None</em>, <em>role: str = None</em>, <em>concentration: float = None</em>, <em>concentrationError: float = None</em>, <em>concentrationUnit: str = None</em>, <em>purity: float = None</em>, <em>comment: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.SampleComponent.SampleComponent<a class="headerlink" href="#ccpn.core.Sample.Sample.newSampleComponent" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create new SampleComponent within Sample</p>
-<p>Automatically creates the corresponding Substance if the name is not already taken</p>
+<code class="descname">newSampleComponent</code><span class="sig-paren">(</span><em>name: str = None</em>, <em>labelling: str = None</em>, <em>comment: str = None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Sample.html#Sample.newSampleComponent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Sample.Sample.newSampleComponent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new SampleComponent within Sample.</p>
+<p>Automatically creates the corresponding Substance if the name is not already taken.</p>
+<p>See the SampleComponent class for details.</p>
+<p>Optional keyword arguments can be passed in; see SampleComponent._newSampleComponent for details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> &#8211; </li>
+<li><strong>labelling</strong> &#8211; </li>
+<li><strong>comment</strong> &#8211; optional comment string</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new SampleComponent instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -4909,13 +5515,6 @@ ccpn.Chains that correspond to ccpn.SampleComponent (if defined)</p>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ccpn.core.SampleComponent.SampleComponent.comment">
-<code class="descname">comment</code><a class="headerlink" href="#ccpn.core.SampleComponent.SampleComponent.comment" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>mutable</em> - 
-Free-form text comment</p>
-</dd></dl>
-
-<dl class="attribute">
 <dt id="ccpn.core.SampleComponent.SampleComponent.concentration">
 <code class="descname">concentration</code><a class="headerlink" href="#ccpn.core.SampleComponent.SampleComponent.concentration" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>float</em>, <em>mutable</em> -</p>
@@ -4932,7 +5531,7 @@ Estimated Standard error of SampleComponent.concentration</p>
 <dt id="ccpn.core.SampleComponent.SampleComponent.concentrationUnit">
 <code class="descname">concentrationUnit</code><a class="headerlink" href="#ccpn.core.SampleComponent.SampleComponent.concentrationUnit" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>str</em>, <em>mutable</em> - 
-Unit of SampleComponent.concentration, one of: &#8216;Molar&#8217;, &#8216;g/L&#8217;, &#8216;L/L&#8217;, &#8216;mol/mol&#8217;, &#8216;g/g&#8217;</p>
+Unit of SampleComponent.concentration, one of: &#8216;Molar&#8217;, &#8216;g/L&#8217;, &#8216;L/L&#8217;, &#8216;mol/mol&#8217;, &#8216;g/g&#8217; , &#8216;eq&#8217;</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -5045,16 +5644,6 @@ path to the stored NMR data file.</p>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ccpn.core.Spectrum.Spectrum.PLANEDATACACHE">
-<code class="descname">PLANEDATACACHE</code><em class="property"> = '_planeDataCache'</em><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.PLANEDATACACHE" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.Spectrum.Spectrum.SLICEDATACACHE">
-<code class="descname">SLICEDATACACHE</code><em class="property"> = '_sliceDataCache'</em><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.SLICEDATACACHE" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
 <dt id="ccpn.core.Spectrum.Spectrum.acquisitionAxisCode">
 <code class="descname">acquisitionAxisCode</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.acquisitionAxisCode" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>str=None</em>, <em>mutable</em> - 
@@ -5114,13 +5703,6 @@ ccpn.ChemicalShiftList used for ccpn.Spectrum</p>
 <dt id="ccpn.core.Spectrum.Spectrum.className">
 <code class="descname">className</code><em class="property"> = 'Spectrum'</em><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.className" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.Spectrum.Spectrum.comment">
-<code class="descname">comment</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.comment" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>mutable</em> - 
-Free-form text comment</p>
-</dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Spectrum.Spectrum.complexStoredBy">
@@ -5194,7 +5776,7 @@ Systematic experiment type descriptor (CCPN system).</p>
 <dl class="attribute">
 <dt id="ccpn.core.Spectrum.Spectrum.filePath">
 <code class="descname">filePath</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.filePath" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>mutable</em> - 
+<dd><p>- <em>str=None</em>, <em>mutable</em> - 
 Absolute path to NMR data file.</p>
 </dd></dl>
 
@@ -5222,10 +5804,9 @@ Yields first 1D slice for nD</p>
 <dl class="method">
 <dt id="ccpn.core.Spectrum.Spectrum.getByAxisCodes">
 <code class="descname">getByAxisCodes</code><span class="sig-paren">(</span><em>attributeName: str</em>, <em>axisCodes: Sequence[] = None</em>, <em>exactMatch: bool = False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.getByAxisCodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.getByAxisCodes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return values defined by attributeName in order defined by axisCodes :
-(default order if None)</p>
-<blockquote>
-<div>perform a mapping if exactMatch=False (eg. &#8216;H&#8217; to &#8216;Hn&#8217;)</div></blockquote>
+<dd><p>Return values defined by attributeName in order defined by axisCodes:
+(default order if None).</p>
+<p>Perform a mapping if exactMatch=False (eg. &#8216;H&#8217; to &#8216;Hn&#8217;)</p>
 <p>NB: Use getByDimensions for dimensions (1..dimensionCount) based access</p>
 </dd></dl>
 
@@ -5240,7 +5821,7 @@ NB: Use getByAxisCodes for axisCode based access</p>
 <dl class="method">
 <dt id="ccpn.core.Spectrum.Spectrum.getHeight">
 <code class="descname">getHeight</code><span class="sig-paren">(</span><em>ppmPositions</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.getHeight"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.getHeight" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns the interpolated height at the ppm position</p>
+<dd><p>Returns the interpolated height at the ppm position</p>
 </dd></dl>
 
 <dl class="method">
@@ -5314,8 +5895,9 @@ Dimensionality must be &gt;= 2</p>
 
 <dl class="method">
 <dt id="ccpn.core.Spectrum.Spectrum.getPositionValue">
-<code class="descname">getPositionValue</code><span class="sig-paren">(</span><em>position</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.getPositionValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.getPositionValue" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">getPositionValue</code><span class="sig-paren">(</span><em>pointPosition</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.getPositionValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.getPositionValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the value nearest to the position given in points.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.Spectrum.Spectrum.getProjection">
@@ -5333,8 +5915,44 @@ return projected spectrum data array</p>
 
 <dl class="method">
 <dt id="ccpn.core.Spectrum.Spectrum.getRegionData">
-<code class="descname">getRegionData</code><span class="sig-paren">(</span><em>**axisDict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.getRegionData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.getRegionData" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the region of the spectrum data defined by the axis limits</p>
+<code class="descname">getRegionData</code><span class="sig-paren">(</span><em>exclusionBuffer=None</em>, <em>**axisDict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.getRegionData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.getRegionData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the region of the spectrum data defined by the axis limits.</p>
+<p>Axis limits are passed in as a dict containing the axis codes and the required limits.
+Each limit is defined as a key, value pair: (str, tuple),
+with the tuple supplied as (min,max) axis limits in ppm.</p>
+<p>For axisCodes that are not included, the limits will by taken from the aliasingLimits of the spectrum.</p>
+<p>Illegal axisCodes will raise an error.</p>
+<p>Example dict:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;Hn&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mf">7.0</span><span class="p">,</span> <span class="mf">9.0</span><span class="p">),</span>
+ <span class="s1">&#39;Nh&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">110</span><span class="p">,</span> <span class="mi">130</span><span class="p">)</span>
+ <span class="p">}</span>
+</pre></div>
+</div>
+<p>Example calling function:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">regionData</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">getRegionData</span><span class="p">(</span><span class="o">**</span><span class="n">limitsDict</span><span class="p">)</span>
+<span class="n">regionData</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">getRegionData</span><span class="p">(</span><span class="n">Hn</span><span class="o">=</span><span class="p">(</span><span class="mf">7.0</span><span class="p">,</span> <span class="mf">9.0</span><span class="p">),</span> <span class="n">Nh</span><span class="o">=</span><span class="p">(</span><span class="mi">110</span><span class="p">,</span> <span class="mi">130</span><span class="p">))</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>exclusionBuffer: defines the size to extend the region by in index units, e.g. [1, 1, 1]</dt>
+<dd>extends the region by 1 index point in all axes.
+Default is 1 in all axis directions.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>exclusionBuffer</strong> &#8211; array of int</li>
+<li><strong>axisDict</strong> &#8211; dict of axis limits</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">numpy data array</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -5361,7 +5979,7 @@ return projected spectrum data array</p>
 <dl class="attribute">
 <dt id="ccpn.core.Spectrum.Spectrum.headerSize">
 <code class="descname">headerSize</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.headerSize" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>int</em>, <em>immutable</em> - 
+<dd><p>- <em>int=None</em>, <em>immutable</em> - 
 File header size in bytes.</p>
 </dd></dl>
 
@@ -5411,6 +6029,14 @@ spectral intensities as NumPy array for 1D spectra</p>
 <code class="descname">isComplex</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.isComplex" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>Tuple[bool, ...]</em>, <em>mutable</em> - 
 Is dimension complex? -  per dimension</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.Spectrum.Spectrum.isValidPath">
+<code class="descname">isValidPath</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.isValidPath" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>bool</em>, <em>immutable</em> - 
+Return true if the spectrum currently points to an existent file.
+(contents of the file are not checked)</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -5477,7 +6103,7 @@ Type of value being measured, per dimension.</p>
 <dl class="attribute">
 <dt id="ccpn.core.Spectrum.Spectrum.name">
 <code class="descname">name</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.name" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>immutable</em> - 
+<dd><p>- <em>str</em>, <em>mutable</em> - 
 short form of name, used for id</p>
 </dd></dl>
 
@@ -5509,16 +6135,24 @@ number of negative contours to draw</p>
 level multiplier for negative contours</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="ccpn.core.Spectrum.Spectrum.negativeNoiseLevel">
+<code class="descname">negativeNoiseLevel</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.negativeNoiseLevel" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>float</em>, <em>mutable</em> - 
+Negative noise level value. Stored in Internal</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="ccpn.core.Spectrum.Spectrum.newIntegralList">
 <code class="descname">newIntegralList</code><span class="sig-paren">(</span><em>title: str = None</em>, <em>symbolColour: str = None</em>, <em>textColour: str = None</em>, <em>comment: str = None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.newIntegralList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.newIntegralList" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new IntegralList within Spectrum.</p>
-<p>See the IntegralList class for details</p>
+<p>See the IntegralList class for details.</p>
+<p>Optional keyword arguments can be passed in; see IntegralList._newIntegralList for details.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>self</strong> &#8211; </li>
 <li><strong>title</strong> &#8211; </li>
 <li><strong>symbolColour</strong> &#8211; </li>
@@ -5527,49 +6161,52 @@ level multiplier for negative contours</p>
 </ul>
 </td>
 </tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new IntegralList attached to the spectrum.</p>
+</td>
+</tr>
 </tbody>
 </table>
-<p>:return a new IntegralList attached to the spectrum.</p>
-<p>optional keyword arguments can be passed in; see IntegralList._newIntegralList for details.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.Spectrum.Spectrum.newMultipletList">
 <code class="descname">newMultipletList</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.newMultipletList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.newMultipletList" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create new MultipletList within Spectrum</p>
-<p>See the MultipletList class for details</p>
+<dd><p>Create new MultipletList within Spectrum.</p>
+<p>See the MultipletList class for details.</p>
+<p>Optional keyword arguments can be passed in; see MultipletList._newMultipletList for details.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>self</strong> &#8211; </li>
-<li><strong>title</strong> &#8211; </li>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>title</strong> &#8211; title string</li>
 <li><strong>symbolColour</strong> &#8211; </li>
 <li><strong>textColour</strong> &#8211; </li>
 <li><strong>lineColour</strong> &#8211; </li>
 <li><strong>multipletAveraging</strong> &#8211; </li>
-<li><strong>comment</strong> &#8211; </li>
-<li><strong>multiplets</strong> &#8211; </li>
+<li><strong>comment</strong> &#8211; optional comment string</li>
+<li><strong>multiplets</strong> &#8211; optional list of multiplets as objects or pids</li>
 </ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new MultipletList attached to the Spectrum.</p>
 </td>
 </tr>
 </tbody>
 </table>
-<p>:return a new MultipletList attached to the Spectrum.</p>
-<p>optional keyword arguments can be passed in; see MultipletList._newMultipletList for details.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.Spectrum.Spectrum.newPeakList">
 <code class="descname">newPeakList</code><span class="sig-paren">(</span><em>title: str = None</em>, <em>comment: str = None</em>, <em>isSimulated: bool = False</em>, <em>symbolStyle: str = None</em>, <em>symbolColour: str = None</em>, <em>textColour: str = None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.newPeakList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.newPeakList" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new empty PeakList within Spectrum</p>
-<p>See the PeakList class for details</p>
+<p>See the PeakList class for details.</p>
+<p>Optional keyword arguments can be passed in; see PeakList._newPeakList for details.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>title</strong> &#8211; </li>
 <li><strong>comment</strong> &#8211; </li>
 <li><strong>isSimulated</strong> &#8211; </li>
@@ -5579,22 +6216,76 @@ level multiplier for negative contours</p>
 </ul>
 </td>
 </tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new PeakList attached to the spectrum.</p>
+</td>
+</tr>
 </tbody>
 </table>
-<p>:return a new PeakList attached to the spectrum.</p>
-<p>optional keyword arguments can be passed in; see PeakList._newPeakList for details.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.Spectrum.Spectrum.newSpectrumHit">
-<code class="descname">newSpectrumHit</code><span class="sig-paren">(</span><em>substanceName: str</em>, <em>pointNumber: int = 0</em>, <em>pseudoDimensionNumber: int = 0</em>, <em>pseudoDimension: ccpn.core.PseudoDimension.PseudoDimension = None</em>, <em>figureOfMerit: float = None</em>, <em>meritCode: str = None</em>, <em>normalisedChange: float = None</em>, <em>isConfirmed: bool = None</em>, <em>concentration: float = None</em>, <em>concentrationError: float = None</em>, <em>concentrationUnit: str = None</em>, <em>comment: str = None</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.newSpectrumHit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create new SpectrumHit within Spectrum</p>
+<code class="descname">newSpectrumHit</code><span class="sig-paren">(</span><em>substanceName: str</em>, <em>pointNumber: int = 0</em>, <em>pseudoDimensionNumber: int = 0</em>, <em>pseudoDimension=None</em>, <em>figureOfMerit: float = None</em>, <em>meritCode: str = None</em>, <em>normalisedChange: float = None</em>, <em>isConfirmed: bool = None</em>, <em>concentration: float = None</em>, <em>concentrationError: float = None</em>, <em>concentrationUnit: str = None</em>, <em>comment: str = None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.newSpectrumHit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.newSpectrumHit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new SpectrumHit within Spectrum.</p>
+<p>See the SpectrumHit class for details.</p>
+<p>Optional keyword arguments can be passed in; see SpectrumHit._newSpectrumHit for details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>substanceName</strong> &#8211; </li>
+<li><strong>pointNumber</strong> &#8211; </li>
+<li><strong>pseudoDimensionNumber</strong> &#8211; </li>
+<li><strong>pseudoDimension</strong> &#8211; </li>
+<li><strong>figureOfMerit</strong> &#8211; </li>
+<li><strong>meritCode</strong> &#8211; </li>
+<li><strong>normalisedChange</strong> &#8211; </li>
+<li><strong>isConfirmed</strong> &#8211; </li>
+<li><strong>concentration</strong> &#8211; </li>
+<li><strong>concentrationError</strong> &#8211; </li>
+<li><strong>concentrationUnit</strong> &#8211; </li>
+<li><strong>comment</strong> &#8211; optional comment string</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new SpectrumHit instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.Spectrum.Spectrum.newSpectrumReference">
-<code class="descname">newSpectrumReference</code><span class="sig-paren">(</span><em>dimension: int</em>, <em>spectrometerFrequency: float</em>, <em>isotopeCodes: Sequence[]</em>, <em>axisCode: str = None</em>, <em>measurementType: str = 'Shift'</em>, <em>maxAliasedFrequency: float = None</em>, <em>minAliasedFrequency: float = None</em>, <em>foldingMode: str = None</em>, <em>axisUnit: str = None</em>, <em>referencePoint: float = 0.0</em>, <em>referenceValue: float = 0.0</em><span class="sig-paren">)</span> &rarr; ccpn.core.SpectrumReference.SpectrumReference<a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.newSpectrumReference" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create new SpectrumReference within Spectrum</p>
+<code class="descname">newSpectrumReference</code><span class="sig-paren">(</span><em>dimension: int</em>, <em>spectrometerFrequency: float</em>, <em>isotopeCodes: Sequence[]</em>, <em>axisCode: str = None</em>, <em>measurementType: str = 'Shift'</em>, <em>maxAliasedFrequency: float = None</em>, <em>minAliasedFrequency: float = None</em>, <em>foldingMode: str = None</em>, <em>axisUnit: str = None</em>, <em>referencePoint: float = 0.0</em>, <em>referenceValue: float = 0.0</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.newSpectrumReference"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.newSpectrumReference" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new SpectrumReference.</p>
+<p>See the SpectrumReference class for details.</p>
+<p>Optional keyword arguments can be passed in; see SpectrumReference._newSpectrumReference for details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dimension</strong> &#8211; </li>
+<li><strong>spectrometerFrequency</strong> &#8211; </li>
+<li><strong>isotopeCodes</strong> &#8211; </li>
+<li><strong>axisCode</strong> &#8211; </li>
+<li><strong>measurementType</strong> &#8211; </li>
+<li><strong>maxAliasedFrequency</strong> &#8211; </li>
+<li><strong>minAliasedFrequency</strong> &#8211; </li>
+<li><strong>foldingMode</strong> &#8211; </li>
+<li><strong>axisUnit</strong> &#8211; </li>
+<li><strong>referencePoint</strong> &#8211; </li>
+<li><strong>referenceValue</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new SpectrumReference instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -5720,7 +6411,7 @@ value used for axis (chemical shift) referencing, per dimension.</p>
 <dl class="method">
 <dt id="ccpn.core.Spectrum.Spectrum.rename">
 <code class="descname">rename</code><span class="sig-paren">(</span><em>value: str</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.rename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.rename" title="Permalink to this definition">¶</a></dt>
-<dd><p>Rename Spectrum, changing its name and Pid</p>
+<dd><p>Rename Spectrum, changing its name and Pid.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -5741,10 +6432,9 @@ Intensities and volumes should be <em>multiplied</em> by scale before comparison
 <dl class="method">
 <dt id="ccpn.core.Spectrum.Spectrum.setByAxisCodes">
 <code class="descname">setByAxisCodes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.setByAxisCodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.setByAxisCodes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set attributeName to values in order defined by axisCodes
+<dd><p>Set attributeName to values in order defined by axisCodes:
 (default order if None)</p>
-<blockquote>
-<div>perform a mapping if exactMatch=False (eg. &#8216;H&#8217; to &#8216;Hn&#8217;)</div></blockquote>
+<p>Perform a mapping if exactMatch=False (eg. &#8216;H&#8217; to &#8216;Hn&#8217;)</p>
 <p>NB: Use setByDimensions for dimensions (1..dimensionCount) based access</p>
 </dd></dl>
 
@@ -5874,13 +6564,18 @@ Always None for sampled dimensions.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="ccpn-core-spectrumgroup-module">
-<h2>ccpn.core.SpectrumGroup module<a class="headerlink" href="#ccpn-core-spectrumgroup-module" title="Permalink to this headline">¶</a></h2>
-<span class="target" id="module-ccpn.core.SpectrumGroup"></span><dl class="class">
+<div class="section" id="module-ccpn.core.SpectrumGroup">
+<span id="ccpn-core-spectrumgroup-module"></span><h2>ccpn.core.SpectrumGroup module<a class="headerlink" href="#module-ccpn.core.SpectrumGroup" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
 <dt id="ccpn.core.SpectrumGroup.SpectrumGroup">
-<em class="property">class </em><code class="descclassname">ccpn.core.SpectrumGroup.</code><code class="descname">SpectrumGroup</code><a class="reference internal" href="../_modules/ccpn/core/SpectrumGroup.html#SpectrumGroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.SpectrumGroup.SpectrumGroup" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.core.SpectrumGroup.</code><code class="descname">SpectrumGroup</code><span class="sig-paren">(</span><em>project</em>, <em>wrappedData</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/SpectrumGroup.html#SpectrumGroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.SpectrumGroup.SpectrumGroup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
 <p>Combines multiple Spectrum objects into a group, so they can be treated as a single object.</p>
+<dl class="attribute">
+<dt id="ccpn.core.SpectrumGroup.SpectrumGroup.SPECTRUM_ORDER">
+<code class="descname">SPECTRUM_ORDER</code><em class="property"> = 'spectrum_order'</em><a class="headerlink" href="#ccpn.core.SpectrumGroup.SpectrumGroup.SPECTRUM_ORDER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.core.SpectrumGroup.SpectrumGroup.className">
 <code class="descname">className</code><em class="property"> = 'SpectrumGroup'</em><a class="headerlink" href="#ccpn.core.SpectrumGroup.SpectrumGroup.className" title="Permalink to this definition">¶</a></dt>
@@ -5889,14 +6584,14 @@ Always None for sampled dimensions.</p>
 <dl class="attribute">
 <dt id="ccpn.core.SpectrumGroup.SpectrumGroup.name">
 <code class="descname">name</code><a class="headerlink" href="#ccpn.core.SpectrumGroup.SpectrumGroup.name" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>immutable</em> - 
+<dd><p>- <em>str</em>, <em>mutable</em> - 
 Name of SpectrumGroup, part of identifier</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.SpectrumGroup.SpectrumGroup.rename">
 <code class="descname">rename</code><span class="sig-paren">(</span><em>value: str</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/SpectrumGroup.html#SpectrumGroup.rename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.SpectrumGroup.SpectrumGroup.rename" title="Permalink to this definition">¶</a></dt>
-<dd><p>Rename SpectrumGroup, changing its name and Pid</p>
+<dd><p>Rename SpectrumGroup, changing its name and Pid.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -5937,13 +6632,6 @@ For this reason SpectrumHits cannot be renamed.</p>
 <dt id="ccpn.core.SpectrumHit.SpectrumHit.className">
 <code class="descname">className</code><em class="property"> = 'SpectrumHit'</em><a class="headerlink" href="#ccpn.core.SpectrumHit.SpectrumHit.className" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.SpectrumHit.SpectrumHit.comment">
-<code class="descname">comment</code><a class="headerlink" href="#ccpn.core.SpectrumHit.SpectrumHit.comment" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>mutable</em> - 
-Free-form text comment</p>
-</dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.SpectrumHit.SpectrumHit.concentration">
@@ -6057,6 +6745,16 @@ Name of hit substance</p>
 </dd></dl>
 
 </dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.SpectrumHit.scoreHit">
+<code class="descclassname">ccpn.core.SpectrumHit.</code><code class="descname">scoreHit</code><span class="sig-paren">(</span><em>heights</em>, <em>snr</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/SpectrumHit.html#scoreHit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.SpectrumHit.scoreHit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.SpectrumHit.scoreHit_tot">
+<code class="descclassname">ccpn.core.SpectrumHit.</code><code class="descname">scoreHit_tot</code><span class="sig-paren">(</span><em>heights</em>, <em>snr</em>, <em>shifts</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/SpectrumHit.html#scoreHit_tot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.SpectrumHit.scoreHit_tot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </div>
 <div class="section" id="ccpn-core-spectrumreference-module">
@@ -6228,13 +6926,6 @@ Spectrum containing spectrumReference.</p>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ccpn.core.StructureEnsemble.StructureEnsemble.comment">
-<code class="descname">comment</code><a class="headerlink" href="#ccpn.core.StructureEnsemble.StructureEnsemble.comment" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>mutable</em> - 
-Free-form text comment</p>
-</dd></dl>
-
-<dl class="attribute">
 <dt id="ccpn.core.StructureEnsemble.StructureEnsemble.data">
 <code class="descname">data</code><a class="headerlink" href="#ccpn.core.StructureEnsemble.StructureEnsemble.data" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>ccpn.util.StructureData.EnsembleData</em>, <em>mutable</em> - 
@@ -6259,21 +6950,38 @@ Changing the data by direct pandas access will not.</p>
 <dl class="attribute">
 <dt id="ccpn.core.StructureEnsemble.StructureEnsemble.name">
 <code class="descname">name</code><a class="headerlink" href="#ccpn.core.StructureEnsemble.StructureEnsemble.name" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>immutable</em> - 
+<dd><p>- <em>str</em>, <em>mutable</em> - 
 Name of StructureEnsemble, part of identifier</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.StructureEnsemble.StructureEnsemble.newModel">
-<code class="descname">newModel</code><span class="sig-paren">(</span><em>serial: int = None</em>, <em>label: str = None</em>, <em>comment: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.Model.Model<a class="headerlink" href="#ccpn.core.StructureEnsemble.StructureEnsemble.newModel" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create new Model</p>
+<code class="descname">newModel</code><span class="sig-paren">(</span><em>label: str = None</em>, <em>comment: str = None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/StructureEnsemble.html#StructureEnsemble.newModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.StructureEnsemble.StructureEnsemble.newModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new Model.</p>
+<p>See the Model class for details.</p>
+<p>Optional keyword arguments can be passed in; see Model._newModel for details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>label</strong> &#8211; new name for the model.</li>
+<li><strong>comment</strong> &#8211; optional comment string.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new Model instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.StructureEnsemble.StructureEnsemble.rename">
 <code class="descname">rename</code><span class="sig-paren">(</span><em>value: str</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/StructureEnsemble.html#StructureEnsemble.rename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.StructureEnsemble.StructureEnsemble.rename" title="Permalink to this definition">¶</a></dt>
-<dd><p>Rename StructureEnsemble, changing its name and Pid.</p>
-<p>NB, the serial remains immutable.</p>
+<dd><p>Rename StructureEnsemble, changing its name and Pid.
+NB, the serial remains immutable.</p>
 </dd></dl>
 
 <dl class="method">
@@ -6355,17 +7063,28 @@ ccpn.Chains that correspond to ccpn.Substance (if defined)</p>
 <dd><p>Clear specificAtomLabelling</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="ccpn.core.Substance.Substance.comment">
-<code class="descname">comment</code><a class="headerlink" href="#ccpn.core.Substance.Substance.comment" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>mutable</em> - 
-Free-form text comment</p>
-</dd></dl>
-
 <dl class="method">
 <dt id="ccpn.core.Substance.Substance.createChain">
-<code class="descname">createChain</code><span class="sig-paren">(</span><em>shortName: str = None</em>, <em>role: str = None</em>, <em>comment: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.Chain.Chain<a class="headerlink" href="#ccpn.core.Substance.Substance.createChain" title="Permalink to this definition">¶</a></dt>
+<code class="descname">createChain</code><span class="sig-paren">(</span><em>shortName: str = None</em>, <em>role: str = None</em>, <em>comment: str = None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Substance.html#Substance.createChain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Substance.Substance.createChain" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new Chain that matches Substance</p>
+<p>See the Chain class for details.</p>
+<p>Optional keyword arguments can be passed in; see Chain._createChainFromSubstance for details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>shortName</strong> &#8211; </li>
+<li><strong>role</strong> &#8211; </li>
+<li><strong>comment</strong> &#8211; optional comment string</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new Chain instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -6460,8 +7179,8 @@ also if the other chains have a different numbering.</p>
 <dt id="ccpn.core.Substance.Substance.rename">
 <code class="descname">rename</code><span class="sig-paren">(</span><em>name: str = None</em>, <em>labelling: str = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Substance.html#Substance.rename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Substance.Substance.rename" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rename Substance, changing its name and/or labelling and Pid, and rename
-SampleComponents and SpectrumHits with matching names. If name is None, the existing value w
-ill be used. Labelling &#8216;None&#8217;  means &#8216;Natural abundance&#8217;</p>
+SampleComponents and SpectrumHits with matching names. If name is None, the existing value
+will be used. Labelling &#8216;None&#8217;  means &#8216;Natural abundance&#8217;</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -6627,7 +7346,7 @@ User-defined compound code</p>
 <li><a class="reference internal" href="#ccpn-core-sample-module">ccpn.core.Sample module</a></li>
 <li><a class="reference internal" href="#ccpn-core-samplecomponent-module">ccpn.core.SampleComponent module</a></li>
 <li><a class="reference internal" href="#ccpn-core-spectrum-module">ccpn.core.Spectrum module</a></li>
-<li><a class="reference internal" href="#ccpn-core-spectrumgroup-module">ccpn.core.SpectrumGroup module</a></li>
+<li><a class="reference internal" href="#module-ccpn.core.SpectrumGroup">ccpn.core.SpectrumGroup module</a></li>
 <li><a class="reference internal" href="#ccpn-core-spectrumhit-module">ccpn.core.SpectrumHit module</a></li>
 <li><a class="reference internal" href="#ccpn-core-spectrumreference-module">ccpn.core.SpectrumReference module</a></li>
 <li><a class="reference internal" href="#ccpn-core-structureensemble-module">ccpn.core.StructureEnsemble module</a></li>

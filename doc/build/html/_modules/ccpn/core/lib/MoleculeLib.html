@@ -53,23 +53,21 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:32 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
@@ -83,153 +81,158 @@
 <span class="kn">from</span> <span class="nn">ccpn.core.Chain</span> <span class="kn">import</span> <span class="n">Chain</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
 
+
 <span class="k">def</span> <span class="nf">_incrementedSequenceCode</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">seqOffset</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;get sequenceCode of Residue or NmrResidue incremented by seqOffset.</span>
+    <span class="sd">&quot;&quot;&quot;get sequenceCode of Residue or NmrResidue incremented by seqOffset.</span>
 
-<span class="sd">  Will raise ValueError if residue.seqCode is not set (i.e. there is no sequence number&quot;&quot;&quot;</span>
-  <span class="n">code</span><span class="p">,</span> <span class="n">ss</span><span class="p">,</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">parseSequenceCode</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">)</span>
-  <span class="n">sequenceCode</span> <span class="o">=</span> <span class="bp">None</span>
-  <span class="k">if</span> <span class="n">code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-    <span class="n">code</span> <span class="o">+=</span> <span class="n">seqOffset</span>
-    <span class="k">if</span> <span class="n">offset</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">sequenceCode</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span><span class="o">%</span> <span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">ss</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">sequenceCode</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s%+d</span><span class="s1">&#39;</span><span class="o">%</span> <span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">ss</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
-  <span class="c1">#</span>
-  <span class="k">return</span> <span class="n">sequenceCode</span>
+<span class="sd">    Will raise ValueError if residue.seqCode is not set (i.e. there is no sequence number&quot;&quot;&quot;</span>
+    <span class="n">code</span><span class="p">,</span> <span class="n">ss</span><span class="p">,</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">parseSequenceCode</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">)</span>
+    <span class="n">sequenceCode</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="n">code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">code</span> <span class="o">+=</span> <span class="n">seqOffset</span>
+        <span class="k">if</span> <span class="n">offset</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">sequenceCode</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">ss</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sequenceCode</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s%+d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">ss</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">sequenceCode</span>
 
 
-<div class="viewcode-block" id="duplicateAtomBonds"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.MoleculeLib.duplicateAtomBonds">[docs]</a><span class="k">def</span> <span class="nf">duplicateAtomBonds</span><span class="p">(</span><span class="n">chainMap</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="n">Chain</span><span class="p">,</span><span class="n">Chain</span><span class="p">]):</span>
-  <span class="sd">&quot;&quot;&quot;Duplicate atom-atom bonds within source chains to target chains,</span>
-<span class="sd">  skipping those that already exist.</span>
+<div class="viewcode-block" id="duplicateAtomBonds"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.MoleculeLib.duplicateAtomBonds">[docs]</a><span class="k">def</span> <span class="nf">duplicateAtomBonds</span><span class="p">(</span><span class="n">chainMap</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="n">Chain</span><span class="p">,</span> <span class="n">Chain</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;Duplicate atom-atom bonds within source chains to target chains,</span>
+<span class="sd">    skipping those that already exist.</span>
 
-<span class="sd">  Input is a map from source chains to corresponding target chains.</span>
+<span class="sd">    Input is a map from source chains to corresponding target chains.</span>
 
-<span class="sd">  Atoms are mapped on matching Pids (with different chain codes&quot;&quot;&quot;</span>
-  <span class="k">if</span> <span class="ow">not</span> <span class="n">chainMap</span><span class="p">:</span>
-    <span class="k">return</span>
-  <span class="n">project</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">chainMap</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_project</span>
-  <span class="n">apiMolSystem</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">molSystem</span>
+<span class="sd">    Atoms are mapped on matching Pids (with different chain codes&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">chainMap</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">chainMap</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_project</span>
+    <span class="n">apiMolSystem</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">molSystem</span>
 
-  <span class="c1"># Make source -&gt; target ApiAtom map and remove target atoms with no match in source</span>
-  <span class="n">apiAtomMap</span> <span class="o">=</span> <span class="p">{}</span>
-  <span class="k">for</span> <span class="n">source</span><span class="p">,</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">chainMap</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="n">cutat</span> <span class="o">=</span> <span class="mi">3</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">shortName</span><span class="p">)</span>  <span class="c1"># Cut after e.g. &#39;MA:B&#39; for chain B</span>
-    <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;MA:&#39;</span> <span class="o">+</span> <span class="n">source</span><span class="o">.</span><span class="n">shortName</span>  <span class="c1"># New prefix - e.g. &#39;MA:E&#39; for chain E</span>
+    <span class="c1"># Make source -&gt; target ApiAtom map and remove target atoms with no match in source</span>
+    <span class="n">apiAtomMap</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">source</span><span class="p">,</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">chainMap</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">cutat</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">shortName</span><span class="p">)</span>  <span class="c1"># Cut after e.g. &#39;MA:B&#39; for chain B</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;MA:&#39;</span> <span class="o">+</span> <span class="n">source</span><span class="o">.</span><span class="n">shortName</span>  <span class="c1"># New prefix - e.g. &#39;MA:E&#39; for chain E</span>
 
-    <span class="k">for</span> <span class="n">atom2</span> <span class="ow">in</span> <span class="n">target</span><span class="o">.</span><span class="n">atoms</span><span class="p">:</span>
-      <span class="c1"># Get equivalent atom in source</span>
-      <span class="n">apid</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">atom2</span><span class="o">.</span><span class="n">pid</span><span class="p">[</span><span class="n">cutat</span><span class="p">:]</span>
-      <span class="n">atom1</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">apid</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">atom2</span> <span class="ow">in</span> <span class="n">target</span><span class="o">.</span><span class="n">atoms</span><span class="p">:</span>
+            <span class="c1"># Get equivalent atom in source</span>
+            <span class="n">apid</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">atom2</span><span class="o">.</span><span class="n">pid</span><span class="p">[</span><span class="n">cutat</span><span class="p">:]</span>
+            <span class="n">atom1</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">apid</span><span class="p">)</span>
 
-      <span class="k">if</span> <span class="n">atom1</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="c1"># Atom missing, presumably removed from original chain manually</span>
-        <span class="n">atom2</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># Make self-other api atom map</span>
-        <span class="n">apiAtomMap</span><span class="p">[</span><span class="n">atom1</span><span class="o">.</span><span class="n">_wrappedData</span><span class="p">]</span> <span class="o">=</span> <span class="n">atom2</span><span class="o">.</span><span class="n">_wrappedData</span>
+            <span class="k">if</span> <span class="n">atom1</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="c1"># Atom missing, presumably removed from original chain manually</span>
+                <span class="n">atom2</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Make self-other api atom map</span>
+                <span class="n">apiAtomMap</span><span class="p">[</span><span class="n">atom1</span><span class="o">.</span><span class="n">_wrappedData</span><span class="p">]</span> <span class="o">=</span> <span class="n">atom2</span><span class="o">.</span><span class="n">_wrappedData</span>
 
-  <span class="c1"># Make target bonds if not already present</span>
-  <span class="k">for</span> <span class="n">genericBond</span> <span class="ow">in</span> <span class="n">apiMolSystem</span><span class="o">.</span><span class="n">genericBonds</span><span class="p">:</span>
-    <span class="n">bondType</span> <span class="o">=</span> <span class="n">genericBond</span><span class="o">.</span><span class="n">bondType</span>
-    <span class="n">apiAtoms</span> <span class="o">=</span> <span class="n">genericBond</span><span class="o">.</span><span class="n">atoms</span>
-    <span class="n">fs</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">apiAtomMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">apiAtoms</span><span class="p">)</span>
-    <span class="k">if</span> <span class="bp">None</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fs</span><span class="p">:</span>
-      <span class="c1"># Both atoms matched an atom on target side&#39;</span>
-      <span class="n">gBond</span> <span class="o">=</span> <span class="n">apiMolSystem</span><span class="o">.</span><span class="n">findFirstGenericBond</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="n">fs</span><span class="p">)</span>
-      <span class="k">if</span> <span class="n">gBond</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="c1"># There is no bond in &#39;other&#39; that matches the bond. Make it</span>
-        <span class="n">apiMolSystem</span><span class="o">.</span><span class="n">newGenericBond</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="n">fs</span><span class="p">,</span> <span class="n">bondType</span><span class="o">=</span><span class="n">bondType</span><span class="p">)</span></div>
+    <span class="c1"># Make target bonds if not already present</span>
+    <span class="k">for</span> <span class="n">genericBond</span> <span class="ow">in</span> <span class="n">apiMolSystem</span><span class="o">.</span><span class="n">genericBonds</span><span class="p">:</span>
+        <span class="n">bondType</span> <span class="o">=</span> <span class="n">genericBond</span><span class="o">.</span><span class="n">bondType</span>
+        <span class="n">apiAtoms</span> <span class="o">=</span> <span class="n">genericBond</span><span class="o">.</span><span class="n">atoms</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">apiAtomMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">apiAtoms</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">None</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fs</span><span class="p">:</span>
+            <span class="c1"># Both atoms matched an atom on target side&#39;</span>
+            <span class="n">gBond</span> <span class="o">=</span> <span class="n">apiMolSystem</span><span class="o">.</span><span class="n">findFirstGenericBond</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="n">fs</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">gBond</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="c1"># There is no bond in &#39;other&#39; that matches the bond. Make it</span>
+                <span class="n">apiMolSystem</span><span class="o">.</span><span class="n">newGenericBond</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="n">fs</span><span class="p">,</span> <span class="n">bondType</span><span class="o">=</span><span class="n">bondType</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="extraBoundAtomPairs"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.MoleculeLib.extraBoundAtomPairs">[docs]</a><span class="k">def</span> <span class="nf">extraBoundAtomPairs</span><span class="p">(</span><span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">selectSequential</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Atom</span><span class="p">,</span> <span class="n">Atom</span><span class="p">]]:</span>
-  <span class="sd">&quot;&quot;&quot;Get pairs of bound Atoms whose bonds are NOT defined through the residue topology.</span>
-<span class="sd">  The result and each individual atom pair are both sorted</span>
 
-<span class="sd">  Returns sequential bond pairs if selectSequential is True,</span>
-<span class="sd">  non-sequential bond pairs if selectSequential is False,</span>
-<span class="sd">  and both if selectSequential is None&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="extraBoundAtomPairs"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.MoleculeLib.extraBoundAtomPairs">[docs]</a><span class="k">def</span> <span class="nf">extraBoundAtomPairs</span><span class="p">(</span><span class="n">project</span><span class="p">:</span> <span class="n">Project</span><span class="p">,</span> <span class="n">selectSequential</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Atom</span><span class="p">,</span> <span class="n">Atom</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;Get pairs of bound Atoms whose bonds are NOT defined through the residue topology.</span>
+<span class="sd">    The result and each individual atom pair are both sorted</span>
 
-  <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="sd">    Returns sequential bond pairs if selectSequential is True,</span>
+<span class="sd">    non-sequential bond pairs if selectSequential is False,</span>
+<span class="sd">    and both if selectSequential is None&quot;&quot;&quot;</span>
 
-  <span class="c1"># TODO NBNB extend to non-protein atoms. This is a HACK!!</span>
-  <span class="n">refAtomNames</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="p">(</span><span class="s1">&#39;protein&#39;</span><span class="p">,):{</span><span class="s1">&#39;first&#39;</span><span class="p">:[</span><span class="s1">&#39;N&#39;</span><span class="p">],</span> <span class="s1">&#39;last&#39;</span><span class="p">:[</span><span class="s1">&#39;C&#39;</span><span class="p">]},</span>
-    <span class="p">(</span><span class="s1">&#39;DNA&#39;</span><span class="p">,):{</span><span class="s1">&#39;first&#39;</span><span class="p">:[</span><span class="s1">&#39;P&#39;</span><span class="p">],</span> <span class="s1">&#39;last&#39;</span><span class="p">:[</span><span class="s2">&quot;O3&#39;&quot;</span><span class="p">]},</span>
-  <span class="p">}</span>
-  <span class="n">refAtomNames</span><span class="p">[(</span><span class="s1">&#39;RNA&#39;</span><span class="p">,)]</span> <span class="o">=</span> <span class="n">refAtomNames</span><span class="p">[(</span><span class="s1">&#39;DNA&#39;</span><span class="p">,</span> <span class="s1">&#39;RNA&#39;</span><span class="p">,)]</span> <span class="o">=</span> <span class="n">refAtomNames</span><span class="p">[(</span><span class="s1">&#39;DNA&#39;</span><span class="p">,)]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
 
-  <span class="n">getData2Obj</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span>
+    <span class="c1"># TODO NBNB extend to non-protein atoms. This is a HACK!!</span>
+    <span class="n">refAtomNames</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="p">(</span><span class="s1">&#39;protein&#39;</span><span class="p">,):</span> <span class="p">{</span><span class="s1">&#39;first&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;N&#39;</span><span class="p">],</span> <span class="s1">&#39;last&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;C&#39;</span><span class="p">]},</span>
+        <span class="p">(</span><span class="s1">&#39;DNA&#39;</span><span class="p">,)</span>    <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;first&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;P&#39;</span><span class="p">],</span> <span class="s1">&#39;last&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;O3&#39;&quot;</span><span class="p">]},</span>
+        <span class="p">}</span>
+    <span class="n">refAtomNames</span><span class="p">[(</span><span class="s1">&#39;RNA&#39;</span><span class="p">,)]</span> <span class="o">=</span> <span class="n">refAtomNames</span><span class="p">[(</span><span class="s1">&#39;DNA&#39;</span><span class="p">,</span> <span class="s1">&#39;RNA&#39;</span><span class="p">,)]</span> <span class="o">=</span> <span class="n">refAtomNames</span><span class="p">[(</span><span class="s1">&#39;DNA&#39;</span><span class="p">,)]</span>
 
-  <span class="n">apiAtomPairs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">molSystem</span><span class="o">.</span><span class="n">genericBonds</span><span class="p">]</span>
-  <span class="n">atomPairs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">getData2Obj</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">apiAtomPairs</span><span class="p">]</span>
+    <span class="n">getData2Obj</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span>
 
-  <span class="k">for</span> <span class="n">atom1</span><span class="p">,</span> <span class="n">atom2</span> <span class="ow">in</span> <span class="n">atomPairs</span><span class="p">:</span>
+    <span class="n">apiAtomPairs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">molSystem</span><span class="o">.</span><span class="n">genericBonds</span><span class="p">]</span>
+    <span class="n">atomPairs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">getData2Obj</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">apiAtomPairs</span><span class="p">]</span>
 
-    <span class="n">isSequential</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">for</span> <span class="n">atom1</span><span class="p">,</span> <span class="n">atom2</span> <span class="ow">in</span> <span class="n">atomPairs</span><span class="p">:</span>
 
-    <span class="n">molTypes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">((</span><span class="n">atom1</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">molType</span><span class="p">,</span>
-                                 <span class="n">atom2</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">molType</span><span class="p">))))</span>
-    <span class="n">refdd</span> <span class="o">=</span> <span class="n">refAtomNames</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">molTypes</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">refdd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="c1"># molTypes match, this could be sequential</span>
-      <span class="n">atomName1</span> <span class="o">=</span> <span class="n">atom1</span><span class="o">.</span><span class="n">name</span>
-      <span class="n">atomName2</span> <span class="o">=</span> <span class="n">atom2</span><span class="o">.</span><span class="n">name</span>
-      <span class="k">if</span> <span class="p">(</span><span class="n">atomName1</span> <span class="ow">in</span> <span class="n">refdd</span><span class="p">[</span><span class="s1">&#39;last&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">atomName2</span> <span class="ow">in</span> <span class="n">refdd</span><span class="p">[</span><span class="s1">&#39;first&#39;</span><span class="p">]</span> <span class="ow">and</span>
-          <span class="n">atom1</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">nextResidue</span> <span class="ow">is</span> <span class="n">atom2</span><span class="o">.</span><span class="n">residue</span><span class="p">):</span>
-        <span class="n">isSequential</span> <span class="o">=</span> <span class="bp">True</span>
-      <span class="k">elif</span> <span class="p">(</span><span class="n">atomName2</span> <span class="ow">in</span> <span class="n">refdd</span><span class="p">[</span><span class="s1">&#39;last&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">atomName1</span> <span class="ow">in</span> <span class="n">refdd</span><span class="p">[</span><span class="s1">&#39;first&#39;</span><span class="p">]</span> <span class="ow">and</span>
-          <span class="n">atom2</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">nextResidue</span> <span class="ow">is</span> <span class="n">atom1</span><span class="o">.</span><span class="n">residue</span><span class="p">):</span>
-        <span class="n">isSequential</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">isSequential</span> <span class="o">=</span> <span class="bp">False</span>
 
-    <span class="k">if</span> <span class="n">selectSequential</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="nb">bool</span><span class="p">(</span><span class="n">selectSequential</span> <span class="p">)</span> <span class="o">==</span> <span class="n">isSequential</span><span class="p">:</span>
-      <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">((</span><span class="n">atom1</span><span class="p">,</span> <span class="n">atom2</span><span class="p">))))</span>
-  <span class="c1">#</span>
-  <span class="n">result</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-  <span class="k">return</span> <span class="n">result</span></div>
+        <span class="n">molTypes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">((</span><span class="n">atom1</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">molType</span><span class="p">,</span>
+                                     <span class="n">atom2</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">molType</span><span class="p">))))</span>
+        <span class="n">refdd</span> <span class="o">=</span> <span class="n">refAtomNames</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">molTypes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">refdd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c1"># molTypes match, this could be sequential</span>
+            <span class="n">atomName1</span> <span class="o">=</span> <span class="n">atom1</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">atomName2</span> <span class="o">=</span> <span class="n">atom2</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">atomName1</span> <span class="ow">in</span> <span class="n">refdd</span><span class="p">[</span><span class="s1">&#39;last&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">atomName2</span> <span class="ow">in</span> <span class="n">refdd</span><span class="p">[</span><span class="s1">&#39;first&#39;</span><span class="p">]</span> <span class="ow">and</span>
+                    <span class="n">atom1</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">nextResidue</span> <span class="ow">is</span> <span class="n">atom2</span><span class="o">.</span><span class="n">residue</span><span class="p">):</span>
+                <span class="n">isSequential</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">atomName2</span> <span class="ow">in</span> <span class="n">refdd</span><span class="p">[</span><span class="s1">&#39;last&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">atomName1</span> <span class="ow">in</span> <span class="n">refdd</span><span class="p">[</span><span class="s1">&#39;first&#39;</span><span class="p">]</span> <span class="ow">and</span>
+                  <span class="n">atom2</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">nextResidue</span> <span class="ow">is</span> <span class="n">atom1</span><span class="o">.</span><span class="n">residue</span><span class="p">):</span>
+                <span class="n">isSequential</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="k">if</span> <span class="n">selectSequential</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="nb">bool</span><span class="p">(</span><span class="n">selectSequential</span><span class="p">)</span> <span class="o">==</span> <span class="n">isSequential</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">((</span><span class="n">atom1</span><span class="p">,</span> <span class="n">atom2</span><span class="p">))))</span>
+    <span class="c1">#</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
 
 <span class="o">.</span><span class="mi">0</span>
-<div class="viewcode-block" id="sequenceMatchOffset"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.MoleculeLib.sequenceMatchOffset">[docs]</a><span class="k">def</span> <span class="nf">sequenceMatchOffset</span><span class="p">(</span><span class="n">reference</span><span class="p">:</span><span class="n">OrderedDict</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span><span class="n">OrderedDict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-  <span class="sd">&quot;&quot;&quot;Check if residues in sequence match those in reference, directly or with an offset.</span>
-<span class="sd">  Reference and sequence are OrderedDict(sequenceCode:residueType)</span>
-<span class="sd">  Both integer and string sequenceCodes (or a mixture) will give correct results</span>
-<span class="sd">  - other types of key will not.</span>
 
-<span class="sd">  Returns 0 if all(reference.get(key) == val for key, val in sequence.items())</span>
 
-<span class="sd">  Otherwise tries to convert keys in sequence and reference to integers</span>
-<span class="sd">  and checks if all (reference.get(key+offset) == val for key, val in sequence.items())</span>
-<span class="sd">  for some offset.</span>
+<div class="viewcode-block" id="sequenceMatchOffset"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.MoleculeLib.sequenceMatchOffset">[docs]</a><span class="k">def</span> <span class="nf">sequenceMatchOffset</span><span class="p">(</span><span class="n">reference</span><span class="p">:</span> <span class="n">OrderedDict</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="n">OrderedDict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Check if residues in sequence match those in reference, directly or with an offset.</span>
+<span class="sd">    Reference and sequence are OrderedDict(sequenceCode:residueType)</span>
+<span class="sd">    Both integer and string sequenceCodes (or a mixture) will give correct results</span>
+<span class="sd">    - other types of key will not.</span>
 
-<span class="sd">  Returns the offset is a match is found,, None if no match is found</span>
-<span class="sd">  &quot;&quot;&quot;</span>
+<span class="sd">    Returns 0 if all(reference.get(key) == val for key, val in sequence.items())</span>
 
-  <span class="k">if</span> <span class="ow">not</span> <span class="n">reference</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">sequence</span><span class="p">:</span>
-    <span class="k">return</span> <span class="bp">None</span>
+<span class="sd">    Otherwise tries to convert keys in sequence and reference to integers</span>
+<span class="sd">    and checks if all (reference.get(key+offset) == val for key, val in sequence.items())</span>
+<span class="sd">    for some offset.</span>
 
-  <span class="k">if</span> <span class="bp">None</span> <span class="ow">in</span> <span class="n">reference</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="ow">or</span> <span class="bp">None</span> <span class="ow">in</span> <span class="n">sequence</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input sequence contained residueType None&quot;</span><span class="p">)</span>
+<span class="sd">    Returns the offset is a match is found,, None if no match is found</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-  <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">reference</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">==</span> <span class="n">val</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">sequence</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
-    <span class="c1"># matches sequence with zero offset correction</span>
-    <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">reference</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">sequence</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">None</span>
 
-  <span class="k">else</span><span class="p">:</span>
-    <span class="c1"># No luck. Convert to integers and try with an offset</span>
-    <span class="k">try</span><span class="p">:</span>
-      <span class="n">reference2</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="nb">int</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="n">reference</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
-      <span class="n">sequence2</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="nb">int</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="n">sequence</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
-    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-      <span class="c1"># Could not convert to integer. Failure</span>
-      <span class="k">return</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="bp">None</span> <span class="ow">in</span> <span class="n">reference</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="ow">or</span> <span class="bp">None</span> <span class="ow">in</span> <span class="n">sequence</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input sequence contained residueType None&quot;</span><span class="p">)</span>
 
-    <span class="n">minOffset</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">reference2</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">-</span> <span class="nb">min</span><span class="p">(</span><span class="n">sequence2</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-    <span class="n">maxOffset</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">reference2</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">-</span> <span class="nb">max</span><span class="p">(</span><span class="n">sequence2</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-    <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">minOffset</span><span class="p">,</span> <span class="n">maxOffset</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-      <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">reference2</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span> <span class="o">+</span> <span class="n">offset</span><span class="p">)</span> <span class="o">==</span> <span class="n">val</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">sequence2</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
-        <span class="k">return</span> <span class="n">offset</span>
+    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">reference</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">==</span> <span class="n">val</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">sequence</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="c1"># matches sequence with zero offset correction</span>
+        <span class="k">return</span> <span class="mi">0</span>
 
-    <span class="c1"># No offset matched. Result is failure</span>
-    <span class="k">return</span> <span class="bp">None</span></div>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># No luck. Convert to integers and try with an offset</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">reference2</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="nb">int</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">reference</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+            <span class="n">sequence2</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="nb">int</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">sequence</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="c1"># Could not convert to integer. Failure</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="n">minOffset</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">reference2</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">-</span> <span class="nb">min</span><span class="p">(</span><span class="n">sequence2</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">maxOffset</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">reference2</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">-</span> <span class="nb">max</span><span class="p">(</span><span class="n">sequence2</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">minOffset</span><span class="p">,</span> <span class="n">maxOffset</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">reference2</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span> <span class="o">+</span> <span class="n">offset</span><span class="p">)</span> <span class="o">==</span> <span class="n">val</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">sequence2</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+                <span class="k">return</span> <span class="n">offset</span>
+
+        <span class="c1"># No offset matched. Result is failure</span>
+        <span class="k">return</span> <span class="bp">None</span></div>
 </pre></div>
 
           </div>

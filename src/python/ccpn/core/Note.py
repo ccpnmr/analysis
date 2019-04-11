@@ -24,8 +24,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import collections
-import typing  # ejb - added for 'header'
+import typing
 from ccpn.util import Constants as utilConstants
 from functools import partial
 from ccpn.core.Project import Project
@@ -33,8 +32,7 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Note as ApiNote
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
-    logCommandBlock, renameObject
+from ccpn.core.lib.ContextManagers import newObject, renameObject
 from ccpn.util.Logging import getLogger
 from ccpn.util import Common as commonUtil
 

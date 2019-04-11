@@ -402,6 +402,11 @@ rather than &#8216;CD&#8217; (Cadmium)</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="ccpn.util.Common.percentage">
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">percentage</code><span class="sig-paren">(</span><em>percent</em>, <em>whole</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#percentage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.percentage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="ccpn.util.Common.recursiveImport">
 <code class="descclassname">ccpn.util.Common.</code><code class="descname">recursiveImport</code><span class="sig-paren">(</span><em>dirname</em>, <em>modname=None</em>, <em>ignoreModules=None</em>, <em>force=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#recursiveImport"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.recursiveImport" title="Permalink to this definition">¶</a></dt>
 <dd><p>recursively import all .py files
@@ -432,6 +437,32 @@ if this is longer than the values.</p>
 and the nextSerial of the parent.</p>
 <p>Raises ValueError for objects that do not have a serial
 (or, more precisely, where the _wrappedData does not have a serial).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.Common.splitDataFrameWithinRange">
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">splitDataFrameWithinRange</code><span class="sig-paren">(</span><em>dataframe</em>, <em>column1</em>, <em>column2</em>, <em>minX</em>, <em>maxX</em>, <em>minY</em>, <em>maxY</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#splitDataFrameWithinRange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.splitDataFrameWithinRange" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dataframe</strong> &#8211; dataframe with index a pid type, columns str, values floats or ints</li>
+<li><strong>column1</strong> &#8211; label1 , eg PC1</li>
+<li><strong>column2</strong> &#8211; label1 , eg PC2</li>
+<li><strong>minX</strong> &#8211; min value for Y</li>
+<li><strong>maxX</strong> &#8211; Max value for X</li>
+<li><strong>minY</strong> &#8211; min value for Y</li>
+<li><strong>maxY</strong> &#8211; max value for Y</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">inners  a dataframe like the unput  but containing only the values within the ranges  and
+outers (rest) not included in inners</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -525,10 +556,6 @@ into an (integer,string) tuple</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="module-ccpn.util.ContextManagers">
-<span id="ccpn-util-contextmanagers-module"></span><h2>ccpn.util.ContextManagers module<a class="headerlink" href="#module-ccpn.util.ContextManagers" title="Permalink to this headline">¶</a></h2>
-<p>Module Documentation here</p>
 </div>
 <div class="section" id="module-ccpn.util.ExcelReader">
 <span id="ccpn-util-excelreader-module"></span><h2>ccpn.util.ExcelReader module<a class="headerlink" href="#module-ccpn.util.ExcelReader" title="Permalink to this headline">¶</a></h2>
@@ -743,6 +770,98 @@ By Raymond Hettinger, <a class="reference external" href="http://code.activestat
 <span id="ccpn-util-path-module"></span><h2>ccpn.util.Path module<a class="headerlink" href="#module-ccpn.util.Path" title="Permalink to this headline">¶</a></h2>
 <p>Utilities for path handling</p>
 <p>Includes extensions of sys.path functions and CCPN-specific functionality</p>
+<dl class="class">
+<dt id="ccpn.util.Path.Path">
+<em class="property">class </em><code class="descclassname">ccpn.util.Path.</code><code class="descname">Path</code><a class="reference internal" href="../_modules/ccpn/util/Path.html#Path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Path.Path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pathlib.Path</span></code></p>
+<p>Subclassed for compatibility, convenience and enhancements</p>
+<dl class="method">
+<dt id="ccpn.util.Path.Path.addTimeStamp">
+<code class="descname">addTimeStamp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Path.html#Path.addTimeStamp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Path.Path.addTimeStamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a Path instance with path.timeStamp.suffix profile</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.Path.Path.asString">
+<code class="descname">asString</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Path.html#Path.asString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Path.Path.asString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.Path.Path.assureSuffix">
+<code class="descname">assureSuffix</code><span class="sig-paren">(</span><em>suffix</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Path.html#Path.assureSuffix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Path.Path.assureSuffix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return Path instance with an assured suffix; adds suffic if not present.
+NB: does not change suffix if there is one (like with_suffix does)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.util.Path.Path.basename">
+<code class="descname">basename</code><a class="headerlink" href="#ccpn.util.Path.Path.basename" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>immutable</em> - 
+the name of self without any suffixes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.Path.Path.fetchDir">
+<code class="descname">fetchDir</code><span class="sig-paren">(</span><em>dirName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Path.html#Path.fetchDir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Path.Path.fetchDir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return and if needed create dirName in self
+:return: Path instance of self / dirName</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.Path.Path.incrementVersion">
+<code class="descname">incrementVersion</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Path.html#Path.incrementVersion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Path.Path.incrementVersion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a Path instance with path.version.suffix profile</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.Path.Path.normalise">
+<code class="descname">normalise</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Path.html#Path.normalise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Path.Path.normalise" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.Path.Path.open">
+<code class="descname">open</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Path.html#Path.open"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Path.Path.open" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subclassing to catch any long file name errors that allegedly can occur on windows</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.Path.Path.removeDir">
+<code class="descname">removeDir</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Path.html#Path.removeDir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Path.Path.removeDir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recursively remove content of self and sub-directories</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.Path.Path.removeFile">
+<code class="descname">removeFile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Path.html#Path.removeFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Path.Path.removeFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove file represented by self.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.Path.Path.split2">
+<code class="descname">split2</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Path.html#Path.split2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Path.Path.split2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a tuple (.parent, .name) strings</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.Path.Path.split3">
+<code class="descname">split3</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Path.html#Path.split3"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Path.Path.split3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a tuple of (.parent, .stem, .suffix) strings</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.util.Path.Path.version">
+<code class="descname">version</code><a class="headerlink" href="#ccpn.util.Path.Path.version" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>immutable</em> -</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.Path.aPath">
+<code class="descclassname">ccpn.util.Path.</code><code class="descname">aPath</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Path.html#aPath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Path.aPath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a ~-expanded, left/right spaces-stripped, normalised Path instance</p>
+</dd></dl>
+
 <dl class="function">
 <dt id="ccpn.util.Path.checkFilePath">
 <code class="descclassname">ccpn.util.Path.</code><code class="descname">checkFilePath</code><span class="sig-paren">(</span><em>filePath</em>, <em>allowDir=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Path.html#checkFilePath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Path.checkFilePath" title="Permalink to this definition">¶</a></dt>
@@ -998,14 +1117,21 @@ specified by one of the following strings: &#8220;acme&#8221;, &#8220;peak_minim
 where n is the first number found such that the file does not already
 exist.
 Returns an open file handle.</p>
-<p>Usage:  with safeOpen(path, [options]) as ...</p>
+<dl class="docutils">
+<dt>Usage:  with safeOpen(path, [options]) as (fd, safeFileName):</dt>
+<dd><blockquote class="first">
+<div>...</div></blockquote>
+<p class="last">fd is the file descriptor, to be used as with open, e.g., fd.read()
+safeFileName is the new safe filename.</p>
+</dd>
+</dl>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> &#8211; filepath and filename.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Open file handle... be sure to close!</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Open file handle and new fileName</td>
 </tr>
 </tbody>
 </table>
@@ -1324,7 +1450,7 @@ uses custom sort <em>for all strings</em> so that e.g. &#8216;&#64;3&#8217; come
 
 <dl class="method">
 <dt id="ccpn.util.StructureData.EnsembleData.deleteCol">
-<code class="descname">deleteCol</code><span class="sig-paren">(</span><em>columnName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/StructureData.html#EnsembleData.deleteCol"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.StructureData.EnsembleData.deleteCol" title="Permalink to this definition">¶</a></dt>
+<code class="descname">deleteCol</code><span class="sig-paren">(</span><em>columnName=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/StructureData.html#EnsembleData.deleteCol"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.StructureData.EnsembleData.deleteCol" title="Permalink to this definition">¶</a></dt>
 <dd><p>Delete a named column from the table, the columnName must be a string and exist in the table.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1338,7 +1464,7 @@ uses custom sort <em>for all strings</em> so that e.g. &#8216;&#64;3&#8217; come
 
 <dl class="method">
 <dt id="ccpn.util.StructureData.EnsembleData.deleteRow">
-<code class="descname">deleteRow</code><span class="sig-paren">(</span><em>rowNumber</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/StructureData.html#EnsembleData.deleteRow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.StructureData.EnsembleData.deleteRow" title="Permalink to this definition">¶</a></dt>
+<code class="descname">deleteRow</code><span class="sig-paren">(</span><em>rowNumber: None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/StructureData.html#EnsembleData.deleteRow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.StructureData.EnsembleData.deleteRow" title="Permalink to this definition">¶</a></dt>
 <dd><p>Delete a numbered row of the table.
 Row must be an integer and exist in the table.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1770,9 +1896,18 @@ Returns False if the file does not exist</p>
 </div>
 <div class="section" id="module-ccpn.util.decorators">
 <span id="ccpn-util-decorators-module"></span><h2>ccpn.util.decorators module<a class="headerlink" href="#module-ccpn.util.decorators" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation here</p>
 <dl class="function">
 <dt id="ccpn.util.decorators.logCommand">
 <code class="descclassname">ccpn.util.decorators.</code><code class="descname">logCommand</code><span class="sig-paren">(</span><em>prefix=''</em>, <em>get=None</em>, <em>isProperty=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/decorators.html#logCommand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.decorators.logCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>A decorator to log the invocation of the call to a Framework, Project, ... method.
+Use prefix to set the proper command context, e.g. &#8216;application.&#8217; or &#8216;project.&#8217;
+Use isProperty to get &#8216; = &#8216;args[1]</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.decorators.logCommand__Container">
+<code class="descclassname">ccpn.util.decorators.</code><code class="descname">logCommand__Container</code><span class="sig-paren">(</span><em>prefix=''</em>, <em>get=None</em>, <em>isProperty=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/decorators.html#logCommand__Container"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.decorators.logCommand__Container" title="Permalink to this definition">¶</a></dt>
 <dd><p>A decorator to log the invocation of the call to a Framework, Project, ... method.
 Use prefix to set the proper command context, e.g. &#8216;application.&#8217; or &#8216;project.&#8217;
 Use isProperty to get &#8216; = &#8216;args[1]</p>
@@ -1959,7 +2094,6 @@ topDirectory must be (intended to be) on the Python path</p>
 <li><a class="reference internal" href="#module-ccpn.util.Colour">ccpn.util.Colour module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.Common">ccpn.util.Common module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.Constants">ccpn.util.Constants module</a></li>
-<li><a class="reference internal" href="#module-ccpn.util.ContextManagers">ccpn.util.ContextManagers module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.ExcelReader">ccpn.util.ExcelReader module</a></li>
 <li><a class="reference internal" href="#ccpn-util-gittools-module">ccpn.util.GitTools module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.Graph">ccpn.util.Graph module</a></li>

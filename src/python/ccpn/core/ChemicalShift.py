@@ -24,7 +24,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import collections
 import operator
 from typing import Tuple
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -32,9 +31,7 @@ from ccpn.core.Project import Project
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.NmrAtom import NmrAtom
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
-from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
-from ccpn.util.Logging import getLogger
+from ccpn.core.lib.ContextManagers import newObject
 
 
 class ChemicalShift(AbstractWrapperObject):

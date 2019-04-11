@@ -122,8 +122,9 @@
 <p>Create a new Pandas dataFrame from SpectrumHits obtained from a pipeline</p>
 <dl class="function">
 <dt id="ccpn.AnalysisScreen.pipes.HitsOutput.hitsToDataFrame">
-<code class="descclassname">ccpn.AnalysisScreen.pipes.HitsOutput.</code><code class="descname">hitsToDataFrame</code><span class="sig-paren">(</span><em>spectrumHits</em><span class="sig-paren">)</span> &rarr; pandas.core.frame.DataFrame<a class="reference internal" href="../_modules/ccpn/AnalysisScreen/pipes/HitsOutput.html#hitsToDataFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.pipes.HitsOutput.hitsToDataFrame" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
+<code class="descclassname">ccpn.AnalysisScreen.pipes.HitsOutput.</code><code class="descname">hitsToDataFrame</code><span class="sig-paren">(</span><em>spectrumHits, roiLeft=[6, 10], roiRight=[0, 5], roundPositionDecimals=3</em><span class="sig-paren">)</span> &rarr; pandas.core.frame.DataFrame<a class="reference internal" href="../_modules/ccpn/AnalysisScreen/pipes/HitsOutput.html#hitsToDataFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.pipes.HitsOutput.hitsToDataFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Each column to be like Default_DataFrame. NB. One spectrum/Hit can have multiple references as could be a mixture of substances</p>
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
@@ -133,7 +134,6 @@
 </tr>
 </tbody>
 </table>
-<p>Each column to be like Default_DataFrame. NB. One spectrum/Hit can have multiple references as could be a mixture of substances</p>
 </dd></dl>
 
 </div>

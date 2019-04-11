@@ -53,24 +53,21 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:32 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
@@ -84,322 +81,324 @@
 <span class="kn">from</span> <span class="nn">ccpn.core.SampleComponent</span> <span class="kn">import</span> <span class="n">SampleComponent</span>
 
 
-<div class="viewcode-block" id="getLabellingScheme"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.LabellingLib.getLabellingScheme">[docs]</a><span class="k">def</span> <span class="nf">getLabellingScheme</span><span class="p">(</span><span class="n">schemeName</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span>  <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">]:</span>
-  <span class="sd">&quot;&quot;&quot;Get labelling scheme dictionary from scheme name (or None if none is found</span>
+<div class="viewcode-block" id="getLabellingScheme"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.LabellingLib.getLabellingScheme">[docs]</a><span class="k">def</span> <span class="nf">getLabellingScheme</span><span class="p">(</span><span class="n">schemeName</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Get labelling scheme dictionary from scheme name (or None if none is found</span>
 
-<span class="sd">  TODO NBNB probably needs more parameters and a different location&quot;&quot;&quot;</span>
-  <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;getLabellingScheme not yet implemented&quot;</span><span class="p">)</span></div>
+<span class="sd">    TODO NBNB probably needs more parameters and a different location&quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;getLabellingScheme not yet implemented&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="sampleComponentLabelledFraction"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.LabellingLib.sampleComponentLabelledFraction">[docs]</a><span class="k">def</span> <span class="nf">sampleComponentLabelledFraction</span><span class="p">(</span><span class="n">sampleComponent</span><span class="p">:</span><span class="n">SampleComponent</span><span class="p">,</span>
-                                    <span class="n">atom2IsotopeCode</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="n">Atom</span><span class="p">,</span><span class="nb">str</span><span class="p">]</span>
+
+<div class="viewcode-block" id="sampleComponentLabelledFraction"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.LabellingLib.sampleComponentLabelledFraction">[docs]</a><span class="k">def</span> <span class="nf">sampleComponentLabelledFraction</span><span class="p">(</span><span class="n">sampleComponent</span><span class="p">:</span> <span class="n">SampleComponent</span><span class="p">,</span>
+                                    <span class="n">atom2IsotopeCode</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="n">Atom</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
                                     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-  <span class="sd">&quot;&quot;&quot;Get labelled fraction from SampleComponent.</span>
-<span class="sd">  All atoms must be from a chain compatible with SampleComponent.</span>
+    <span class="sd">&quot;&quot;&quot;Get labelled fraction from SampleComponent.</span>
+<span class="sd">    All atoms must be from a chain compatible with SampleComponent.</span>
 
-<span class="sd">  NB for x/y and % wildcard atoms, labelling is averaged over the</span>
-<span class="sd">  component atoms. If only some of these are specifically labelled or</span>
-<span class="sd">  in a labelling scheme, the rest will be assumed to have the</span>
-<span class="sd">  default labelling of the sampleComponent. This may sometimes give</span>
-<span class="sd">  misleading results, but it is the best available default behaviour&quot;&quot;&quot;</span>
+<span class="sd">    NB for x/y and % wildcard atoms, labelling is averaged over the</span>
+<span class="sd">    component atoms. If only some of these are specifically labelled or</span>
+<span class="sd">    in a labelling scheme, the rest will be assumed to have the</span>
+<span class="sd">    default labelling of the sampleComponent. This may sometimes give</span>
+<span class="sd">    misleading results, but it is the best available default behaviour&quot;&quot;&quot;</span>
 
-  <span class="n">result</span> <span class="o">=</span> <span class="mf">1.0</span>
-  <span class="n">isotopeCode2Fraction</span> <span class="o">=</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">isotopeCode2Fraction</span>
-  <span class="n">processData</span> <span class="o">=</span> <span class="p">{}</span>
-  <span class="n">substance</span> <span class="o">=</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span>
-  <span class="n">chains</span> <span class="o">=</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">chains</span>
-
-  <span class="k">for</span> <span class="n">atom</span><span class="p">,</span> <span class="n">isotopeCode</span> <span class="ow">in</span> <span class="n">atom2IsotopeCode</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-
-    <span class="n">residue</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">residue</span>
-    <span class="n">chain</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">chain</span>
-    <span class="k">if</span> <span class="n">chain</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">chains</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> does not match any of the chains for </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">atom</span><span class="p">,</span> <span class="n">sampleComponent</span><span class="p">))</span>
-
-    <span class="c1"># fraction serves as a sentinel, to check if there was specific labelling</span>
-    <span class="n">fraction</span> <span class="o">=</span> <span class="bp">None</span>
-
-    <span class="k">if</span> <span class="n">substance</span><span class="p">:</span>
-      <span class="c1"># Go from Atom to a list of component atoms, to catch wildcard atoms</span>
-      <span class="n">atoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">atom</span><span class="p">]</span>
-      <span class="n">ll</span> <span class="o">=</span> <span class="p">[]</span>
-      <span class="k">for</span> <span class="n">aa</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">:</span>
-        <span class="n">ll2</span> <span class="o">=</span> <span class="n">aa</span><span class="o">.</span><span class="n">componentAtoms</span>
-        <span class="k">if</span> <span class="n">ll2</span><span class="p">:</span>
-          <span class="n">atoms</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">ll2</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-          <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aa</span><span class="p">)</span>
-      <span class="n">atoms</span> <span class="o">=</span> <span class="n">ll</span>
-
-      <span class="c1"># Sum specific labelling over wildcard component atoms</span>
-      <span class="n">summa</span> <span class="o">=</span> <span class="mf">0.0</span>
-      <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
-      <span class="k">for</span> <span class="n">aa</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">:</span>
-        <span class="n">dd</span> <span class="o">=</span> <span class="n">substance</span><span class="o">.</span><span class="n">getSpecificAtomLabelling</span><span class="p">(</span><span class="n">aa</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">dd</span><span class="p">:</span>
-          <span class="c1"># There is a specific labelling for this atom</span>
-          <span class="n">fract</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">isotopeCode</span><span class="p">)</span>
-          <span class="k">if</span> <span class="n">fract</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;isotopeCode </span><span class="si">%s</span><span class="s2"> not recognised in specificAtomLabelling for </span><span class="si">%s</span><span class="s2">&quot;</span>
-                             <span class="o">%</span> <span class="p">(</span><span class="n">isotopeCode</span><span class="p">,</span> <span class="n">atom</span><span class="p">))</span>
-          <span class="k">else</span><span class="p">:</span>
-            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="n">summa</span> <span class="o">+=</span> <span class="n">fract</span>
-
-      <span class="k">if</span> <span class="n">count</span><span class="p">:</span>
-        <span class="c1"># At least some atoms were specifically labelled. Use them</span>
-        <span class="n">fraction</span> <span class="o">=</span> <span class="n">summa</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">):</span>
-          <span class="c1"># Not all atoms were specifically labelled,</span>
-          <span class="c1"># Could happen e.g. when checking HG% for a Valine with only one methyl group</span>
-          <span class="c1"># specifically labelled, or for unsuitable labelling patterns</span>
-          <span class="c1"># Assume default labeling for the rest.</span>
-          <span class="c1"># This may give misleading results, but it is the best we can reasonably do.</span>
-          <span class="n">fract</span> <span class="o">=</span> <span class="n">isotopeCode2Fraction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">isotopeCode</span><span class="p">)</span>
-          <span class="k">if</span> <span class="n">fract</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;isotopeCode </span><span class="si">%s</span><span class="s2"> not recognised for </span><span class="si">%s</span><span class="s2">&quot;</span>
-                             <span class="o">%</span> <span class="p">(</span><span class="n">isotopeCode</span><span class="p">,</span> <span class="n">atom</span><span class="p">))</span>
-          <span class="k">else</span><span class="p">:</span>
-            <span class="n">fraction</span> <span class="o">+=</span> <span class="n">fract</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">count</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">))</span>
-
-    <span class="k">if</span> <span class="n">fraction</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="c1"># Most common case - put in dta structure to process below</span>
-      <span class="n">dd2</span> <span class="o">=</span> <span class="n">processData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">residue</span><span class="p">,</span> <span class="p">{})</span>
-      <span class="n">dd2</span><span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">isotopeCode</span>
-      <span class="n">processData</span><span class="p">[</span><span class="n">residue</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd2</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="c1"># include fraction in result</span>
-      <span class="n">result</span> <span class="o">*=</span> <span class="n">fraction</span>
-
-  <span class="c1"># Process atoms that were not specifically labelled</span>
-  <span class="n">labelling</span> <span class="o">=</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">labelling</span>
-  <span class="k">if</span> <span class="n">labelling</span><span class="p">:</span>
-    <span class="n">labellingScheme</span> <span class="o">=</span> <span class="n">getLabellingScheme</span><span class="p">(</span><span class="n">labelling</span><span class="p">)</span>
-  <span class="k">else</span><span class="p">:</span>
-    <span class="n">labellingScheme</span> <span class="o">=</span> <span class="bp">None</span>
-  <span class="k">for</span> <span class="n">residue</span><span class="p">,</span> <span class="n">atomName2IsotopeCode</span> <span class="ow">in</span> <span class="n">processData</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="n">fraction</span> <span class="o">=</span> <span class="n">residueLabelledFraction</span><span class="p">(</span><span class="n">atomName2IsotopeCode</span><span class="o">=</span><span class="n">atomName2IsotopeCode</span><span class="p">,</span>
-                                       <span class="n">residueType</span><span class="o">=</span><span class="n">residue</span><span class="o">.</span><span class="n">residueType</span><span class="p">,</span>
-                                       <span class="n">labellingScheme</span><span class="o">=</span><span class="n">labellingScheme</span><span class="p">,</span>
-                                       <span class="n">isotopeCode2Fraction</span><span class="o">=</span><span class="n">isotopeCode2Fraction</span><span class="p">)</span>
-    <span class="c1"># include fraction in result</span>
-    <span class="n">result</span> <span class="o">*=</span> <span class="n">fraction</span>
-  <span class="c1">#</span>
-  <span class="k">return</span> <span class="n">result</span></div>
-
-
-<div class="viewcode-block" id="residueLabelledFraction"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.LabellingLib.residueLabelledFraction">[docs]</a><span class="k">def</span> <span class="nf">residueLabelledFraction</span><span class="p">(</span><span class="n">atomName2IsotopeCode</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="nb">str</span><span class="p">],</span> <span class="n">residueType</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                            <span class="n">labellingScheme</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                            <span class="n">isotopeCode2Fraction</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                            <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-  <span class="sd">&quot;&quot;&quot;Get fraction matching isotopeCodes for atoms in a single residue from labeling scheme and/or</span>
-<span class="sd">  uniform labeling. Position-specific labeling is NOT considered. If residueType or labellingScheme</span>
-<span class="sd">  is absent, or if an atom name is not found in the labelling scheme, the isotopeCode2Fraction</span>
-<span class="sd">  dictionary is used for that atom(s). If any atom has no labelling information anywhere, the</span>
-<span class="sd">  function returns None.</span>
-
-<span class="sd">  :params atomName2IsotopeCode  {atomName:isotopeCode} dictionary defining the labelling pattern</span>
-<span class="sd">  to evaluate, e.g. {&#39;CA&#39;:&#39;13C&#39;, &#39;CB&#39;:&#39;12C&#39;, &#39;CG&#39;:&#39;13C&#39;}.</span>
-<span class="sd">  The atom name may may end in &#39;%&#39;, referring to equivalent atoms e.g. Leu HB%, CD%, HD1% or HD%,</span>
-<span class="sd">  in which case the labelling is averaged over the components.</span>
-<span class="sd">  Non-stereo assigned atoms, e.g. Leu HBx or HDy% will also be averaged, treating</span>
-<span class="sd">  HBx as HB% and HDy% as HD%. This will be misleading if the components have very different</span>
-<span class="sd">  labelling levels, but it is the lesser evil.</span>
-
-<span class="sd">  :params residueType  Type of residue that atoms belong to.</span>
-<span class="sd">  If absent only uniform labelling is considered.</span>
-
-<span class="sd">  :params labellingScheme  Labelling scheme dictionary (see example below).</span>
-<span class="sd">  If absent only uniform labelling is considered.</span>
-
-<span class="sd">  :params isotopeCode2Fraction  gives default uniform isotope</span>
-<span class="sd">    percentages, as for SampleComponent.uniformIsotopeFractions (q.v.).</span>
-<span class="sd">    Example value: {&#39;12C&#39;:0.289, &#39;13C&#39;:0.711, &#39;1H&#39;:0.99985, &#39;2H&#39;:0.00015}</span>
-
-<span class="sd">  |  *Example of labeling scheme dictionary*</span>
-<span class="sd">  |</span>
-<span class="sd">  | &#39;MyScheme&#39;: {</span>
-<span class="sd">  |   &#39;_name&#39;:&#39;MyScheme&#39;,</span>
-<span class="sd">  |   &#39;GLY&#39;:[</span>
-<span class="sd">  |     { &#39;_weight&#39;:0.2,</span>
-<span class="sd">  |        &#39;CA&#39;:{&#39;13C&#39;:0.5, &#39;12C&#39;:0.5}</span>
-<span class="sd">  |         &#39;C&#39;:{&#39;13C&#39;:0.99,&#39;12C&#39;:0.01}</span>
-<span class="sd">  |     },</span>
-<span class="sd">  |     {</span>
-<span class="sd">  |          &#39;_weight&#39;:0.5,</span>
-<span class="sd">  |         &#39;CA&#39;:{&#39;13C&#39;:0.0, &#39;12C&#39;:1.0}</span>
-<span class="sd">  |         &#39;C&#39;:{&#39;13C&#39;:0.0,&#39;12C&#39;:1.0}</span>
-<span class="sd">  |     },</span>
-<span class="sd">  |     {</span>
-<span class="sd">  |        &#39;_weight&#39;:0.3,</span>
-<span class="sd">  |        &#39;C&#39;:{&#39;13C&#39;:0.95, &#39;12C&#39;:0.05},</span>
-<span class="sd">  |        &#39;HA2&#39;:{&#39;1H&#39;:0.7, &#39;2H&#39;:0.3},</span>
-<span class="sd">  |        &#39;HA3&#39;:{&#39;1H&#39;:0.7, &#39;2H&#39;:0.3} }</span>
-<span class="sd">  |   ],</span>
-<span class="sd">  |   &#39;ALA&#39;: [</span>
-<span class="sd">  |   ...</span>
-<span class="sd">  |   ],</span>
-<span class="sd">  |   ...</span>
-<span class="sd">  | },</span>
-<span class="sd">  |</span>
-<span class="sd">  | The first isotopomer is 50% 13C CA and 99% 13C carbonyl, and defaults to the uniform labelling</span>
-<span class="sd">  | fraction for 1H and 15N.</span>
-<span class="sd">  |</span>
-<span class="sd">  | The second isotopomer is 100% C12 for both CA and carbonyl, and defaults to the uniform</span>
-<span class="sd">  | labelling fraction for 1H and 15N</span>
-<span class="sd">  |</span>
-<span class="sd">  | The third isotopomer is 95% 13C for carbonyl, 30% deuterium labelled (i.e. 70% 1H) for the</span>
-<span class="sd">  | aliphatic protons, and defaults to the uniform labelling fraction for nitrogen, CA, and NH</span>
-<span class="sd">  | protons.</span>
-
-
-<span class="sd">  &quot;&quot;&quot;</span>
-
-  <span class="c1"># NB This does NOT support wildcards ending in &#39;*&#39; (used e.g. for DNA &quot;H2&#39;*&quot;)</span>
-  <span class="c1"># But the fragility of adding &#39;*&#39; is not worth the limited usefulness</span>
-  <span class="n">wildCardEndings</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;x%&#39;</span><span class="p">,</span> <span class="s1">&#39;y%&#39;</span><span class="p">,</span> <span class="s1">&#39;%&#39;</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,)</span>
-
-  <span class="k">if</span> <span class="n">residueType</span> <span class="ow">and</span> <span class="n">labellingScheme</span><span class="p">:</span>
-    <span class="n">isotopomers</span> <span class="o">=</span> <span class="n">labellingScheme</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">residueType</span><span class="p">)</span>
-  <span class="k">else</span><span class="p">:</span>
-    <span class="n">isotopomers</span> <span class="o">=</span> <span class="bp">None</span>
-
-  <span class="k">if</span> <span class="n">isotopomers</span><span class="p">:</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="mf">0.0</span>
-    <span class="n">weights</span> <span class="o">=</span> <span class="mf">0.0</span>
-    <span class="k">for</span> <span class="n">isotopomer</span> <span class="ow">in</span> <span class="n">isotopomers</span><span class="p">:</span>
-
-      <span class="n">contribution</span> <span class="o">=</span> <span class="mf">1.0</span>
-
-      <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">isotopeCode</span> <span class="ow">in</span> <span class="n">atomName2IsotopeCode</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">dd</span> <span class="o">=</span> <span class="n">isotopomer</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">dd</span><span class="p">:</span>
-          <span class="c1"># Isotopomer has data for atom `name`</span>
-          <span class="n">fraction</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">isotopeCode</span><span class="p">)</span>
-
-        <span class="k">else</span><span class="p">:</span>
-          <span class="c1"># No data for atom `name`.</span>
-          <span class="n">fraction</span> <span class="o">=</span> <span class="bp">None</span>
-          <span class="k">for</span> <span class="n">ending</span> <span class="ow">in</span> <span class="n">wildCardEndings</span><span class="p">:</span>
-            <span class="c1"># Check if it is a wildcard atom</span>
-
-            <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">ending</span><span class="p">):</span>
-              <span class="c1"># Wildcard. average over contained atoms</span>
-              <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ending</span><span class="p">)</span>
-              <span class="n">prefix</span> <span class="o">=</span> <span class="n">name</span><span class="p">[:</span><span class="o">-</span><span class="n">length</span><span class="p">]</span>
-              <span class="n">summa</span> <span class="o">=</span> <span class="mf">0.0</span>
-              <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
-              <span class="k">for</span> <span class="n">ss</span><span class="p">,</span> <span class="n">dd</span> <span class="ow">in</span> <span class="n">isotopomer</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">if</span> <span class="n">ss</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="ow">and</span> <span class="n">ss</span><span class="p">[</span><span class="o">-</span><span class="n">length</span><span class="p">:]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
-                  <span class="c1"># Atom matches wildcard expression</span>
-                  <span class="n">fract</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">isotopeCode</span><span class="p">)</span>
-                  <span class="k">if</span> <span class="n">fract</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                      <span class="s2">&quot;Residue </span><span class="si">%s</span><span class="s2">, atom </span><span class="si">%s</span><span class="s2"> (from </span><span class="si">%s</span><span class="s2">) recognised, but no data for isotope </span><span class="si">%s</span><span class="s2">&quot;</span>
-                      <span class="o">%</span> <span class="p">(</span><span class="n">residueType</span><span class="p">,</span> <span class="n">ss</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">isotopeCode</span><span class="p">)</span>
-                    <span class="p">)</span>
-                  <span class="k">else</span><span class="p">:</span>
-                    <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
-                    <span class="n">summa</span> <span class="o">+=</span> <span class="n">fract</span>
-              <span class="k">if</span> <span class="n">count</span><span class="p">:</span>
-                <span class="n">fraction</span> <span class="o">=</span> <span class="n">summa</span><span class="o">/</span><span class="n">count</span>
-
-              <span class="k">break</span>
-
-        <span class="k">if</span> <span class="n">fraction</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-          <span class="c1"># Not a wildcard or no matches found - get fraction from isotope</span>
-          <span class="n">fraction</span> <span class="o">=</span> <span class="n">isotopeCode2Fraction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">isotopeCode</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">fraction</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Residue </span><span class="si">%s</span><span class="s2">, atom </span><span class="si">%s</span><span class="s2"> recognised, but no data for isotope </span><span class="si">%s</span><span class="s2">&quot;</span>
-                           <span class="o">%</span> <span class="p">(</span><span class="n">residueType</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">isotopeCode</span><span class="p">))</span>
-
-        <span class="k">else</span><span class="p">:</span>
-          <span class="n">contribution</span> <span class="o">*=</span> <span class="n">fraction</span>
-
-      <span class="n">weight</span> <span class="o">=</span> <span class="n">isotopomer</span><span class="p">[</span><span class="s1">&#39;_weight&#39;</span><span class="p">]</span>
-      <span class="n">weights</span> <span class="o">+=</span> <span class="n">weight</span>
-      <span class="n">result</span> <span class="o">+=</span> <span class="n">contribution</span><span class="o">*</span><span class="n">weight</span>
-    <span class="c1">#</span>
-    <span class="n">result</span> <span class="o">/=</span> <span class="n">weights</span>
-
-  <span class="k">else</span><span class="p">:</span>
-    <span class="c1"># No isotopomers - get labelling from uniform fractions only</span>
     <span class="n">result</span> <span class="o">=</span> <span class="mf">1.0</span>
-    <span class="k">for</span> <span class="n">isotopeCode</span> <span class="ow">in</span> <span class="n">atomName2IsotopeCode</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-      <span class="n">fraction</span> <span class="o">=</span> <span class="n">isotopeCode2Fraction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">isotopeCode</span><span class="p">)</span>
-      <span class="k">if</span> <span class="n">fraction</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No data for isotope </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">isotopeCode</span><span class="p">)</span>
-      <span class="k">else</span><span class="p">:</span>
+    <span class="n">isotopeCode2Fraction</span> <span class="o">=</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">isotopeCode2Fraction</span>
+    <span class="n">processData</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">substance</span> <span class="o">=</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span>
+    <span class="n">chains</span> <span class="o">=</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">chains</span>
+
+    <span class="k">for</span> <span class="n">atom</span><span class="p">,</span> <span class="n">isotopeCode</span> <span class="ow">in</span> <span class="n">atom2IsotopeCode</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+        <span class="n">residue</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">residue</span>
+        <span class="n">chain</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">chain</span>
+        <span class="k">if</span> <span class="n">chain</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">chains</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> does not match any of the chains for </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">atom</span><span class="p">,</span> <span class="n">sampleComponent</span><span class="p">))</span>
+
+        <span class="c1"># fraction serves as a sentinel, to check if there was specific labelling</span>
+        <span class="n">fraction</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="n">substance</span><span class="p">:</span>
+            <span class="c1"># Go from Atom to a list of component atoms, to catch wildcard atoms</span>
+            <span class="n">atoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">atom</span><span class="p">]</span>
+            <span class="n">ll</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">aa</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">:</span>
+                <span class="n">ll2</span> <span class="o">=</span> <span class="n">aa</span><span class="o">.</span><span class="n">componentAtoms</span>
+                <span class="k">if</span> <span class="n">ll2</span><span class="p">:</span>
+                    <span class="n">atoms</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">ll2</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aa</span><span class="p">)</span>
+            <span class="n">atoms</span> <span class="o">=</span> <span class="n">ll</span>
+
+            <span class="c1"># Sum specific labelling over wildcard component atoms</span>
+            <span class="n">summa</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">aa</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">:</span>
+                <span class="n">dd</span> <span class="o">=</span> <span class="n">substance</span><span class="o">.</span><span class="n">getSpecificAtomLabelling</span><span class="p">(</span><span class="n">aa</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">dd</span><span class="p">:</span>
+                    <span class="c1"># There is a specific labelling for this atom</span>
+                    <span class="n">fract</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">isotopeCode</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">fract</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;isotopeCode </span><span class="si">%s</span><span class="s2"> not recognised in specificAtomLabelling for </span><span class="si">%s</span><span class="s2">&quot;</span>
+                                         <span class="o">%</span> <span class="p">(</span><span class="n">isotopeCode</span><span class="p">,</span> <span class="n">atom</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">summa</span> <span class="o">+=</span> <span class="n">fract</span>
+
+            <span class="k">if</span> <span class="n">count</span><span class="p">:</span>
+                <span class="c1"># At least some atoms were specifically labelled. Use them</span>
+                <span class="n">fraction</span> <span class="o">=</span> <span class="n">summa</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">):</span>
+                    <span class="c1"># Not all atoms were specifically labelled,</span>
+                    <span class="c1"># Could happen e.g. when checking HG% for a Valine with only one methyl group</span>
+                    <span class="c1"># specifically labelled, or for unsuitable labelling patterns</span>
+                    <span class="c1"># Assume default labeling for the rest.</span>
+                    <span class="c1"># This may give misleading results, but it is the best we can reasonably do.</span>
+                    <span class="n">fract</span> <span class="o">=</span> <span class="n">isotopeCode2Fraction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">isotopeCode</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">fract</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;isotopeCode </span><span class="si">%s</span><span class="s2"> not recognised for </span><span class="si">%s</span><span class="s2">&quot;</span>
+                                         <span class="o">%</span> <span class="p">(</span><span class="n">isotopeCode</span><span class="p">,</span> <span class="n">atom</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">fraction</span> <span class="o">+=</span> <span class="n">fract</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">count</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">fraction</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c1"># Most common case - put in dta structure to process below</span>
+            <span class="n">dd2</span> <span class="o">=</span> <span class="n">processData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">residue</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="n">dd2</span><span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">isotopeCode</span>
+            <span class="n">processData</span><span class="p">[</span><span class="n">residue</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># include fraction in result</span>
+            <span class="n">result</span> <span class="o">*=</span> <span class="n">fraction</span>
+
+    <span class="c1"># Process atoms that were not specifically labelled</span>
+    <span class="n">labelling</span> <span class="o">=</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">labelling</span>
+    <span class="k">if</span> <span class="n">labelling</span><span class="p">:</span>
+        <span class="n">labellingScheme</span> <span class="o">=</span> <span class="n">getLabellingScheme</span><span class="p">(</span><span class="n">labelling</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">labellingScheme</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">for</span> <span class="n">residue</span><span class="p">,</span> <span class="n">atomName2IsotopeCode</span> <span class="ow">in</span> <span class="n">processData</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">fraction</span> <span class="o">=</span> <span class="n">residueLabelledFraction</span><span class="p">(</span><span class="n">atomName2IsotopeCode</span><span class="o">=</span><span class="n">atomName2IsotopeCode</span><span class="p">,</span>
+                                           <span class="n">residueType</span><span class="o">=</span><span class="n">residue</span><span class="o">.</span><span class="n">residueType</span><span class="p">,</span>
+                                           <span class="n">labellingScheme</span><span class="o">=</span><span class="n">labellingScheme</span><span class="p">,</span>
+                                           <span class="n">isotopeCode2Fraction</span><span class="o">=</span><span class="n">isotopeCode2Fraction</span><span class="p">)</span>
+        <span class="c1"># include fraction in result</span>
         <span class="n">result</span> <span class="o">*=</span> <span class="n">fraction</span>
-  <span class="c1">#</span>
-  <span class="k">return</span> <span class="n">result</span></div>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">result</span></div>
 
-<div class="viewcode-block" id="atomLabelledFraction"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.LabellingLib.atomLabelledFraction">[docs]</a><span class="k">def</span> <span class="nf">atomLabelledFraction</span><span class="p">(</span><span class="n">sample</span><span class="p">:</span><span class="n">Sample</span><span class="p">,</span> <span class="n">atom2IsotopeCode</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="n">Atom</span><span class="p">,</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-  <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  Get fraction of cases in sample where the atoms have the</span>
-<span class="sd">  indicated isotopeCodes.</span>
-<span class="sd">  Equivalent groups of atoms e.g. Leu HB%, CD%, HD1% or HD%, will be averaged over their constituent</span>
-<span class="sd">  atoms. Non-stereo assigned atoms, e.g. Leu HBx or HDy% will also be averaged, treating</span>
-<span class="sd">  HBx as HB% and HDy% as HD%. This will be misleading if the components have very different</span>
-<span class="sd">  labelling levels, but it remains the lesser evil.</span>
 
-<span class="sd">  :params sample  Sample to use for determining labeling</span>
+<div class="viewcode-block" id="residueLabelledFraction"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.LabellingLib.residueLabelledFraction">[docs]</a><span class="k">def</span> <span class="nf">residueLabelledFraction</span><span class="p">(</span><span class="n">atomName2IsotopeCode</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">residueType</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                            <span class="n">labellingScheme</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                            <span class="n">isotopeCode2Fraction</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                            <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Get fraction matching isotopeCodes for atoms in a single residue from labeling scheme and/or</span>
+<span class="sd">    uniform labeling. Position-specific labeling is NOT considered. If residueType or labellingScheme</span>
+<span class="sd">    is absent, or if an atom name is not found in the labelling scheme, the isotopeCode2Fraction</span>
+<span class="sd">    dictionary is used for that atom(s). If any atom has no labelling information anywhere, the</span>
+<span class="sd">    function returns None.</span>
 
-<span class="sd">  :params atom2IsotopeCode  {atom:isotopeCode} dictionary for atoms to look at.</span>
-<span class="sd"> &quot;&quot;&quot;</span>
+<span class="sd">    :params atomName2IsotopeCode  {atomName:isotopeCode} dictionary defining the labelling pattern</span>
+<span class="sd">    to evaluate, e.g. {&#39;CA&#39;:&#39;13C&#39;, &#39;CB&#39;:&#39;12C&#39;, &#39;CG&#39;:&#39;13C&#39;}.</span>
+<span class="sd">    The atom name may may end in &#39;%&#39;, referring to equivalent atoms e.g. Leu HB%, CD%, HD1% or HD%,</span>
+<span class="sd">    in which case the labelling is averaged over the components.</span>
+<span class="sd">    Non-stereo assigned atoms, e.g. Leu HBx or HDy% will also be averaged, treating</span>
+<span class="sd">    HBx as HB% and HDy% as HD%. This will be misleading if the components have very different</span>
+<span class="sd">    labelling levels, but it is the lesser evil.</span>
 
-  <span class="c1"># Reorganise input for processing</span>
-  <span class="n">processData</span> <span class="o">=</span> <span class="p">{}</span>
-  <span class="k">for</span> <span class="n">atom</span><span class="p">,</span> <span class="n">isotopeCode</span> <span class="ow">in</span> <span class="n">atom2IsotopeCode</span><span class="p">:</span>
-    <span class="n">chain</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">chain</span>
-    <span class="n">dd</span> <span class="o">=</span> <span class="n">processData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">chain</span><span class="p">,{})</span>
-    <span class="n">dd</span><span class="p">[</span><span class="n">atom</span><span class="p">]</span> <span class="o">=</span> <span class="n">isotopeCode</span>
-    <span class="n">processData</span><span class="p">[</span><span class="n">chain</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span>
+<span class="sd">    :params residueType  Type of residue that atoms belong to.</span>
+<span class="sd">    If absent only uniform labelling is considered.</span>
 
-  <span class="n">result</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="sd">    :params labellingScheme  Labelling scheme dictionary (see example below).</span>
+<span class="sd">    If absent only uniform labelling is considered.</span>
 
-  <span class="c1"># Get labelledFractions, one chain at a time</span>
-  <span class="n">sampleComponents</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">sampleComponents</span>
-  <span class="k">for</span> <span class="n">chain</span><span class="p">,</span> <span class="n">dd</span> <span class="ow">in</span> <span class="n">processData</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="n">chainComponents</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sampleComponents</span> <span class="k">if</span> <span class="n">chain</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">chains</span><span class="p">]</span>
+<span class="sd">    :params isotopeCode2Fraction  gives default uniform isotope</span>
+<span class="sd">      percentages, as for SampleComponent.uniformIsotopeFractions (q.v.).</span>
+<span class="sd">      Example value: {&#39;12C&#39;:0.289, &#39;13C&#39;:0.711, &#39;1H&#39;:0.99985, &#39;2H&#39;:0.00015}</span>
 
-    <span class="k">if</span> <span class="n">chainComponents</span><span class="p">:</span>
-      <span class="n">sampleComponent0</span> <span class="o">=</span> <span class="n">chainComponents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-      <span class="n">fraction</span> <span class="o">=</span> <span class="n">sampleComponentLabelledFraction</span><span class="p">(</span><span class="n">sampleComponent0</span><span class="p">,</span> <span class="n">dd</span><span class="p">)</span>
+<span class="sd">    |  *Example of labeling scheme dictionary*</span>
+<span class="sd">    |</span>
+<span class="sd">    | &#39;MyScheme&#39;: {</span>
+<span class="sd">    |   &#39;_name&#39;:&#39;MyScheme&#39;,</span>
+<span class="sd">    |   &#39;GLY&#39;:[</span>
+<span class="sd">    |     { &#39;_weight&#39;:0.2,</span>
+<span class="sd">    |        &#39;CA&#39;:{&#39;13C&#39;:0.5, &#39;12C&#39;:0.5}</span>
+<span class="sd">    |         &#39;C&#39;:{&#39;13C&#39;:0.99,&#39;12C&#39;:0.01}</span>
+<span class="sd">    |     },</span>
+<span class="sd">    |     {</span>
+<span class="sd">    |          &#39;_weight&#39;:0.5,</span>
+<span class="sd">    |         &#39;CA&#39;:{&#39;13C&#39;:0.0, &#39;12C&#39;:1.0}</span>
+<span class="sd">    |         &#39;C&#39;:{&#39;13C&#39;:0.0,&#39;12C&#39;:1.0}</span>
+<span class="sd">    |     },</span>
+<span class="sd">    |     {</span>
+<span class="sd">    |        &#39;_weight&#39;:0.3,</span>
+<span class="sd">    |        &#39;C&#39;:{&#39;13C&#39;:0.95, &#39;12C&#39;:0.05},</span>
+<span class="sd">    |        &#39;HA2&#39;:{&#39;1H&#39;:0.7, &#39;2H&#39;:0.3},</span>
+<span class="sd">    |        &#39;HA3&#39;:{&#39;1H&#39;:0.7, &#39;2H&#39;:0.3} }</span>
+<span class="sd">    |   ],</span>
+<span class="sd">    |   &#39;ALA&#39;: [</span>
+<span class="sd">    |   ...</span>
+<span class="sd">    |   ],</span>
+<span class="sd">    |   ...</span>
+<span class="sd">    | },</span>
+<span class="sd">    |</span>
+<span class="sd">    | The first isotopomer is 50% 13C CA and 99% 13C carbonyl, and defaults to the uniform labelling</span>
+<span class="sd">    | fraction for 1H and 15N.</span>
+<span class="sd">    |</span>
+<span class="sd">    | The second isotopomer is 100% C12 for both CA and carbonyl, and defaults to the uniform</span>
+<span class="sd">    | labelling fraction for 1H and 15N</span>
+<span class="sd">    |</span>
+<span class="sd">    | The third isotopomer is 95% 13C for carbonyl, 30% deuterium labelled (i.e. 70% 1H) for the</span>
+<span class="sd">    | aliphatic protons, and defaults to the uniform labelling fraction for nitrogen, CA, and NH</span>
+<span class="sd">    | protons.</span>
 
-      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">chainComponents</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="c1"># Multiple components - we need to weigh them by concentration and redetermine fraction</span>
-        <span class="n">concentration0</span> <span class="o">=</span> <span class="n">sampleComponent0</span><span class="o">.</span><span class="n">concentration</span>
-        <span class="n">unit0</span> <span class="o">=</span> <span class="n">sampleComponent0</span><span class="o">.</span><span class="n">concentrationUnit</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">concentration0</span><span class="p">:</span>
-          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Concentration not set for </span><span class="si">%s</span><span class="s2"> - cannot average over sampleComponents (1)&quot;</span>
-                           <span class="o">%</span> <span class="n">sampleComponent</span><span class="p">)</span>
 
-        <span class="n">weight</span> <span class="o">=</span> <span class="n">concentration0</span>
-        <span class="n">summa</span> <span class="o">=</span> <span class="n">fraction</span> <span class="o">*</span> <span class="n">concentration0</span>
-        <span class="k">for</span> <span class="n">sampleComponent</span> <span class="ow">in</span> <span class="n">chainComponents</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
-          <span class="n">concentration</span> <span class="o">=</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">concentration</span>
-          <span class="k">if</span> <span class="ow">not</span> <span class="n">concentration</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-              <span class="s2">&quot;Concentration not set for </span><span class="si">%s</span><span class="s2"> - cannot average over sampleComponents (2)&quot;</span>
-              <span class="o">%</span> <span class="n">sampleComponent</span>
-            <span class="p">)</span>
-          <span class="n">unit</span> <span class="o">=</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">concentrationUnit</span>
-          <span class="k">if</span> <span class="n">unit</span> <span class="o">!=</span> <span class="n">unit0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> unit </span><span class="si">%s</span><span class="s2"> does not match previous component </span><span class="si">%s</span><span class="s2"> - </span><span class="si">%s</span><span class="s2">&quot;</span>
-                             <span class="o">%</span> <span class="p">(</span><span class="n">sampleComponent</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">sampleComponent0</span><span class="p">,</span> <span class="n">unit0</span><span class="p">))</span>
-          <span class="n">fract</span> <span class="o">=</span> <span class="n">sampleComponentLabelledFraction</span><span class="p">(</span><span class="n">sampleComponent</span><span class="p">,</span> <span class="n">dd</span><span class="p">)</span>
-          <span class="n">weight</span> <span class="o">+=</span> <span class="n">concentration</span>
-          <span class="n">summa</span> <span class="o">+=</span> <span class="n">fract</span> <span class="o">*</span> <span class="n">concentration</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># NB This does NOT support wildcards ending in &#39;*&#39; (used e.g. for DNA &quot;H2&#39;*&quot;)</span>
+    <span class="c1"># But the fragility of adding &#39;*&#39; is not worth the limited usefulness</span>
+    <span class="n">wildCardEndings</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;x%&#39;</span><span class="p">,</span> <span class="s1">&#39;y%&#39;</span><span class="p">,</span> <span class="s1">&#39;%&#39;</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,)</span>
+
+    <span class="k">if</span> <span class="n">residueType</span> <span class="ow">and</span> <span class="n">labellingScheme</span><span class="p">:</span>
+        <span class="n">isotopomers</span> <span class="o">=</span> <span class="n">labellingScheme</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">residueType</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">isotopomers</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">if</span> <span class="n">isotopomers</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">for</span> <span class="n">isotopomer</span> <span class="ow">in</span> <span class="n">isotopomers</span><span class="p">:</span>
+
+            <span class="n">contribution</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">isotopeCode</span> <span class="ow">in</span> <span class="n">atomName2IsotopeCode</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">dd</span> <span class="o">=</span> <span class="n">isotopomer</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">dd</span><span class="p">:</span>
+                    <span class="c1"># Isotopomer has data for atom `name`</span>
+                    <span class="n">fraction</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">isotopeCode</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># No data for atom `name`.</span>
+                    <span class="n">fraction</span> <span class="o">=</span> <span class="bp">None</span>
+                    <span class="k">for</span> <span class="n">ending</span> <span class="ow">in</span> <span class="n">wildCardEndings</span><span class="p">:</span>
+                        <span class="c1"># Check if it is a wildcard atom</span>
+
+                        <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">ending</span><span class="p">):</span>
+                            <span class="c1"># Wildcard. average over contained atoms</span>
+                            <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ending</span><span class="p">)</span>
+                            <span class="n">prefix</span> <span class="o">=</span> <span class="n">name</span><span class="p">[:</span><span class="o">-</span><span class="n">length</span><span class="p">]</span>
+                            <span class="n">summa</span> <span class="o">=</span> <span class="mf">0.0</span>
+                            <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+                            <span class="k">for</span> <span class="n">ss</span><span class="p">,</span> <span class="n">dd</span> <span class="ow">in</span> <span class="n">isotopomer</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                                <span class="k">if</span> <span class="n">ss</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="ow">and</span> <span class="n">ss</span><span class="p">[</span><span class="o">-</span><span class="n">length</span><span class="p">:]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                                    <span class="c1"># Atom matches wildcard expression</span>
+                                    <span class="n">fract</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">isotopeCode</span><span class="p">)</span>
+                                    <span class="k">if</span> <span class="n">fract</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                                                <span class="s2">&quot;Residue </span><span class="si">%s</span><span class="s2">, atom </span><span class="si">%s</span><span class="s2"> (from </span><span class="si">%s</span><span class="s2">) recognised, but no data for isotope </span><span class="si">%s</span><span class="s2">&quot;</span>
+                                                <span class="o">%</span> <span class="p">(</span><span class="n">residueType</span><span class="p">,</span> <span class="n">ss</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">isotopeCode</span><span class="p">)</span>
+                                                <span class="p">)</span>
+                                    <span class="k">else</span><span class="p">:</span>
+                                        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                                        <span class="n">summa</span> <span class="o">+=</span> <span class="n">fract</span>
+                            <span class="k">if</span> <span class="n">count</span><span class="p">:</span>
+                                <span class="n">fraction</span> <span class="o">=</span> <span class="n">summa</span> <span class="o">/</span> <span class="n">count</span>
+
+                            <span class="k">break</span>
+
+                <span class="k">if</span> <span class="n">fraction</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="c1"># Not a wildcard or no matches found - get fraction from isotope</span>
+                    <span class="n">fraction</span> <span class="o">=</span> <span class="n">isotopeCode2Fraction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">isotopeCode</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">fraction</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Residue </span><span class="si">%s</span><span class="s2">, atom </span><span class="si">%s</span><span class="s2"> recognised, but no data for isotope </span><span class="si">%s</span><span class="s2">&quot;</span>
+                                     <span class="o">%</span> <span class="p">(</span><span class="n">residueType</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">isotopeCode</span><span class="p">))</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">contribution</span> <span class="o">*=</span> <span class="n">fraction</span>
+
+            <span class="n">weight</span> <span class="o">=</span> <span class="n">isotopomer</span><span class="p">[</span><span class="s1">&#39;_weight&#39;</span><span class="p">]</span>
+            <span class="n">weights</span> <span class="o">+=</span> <span class="n">weight</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="n">contribution</span> <span class="o">*</span> <span class="n">weight</span>
         <span class="c1">#</span>
-        <span class="n">fraction</span> <span class="o">=</span> <span class="n">summa</span><span class="o">/</span><span class="n">weight</span>
-      <span class="c1">#</span>
-      <span class="n">result</span> <span class="o">*=</span> <span class="n">fraction</span>
+        <span class="n">result</span> <span class="o">/=</span> <span class="n">weights</span>
 
     <span class="k">else</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Chain </span><span class="si">%s</span><span class="s2"> matches no SampleComponent in sample </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">chain</span><span class="p">,</span> <span class="n">sample</span><span class="p">))</span>
-  <span class="c1">#</span>
-  <span class="k">return</span> <span class="n">result</span></div>
+        <span class="c1"># No isotopomers - get labelling from uniform fractions only</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="k">for</span> <span class="n">isotopeCode</span> <span class="ow">in</span> <span class="n">atomName2IsotopeCode</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">fraction</span> <span class="o">=</span> <span class="n">isotopeCode2Fraction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">isotopeCode</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">fraction</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No data for isotope </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">isotopeCode</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">*=</span> <span class="n">fraction</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="atomLabelledFraction"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.LabellingLib.atomLabelledFraction">[docs]</a><span class="k">def</span> <span class="nf">atomLabelledFraction</span><span class="p">(</span><span class="n">sample</span><span class="p">:</span> <span class="n">Sample</span><span class="p">,</span> <span class="n">atom2IsotopeCode</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="n">Atom</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get fraction of cases in sample where the atoms have the</span>
+<span class="sd">    indicated isotopeCodes.</span>
+<span class="sd">    Equivalent groups of atoms e.g. Leu HB%, CD%, HD1% or HD%, will be averaged over their constituent</span>
+<span class="sd">    atoms. Non-stereo assigned atoms, e.g. Leu HBx or HDy% will also be averaged, treating</span>
+<span class="sd">    HBx as HB% and HDy% as HD%. This will be misleading if the components have very different</span>
+<span class="sd">    labelling levels, but it remains the lesser evil.</span>
+
+<span class="sd">    :params sample  Sample to use for determining labeling</span>
+
+<span class="sd">    :params atom2IsotopeCode  {atom:isotopeCode} dictionary for atoms to look at.</span>
+<span class="sd">   &quot;&quot;&quot;</span>
+
+    <span class="c1"># Reorganise input for processing</span>
+    <span class="n">processData</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">atom</span><span class="p">,</span> <span class="n">isotopeCode</span> <span class="ow">in</span> <span class="n">atom2IsotopeCode</span><span class="p">:</span>
+        <span class="n">chain</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">chain</span>
+        <span class="n">dd</span> <span class="o">=</span> <span class="n">processData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">chain</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">dd</span><span class="p">[</span><span class="n">atom</span><span class="p">]</span> <span class="o">=</span> <span class="n">isotopeCode</span>
+        <span class="n">processData</span><span class="p">[</span><span class="n">chain</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+    <span class="c1"># Get labelledFractions, one chain at a time</span>
+    <span class="n">sampleComponents</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">sampleComponents</span>
+    <span class="k">for</span> <span class="n">chain</span><span class="p">,</span> <span class="n">dd</span> <span class="ow">in</span> <span class="n">processData</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">chainComponents</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sampleComponents</span> <span class="k">if</span> <span class="n">chain</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">chains</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">chainComponents</span><span class="p">:</span>
+            <span class="n">sampleComponent0</span> <span class="o">=</span> <span class="n">chainComponents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">fraction</span> <span class="o">=</span> <span class="n">sampleComponentLabelledFraction</span><span class="p">(</span><span class="n">sampleComponent0</span><span class="p">,</span> <span class="n">dd</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">chainComponents</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c1"># Multiple components - we need to weigh them by concentration and redetermine fraction</span>
+                <span class="n">concentration0</span> <span class="o">=</span> <span class="n">sampleComponent0</span><span class="o">.</span><span class="n">concentration</span>
+                <span class="n">unit0</span> <span class="o">=</span> <span class="n">sampleComponent0</span><span class="o">.</span><span class="n">concentrationUnit</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">concentration0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Concentration not set for </span><span class="si">%s</span><span class="s2"> - cannot average over sampleComponents (1)&quot;</span>
+                                     <span class="o">%</span> <span class="n">sampleComponent</span><span class="p">)</span>
+
+                <span class="n">weight</span> <span class="o">=</span> <span class="n">concentration0</span>
+                <span class="n">summa</span> <span class="o">=</span> <span class="n">fraction</span> <span class="o">*</span> <span class="n">concentration0</span>
+                <span class="k">for</span> <span class="n">sampleComponent</span> <span class="ow">in</span> <span class="n">chainComponents</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                    <span class="n">concentration</span> <span class="o">=</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">concentration</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">concentration</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                                <span class="s2">&quot;Concentration not set for </span><span class="si">%s</span><span class="s2"> - cannot average over sampleComponents (2)&quot;</span>
+                                <span class="o">%</span> <span class="n">sampleComponent</span>
+                                <span class="p">)</span>
+                    <span class="n">unit</span> <span class="o">=</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">concentrationUnit</span>
+                    <span class="k">if</span> <span class="n">unit</span> <span class="o">!=</span> <span class="n">unit0</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> unit </span><span class="si">%s</span><span class="s2"> does not match previous component </span><span class="si">%s</span><span class="s2"> - </span><span class="si">%s</span><span class="s2">&quot;</span>
+                                         <span class="o">%</span> <span class="p">(</span><span class="n">sampleComponent</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">sampleComponent0</span><span class="p">,</span> <span class="n">unit0</span><span class="p">))</span>
+                    <span class="n">fract</span> <span class="o">=</span> <span class="n">sampleComponentLabelledFraction</span><span class="p">(</span><span class="n">sampleComponent</span><span class="p">,</span> <span class="n">dd</span><span class="p">)</span>
+                    <span class="n">weight</span> <span class="o">+=</span> <span class="n">concentration</span>
+                    <span class="n">summa</span> <span class="o">+=</span> <span class="n">fract</span> <span class="o">*</span> <span class="n">concentration</span>
+                <span class="c1">#</span>
+                <span class="n">fraction</span> <span class="o">=</span> <span class="n">summa</span> <span class="o">/</span> <span class="n">weight</span>
+            <span class="c1">#</span>
+            <span class="n">result</span> <span class="o">*=</span> <span class="n">fraction</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Chain </span><span class="si">%s</span><span class="s2"> matches no SampleComponent in sample </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">chain</span><span class="p">,</span> <span class="n">sample</span><span class="p">))</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">result</span></div>
 </pre></div>
 
           </div>

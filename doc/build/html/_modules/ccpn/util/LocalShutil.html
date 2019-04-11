@@ -54,23 +54,21 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:58 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
@@ -80,6 +78,8 @@
 <span class="c1"># Deliberate</span>
 <span class="kn">from</span> <span class="nn">shutil</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">import</span> <span class="nn">os</span>
+
+
 <span class="c1"># Override copytree to ignore copystat errors:</span>
 <span class="c1"># def copytree(src, dst, symlinks=False, ignore=None, copy_function=copy2,</span>
 <span class="c1">#              ignore_dangling_symlinks=False):</span>
@@ -143,10 +143,10 @@
                     <span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="n">linkto</span><span class="p">,</span> <span class="n">dstname</span><span class="p">)</span>
                     <span class="c1"># copystat(srcname, dstname, follow_symlinks=not symlinks)</span>
                     <span class="k">try</span><span class="p">:</span>
-                      <span class="n">copystat</span><span class="p">(</span><span class="n">srcname</span><span class="p">,</span> <span class="n">dstname</span><span class="p">,</span> <span class="n">follow_symlinks</span><span class="o">=</span><span class="ow">not</span> <span class="n">symlinks</span><span class="p">)</span>
+                        <span class="n">copystat</span><span class="p">(</span><span class="n">srcname</span><span class="p">,</span> <span class="n">dstname</span><span class="p">,</span> <span class="n">follow_symlinks</span><span class="o">=</span><span class="ow">not</span> <span class="n">symlinks</span><span class="p">)</span>
                     <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">why</span><span class="p">:</span>
-                      <span class="k">print</span><span class="p">(</span><span class="s1">&#39;WARNING from symlink copying: file permissions could not be copied. &#39;</span>
-                            <span class="s1">&#39;Ignored - known problem on Windows-type file systems&#39;</span><span class="p">)</span>
+                        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;WARNING from symlink copying: file permissions could not be copied. &#39;</span>
+                              <span class="s1">&#39;Ignored - known problem on Windows-type file systems&#39;</span><span class="p">)</span>
                     <span class="c1"># ignore dangling symlink if the flag is on</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">linkto</span><span class="p">)</span> <span class="ow">and</span> <span class="n">ignore_dangling_symlinks</span><span class="p">:</span>
                         <span class="k">continue</span>
@@ -175,7 +175,7 @@
             <span class="k">print</span><span class="p">(</span><span class="s1">&#39;WARNING: file permissions could not be copied. &#39;</span>
                   <span class="s1">&#39;Ignored - known problem on Windows-type file systems&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">errors</span><span class="p">:</span>
-        <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;&quot;&quot;ERRORS in shutil copytree recursive copying. Some possible reasons:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;ERRORS in shutil copytree recursive copying. Some possible reasons:</span>
 <span class="s2">- Absolute file name too long</span>
 <span class="s2">- Permission errors</span>
 <span class="s2">- Mismatch between Windows and Linux file systems</span>
@@ -183,7 +183,6 @@
 <span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
         <span class="k">raise</span> <span class="n">Error</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">dst</span></div>
-
 </pre></div>
 
           </div>

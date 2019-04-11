@@ -24,9 +24,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import collections
 import typing
-import operator
 from functools import partial
 from ccpn.util import Common as commonUtil
 from ccpn.core.lib import MoleculeLib
@@ -36,10 +34,9 @@ from ccpn.core.Residue import Residue
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrChain as ApiNmrChain
-from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.lib import Constants
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, logCommandBlock, undoStackBlocking, renameObject, undoBlock
+from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, renameObject, undoBlock
 
 
 class NmrChain(AbstractWrapperObject):
@@ -166,7 +163,7 @@ class NmrChain(AbstractWrapperObject):
             self._wrappedData.code = None
 
     @logCommand(get='self')
-    def assignSingleResidue(self, thisNmrResidue: typing.Union['NmrResidue'], firstResidue: typing.Union[Residue, str]):
+    def assignSingleResidue(self, thisNmrResidue: typing.Union['NmrResidue'], firstResidue: typing.Union['Residue', str]):
         """Assign a single unconnected residue from the default '@-' chain"""
 
         project = self._project
@@ -192,7 +189,7 @@ class NmrChain(AbstractWrapperObject):
             thisNmrResidue._wrappedData.assignedResidue = firstResidue._wrappedData
 
     @logCommand(get='self')
-    def assignConnectedResidues(self, firstResidue: typing.Union[Residue, str]):
+    def assignConnectedResidues(self, firstResidue: typing.Union['Residue', str]):
         """Assign all NmrResidues in connected NmrChain sequentially,
         with the first NmrResidue assigned to firstResidue.
 
@@ -371,9 +368,9 @@ class NmrChain(AbstractWrapperObject):
         """Fetch NmrResidue with sequenceCode=sequenceCode and residueType=residueType,
         creating it if necessary.
 
-        if sequenceCode is None will create a new NmrResidue
+        if sequenceCode is None will create a new NmrResidue.
 
-        if bool(residueType)  is False will return any existing NmrResidue that matches the sequenceCode
+        if bool(residueType)  is False will return any existing NmrResidue that matches the sequenceCode.
 
         :param sequenceCode:
         :param residueType:

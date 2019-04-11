@@ -69,23 +69,21 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:36 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
@@ -97,6 +95,7 @@
 
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Logging</span>
 
+
 <span class="n">defaultLanguage</span> <span class="o">=</span> <span class="s1">&#39;English-UK&#39;</span>
 <span class="n">translationDirectory</span> <span class="o">=</span> <span class="s1">&#39;translation&#39;</span>  <span class="c1"># assumes that all translations are in sub-directory with this name in a file language.py</span>
 
@@ -104,88 +103,88 @@
 <span class="kn">import</span> <span class="nn">pkgutil</span>
 <span class="kn">import</span> <span class="nn">ccpn.framework.languages</span> <span class="kn">as</span> <span class="nn">tModule</span>
 
+
 <span class="n">languages</span> <span class="o">=</span> <span class="p">[</span><span class="n">defaultLanguage</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">pkgutil</span><span class="o">.</span><span class="n">iter_modules</span><span class="p">(</span><span class="n">tModule</span><span class="o">.</span><span class="n">__path__</span><span class="p">)]</span>
 <span class="k">if</span> <span class="s1">&#39;rude&#39;</span> <span class="ow">in</span> <span class="n">languages</span><span class="p">:</span>
-  <span class="n">languages</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;rude&#39;</span><span class="p">)</span>
+    <span class="n">languages</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;rude&#39;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">Translation</span><span class="p">:</span>
+    <span class="c1"># class variables as the class is used in many instances and there is only one language!</span>
+    <span class="n">_language</span> <span class="o">=</span> <span class="n">defaultLanguage</span>
+    <span class="n">_translationDict</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># maps from default language text to translated text</span>
+    <span class="n">_silentTranslation</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">_translationDebug</span> <span class="o">=</span> <span class="bp">False</span>
 
-  <span class="c1"># class variables as the class is used in many instances and there is only one language!</span>
-  <span class="n">_language</span> <span class="o">=</span> <span class="n">defaultLanguage</span>
-  <span class="n">_translationDict</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># maps from default language text to translated text</span>
-  <span class="n">_silentTranslation</span> <span class="o">=</span> <span class="bp">False</span>
-  <span class="n">_translationDebug</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">pass</span>
+    <span class="k">def</span> <span class="nf">setLanguage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="n">defaultLanguage</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the language. Return True on error</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">language</span> <span class="o">==</span> <span class="n">defaultLanguage</span><span class="p">:</span> <span class="k">return</span>
+        <span class="k">if</span> <span class="n">language</span> <span class="o">==</span> <span class="n">Translation</span><span class="o">.</span><span class="n">_language</span><span class="p">:</span> <span class="k">return</span>
 
-  <span class="k">def</span> <span class="nf">setLanguage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">language</span> <span class="o">=</span> <span class="n">defaultLanguage</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Set the language. Return True on error</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">language</span> <span class="o">==</span> <span class="n">defaultLanguage</span><span class="p">:</span> <span class="k">return</span>
-    <span class="k">if</span> <span class="n">language</span> <span class="o">==</span> <span class="n">Translation</span><span class="o">.</span><span class="n">_language</span><span class="p">:</span> <span class="k">return</span>
+        <span class="n">translationModuleName</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tModule</span><span class="o">.</span><span class="n">__package__</span><span class="p">,</span> <span class="n">language</span><span class="p">)</span>
+        <span class="c1">#print(translationModuleName)</span>
 
-    <span class="n">translationModuleName</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tModule</span><span class="o">.</span><span class="n">__package__</span><span class="p">,</span> <span class="n">language</span><span class="p">)</span>
-    <span class="c1">#print(translationModuleName)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">translationModuleName</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span> <span class="o">=</span> <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Translation for language &quot;</span><span class="si">%s</span><span class="s1">&quot; not available&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">language</span><span class="p">))</span>
+            <span class="k">return</span> <span class="bp">True</span>
 
-    <span class="k">try</span><span class="p">:</span>
-      <span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">translationModuleName</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-      <span class="n">logger</span> <span class="o">=</span> <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
-      <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Translation for language &quot;</span><span class="si">%s</span><span class="s1">&quot; not available&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">language</span><span class="p">))</span>
-      <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">moduleTranslationDict</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">translationDict</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span> <span class="o">=</span> <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;translation module &quot;</span><span class="si">%s</span><span class="s1">&quot; does not have a translationDict&#39;</span> <span class="o">%</span> <span class="n">translationModuleName</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">True</span>
 
-    <span class="k">try</span><span class="p">:</span>
-      <span class="n">moduleTranslationDict</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">translationDict</span>
-    <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-      <span class="n">logger</span> <span class="o">=</span> <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
-      <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;translation module &quot;</span><span class="si">%s</span><span class="s1">&quot; does not have a translationDict&#39;</span> <span class="o">%</span> <span class="n">translationModuleName</span><span class="p">)</span>
-      <span class="k">return</span> <span class="bp">True</span>
+        <span class="n">Translation</span><span class="o">.</span><span class="n">_translationDict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">moduleTranslationDict</span><span class="p">)</span>
+        <span class="n">Translation</span><span class="o">.</span><span class="n">_language</span> <span class="o">=</span> <span class="n">language</span>
+        <span class="k">return</span> <span class="bp">False</span>
 
-    <span class="n">Translation</span><span class="o">.</span><span class="n">_translationDict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">moduleTranslationDict</span><span class="p">)</span>
-    <span class="n">Translation</span><span class="o">.</span><span class="n">_language</span> <span class="o">=</span> <span class="n">language</span>
-    <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">def</span> <span class="nf">translate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Translate a specific text into the previously specified language. &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">text</span>
 
-  <span class="k">def</span> <span class="nf">translate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Translate a specific text into the previously specified language. &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="p">:</span>
-      <span class="k">return</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">text</span>
+        <span class="c1"># default language;</span>
+        <span class="k">if</span> <span class="n">Translation</span><span class="o">.</span><span class="n">_language</span> <span class="o">==</span> <span class="n">defaultLanguage</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">text</span>
 
-    <span class="c1"># default language;</span>
-    <span class="k">if</span> <span class="n">Translation</span><span class="o">.</span><span class="n">_language</span> <span class="o">==</span> <span class="n">defaultLanguage</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">text</span>
+        <span class="n">translatedText</span> <span class="o">=</span> <span class="n">Translation</span><span class="o">.</span><span class="n">_translationDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
 
-    <span class="n">translatedText</span> <span class="o">=</span> <span class="n">Translation</span><span class="o">.</span><span class="n">_translationDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="c1">#print(&#39;&gt;&gt;translate: &quot;%s&quot; -&gt; &quot;%s&quot;&#39; % (text,translatedText))</span>
 
-    <span class="c1">#print(&#39;&gt;&gt;translate: &quot;%s&quot; -&gt; &quot;%s&quot;&#39; % (text,translatedText))</span>
+        <span class="k">if</span> <span class="n">translatedText</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">translatedText</span> <span class="o">=</span> <span class="n">text</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">Translation</span><span class="o">.</span><span class="n">_silentTranslation</span><span class="p">:</span>
+                <span class="n">logger</span> <span class="o">=</span> <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;text &quot;</span><span class="si">%s</span><span class="s1">&quot; not in &quot;</span><span class="si">%s</span><span class="s1">&quot; translation dictionary&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">Translation</span><span class="o">.</span><span class="n">_language</span><span class="p">))</span>
+                <span class="c1"># only warn once for &#39;text&#39; by putting the string in the translation dictionary</span>
+                <span class="n">Translation</span><span class="o">.</span><span class="n">_translationDict</span><span class="p">[</span><span class="n">text</span><span class="p">]</span> <span class="o">=</span> <span class="n">translatedText</span>
 
-    <span class="k">if</span> <span class="n">translatedText</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">translatedText</span> <span class="o">=</span> <span class="n">text</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="n">Translation</span><span class="o">.</span><span class="n">_silentTranslation</span><span class="p">:</span>
-        <span class="n">logger</span> <span class="o">=</span> <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;text &quot;</span><span class="si">%s</span><span class="s1">&quot; not in &quot;</span><span class="si">%s</span><span class="s1">&quot; translation dictionary&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">Translation</span><span class="o">.</span><span class="n">_language</span><span class="p">))</span>
-        <span class="c1"># only warn once for &#39;text&#39; by putting the string in the translation dictionary</span>
-        <span class="n">Translation</span><span class="o">.</span><span class="n">_translationDict</span><span class="p">[</span><span class="n">text</span><span class="p">]</span> <span class="o">=</span> <span class="n">translatedText</span>
+        <span class="k">if</span> <span class="n">Translation</span><span class="o">.</span><span class="n">_translationDebug</span><span class="p">:</span>
+            <span class="n">translatedText</span> <span class="o">+=</span> <span class="s1">&#39; (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">text</span>
 
-    <span class="k">if</span> <span class="n">Translation</span><span class="o">.</span><span class="n">_translationDebug</span><span class="p">:</span>
-      <span class="n">translatedText</span> <span class="o">+=</span> <span class="s1">&#39; (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">text</span>
+        <span class="k">return</span> <span class="n">translatedText</span>
 
-    <span class="k">return</span> <span class="n">translatedText</span>
+    <span class="k">def</span> <span class="nf">setSilent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">Translation</span><span class="o">.</span><span class="n">_silentTranslation</span> <span class="o">=</span> <span class="bp">True</span>
 
-  <span class="k">def</span> <span class="nf">setSilent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">Translation</span><span class="o">.</span><span class="n">_silentTranslation</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">def</span> <span class="nf">setLoud</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">Translation</span><span class="o">.</span><span class="n">_silentTranslation</span> <span class="o">=</span> <span class="bp">False</span>
 
-  <span class="k">def</span> <span class="nf">setLoud</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">Translation</span><span class="o">.</span><span class="n">_silentTranslation</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">def</span> <span class="nf">setDebug</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">Translation</span><span class="o">.</span><span class="n">_translationDebug</span> <span class="o">=</span> <span class="n">value</span>
 
-  <span class="k">def</span> <span class="nf">setDebug</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-    <span class="n">Translation</span><span class="o">.</span><span class="n">_translationDebug</span> <span class="o">=</span> <span class="n">value</span>
 
 <span class="n">translator</span> <span class="o">=</span> <span class="n">Translation</span><span class="p">()</span>
-
 
 <span class="c1">######################################################################################</span>
 
@@ -196,50 +195,51 @@
 <span class="kn">from</span> <span class="nn">ccpn.util.Path</span> <span class="kn">import</span> <span class="n">getTopDirectory</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
+
 <span class="n">logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">()</span>
 
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;getTranslator&#39;</span><span class="p">]</span>
 
-<span class="n">__all__</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;getTranslator&#39;</span><span class="p">]</span>
 
 <span class="k">def</span> <span class="nf">_get_languages</span><span class="p">():</span>
-  <span class="n">languagesPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">getTopDirectory</span><span class="p">(),</span> <span class="s1">&#39;config&#39;</span><span class="p">,</span> <span class="s1">&#39;languages&#39;</span><span class="p">)</span>
-  <span class="n">languageFiles</span> <span class="o">=</span>  <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">languagesPath</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">languagesPath</span><span class="p">,</span> <span class="n">f</span><span class="p">))]</span>
-  <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Found {} language files&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">languageFiles</span><span class="p">))</span>
-  <span class="n">languages</span> <span class="o">=</span> <span class="p">[</span><span class="n">l</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">languageFiles</span><span class="p">]</span>
-  <span class="k">return</span> <span class="n">languages</span>
+    <span class="n">languagesPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">getTopDirectory</span><span class="p">(),</span> <span class="s1">&#39;config&#39;</span><span class="p">,</span> <span class="s1">&#39;languages&#39;</span><span class="p">)</span>
+    <span class="n">languageFiles</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">languagesPath</span><span class="p">)</span>
+                     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">languagesPath</span><span class="p">,</span> <span class="n">f</span><span class="p">))]</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Found {} language files&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">languageFiles</span><span class="p">))</span>
+    <span class="n">languages</span> <span class="o">=</span> <span class="p">[</span><span class="n">l</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">languageFiles</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">languages</span>
 
 
 <span class="k">def</span> <span class="nf">_get_translation_dictionary</span><span class="p">(</span><span class="n">language</span><span class="p">):</span>
-  <span class="n">languagesPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">getTopDirectory</span><span class="p">(),</span> <span class="s1">&#39;config&#39;</span><span class="p">,</span> <span class="s1">&#39;languages&#39;</span><span class="p">)</span>
-  <span class="k">try</span><span class="p">:</span>
-    <span class="n">languageFilePath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">languagesPath</span><span class="p">,</span> <span class="n">language</span> <span class="o">+</span> <span class="s1">&#39;.json&#39;</span><span class="p">)</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">languageFilePath</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-      <span class="n">tDict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">tDict</span>
-  <span class="k">except</span><span class="p">:</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Language file for {} failed to load&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">language</span><span class="p">))</span>
-    <span class="k">return</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">languagesPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">getTopDirectory</span><span class="p">(),</span> <span class="s1">&#39;config&#39;</span><span class="p">,</span> <span class="s1">&#39;languages&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">languageFilePath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">languagesPath</span><span class="p">,</span> <span class="n">language</span> <span class="o">+</span> <span class="s1">&#39;.json&#39;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">languageFilePath</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">tDict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tDict</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Language file for {} failed to load&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">language</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">()</span>
 
 
 <span class="k">def</span> <span class="nf">_translator</span><span class="p">(</span><span class="n">translationDict</span><span class="p">,</span> <span class="n">word</span><span class="p">):</span>
-  <span class="n">t</span> <span class="o">=</span> <span class="n">translationDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">word</span><span class="p">)</span>
-  <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Translating {} to {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">t</span><span class="p">))</span>  <span class="c1"># The string interpolation can be costly.</span>
-  <span class="k">return</span> <span class="n">t</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">translationDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">word</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Translating {} to {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">t</span><span class="p">))</span>  <span class="c1"># The string interpolation can be costly.</span>
+    <span class="k">return</span> <span class="n">t</span>
 
 
 <div class="viewcode-block" id="getTranslator"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Translation.getTranslator">[docs]</a><span class="k">def</span> <span class="nf">getTranslator</span><span class="p">(</span><span class="n">language</span><span class="p">):</span>
-  <span class="n">tDict</span> <span class="o">=</span> <span class="n">_get_translation_dictionary</span><span class="p">(</span><span class="n">language</span><span class="p">)</span>
-  <span class="n">tr</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">_translator</span><span class="p">,</span> <span class="n">tDict</span><span class="p">)</span>
-  <span class="k">return</span> <span class="n">tr</span></div>
+    <span class="n">tDict</span> <span class="o">=</span> <span class="n">_get_translation_dictionary</span><span class="p">(</span><span class="n">language</span><span class="p">)</span>
+    <span class="n">tr</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">_translator</span><span class="p">,</span> <span class="n">tDict</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tr</span></div>
+
 
 <span class="c1">######################################################################################</span>
 
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-
-  <span class="n">tr</span> <span class="o">=</span> <span class="n">Translation</span><span class="p">()</span>
-  <span class="n">tr</span><span class="o">.</span><span class="n">setLanguage</span><span class="p">(</span><span class="s1">&#39;Italian&#39;</span><span class="p">)</span>
-  <span class="k">print</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="s2">&quot;New&quot;</span><span class="p">))</span>
+    <span class="n">tr</span> <span class="o">=</span> <span class="n">Translation</span><span class="p">()</span>
+    <span class="n">tr</span><span class="o">.</span><span class="n">setLanguage</span><span class="p">(</span><span class="s1">&#39;Italian&#39;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="s2">&quot;New&quot;</span><span class="p">))</span>
 </pre></div>
 
           </div>

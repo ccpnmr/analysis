@@ -50,18 +50,18 @@
 <span></span><span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:45 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -89,259 +89,247 @@
 <span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
+
 <div class="viewcode-block" id="MacroEditor"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.MacroEditor.MacroEditor">[docs]</a><span class="k">class</span> <span class="nc">MacroEditor</span><span class="p">(</span><span class="n">CcpnModule</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  This module will create a temp python file when you press the run button and will execute it from the console.</span>
-<span class="sd">  A file will be created in the temporary  macro directory .ccpn/macros</span>
-<span class="sd">  and will be automatically deleted after the macro is ran.</span>
-<span class="sd">  The user can decide to save as a in a new file location.</span>
-
-<span class="sd">  The macro name is the file name on the disk (without the .py extension).</span>
-<span class="sd">  NB. If you open an existing file.py and modify it, the changes are not automatically re-written on the disk.</span>
-<span class="sd">   All changes WILL BE LOST if not save them. Automatic saving of a .py file can be dangerous for the users.</span>
-
-<span class="sd">  &quot;&quot;&quot;</span>
-  <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">False</span>
-  <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;MacroEditor&#39;</span>
-
-
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Macro Editor&#39;</span><span class="p">,</span> <span class="n">filePath</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="n">CcpnModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">preferences</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_pythonConsole</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pythonConsole</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_pythonConsole</span> <span class="o">=</span> <span class="n">IpythonConsole</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">macroPath</span> <span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">userMacroPath</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_isTempMacro</span> <span class="o">=</span> <span class="bp">True</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_originalOpenedFile</span> <span class="o">=</span> <span class="bp">None</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
-
-    <span class="n">hGrid</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">namelabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="s1">&#39;Macro Name&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">hGrid</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">nameLineEdit</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span>  <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
-    <span class="c1"># self.nameLineEdit.editingFinished().connect(self._changedName)</span>
-
-    <span class="n">hGrid</span> <span class="o">+=</span><span class="mi">1</span>
-    <span class="c1"># macro editing area</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">textBox</span> <span class="o">=</span> <span class="n">QCodeEditor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">hGrid</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">acceptDrops</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
-
-    <span class="n">hGrid</span> <span class="o">+=</span><span class="mi">1</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">buttonBox</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Open&#39;</span><span class="p">,</span> <span class="s1">&#39;save&#39;</span><span class="p">,</span><span class="s1">&#39;Save As&#39;</span><span class="p">,</span> <span class="s1">&#39;Run&#39;</span><span class="p">],</span>
-                                <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_openMacroFile</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_saveMacro</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_saveMacroAs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_runMacro</span><span class="p">],</span> <span class="n">grid</span> <span class="o">=</span> <span class="p">(</span><span class="n">hGrid</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
-
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span> <span class="o">=</span> <span class="n">filePath</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span><span class="p">:</span> <span class="c1"># if  a path is specified then opens it</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_openPath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filePath</span><span class="p">)</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">_setFileName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filePath</span><span class="p">)</span>
-
-
-    <span class="c1"># self.textBox.editingFinished.connect(self._saveMacro)  # automatic saving</span>
-    <span class="c1"># self.nameLineEdit.editingFinished.connect(self._macroNameChanged)  # automatic renaming the fileName</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">droppedNotifier</span> <span class="o">=</span> <span class="n">GuiNotifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">textBox</span><span class="p">,</span>
-                                     <span class="p">[</span><span class="n">GuiNotifier</span><span class="o">.</span><span class="n">DROPEVENT</span><span class="p">],</span> <span class="p">[</span><span class="n">DropBase</span><span class="o">.</span><span class="n">URLS</span><span class="p">],</span>
-                                     <span class="bp">self</span><span class="o">.</span><span class="n">_processDroppedItems</span><span class="p">)</span>
-
-  <span class="k">def</span> <span class="nf">_processDroppedItems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    CallBack for Drop events</span>
+<span class="sd">    This module will create a temp python file when you press the run button and will execute it from the console.</span>
+<span class="sd">    A file will be created in the temporary  macro directory .ccpn/macros</span>
+<span class="sd">    and will be automatically deleted after the macro is ran.</span>
+<span class="sd">    The user can decide to save as a in a new file location.</span>
+
+<span class="sd">    The macro name is the file name on the disk (without the .py extension).</span>
+<span class="sd">    NB. If you open an existing file.py and modify it, the changes are not automatically re-written on the disk.</span>
+<span class="sd">     All changes WILL BE LOST if not save them. Automatic saving of a .py file can be dangerous for the users.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">urls</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;urls&#39;</span><span class="p">,</span> <span class="p">[])</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">urls</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-      <span class="n">filePath</span> <span class="o">=</span> <span class="n">urls</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">textBox</span><span class="o">.</span><span class="n">get</span><span class="p">())</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-        <span class="n">ok</span><span class="o">=</span> <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showYesNoWarning</span><span class="p">(</span><span class="s1">&#39;Open new macro&#39;</span><span class="p">,</span> <span class="s1">&#39;Replace the current macro?&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">ok</span><span class="p">:</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">_openPath</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">_setFileName</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
+    <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;MacroEditor&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Macro Editor&#39;</span><span class="p">,</span> <span class="n">filePath</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">CcpnModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">preferences</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pythonConsole</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pythonConsole</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pythonConsole</span> <span class="o">=</span> <span class="n">IpythonConsole</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">macroPath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">userMacroPath</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_isTempMacro</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_originalOpenedFile</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+        <span class="n">hGrid</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">namelabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="s1">&#39;Macro Name&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">hGrid</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nameLineEdit</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="c1"># self.nameLineEdit.editingFinished().connect(self._changedName)</span>
+
+        <span class="n">hGrid</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1"># macro editing area</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textBox</span> <span class="o">=</span> <span class="n">QCodeEditor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">hGrid</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">acceptDrops</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+        <span class="n">hGrid</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttonBox</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Open&#39;</span><span class="p">,</span> <span class="s1">&#39;save&#39;</span><span class="p">,</span> <span class="s1">&#39;Save As&#39;</span><span class="p">,</span> <span class="s1">&#39;Run&#39;</span><span class="p">],</span>
+                                    <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_openMacroFile</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_saveMacro</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_saveMacroAs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_runMacro</span><span class="p">],</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">hGrid</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span> <span class="o">=</span> <span class="n">filePath</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span><span class="p">:</span>  <span class="c1"># if  a path is specified then opens it</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_openPath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filePath</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setFileName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filePath</span><span class="p">)</span>
+
+        <span class="c1"># self.textBox.editingFinished.connect(self._saveMacro)  # automatic saving</span>
+        <span class="c1"># self.nameLineEdit.editingFinished.connect(self._macroNameChanged)  # automatic renaming the fileName</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">droppedNotifier</span> <span class="o">=</span> <span class="n">GuiNotifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">textBox</span><span class="p">,</span>
+                                           <span class="p">[</span><span class="n">GuiNotifier</span><span class="o">.</span><span class="n">DROPEVENT</span><span class="p">],</span> <span class="p">[</span><span class="n">DropBase</span><span class="o">.</span><span class="n">URLS</span><span class="p">],</span>
+                                           <span class="bp">self</span><span class="o">.</span><span class="n">_processDroppedItems</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_processDroppedItems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        CallBack for Drop events</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">urls</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;urls&#39;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">urls</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">filePath</span> <span class="o">=</span> <span class="n">urls</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">textBox</span><span class="o">.</span><span class="n">get</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ok</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showYesNoWarning</span><span class="p">(</span><span class="s1">&#39;Open new macro&#39;</span><span class="p">,</span> <span class="s1">&#39;Replace the current macro?&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">ok</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_openPath</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_setFileName</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_openPath</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_setFileName</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-          <span class="k">return</span>
-      <span class="k">else</span><span class="p">:</span>
+            <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showMessage</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;Drop only a file at the time&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_createTemporaryFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">dateTime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%y-%m-</span><span class="si">%d</span><span class="s2">-%H:%M:%S&quot;</span><span class="p">)</span>
+            <span class="n">tempName</span> <span class="o">=</span> <span class="s1">&#39;Macro&#39;</span> <span class="o">+</span> <span class="n">dateTime</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">tempName</span>
+        <span class="n">filePath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">tempMacrosPath</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">name</span>
+        <span class="k">if</span> <span class="n">filePath</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">filePath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.py&#39;</span><span class="p">):</span>
+                <span class="n">filePath</span> <span class="o">+=</span> <span class="s1">&#39;.py&#39;</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span> <span class="o">=</span> <span class="n">filePath</span>
+        <span class="k">return</span> <span class="n">filePath</span>
+
+    <span class="k">def</span> <span class="nf">_runMacro</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pythonConsole</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span><span class="p">:</span>
+                <span class="c1"># self._pythonConsole._runMacro(self.filePath)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">recentMacros</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isTempMacro</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">recentMacros</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filePath</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_createTemporaryFile</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_saveTextToFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filePath</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pythonConsole</span><span class="o">.</span><span class="n">_runMacro</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filePath</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_deleteTempMacro</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filePath</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;No Console available&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_saveMacro</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Saves the text inside the textbox to a file, if a file path is not specified, a save file dialog</span>
+<span class="sd">        appears for specification of the file path.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_saveMacroAs</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_originalOpenedFile</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getFileNameFromPath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_originalOpenedFile</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nameLineEdit</span><span class="o">.</span><span class="n">get</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_saveMacroAs</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_saveTextToFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_originalOpenedFile</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_macroNameChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nameLineEdit</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getFileNameFromPath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filePath</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">nameLineEdit</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_saveMacro</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_deleteTempMacro</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filePath</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filePath</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Trying to remove a temporary Macro file which does not exist&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MacroEditor.saveToPdf"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.MacroEditor.MacroEditor.saveToPdf">[docs]</a>    <span class="k">def</span> <span class="nf">saveToPdf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textBox</span><span class="o">.</span><span class="n">saveToPDF</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_saveTextToFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filePath</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">filePath</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">textBox</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">())</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_saveMacroAs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Opens a save file dialog and saves the text inside the textbox to a file specified in the dialog.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">newText</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">textBox</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span>
+        <span class="n">dialog</span> <span class="o">=</span> <span class="n">FileDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AnyFile</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Save Macro As...&#39;</span><span class="p">,</span>
+                            <span class="n">acceptMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AcceptSave</span><span class="p">,</span> <span class="n">selectFile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nameLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">(),</span>
+                            <span class="n">directory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">macroPath</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;*.py&#39;</span><span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="p">)</span>
+        <span class="n">filePath</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">selectedFile</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">filePath</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">filePath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.py&#39;</span><span class="p">):</span>
+                <span class="n">filePath</span> <span class="o">+=</span> <span class="s1">&#39;.py&#39;</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">newText</span><span class="p">)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">filePath</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nameLineEdit</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getFileNameFromPath</span><span class="p">(</span><span class="n">filePath</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span> <span class="o">=</span> <span class="n">filePath</span>
+
+    <span class="k">def</span> <span class="nf">_openMacroFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Opens a file dialog box at the macro path specified in the application preferences and loads the</span>
+<span class="sd">        contents of the macro file into the textbox.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">dialog</span> <span class="o">=</span> <span class="n">FileDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Open Macro&#39;</span><span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">ExistingFile</span><span class="p">,</span>
+                            <span class="n">acceptMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AcceptOpen</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">macroPath</span><span class="p">,</span>
+                            <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;*.py&#39;</span><span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="p">)</span>
+
+        <span class="n">filePath</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">selectedFile</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_openPath</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setFileName</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showMessage</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;Drop only a file at the time&#39;</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">_openPath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filePath</span><span class="p">):</span>
 
-  <span class="k">def</span> <span class="nf">_createTemporaryFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">dateTime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%y-%m-</span><span class="si">%d</span><span class="s2">-%H:%M:%S&quot;</span><span class="p">)</span>
-      <span class="n">tempName</span> <span class="o">=</span> <span class="s1">&#39;Macro&#39;</span><span class="o">+</span><span class="n">dateTime</span>
-      <span class="n">name</span> <span class="o">=</span> <span class="n">tempName</span>
-    <span class="n">filePath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">tempMacrosPath</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span><span class="o">+</span> <span class="n">name</span>
-    <span class="k">if</span> <span class="n">filePath</span><span class="p">:</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="n">filePath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.py&#39;</span><span class="p">):</span>
-        <span class="n">filePath</span><span class="o">+=</span><span class="s1">&#39;.py&#39;</span>
-      <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span> <span class="o">=</span> <span class="n">filePath</span>
-    <span class="k">return</span> <span class="n">filePath</span>
+        <span class="k">if</span> <span class="n">filePath</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">filePath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.py&#39;</span><span class="p">):</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">textBox</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+                    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">():</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">textBox</span><span class="o">.</span><span class="n">insertPlainText</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">macroFile</span> <span class="o">=</span> <span class="n">f</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span> <span class="o">=</span> <span class="n">filePath</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_originalOpenedFile</span> <span class="o">=</span> <span class="n">filePath</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_isTempMacro</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showMessage</span><span class="p">(</span><span class="s1">&#39;Format Not Recognised&#39;</span><span class="p">,</span> <span class="s1">&#39;On MacroEditor you can drop only a *.py file type&#39;</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">_setFileName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filePath</span><span class="p">):</span>
 
-  <span class="k">def</span> <span class="nf">_runMacro</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pythonConsole</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span><span class="p">:</span>
-        <span class="c1"># self._pythonConsole._runMacro(self.filePath)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">recentMacros</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isTempMacro</span><span class="p">:</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">recentMacros</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filePath</span><span class="p">)</span>
+        <span class="n">fileName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getFileNameFromPath</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nameLineEdit</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fileName</span><span class="p">))</span>
 
-      <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_createTemporaryFile</span><span class="p">()</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_saveTextToFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filePath</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_pythonConsole</span><span class="o">.</span><span class="n">_runMacro</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filePath</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_deleteTempMacro</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filePath</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;No Console available&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_getFileNameFromPath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filePath</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">filePath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.py&#39;</span><span class="p">):</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="n">filePath</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+                <span class="n">fileName</span> <span class="o">=</span> <span class="n">path</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">return</span> <span class="n">fileName</span>
 
+    <span class="k">def</span> <span class="nf">_closeModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Re-implementation of closeModule  &quot;&quot;&quot;</span>
+        <span class="n">ok</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showYesNoWarning</span><span class="p">(</span><span class="s1">&#39;Close Macro&#39;</span><span class="p">,</span> <span class="s1">&#39;Do you want save?&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ok</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_saveMacro</span><span class="p">()</span>
 
-  <span class="k">def</span> <span class="nf">_saveMacro</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Saves the text inside the textbox to a file, if a file path is not specified, a save file dialog</span>
-<span class="sd">    appears for specification of the file path.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">()</span></div>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_saveMacroAs</span><span class="p">()</span>
-
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_originalOpenedFile</span><span class="p">:</span>
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getFileNameFromPath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_originalOpenedFile</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nameLineEdit</span><span class="o">.</span><span class="n">get</span><span class="p">():</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_saveMacroAs</span><span class="p">()</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_saveTextToFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_originalOpenedFile</span><span class="p">)</span>
-
-  <span class="k">def</span> <span class="nf">_macroNameChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span><span class="p">:</span>
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nameLineEdit</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getFileNameFromPath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filePath</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">nameLineEdit</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_saveMacro</span><span class="p">()</span>
-
-
-
-  <span class="k">def</span> <span class="nf">_deleteTempMacro</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filePath</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filePath</span><span class="p">):</span>
-      <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span> <span class="o">=</span> <span class="bp">None</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Trying to remove a temporary Macro file which does not exist&quot;</span><span class="p">)</span>
-
-<div class="viewcode-block" id="MacroEditor.saveToPdf"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.MacroEditor.MacroEditor.saveToPdf">[docs]</a>  <span class="k">def</span> <span class="nf">saveToPdf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">textBox</span><span class="o">.</span><span class="n">saveToPDF</span><span class="p">()</span></div>
-
-  <span class="k">def</span> <span class="nf">_saveTextToFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filePath</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">filePath</span><span class="p">:</span>
-      <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">textBox</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">())</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
-  <span class="k">def</span> <span class="nf">_saveMacroAs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Opens a save file dialog and saves the text inside the textbox to a file specified in the dialog.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">newText</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">textBox</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span>
-    <span class="n">dialog</span> <span class="o">=</span> <span class="n">FileDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AnyFile</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Save Macro As...&#39;</span><span class="p">,</span>
-                        <span class="n">acceptMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AcceptSave</span><span class="p">,</span><span class="n">selectFile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nameLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">(),</span>
-                        <span class="n">directory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">macroPath</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;*.py&#39;</span><span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="p">)</span>
-    <span class="n">filePath</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">selectedFile</span><span class="p">()</span>
-
-    <span class="k">if</span> <span class="n">filePath</span><span class="p">:</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="n">filePath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.py&#39;</span><span class="p">):</span>
-        <span class="n">filePath</span><span class="o">+=</span><span class="s1">&#39;.py&#39;</span>
-      <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">newText</span><span class="p">)</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
-    <span class="k">if</span> <span class="n">filePath</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">nameLineEdit</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getFileNameFromPath</span><span class="p">(</span><span class="n">filePath</span><span class="p">))</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span> <span class="o">=</span> <span class="n">filePath</span>
-
-  <span class="k">def</span> <span class="nf">_openMacroFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Opens a file dialog box at the macro path specified in the application preferences and loads the</span>
-<span class="sd">    contents of the macro file into the textbox.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">dialog</span> <span class="o">=</span> <span class="n">FileDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Open Macro&#39;</span><span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">ExistingFile</span><span class="p">,</span>
-                        <span class="n">acceptMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AcceptOpen</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">macroPath</span><span class="p">,</span>
-                        <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;*.py&#39;</span><span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="p">)</span>
-
-    <span class="n">filePath</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">selectedFile</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_openPath</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_setFileName</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
-
-  <span class="k">def</span> <span class="nf">_openPath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filePath</span><span class="p">):</span>
-
-    <span class="k">if</span> <span class="n">filePath</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">filePath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.py&#39;</span><span class="p">):</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">textBox</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-          <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">textBox</span><span class="o">.</span><span class="n">insertPlainText</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">macroFile</span> <span class="o">=</span> <span class="n">f</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span> <span class="o">=</span> <span class="n">filePath</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">_originalOpenedFile</span> <span class="o">=</span> <span class="n">filePath</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">_isTempMacro</span> <span class="o">=</span> <span class="bp">False</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showMessage</span><span class="p">(</span><span class="s1">&#39;Format Not Recognised&#39;</span><span class="p">,</span> <span class="s1">&#39;On MacroEditor you can drop only a *.py file type&#39;</span><span class="p">)</span>
-
-  <span class="k">def</span> <span class="nf">_setFileName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filePath</span><span class="p">):</span>
-
-    <span class="n">fileName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getFileNameFromPath</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">nameLineEdit</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fileName</span><span class="p">))</span>
-
-  <span class="k">def</span> <span class="nf">_getFileNameFromPath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filePath</span><span class="p">):</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span><span class="nb">str</span><span class="p">):</span>
-      <span class="k">if</span> <span class="n">filePath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.py&#39;</span><span class="p">):</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="n">filePath</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
-        <span class="n">fileName</span> <span class="o">=</span> <span class="n">path</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">fileName</span>
-
-  <span class="k">def</span> <span class="nf">_closeModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Re-implementation of closeModule  &quot;&quot;&quot;</span>
-    <span class="n">ok</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showYesNoWarning</span><span class="p">(</span><span class="s1">&#39;Close Macro&#39;</span><span class="p">,</span> <span class="s1">&#39;Do you want save?&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">ok</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_saveMacro</span><span class="p">()</span>
-
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">()</span></div>
 
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-  <span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
-  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Application</span> <span class="kn">import</span> <span class="n">TestApplication</span>
-  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CcpnModuleArea</span> <span class="kn">import</span> <span class="n">CcpnModuleArea</span>
-  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CheckBox</span> <span class="kn">import</span> <span class="n">EditableCheckBox</span><span class="p">,</span> <span class="n">CheckBox</span>
+    <span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Application</span> <span class="kn">import</span> <span class="n">TestApplication</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CcpnModuleArea</span> <span class="kn">import</span> <span class="n">CcpnModuleArea</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CheckBox</span> <span class="kn">import</span> <span class="n">EditableCheckBox</span><span class="p">,</span> <span class="n">CheckBox</span>
 
 
+    <span class="n">app</span> <span class="o">=</span> <span class="n">TestApplication</span><span class="p">()</span>
+    <span class="n">win</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMainWindow</span><span class="p">()</span>
 
+    <span class="n">moduleArea</span> <span class="o">=</span> <span class="n">CcpnModuleArea</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
 
-  <span class="n">app</span> <span class="o">=</span> <span class="n">TestApplication</span><span class="p">()</span>
-  <span class="n">win</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMainWindow</span><span class="p">()</span>
+    <span class="n">module</span> <span class="o">=</span> <span class="n">MacroEditor</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
 
-  <span class="n">moduleArea</span> <span class="o">=</span> <span class="n">CcpnModuleArea</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+    <span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
 
-  <span class="n">module</span> <span class="o">=</span> <span class="n">MacroEditor</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+    <span class="n">win</span><span class="o">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="n">moduleArea</span><span class="p">)</span>
+    <span class="n">win</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
+    <span class="n">win</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s1">&#39;Testing </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">module</span><span class="o">.</span><span class="n">moduleName</span><span class="p">)</span>
+    <span class="n">win</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
-
-  <span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
-
-  <span class="n">win</span><span class="o">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="n">moduleArea</span><span class="p">)</span>
-  <span class="n">win</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
-  <span class="n">win</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s1">&#39;Testing </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">module</span><span class="o">.</span><span class="n">moduleName</span><span class="p">)</span>
-  <span class="n">win</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-
-
-  <span class="n">app</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-  <span class="n">win</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
+    <span class="n">app</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">win</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 
           </div>

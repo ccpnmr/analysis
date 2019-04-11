@@ -53,18 +53,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:27 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -79,10 +79,11 @@
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">commonUtil</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Pid</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib.Util</span> <span class="kn">import</span> <span class="n">AtomIdTuple</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Residue</span> <span class="kn">import</span> <span class="n">Residue</span>
 <span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.molecule.MolSystem</span> <span class="kn">import</span> <span class="n">Atom</span> <span class="k">as</span> <span class="n">ApiAtom</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">newObject</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
 
 <div class="viewcode-block" id="Atom"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Atom.Atom">[docs]</a><span class="k">class</span> <span class="nc">Atom</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
@@ -267,22 +268,57 @@
         <span class="sd">&quot;&quot;&quot;get wrappedData (MolSystem.Atoms) for all Atom children of parent Residue&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedAtoms</span><span class="p">()</span></div>
 
+    <span class="c1">#=========================================================================================</span>
+    <span class="c1"># CCPN functions</span>
+    <span class="c1">#=========================================================================================</span>
 
-<span class="k">def</span> <span class="nf">_newAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Residue</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">elementSymbol</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Atom&#39;</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Create new Atom within Residue. If elementSymbol is None, it is derived from the name&quot;&quot;&quot;</span>
+    <span class="c1">#===========================================================================================</span>
+    <span class="c1"># new&#39;Object&#39; and other methods</span>
+    <span class="c1"># Call appropriate routines in their respective locations</span>
+    <span class="c1">#===========================================================================================</span>
+
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Connections to parents:</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="nd">@newObject</span><span class="p">(</span><span class="n">Atom</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_newAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Residue</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">elementSymbol</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">serial</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Atom&#39;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Create new Atom within Residue. If elementSymbol is None, it is derived from the name</span>
+
+<span class="sd">    See the Atom class for details.</span>
+
+<span class="sd">    :param name:</span>
+<span class="sd">    :param elementSymbol:</span>
+<span class="sd">    :param serial: optional serial number.</span>
+<span class="sd">    :return: a new Atom instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">lastAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getAtom</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">lastAtom</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot create </span><span class="si">%s</span><span class="s2">, atom name </span><span class="si">%s</span><span class="s2"> already in use&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">lastAtom</span><span class="o">.</span><span class="n">longPid</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">elementSymbol</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">elementSymbol</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">name2ElementSymbol</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
     <span class="n">apiAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">newAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">elementSymbol</span><span class="o">=</span><span class="n">elementSymbol</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">apiAtom</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Unable to generate new Atom item&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">serial</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Could not reset serial of </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2"> - keeping original value&quot;</span>
+                                <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">serial</span><span class="p">))</span>
+
     <span class="n">apiAtom</span><span class="o">.</span><span class="n">expandNewAtom</span><span class="p">()</span>
-    <span class="c1">#</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">apiAtom</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">result</span>
 
 
-<span class="c1">#</span>
-<span class="n">Residue</span><span class="o">.</span><span class="n">newAtom</span> <span class="o">=</span> <span class="n">_newAtom</span>
+<span class="c1">#EJB 20181204: moved to Residue</span>
+<span class="c1"># Residue.newAtom = _newAtom</span>
 
 <span class="c1"># Connections to parents:</span>
 </pre></div>

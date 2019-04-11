@@ -61,18 +61,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:21 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -98,7 +98,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">getColours</span><span class="p">,</span> <span class="n">DIVIDER</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.HLine</span> <span class="kn">import</span> <span class="n">HLine</span>
-
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">undoBlock</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">()</span>
 
@@ -149,55 +149,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">restrictedPickAndAssignButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">addWidgetToPos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">restrictedPickAndAssignButton</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 
-        <span class="c1"># self._spacer = Frame(None, setLayout=True)</span>
-        <span class="c1"># self._spacer.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)</span>
-        <span class="c1"># self.nmrResidueTable.addWidgetToPos(self._spacer, row=1, col=6)</span>
-
         <span class="c1"># change some of the defaults setting inherited from NmrResidueTableModule</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTableSettings</span><span class="o">.</span><span class="n">sequentialStripsWidget</span><span class="o">.</span><span class="n">checkBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTableSettings</span><span class="o">.</span><span class="n">displaysWidget</span><span class="o">.</span><span class="n">addPulldownItem</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># select the &lt;all&gt; option</span>
-
-        <span class="c1"># # create row&#39;s of spectrum information</span>
-        <span class="c1"># self._spectraWidget = Frame(parent=self.settingsWidget,</span>
-        <span class="c1">#                             setLayout=True, showBorder=True, hPolicy=&#39;minimal&#39;,</span>
-        <span class="c1">#                             grid=(0, 1), gridSpan=(4, 1), vAlign=&#39;top&#39;, hAlign=&#39;left&#39;)</span>
-        <span class="c1">#</span>
-        <span class="c1"># # modifier for atomCode</span>
-        <span class="c1"># spectraRow = 0</span>
-        <span class="c1"># self.atomCodeFrame = Frame(self._spectraWidget, setLayout=True, showBorder=False, fShape=&#39;noFrame&#39;,</span>
-        <span class="c1">#                            grid=(spectraRow, 0), gridSpan=(1, 4), vAlign=&#39;top&#39;, hAlign=&#39;left&#39;)</span>
-        <span class="c1"># self.axisCodeLabel = Label(self.atomCodeFrame, &#39;Restricted Axes:&#39;, grid=(0, 0))</span>
-        <span class="c1"># self.axisCodeOptions = CheckBoxes(self.atomCodeFrame, selectedInd=0, texts=[&#39;C&#39;],</span>
-        <span class="c1">#                                   callback=self._changeAxisCode, grid=(0, 1))</span>
-        <span class="c1"># # self.nmrResidueTable.addWidgetToPos(self.atomCodeFrame, row=1, col=5)</span>
-        <span class="c1">#</span>
-        <span class="c1"># spectraRow += 1</span>
-        <span class="c1"># HLine(self._spectraWidget, grid=(spectraRow, 0), gridSpan=(1, 4),</span>
-        <span class="c1">#       colour=getColours()[DIVIDER], height=15)</span>
-        <span class="c1">#</span>
-        <span class="c1"># spectraRow += 1</span>
-        <span class="c1"># Label(self._spectraWidget, &#39;Spectrum&#39;, grid=(spectraRow, 0))</span>
-        <span class="c1"># Label(self._spectraWidget, &#39;Tolerance&#39;, grid=(spectraRow, 1))</span>
-        <span class="c1"># Label(self._spectraWidget, &#39;Tolerance&#39;, grid=(spectraRow, 2))</span>
-        <span class="c1"># Label(self._spectraWidget, &#39;Tolerance&#39;, grid=(spectraRow, 3))</span>
-        <span class="c1"># self.spectraStartRow = spectraRow + 1</span>
-        <span class="c1">#</span>
-        <span class="c1"># self._spectraWidgets = {}  # spectrum.pid, frame dict to show/hide</span>
-        <span class="c1"># for row, spectrum in enumerate(self.application.project.spectra):</span>
-        <span class="c1">#</span>
-        <span class="c1">#     spectraRow += 1</span>
-        <span class="c1">#     # f = _SpectrumRow(parent=self._spectraWidget, setLayout=True, spectrum=spectrum,</span>
-        <span class="c1">#     #                  grid=(self.spectraStartRow + row, 0), gridSpan=(1, 1 + len(spectrum.axisCodes)), vAlign=&#39;top&#39;)</span>
-        <span class="c1">#     f = _SpectrumRow(parent=self._spectraWidget, row=spectraRow, col=0, setLayout=True, spectrum=spectrum)</span>
-        <span class="c1">#</span>
-        <span class="c1">#     self._spectraWidgets[spectrum.pid] = f</span>
-        <span class="c1">#</span>
-        <span class="c1"># # add a spacer in the bottom-right corner to stop everything moving</span>
-        <span class="c1"># rows = self.settingsWidget.layout().rowCount()</span>
-        <span class="c1"># cols = self.settingsWidget.layout().columnCount()</span>
-        <span class="c1"># Spacer(self.settingsWidget, 5, 5,</span>
-        <span class="c1">#        QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,</span>
-        <span class="c1">#        grid=(rows, cols), gridSpan=(1, 1))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">_setWidgetHeight</span><span class="p">(</span><span class="mi">45</span><span class="p">)</span>
 
@@ -264,8 +218,7 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Undefined peak(s); select one or more before proceeding&#39;</span><span class="p">)</span>
             <span class="k">return</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">_startCommandBlock</span><span class="p">(</span><span class="s1">&#39;application.pickAndAssignModule.assignSelected()&#39;</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
             <span class="n">lastNmrResidue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span>
 
             <span class="n">shiftDict</span> <span class="o">=</span> <span class="p">{}</span>
@@ -275,27 +228,35 @@
             <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peaks</span><span class="p">:</span>
                 <span class="n">shiftList</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">chemicalShiftList</span>
                 <span class="n">spectrum</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span>
+
                 <span class="k">for</span> <span class="n">nmrAtom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">isotopeCode</span> <span class="ow">in</span> <span class="n">shiftDict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                         <span class="n">shiftDict</span><span class="p">[</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">isotopeCode</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">nmrAtom</span><span class="p">,</span> <span class="n">shiftList</span><span class="o">.</span><span class="n">getChemicalShift</span><span class="p">(</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+
                 <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">isotopeCode</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">isotopeCodes</span><span class="p">):</span>
+
+                    <span class="n">pValue</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
                     <span class="k">if</span> <span class="n">isotopeCode</span> <span class="ow">in</span> <span class="n">shiftDict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+
+                        <span class="n">shiftList</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
                         <span class="k">for</span> <span class="n">shift</span> <span class="ow">in</span> <span class="n">shiftDict</span><span class="p">[</span><span class="n">isotopeCode</span><span class="p">]:</span>
                             <span class="n">sValue</span> <span class="o">=</span> <span class="n">shift</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                            <span class="n">pValue</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+                            <span class="c1"># pValue = peak.position[ii]</span>
                             <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">sValue</span> <span class="o">-</span> <span class="n">pValue</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">assignmentTolerances</span><span class="p">[</span><span class="n">ii</span><span class="p">]:</span>
-                                <span class="n">peak</span><span class="o">.</span><span class="n">assignDimension</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="p">[</span><span class="n">shift</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+                                <span class="c1"># peak.assignDimension(spectrum.axisCodes[ii], [shift[0]])</span>
+                                <span class="n">shiftList</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">shift</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+                        <span class="k">if</span> <span class="n">shiftList</span><span class="p">:</span>
+                            <span class="n">peak</span><span class="o">.</span><span class="n">assignDimension</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="nb">list</span><span class="p">(</span><span class="n">shiftList</span><span class="p">))</span>
 
             <span class="c1"># self.application.current.peaks = []</span>
             <span class="c1"># update the NmrResidue table</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">_update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="p">)</span>
 
             <span class="c1"># reset to the last selected nmrResidue - stops other tables messing up</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">lastNmrResidue</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">lastNmrResidue</span></div>
 
-        <span class="k">finally</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span></div>
-
+    <span class="c1">#TODO:GEERTEN: compact the two routines</span>
 <div class="viewcode-block" id="PickAndAssignModule.restrictedPick"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisAssign.modules.html#ccpn.AnalysisAssign.modules.PickAndAssignModule.PickAndAssignModule.restrictedPick">[docs]</a>    <span class="k">def</span> <span class="nf">restrictedPick</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Routine refactored in revision 9381.</span>
@@ -304,6 +265,8 @@
 <span class="sd">        spectrum displays specified in the settings tab. Pick uses X and Z axes for each spectrumView as</span>
 <span class="sd">        centre points with tolerances and the y as the long axis to pick the whole region.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nmrResidue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">nmrResidue</span>
+
         <span class="k">if</span> <span class="ow">not</span> <span class="n">nmrResidue</span><span class="p">:</span>
             <span class="n">nmrResidue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span>
 
@@ -314,9 +277,8 @@
         <span class="n">currentAxisCodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTableSettings</span><span class="o">.</span><span class="n">axisCodeOptions</span><span class="o">.</span><span class="n">getSelectedText</span><span class="p">()</span>
         <span class="n">currentAxisCodeIndexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTableSettings</span><span class="o">.</span><span class="n">axisCodeOptions</span><span class="o">.</span><span class="n">getSelectedIndexes</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">_startCommandBlock</span><span class="p">(</span><span class="s1">&#39;application.pickAndAssignModule.restrictedPick(nmrResidue)&#39;</span><span class="p">,</span>
-                                            <span class="n">nmrResidue</span><span class="o">=</span><span class="n">nmrResidue</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
+
             <span class="n">peaks</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">displays</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getDisplays</span><span class="p">()</span>
             <span class="n">validPeakListViews</span> <span class="o">=</span> <span class="p">{}</span>
@@ -343,7 +305,8 @@
 
                 <span class="n">peakList</span><span class="p">,</span> <span class="n">pks</span> <span class="o">=</span> <span class="n">PeakList</span><span class="o">.</span><span class="n">restrictedPick</span><span class="p">(</span><span class="n">peakListView</span><span class="o">=</span><span class="n">peakListView</span><span class="p">,</span>
                                                         <span class="n">axisCodes</span><span class="o">=</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="o">=</span><span class="n">nmrResidue</span><span class="p">)</span>
-                <span class="n">peaks</span> <span class="o">=</span> <span class="n">peaks</span> <span class="o">+</span> <span class="n">pks</span>
+                <span class="k">if</span> <span class="n">pks</span><span class="p">:</span>
+                    <span class="n">peaks</span> <span class="o">=</span> <span class="n">peaks</span> <span class="o">+</span> <span class="n">pks</span>
 
             <span class="c1"># for module in self.application.project.spectrumDisplays:</span>
             <span class="c1">#     if len(module.axisCodes) &gt;= 2:</span>
@@ -366,11 +329,7 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peaks</span> <span class="o">=</span> <span class="n">peaks</span>
             <span class="c1"># update the NmrResidue table</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">_update</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="p">)</span>
-
-        <span class="k">finally</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span></div>
-
+            <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">_update</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PickAndAssignModule.restrictedPickAndAssign"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisAssign.modules.html#ccpn.AnalysisAssign.modules.PickAndAssignModule.PickAndAssignModule.restrictedPickAndAssign">[docs]</a>    <span class="k">def</span> <span class="nf">restrictedPickAndAssign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -382,36 +341,34 @@
 <span class="sd">        </span>
 <span class="sd">        Calls assignSelected to assign</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nmrResidue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">nmrResidue</span>
+
         <span class="k">if</span> <span class="ow">not</span> <span class="n">nmrResidue</span><span class="p">:</span>
             <span class="n">nmrResidue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span><span class="p">:</span>
             <span class="k">print</span><span class="p">(</span><span class="s1">&#39;No current nmrResidue&#39;</span><span class="p">)</span>
             <span class="k">return</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">_startCommandBlock</span><span class="p">(</span><span class="s1">&#39;application.pickAndAssignModule.restrictedPickAndAssign(nmrResidue)&#39;</span><span class="p">,</span>
-                                            <span class="n">nmrResidue</span><span class="o">=</span><span class="n">nmrResidue</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">restrictedPick</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">)</span>
 
             <span class="c1"># if peaks have been selected then assign them</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peaks</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">assignSelected</span><span class="p">()</span>
 
-                <span class="c1"># # notifier for other modules</span>
-                <span class="c1"># nmrResidue._finaliseAction(&#39;change&#39;)</span>
-
-        <span class="k">finally</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
-
-            <span class="c1"># notifier for other modules</span>
-            <span class="n">nmrResidue</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;change&#39;</span><span class="p">)</span></div>
+                <span class="c1"># notifier for other modules</span>
+                <span class="n">nmrResidue</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;change&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PickAndAssignModule.goToPositionInModules"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisAssign.modules.html#ccpn.AnalysisAssign.modules.PickAndAssignModule.PickAndAssignModule.goToPositionInModules">[docs]</a>    <span class="k">def</span> <span class="nf">goToPositionInModules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="s2">&quot;Go to the positions defined my NmrAtoms of nmrResidue in the active displays&quot;</span>
 
+        <span class="n">nmrResidue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">nmrResidue</span>
+
         <span class="n">activeDisplays</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumSelectionWidget</span><span class="o">.</span><span class="n">getActiveDisplays</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">_startCommandBlock</span><span class="p">(</span><span class="s1">&#39;application.pickAndAssignModule.goToPositionInModules(nmrResidue)&#39;</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="o">=</span><span class="n">nmrResidue</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
+
+        <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
+
             <span class="k">if</span> <span class="n">nmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
                 <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
                 <span class="n">mainWindow</span><span class="o">.</span><span class="n">clearMarks</span><span class="p">()</span>
@@ -428,9 +385,7 @@
                                                     <span class="n">nmrAtoms</span><span class="o">=</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">,</span>
                                                     <span class="n">widths</span><span class="o">=</span><span class="n">strip</span><span class="o">.</span><span class="n">_getCurrentZoomRatio</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">viewRange</span><span class="p">()),</span>
                                                     <span class="n">markPositions</span><span class="o">=</span><span class="p">(</span><span class="n">n</span> <span class="o">==</span> <span class="mi">2</span><span class="p">))</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">nmrResidue</span>
-        <span class="k">finally</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span></div></div>
+                <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">nmrResidue</span></div></div>
 
     <span class="c1"># def _changeAxisCode(self):</span>
     <span class="c1">#     pass</span>
@@ -511,31 +466,31 @@
     <span class="c1">#     return code[0:numChars]</span>
 
 
-<span class="k">class</span> <span class="nc">_SpectrumRow</span><span class="p">(</span><span class="n">Frame</span><span class="p">):</span>
-    <span class="s2">&quot;Class to make a spectrum row&quot;</span>
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">_SpectrumRow</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
-
-        <span class="c1"># col = 0</span>
-        <span class="c1"># self.checkbox = CheckBoxCompoundWidget(self, grid=(0, col), gridSpan=(1, 1), hAlign=&#39;left&#39;,</span>
-        <span class="c1">#                                        checked=True, labelText=spectrum.pid,</span>
-        <span class="c1">#                                        fixedWidths=[100, 50])</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">checkbox</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">spinBoxes</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">axisCode</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">):</span>
-            <span class="n">decimals</span><span class="p">,</span> <span class="n">step</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span> <span class="k">if</span> <span class="n">axisCode</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;H&#39;</span> <span class="k">else</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
-            <span class="n">col</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="n">ds</span> <span class="o">=</span> <span class="n">DoubleSpinBoxCompoundWidget</span><span class="p">(</span>
-                    <span class="n">parent</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span>
-                    <span class="n">fixedWidths</span><span class="o">=</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span>
-                    <span class="n">labelText</span><span class="o">=</span><span class="n">axisCode</span><span class="p">,</span>
-                    <span class="n">value</span><span class="o">=</span><span class="n">spectrum</span><span class="o">.</span><span class="n">assignmentTolerances</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span>
-                    <span class="n">decimals</span><span class="o">=</span><span class="n">decimals</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
-            <span class="n">ds</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">pid</span> <span class="o">+</span> <span class="n">axisCode</span><span class="p">))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spinBoxes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+<span class="c1"># class _SpectrumRow(Frame):</span>
+<span class="c1">#     &quot;Class to make a spectrum row&quot;</span>
+<span class="c1">#</span>
+<span class="c1">#     def __init__(self, parent, spectrum, row=0, col=0, **kwds):</span>
+<span class="c1">#         super().__init__(parent, **kwds)</span>
+<span class="c1">#</span>
+<span class="c1">#         # col = 0</span>
+<span class="c1">#         # self.checkbox = CheckBoxCompoundWidget(self, grid=(0, col), gridSpan=(1, 1), hAlign=&#39;left&#39;,</span>
+<span class="c1">#         #                                        checked=True, labelText=spectrum.pid,</span>
+<span class="c1">#         #                                        fixedWidths=[100, 50])</span>
+<span class="c1">#</span>
+<span class="c1">#         self.checkbox = Label(parent, spectrum.pid, grid=(row, col), gridSpan=(1, 1), hAlign=&#39;left&#39;)</span>
+<span class="c1">#</span>
+<span class="c1">#         self.spinBoxes = []</span>
+<span class="c1">#         for ii, axisCode in enumerate(spectrum.axisCodes):</span>
+<span class="c1">#             decimals, step = (2, 0.01) if axisCode[0:1] == &#39;H&#39; else (1, 0.1)</span>
+<span class="c1">#             col += 1</span>
+<span class="c1">#             ds = DoubleSpinBoxCompoundWidget(</span>
+<span class="c1">#                     parent, grid=(row, col), gridSpan=(1, 1), hAlign=&#39;left&#39;,</span>
+<span class="c1">#                     fixedWidths=(30, 50),</span>
+<span class="c1">#                     labelText=axisCode,</span>
+<span class="c1">#                     value=spectrum.assignmentTolerances[ii],</span>
+<span class="c1">#                     decimals=decimals, step=step, range=(0, None))</span>
+<span class="c1">#             ds.setObjectName(str(spectrum.pid + axisCode))</span>
+<span class="c1">#             self.spinBoxes.append(ds)</span>
 </pre></div>
 
           </div>

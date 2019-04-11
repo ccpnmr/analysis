@@ -57,18 +57,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:51 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -86,34 +86,35 @@
 
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
+
 <span class="n">HALIGN_DICT</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;left&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span><span class="p">,</span>
-    <span class="s1">&#39;right&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignRight</span><span class="p">,</span>
+    <span class="s1">&#39;left&#39;</span>  <span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span><span class="p">,</span>
+    <span class="s1">&#39;right&#39;</span> <span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignRight</span><span class="p">,</span>
     <span class="s1">&#39;center&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignHCenter</span><span class="p">,</span>
     <span class="s1">&#39;centre&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignHCenter</span><span class="p">,</span>
-    <span class="s1">&#39;l&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span><span class="p">,</span>
-    <span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignRight</span><span class="p">,</span>
-    <span class="s1">&#39;c&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignHCenter</span><span class="p">,</span>
+    <span class="s1">&#39;l&#39;</span>     <span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span><span class="p">,</span>
+    <span class="s1">&#39;r&#39;</span>     <span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignRight</span><span class="p">,</span>
+    <span class="s1">&#39;c&#39;</span>     <span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignHCenter</span><span class="p">,</span>
     <span class="p">}</span>
 
 <span class="n">VALIGN_DICT</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;top&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignTop</span><span class="p">,</span>
+    <span class="s1">&#39;top&#39;</span>   <span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignTop</span><span class="p">,</span>
     <span class="s1">&#39;bottom&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignBottom</span><span class="p">,</span>
     <span class="s1">&#39;center&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">,</span>
     <span class="s1">&#39;centre&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">,</span>
-    <span class="s1">&#39;t&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignTop</span><span class="p">,</span>
-    <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignBottom</span><span class="p">,</span>
-    <span class="s1">&#39;c&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">,</span>
+    <span class="s1">&#39;t&#39;</span>     <span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignTop</span><span class="p">,</span>
+    <span class="s1">&#39;b&#39;</span>     <span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignBottom</span><span class="p">,</span>
+    <span class="s1">&#39;c&#39;</span>     <span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">,</span>
     <span class="p">}</span>
 
 <span class="n">POLICY_DICT</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;fixed&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span>
-    <span class="s1">&#39;minimum&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Minimum</span><span class="p">,</span>
-    <span class="s1">&#39;maximum&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Maximum</span><span class="p">,</span>
-    <span class="s1">&#39;preferred&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Preferred</span><span class="p">,</span>
-    <span class="s1">&#39;expanding&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span>
+    <span class="s1">&#39;fixed&#39;</span>           <span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span>
+    <span class="s1">&#39;minimum&#39;</span>         <span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Minimum</span><span class="p">,</span>
+    <span class="s1">&#39;maximum&#39;</span>         <span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Maximum</span><span class="p">,</span>
+    <span class="s1">&#39;preferred&#39;</span>       <span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Preferred</span><span class="p">,</span>
+    <span class="s1">&#39;expanding&#39;</span>       <span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span>
     <span class="s1">&#39;minimumExpanding&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">MinimumExpanding</span><span class="p">,</span>
-    <span class="s1">&#39;ignored&#39;</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Ignored</span><span class="p">,</span>
+    <span class="s1">&#39;ignored&#39;</span>         <span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Ignored</span><span class="p">,</span>
     <span class="p">}</span>
 
 
@@ -121,7 +122,7 @@
 
     <span class="c1"># Base._init(**kwds) should be called from every widget</span>
     <span class="c1"># We don&#39;t use __init__ as it messes up the super() methods resolution and the</span>
-    <span class="c1"># destroy signal when closing  the windows</span>
+    <span class="c1"># destroy signal when closing the windows</span>
     <span class="k">def</span> <span class="nf">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">isFloatWidget</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
               <span class="n">tipText</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
               <span class="n">bgColor</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fgColor</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
@@ -134,6 +135,7 @@
               <span class="c1"># keywords for adding to parent</span>
               <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">stretch</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
               <span class="n">hAlign</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">vAlign</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+              <span class="n">hidden</span><span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
 
               <span class="c1"># keywords related to dropable properties</span>
               <span class="n">acceptDrops</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
@@ -144,12 +146,13 @@
 
 <span class="sd">        :param tipText:  add tiptext to widget</span>
 <span class="sd">        :param grid:     insert widget at (row,col) of parent layout (if available)</span>
+<span class="sd">        :param hidden:   hide widget upon creation</span>
 <span class="sd">        :param gridSpan: extend widget over (rows,cols); default (1,1)</span>
 <span class="sd">        :param stretch:  stretch factor (row,col) of widget; default (0, 0)</span>
-<span class="sd">        :param hAlign:   horizontal alignment: left, right, centre (center, l, r, c)</span>
-<span class="sd">        :param vAlign:   vertical alignment: top, bottom, centre (center, t, b. c)</span>
-<span class="sd">        :param hPolicy:  horizontal policy of widget: fixed, minimum, maximum, preferred, expanding, minimumExpanding, ignored</span>
-<span class="sd">        :param vPolicy:  vertical policy of widget: fixed, minimum, maximum, preferred, expanding, minimumExpanding, ignored</span>
+<span class="sd">        :param hAlign:   horizontal alignment: (l, left, r, right, c, center, centre)</span>
+<span class="sd">        :param vAlign:   vertical alignment: (t, top, b, bottom, c, center, centre)</span>
+<span class="sd">        :param hPolicy:  horizontal policy of widget: (fixed, minimum, maximum, preferred, expanding, minimumExpanding, ignored)</span>
+<span class="sd">        :param vPolicy:  vertical policy of widget: ( fixed, minimum, maximum, preferred, expanding, minimumExpanding, ignored)</span>
 <span class="sd">        :param bgColor:  background RGB colour tuple; depreciated: use styleSheet routines instead</span>
 <span class="sd">        :param fgColor:  foreground RGB colour tuple; depreciated: use styleSheet routines instead</span>
 <span class="sd">        :param isFloatWidget: indicates widget to be floating</span>
@@ -195,9 +198,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_col</span> <span class="o">=</span> <span class="n">grid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_row</span> <span class="o">=</span> <span class="n">grid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span> <span class="o">=</span> <span class="n">grid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__hidden</span> <span class="o">=</span> <span class="n">hidden</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">isFloatWidget</span> <span class="ow">and</span> <span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">grid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addToParent</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span> <span class="n">gridSpan</span><span class="o">=</span><span class="n">gridSpan</span><span class="p">,</span> <span class="n">stretch</span><span class="o">=</span><span class="n">stretch</span><span class="p">,</span>
                               <span class="n">hAlign</span><span class="o">=</span><span class="n">hAlign</span><span class="p">,</span> <span class="n">vAlign</span><span class="o">=</span><span class="n">vAlign</span><span class="p">)</span>
+
+        <span class="c1"># set the object name of the widget to give unique name for restoring widgets</span>
+        <span class="k">if</span> <span class="n">objectName</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">objectName</span><span class="p">)</span>
 
         <span class="c1"># connect destruction of widget to onDestroyed method,</span>
         <span class="c1"># which subsequently can be subclassed</span>
@@ -266,6 +274,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_col</span> <span class="o">=</span> <span class="n">col</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_row</span> <span class="o">=</span> <span class="n">row</span>
             <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">rowSpan</span><span class="p">,</span> <span class="n">colSpan</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Alignment</span><span class="p">(</span><span class="n">align</span><span class="p">))</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__hidden</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_getRowCol</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="n">grid</span><span class="p">):</span>
@@ -287,7 +297,18 @@
 <div class="viewcode-block" id="Base.getParent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Base.Base.getParent">[docs]</a>    <span class="k">def</span> <span class="nf">getParent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;A method to return the parent of a widget</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Base.addSpacer"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Base.Base.addSpacer">[docs]</a>    <span class="k">def</span> <span class="nf">addSpacer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)):</span>
+        <span class="sd">&quot;&quot;&quot;Convience to insert spacer</span>
+<span class="sd">        width, height: in pixels</span>
+<span class="sd">        grid=(row,col): tuple or list defining row, column</span>
+<span class="sd">        gridSpan: tuple or list defining grid-span along row, column</span>
+
+<span class="sd">        :returns: Spacer widget</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Spacer</span> <span class="kn">import</span> <span class="n">Spacer</span>
+        <span class="k">return</span> <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span> <span class="n">gridSpan</span><span class="o">=</span><span class="n">gridSpan</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>

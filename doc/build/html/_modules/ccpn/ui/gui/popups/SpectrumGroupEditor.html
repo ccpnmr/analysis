@@ -53,18 +53,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:50 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -74,476 +74,35 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ListWidget</span> <span class="kn">import</span> <span class="n">ListWidget</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.LineEdit</span> <span class="kn">import</span> <span class="n">LineEdit</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ButtonList</span> <span class="kn">import</span> <span class="n">ButtonList</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.RadioButtons</span> <span class="kn">import</span> <span class="n">RadioButtons</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>  <span class="c1"># ejb</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.MessageDialog</span> <span class="kn">import</span> <span class="n">showWarning</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.core.SpectrumGroup</span> <span class="kn">import</span> <span class="n">SpectrumGroup</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownListsForObjects</span> <span class="kn">import</span> <span class="n">SpectrumGroupPulldown</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups._GroupEditorPopupABC</span> <span class="kn">import</span> <span class="n">_GroupEditorPopupABC</span>
+
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
 
-<div class="viewcode-block" id="SpectrumGroupEditor"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.SpectrumGroupEditor.SpectrumGroupEditor">[docs]</a><span class="k">class</span> <span class="nc">SpectrumGroupEditor</span><span class="p">(</span><span class="n">CcpnDialog</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                 <span class="n">spectrumGroup</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">addNew</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">editorMode</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">spectra</span><span class="o">=</span><span class="bp">None</span> <span class="ow">or</span> <span class="p">[],</span>
-                 <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Spectrum Group Setup&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialise the widget</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">CcpnDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">addNewSpectrumGroup</span> <span class="o">=</span> <span class="n">addNew</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span> <span class="o">=</span> <span class="n">spectrumGroup</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">editorMode</span> <span class="o">=</span> <span class="n">editorMode</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_spectra</span> <span class="o">=</span> <span class="n">spectra</span>  <span class="c1">#open popup with already these spectra in. Ready to create the group.</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_setMainLayout</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_setLeftWidgets</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_setRightWidgets</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_setApplyButtons</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_addWidgetsToLayout</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">editorMode</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_setEditorMode</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_populateListWidgetLeft</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupLabel</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">addNewSpectrumGroup</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_checkCurrentSpectrumGroups</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spectra</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_spectra</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_addSpectraOnStart</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="nf">_setMainLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s2">&quot;Spectrum Group Setup&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>  <span class="c1"># L,T,R,B</span>
-        <span class="c1"># self.setFixedWidth(800)</span>
-
-    <span class="k">def</span> <span class="nf">_setLeftWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">selectInitialRadioButtons</span> <span class="o">=</span> <span class="n">RadioButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;New&#39;</span><span class="p">,</span> <span class="s1">&#39;From Current SGs&#39;</span><span class="p">],</span>
-                                                      <span class="n">selectedInd</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                                                      <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initialOptionsCallBack</span><span class="p">,</span>
-                                                      <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span>
-                                                      <span class="n">tipTexts</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">leftSpectrumGroupLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Name&#39;</span><span class="p">,</span> <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">leftSpectrumGroupsLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Current SGs&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">leftSpectrumGroupLineEdit</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">leftSpectrumGroupLineEdit</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">leftSpectrumGroupLineEdit</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="mi">170</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelection</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_populateLeftPullDownList</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelection</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="mi">170</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetLeft</span> <span class="o">=</span> <span class="n">ListWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetLeft</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_setRightWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rightSelectionLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Select Spectra from&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rightPullDownSelection</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rightPullDownSelection</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getRightPullDownSelectionData</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rightPullDownSelection</span><span class="o">.</span><span class="n">activated</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rightPullDownSelectionAction</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rightPullDownSelection</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="mi">170</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetRight</span> <span class="o">=</span> <span class="n">ListWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetRight</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_initialLabelListWidgetRight</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="nf">_setApplyButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">applyButtons</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Cancel&#39;</span><span class="p">,</span> <span class="s1">&#39;Apply&#39;</span><span class="p">,</span> <span class="s1">&#39;Ok&#39;</span><span class="p">],</span>
-                                       <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">reject</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_applyChanges</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_okButton</span><span class="p">],</span>
-                                       <span class="n">tipTexts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">],</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span>
-                                       <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
-        <span class="c1"># if self.addNewSpectrumGroup:  # Restore button disabled</span>
-        <span class="c1">#   self.applyButtons.buttons[1].setEnabled(False)</span>
-
-    <span class="k">def</span> <span class="nf">_addWidgetsToLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1">###### Add left Widgets on Main layout ######</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectInitialRadioButtons</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">leftSpectrumGroupsLabel</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelection</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupLabel</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">leftSpectrumGroupLabel</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">leftSpectrumGroupLineEdit</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetLeft</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-
-        <span class="c1">###### Add Right Widgets on Main layout ######</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rightSelectionLabel</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rightPullDownSelection</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetRight</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-
-        <span class="c1">###### Add Buttons Widgets on Main layout ######</span>
-        <span class="c1"># self.mainLayout.addWidget(self.restoreButton, 4, 0)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">applyButtons</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupLabel</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="nf">_initialOptionsCallBack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">selected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectInitialRadioButtons</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="n">selected</span> <span class="o">==</span> <span class="s1">&#39;New&#39;</span><span class="p">:</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetLeft</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelection</span><span class="o">.</span><span class="n">setIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">leftSpectrumGroupLineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelection</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelection</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">leftSpectrumGroupsLabel</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_selectAnOptionState</span><span class="p">()</span>
-
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetLeft</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelection</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelection</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">leftSpectrumGroupsLabel</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_selectAnOptionState</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="nf">_populateLeftPullDownList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">leftPullDownData</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Select an Option&#39;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">addNewSpectrumGroup</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectrumGroups</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">sg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectrumGroups</span><span class="p">:</span>
-                    <span class="n">leftPullDownData</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">sg</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelection</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">leftPullDownData</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelection</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">leftPullDownData</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelection</span><span class="o">.</span><span class="n">activated</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_leftPullDownSelectionAction</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">editorMode</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelection</span><span class="o">.</span><span class="n">setData</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">sg</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">sg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectrumGroups</span><span class="p">])</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelection</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelection</span><span class="o">.</span><span class="n">setData</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">name</span><span class="p">)])</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">leftSpectrumGroupLineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">selectInitialRadioButtons</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">leftSpectrumGroupsLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;Current&#39;</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelection</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupLabel</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="nf">_populateListWidgetLeft</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetLeft</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
-                <span class="n">item</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QListWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetLeft</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">leftPullDownSelection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelection</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">leftPullDownSelection</span> <span class="o">!=</span> <span class="s1">&#39;Select an Option&#39;</span><span class="p">:</span>
-                <span class="n">spectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SG:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">leftPullDownSelection</span><span class="p">))</span>
-                <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
-                    <span class="n">item</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QListWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetLeft</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_populateListWidgetRight</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetRight</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">spectra</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getRightPullDownSpectrumGroup</span><span class="p">()</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
-                <span class="n">item</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QListWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetRight</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
-                <span class="n">item</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QListWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetRight</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_leftPullDownSelectionAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selected</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">selected</span> <span class="o">!=</span> <span class="s1">&#39;Select an Option&#39;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">selected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SG:&#39;</span> <span class="o">+</span> <span class="n">selected</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">editorMode</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">rightPullDownSelection</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getRightPullDownSelectionData</span><span class="p">())</span>
-
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetLeft</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_populateListWidgetLeft</span><span class="p">()</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">leftSpectrumGroupLineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">selected</span><span class="p">))</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">rightPullDownSelection</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getRightPullDownSelectionData</span><span class="p">())</span>
-
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightPullDownSelection</span><span class="o">.</span><span class="n">getText</span><span class="p">():</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_selectAnOptionState</span><span class="p">()</span>
-                <span class="k">print</span><span class="p">(</span><span class="s1">&#39;You cannot have the same SG on the left and right list&#39;</span><span class="p">)</span>
-
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetLeft</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetRight</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_populateListWidgetLeft</span><span class="p">()</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">rightPullDownSelection</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getRightPullDownSelectionData</span><span class="p">())</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_selectAnOptionState</span><span class="p">()</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">leftSpectrumGroupLineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">addNewSpectrumGroup</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_checkForDuplicatedNames</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetLeft</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">leftSpectrumGroupLineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_rightPullDownSelectionAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selected</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">selected</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-
-            <span class="k">if</span> <span class="n">selected</span> <span class="o">==</span> <span class="s1">&#39; &#39;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetRight</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetRight</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_initialLabelListWidgetRight</span><span class="p">()</span>
-
-            <span class="k">elif</span> <span class="n">selected</span> <span class="o">==</span> <span class="s1">&#39;Available Spectra&#39;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetRight</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_populateListWidgetRight</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getAllSpectra</span><span class="p">())</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetRight</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetRight</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetRight</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-                <span class="n">spectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">selected</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">spectrumGroup</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_populateListWidgetRight</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_initialLabelListWidgetRight</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">item</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QListWidgetItem</span><span class="p">(</span><span class="s1">&#39;Select an option and drag/drop items across&#39;</span><span class="p">)</span>
-        <span class="n">item</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">NoItemFlags</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetRight</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_getLeftPullDownSelectionData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelectionData</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">spectrumGroup</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectrumGroups</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">spectrumGroup</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelectionData</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span><span class="p">))</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelectionData</span>
-
-    <span class="k">def</span> <span class="nf">_getRightPullDownSelectionData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rightPullDownSelectionData</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;Available Spectra&#39;</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">spectrumGroup</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectrumGroups</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelection</span><span class="o">.</span><span class="n">getText</span><span class="p">():</span>  <span class="c1"># self.spectrumGroup:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">rightPullDownSelectionData</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span><span class="p">))</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightPullDownSelectionData</span><span class="p">:</span>  <span class="c1">#This to avoid duplicates</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">rightPullDownSelectionData</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightPullDownSelectionData</span>
-
-    <span class="k">def</span> <span class="nf">_addSpectraOnStart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spectra</span><span class="p">:</span>
-
-            <span class="c1"># update other widgets</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">selectInitialRadioButtons</span><span class="o">.</span><span class="n">radioButtons</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_initialOptionsCallBack</span><span class="p">()</span>
-
-            <span class="c1"># add spectra on left list widget ready to create a new Group</span>
-            <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spectra</span><span class="p">:</span>
-                <span class="n">item</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QListWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetLeft</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_getAllSpectra</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span><span class="p">:</span>
-            <span class="n">allSpectra</span> <span class="o">=</span> <span class="p">[</span><span class="n">sp</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectra</span><span class="p">]</span>
-            <span class="n">spectrumGroupSpectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span>
-            <span class="k">for</span> <span class="n">spectrumSG</span> <span class="ow">in</span> <span class="n">spectrumGroupSpectra</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">spectrumSG</span> <span class="ow">in</span> <span class="n">allSpectra</span><span class="p">:</span>
-                    <span class="n">allSpectra</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">spectrumSG</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">allSpectra</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">leftWidgetSpectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getItemListWidgets</span><span class="p">()[</span><span class="s1">&#39;leftWidgetSpectra&#39;</span><span class="p">]</span>
-            <span class="n">availableSpectra</span> <span class="o">=</span> <span class="p">[</span><span class="n">sp</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectra</span> <span class="k">if</span>
-                                <span class="n">sp</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">leftWidgetSpectra</span><span class="p">]</span>  <span class="c1"># make sure to don&#39;t have spectra on left and right at the same time</span>
-            <span class="k">return</span> <span class="n">availableSpectra</span>
-
-    <span class="k">def</span> <span class="nf">_changeLeftSpectrumGroupName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftSpectrumGroupLineEdit</span><span class="o">.</span><span class="n">isModified</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">leftSpectrumGroupLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
-
-    <span class="k">def</span> <span class="nf">_getItemListWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">leftWidgets</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">leftWidgetSpectra</span> <span class="o">=</span> <span class="p">[]</span>
-
-        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetLeft</span><span class="o">.</span><span class="n">count</span><span class="p">()):</span>
-            <span class="n">leftWidgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetLeft</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">index</span><span class="p">))</span>
-        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">leftWidgets</span><span class="p">:</span>
-            <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SP:&#39;</span> <span class="o">+</span> <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
-            <span class="n">leftWidgetSpectra</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span>
-
-        <span class="n">rightWidgets</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">rightWidgetSpectra</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetRight</span><span class="o">.</span><span class="n">count</span><span class="p">()):</span>
-            <span class="n">rightWidgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetRight</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">index</span><span class="p">))</span>
-        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">rightWidgets</span><span class="p">:</span>
-            <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SP:&#39;</span> <span class="o">+</span> <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
-            <span class="n">rightWidgetSpectra</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;leftWidgetSpectra&#39;</span><span class="p">:</span> <span class="n">leftWidgetSpectra</span><span class="p">,</span> <span class="s1">&#39;rightWidgetSpectra&#39;</span><span class="p">:</span> <span class="n">rightWidgetSpectra</span><span class="p">}</span>
-
-    <span class="k">def</span> <span class="nf">_checkForDuplicatedNames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">newName</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">leftSpectrumGroupLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
-        <span class="k">for</span> <span class="n">sg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectrumGroups</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">sg</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">newName</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">leftSpectrumGroupLineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">sg</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;-1&#39;</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_setEditorMode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="n">leftPullDownData</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Select an Option&#39;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectrumGroups</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">selectInitialRadioButtons</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">sg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectrumGroups</span><span class="p">:</span>
-                <span class="n">leftPullDownData</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">sg</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelection</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">leftPullDownData</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetLeft</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelection</span><span class="o">.</span><span class="n">activated</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_leftPullDownSelectionAction</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">addNewSpectrumGroup</span> <span class="o">=</span> <span class="bp">True</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_populateLeftPullDownList</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="nf">_applyChanges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The apply button has been clicked</span>
-<span class="sd">        Define an undo block for setting the properties of the object</span>
-<span class="sd">        If there is an error setting any values then generate an error message</span>
-<span class="sd">          If anything has been added to the undo queue then remove it with application.undo()</span>
-<span class="sd">          repopulate the popup widgets</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">leftWidgetSpectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getItemListWidgets</span><span class="p">()[</span><span class="s1">&#39;leftWidgetSpectra&#39;</span><span class="p">]</span>
-        <span class="n">rightWidgetSpectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getItemListWidgets</span><span class="p">()[</span><span class="s1">&#39;rightWidgetSpectra&#39;</span><span class="p">]</span>
-
-        <span class="n">applyAccept</span> <span class="o">=</span> <span class="bp">False</span>
-        <span class="n">oldUndo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">numItems</span><span class="p">()</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;_applyChanges&#39;</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">addNewSpectrumGroup</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_applyToNewSG</span><span class="p">(</span><span class="n">leftWidgetSpectra</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">editorMode</span><span class="p">:</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelection</span><span class="o">.</span><span class="n">text</span> <span class="o">!=</span> <span class="s1">&#39;Select an Option&#39;</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SG:&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelection</span><span class="o">.</span><span class="n">getText</span><span class="p">())</span>
-
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_applyToCurrentSG</span><span class="p">(</span><span class="n">leftWidgetSpectra</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightPullDownSelection</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39; &#39;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightPullDownSelection</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;Available Spectra&#39;</span><span class="p">:</span>
-                <span class="c1"># return # don&#39;t do changes to spectra</span>
-                <span class="k">pass</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_updateRightSGspectra</span><span class="p">(</span><span class="n">rightWidgetSpectra</span><span class="p">)</span>
-
-            <span class="n">applyAccept</span> <span class="o">=</span> <span class="bp">True</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
-            <span class="n">showWarning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">windowTitle</span><span class="p">()),</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">))</span>
-        <span class="k">finally</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="n">applyAccept</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
-            <span class="c1"># should only undo if something new has been added to the undo deque</span>
-            <span class="c1"># may cause a problem as some things may be set with the same values</span>
-            <span class="c1"># and still be added to the change list, so only undo if length has changed</span>
-            <span class="n">errorName</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">oldUndo</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">numItems</span><span class="p">():</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">undo</span><span class="p">()</span>
-                <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt;Undo.</span><span class="si">%s</span><span class="s1">._applychanges&#39;</span> <span class="o">%</span> <span class="n">errorName</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt;Undo.</span><span class="si">%s</span><span class="s1">._applychanges nothing to remove&#39;</span> <span class="o">%</span> <span class="n">errorName</span><span class="p">)</span>
-
-            <span class="c1"># repopulate popup</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_repopulate</span><span class="p">()</span>
-            <span class="k">return</span> <span class="bp">False</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">True</span>
-
-    <span class="k">def</span> <span class="nf">_okButton</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_applyChanges</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="nf">_repopulate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_restoreButton</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="nf">_restoreButton</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">addNewSpectrumGroup</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_populateLeftPullDownList</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_populateListWidgetLeft</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_selectAnOptionState</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="nf">_applyToNewSG</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">leftWidgetSpectra</span><span class="p">):</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">leftSpectrumGroupLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
-        <span class="k">if</span> <span class="n">name</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">newSpectrumGroup</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">leftWidgetSpectra</span><span class="p">))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">addNewSpectrumGroup</span> <span class="o">=</span> <span class="bp">False</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">selectInitialRadioButtons</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">leftSpectrumGroupsLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;Current&#39;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelection</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelection</span><span class="o">.</span><span class="n">setData</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">name</span><span class="p">)])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">applyButtons</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">leftSpectrumGroupLineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;Unnamed&#39;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_applyToNewSG</span><span class="p">(</span><span class="n">leftWidgetSpectra</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_applyToCurrentSG</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">leftWidgetSpectra</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_changeLeftSpectrumGroupName</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">leftWidgetSpectra</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupLabel</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_populateLeftPullDownList</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="nf">_updateRightSGspectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rightWidgetSpectra</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getRightPullDownSpectrumGroup</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_getRightPullDownSpectrumGroup</span><span class="p">()</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_getRightPullDownSpectrumGroup</span><span class="p">()</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">rightWidgetSpectra</span><span class="p">))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_selectAnOptionState</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="nf">_updateLeftPullDown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelection</span><span class="o">.</span><span class="n">setData</span><span class="p">([</span><span class="n">sg</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">sg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectrumGroups</span><span class="p">])</span>
-
-    <span class="k">def</span> <span class="nf">_selectAnOptionState</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rightPullDownSelection</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetRight</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupListWidgetRight</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_initialLabelListWidgetRight</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="nf">_getRightPullDownSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">pullDownSelection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightPullDownSelection</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span>
-        <span class="n">rightSpectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">pullDownSelection</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">rightSpectrumGroup</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">rightSpectrumGroup</span>
-
-    <span class="k">def</span> <span class="nf">_checkCurrentSpectrumGroups</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectrumGroups</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">selectInitialRadioButtons</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">leftSpectrumGroupsLabel</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelection</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">selectInitialRadioButtons</span><span class="o">.</span><span class="n">radioButtons</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">selectInitialRadioButtons</span><span class="o">.</span><span class="n">radioButtons</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">leftSpectrumGroupsLabel</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">leftPullDownSelection</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">rightPullDownSelection</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;Available Spectra&#39;</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_populateListWidgetRight</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_cancelNewSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_populateListWidgetLeft</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_selectAnOptionState</span><span class="p">()</span>
-        <span class="c1"># self._disableButtons()</span>
-
-    <span class="k">def</span> <span class="nf">_disableButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">button</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">applyButtons</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
-            <span class="n">button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-        <span class="c1"># self.restoreButton.setEnabled(False)</span>
-
-    <span class="k">def</span> <span class="nf">_changeButtonStatus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">button</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">applyButtons</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
-            <span class="n">button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span></div>
-        <span class="c1"># self.restoreButton.setEnabled(True)</span>
+<div class="viewcode-block" id="SpectrumGroupEditor"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.SpectrumGroupEditor.SpectrumGroupEditor">[docs]</a><span class="k">class</span> <span class="nc">SpectrumGroupEditor</span><span class="p">(</span><span class="n">_GroupEditorPopupABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A popup to create and manage SpectrumGroups</span>
+
+<span class="sd">    Used in &#39;New&#39; or &#39;Edit&#39; mode:</span>
+<span class="sd">    - For creating new SpectrumGroup (editMode==False); optionally uses passed in spectra list</span>
+<span class="sd">      i.e. NewSpectrumGroup of SideBar and Context menu of SideBar</span>
+
+<span class="sd">    - For editing existing SpectrumGroup (editMode==True); requires spectrumGroup argument</span>
+<span class="sd">      i.e. Edit of SpectrumGroup of SideBar</span>
+<span class="sd">    or</span>
+<span class="sd">      For selecting and editing SpectrumGroup (editMode==True)</span>
+<span class="sd">      i.e. Menu Spectrum-&gt;Edit SpectrumGroup...</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">KLASS</span> <span class="o">=</span> <span class="n">SpectrumGroup</span>
+    <span class="n">KLASS_ITEM_ATTRIBUTE</span> <span class="o">=</span> <span class="s1">&#39;spectra&#39;</span> <span class="c1"># Attribute in KLASS containing items</span>
+    <span class="n">KLASS_PULLDOWN</span> <span class="o">=</span> <span class="n">SpectrumGroupPulldown</span>
+
+    <span class="n">PROJECT_NEW_METHOD</span> <span class="o">=</span> <span class="s1">&#39;newSpectrumGroup&#39;</span>  <span class="c1"># Method of Project to create new KLASS instance</span>
+    <span class="n">PROJECT_ITEM_ATTRIBUTE</span> <span class="o">=</span> <span class="s1">&#39;spectra&#39;</span>  <span class="c1"># Attribute of Project containing items</span></div>
 </pre></div>
 
           </div>

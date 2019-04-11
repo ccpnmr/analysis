@@ -54,25 +54,23 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:52 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: Geerten Vuister $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $&quot;</span>
-
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
@@ -97,116 +95,118 @@
 
 <span class="n">NOTIFIERS</span> <span class="o">=</span> <span class="s1">&#39;_notifiers&#39;</span>
 
+
 <div class="viewcode-block" id="CompoundBaseWidget"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget">[docs]</a><span class="k">class</span> <span class="nc">CompoundBaseWidget</span><span class="p">(</span><span class="n">Frame</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  Base widget for Compound classes; inherits from Frame (and hence Base)</span>
-<span class="sd">  Implements the addNotifier and deleteNotifiers methods</span>
-<span class="sd">  &quot;&quot;&quot;</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">layoutDict</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">showBorder</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    :param parent: parent widget</span>
-<span class="sd">    :param showBorder: flag to display the border of Frame (True, False)</span>
-<span class="sd">    :param layoutDict: dictionary of orientation, griddingList key,value pairs; griddingList should</span>
-<span class="sd">                       contain a (x,y) tuple for each widget to be added later-on</span>
-<span class="sd">    :param orientation: orientation keyword</span>
-<span class="sd">    :param kwds: (optional) keyword, value pairs for the gridding of Frame</span>
+<span class="sd">    Base widget for Compound classes; inherits from Frame (and hence Base)</span>
+<span class="sd">    Implements the addNotifier and deleteNotifiers methods</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">showBorder</span><span class="o">=</span><span class="n">showBorder</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">orientation</span> <span class="ow">in</span> <span class="n">layoutDict</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Invalid parameter &quot;orientation&quot; (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">orientation</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_orientation</span> <span class="o">=</span> <span class="n">orientation</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_gridding</span> <span class="o">=</span> <span class="n">layoutDict</span><span class="p">[</span><span class="n">orientation</span><span class="p">]</span> <span class="c1"># list of grid tuples for all succesive widgets</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span> <span class="o">=</span> <span class="p">[]</span>    <span class="c1"># list of all the widgets; use addWidget to add using the layoutDict</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">layoutDict</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">showBorder</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param parent: parent widget</span>
+<span class="sd">        :param showBorder: flag to display the border of Frame (True, False)</span>
+<span class="sd">        :param layoutDict: dictionary of orientation, griddingList key,value pairs; griddingList should</span>
+<span class="sd">                           contain a (x,y) tuple for each widget to be added later-on</span>
+<span class="sd">        :param orientation: orientation keyword</span>
+<span class="sd">        :param kwds: (optional) keyword, value pairs for the gridding of Frame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">showBorder</span><span class="o">=</span><span class="n">showBorder</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
-    <span class="c1"># notifiers</span>
-    <span class="c1">#TODO:GEERTEN: poor design?; rethink this over</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NOTIFIERS</span><span class="p">):</span>
-      <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NOTIFIERS</span><span class="p">,</span> <span class="p">[])</span> <span class="c1"># list of all notifiers for this widget</span>
-    <span class="n">nf</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NOTIFIERS</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nf</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-      <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Invalid notifiers attribute (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">nf</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">orientation</span> <span class="ow">in</span> <span class="n">layoutDict</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Invalid parameter &quot;orientation&quot; (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">orientation</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_orientation</span> <span class="o">=</span> <span class="n">orientation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gridding</span> <span class="o">=</span> <span class="n">layoutDict</span><span class="p">[</span><span class="n">orientation</span><span class="p">]</span>  <span class="c1"># list of grid tuples for all succesive widgets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list of all the widgets; use addWidget to add using the layoutDict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_blockingLevel</span> <span class="o">=</span> <span class="mi">0</span>
 
-  <span class="k">def</span> <span class="nf">_addWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
-    <span class="s2">&quot;Add widget, using the layout as defined previously by layoutDict and orientation&quot;</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_gridding</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Cannot add widget; invalid gridding&#39;</span><span class="p">)</span>
-    <span class="n">gx</span><span class="p">,</span> <span class="n">gy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gridding</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">)]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">gx</span><span class="p">,</span> <span class="n">gy</span><span class="p">)</span>
+        <span class="c1"># notifiers</span>
+        <span class="c1">#TODO:GEERTEN: poor design?; rethink this over</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NOTIFIERS</span><span class="p">):</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NOTIFIERS</span><span class="p">,</span> <span class="p">[])</span>  <span class="c1"># list of all notifiers for this widget</span>
+        <span class="n">nf</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NOTIFIERS</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nf</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Invalid notifiers attribute (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">nf</span><span class="p">)</span>
 
-<div class="viewcode-block" id="CompoundBaseWidget.setMinimumWidths"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.setMinimumWidths">[docs]</a>  <span class="k">def</span> <span class="nf">setMinimumWidths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minimumWidths</span><span class="p">):</span>
-    <span class="s2">&quot;Set minimumwidths of widgets&quot;</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">minimumWidths</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">):</span>
-      <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Not enough values to set minimum widths of all widgets&#39;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">width</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">minimumWidths</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">)]):</span>
-      <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="n">width</span><span class="p">)</span></div>
+    <span class="k">def</span> <span class="nf">_addWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+        <span class="s2">&quot;Add widget, using the layout as defined previously by layoutDict and orientation&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_gridding</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Cannot add widget; invalid gridding&#39;</span><span class="p">)</span>
+        <span class="n">gx</span><span class="p">,</span> <span class="n">gy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gridding</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">gx</span><span class="p">,</span> <span class="n">gy</span><span class="p">)</span>
 
-<div class="viewcode-block" id="CompoundBaseWidget.setMaximumWidths"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.setMaximumWidths">[docs]</a>  <span class="k">def</span> <span class="nf">setMaximumWidths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maximumWidths</span><span class="p">):</span>
-    <span class="s2">&quot;Set maximumWidths of widgets&quot;</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">maximumWidths</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">):</span>
-      <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Not enough values to set maximum widths of all widgets&#39;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">width</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">maximumWidths</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">)]):</span>
-      <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">setMaximumWidth</span><span class="p">(</span><span class="n">width</span><span class="p">)</span></div>
+<div class="viewcode-block" id="CompoundBaseWidget.setMinimumWidths"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.setMinimumWidths">[docs]</a>    <span class="k">def</span> <span class="nf">setMinimumWidths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minimumWidths</span><span class="p">):</span>
+        <span class="s2">&quot;Set minimumwidths of widgets&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">minimumWidths</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Not enough values to set minimum widths of all widgets&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">width</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">minimumWidths</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">)]):</span>
+            <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="n">width</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="CompoundBaseWidget.setFixedWidths"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.setFixedWidths">[docs]</a>  <span class="k">def</span> <span class="nf">setFixedWidths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fixedWidths</span><span class="p">):</span>
-    <span class="s2">&quot;Set maximumWidths of widgets&quot;</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fixedWidths</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">):</span>
-      <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Not enough values to set fixed widths of all widgets&#39;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">width</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fixedWidths</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">)]):</span>
-      <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="n">width</span><span class="p">)</span></div>
+<div class="viewcode-block" id="CompoundBaseWidget.setMaximumWidths"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.setMaximumWidths">[docs]</a>    <span class="k">def</span> <span class="nf">setMaximumWidths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maximumWidths</span><span class="p">):</span>
+        <span class="s2">&quot;Set maximumWidths of widgets&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">maximumWidths</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Not enough values to set maximum widths of all widgets&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">width</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">maximumWidths</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">)]):</span>
+            <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">setMaximumWidth</span><span class="p">(</span><span class="n">width</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="CompoundBaseWidget.setFixedHeights"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.setFixedHeights">[docs]</a>  <span class="k">def</span> <span class="nf">setFixedHeights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fixedHeights</span><span class="p">):</span>
-    <span class="s2">&quot;Set fixed heights of widgets&quot;</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fixedHeights</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">):</span>
-      <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Not enough values to set fixed heights of all widgets&#39;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">height</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fixedHeights</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">)]):</span>
-      <span class="k">if</span> <span class="n">height</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="n">height</span><span class="p">)</span></div>
+<div class="viewcode-block" id="CompoundBaseWidget.setFixedWidths"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.setFixedWidths">[docs]</a>    <span class="k">def</span> <span class="nf">setFixedWidths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fixedWidths</span><span class="p">):</span>
+        <span class="s2">&quot;Set maximumWidths of widgets&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fixedWidths</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Not enough values to set fixed widths of all widgets&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">width</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fixedWidths</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">)]):</span>
+            <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="n">width</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="CompoundBaseWidget.addObjectNotifier"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.addObjectNotifier">[docs]</a>  <span class="k">def</span> <span class="nf">addObjectNotifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theObject</span><span class="p">,</span> <span class="n">triggers</span><span class="p">,</span> <span class="n">targetName</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Add and store a notifier with widget; </span>
+<div class="viewcode-block" id="CompoundBaseWidget.setFixedHeights"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.setFixedHeights">[docs]</a>    <span class="k">def</span> <span class="nf">setFixedHeights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fixedHeights</span><span class="p">):</span>
+        <span class="s2">&quot;Set fixed heights of widgets&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fixedHeights</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Not enough values to set fixed heights of all widgets&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">height</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fixedHeights</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">)]):</span>
+            <span class="k">if</span> <span class="n">height</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="n">height</span><span class="p">)</span></div>
 
-<span class="sd">    :param theObject: A valid V3 core or current object</span>
-<span class="sd">    :param triggers: any of the triggers, as defined in Notifier class</span>
-<span class="sd">    :param targetName: a valid target for theObject, as defined in the Notifier class</span>
-<span class="sd">    :param func: callback function on triggering</span>
-<span class="sd">    :param args: optional arguments to func</span>
-<span class="sd">    :param kwds: optional keyword arguments to func</span>
-<span class="sd">    :return: Notifier instance</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">notifier</span> <span class="o">=</span> <span class="n">Notifier</span><span class="p">(</span><span class="n">theObject</span><span class="p">,</span> <span class="n">triggers</span><span class="p">,</span> <span class="n">targetName</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">addNotifier</span><span class="p">(</span><span class="n">notifier</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">notifier</span></div>
+<div class="viewcode-block" id="CompoundBaseWidget.addObjectNotifier"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.addObjectNotifier">[docs]</a>    <span class="k">def</span> <span class="nf">addObjectNotifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theObject</span><span class="p">,</span> <span class="n">triggers</span><span class="p">,</span> <span class="n">targetName</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add and store a notifier with widget;</span>
 
-<div class="viewcode-block" id="CompoundBaseWidget.addNotifier"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.addNotifier">[docs]</a>  <span class="k">def</span> <span class="nf">addNotifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notifier</span><span class="p">):</span>
-    <span class="s2">&quot;add a notifer to the widget&quot;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NOTIFIERS</span><span class="p">):</span>
-      <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Widget has no notifiers attribute&#39;</span><span class="p">)</span>
-    <span class="n">nf</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NOTIFIERS</span><span class="p">)</span>
-    <span class="n">nf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">notifier</span><span class="p">)</span>
-    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Added notifier </span><span class="si">%s</span><span class="s1"> to widget </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">notifier</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span></div>
+<span class="sd">        :param theObject: A valid V3 core or current object</span>
+<span class="sd">        :param triggers: any of the triggers, as defined in Notifier class</span>
+<span class="sd">        :param targetName: a valid target for theObject, as defined in the Notifier class</span>
+<span class="sd">        :param func: callback function on triggering</span>
+<span class="sd">        :param args: optional arguments to func</span>
+<span class="sd">        :param kwds: optional keyword arguments to func</span>
+<span class="sd">        :return: Notifier instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">notifier</span> <span class="o">=</span> <span class="n">Notifier</span><span class="p">(</span><span class="n">theObject</span><span class="p">,</span> <span class="n">triggers</span><span class="p">,</span> <span class="n">targetName</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addNotifier</span><span class="p">(</span><span class="n">notifier</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">notifier</span></div>
 
-<div class="viewcode-block" id="CompoundBaseWidget.deleteNotifiers"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.deleteNotifiers">[docs]</a>  <span class="k">def</span> <span class="nf">deleteNotifiers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="s2">&quot;Delete all notifiers associated with the widget&quot;</span>
-    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_notifiers</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">notifier</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notifiers</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-        <span class="c1">#print(&#39;&gt;deleteNotifier&gt;&#39;, notifier)</span>
-        <span class="n">notifier</span><span class="o">.</span><span class="n">unRegister</span><span class="p">()</span>
-        <span class="k">del</span><span class="p">(</span><span class="n">notifier</span><span class="p">)</span></div>
+<div class="viewcode-block" id="CompoundBaseWidget.addNotifier"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.addNotifier">[docs]</a>    <span class="k">def</span> <span class="nf">addNotifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notifier</span><span class="p">):</span>
+        <span class="s2">&quot;add a notifer to the widget&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NOTIFIERS</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Widget has no notifiers attribute&#39;</span><span class="p">)</span>
+        <span class="n">nf</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NOTIFIERS</span><span class="p">)</span>
+        <span class="n">nf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">notifier</span><span class="p">)</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Added notifier </span><span class="si">%s</span><span class="s1"> to widget </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">notifier</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span></div>
 
-  <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="c1"># The project and all its things are already disassembled when closing the program;</span>
-    <span class="c1"># hence, the deregistering of notifiers fails and needs to be caught</span>
-    <span class="k">try</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">deleteNotifiers</span><span class="p">()</span>
-    <span class="k">except</span><span class="p">:</span>
-      <span class="k">pass</span></div>
+<div class="viewcode-block" id="CompoundBaseWidget.deleteNotifiers"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.deleteNotifiers">[docs]</a>    <span class="k">def</span> <span class="nf">deleteNotifiers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Delete all notifiers associated with the widget&quot;</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_notifiers</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">notifier</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notifiers</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="c1">#print(&#39;&gt;deleteNotifier&gt;&#39;, notifier)</span>
+            <span class="n">notifier</span><span class="o">.</span><span class="n">unRegister</span><span class="p">()</span>
+            <span class="k">del</span> <span class="p">(</span><span class="n">notifier</span><span class="p">)</span></div>
 
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># The project and all its things are already disassembled when closing the program;</span>
+        <span class="c1"># hence, the deregistering of notifiers fails and needs to be caught</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">deleteNotifiers</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span></div>
 </pre></div>
 
           </div>

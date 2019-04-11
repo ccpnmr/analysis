@@ -24,22 +24,13 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import itertools
-import collections
-import operator
-
-from ccpn.core.lib import Undo
-from ccpn.util import Common as commonUtil
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.core.Project import Project
-from ccpn.core.SpectrumReference import SpectrumReference
 from ccpn.core.Peak import Peak
 from ccpn.core.Spectrum import Spectrum
-# from ccpn.core.Multiplet import Multiplet
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import MultipletList as ApiMultipletList
-from typing import Optional, Tuple, Sequence, List
+from typing import Optional, Tuple, Sequence, Union
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.core.lib.ContextManagers import newObject
 from ccpn.util.Logging import getLogger
 
 
@@ -249,20 +240,20 @@ class MultipletList(AbstractWrapperObject):
 def _newMultipletList(self: Spectrum, title: str = None,
                       symbolColour: str = None, textColour: str = None, lineColour: str = None,
                       multipletAveraging = 0,
-                      comment: str = None, multiplets: ['Multiplet'] = None,
+                      comment: str = None, multiplets: Sequence[Union['Multiplet', str]] = None,
                       serial: int = None) -> MultipletList:
-    """Create new MultipletList within Spectrum
+    """Create new MultipletList within Spectrum.
 
     See the MultipletList class for details.
 
-    :param title:
+    :param title: title string
     :param symbolColour:
     :param textColour:
     :param lineColour:
     :param multipletAveraging:
-    :param comment:
-    :param multiplets:
-    :return: a new MultipletList instance.
+    :param comment: optional comment string
+    :param multiplets: optional list of multiplets as objects or pids
+    :return: a new MultipletList attached to the Spectrum.
     """
 
     dd = {'name': title, 'details': comment}

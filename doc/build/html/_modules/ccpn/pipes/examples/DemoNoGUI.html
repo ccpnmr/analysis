@@ -50,18 +50,18 @@
 <span></span><span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Luca Mureddu $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:39 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -70,7 +70,6 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
-
 
 
 <span class="c1">#### NON GUI IMPORTS</span>
@@ -89,7 +88,6 @@
     <span class="k">return</span> <span class="n">data</span></div>
 
 
-
 <span class="c1">########################################################################################################################</span>
 <span class="c1">##########################################     GUI PIPE    #############################################################</span>
 <span class="c1">########################################################################################################################</span>
@@ -98,22 +96,18 @@
 <span class="c1">## the guiPipeline will still appear as an empty guiPipe but without widgets.</span>
 
 
-
 <span class="c1">########################################################################################################################</span>
 <span class="c1">##########################################       PIPE      #############################################################</span>
 <span class="c1">########################################################################################################################</span>
 
 
-
 <div class="viewcode-block" id="DemoPipe3"><a class="viewcode-back" href="../../../../ccpn/ccpn.pipes.examples.html#ccpn.pipes.examples.DemoNoGUI.DemoPipe3">[docs]</a><span class="k">class</span> <span class="nc">DemoPipe3</span><span class="p">(</span><span class="n">PandasPipe</span><span class="p">):</span>
-  <span class="s1">&#39;Pandas pipe with No Gui, Feeds with a dataFrame, returns a DataFrame &#39;</span>
-  <span class="n">pipeName</span> <span class="o">=</span> <span class="s1">&#39;NoGui Pandas Pipe&#39;</span>
+    <span class="s1">&#39;Pandas pipe with No Gui, Feeds with a dataFrame, returns a DataFrame &#39;</span>
+    <span class="n">pipeName</span> <span class="o">=</span> <span class="s1">&#39;NoGui Pandas Pipe&#39;</span>
 
-<div class="viewcode-block" id="DemoPipe3.runPipe"><a class="viewcode-back" href="../../../../ccpn/ccpn.pipes.examples.html#ccpn.pipes.examples.DemoNoGUI.DemoPipe3.runPipe">[docs]</a>  <span class="k">def</span> <span class="nf">runPipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">:</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="n">outputDataframe</span> <span class="o">=</span> <span class="n">myAlgorithm</span><span class="p">(</span><span class="n">dataframe</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">outputDataframe</span></div></div>
-
-
+<div class="viewcode-block" id="DemoPipe3.runPipe"><a class="viewcode-back" href="../../../../ccpn/ccpn.pipes.examples.html#ccpn.pipes.examples.DemoNoGUI.DemoPipe3.runPipe">[docs]</a>    <span class="k">def</span> <span class="nf">runPipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="n">outputDataframe</span> <span class="o">=</span> <span class="n">myAlgorithm</span><span class="p">(</span><span class="n">dataframe</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">outputDataframe</span></div></div>
 </pre></div>
 
           </div>

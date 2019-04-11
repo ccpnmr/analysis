@@ -25,7 +25,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from collections import OrderedDict
-# from typing import Tuple, Optional, Sequence, Dict
 import typing
 from functools import partial
 from ccpn.util import Common as commonUtil
@@ -41,8 +40,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.lib import Util as coreUtil
 from ccpnmodel.ccpncore.lib.molecule import MoleculeModify
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, \
-    ccpNmrV3CoreSetter, logCommandBlock, renameObject, undoBlock
+from ccpn.core.lib.ContextManagers import newObject, renameObject, undoBlock
 from ccpn.util.Logging import getLogger
 
 

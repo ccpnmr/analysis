@@ -26,8 +26,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from typing import Sequence, Tuple, Optional
-import collections
-from functools import partial
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
@@ -38,10 +36,9 @@ from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
-from ccpn.core.lib.OrderedSpectrumViews import SPECTRUMVIEWINDEX, OrderedSpectrumViews
+from ccpn.core.lib.OrderedSpectrumViews import OrderedSpectrumViews
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
-    logCommandBlock, undoStackBlocking, undoBlock
+from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, undoBlock
 from ccpn.util.Logging import getLogger
 
 logger = getLogger()

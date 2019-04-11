@@ -24,36 +24,26 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import itertools
-import collections
-import operator
-
-from ccpn.core.lib import Undo
-from ccpn.util import Common as commonUtil
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
-from ccpn.core.SpectrumReference import SpectrumReference
 from ccpn.core.Peak import Peak
-from ccpn.core.Spectrum import Spectrum
-from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
-#from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakCluster as apiPeakCluster
-# from ccpn.core.PeakClusterList import PeakClusterList
-from typing import Optional, Tuple, Any, Union, Sequence
+from typing import Optional, Tuple, Any, Sequence, Union
 from ccpn.util.Common import makeIterableList
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock, undoBlock
+from ccpn.core.lib.ContextManagers import newObject, undoBlock
 from ccpn.util.Logging import getLogger
 
 
 class PeakCluster(AbstractWrapperObject):
-    """PeakCluster object, holding position, intensity, and assignment information
+    """PeakCluster object, holding position, intensity, and assignment information.
 
     Measurements that require more than one NmrAtom for an individual assignment
     (such as  splittings, J-couplings, MQ dimensions, reduced-dimensionality
     experiments etc.) are not supported (yet). Assignments can be viewed and set
     either as a list of assignments for each dimension (dimensionNmrAtoms) or as a
-    list of all possible assignment combinations (assignedNmrAtoms)"""
+    list of all possible assignment combinations (assignedNmrAtoms).
+    """
 
     #: Short class name, for PID.
     shortClassName = 'PC'
@@ -88,9 +78,8 @@ class PeakCluster(AbstractWrapperObject):
         return self._wrappedData.serial
 
     @property
-    def _parent(self) -> Optional[Project]:
+    def _parent(self) -> Optional['Project']:
         """parent containing peakCluster."""
-        #TODO:ED trap that the PeakCluster is no longer attached due to deletion
         return self._project._data2Obj[self._wrappedData.nmrProject]
 
     peakClusterParent = _parent
@@ -122,7 +111,7 @@ class PeakCluster(AbstractWrapperObject):
     #=========================================================================================
 
     @classmethod
-    def _getAllWrappedData(cls, parent: Project) -> Tuple[apiPeakCluster, ...]:
+    def _getAllWrappedData(cls, parent: 'Project') -> Tuple[apiPeakCluster]:
         """get wrappedData (PeakClusters) for all PeakCluster children of parent PeakClusterList"""
         return parent._wrappedData.sortedPeakClusters()
 
@@ -131,12 +120,12 @@ class PeakCluster(AbstractWrapperObject):
     #=========================================================================================
 
     @logCommand(get='self')
-    def addPeaks(self, peaks: ['Peak'] = None):
+    def addPeaks(self, peaks: Sequence[Union['Peak', str]]):
         """
-        Add a peak or list of peaks to the peakCluster
+        Add a peak or list of peaks to the peakCluster.
         The peaks must belong to the spectrum containing the multipletList.
 
-        :param peaks - single peak or list of peaks:
+        :param peaks: single peak or list of peaks, as objects or pid strings.
         """
         peakList = makeIterableList(peaks)
         pks = []
@@ -147,24 +136,17 @@ class PeakCluster(AbstractWrapperObject):
             if not isinstance(pp, Peak):
                 raise TypeError('%s is not of type Peak' % pp)
 
-        # with logCommandBlock(get='self') as log:
-        #     if pks:
-        #         peakStr = '[' + ','.join(["'%s'" % peak.pid for peak in pks]) + ']'
-        #         log('addPeaks', peaks=peakStr)
-        #     else:
-        #         log('addPeaks')
-
         with undoBlock():
             for pk in pks:
                 self._wrappedData.addPeak(pk._wrappedData)
 
     @logCommand(get='self')
-    def removePeaks(self, peaks: ['Peak'] = None):
+    def removePeaks(self, peaks: Sequence[Union['Peak', str]]):
         """
-        Remove a peak or list of peaks from the peakCluster
+        Remove a peak or list of peaks from the peakCluster.
         The peaks must belong to the peakCluster.
 
-        :param peaks - single peak or list of peaks:
+        :param peaks: single peak or list of peaks, as objects or pid strings.
         """
         peakList = makeIterableList(peaks)
         pks = []
@@ -176,13 +158,6 @@ class PeakCluster(AbstractWrapperObject):
                 raise TypeError('%s is not of type Peak' % pp)
             if pp not in self.peaks:
                 raise ValueError('%s does not belong to peakCluster: %s' % (pp.pid, self.pid))
-
-        # with logCommandBlock(get='self') as log:
-        #     if pks:
-        #         peakStr = '[' + ','.join(["'%s'" % peak.pid for peak in pks]) + ']'
-        #         log('removePeaks', peaks=peakStr)
-        #     else:
-        #         log('removePeaks')
 
         with undoBlock():
             for pk in pks:
@@ -199,7 +174,7 @@ class PeakCluster(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(PeakCluster)
-def _newPeakCluster(self: Project, peaks: ['Peak'] = None, serial: int = None) -> PeakCluster:
+def _newPeakCluster(self: Project, peaks: Sequence[Union['Peak', str]] = None, serial: int = None) -> PeakCluster:
     """Create new PeakCluster.
 
     See the PeakCluster class for details.

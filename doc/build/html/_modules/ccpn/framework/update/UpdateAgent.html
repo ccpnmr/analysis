@@ -109,13 +109,12 @@
         <span class="k">return</span> <span class="mi">0</span>
 
     <span class="c1"># fp = open(filePath, &#39;rU&#39;, encoding=&#39;utf-8&#39;)</span>
-    <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;error reading data, not Unicode&#39;</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-    <span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
     <span class="n">h</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
     <span class="c1"># h.update(data.encode(&#39;utf-8&#39;))</span>
@@ -207,13 +206,12 @@
     <span class="sd">&quot;&quot;&quot;Upload a file to the server</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># fp = open(fileName, &#39;rU&#39;)</span>
-    <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">fileData</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">fileData</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;error reading file, not unicode&#39;</span><span class="p">)</span>
         <span class="n">fileData</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-    <span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">uploadData</span><span class="p">(</span><span class="n">serverUser</span><span class="p">,</span> <span class="n">serverPassword</span><span class="p">,</span> <span class="n">serverScript</span><span class="p">,</span> <span class="n">fileData</span><span class="p">,</span> <span class="n">serverDbRoot</span><span class="p">,</span> <span class="n">fileStoredAs</span><span class="p">)</span></div>
 
@@ -269,9 +267,8 @@
             <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">fullFilePath</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
-        <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fullFilePath</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
-        <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-        <span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fullFilePath</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="UpdateFile.commitUpdate"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.update.html#ccpn.framework.update.UpdateAgent.UpdateFile.commitUpdate">[docs]</a>    <span class="k">def</span> <span class="nf">commitUpdate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serverUser</span><span class="p">,</span> <span class="n">serverPassword</span><span class="p">):</span>
 
@@ -408,8 +405,8 @@
 
         <span class="n">testFile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">installLocation</span><span class="p">,</span> <span class="s1">&#39;__write_test__&#39;</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">testFile</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
-            <span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">testFile</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">):</span>
+                <span class="k">pass</span>
             <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">testFile</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">True</span>
         <span class="k">except</span><span class="p">:</span>
@@ -529,7 +526,8 @@
                     <span class="n">write</span><span class="p">(</span><span class="s1">&#39;No server copy of file</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">haveDiff</span> <span class="o">=</span> <span class="bp">False</span>
-                    <span class="n">localLines</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fullFilePath</span><span class="p">,</span> <span class="s1">&#39;rU&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fullFilePath</span><span class="p">,</span> <span class="s1">&#39;rU&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+                        <span class="n">localLines</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
                     <span class="n">serverData</span> <span class="o">=</span> <span class="n">downloadFile</span><span class="p">(</span><span class="n">serverDownloadScript</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverDbRoot</span><span class="p">,</span> <span class="n">updateFile</span><span class="o">.</span><span class="n">fileStoredAs</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">serverData</span><span class="p">:</span>
                         <span class="n">serverLines</span> <span class="o">=</span> <span class="n">serverData</span><span class="o">.</span><span class="n">splitlines</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>

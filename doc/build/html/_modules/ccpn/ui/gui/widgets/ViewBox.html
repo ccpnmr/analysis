@@ -94,18 +94,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Wayne Boucher $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:57 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -134,6 +134,7 @@
     <span class="n">rightMouse</span><span class="p">,</span> <span class="n">shiftRightMouse</span><span class="p">,</span> <span class="n">controlRightMouse</span><span class="p">,</span> <span class="n">controlShiftRightMouse</span><span class="p">,</span> <span class="n">PICK</span><span class="p">,</span> <span class="n">SELECT</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.LinearRegionsPlot</span> <span class="kn">import</span> <span class="n">LinearRegionsPlot</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.mouseEvents</span> <span class="kn">import</span> <span class="n">MouseModes</span><span class="p">,</span> <span class="n">getCurrentMouseMode</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">undoBlock</span>
 
 
 <div class="viewcode-block" id="CrossHair"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ViewBox.CrossHair">[docs]</a><span class="k">class</span> <span class="nc">CrossHair</span><span class="p">:</span>
@@ -332,7 +333,7 @@
             <span class="c1">#   if not peakListView.isVisible():</span>
             <span class="c1">#     continue</span>
             <span class="c1">#   peakList = peakListView.peakList</span>
-            <span class="c1">#   peak = peakList.newPeak(position=position)</span>
+            <span class="c1">#   peak = peakList.newPeak(ppmPositions=position)</span>
             <span class="c1">#   # note, the height below is not derived from any fitting</span>
             <span class="c1">#   # but is a weighted average of the values at the neighbouring grid points</span>
             <span class="c1">#   peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)</span>
@@ -526,15 +527,17 @@
                     <span class="n">project</span><span class="o">.</span><span class="n">unblankNotification</span><span class="p">()</span>
 
                 <span class="c1"># hide all the messages from the peak annotation generation</span>
-                <span class="n">project</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;mousePeakPicking&#39;</span><span class="p">)</span>
+                <span class="c1"># project._startCommandEchoBlock(&#39;mousePeakPicking&#39;)</span>
                 <span class="c1"># update strips which have the above peaks in them</span>
                 <span class="c1"># (could check for visibility...)</span>
-                <span class="n">peakLists</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">peak</span><span class="o">.</span><span class="n">peakList</span> <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">])</span>
-                <span class="k">for</span> <span class="n">peakList</span> <span class="ow">in</span> <span class="n">peakLists</span><span class="p">:</span>
-                    <span class="k">for</span> <span class="n">peakListView</span> <span class="ow">in</span> <span class="n">peakList</span><span class="o">.</span><span class="n">peakListViews</span><span class="p">:</span>
-                        <span class="n">peakListView</span><span class="o">.</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">showPeaks</span><span class="p">(</span><span class="n">peakList</span><span class="p">)</span>
 
-                <span class="n">project</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
+                <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
+                    <span class="n">peakLists</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">peak</span><span class="o">.</span><span class="n">peakList</span> <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">])</span>
+                    <span class="k">for</span> <span class="n">peakList</span> <span class="ow">in</span> <span class="n">peakLists</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">peakListView</span> <span class="ow">in</span> <span class="n">peakList</span><span class="o">.</span><span class="n">peakListViews</span><span class="p">:</span>
+                            <span class="n">peakListView</span><span class="o">.</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">showPeaks</span><span class="p">(</span><span class="n">peakList</span><span class="p">)</span>
+
+                <span class="c1"># project._endCommandEchoBlock()</span>
                 <span class="c1"># update peak table</span>
                 <span class="c1"># limitation: this will only update the first peak table</span>
                 <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="p">,</span> <span class="s1">&#39;peakTableModule&#39;</span><span class="p">):</span>

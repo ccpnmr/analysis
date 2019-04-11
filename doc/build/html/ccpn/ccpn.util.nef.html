@@ -104,18 +104,18 @@ ${ANACONDA3}/bin/python ${CCPNMR_TOP_DIR}/src/python/ccpn/util/nef/compareNef.py
 May be required when converting Nef files through
 different applications
 May be used with -f and -b</td></tr>
-<tr><td class="option-group">
-<kbd><span class="option">-k</span>, <span class="option">--keep</span></kbd></td>
-<td>Keep existing .txt files. New files are appended with &#8216;(n)&#8217; before
-the extension, where n is the next available number.</td></tr>
 </tbody>
 </table>
 <dl class="docutils">
 <dt>-f inFile1 inFile2, &#8211;file inFile1 inFile2</dt>
 <dd>Compare two Nef files and print the results to the
 screen</dd>
+<dt>-b inDir1 inDir2 outDir, &#8211;block inDir1 inDir2 outDir</dt>
+<dd>compare Nef files common to directories
+inDir1 and inDir2. Write output <a href="#id1"><span class="problematic" id="id2">*</span></a>.txt for each
+file into the outDir directory.</dd>
 </dl>
-<table class="docutils option-list" frame="void" rules="none">
+<table class="last docutils option-list" frame="void" rules="none">
 <col class="option" />
 <col class="description" />
 <tbody valign="top">
@@ -123,14 +123,12 @@ screen</dd>
 <kbd><span class="option">-s</span>, <span class="option">--screen</span></kbd></td>
 <td>Output batch processing to screen, default is to .txt files
 may be used with -b</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-k</span>, <span class="option">--keep</span></kbd></td>
+<td>Keep existing .txt files. New files are appended with &#8216;(n)&#8217; before
+the extension, where n is the next available number.</td></tr>
 </tbody>
 </table>
-<dl class="last docutils">
-<dt>-b inDir1 inDir2 outDir, &#8211;block inDir1 inDir2 outDir</dt>
-<dd>compare Nef files common to directories
-inDir1 and inDir2. Write output <a href="#id1"><span class="problematic" id="id2">*</span></a>.txt for each
-file into the outDir directory.</dd>
-</dl>
 </dd>
 </dl>
 </dd>

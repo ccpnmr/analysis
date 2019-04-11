@@ -555,7 +555,7 @@ class Peak(AbstractWrapperObject):
             # change to order defined by axisCodes
             return self.reorderValues(values, axisCodes)
 
-    def setInAxisOrder(self, attributeName: str, values: Sequence, axisCodes: Sequence[str] = None):
+    def setInAxisOrder(self, attributeName: str, values: Sequence[Any], axisCodes: Sequence[str] = None):
         """Set attributeName from values in order defined by axisCodes
            (default order if None)"""
         if not hasattr(self, attributeName):

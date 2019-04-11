@@ -52,242 +52,393 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:28 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">import</span> <span class="nn">datetime</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
 <span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint</span> <span class="kn">import</span> <span class="n">NmrConstraintStore</span> <span class="k">as</span> <span class="n">ApiNmrConstraintStore</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint</span> <span class="kn">import</span> <span class="n">FixedResonance</span> <span class="k">as</span> <span class="n">ApiFixedResonance</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Common</span> <span class="kn">import</span> <span class="n">name2IsotopeCode</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Pid</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">commonUtil</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.decorators</span> <span class="kn">import</span> <span class="n">logCommand</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">newObject</span><span class="p">,</span> <span class="n">renameObject</span>
 
 
 <div class="viewcode-block" id="DataSet"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.DataSet.DataSet">[docs]</a><span class="k">class</span> <span class="nc">DataSet</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Data set. Used to store the input to (or output from) a calculation, including data</span>
-<span class="sd">  selection and parameters, to group Restraints that are used together, to track</span>
-<span class="sd">  data history and file loads. &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Data set. Used to store the input to (or output from) a calculation, including data</span>
+<span class="sd">    selection and parameters, to group Restraints that are used together, to track</span>
+<span class="sd">    data history and file loads. &quot;&quot;&quot;</span>
 
-  <span class="c1">#: Short class name, for PID.</span>
-  <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;DS&#39;</span>
-  <span class="c1"># Attribute it necessary as subclasses must use superclass className</span>
-  <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;DataSet&#39;</span>
+    <span class="c1">#: Short class name, for PID.</span>
+    <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;DS&#39;</span>
+    <span class="c1"># Attribute it necessary as subclasses must use superclass className</span>
+    <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;DataSet&#39;</span>
 
-  <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">Project</span>
+    <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">Project</span>
 
-  <span class="c1">#: Name of plural link to instances of class</span>
-  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s1">&#39;dataSets&#39;</span>
-  
-  <span class="c1">#: List of child classes.</span>
-  <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1">#: Name of plural link to instances of class</span>
+    <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s1">&#39;dataSets&#39;</span>
 
-  <span class="c1"># Qualified name of matching API class</span>
-  <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">ApiNmrConstraintStore</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+    <span class="c1">#: List of child classes.</span>
+    <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
 
-  <span class="c1"># CCPN properties  </span>
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">_apiDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ApiNmrConstraintStore</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; CCPN NmrConstraintStore matching DataSet&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="c1"># Qualified name of matching API class</span>
+    <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">ApiNmrConstraintStore</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
 
-    
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;id string - serial number converted to string&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">serial</span><span class="p">)</span>
+    <span class="c1"># CCPN properties</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_apiDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ApiNmrConstraintStore</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; CCPN NmrConstraintStore matching DataSet&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">serial</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;serial number of DataSet, used in Pid and to identify the DataSet. &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">serial</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;id string - serial number converted to string&quot;&quot;&quot;</span>
+        <span class="c1">#return str(self._wrappedData.serial)</span>
+        <span class="c1">#return str(self.title)+&#39;_&#39;+str(self.serial)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">remapSeparators</span><span class="p">)</span>  <span class="c1"># Title should not be unique</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Project</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Parent (containing) object.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">serial</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;serial number of DataSet, used in Pid and to identify the DataSet. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">serial</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">title</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Title of DataSet (not used in PID).&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Project</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Parent (containing) object.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
 
-  <span class="nd">@title.setter</span>
-  <span class="k">def</span> <span class="nf">title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">title</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Title of DataSet.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Reading V2 project resulted in name being None; create one on the fly</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">nextNumber</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">dataSets</span><span class="p">)</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_defaultName</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">nextNumber</span><span class="p">)</span> <span class="k">if</span> <span class="n">nextNumber</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_defaultName</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">findFirstNmrConstraintStore</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">title</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">title</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">incrementName</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">title</span>  <span class="c1"># The only way to access this</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">programName</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Name of program performing the calculation&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">programName</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span>
 
-  <span class="nd">@programName.setter</span>
-  <span class="k">def</span> <span class="nf">programName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">programName</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="nd">@title.setter</span>
+    <span class="k">def</span> <span class="nf">title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set title of the DataSet.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">programVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Version of program performing the calculation&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">programVersion</span>
+    <span class="c1"># fix for now</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">title</span>
 
-  <span class="nd">@programVersion.setter</span>
-  <span class="k">def</span> <span class="nf">programVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">programVersion</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">programName</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Name of program performing the calculation&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_none2str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">programName</span><span class="p">)</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">dataPath</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;File path where dataSet is stored&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">dataPath</span>
+    <span class="nd">@programName.setter</span>
+    <span class="k">def</span> <span class="nf">programName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">programName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_str2none</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
-  <span class="nd">@dataPath.setter</span>
-  <span class="k">def</span> <span class="nf">dataPath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">dataPath</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">programVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Version of program performing the calculation&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_none2str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">programVersion</span><span class="p">)</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">creationDate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Creation timestamp for DataSet&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">creationDate</span>
+    <span class="nd">@programVersion.setter</span>
+    <span class="k">def</span> <span class="nf">programVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">programVersion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_str2none</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
-  <span class="nd">@creationDate.setter</span>
-  <span class="k">def</span> <span class="nf">creationDate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">creationDate</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dataPath</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;File path where dataSet is stored&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_none2str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">dataPath</span><span class="p">)</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">uuid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Universal identifier for dataSet&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">uuid</span>
+    <span class="nd">@dataPath.setter</span>
+    <span class="k">def</span> <span class="nf">dataPath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">dataPath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_str2none</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
-  <span class="nd">@uuid.setter</span>
-  <span class="k">def</span> <span class="nf">uuid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">uuid</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">creationDate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Creation timestamp for DataSet&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">creationDate</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Free-form text comment&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span>
-    
-  <span class="nd">@comment.setter</span>
-  <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="nd">@creationDate.setter</span>
+    <span class="k">def</span> <span class="nf">creationDate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">creationDate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_str2none</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">uuid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Universal identifier for dataSet&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_none2str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">uuid</span><span class="p">)</span>
 
-  <span class="c1"># Implementation functions</span>
-  <span class="nd">@classmethod</span>
-  <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span><span class="n">Project</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;get wrappedData for all NmrConstraintStores linked to NmrProject&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedNmrConstraintStores</span><span class="p">()</span>
+    <span class="nd">@uuid.setter</span>
+    <span class="k">def</span> <span class="nf">uuid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">uuid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_str2none</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">_fetchFixedResonance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">assignment</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">checkUniqueness</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ApiFixedResonance</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Fetch FixedResonance matching assignment string, creating anew if needed.</span>
-
-<span class="sd">    If checkUniqueness is False the uniqueness of FixedResonance assignments will</span>
-<span class="sd">    not be checked. NB, the odd duplicate should not be a major problem.&quot;&quot;&quot;</span>
-
-    <span class="n">apiNmrConstraintStore</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
-
-    <span class="n">tt</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="ow">or</span> <span class="bp">None</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">Pid</span><span class="o">.</span><span class="n">splitId</span><span class="p">(</span><span class="n">assignment</span><span class="p">)]</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tt</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;assignment </span><span class="si">%s</span><span class="s2"> must have four dot-separated fields&quot;</span> <span class="o">%</span> <span class="n">tt</span><span class="p">)</span>
-
-    <span class="n">dd</span> <span class="o">=</span> <span class="p">{</span>
-      <span class="s1">&#39;chainCode&#39;</span><span class="p">:</span><span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-      <span class="s1">&#39;sequenceCode&#39;</span><span class="p">:</span><span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-      <span class="s1">&#39;residueType&#39;</span><span class="p">:</span><span class="n">tt</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-      <span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="n">tt</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
-    <span class="p">}</span>
-
-    <span class="k">if</span> <span class="n">checkUniqueness</span><span class="p">:</span>
-      <span class="n">result</span> <span class="o">=</span> <span class="n">apiNmrConstraintStore</span><span class="o">.</span><span class="n">findFirstFixedResonance</span><span class="p">(</span><span class="o">**</span><span class="n">dd</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
-
-    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;isotopeCode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name2IsotopeCode</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="ow">or</span> <span class="s1">&#39;?&#39;</span>
-      <span class="n">result</span> <span class="o">=</span> <span class="n">apiNmrConstraintStore</span><span class="o">.</span><span class="n">newFixedResonance</span><span class="p">(</span><span class="o">**</span><span class="n">dd</span><span class="p">)</span>
+    <span class="c1"># @property</span>
+    <span class="c1"># def comment(self) -&gt; str:</span>
+    <span class="c1">#     &quot;&quot;&quot;Free-form text comment&quot;&quot;&quot;</span>
+    <span class="c1">#     return self._none2str(self._wrappedData.details)</span>
     <span class="c1">#</span>
+    <span class="c1"># @comment.setter</span>
+    <span class="c1"># def comment(self, value: str):</span>
+    <span class="c1">#     self._wrappedData.details = self._str2none(value)</span>
+
+    <span class="k">def</span> <span class="nf">_fetchFixedResonance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">assignment</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">checkUniqueness</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ApiFixedResonance</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Fetch FixedResonance matching assignment string, creating anew if needed.</span>
+
+<span class="sd">        If checkUniqueness is False the uniqueness of FixedResonance assignments will</span>
+<span class="sd">        not be checked. NB, the odd duplicate should not be a major problem.&quot;&quot;&quot;</span>
+
+        <span class="n">apiNmrConstraintStore</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+
+        <span class="n">tt</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="ow">or</span> <span class="bp">None</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">Pid</span><span class="o">.</span><span class="n">splitId</span><span class="p">(</span><span class="n">assignment</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tt</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;assignment </span><span class="si">%s</span><span class="s2"> must have four dot-separated fields&quot;</span> <span class="o">%</span> <span class="n">tt</span><span class="p">)</span>
+
+        <span class="n">dd</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;chainCode&#39;</span><span class="p">:</span> <span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="s1">&#39;sequenceCode&#39;</span><span class="p">:</span> <span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="s1">&#39;residueType&#39;</span><span class="p">:</span> <span class="n">tt</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">tt</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+            <span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">checkUniqueness</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">apiNmrConstraintStore</span><span class="o">.</span><span class="n">findFirstFixedResonance</span><span class="p">(</span><span class="o">**</span><span class="n">dd</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;isotopeCode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name2IsotopeCode</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="ow">or</span> <span class="s1">&#39;?&#39;</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">apiNmrConstraintStore</span><span class="o">.</span><span class="n">newFixedResonance</span><span class="p">(</span><span class="o">**</span><span class="n">dd</span><span class="p">)</span>
+        <span class="c1">#</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span> <span class="nf">_getTempItemMap</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get itemString:FixedResonance map, used as optional input for</span>
+<span class="sd">        RestraintContribution.addRestraintItem(), as a faster alternative to</span>
+<span class="sd">        calling _fetchFixedResonance (above). No other uses expected.</span>
+<span class="sd">        Since FixedResonances are in principle mutable, this map should</span>
+<span class="sd">        be used for a single series of creation operations (making or loading</span>
+<span class="sd">        a set of restraint lists) and then discarded.&quot;&quot;&quot;</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">fx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">fixedResonances</span><span class="p">:</span>
+            <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">x</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="n">fx</span><span class="o">.</span><span class="n">chainCode</span><span class="p">,</span> <span class="n">fx</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">fx</span><span class="o">.</span><span class="n">residueType</span><span class="p">,</span> <span class="n">fx</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">ss</span><span class="p">]</span> <span class="o">=</span> <span class="n">fx</span>
+        <span class="c1">#</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="c1">#=========================================================================================</span>
+    <span class="c1"># Implementation functions</span>
+    <span class="c1">#=========================================================================================</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Project</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;get wrappedData for all NmrConstraintStores linked to NmrProject&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedNmrConstraintStores</span><span class="p">()</span>
+
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="DataSet.rename"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.DataSet.DataSet.rename">[docs]</a>    <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Rename DataSet, changing its name and Pid.</span>
+<span class="sd">        NB, the serial remains immutable.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validateName</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">allowWhitespace</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">renameObject</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="k">as</span> <span class="n">addUndoItem</span><span class="p">:</span>
+            <span class="n">oldName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">value</span>
+
+            <span class="n">addUndoItem</span><span class="p">(</span><span class="n">undo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">,</span> <span class="n">oldName</span><span class="p">),</span>
+                        <span class="n">redo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span></div>
+
+    <span class="c1">#=========================================================================================</span>
+    <span class="c1"># CCPN functions</span>
+    <span class="c1">#=========================================================================================</span>
+
+    <span class="c1">#===========================================================================================</span>
+    <span class="c1"># new&#39;Object&#39; and other methods</span>
+    <span class="c1"># Call appropriate routines in their respective locations</span>
+    <span class="c1">#===========================================================================================</span>
+
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="DataSet.newRestraintList"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.DataSet.DataSet.newRestraintList">[docs]</a>    <span class="k">def</span> <span class="nf">newRestraintList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">restraintType</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                         <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">potentialType</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;unknown&#39;</span><span class="p">,</span>
+                         <span class="n">tensorMagnitude</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">tensorRhombicity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+                         <span class="n">tensorIsotropicValue</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">tensorChainCode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                         <span class="n">tensorSequenceCode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">tensorResidueType</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                         <span class="n">restraintItemLength</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create new RestraintList of type restraintType within DataSet.</span>
+
+<span class="sd">        See the RestraintList class for details.</span>
+
+<span class="sd">        Optional keyword arguments can be passed in; see RestraintList._newRestraintList for details.</span>
+
+<span class="sd">        :param restraintType:</span>
+<span class="sd">        :param name:</span>
+<span class="sd">        :param origin:</span>
+<span class="sd">        :param comment:</span>
+<span class="sd">        :param unit:</span>
+<span class="sd">        :param potentialType:</span>
+<span class="sd">        :param tensorMagnitude:</span>
+<span class="sd">        :param tensorRhombicity:</span>
+<span class="sd">        :param tensorIsotropicValue:</span>
+<span class="sd">        :param tensorChainCode:</span>
+<span class="sd">        :param tensorSequenceCode:</span>
+<span class="sd">        :param tensorResidueType:</span>
+<span class="sd">        :param restraintItemLength:</span>
+<span class="sd">        :return: a new RestraintList instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.RestraintList</span> <span class="kn">import</span> <span class="n">_newRestraintList</span>
+
+        <span class="k">return</span> <span class="n">_newRestraintList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">restraintType</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="n">origin</span><span class="p">,</span>
+                                 <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span> <span class="n">potentialType</span><span class="o">=</span><span class="n">potentialType</span><span class="p">,</span>
+                                 <span class="n">tensorMagnitude</span><span class="o">=</span><span class="n">tensorMagnitude</span><span class="p">,</span> <span class="n">tensorRhombicity</span><span class="o">=</span><span class="n">tensorRhombicity</span><span class="p">,</span>
+                                 <span class="n">tensorIsotropicValue</span><span class="o">=</span><span class="n">tensorIsotropicValue</span><span class="p">,</span> <span class="n">tensorChainCode</span><span class="o">=</span><span class="n">tensorChainCode</span><span class="p">,</span>
+                                 <span class="n">tensorSequenceCode</span><span class="o">=</span><span class="n">tensorSequenceCode</span><span class="p">,</span> <span class="n">tensorResidueType</span><span class="o">=</span><span class="n">tensorResidueType</span><span class="p">,</span>
+                                 <span class="n">restraintItemLength</span><span class="o">=</span><span class="n">restraintItemLength</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span></div>
+
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="DataSet.newCalculationStep"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.DataSet.DataSet.newCalculationStep">[docs]</a>    <span class="k">def</span> <span class="nf">newCalculationStep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">programName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">programVersion</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                           <span class="n">scriptName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">script</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                           <span class="n">inputDataUuid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">outputDataUuid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                           <span class="n">inputDataSet</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">outputDataSet</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create new CalculationStep within DataSet.</span>
+
+<span class="sd">        See the CalculationStep class for details.</span>
+
+<span class="sd">        Optional keyword arguments can be passed in; see CalculationStep._newCalculationStep for details.</span>
+
+<span class="sd">        :param programName:</span>
+<span class="sd">        :param programVersion:</span>
+<span class="sd">        :param scriptName:</span>
+<span class="sd">        :param script:</span>
+<span class="sd">        :param inputDataUuid:</span>
+<span class="sd">        :param outputDataUuid:</span>
+<span class="sd">        :param inputDataSet:</span>
+<span class="sd">        :param outputDataSet:</span>
+<span class="sd">        :return: a new CalculationStep instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.CalculationStep</span> <span class="kn">import</span> <span class="n">_newCalculationStep</span>
+
+        <span class="k">return</span> <span class="n">_newCalculationStep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">programName</span><span class="o">=</span><span class="n">programName</span><span class="p">,</span> <span class="n">programVersion</span><span class="o">=</span><span class="n">programVersion</span><span class="p">,</span>
+                                   <span class="n">scriptName</span><span class="o">=</span><span class="n">scriptName</span><span class="p">,</span> <span class="n">script</span><span class="o">=</span><span class="n">script</span><span class="p">,</span>
+                                   <span class="n">inputDataUuid</span><span class="o">=</span><span class="n">inputDataUuid</span><span class="p">,</span> <span class="n">outputDataUuid</span><span class="o">=</span><span class="n">outputDataUuid</span><span class="p">,</span>
+                                   <span class="n">inputDataSet</span><span class="o">=</span><span class="n">inputDataSet</span><span class="p">,</span> <span class="n">outputDataSet</span><span class="o">=</span><span class="n">outputDataSet</span><span class="p">,</span>
+                                   <span class="o">**</span><span class="n">kwds</span><span class="p">)</span></div>
+
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="DataSet.newData"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.DataSet.DataSet.newData">[docs]</a>    <span class="k">def</span> <span class="nf">newData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">attachedObjectPid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                <span class="n">attachedObject</span><span class="p">:</span> <span class="n">AbstractWrapperObject</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create new Data within DataSet.</span>
+
+<span class="sd">        See the Data class for details.</span>
+
+<span class="sd">        Optional keyword arguments can be passed in; see Data._newData for details.</span>
+
+<span class="sd">        :param name:</span>
+<span class="sd">        :param attachedObjectPid:</span>
+<span class="sd">        :param attachedObject:</span>
+<span class="sd">        :return: a new Data instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.Data</span> <span class="kn">import</span> <span class="n">_newData</span>
+
+        <span class="k">return</span> <span class="n">_newData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">attachedObjectPid</span><span class="o">=</span><span class="n">attachedObjectPid</span><span class="p">,</span>
+                        <span class="n">attachedObject</span><span class="o">=</span><span class="n">attachedObject</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span></div></div>
+
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Connections to parents:</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="nd">@newObject</span><span class="p">(</span><span class="n">DataSet</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_newDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Project</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">programName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">programVersion</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                <span class="n">dataPath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">creationDate</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">serial</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataSet</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Create new DataSet</span>
+
+<span class="sd">    See the DataSet class for details.</span>
+
+<span class="sd">    :param title:</span>
+<span class="sd">    :param programName:</span>
+<span class="sd">    :param programVersion:</span>
+<span class="sd">    :param dataPath:</span>
+<span class="sd">    :param creationDate:</span>
+<span class="sd">    :param uuid:</span>
+<span class="sd">    :param comment:</span>
+<span class="sd">    :param serial: optional serial number.</span>
+<span class="sd">    :return: a new DataSet instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">nmrProject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">title</span><span class="p">:</span>
+        <span class="c1"># Make default name</span>
+        <span class="c1"># nextNumber = len(nmrProject.sortedNmrConstraintStores())</span>
+        <span class="c1"># GWV: use V3 attributes whenever possible</span>
+        <span class="n">nextNumber</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataSets</span><span class="p">)</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_defaultName</span><span class="p">(</span><span class="n">DataSet</span><span class="p">),</span> <span class="n">nextNumber</span><span class="p">)</span> <span class="k">if</span> <span class="n">nextNumber</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_defaultName</span><span class="p">(</span><span class="n">DataSet</span><span class="p">)</span>
+    <span class="n">titles</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">title</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataSets</span><span class="p">]</span>
+    <span class="k">while</span> <span class="n">title</span> <span class="ow">in</span> <span class="n">titles</span><span class="p">:</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">incrementName</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;DataSet name must be a string&quot;</span><span class="p">)</span>  <span class="c1"># ejb catch non-string</span>
+    <span class="k">if</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">title</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Character </span><span class="si">%s</span><span class="s2"> not allowed in DataSet name&quot;</span> <span class="o">%</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">programName</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">programName</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;programName must be a string&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">programVersion</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">programVersion</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;programName must be a string&quot;</span><span class="p">)</span>
+
+    <span class="n">apiNmrConstraintStore</span> <span class="o">=</span> <span class="n">nmrProject</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">newNmrConstraintStore</span><span class="p">(</span><span class="n">nmrProject</span><span class="o">=</span><span class="n">nmrProject</span><span class="p">,</span>
+                                                                  <span class="n">name</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+                                                                  <span class="n">programName</span><span class="o">=</span><span class="n">programName</span><span class="p">,</span>
+                                                                  <span class="n">programVersion</span><span class="o">=</span><span class="n">programVersion</span><span class="p">,</span>
+                                                                  <span class="n">dataPath</span><span class="o">=</span><span class="n">dataPath</span><span class="p">,</span>
+                                                                  <span class="n">creationDate</span><span class="o">=</span><span class="n">creationDate</span><span class="p">,</span>
+                                                                  <span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span>
+                                                                  <span class="n">details</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">apiNmrConstraintStore</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Unable to generate new DataSet item&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">serial</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Could not reset serial of </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2"> - keeping original value&quot;</span>
+                                         <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">serial</span><span class="p">))</span>
+
     <span class="k">return</span> <span class="n">result</span>
 
-  <span class="k">def</span> <span class="nf">_getTempItemMap</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Get itemString:FixedResonance map, used as optional input for</span>
-<span class="sd">    RestraintContribution.addRestraintItem(), as a faster alternative to</span>
-<span class="sd">    calling _fetchFixedResonance (above). No other uses expected.</span>
-<span class="sd">    Since FixedResonances are in principle mutable, this map should</span>
-<span class="sd">    be used for a single series of creation operations (making or loading</span>
-<span class="sd">    a set of restraint lists) and then discarded.&quot;&quot;&quot;</span>
-
-    <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">fx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">fixedResonances</span><span class="p">:</span>
-      <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">x</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="n">fx</span><span class="o">.</span><span class="n">chainCode</span><span class="p">,</span> <span class="n">fx</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">fx</span><span class="o">.</span><span class="n">residueType</span><span class="p">,</span> <span class="n">fx</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-      <span class="n">result</span><span class="p">[</span><span class="n">ss</span><span class="p">]</span> <span class="o">=</span> <span class="n">fx</span>
-    <span class="c1">#</span>
-    <span class="k">return</span> <span class="n">result</span></div>
-
-
-<span class="k">def</span> <span class="nf">_newDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">programName</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">programVersion</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                <span class="n">dataPath</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">creationDate</span><span class="p">:</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                <span class="n">comment</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataSet</span><span class="p">:</span>
-                <span class="c1"># comment:str=None, serial:int=None) -&gt; DataSet:</span>
-  <span class="sd">&quot;&quot;&quot;Create new DataSet&quot;&quot;&quot;</span>
-
-  <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;programName&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-                                     <span class="p">(</span><span class="s1">&#39;programVersion&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;dataPath&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-                                     <span class="p">(</span><span class="s1">&#39;creationDate&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;uuid&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
-                                      <span class="c1"># (&#39;serial&#39;,None)</span>
-  <span class="p">))</span>
-  
-  <span class="n">nmrProject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
-  <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;newDataSet&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
-                              <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newDataSet&#39;</span><span class="p">)</span>
-  <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
-  <span class="k">try</span><span class="p">:</span>
-    <span class="n">newApiNmrConstraintStore</span> <span class="o">=</span> <span class="n">nmrProject</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">newNmrConstraintStore</span><span class="p">(</span><span class="n">nmrProject</span><span class="o">=</span><span class="n">nmrProject</span><span class="p">,</span>
-                                                                     <span class="n">name</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
-                                                                     <span class="n">programName</span><span class="o">=</span><span class="n">programName</span><span class="p">,</span>
-                                                                     <span class="n">programVersion</span><span class="o">=</span><span class="n">programVersion</span><span class="p">,</span>
-                                                                     <span class="n">dataPath</span><span class="o">=</span><span class="n">dataPath</span><span class="p">,</span>
-                                                                     <span class="n">creationDate</span><span class="o">=</span><span class="n">creationDate</span><span class="p">,</span>
-                                                                     <span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span>
-                                                                     <span class="n">details</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">newApiNmrConstraintStore</span><span class="p">)</span>
-    <span class="c1"># if serial is not None:</span>
-    <span class="c1">#   try:</span>
-    <span class="c1">#     modelUtil.resetSerial(newApiNmrConstraintStore, serial, &#39;nmrConstraintStores&#39;)</span>
-    <span class="c1">#   except ValueError:</span>
-    <span class="c1">#     self.project._logger.warning(&quot;Could not reset serial of %s to %s - keeping original value&quot;</span>
-    <span class="c1">#                                  %(result, serial))</span>
-    <span class="c1">#   result._finaliseAction(&#39;rename&#39;)</span>
-  <span class="k">finally</span><span class="p">:</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
-  <span class="k">return</span> <span class="n">result</span>
-    
-    
-<span class="c1"># Connections to parents:</span>
-<span class="n">Project</span><span class="o">.</span><span class="n">newDataSet</span> <span class="o">=</span> <span class="n">_newDataSet</span>
-<span class="k">del</span> <span class="n">_newDataSet</span>
-
-<span class="c1"># Notifiers:</span>
+<span class="c1">#EJB 20181206: moved to Project</span>
+<span class="c1"># Project.newDataSet = _newDataSet</span>
+<span class="c1"># del _newDataSet</span>
 </pre></div>
 
           </div>

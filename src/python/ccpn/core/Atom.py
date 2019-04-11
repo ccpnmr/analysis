@@ -30,12 +30,10 @@ import typing
 from ccpn.util import Common as commonUtil
 from ccpn.core.lib import Pid
 from ccpn.core.lib.Util import AtomIdTuple
-from ccpn.core.Project import Project
 from ccpn.core.Residue import Residue
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Atom as ApiAtom
-from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.core.lib.ContextManagers import newObject
 from ccpn.util.Logging import getLogger
 
 

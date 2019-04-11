@@ -51,32 +51,31 @@
 
 <span class="kn">import</span> <span class="nn">os</span>
 
+
 <span class="n">moduleDoc</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;&quot;&quot;&quot;Module Documentation here</span>
 
 <span class="s1">&quot;&quot;&quot;</span>
 <span class="s1">&#39;&#39;&#39;</span>
 
-<span class="n">template</span><span class="o">=</span><span class="s1">&#39;&#39;&#39;#=========================================================================================</span>
+<span class="n">template</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;#=========================================================================================</span>
 <span class="s1">#=========================================================================================</span>
 <span class="s1"># Licence, Reference and Credits</span>
 <span class="s1">#=========================================================================================</span>
-<span class="s1">__copyright__ = &quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="s1">__credits__ = (&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;)</span>
-<span class="s1">__licence__ = (&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;,</span>
-<span class="s1">               &quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;)</span>
-<span class="s1">__reference__ = (&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;,</span>
-<span class="s1">               &quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;)</span>
-
+<span class="s1">__copyright__ = &quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="s1">__credits__ = (&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;)</span>
+<span class="s1">__licence__ = (&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;)</span>
+<span class="s1">__reference__ = (&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;,</span>
+<span class="s1">                 &quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;,</span>
+<span class="s1">                 &quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;)</span>
 <span class="s1">#=========================================================================================</span>
 <span class="s1"># Last code modification</span>
 <span class="s1">#=========================================================================================</span>
 <span class="s1">__modifiedBy__ = &quot;$modifiedBy: CCPN $&quot;</span>
 <span class="s1">__dateModified__ = &quot;$dateModified: 2017-07-07 16:33:00 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="s1">__version__ = &quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="s1">__version__ = &quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="s1">#=========================================================================================</span>
 <span class="s1"># Created</span>
 <span class="s1">#=========================================================================================</span>
-
 <span class="s1">__author__ = &quot;$Author: CCPN $&quot;</span>
 <span class="s1">__date__ = &quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="s1">#=========================================================================================</span>
@@ -98,36 +97,35 @@
 <span class="n">curDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
 <span class="n">thisFile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">curDir</span><span class="p">,</span> <span class="n">__file__</span><span class="p">)</span>
 
-<div class="viewcode-block" id="updateFile"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.updateHeader.updateFile">[docs]</a><span class="k">def</span> <span class="nf">updateFile</span><span class="p">(</span><span class="n">fileName</span><span class="p">):</span>
 
-  <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="s1">&#39;rU&#39;</span><span class="p">)</span>
-  <span class="n">data</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-  <span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-  <span class="n">n1</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">startMatch</span><span class="p">)</span>
-  <span class="n">n2</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">endMatch</span><span class="p">)</span>
-  <span class="k">if</span> <span class="n">n1</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">n2</span> <span class="o">&gt;</span> <span class="n">n1</span><span class="p">:</span> <span class="c1"># have a match</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:</span><span class="n">n1</span><span class="p">]</span> <span class="o">+</span> <span class="n">template</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="n">n2</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">endMatch</span><span class="p">):]</span>
-  <span class="k">else</span><span class="p">:</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">moduleDoc</span> <span class="o">+</span> <span class="n">template</span> <span class="o">+</span> <span class="n">data</span>
-  <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
-  <span class="n">data</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-  <span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+<div class="viewcode-block" id="updateFile"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.updateHeader.updateFile">[docs]</a><span class="k">def</span> <span class="nf">updateFile</span><span class="p">(</span><span class="n">fileName</span><span class="p">):</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="s1">&#39;rU&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="n">n1</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">startMatch</span><span class="p">)</span>
+    <span class="n">n2</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">endMatch</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n1</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">n2</span> <span class="o">&gt;</span> <span class="n">n1</span><span class="p">:</span>  <span class="c1"># have a match</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:</span><span class="n">n1</span><span class="p">]</span> <span class="o">+</span> <span class="n">template</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="n">n2</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">endMatch</span><span class="p">):]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">moduleDoc</span> <span class="o">+</span> <span class="n">template</span> <span class="o">+</span> <span class="n">data</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+        <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="visitDirectory"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.updateHeader.visitDirectory">[docs]</a><span class="k">def</span> <span class="nf">visitDirectory</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+    <span class="n">relFiles</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">relFile</span> <span class="ow">in</span> <span class="n">relFiles</span><span class="p">:</span>
+        <span class="n">absFile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">relFile</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">absFile</span><span class="p">)</span> <span class="ow">and</span> <span class="n">absFile</span> <span class="o">!=</span> <span class="n">thisFile</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">relFile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">suffixMatch</span><span class="p">)</span> <span class="ow">and</span> <span class="n">relFile</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">excludeFiles</span><span class="p">:</span>
+                <span class="n">updateFile</span><span class="p">(</span><span class="n">absFile</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">absFile</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">relFile</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">excludeDirs</span><span class="p">:</span>
+                <span class="n">visitDirectory</span><span class="p">(</span><span class="n">absFile</span><span class="p">)</span></div>
 
-  <span class="n">relFiles</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
-  <span class="k">for</span> <span class="n">relFile</span> <span class="ow">in</span> <span class="n">relFiles</span><span class="p">:</span>
-    <span class="n">absFile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">relFile</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">absFile</span><span class="p">)</span> <span class="ow">and</span> <span class="n">absFile</span> <span class="o">!=</span> <span class="n">thisFile</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">relFile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">suffixMatch</span><span class="p">)</span> <span class="ow">and</span> <span class="n">relFile</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">excludeFiles</span><span class="p">:</span>
-        <span class="n">updateFile</span><span class="p">(</span><span class="n">absFile</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">absFile</span><span class="p">):</span>
-      <span class="k">if</span> <span class="n">relFile</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">excludeDirs</span><span class="p">:</span>
-        <span class="n">visitDirectory</span><span class="p">(</span><span class="n">absFile</span><span class="p">)</span></div>
-      
+
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-
-  <span class="n">visitDirectory</span><span class="p">(</span><span class="n">curDir</span><span class="p">)</span>
+    <span class="n">visitDirectory</span><span class="p">(</span><span class="n">curDir</span><span class="p">)</span>
 </pre></div>
 
           </div>

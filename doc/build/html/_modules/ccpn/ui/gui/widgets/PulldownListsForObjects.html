@@ -55,18 +55,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:55 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -110,7 +110,7 @@
                  <span class="n">setCurrent</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">followCurrent</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
                  <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create  a PulldownListCompoundWidget with callbacks responding to changes in the objects</span>
+<span class="sd">        Create a PulldownListCompoundWidget with callbacks responding to changes in the objects</span>
 <span class="sd">        in project; not to be used directly, used as a base class for the specific classes for </span>
 <span class="sd">        the different V3 objects, as defined below.</span>
 
@@ -163,9 +163,25 @@
                          <span class="n">labelText</span><span class="o">=</span><span class="n">labelText</span><span class="p">,</span>
                          <span class="n">texts</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getPids</span><span class="p">(),</span>
                          <span class="n">sizeAdjustPolicy</span><span class="o">=</span><span class="n">sizeAdjustPolicy</span><span class="p">,</span>
-                         <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
+                         <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">,</span>
                          <span class="n">editable</span><span class="o">=</span><span class="n">editable</span><span class="p">,</span>
                          <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="k">pass</span>
+
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_klass</span><span class="p">):</span>
+                <span class="c1"># objs = self.getObjects()</span>
+                <span class="c1"># default = objs.index(default) if default in objs else None</span>
+                <span class="n">default</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">object2value</span><span class="p">(</span><span class="n">default</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;default parameter: expected int or &quot;</span><span class="si">%s</span><span class="s1">&quot; object, got &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span>
+                                 <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_klass</span><span class="o">.</span><span class="n">className</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">default</span><span class="p">)))</span>
+
+            <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="n">blockSignals</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
         <span class="c1"># add a notifier to update the pulldown list</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_notifier1</span> <span class="o">=</span> <span class="n">Notifier</span><span class="p">(</span><span class="n">project</span><span class="p">,</span>
@@ -183,13 +199,16 @@
                                        <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_notifier2</span><span class="o">.</span><span class="n">setDebug</span><span class="p">(</span><span class="n">DEBUG</span><span class="p">)</span>
 
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">textList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="s2">&quot;Compatibility with previous implementation&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Compatibility with previous implementation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulldownList</span><span class="o">.</span><span class="n">texts</span>
 
     <span class="k">def</span> <span class="nf">getSelectedObject</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="s2">&quot;Return the selected object&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Return the selected object, or None if not selected or empty</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="n">SELECT</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -197,7 +216,8 @@
         <span class="k">return</span> <span class="n">obj</span>
 
     <span class="k">def</span> <span class="nf">getObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="s2">&quot;Return a list of objects from the pulldown list&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Return a list of objects from the pulldown list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">value2object</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">textList</span> <span class="k">if</span> <span class="n">val</span> <span class="o">!=</span> <span class="n">SELECT</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">getCurrentObject</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -212,8 +232,16 @@
         <span class="c1">#sys.stderr.write(&#39;&gt;&gt;&gt; currentObject:\n&#39;, obj)</span>
         <span class="k">return</span> <span class="n">obj</span>
 
+    <span class="k">def</span> <span class="nf">selectFirstItem</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the table to the first item.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">texts</span> <span class="o">=</span> <span class="p">[</span><span class="n">txt</span> <span class="k">for</span> <span class="n">txt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulldownList</span><span class="o">.</span><span class="n">texts</span> <span class="k">if</span> <span class="n">txt</span> <span class="o">!=</span> <span class="n">SELECT</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">texts</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">texts</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
     <span class="k">def</span> <span class="nf">object2value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
-        <span class="s2">&quot;Convert object to a value (pid or id), to be displayed&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Convert object to a value (pid or id), to be displayed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">id</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_useIds</span> <span class="k">else</span> <span class="n">obj</span><span class="o">.</span><span class="n">pid</span>
@@ -231,14 +259,16 @@
         <span class="k">return</span> <span class="n">obj</span>
 
     <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="s2">&quot;Public function to update&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Public function to update</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_followCurrent</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_updateFromCurrent</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_updatePulldownList</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">unRegister</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="s2">&quot;Unregister the notifiers; needs to be called when disgarding a instance&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Unregister the notifiers; needs to be called when disgarding a instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notifier1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_notifier1</span><span class="o">.</span><span class="n">unRegister</span><span class="p">()</span>
@@ -274,18 +304,46 @@
         <span class="k">return</span> <span class="n">pids</span>
 
     <span class="k">def</span> <span class="nf">_updatePulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callbackDict</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="s2">&quot;Callback to update the pulldown list; triggered by object creation, deletion or renaming&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Callback to update the pulldown list; triggered by object creation, deletion or renaming</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt; </span><span class="si">%s</span><span class="s1">._updatePulldownList()</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
         <span class="n">pids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getPids</span><span class="p">()</span>
+
+        <span class="c1"># update the pid list with renamed, created or deleted pids</span>
+        <span class="n">lastPulldownItem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span>
+        <span class="n">newName</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">callbackDict</span><span class="p">:</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">callbackDict</span><span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
+            <span class="n">trigger</span> <span class="o">=</span> <span class="n">callbackDict</span><span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">TRIGGER</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">trigger</span> <span class="o">==</span> <span class="n">Notifier</span><span class="o">.</span><span class="n">DELETE</span><span class="p">:</span>
+                <span class="c1"># the object has been notified for delete but still exists so needs to be removed from the list</span>
+                <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">pid</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+                    <span class="n">pids</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">trigger</span> <span class="o">==</span> <span class="n">Notifier</span><span class="o">.</span><span class="n">RENAME</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">callbackDict</span><span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">OLDPID</span><span class="p">]</span> <span class="o">==</span> <span class="n">lastPulldownItem</span><span class="p">:</span>
+                    <span class="n">newName</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">pid</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">modifyTexts</span><span class="p">(</span><span class="n">pids</span><span class="p">)</span>
+
+        <span class="c1"># if the pulldownlist has updated then emit a changed notifier; assumes that the texts are unique</span>
+        <span class="n">newPulldownItem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">lastPulldownItem</span> <span class="o">!=</span> <span class="n">newPulldownItem</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">newName</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">newName</span><span class="p">,</span> <span class="n">blockSignals</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">newItem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulldownList</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pulldownList</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">newItem</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  &lt; </span><span class="si">%s</span><span class="s1">._updatePulldownList()</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_updateFromCurrent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callbackDict</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="s2">&quot;Callback to update the selection from current change&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Callback to update the selection from current change</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCurrentObject</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt; </span><span class="si">%s</span><span class="s1">._updateFromCurrent() &quot;</span><span class="si">%s</span><span class="s1">&quot;: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span>
-                        <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_currentAttributeName</span><span class="p">,</span> <span class="n">obj</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_updatePulldownList</span><span class="p">()</span>
+                                   <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_currentAttributeName</span><span class="p">,</span> <span class="n">obj</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_updatePulldownList</span><span class="p">(</span><span class="n">callbackDict</span><span class="o">=</span><span class="n">callbackDict</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">object2value</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">blockSignals</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
@@ -294,14 +352,15 @@
         <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  &lt; </span><span class="si">%s</span><span class="s1">._updateFromCurrent()</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="s2">&quot;Callback when selecting the pulldown&quot;</span>
-        <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt; </span><span class="si">%s</span><span class="s1">._callback() selecting pulldown: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+        <span class="sd">&quot;&quot;&quot;Callback when selecting the pulldown</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt; </span><span class="si">%s</span><span class="s1">._callback() selecting pulldown: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_userCallback</span><span class="p">:</span>
             <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_userCallback</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setCurrent</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="n">SELECT</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value2object</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt; </span><span class="si">%s</span><span class="s1">._callback() selecting pulldown: setting current.</span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span>
-                            <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_currentAttributeName</span><span class="p">,</span> <span class="n">obj</span><span class="p">))</span>
+                                       <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_currentAttributeName</span><span class="p">,</span> <span class="n">obj</span><span class="p">))</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_currentAttributeName</span><span class="p">,</span> <span class="p">[</span><span class="n">obj</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  &lt; </span><span class="si">%s</span><span class="s1">._callback() selecting pulldown</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
 
@@ -313,274 +372,307 @@
         <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt; being destroyed:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">widget</span><span class="p">)</span>
 
 
-
 <span class="c1">#==========================================================================================================</span>
 <span class="c1"># Implementations for the various V3 objects</span>
 <span class="c1">#==========================================================================================================</span>
 
 <span class="k">def</span> <span class="nf">_definedBy</span><span class="p">(</span><span class="n">klass</span><span class="p">):</span>
-    <span class="s2">&quot;Return relevant attributes from klass&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Return relevant attributes from klass</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="n">klass</span><span class="o">.</span><span class="n">className</span><span class="p">,</span> <span class="n">klass</span><span class="o">.</span><span class="n">shortClassName</span><span class="p">,</span> <span class="n">klass</span><span class="o">.</span><span class="n">_pluralLinkName</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="AtomPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.AtomPulldown">[docs]</a><span class="k">class</span> <span class="nc">AtomPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for Atom&#39;s&quot;</span>
+<div class="viewcode-block" id="AtomPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.AtomPulldown">[docs]</a><span class="k">class</span> <span class="nc">AtomPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;&quot;A PulldownListCompoundWidget class for Atom&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.Atom</span> <span class="kn">import</span> <span class="n">Atom</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">Atom</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="bp">None</span></div>
 
 
-<div class="viewcode-block" id="CalculationStepPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.CalculationStepPulldown">[docs]</a><span class="k">class</span> <span class="nc">CalculationStepPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for CalculationStep&#39;s&quot;</span>
+<div class="viewcode-block" id="CalculationStepPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.CalculationStepPulldown">[docs]</a><span class="k">class</span> <span class="nc">CalculationStepPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for CalculationStep&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.CalculationStep</span> <span class="kn">import</span> <span class="n">CalculationStep</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">CalculationStep</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="bp">None</span></div>
 
 
-<div class="viewcode-block" id="ChainPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.ChainPulldown">[docs]</a><span class="k">class</span> <span class="nc">ChainPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for Chain&#39;s&quot;</span>
+<div class="viewcode-block" id="ChainPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.ChainPulldown">[docs]</a><span class="k">class</span> <span class="nc">ChainPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for Chain&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.Chain</span> <span class="kn">import</span> <span class="n">Chain</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">Chain</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="s1">&#39;chains&#39;</span></div>
 
 
-<div class="viewcode-block" id="ChemicalShiftPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.ChemicalShiftPulldown">[docs]</a><span class="k">class</span> <span class="nc">ChemicalShiftPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for ChemicalShift&#39;s&quot;</span>
+<div class="viewcode-block" id="ChemicalShiftPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.ChemicalShiftPulldown">[docs]</a><span class="k">class</span> <span class="nc">ChemicalShiftPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for ChemicalShift&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.ChemicalShift</span> <span class="kn">import</span> <span class="n">ChemicalShift</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">ChemicalShift</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="s1">&#39;chemicalShifts&#39;</span></div>
 
 
-<div class="viewcode-block" id="ChemicalShiftListPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.ChemicalShiftListPulldown">[docs]</a><span class="k">class</span> <span class="nc">ChemicalShiftListPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for ChemicalShiftList&#39;s&quot;</span>
+<div class="viewcode-block" id="ChemicalShiftListPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.ChemicalShiftListPulldown">[docs]</a><span class="k">class</span> <span class="nc">ChemicalShiftListPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for ChemicalShiftList&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.ChemicalShiftList</span> <span class="kn">import</span> <span class="n">ChemicalShiftList</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">ChemicalShiftList</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="s1">&#39;chemicalShiftLists&#39;</span></div>
 
 
-<div class="viewcode-block" id="ComplexPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.ComplexPulldown">[docs]</a><span class="k">class</span> <span class="nc">ComplexPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for Complex&#39;s&quot;</span>
+<div class="viewcode-block" id="ComplexPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.ComplexPulldown">[docs]</a><span class="k">class</span> <span class="nc">ComplexPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for Complex&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.Complex</span> <span class="kn">import</span> <span class="n">Complex</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">Complex</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="bp">None</span></div>
 
 
-<div class="viewcode-block" id="DataPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.DataPulldown">[docs]</a><span class="k">class</span> <span class="nc">DataPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for Data&#39;s&quot;</span>
+<div class="viewcode-block" id="DataPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.DataPulldown">[docs]</a><span class="k">class</span> <span class="nc">DataPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for Data&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.Data</span> <span class="kn">import</span> <span class="n">Data</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">Data</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="bp">None</span></div>
 
 
-<div class="viewcode-block" id="DataSetPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.DataSetPulldown">[docs]</a><span class="k">class</span> <span class="nc">DataSetPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for DataSet&#39;s&quot;</span>
+<div class="viewcode-block" id="DataSetPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.DataSetPulldown">[docs]</a><span class="k">class</span> <span class="nc">DataSetPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for DataSet&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.DataSet</span> <span class="kn">import</span> <span class="n">DataSet</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">DataSet</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="bp">None</span></div>
 
 
-<div class="viewcode-block" id="IntegralPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.IntegralPulldown">[docs]</a><span class="k">class</span> <span class="nc">IntegralPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for Integral&#39;s&quot;</span>
+<div class="viewcode-block" id="IntegralPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.IntegralPulldown">[docs]</a><span class="k">class</span> <span class="nc">IntegralPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for Integral&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.Integral</span> <span class="kn">import</span> <span class="n">Integral</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">Integral</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="s1">&#39;integrals&#39;</span></div>
 
 
-<div class="viewcode-block" id="IntegralListPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.IntegralListPulldown">[docs]</a><span class="k">class</span> <span class="nc">IntegralListPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for IntegralList&#39;s&quot;</span>
+<div class="viewcode-block" id="IntegralListPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.IntegralListPulldown">[docs]</a><span class="k">class</span> <span class="nc">IntegralListPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for IntegralList&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.IntegralList</span> <span class="kn">import</span> <span class="n">IntegralList</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">IntegralList</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="bp">None</span></div>
 
 
-<div class="viewcode-block" id="ModelPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.ModelPulldown">[docs]</a><span class="k">class</span> <span class="nc">ModelPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for Model&#39;s&quot;</span>
+<div class="viewcode-block" id="ModelPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.ModelPulldown">[docs]</a><span class="k">class</span> <span class="nc">ModelPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for Model&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.Model</span> <span class="kn">import</span> <span class="n">Model</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">Model</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="bp">None</span></div>
 
 
-<div class="viewcode-block" id="MultipletPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.MultipletPulldown">[docs]</a><span class="k">class</span> <span class="nc">MultipletPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for Multiplet&#39;s&quot;</span>
+<div class="viewcode-block" id="MultipletPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.MultipletPulldown">[docs]</a><span class="k">class</span> <span class="nc">MultipletPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for Multiplet&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.Multiplet</span> <span class="kn">import</span> <span class="n">Multiplet</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">Multiplet</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="s1">&#39;multiplets&#39;</span></div>
 
 
-<div class="viewcode-block" id="MultipletListPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.MultipletListPulldown">[docs]</a><span class="k">class</span> <span class="nc">MultipletListPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for MultipletList&#39;s&quot;</span>
+<div class="viewcode-block" id="MultipletListPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.MultipletListPulldown">[docs]</a><span class="k">class</span> <span class="nc">MultipletListPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for MultipletList&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.MultipletList</span> <span class="kn">import</span> <span class="n">MultipletList</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">MultipletList</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="bp">None</span></div>
 
 
-<div class="viewcode-block" id="NmrAtomPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.NmrAtomPulldown">[docs]</a><span class="k">class</span> <span class="nc">NmrAtomPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for NmrAtom&#39;s&quot;</span>
+<div class="viewcode-block" id="NmrAtomPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.NmrAtomPulldown">[docs]</a><span class="k">class</span> <span class="nc">NmrAtomPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for NmrAtom&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.NmrAtom</span> <span class="kn">import</span> <span class="n">NmrAtom</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">NmrAtom</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="s1">&#39;nmrAtoms&#39;</span></div>
 
 
-<div class="viewcode-block" id="NmrChainPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.NmrChainPulldown">[docs]</a><span class="k">class</span> <span class="nc">NmrChainPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for NmrChain&#39;s&quot;</span>
+<div class="viewcode-block" id="NmrChainPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.NmrChainPulldown">[docs]</a><span class="k">class</span> <span class="nc">NmrChainPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for NmrChain&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.NmrChain</span> <span class="kn">import</span> <span class="n">NmrChain</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">NmrChain</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="s1">&#39;nmrChains&#39;</span></div>
 
 
-<div class="viewcode-block" id="NmrResiduePulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.NmrResiduePulldown">[docs]</a><span class="k">class</span> <span class="nc">NmrResiduePulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for NmrResidue&#39;s&quot;</span>
+<div class="viewcode-block" id="NmrResiduePulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.NmrResiduePulldown">[docs]</a><span class="k">class</span> <span class="nc">NmrResiduePulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for NmrResidue&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.NmrResidue</span> <span class="kn">import</span> <span class="n">NmrResidue</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">NmrResidue</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="s1">&#39;nmrResidues&#39;</span></div>
 
 
-<div class="viewcode-block" id="NotePulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.NotePulldown">[docs]</a><span class="k">class</span> <span class="nc">NotePulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for Note&#39;s&quot;</span>
+<div class="viewcode-block" id="NotePulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.NotePulldown">[docs]</a><span class="k">class</span> <span class="nc">NotePulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for Note&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.Note</span> <span class="kn">import</span> <span class="n">Note</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">Note</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="bp">None</span></div>
 
 
-<div class="viewcode-block" id="PeakPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.PeakPulldown">[docs]</a><span class="k">class</span> <span class="nc">PeakPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for Peak&#39;s&quot;</span>
+<div class="viewcode-block" id="PeakPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.PeakPulldown">[docs]</a><span class="k">class</span> <span class="nc">PeakPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for Peak&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.Peak</span> <span class="kn">import</span> <span class="n">Peak</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">Peak</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="s1">&#39;peaks&#39;</span></div>
 
 
-<div class="viewcode-block" id="PeakClusterPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.PeakClusterPulldown">[docs]</a><span class="k">class</span> <span class="nc">PeakClusterPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for PeakCluster&#39;s&quot;</span>
+<div class="viewcode-block" id="PeakClusterPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.PeakClusterPulldown">[docs]</a><span class="k">class</span> <span class="nc">PeakClusterPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for PeakCluster&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.PeakCluster</span> <span class="kn">import</span> <span class="n">PeakCluster</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">PeakCluster</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="bp">None</span></div>
 
 
-<div class="viewcode-block" id="PeakListPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.PeakListPulldown">[docs]</a><span class="k">class</span> <span class="nc">PeakListPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for PeakList&#39;s&quot;</span>
+<div class="viewcode-block" id="PeakListPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.PeakListPulldown">[docs]</a><span class="k">class</span> <span class="nc">PeakListPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for PeakList&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.PeakList</span> <span class="kn">import</span> <span class="n">PeakList</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">PeakList</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="bp">None</span></div>
 
 
-<div class="viewcode-block" id="PseudoDimensionPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.PseudoDimensionPulldown">[docs]</a><span class="k">class</span> <span class="nc">PseudoDimensionPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for PseudoDimension&#39;s&quot;</span>
+<div class="viewcode-block" id="PseudoDimensionPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.PseudoDimensionPulldown">[docs]</a><span class="k">class</span> <span class="nc">PseudoDimensionPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for PseudoDimension&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.PseudoDimension</span> <span class="kn">import</span> <span class="n">PseudoDimension</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">PseudoDimension</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="bp">None</span></div>
 
 
-<div class="viewcode-block" id="ResiduePulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.ResiduePulldown">[docs]</a><span class="k">class</span> <span class="nc">ResiduePulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for Residue&#39;s&quot;</span>
+<div class="viewcode-block" id="ResiduePulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.ResiduePulldown">[docs]</a><span class="k">class</span> <span class="nc">ResiduePulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for Residue&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.Residue</span> <span class="kn">import</span> <span class="n">Residue</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">Residue</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="s1">&#39;residues&#39;</span></div>
 
 
-<div class="viewcode-block" id="RestraintPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.RestraintPulldown">[docs]</a><span class="k">class</span> <span class="nc">RestraintPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for Restraint&#39;s&quot;</span>
+<div class="viewcode-block" id="RestraintPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.RestraintPulldown">[docs]</a><span class="k">class</span> <span class="nc">RestraintPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for Restraint&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.Restraint</span> <span class="kn">import</span> <span class="n">Restraint</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">Restraint</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="bp">None</span></div>
 
 
-<div class="viewcode-block" id="RestraintContributionPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.RestraintContributionPulldown">[docs]</a><span class="k">class</span> <span class="nc">RestraintContributionPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for RestraintContribution&#39;s&quot;</span>
+<div class="viewcode-block" id="RestraintContributionPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.RestraintContributionPulldown">[docs]</a><span class="k">class</span> <span class="nc">RestraintContributionPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for RestraintContribution&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.RestraintContribution</span> <span class="kn">import</span> <span class="n">RestraintContribution</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">RestraintContribution</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="bp">None</span></div>
 
 
-<div class="viewcode-block" id="RestraintListPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.RestraintListPulldown">[docs]</a><span class="k">class</span> <span class="nc">RestraintListPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for RestraintList&#39;s&quot;</span>
+<div class="viewcode-block" id="RestraintListPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.RestraintListPulldown">[docs]</a><span class="k">class</span> <span class="nc">RestraintListPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for RestraintList&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.RestraintList</span> <span class="kn">import</span> <span class="n">RestraintList</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">RestraintList</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="bp">None</span></div>
 
 
-<div class="viewcode-block" id="SamplePulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.SamplePulldown">[docs]</a><span class="k">class</span> <span class="nc">SamplePulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for Sample&#39;s&quot;</span>
+<div class="viewcode-block" id="SamplePulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.SamplePulldown">[docs]</a><span class="k">class</span> <span class="nc">SamplePulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for Sample&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.Sample</span> <span class="kn">import</span> <span class="n">Sample</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">Sample</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="s1">&#39;samples&#39;</span></div>
 
 
-<div class="viewcode-block" id="SampleComponentPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.SampleComponentPulldown">[docs]</a><span class="k">class</span> <span class="nc">SampleComponentPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for SampleComponent&#39;s&quot;</span>
+<div class="viewcode-block" id="SampleComponentPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.SampleComponentPulldown">[docs]</a><span class="k">class</span> <span class="nc">SampleComponentPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for SampleComponent&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.SampleComponent</span> <span class="kn">import</span> <span class="n">SampleComponent</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">SampleComponent</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="bp">None</span></div>
 
 
-<div class="viewcode-block" id="SpectrumPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown">[docs]</a><span class="k">class</span> <span class="nc">SpectrumPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for Spectrum&#39;s&quot;</span>
+<div class="viewcode-block" id="SpectrumPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.SpectrumPulldown">[docs]</a><span class="k">class</span> <span class="nc">SpectrumPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for Spectrum&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.Spectrum</span> <span class="kn">import</span> <span class="n">Spectrum</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">Spectrum</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="bp">None</span></div>
 
 
-<div class="viewcode-block" id="SpectrumGroupPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumGroupPulldown">[docs]</a><span class="k">class</span> <span class="nc">SpectrumGroupPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for SpectrumGroup&#39;s&quot;</span>
+<div class="viewcode-block" id="SpectrumGroupPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.SpectrumGroupPulldown">[docs]</a><span class="k">class</span> <span class="nc">SpectrumGroupPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for SpectrumGroup&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.SpectrumGroup</span> <span class="kn">import</span> <span class="n">SpectrumGroup</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">SpectrumGroup</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="s1">&#39;spectrumGroups&#39;</span></div>
 
 
-<div class="viewcode-block" id="SpectrumHitPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumHitPulldown">[docs]</a><span class="k">class</span> <span class="nc">SpectrumHitPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for SpectrumHit&#39;s&quot;</span>
+<div class="viewcode-block" id="SpectrumHitPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.SpectrumHitPulldown">[docs]</a><span class="k">class</span> <span class="nc">SpectrumHitPulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for SpectrumHit&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.SpectrumHit</span> <span class="kn">import</span> <span class="n">SpectrumHit</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">SpectrumHit</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="s1">&#39;spectrumHits&#39;</span></div>
 
 
-<div class="viewcode-block" id="SpectrumReferencePulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumReferencePulldown">[docs]</a><span class="k">class</span> <span class="nc">SpectrumReferencePulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for SpectrumReference&#39;s&quot;</span>
+<div class="viewcode-block" id="SpectrumReferencePulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.SpectrumReferencePulldown">[docs]</a><span class="k">class</span> <span class="nc">SpectrumReferencePulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for SpectrumReference&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.SpectrumReference</span> <span class="kn">import</span> <span class="n">SpectrumReference</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">SpectrumReference</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="bp">None</span></div>
 
 
-<div class="viewcode-block" id="StructureEnsemblePulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.StructureEnsemblePulldown">[docs]</a><span class="k">class</span> <span class="nc">StructureEnsemblePulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for StructureEnsemble&#39;s&quot;</span>
+<div class="viewcode-block" id="StructureEnsemblePulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.StructureEnsemblePulldown">[docs]</a><span class="k">class</span> <span class="nc">StructureEnsemblePulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for StructureEnsemble&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.StructureEnsemble</span> <span class="kn">import</span> <span class="n">StructureEnsemble</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">StructureEnsemble</span><span class="p">)</span>
     <span class="n">_currentAttributeName</span> <span class="o">=</span> <span class="bp">None</span></div>
 
 
-<div class="viewcode-block" id="SubstancePulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.SubstancePulldown">[docs]</a><span class="k">class</span> <span class="nc">SubstancePulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
-    <span class="s2">&quot;A PulldownListCompoundWidget class for Substance&#39;s&quot;</span>
+<div class="viewcode-block" id="SubstancePulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.popups.ComplexEditorPopup.SubstancePulldown">[docs]</a><span class="k">class</span> <span class="nc">SubstancePulldown</span><span class="p">(</span><span class="n">_PulldownABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A PulldownListCompoundWidget class for Substance&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.Substance</span> <span class="kn">import</span> <span class="n">Substance</span>
 
     <span class="n">_klass</span><span class="p">,</span> <span class="n">_className</span><span class="p">,</span> <span class="n">_shortClassName</span><span class="p">,</span> <span class="n">_attributeName</span> <span class="o">=</span> <span class="n">_definedBy</span><span class="p">(</span><span class="n">Substance</span><span class="p">)</span>

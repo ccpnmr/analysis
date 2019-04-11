@@ -53,18 +53,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:26 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -79,99 +79,99 @@
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.FileDialog</span> <span class="kn">import</span> <span class="n">FileDialog</span>
 
+
 <div class="viewcode-block" id="Structure"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisStructure.html#ccpn.AnalysisStructure.AnalysisStructure.Structure">[docs]</a><span class="k">class</span> <span class="nc">Structure</span><span class="p">(</span><span class="n">Assign</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Root class for Structure application&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Root class for Structure application&quot;&quot;&quot;</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">applicationName</span><span class="p">,</span> <span class="n">applicationVersion</span><span class="p">,</span> <span class="n">commandLineArguments</span><span class="p">):</span>
-    <span class="n">Assign</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">applicationName</span><span class="p">,</span> <span class="n">applicationVersion</span><span class="p">,</span> <span class="n">commandLineArguments</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">applicationName</span><span class="p">,</span> <span class="n">applicationVersion</span><span class="p">,</span> <span class="n">commandLineArguments</span><span class="p">):</span>
+        <span class="n">Assign</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">applicationName</span><span class="p">,</span> <span class="n">applicationVersion</span><span class="p">,</span> <span class="n">commandLineArguments</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Structure.setupMenus"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisStructure.html#ccpn.AnalysisStructure.AnalysisStructure.Structure.setupMenus">[docs]</a>  <span class="k">def</span> <span class="nf">setupMenus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">Structure</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setupMenus</span><span class="p">()</span>
-    <span class="n">menuSpec</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Structure&#39;</span><span class="p">,</span> <span class="p">[</span>
-                              <span class="p">(</span><span class="s2">&quot;Load PDB&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadPDB</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;lp&#39;</span><span class="p">)]),</span>
-                              <span class="p">(</span><span class="s2">&quot;Load NEF&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadNEF</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;ln&#39;</span><span class="p">)]),</span>
-                              <span class="p">(),</span>
-                              <span class="p">(</span><span class="s2">&quot;Structure Table&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showStructureTable</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;st&#39;</span><span class="p">)]),</span>
-                              <span class="p">(</span><span class="s2">&quot;Match to Molecule&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">matchToMolecule</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;mm&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)]),</span>
-                              <span class="p">(</span><span class="s2">&quot;Chain(s) from Structure&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chainsFromStructure</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;cs&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)]),</span>
-                              <span class="p">(),</span>
-                              <span class="p">(</span><span class="s2">&quot;Find Consensus...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">findConsensus</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;fc&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)]),</span>
-                              <span class="p">(</span><span class="s2">&quot;Superpose&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">superpose</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;sp&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)]),</span>
-                              <span class="p">(),</span>
-                              <span class="p">(</span><span class="s2">&quot;Validate Restraints&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">validateRestraints</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;vr&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)]),</span>
-                              <span class="p">(),</span>
-                              <span class="p">(</span><span class="s2">&quot;Submit to wwPDB&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">submitToWWPDB</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;sw&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)]),</span>
-    <span class="p">])</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">addApplicationMenuSpec</span><span class="p">(</span><span class="n">menuSpec</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span></div>
+<div class="viewcode-block" id="Structure.setupMenus"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisStructure.html#ccpn.AnalysisStructure.AnalysisStructure.Structure.setupMenus">[docs]</a>    <span class="k">def</span> <span class="nf">setupMenus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Structure</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setupMenus</span><span class="p">()</span>
+        <span class="n">menuSpec</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Structure&#39;</span><span class="p">,</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;Load PDB&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadPDB</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;lp&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="s2">&quot;Load NEF&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadNEF</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;ln&#39;</span><span class="p">)]),</span>
+            <span class="p">(),</span>
+            <span class="p">(</span><span class="s2">&quot;Structure Table&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showStructureTable</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;st&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="s2">&quot;Match to Molecule&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">matchToMolecule</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;mm&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="s2">&quot;Chain(s) from Structure&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chainsFromStructure</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;cs&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)]),</span>
+            <span class="p">(),</span>
+            <span class="p">(</span><span class="s2">&quot;Find Consensus...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">findConsensus</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;fc&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="s2">&quot;Superpose&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">superpose</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;sp&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)]),</span>
+            <span class="p">(),</span>
+            <span class="p">(</span><span class="s2">&quot;Validate Restraints&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">validateRestraints</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;vr&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)]),</span>
+            <span class="p">(),</span>
+            <span class="p">(</span><span class="s2">&quot;Submit to wwPDB&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">submitToWWPDB</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;sw&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)]),</span>
+            <span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addApplicationMenuSpec</span><span class="p">(</span><span class="n">menuSpec</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Structure.loadData"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisStructure.html#ccpn.AnalysisStructure.AnalysisStructure.Structure.loadData">[docs]</a>  <span class="k">def</span> <span class="nf">loadData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">paths</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="c1">#TODO:LIST-AS-ISSUE: This fails for native file dialogs on OSX when trying to select a project (i.e. a directory)</span>
-      <span class="c1"># NBNB TBD I assume here that path is either a string or a list lf string paths.</span>
-      <span class="c1"># NBNB #FIXME if incorrect</span>
-      <span class="n">dialog</span> <span class="o">=</span> <span class="n">FileDialog</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AnyFile</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span>
-                          <span class="n">acceptMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AcceptOpen</span><span class="p">,</span>
-                          <span class="n">preferences</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="p">,</span>
-                          <span class="nb">filter</span><span class="o">=</span><span class="nb">filter</span><span class="p">)</span>
-      <span class="n">path</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">selectedFile</span><span class="p">()</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="p">:</span>
-        <span class="k">return</span>
-      <span class="n">paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">path</span><span class="p">]</span>
+<div class="viewcode-block" id="Structure.loadData"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisStructure.html#ccpn.AnalysisStructure.AnalysisStructure.Structure.loadData">[docs]</a>    <span class="k">def</span> <span class="nf">loadData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">paths</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c1">#TODO:LIST-AS-ISSUE: This fails for native file dialogs on OSX when trying to select a project (i.e. a directory)</span>
+            <span class="c1"># NBNB TBD I assume here that path is either a string or a list lf string paths.</span>
+            <span class="c1"># NBNB #FIXME if incorrect</span>
+            <span class="n">dialog</span> <span class="o">=</span> <span class="n">FileDialog</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AnyFile</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span>
+                                <span class="n">acceptMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AcceptOpen</span><span class="p">,</span>
+                                <span class="n">preferences</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="p">,</span>
+                                <span class="nb">filter</span><span class="o">=</span><span class="nb">filter</span><span class="p">)</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">selectedFile</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="n">paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">path</span><span class="p">]</span>
 
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-      <span class="n">paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">paths</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">paths</span><span class="p">]</span>
 
-    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Structure.loadPDB"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisStructure.html#ccpn.AnalysisStructure.AnalysisStructure.Structure.loadPDB">[docs]</a>  <span class="k">def</span> <span class="nf">loadPDB</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Load PDB File&#39;</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;*.pdb&#39;</span><span class="p">)</span></div>
+<div class="viewcode-block" id="Structure.loadPDB"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisStructure.html#ccpn.AnalysisStructure.AnalysisStructure.Structure.loadPDB">[docs]</a>    <span class="k">def</span> <span class="nf">loadPDB</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Load PDB File&#39;</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;*.pdb&#39;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Structure.loadNEF"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisStructure.html#ccpn.AnalysisStructure.AnalysisStructure.Structure.loadNEF">[docs]</a>  <span class="k">def</span> <span class="nf">loadNEF</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Load NEF File&#39;</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;*.nef&#39;</span><span class="p">)</span></div>
+<div class="viewcode-block" id="Structure.loadNEF"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisStructure.html#ccpn.AnalysisStructure.AnalysisStructure.Structure.loadNEF">[docs]</a>    <span class="k">def</span> <span class="nf">loadNEF</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Load NEF File&#39;</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;*.nef&#39;</span><span class="p">)</span></div>
 
-  <span class="c1"># Should inherit from Framework</span>
-  <span class="c1"># def showStructureTable(self, position=&#39;bottom&#39;, relativeTo=None, structureEnsemble=None):</span>
-  <span class="c1">#   &quot;&quot;&quot;Displays Structure Table&quot;&quot;&quot;</span>
-  <span class="c1">#   from ccpn.ui.gui.modules.StructureTable import StructureTableModule</span>
-  <span class="c1">#</span>
-  <span class="c1">#   mainWindow = self.ui.mainWindow</span>
-  <span class="c1">#</span>
-  <span class="c1">#   #FIXME:ED - sometimes crashes</span>
-  <span class="c1">#   if not relativeTo:</span>
-  <span class="c1">#     relativeTo = mainWindow.moduleArea      # ejb</span>
-  <span class="c1">#   self.structureTableModule = StructureTableModule(mainWindow=mainWindow,</span>
-  <span class="c1">#                                               structureEnsemble=structureEnsemble)</span>
-  <span class="c1">#</span>
-  <span class="c1">#   # self.project.newModule(moduleType=self.structureTableModule.className,</span>
-  <span class="c1">#   #                        title=None,</span>
-  <span class="c1">#   #                        window=mainWindow,</span>
-  <span class="c1">#   #                        comment=&#39;&#39;)</span>
-  <span class="c1">#</span>
-  <span class="c1">#   mainWindow.moduleArea.addModule(self.structureTableModule, position=position, relativeTo=relativeTo)</span>
-  <span class="c1">#</span>
-  <span class="c1">#   mainWindow.pythonConsole.writeConsoleCommand(&quot;application.showStructureTable()&quot;)</span>
-  <span class="c1">#   getLogger().info(&quot;application.showStructureTable()&quot;)</span>
-  <span class="c1">#   return self.structureTableModule</span>
+    <span class="c1"># Should inherit from Framework</span>
+    <span class="c1"># def showStructureTable(self, position=&#39;bottom&#39;, relativeTo=None, structureEnsemble=None):</span>
+    <span class="c1">#   &quot;&quot;&quot;Displays Structure Table&quot;&quot;&quot;</span>
+    <span class="c1">#   from ccpn.ui.gui.modules.StructureTable import StructureTableModule</span>
+    <span class="c1">#</span>
+    <span class="c1">#   mainWindow = self.ui.mainWindow</span>
+    <span class="c1">#</span>
+    <span class="c1">#   #FIXME:ED - sometimes crashes</span>
+    <span class="c1">#   if not relativeTo:</span>
+    <span class="c1">#     relativeTo = mainWindow.moduleArea      # ejb</span>
+    <span class="c1">#   self.structureTableModule = StructureTableModule(mainWindow=mainWindow,</span>
+    <span class="c1">#                                               structureEnsemble=structureEnsemble)</span>
+    <span class="c1">#</span>
+    <span class="c1">#   # self.project.newModule(moduleType=self.structureTableModule.className,</span>
+    <span class="c1">#   #                        title=None,</span>
+    <span class="c1">#   #                        window=mainWindow,</span>
+    <span class="c1">#   #                        comment=&#39;&#39;)</span>
+    <span class="c1">#</span>
+    <span class="c1">#   mainWindow.moduleArea.addModule(self.structureTableModule, position=position, relativeTo=relativeTo)</span>
+    <span class="c1">#</span>
+    <span class="c1">#   mainWindow.pythonConsole.writeConsoleCommand(&quot;application.showStructureTable()&quot;)</span>
+    <span class="c1">#   getLogger().info(&quot;application.showStructureTable()&quot;)</span>
+    <span class="c1">#   return self.structureTableModule</span>
 
-<div class="viewcode-block" id="Structure.matchToMolecule"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisStructure.html#ccpn.AnalysisStructure.AnalysisStructure.Structure.matchToMolecule">[docs]</a>  <span class="k">def</span> <span class="nf">matchToMolecule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">pass</span></div>
+<div class="viewcode-block" id="Structure.matchToMolecule"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisStructure.html#ccpn.AnalysisStructure.AnalysisStructure.Structure.matchToMolecule">[docs]</a>    <span class="k">def</span> <span class="nf">matchToMolecule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="Structure.chainsFromStructure"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisStructure.html#ccpn.AnalysisStructure.AnalysisStructure.Structure.chainsFromStructure">[docs]</a>  <span class="k">def</span> <span class="nf">chainsFromStructure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">pass</span></div>
+<div class="viewcode-block" id="Structure.chainsFromStructure"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisStructure.html#ccpn.AnalysisStructure.AnalysisStructure.Structure.chainsFromStructure">[docs]</a>    <span class="k">def</span> <span class="nf">chainsFromStructure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="Structure.findConsensus"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisStructure.html#ccpn.AnalysisStructure.AnalysisStructure.Structure.findConsensus">[docs]</a>  <span class="k">def</span> <span class="nf">findConsensus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">pass</span></div>
+<div class="viewcode-block" id="Structure.findConsensus"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisStructure.html#ccpn.AnalysisStructure.AnalysisStructure.Structure.findConsensus">[docs]</a>    <span class="k">def</span> <span class="nf">findConsensus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="Structure.superpose"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisStructure.html#ccpn.AnalysisStructure.AnalysisStructure.Structure.superpose">[docs]</a>  <span class="k">def</span> <span class="nf">superpose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">pass</span></div>
+<div class="viewcode-block" id="Structure.superpose"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisStructure.html#ccpn.AnalysisStructure.AnalysisStructure.Structure.superpose">[docs]</a>    <span class="k">def</span> <span class="nf">superpose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="Structure.validateRestraints"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisStructure.html#ccpn.AnalysisStructure.AnalysisStructure.Structure.validateRestraints">[docs]</a>  <span class="k">def</span> <span class="nf">validateRestraints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">pass</span></div>
+<div class="viewcode-block" id="Structure.validateRestraints"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisStructure.html#ccpn.AnalysisStructure.AnalysisStructure.Structure.validateRestraints">[docs]</a>    <span class="k">def</span> <span class="nf">validateRestraints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="Structure.submitToWWPDB"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisStructure.html#ccpn.AnalysisStructure.AnalysisStructure.Structure.submitToWWPDB">[docs]</a>  <span class="k">def</span> <span class="nf">submitToWWPDB</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">pass</span></div></div>
-
+<div class="viewcode-block" id="Structure.submitToWWPDB"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisStructure.html#ccpn.AnalysisStructure.AnalysisStructure.Structure.submitToWWPDB">[docs]</a>    <span class="k">def</span> <span class="nf">submitToWWPDB</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div></div>
 </pre></div>
 
           </div>

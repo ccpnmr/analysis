@@ -47,7 +47,7 @@ class ModelData:
     If it doesn't, please report it as a bug.
 
     Note that ModelData objects are only valid when linked to an existing StructureEnsemble
-    and that self._modelNumber must match
+    and that self._modelNumber must match.
     """
 
     def __init__(self, model: 'Model' = None) -> None:
@@ -62,11 +62,11 @@ class ModelData:
 
     @property
     def _ensemble(self) -> EnsembleData:
-        """EnsembleData object on which the ModelData are a view"""
+        """EnsembleData object on which the ModelData are a view."""
         return self._model.structureEnsemble.data
 
     @property
-    def _modelNumberIndices(self) -> typing.Tuple[int, int]:
+    def _modelNumberIndices(self) -> typing.Optional[typing.Tuple[int, int]]:
         """Get indices (in the pandas sense, elements of the index column,
         in theory need not be integers). These should be used with self._ensemble.loc"""
         data = self._ensemble

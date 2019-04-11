@@ -51,22 +51,21 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 
-
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:37 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -82,105 +81,99 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
 
+
 <div class="viewcode-block" id="Pipe"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.lib.html#ccpn.framework.lib.Pipe.Pipe">[docs]</a><span class="k">class</span> <span class="nc">Pipe</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  Pipeline step base class.</span>
-
-<span class="sd">  &quot;&quot;&quot;</span>
-
-
-  <span class="n">guiPipe</span> <span class="o">=</span> <span class="bp">None</span> <span class="c1">#Only the class. it will be init later on the GuiPipeline</span>
-  <span class="n">autoGuiParams</span> <span class="o">=</span> <span class="bp">None</span>
-  <span class="n">pipeName</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-  <span class="n">isActive</span> <span class="o">=</span> <span class="bp">False</span>
-
-
-  <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Pipe.register"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.lib.html#ccpn.framework.lib.Pipe.Pipe.register">[docs]</a>  <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    method to register the pipe in the loaded pipes to appear in the pipeline</span>
+<span class="sd">    Pipeline step base class.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">ccpn.pipes</span> <span class="kn">import</span> <span class="n">loadedPipes</span>
-    <span class="n">loadedPipes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span></div>
 
+    <span class="n">guiPipe</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1">#Only the class. it will be init later on the GuiPipeline</span>
+    <span class="n">autoGuiParams</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">pipeName</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">isActive</span> <span class="o">=</span> <span class="bp">False</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">inputData</span> <span class="o">=</span> <span class="bp">None</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroups</span> <span class="o">=</span> <span class="bp">None</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span> <span class="o">=</span> <span class="bp">None</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Pipe.register"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.lib.html#ccpn.framework.lib.Pipe.Pipe.register">[docs]</a>    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        method to register the pipe in the loaded pipes to appear in the pipeline</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.pipes</span> <span class="kn">import</span> <span class="n">loadedPipes</span>
 
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">inputData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">inputData</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">spectrumGroups</span>
+        <span class="n">loadedPipes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span></div>
 
-    <span class="k">if</span> <span class="n">application</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">application</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">preferences</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">ui</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ui</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
-      <span class="k">try</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
-      <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-        <span class="k">pass</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputData</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroups</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_startedInfo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeName</span> <span class="o">+</span> <span class="s1">&#39; has started&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_finishedInfo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeName</span> <span class="o">+</span> <span class="s1">&#39; has finished&#39;</span>
 
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">inputData</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">spectrumGroups</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">customizeSetup</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">application</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">application</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">preferences</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ui</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="k">pass</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">customizeSetup</span><span class="p">()</span>
 
-  <span class="k">def</span> <span class="nf">_getSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pid</span><span class="p">):</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_getSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pid</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
 
+    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="Pipe.runPipe"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.lib.html#ccpn.framework.lib.Pipe.Pipe.runPipe">[docs]</a>    <span class="k">def</span> <span class="nf">runPipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">data</span></div>
 
-  <span class="nd">@abstractmethod</span>
-<div class="viewcode-block" id="Pipe.runPipe"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.lib.html#ccpn.framework.lib.Pipe.Pipe.runPipe">[docs]</a>  <span class="k">def</span> <span class="nf">runPipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">data</span></div>
+<div class="viewcode-block" id="Pipe.customizeSetup"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.lib.html#ccpn.framework.lib.Pipe.Pipe.customizeSetup">[docs]</a>    <span class="k">def</span> <span class="nf">customizeSetup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Override this method to customize the UI auto-generation attributes</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">pass</span></div>
 
-
-<div class="viewcode-block" id="Pipe.customizeSetup"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.lib.html#ccpn.framework.lib.Pipe.Pipe.customizeSetup">[docs]</a>  <span class="k">def</span> <span class="nf">customizeSetup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Override this method to customize the UI auto-generation attributes</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">pass</span></div>
-
-
-  <span class="k">def</span> <span class="nf">_updateRunArgs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">arg</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
-
-
-
+    <span class="k">def</span> <span class="nf">_updateRunArgs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">arg</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
 
 
 <div class="viewcode-block" id="PandasPipe"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.lib.html#ccpn.framework.lib.Pipe.PandasPipe">[docs]</a><span class="k">class</span> <span class="nc">PandasPipe</span><span class="p">(</span><span class="n">Pipe</span><span class="p">):</span>
-  <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">  A pipe where the run method accepts a pandas dataframe and returns a pandas dataframe</span>
-<span class="sd">  &#39;&#39;&#39;</span>
-  <span class="nd">@abstractmethod</span>
-<div class="viewcode-block" id="PandasPipe.runPipe"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.lib.html#ccpn.framework.lib.Pipe.PandasPipe.runPipe">[docs]</a>  <span class="k">def</span> <span class="nf">runPipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">:</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">dataframe</span></div></div>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    A pipe where the run method accepts a pandas dataframe and returns a pandas dataframe</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="PandasPipe.runPipe"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.lib.html#ccpn.framework.lib.Pipe.PandasPipe.runPipe">[docs]</a>    <span class="k">def</span> <span class="nf">runPipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">dataframe</span></div></div>
 
 
 <div class="viewcode-block" id="SpectraPipe"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.lib.html#ccpn.framework.lib.Pipe.SpectraPipe">[docs]</a><span class="k">class</span> <span class="nc">SpectraPipe</span><span class="p">(</span><span class="n">Pipe</span><span class="p">):</span>
-  <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">  A pipe where the run method accepts a list of spectra and returns a list of spectra</span>
-<span class="sd">  &#39;&#39;&#39;</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    A pipe where the run method accepts a list of spectra and returns a list of spectra</span>
+<span class="sd">    &#39;&#39;&#39;</span>
 
-  <span class="nd">@abstractmethod</span>
-<div class="viewcode-block" id="SpectraPipe.runPipe"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.lib.html#ccpn.framework.lib.Pipe.SpectraPipe.runPipe">[docs]</a>  <span class="k">def</span> <span class="nf">runPipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="s1">&#39;Spectrum&#39;</span><span class="p">]:</span>
-    <span class="k">return</span> <span class="n">spectra</span></div></div>
+    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="SpectraPipe.runPipe"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.lib.html#ccpn.framework.lib.Pipe.SpectraPipe.runPipe">[docs]</a>    <span class="k">def</span> <span class="nf">runPipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="s1">&#39;Spectrum&#39;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">spectra</span></div></div>
 
 
 <div class="viewcode-block" id="NumpyPipe"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.lib.html#ccpn.framework.lib.Pipe.NumpyPipe">[docs]</a><span class="k">class</span> <span class="nc">NumpyPipe</span><span class="p">(</span><span class="n">Pipe</span><span class="p">):</span>
-  <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">  A pipe where the run method accepts a numpy Array and returns a numpy Array</span>
-<span class="sd">  &#39;&#39;&#39;</span>
-  <span class="nd">@abstractmethod</span>
-<div class="viewcode-block" id="NumpyPipe.runPipe"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.lib.html#ccpn.framework.lib.Pipe.NumpyPipe.runPipe">[docs]</a>  <span class="k">def</span> <span class="nf">runPipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">npArray</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">npArray</span></div></div>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    A pipe where the run method accepts a numpy Array and returns a numpy Array</span>
+<span class="sd">    &#39;&#39;&#39;</span>
 
+    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="NumpyPipe.runPipe"><a class="viewcode-back" href="../../../../ccpn/ccpn.framework.lib.html#ccpn.framework.lib.Pipe.NumpyPipe.runPipe">[docs]</a>    <span class="k">def</span> <span class="nf">runPipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">npArray</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">npArray</span></div></div>
 </pre></div>
 
           </div>

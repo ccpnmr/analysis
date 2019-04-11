@@ -50,18 +50,18 @@
 <span></span><span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Luca Mureddu $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:38 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -73,7 +73,7 @@
 
 
 <span class="c1">#### GUI IMPORTS</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PipelineWidgets</span> <span class="kn">import</span> <span class="n">GuiPipe</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PipelineWidgets</span> <span class="kn">import</span> <span class="n">GuiPipe</span><span class="p">,</span> <span class="n">commonWidgets</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CheckBox</span> <span class="kn">import</span> <span class="n">CheckBox</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ButtonList</span> <span class="kn">import</span> <span class="n">ButtonList</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.LinearRegionsPlot</span> <span class="kn">import</span> <span class="n">TargetButtonSpinBoxes</span>
@@ -85,6 +85,7 @@
 
 <span class="c1">#### NON GUI IMPORTS</span>
 <span class="kn">from</span> <span class="nn">ccpn.framework.lib.Pipe</span> <span class="kn">import</span> <span class="n">SpectraPipe</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
 
 <span class="c1">########################################################################################################################</span>
@@ -95,7 +96,7 @@
 <span class="n">PipeName</span> <span class="o">=</span> <span class="s1">&#39;Exclude Regions&#39;</span>
 <span class="n">Region</span> <span class="o">=</span> <span class="s1">&#39;Region_&#39;</span>
 <span class="n">ExcludeRegions</span> <span class="o">=</span> <span class="s1">&#39;Exclude_Regions&#39;</span>
-
+<span class="n">_STORE</span> <span class="o">=</span> <span class="s1">&#39;_storeCount&#39;</span>
 
 <span class="c1">########################################################################################################################</span>
 <span class="c1">##########################################      ALGORITHM       ########################################################</span>
@@ -127,20 +128,22 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">excludeRegion1Label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">Region</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">),</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
         <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Region</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">),</span> <span class="n">GLTargetButtonSpinBoxes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="p">,</span>
-                                                                        <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                                                                        <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_STORE</span><span class="p">,</span> <span class="n">Spinbox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">hidden</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span> <span class="c1"># used to store how many entries there are</span>
 
     <span class="c1">############       Gui Callbacks      ###########</span>
 
     <span class="k">def</span> <span class="nf">_addRegion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Also called upon restoring widget state &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">excludeRegionLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">Region</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">),</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
         <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Region</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">),</span> <span class="n">GLTargetButtonSpinBoxes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="p">,</span>
-                                                                        <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
-
+                                                                        <span class="n">decimals</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_STORE</span><span class="p">)</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_deleteRegions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;  delete the widget from layout. &#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot; delete the widget from layout. &quot;&quot;&quot;</span>
         <span class="n">positions</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">):</span>
             <span class="n">positions</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
@@ -158,12 +161,26 @@
                                 <span class="n">w</span><span class="o">.</span><span class="n">_turnOffPositionPicking</span><span class="p">()</span>
                             <span class="n">w</span><span class="o">.</span><span class="n">deleteLater</span><span class="p">()</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_STORE</span><span class="p">)</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_closeBox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="s1">&#39;remove the lines from plotwidget if any&#39;</span>
+        <span class="sd">&quot;&quot;&quot;remove the lines from plotwidget if any&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_deleteRegions</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">closeBox</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">closeBox</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ExcludeRegionsGuiPipe.restoreWidgetsState"><a class="viewcode-back" href="../../../ccpn/ccpn.pipes.html#ccpn.pipes.ExcludeRegionsFromSpectrum.ExcludeRegionsGuiPipe.restoreWidgetsState">[docs]</a>    <span class="k">def</span> <span class="nf">restoreWidgetsState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">widgetsState</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Restore the gui params.</span>
+<span class="sd">        overide the default function first to recreate the correct number of boxes. Then call the super to restore values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">variableName</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">widgetsState</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">variableName</span> <span class="o">==</span> <span class="n">_STORE</span><span class="p">:</span>  <span class="c1"># find the widget which stores the box count</span>
+                <span class="n">count</span> <span class="o">=</span> <span class="n">value</span><span class="o">-</span><span class="mi">1</span>         <span class="c1"># remove one as the first is always created as default on init</span>
+        <span class="k">if</span> <span class="n">count</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>                     <span class="c1"># if more then the first, then create all the rest</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">count</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_addRegion</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">restoreWidgetsState</span><span class="p">(</span><span class="o">**</span><span class="n">widgetsState</span><span class="p">)</span></div></div>
 
 
 <span class="c1">########################################################################################################################</span>

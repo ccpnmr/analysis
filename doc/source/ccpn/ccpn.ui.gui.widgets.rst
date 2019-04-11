@@ -217,6 +217,14 @@ ccpn.ui.gui.widgets.CompoundWidgets module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.widgets.ConcentrationsWidget module
+-----------------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.ConcentrationsWidget
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.widgets.Console module
 ----------------------------------
 
@@ -333,6 +341,14 @@ ccpn.ui.gui.widgets.GroupBox module
 -----------------------------------
 
 .. automodule:: ccpn.ui.gui.widgets.GroupBox
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.widgets.GuiTable module
+-----------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.GuiTable
     :members:
     :undoc-members:
     :show-inheritance:
@@ -481,18 +497,18 @@ ccpn.ui.gui.widgets.PulldownListsForObjects module
     :undoc-members:
     :show-inheritance:
 
-ccpn.ui.gui.widgets.PythonEditor module
+ccpn.ui.gui.widgets.PyPlotWidget module
 ---------------------------------------
 
-.. automodule:: ccpn.ui.gui.widgets.PythonEditor
+.. automodule:: ccpn.ui.gui.widgets.PyPlotWidget
     :members:
     :undoc-members:
     :show-inheritance:
 
-ccpn.ui.gui.widgets.QuickTable module
--------------------------------------
+ccpn.ui.gui.widgets.PythonEditor module
+---------------------------------------
 
-.. automodule:: ccpn.ui.gui.widgets.QuickTable
+.. automodule:: ccpn.ui.gui.widgets.PythonEditor
     :members:
     :undoc-members:
     :show-inheritance:

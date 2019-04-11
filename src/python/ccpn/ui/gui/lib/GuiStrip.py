@@ -26,15 +26,11 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import typing
-
-import pyqtgraph as pg
 from PyQt5 import QtWidgets, QtCore, QtGui
-
 from ccpn.core.Project import Project
-from ccpn.core.lib.Notifiers import Notifier, NotifierBase
-
+from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.guiSettings import getColours, GUISTRIP_PIVOT
-from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel, StripHeader
+from ccpn.ui.gui.widgets.PlaneToolbar import StripHeader
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
@@ -45,7 +41,7 @@ from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO, \
     SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS
-from ccpn.core.lib.ContextManagers import logCommandBlock, undoStackBlocking, undoBlock
+from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock
 from ccpn.util.decorators import logCommand
 
 

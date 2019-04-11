@@ -9,18 +9,18 @@ ccpn.AnalysisMetabolomics.ui.gui.modules package
 Submodules
 ----------
 
-ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule module
--------------------------------------------------------------------
-
-.. automodule:: ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ccpn.AnalysisMetabolomics.ui.gui.modules.MetaboliteFinder module
 ----------------------------------------------------------------
 
 .. automodule:: ccpn.AnalysisMetabolomics.ui.gui.modules.MetaboliteFinder
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.AnalysisMetabolomics.ui.gui.modules.PcaModule module
+---------------------------------------------------------
+
+.. automodule:: ccpn.AnalysisMetabolomics.ui.gui.modules.PcaModule
     :members:
     :undoc-members:
     :show-inheritance:

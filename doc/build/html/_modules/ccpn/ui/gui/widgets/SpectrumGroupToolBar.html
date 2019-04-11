@@ -53,18 +53,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:56 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -78,120 +78,157 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ToolBar</span> <span class="kn">import</span> <span class="n">ToolBar</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Menu</span> <span class="kn">import</span> <span class="n">Menu</span>
+<span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
+
 
 <div class="viewcode-block" id="SpectrumGroupToolBar"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SpectrumGroupToolBar.SpectrumGroupToolBar">[docs]</a><span class="k">class</span> <span class="nc">SpectrumGroupToolBar</span><span class="p">(</span><span class="n">ToolBar</span><span class="p">):</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">spectrumDisplay</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span> <span class="o">=</span> <span class="n">spectrumDisplay</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">project</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumGroups</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">spectrumDisplay</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span> <span class="o">=</span> <span class="n">spectrumDisplay</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">project</span>
 
-  <span class="k">def</span> <span class="nf">_addAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">spectrumGroup</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumGroups</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumGroups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="p">)</span>
+        <span class="c1"># self._spectrumGroups = []</span>
 
-      <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleSpectrumGroup</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">))</span>
-      <span class="n">action</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-      <span class="n">action</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-      <span class="n">action</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_setupButton</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">)</span>
+    <span class="c1"># def _getSpectrumGroups(self):</span>
+    <span class="c1">#     from ccpn.ui.gui.lib.GuiSpectrumDisplay import SPECTRUMGROUPS, SPECTRUMGROUPLIST</span>
+    <span class="c1">#</span>
+    <span class="c1">#     _spectrumGroups = AbstractWrapperObject.getParameter(self.spectrumDisplay,</span>
+    <span class="c1">#                                                          SPECTRUMGROUPS, SPECTRUMGROUPLIST)</span>
+    <span class="c1">#     if _spectrumGroups is not None:</span>
+    <span class="c1">#         return _spectrumGroups</span>
+    <span class="c1">#</span>
+    <span class="c1">#     AbstractWrapperObject.setParameter(self.spectrumDisplay,</span>
+    <span class="c1">#                                        SPECTRUMGROUPS, SPECTRUMGROUPLIST, ())</span>
+    <span class="c1">#     return ()</span>
+    <span class="c1">#</span>
+    <span class="c1"># def _setSpectrumGroups(self, groups):</span>
+    <span class="c1">#     from ccpn.ui.gui.lib.GuiSpectrumDisplay import SPECTRUMGROUPS, SPECTRUMGROUPLIST</span>
+    <span class="c1">#</span>
+    <span class="c1">#     AbstractWrapperObject.setParameter(self.spectrumDisplay,</span>
+    <span class="c1">#                                        SPECTRUMGROUPS, SPECTRUMGROUPLIST, groups)</span>
 
-  <span class="k">def</span> <span class="nf">_setupButton</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">):</span>
-      <span class="n">widget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widgetForAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
-      <span class="n">widget</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">120</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
-      <span class="n">widget</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="mi">75</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_addAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">):</span>
 
-<div class="viewcode-block" id="SpectrumGroupToolBar.mousePressEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SpectrumGroupToolBar.SpectrumGroupToolBar.mousePressEvent">[docs]</a>  <span class="k">def</span> <span class="nf">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Re-implementation of the Toolbar mouse event so a right mouse context menu can be raised.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">RightButton</span><span class="p">:</span>
-      <span class="n">button</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">childAt</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
-      <span class="k">if</span> <span class="n">button</span><span class="p">:</span>
-        <span class="n">sg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">button</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
-        <span class="k">if</span> <span class="n">sg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-          <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">button</span><span class="o">.</span><span class="n">actions</span><span class="p">())</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-            <span class="n">menu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setupContextMenu</span><span class="p">(</span><span class="n">button</span><span class="o">.</span><span class="n">actions</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sg</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">menu</span><span class="p">:</span>
-              <span class="n">menu</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">globalPos</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">event</span><span class="o">.</span><span class="n">globalPos</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="o">+</span> <span class="mi">10</span><span class="p">)</span>
-              <span class="n">menu</span><span class="o">.</span><span class="k">exec</span><span class="p">()</span></div>
+        <span class="n">_spectrumGroups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">_getSpectrumGroups</span><span class="p">()</span>
 
-  <span class="k">def</span> <span class="nf">_setupContextMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_spectrumGroups</span><span class="p">:</span>
+            <span class="c1"># _spectrumGroups.append(spectrumGroup)</span>
+            <span class="n">_spectrumGroups</span> <span class="o">+=</span> <span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span><span class="p">,)</span>
 
-    <span class="n">popMenu</span> <span class="o">=</span> <span class="n">Menu</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span>
-    <span class="n">removeAction</span> <span class="o">=</span> <span class="n">popMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Remove&#39;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_deleteSpectrumGroup</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">))</span>
-    <span class="n">peakListAction</span> <span class="o">=</span> <span class="n">popMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;PeakLists&#39;</span><span class="p">)</span>
-    <span class="n">peakListAction</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-    <span class="n">peakListAction</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_showHidePeakListView</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">popMenu</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleSpectrumGroup</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">))</span>
+            <span class="n">action</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">action</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">action</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">action</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_setupButton</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">_getStrip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">strips</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">strips</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">strips</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">_setSpectrumGroups</span><span class="p">(</span><span class="n">_spectrumGroups</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">_toggleSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">):</span>
-    <span class="n">spectrumGroupPeakLists</span> <span class="o">=</span> <span class="p">[</span><span class="n">spectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">]</span>
-    <span class="n">peakListViews</span> <span class="o">=</span> <span class="p">[</span><span class="n">peakListView</span> <span class="k">for</span> <span class="n">peakListView</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">peakListViews</span><span class="p">]</span>
+    <span class="k">def</span> <span class="nf">_forceAddAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">):</span>
 
-    <span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getStrip</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">strip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">spectrumViews</span> <span class="o">=</span> <span class="p">[</span><span class="n">spectrumView</span> <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="n">strip</span><span class="o">.</span><span class="n">spectrumViews</span>
-                       <span class="k">if</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">]</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleSpectrumGroup</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">))</span>
+        <span class="n">action</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">action</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">action</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">action</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setupButton</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">)</span>
 
-      <span class="n">widget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widgetForAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sender</span><span class="p">())</span>
-      <span class="k">if</span> <span class="n">widget</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
-        <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="n">spectrumViews</span><span class="p">:</span>
-          <span class="n">spectrumView</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-          <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">spectrumView</span><span class="p">,</span> <span class="s1">&#39;plot&#39;</span><span class="p">):</span>
-            <span class="n">spectrumView</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">_showPeakList</span><span class="p">(</span><span class="n">spectrumGroupPeakLists</span><span class="p">,</span> <span class="n">peakListViews</span><span class="p">)</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="n">spectrumViews</span><span class="p">:</span>
-          <span class="n">spectrumView</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-          <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">spectrumView</span><span class="p">,</span> <span class="s1">&#39;plot&#39;</span><span class="p">):</span>
-            <span class="n">spectrumView</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_hidePeakLists</span><span class="p">(</span><span class="n">spectrumGroupPeakLists</span><span class="p">,</span> <span class="n">peakListViews</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_setupButton</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">):</span>
+        <span class="n">widget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widgetForAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">120</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="mi">75</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">_deleteSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">):</span>
-    <span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getStrip</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">strip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">removeAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
-      <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="n">strip</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
-          <span class="n">spectrumView</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">spectrumGroup</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumGroups</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumGroups</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">()</span>
+<div class="viewcode-block" id="SpectrumGroupToolBar.mousePressEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SpectrumGroupToolBar.SpectrumGroupToolBar.mousePressEvent">[docs]</a>    <span class="k">def</span> <span class="nf">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Re-implementation of the Toolbar mouse event so a right mouse context menu can be raised.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">RightButton</span><span class="p">:</span>
+            <span class="n">button</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">childAt</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">button</span><span class="p">:</span>
+                <span class="n">sg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">button</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+                <span class="k">if</span> <span class="n">sg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">button</span><span class="o">.</span><span class="n">actions</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">menu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setupContextMenu</span><span class="p">(</span><span class="n">button</span><span class="o">.</span><span class="n">actions</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sg</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">menu</span><span class="p">:</span>
+                            <span class="n">menu</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">globalPos</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">event</span><span class="o">.</span><span class="n">globalPos</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="o">+</span> <span class="mi">10</span><span class="p">)</span>
+                            <span class="n">menu</span><span class="o">.</span><span class="k">exec</span><span class="p">()</span></div>
 
-  <span class="c1"># LM: Fixme the code for peakList views below needs refactoring</span>
+    <span class="k">def</span> <span class="nf">_setupContextMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">):</span>
 
-  <span class="k">def</span> <span class="nf">_showHidePeakListView</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">plv</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getPeakListViews</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="p">):</span>
-      <span class="k">if</span> <span class="n">plv</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">plv</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
-          <span class="n">plv</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-          <span class="n">plv</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">popMenu</span> <span class="o">=</span> <span class="n">Menu</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">removeAction</span> <span class="o">=</span> <span class="n">popMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Remove&#39;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_deleteSpectrumGroup</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">))</span>
+        <span class="n">peakListAction</span> <span class="o">=</span> <span class="n">popMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;PeakLists&#39;</span><span class="p">)</span>
+        <span class="n">peakListAction</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">peakListAction</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_showHidePeakListView</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">popMenu</span>
 
-  <span class="k">def</span> <span class="nf">_hidePeakLists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumGroupPeakLists</span><span class="p">,</span> <span class="n">peakListViews</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">peakList</span> <span class="ow">in</span> <span class="n">spectrumGroupPeakLists</span><span class="p">:</span>
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">peakListView</span> <span class="ow">in</span> <span class="n">peakListViews</span><span class="p">:</span>
-          <span class="k">if</span> <span class="n">peakList</span> <span class="o">==</span> <span class="n">peakListView</span><span class="o">.</span><span class="n">peakList</span><span class="p">:</span>
-            <span class="n">peakListView</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_getStrip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">strips</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">strips</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">strips</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-  <span class="k">def</span> <span class="nf">_showPeakList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumGroupPeakLists</span><span class="p">,</span> <span class="n">peakListViews</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">peakList</span> <span class="ow">in</span> <span class="n">spectrumGroupPeakLists</span><span class="p">:</span>
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">peakListView</span> <span class="ow">in</span> <span class="n">peakListViews</span><span class="p">:</span>
-          <span class="k">if</span> <span class="n">peakList</span> <span class="o">==</span> <span class="n">peakListView</span><span class="o">.</span><span class="n">peakList</span><span class="p">:</span>
-            <span class="n">peakListView</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_toggleSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">):</span>
+        <span class="n">spectrumGroupPeakLists</span> <span class="o">=</span> <span class="p">[</span><span class="n">spectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">]</span>
+        <span class="n">peakListViews</span> <span class="o">=</span> <span class="p">[</span><span class="n">peakListView</span> <span class="k">for</span> <span class="n">peakListView</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">peakListViews</span><span class="p">]</span>
 
-  <span class="k">def</span> <span class="nf">_getPeakListViews</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">):</span>
-    <span class="n">spectrumGroupPeakLists</span> <span class="o">=</span> <span class="p">[</span><span class="n">peakList</span> <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span> <span class="k">for</span> <span class="n">peakList</span> <span class="ow">in</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">]</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">plv</span> <span class="k">for</span> <span class="n">peakList</span> <span class="ow">in</span> <span class="n">spectrumGroupPeakLists</span> <span class="k">for</span> <span class="n">plv</span> <span class="ow">in</span> <span class="n">peakList</span><span class="o">.</span><span class="n">peakListViews</span><span class="p">]</span></div>
+        <span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getStrip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">strip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">spectrumViews</span> <span class="o">=</span> <span class="p">[</span><span class="n">spectrumView</span> <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="n">strip</span><span class="o">.</span><span class="n">spectrumViews</span>
+                             <span class="k">if</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">]</span>
+
+            <span class="n">widget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widgetForAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sender</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">widget</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="n">spectrumViews</span><span class="p">:</span>
+                    <span class="n">spectrumView</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">spectrumView</span><span class="p">,</span> <span class="s1">&#39;plot&#39;</span><span class="p">):</span>
+                        <span class="n">spectrumView</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_showPeakList</span><span class="p">(</span><span class="n">spectrumGroupPeakLists</span><span class="p">,</span> <span class="n">peakListViews</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="n">spectrumViews</span><span class="p">:</span>
+                    <span class="n">spectrumView</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">spectrumView</span><span class="p">,</span> <span class="s1">&#39;plot&#39;</span><span class="p">):</span>
+                        <span class="n">spectrumView</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_hidePeakLists</span><span class="p">(</span><span class="n">spectrumGroupPeakLists</span><span class="p">,</span> <span class="n">peakListViews</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_deleteSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">):</span>
+        <span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getStrip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">strip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">removeAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="n">strip</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
+                    <span class="n">spectrumView</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">spectrumGroup</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumGroups</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumGroups</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">()</span>
+
+    <span class="c1"># LM: Fixme the code for peakList views below needs refactoring</span>
+
+    <span class="k">def</span> <span class="nf">_showHidePeakListView</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">plv</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getPeakListViews</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">plv</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">plv</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
+                    <span class="n">plv</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">plv</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_hidePeakLists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumGroupPeakLists</span><span class="p">,</span> <span class="n">peakListViews</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">peakList</span> <span class="ow">in</span> <span class="n">spectrumGroupPeakLists</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">peakListView</span> <span class="ow">in</span> <span class="n">peakListViews</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">peakList</span> <span class="o">==</span> <span class="n">peakListView</span><span class="o">.</span><span class="n">peakList</span><span class="p">:</span>
+                        <span class="n">peakListView</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_showPeakList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumGroupPeakLists</span><span class="p">,</span> <span class="n">peakListViews</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">peakList</span> <span class="ow">in</span> <span class="n">spectrumGroupPeakLists</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">peakListView</span> <span class="ow">in</span> <span class="n">peakListViews</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">peakList</span> <span class="o">==</span> <span class="n">peakListView</span><span class="o">.</span><span class="n">peakList</span><span class="p">:</span>
+                        <span class="n">peakListView</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_getPeakListViews</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">):</span>
+        <span class="n">spectrumGroupPeakLists</span> <span class="o">=</span> <span class="p">[</span><span class="n">peakList</span> <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span> <span class="k">for</span> <span class="n">peakList</span> <span class="ow">in</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">plv</span> <span class="k">for</span> <span class="n">peakList</span> <span class="ow">in</span> <span class="n">spectrumGroupPeakLists</span> <span class="k">for</span> <span class="n">plv</span> <span class="ow">in</span> <span class="n">peakList</span><span class="o">.</span><span class="n">peakListViews</span><span class="p">]</span></div>
 </pre></div>
 
           </div>

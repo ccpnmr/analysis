@@ -17,10 +17,26 @@ ccpn.ui.gui.popups.AboutPopup module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.popups.ChainPopup module
+------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.ChainPopup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.popups.ChemicalShiftListPopup module
 ------------------------------------------------
 
 .. automodule:: ccpn.ui.gui.popups.ChemicalShiftListPopup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.popups.ComplexEditorPopup module
+--------------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.ComplexEditorPopup
     :members:
     :undoc-members:
     :show-inheritance:
@@ -265,10 +281,10 @@ ccpn.ui.gui.popups.RegisterPopup module
     :undoc-members:
     :show-inheritance:
 
-ccpn.ui.gui.popups.RestraintTypePopup module
+ccpn.ui.gui.popups.RestraintListPopup module
 --------------------------------------------
 
-.. automodule:: ccpn.ui.gui.popups.RestraintTypePopup
+.. automodule:: ccpn.ui.gui.popups.RestraintListPopup
     :members:
     :undoc-members:
     :show-inheritance:
@@ -313,6 +329,14 @@ ccpn.ui.gui.popups.ShortcutsPopup module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.popups.SimpleAttributeEditorPopupABC module
+-------------------------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.SimpleAttributeEditorPopupABC
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.popups.SpectrumGroupEditor module
 ---------------------------------------------
 
@@ -345,10 +369,10 @@ ccpn.ui.gui.popups.StripPlotPopup module
     :undoc-members:
     :show-inheritance:
 
-ccpn.ui.gui.popups.StructurePopup module
-----------------------------------------
+ccpn.ui.gui.popups.StructureEnsemblePopup module
+------------------------------------------------
 
-.. automodule:: ccpn.ui.gui.popups.StructurePopup
+.. automodule:: ccpn.ui.gui.popups.StructureEnsemblePopup
     :members:
     :undoc-members:
     :show-inheritance:
@@ -365,6 +389,14 @@ ccpn.ui.gui.popups.SubstancePropertiesPopup module
 --------------------------------------------------
 
 .. automodule:: ccpn.ui.gui.popups.SubstancePropertiesPopup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.popups.ValidateSpectraPopup module
+----------------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.ValidateSpectraPopup
     :members:
     :undoc-members:
     :show-inheritance:

@@ -53,18 +53,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Luca $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:46 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -81,54 +81,52 @@
 
 
 <div class="viewcode-block" id="PythonConsoleModule"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PythonConsoleModule.PythonConsoleModule">[docs]</a><span class="k">class</span> <span class="nc">PythonConsoleModule</span><span class="p">(</span><span class="n">CcpnModule</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  This class implements the module by wrapping a PeakListTable instance</span>
-<span class="sd">  &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class implements the module by wrapping a PeakListTable instance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-  <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">True</span>
-  <span class="n">maxSettingsState</span> <span class="o">=</span> <span class="mi">2</span>
-  <span class="n">settingsPosition</span> <span class="o">=</span> <span class="s1">&#39;top&#39;</span>
+    <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">maxSettingsState</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">settingsPosition</span> <span class="o">=</span> <span class="s1">&#39;top&#39;</span>
 
-  <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;PythonConsoleModule&#39;</span>
+    <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;PythonConsoleModule&#39;</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Python Console&#39;</span><span class="p">,</span> <span class="n">closeFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
-    <span class="n">CcpnModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">closeFunc</span><span class="o">=</span><span class="n">closeFunc</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Python Console&#39;</span><span class="p">,</span> <span class="n">closeFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">CcpnModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">closeFunc</span><span class="o">=</span><span class="n">closeFunc</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">pythonConsoleWidget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pythonConsoleWidget</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="c1"># For some reason it can get destroid!</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pythonConsoleWidget</span><span class="o">=</span> <span class="n">IpythonConsole</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pythonConsoleWidget</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pythonConsoleWidget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pythonConsoleWidget</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>  <span class="c1"># For some reason it can get destroid!</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pythonConsoleWidget</span> <span class="o">=</span> <span class="n">IpythonConsole</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pythonConsoleWidget</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">pythonConsoleWidget</span><span class="o">.</span><span class="n">_startChannels</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsoleModule</span> <span class="o">=</span> <span class="bp">self</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_menuAction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">_findMenuAction</span><span class="p">(</span><span class="s1">&#39;View&#39;</span><span class="p">,</span> <span class="s1">&#39;Python Console&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_menuAction</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_menuAction</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pythonConsoleWidget</span><span class="o">.</span><span class="n">_startChannels</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsoleModule</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_menuAction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">_findMenuAction</span><span class="p">(</span><span class="s1">&#39;View&#39;</span><span class="p">,</span> <span class="s1">&#39;Python Console&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_menuAction</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_menuAction</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">settingsEditorCheckBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Log Display&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleTextEditor</span><span class="p">,</span>
+                                               <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_toggleTextEditor</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">settingsEditorCheckBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Log Display&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleTextEditor</span><span class="p">,</span>
-                                           <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+        <span class="c1"># make the widget visible, it is hidden when first instantiated</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pythonConsoleWidget</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pythonConsoleWidget</span><span class="o">.</span><span class="n">textEditor</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
-    <span class="c1"># make the widget visible, it is hidden when first instantiated</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">pythonConsoleWidget</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">_toggleTextEditor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pythonConsoleWidget</span><span class="o">.</span><span class="n">textEditor</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pythonConsoleWidget</span><span class="o">.</span><span class="n">textEditor</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
 
-  <span class="k">def</span> <span class="nf">_toggleTextEditor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">pythonConsoleWidget</span><span class="o">.</span><span class="n">textEditor</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">pythonConsoleWidget</span><span class="o">.</span><span class="n">textEditor</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-
-
-  <span class="k">def</span> <span class="nf">_closeModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="c1"># self.pythonConsoleWidget._stopChannels()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsoleModule</span> <span class="o">=</span> <span class="bp">None</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_menuAction</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_menuAction</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">PythonConsoleModule</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">()</span></div>
-
-
+    <span class="k">def</span> <span class="nf">_closeModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># self.pythonConsoleWidget._stopChannels()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsoleModule</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_menuAction</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_menuAction</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PythonConsoleModule</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">()</span></div>
 </pre></div>
 
           </div>

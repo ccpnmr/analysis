@@ -24,28 +24,16 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import itertools
-import collections
-import operator
-
-from ccpn.core.lib import Undo
-from ccpn.util import Common as commonUtil
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
-from ccpn.core.SpectrumReference import SpectrumReference
 from ccpn.core.Peak import Peak
-# from ccpn.core.Spectrum import Spectrum
 from ccpn.core.MultipletList import MultipletList
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
-#from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Multiplet as apiMultiplet
-# from ccpn.core.MultipletList import MultipletList
 from typing import Optional, Tuple, Any, Union, Sequence, List
 from ccpn.util.Common import makeIterableList
-from ccpn.core.lib.ContextManagers import undoStackBlocking
-from functools import partial
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock, undoBlock
+from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, undoBlock
 from ccpn.util.Logging import getLogger
 
 
@@ -381,12 +369,12 @@ class Multiplet(AbstractWrapperObject):
     #=========================================================================================
 
     @logCommand(get='self')
-    def addPeaks(self, peaks: ['Peak'] = None):
+    def addPeaks(self, peaks: Sequence[Union['Peak', str]]):
         """
-        Add a peak or list of peaks to the Multiplet
+        Add a peak or list of peaks to the Multiplet.
         The peaks must belong to the spectrum containing the multipletList.
 
-        :param peaks: single peak or list of peaks
+        :param peaks: single peak or list of peaks as objects or pids.
         """
         spectrum = self._parent.spectrum
         peakList = makeIterableList(peaks)
@@ -400,24 +388,17 @@ class Multiplet(AbstractWrapperObject):
             if pp not in spectrum.peaks:
                 raise ValueError('%s does not belong to spectrum: %s' % (pp.pid, spectrum.pid))
 
-        # with logCommandBlock(get='self') as log:
-        #     if pks:
-        #         peakStr = '[' + ','.join(["'%s'" % peak.pid for peak in pks]) + ']'
-        #         log('addPeaks', peaks=peakStr)
-        #     else:
-        #         log('addPeaks')
-
         with undoBlock():
             for pk in pks:
                 self._wrappedData.addPeak(pk._wrappedData)
 
     @logCommand(get='self')
-    def removePeaks(self, peaks: ['Peak'] = None):
+    def removePeaks(self, peaks: Sequence[Union['Peak', str]]):
         """
-        Remove a peak or list of peaks from the Multiplet
+        Remove a peak or list of peaks from the Multiplet.
         The peaks must belong to the multiplet.
 
-        :param peaks: single peak or list of peaks
+        :param peaks: single peak or list of peaks as objects or pids
         """
         spectrum = self._parent.spectrum
         peakList = makeIterableList(peaks)
@@ -432,13 +413,6 @@ class Multiplet(AbstractWrapperObject):
                 raise ValueError('%s does not belong to multiplet: %s' % (pp.pid, self.pid))
             if pp not in spectrum.peaks:
                 raise ValueError('%s does not belong to spectrum: %s' % (pp.pid, spectrum.pid))
-
-        # with logCommandBlock(get='self') as log:
-        #     if pks:
-        #         peakStr = '[' + ','.join(["'%s'" % peak.pid for peak in pks]) + ']'
-        #         log('removePeaks', peaks=peakStr)
-        #     else:
-        #         log('removePeaks')
 
         with undoBlock():
             for pk in pks:
@@ -471,7 +445,7 @@ def _newMultiplet(self: MultipletList,
                   figureOfMerit: float = 1.0, annotation: str = None, comment: str = None,
                   limits: Sequence[Tuple[float, float]] = (), slopes: List[float] = (),
                   pointLimits: Sequence[Tuple[float, float]] = (), serial: int = None,
-                  peaks: ['Peak'] = ()) -> Multiplet:
+                  peaks: Sequence[Union['Peak', str]] = ()) -> Multiplet:
     """Create a new Multiplet within a multipletList
 
     See the Multiplet class for details.

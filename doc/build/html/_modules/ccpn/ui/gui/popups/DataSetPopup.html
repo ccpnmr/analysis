@@ -53,18 +53,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:47 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -74,90 +74,22 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ButtonList</span> <span class="kn">import</span> <span class="n">ButtonList</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.LineEdit</span> <span class="kn">import</span> <span class="n">LineEdit</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.MessageDialog</span> <span class="kn">import</span> <span class="n">showWarning</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.DataSet</span> <span class="kn">import</span> <span class="n">DataSet</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.SimpleAttributeEditorPopupABC</span> <span class="kn">import</span> <span class="n">SimpleAttributeEditorPopupABC</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
 
-<div class="viewcode-block" id="DataSetPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.DataSetPopup.DataSetPopup">[docs]</a><span class="k">class</span> <span class="nc">DataSetPopup</span><span class="p">(</span><span class="n">CcpnDialog</span><span class="p">):</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">dataSet</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;DataSet&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Initialise the widget</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">CcpnDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+<div class="viewcode-block" id="DataSetPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.DataSetPopup.DataSetPopup">[docs]</a><span class="k">class</span> <span class="nc">DataSetPopup</span><span class="p">(</span><span class="n">SimpleAttributeEditorPopupABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;DataSet attributes editor popup&quot;&quot;&quot;</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">dataSet</span> <span class="o">=</span> <span class="n">dataSet</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">dataSetLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;DataSet Name &quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">dataSetText</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataSet</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-    <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;Cancel&#39;</span><span class="p">,</span> <span class="s1">&#39;OK&#39;</span><span class="p">],</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">reject</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_okButton</span><span class="p">],</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-
-  <span class="k">def</span> <span class="nf">_setDataSetName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">newName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataSetText</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
-
-    <span class="k">try</span><span class="p">:</span>
-      <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">newName</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataSet</span><span class="o">.</span><span class="n">title</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dataSet</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">newName</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
-    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
-      <span class="n">showWarning</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">windowTitle</span><span class="p">(),</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">))</span>
-
-  <span class="k">def</span> <span class="nf">_repopulate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">dataSetText</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataSet</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
-
-  <span class="k">def</span> <span class="nf">_applyChanges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The apply button has been clicked</span>
-<span class="sd">    Define an undo block for setting the properties of the object</span>
-<span class="sd">    If there is an error setting any values then generate an error message</span>
-<span class="sd">      If anything has been added to the undo queue then remove it with application.undo()</span>
-<span class="sd">      repopulate the popup widgets</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># ejb - major refactoring</span>
-
-    <span class="n">applyAccept</span> <span class="o">=</span> <span class="bp">False</span>
-    <span class="n">oldUndo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">numItems</span><span class="p">()</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;_applyChanges&#39;</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-    <span class="k">try</span><span class="p">:</span>
-      <span class="n">newName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataSetText</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
-      <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">newName</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataSet</span><span class="o">.</span><span class="n">title</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dataSet</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">newName</span>
-
-      <span class="n">applyAccept</span> <span class="o">=</span> <span class="bp">True</span>
-    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
-      <span class="n">showWarning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">windowTitle</span><span class="p">()),</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">))</span>
-    <span class="k">finally</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
-
-    <span class="k">if</span> <span class="n">applyAccept</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
-      <span class="c1"># should only undo if something new has been added to the undo deque</span>
-      <span class="c1"># may cause a problem as some things may be set with the same values</span>
-      <span class="c1"># and still be added to the change list, so only undo if length has changed</span>
-      <span class="n">errorName</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
-      <span class="k">if</span> <span class="n">oldUndo</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">numItems</span><span class="p">():</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">undo</span><span class="p">()</span>
-        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt;Undo.</span><span class="si">%s</span><span class="s1">._applychanges&#39;</span> <span class="o">%</span> <span class="n">errorName</span><span class="p">)</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt;Undo.</span><span class="si">%s</span><span class="s1">._applychanges nothing to remove&#39;</span> <span class="o">%</span> <span class="n">errorName</span><span class="p">)</span>
-
-      <span class="c1"># repopulate popup</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_repopulate</span><span class="p">()</span>
-      <span class="k">return</span> <span class="bp">False</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">return</span> <span class="bp">True</span>
-
-  <span class="k">def</span> <span class="nf">_okButton</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_applyChanges</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span></div>
+    <span class="n">klass</span> <span class="o">=</span> <span class="n">DataSet</span>
+    <span class="n">attributes</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span>           <span class="nb">getattr</span><span class="p">,</span> <span class="nb">setattr</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;backgroundText&#39;</span><span class="p">:</span><span class="s1">&#39;&gt; Enter name &lt;&#39;</span><span class="p">}),</span>
+                  <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span>        <span class="nb">getattr</span><span class="p">,</span> <span class="nb">setattr</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;backgroundText&#39;</span><span class="p">:</span><span class="s1">&#39;&gt; Optional &lt;&#39;</span><span class="p">}),</span>
+                  <span class="p">(</span><span class="s1">&#39;programName&#39;</span><span class="p">,</span>    <span class="nb">getattr</span><span class="p">,</span> <span class="nb">setattr</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;backgroundText&#39;</span><span class="p">:</span><span class="s1">&#39;&gt; Optional &lt;&#39;</span><span class="p">}),</span>
+                  <span class="p">(</span><span class="s1">&#39;programVersion&#39;</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">,</span> <span class="nb">setattr</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;backgroundText&#39;</span><span class="p">:</span><span class="s1">&#39;&gt; Optional &lt;&#39;</span><span class="p">}),</span>
+                  <span class="p">(</span><span class="s1">&#39;dataPath&#39;</span><span class="p">,</span>       <span class="nb">getattr</span><span class="p">,</span> <span class="nb">setattr</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;backgroundText&#39;</span><span class="p">:</span><span class="s1">&#39;&gt; Optional &lt;&#39;</span><span class="p">}),</span>
+                  <span class="p">(</span><span class="s1">&#39;uuid&#39;</span><span class="p">,</span>           <span class="nb">getattr</span><span class="p">,</span> <span class="nb">setattr</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;backgroundText&#39;</span><span class="p">:</span><span class="s1">&#39;&gt; Optional &lt;&#39;</span><span class="p">}),</span>
+                  <span class="p">]</span></div>
 
 </pre></div>
 

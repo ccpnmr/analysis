@@ -24,11 +24,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import collections
-import operator
-from typing import Union, Tuple, Optional
+from typing import Union, Tuple
 from functools import partial
-from ccpn.core.Residue import Residue
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -36,10 +33,9 @@ from ccpn.core.lib import Pid
 from ccpn.core.lib.Util import AtomIdTuple
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.lib import Constants
-from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpn.util.Common import name2IsotopeCode
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, logCommandBlock, renameObject, undoBlock
+from ccpn.core.lib.ContextManagers import newObject, renameObject, undoBlock
 from ccpn.util.Logging import getLogger
 
 

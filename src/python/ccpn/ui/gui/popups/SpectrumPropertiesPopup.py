@@ -25,14 +25,9 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
-import os
 from functools import partial
-
-from PyQt5 import QtGui, QtWidgets, QtCore
-
+from PyQt5 import QtWidgets, QtCore
 from ccpn.core.lib import Util as ccpnUtil
-
-from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
@@ -47,13 +42,13 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.popups.ExperimentTypePopup import _getExperimentTypes
 from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString
-from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
 from ccpn.util.OrderedSet import OrderedSet
-from ccpn.core.lib.ContextManagers import logCommandBlock, undoStackBlocking, undoBlock
+from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock
 from ccpn.ui.gui.popups.ValidateSpectraPopup import SpectrumValidator
 
 

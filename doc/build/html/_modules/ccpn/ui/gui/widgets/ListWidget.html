@@ -54,25 +54,23 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:54 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: Geerten Vuister $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $&quot;</span>
-
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
@@ -106,6 +104,7 @@
                  <span class="n">multiSelect</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
                  <span class="n">acceptDrops</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
                  <span class="n">sortOnDrop</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                 <span class="n">allowDuplicates</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
                  <span class="n">copyDrop</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
                  <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
 
@@ -117,12 +116,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="n">acceptDrops</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">contextMenu</span> <span class="o">=</span> <span class="n">contextMenu</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="o">=</span> <span class="n">callback</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">objects</span> <span class="o">=</span> <span class="p">{</span><span class="nb">id</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span><span class="n">obj</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objects</span><span class="p">}</span> <span class="k">if</span> <span class="n">objects</span> <span class="k">else</span> <span class="p">{}</span>     <span class="c1"># list(objects) or [])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">items</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">objects</span> <span class="ow">or</span> <span class="p">[])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objects</span> <span class="o">=</span> <span class="p">{</span><span class="nb">id</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span> <span class="n">obj</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objects</span><span class="p">}</span> <span class="k">if</span> <span class="n">objects</span> <span class="k">else</span> <span class="p">{}</span>  <span class="c1"># list(objects) or [])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_items</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">objects</span> <span class="ow">or</span> <span class="p">[])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">multiSelect</span> <span class="o">=</span> <span class="n">multiSelect</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dropSource</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sortOnDrop</span> <span class="o">=</span> <span class="n">sortOnDrop</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">copyDrop</span> <span class="o">=</span> <span class="n">copyDrop</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allowDuplicates</span> <span class="o">=</span> <span class="n">allowDuplicates</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">copyDrop</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setDefaultDropAction</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MoveAction</span><span class="p">)</span>
 
@@ -151,7 +151,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cleared</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># self.items = []</span>
         <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">texts</span><span class="p">:</span>
             <span class="n">item</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QListWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
@@ -160,14 +160,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cleared</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">objects</span> <span class="o">=</span> <span class="p">{</span><span class="nb">id</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span><span class="n">obj</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objects</span><span class="p">}</span>     <span class="c1"># list(objects)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objects</span> <span class="o">=</span> <span class="p">{</span><span class="nb">id</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span> <span class="n">obj</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objects</span><span class="p">}</span>  <span class="c1"># list(objects)</span>
         <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objects</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
                 <span class="n">item</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QListWidgetItem</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span> <span class="bp">self</span><span class="p">)</span>
                 <span class="n">item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span><span class="p">,</span> <span class="nb">id</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
                 <span class="n">obj</span><span class="o">.</span><span class="n">item</span> <span class="o">=</span> <span class="n">item</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">item</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QListWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
@@ -176,6 +176,17 @@
 
 <div class="viewcode-block" id="ListWidget.getObjects"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ListWidget.ListWidget.getObjects">[docs]</a>    <span class="k">def</span> <span class="nf">getObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">values</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="ListWidget.addItem"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ListWidget.ListWidget.addItem">[docs]</a>    <span class="k">def</span> <span class="nf">addItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">allowDuplicates</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">ListWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTexts</span><span class="p">():</span>
+                    <span class="nb">super</span><span class="p">(</span><span class="n">ListWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTexts</span><span class="p">():</span>
+                    <span class="nb">super</span><span class="p">(</span><span class="n">ListWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ListWidget.hideAllItems"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ListWidget.ListWidget.hideAllItems">[docs]</a>    <span class="k">def</span> <span class="nf">hideAllItems</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">()):</span>
@@ -223,6 +234,12 @@
                     <span class="n">objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">objects</span></div>
 
+<div class="viewcode-block" id="ListWidget.selectItems"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ListWidget.ListWidget.selectItems">[docs]</a>    <span class="k">def</span> <span class="nf">selectItems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">()):</span>
+            <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+                <span class="n">item</span><span class="o">.</span><span class="n">setSelected</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="ListWidget.select"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ListWidget.ListWidget.select">[docs]</a>    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">()):</span>
             <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
@@ -235,11 +252,20 @@
             <span class="c1"># self.setItemSelected(item, False)</span>
             <span class="n">item</span><span class="o">.</span><span class="n">setSelected</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="ListWidget.getItems"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ListWidget.ListWidget.getItems">[docs]</a>    <span class="k">def</span> <span class="nf">getItems</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">()):</span>
+            <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">index</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">items</span></div>
+
 <div class="viewcode-block" id="ListWidget.getTexts"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ListWidget.ListWidget.getTexts">[docs]</a>    <span class="k">def</span> <span class="nf">getTexts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">()):</span>
             <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">index</span><span class="p">))</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">items</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="ListWidget.getSelectedTexts"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ListWidget.ListWidget.getSelectedTexts">[docs]</a>    <span class="k">def</span> <span class="nf">getSelectedTexts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedItems</span><span class="p">()]</span></div>
 
 <div class="viewcode-block" id="ListWidget.selectObject"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ListWidget.ListWidget.selectObject">[docs]</a>    <span class="k">def</span> <span class="nf">selectObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
@@ -320,7 +346,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">()):</span>
             <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">setItemSelected</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+            <span class="n">item</span><span class="o">.</span><span class="n">setSelected</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_selectNone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -357,17 +383,18 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sortOnDrop</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">sortItems</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parseEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)]</span>
             <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">source</span><span class="p">()</span> <span class="o">!=</span> <span class="bp">self</span><span class="p">:</span>  <span class="c1"># otherwise duplicates</span>
-
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropSource</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>  <span class="c1"># allow event drops from anywhere</span>
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">copyDrop</span><span class="p">:</span>
                         <span class="n">event</span><span class="o">.</span><span class="n">setDropAction</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">CopyAction</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">event</span><span class="o">.</span><span class="n">setDropAction</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MoveAction</span><span class="p">)</span>
-                    <span class="c1"># self.emit(QtCore.SIGNAL(&quot;dropped&quot;), items)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">dropped</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+
                     <span class="nb">super</span><span class="p">(</span><span class="n">ListWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dropEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">dropped</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">allowDuplicates</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_removeDuplicate</span><span class="p">()</span>
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sortOnDrop</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">sortItems</span><span class="p">()</span>
                 <span class="k">else</span><span class="p">:</span>
@@ -375,12 +402,12 @@
                     <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">source</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropSource</span><span class="p">:</span>  <span class="c1"># check that the drop comes</span>
                         <span class="n">event</span><span class="o">.</span><span class="n">setDropAction</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MoveAction</span><span class="p">)</span>  <span class="c1"># from only the permitted widget</span>
                         <span class="c1"># self.emit(QtCore.SIGNAL(&quot;dropped&quot;), items)</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">dropped</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
                         <span class="nb">super</span><span class="p">(</span><span class="n">ListWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dropEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">dropped</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
                         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sortOnDrop</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">sortItems</span><span class="p">()</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span></div></div>
+                        <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span></div>
 
                         <span class="c1"># ejb - tried to fix transfer of CopyAction, but intermittent</span>
             <span class="c1"># encodedData = event.mimeData().data(ccpnmrJsonData)</span>
@@ -402,6 +429,17 @@
             <span class="c1">#   super(ListWidget, self).dropEvent(event)</span>
             <span class="c1"># else:</span>
             <span class="c1">#   event.ignore()</span>
+
+    <span class="k">def</span> <span class="nf">_removeDuplicate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Removes duplicates from listwidget on dropping. Could be implemented to don&#39;t add in first place but difficult</span>
+<span class="sd">        to know where the items are added from, eg from different drop event sources (sidebar, other List or outside urls etc).</span>
+<span class="sd">        which didn&#39;t work well when duplicates  were dropped as a group and also qt as different signatures for each item on same function!.</span>
+<span class="sd">        Don&#39;t use the ccpn parse data for pids as this is not a widget where you use always pids!</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">uniq</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getItems</span><span class="p">()</span> <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">text</span><span class="p">())]</span>
+        <span class="n">removeDuplicates</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">removeRow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getItems</span><span class="p">()</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">uniq</span><span class="p">]</span></div>
 
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Frame</span> <span class="kn">import</span> <span class="n">Frame</span>
@@ -784,40 +822,28 @@
 
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Application</span> <span class="kn">import</span> <span class="n">TestApplication</span>
-    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.BasePopup</span> <span class="kn">import</span> <span class="n">BasePopup</span>
-    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
+
+
+    <span class="k">def</span> <span class="nf">droppedCallback</span><span class="p">(</span><span class="o">*</span><span class="n">r</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
 
 
     <span class="n">app</span> <span class="o">=</span> <span class="n">TestApplication</span><span class="p">()</span>
 
-    <span class="n">texts</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Int&#39;</span><span class="p">,</span> <span class="s1">&#39;Float&#39;</span><span class="p">,</span> <span class="s1">&#39;String&#39;</span><span class="p">,</span> <span class="s1">&#39;icon&#39;</span><span class="p">]</span>
+    <span class="n">texts</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Int&#39;</span><span class="p">,</span> <span class="s1">&#39;Float&#39;</span><span class="p">,</span> <span class="s1">&#39;String&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>
     <span class="n">objects</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;Green&#39;</span><span class="p">]</span>
-    <span class="n">icons</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">Icon</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;#008000&#39;</span><span class="p">)]</span>
 
+    <span class="n">popup</span> <span class="o">=</span> <span class="n">CcpnDialog</span><span class="p">(</span><span class="n">windowTitle</span><span class="o">=</span><span class="s1">&#39;Test widget&#39;</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">ListWidget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">popup</span><span class="p">,</span> <span class="n">allowDuplicates</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">acceptDrops</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">widget2</span> <span class="o">=</span> <span class="n">ListWidget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">popup</span><span class="p">,</span> <span class="n">allowDuplicates</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">acceptDrops</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">widget2</span><span class="o">.</span><span class="n">dropped</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">droppedCallback</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">callback</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;callback&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">)</span>
-
-
-    <span class="k">def</span> <span class="nf">callback2</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;callback2&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">)</span>
-
-
-    <span class="n">popup</span> <span class="o">=</span> <span class="n">BasePopup</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Test PulldownList&#39;</span><span class="p">)</span>
-
-    <span class="c1"># policyDict = dict(</span>
-    <span class="c1">#   vAlign=&#39;top&#39;,</span>
-    <span class="c1">#   hPolicy=&#39;expanding&#39;,</span>
-    <span class="c1"># )</span>
-    <span class="c1"># policyDict = dict(</span>
-    <span class="c1">#   vAlign=&#39;top&#39;,</span>
-    <span class="c1">#   # hAlign=&#39;left&#39;,</span>
-    <span class="c1"># )</span>
-    <span class="c1"># policyDict = dict(</span>
-    <span class="c1">#   hAlign=&#39;left&#39;,</span>
-    <span class="c1"># )</span>
-    <span class="n">policyDict</span> <span class="o">=</span> <span class="p">{}</span>
-
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">]:</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="n">popup</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
     <span class="n">app</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 </pre></div>
 

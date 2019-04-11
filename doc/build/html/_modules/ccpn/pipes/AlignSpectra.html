@@ -50,18 +50,18 @@
 <span></span><span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Luca Mureddu $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:38 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -120,7 +120,7 @@
 
 
 <span class="k">def</span> <span class="nf">_getShift</span><span class="p">(</span><span class="n">ref_x</span><span class="p">,</span> <span class="n">ref_y</span><span class="p">,</span> <span class="n">target_y</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    :param ref_x: X array of the reference spectra (positions)</span>
 <span class="sd">    :param ref_y: Y array of the reference spectra (intensities)</span>
 <span class="sd">    :param target_y: Y array of the target spectra (intensities)</span>
@@ -128,28 +128,28 @@
 <span class="sd">    Global alignment. This can give unpredictable results if the signal intensities are very different</span>
 <span class="sd">    To align the target spectrum to its reference: add the shift to the x array.</span>
 <span class="sd">    E.g. target_y += shift</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">correlate</span><span class="p">(</span><span class="n">ref_y</span><span class="p">,</span> <span class="n">target_y</span><span class="p">))</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_y</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">ref_x</span><span class="p">))</span>
 
 
 <span class="k">def</span> <span class="nf">_getShiftForSpectra</span><span class="p">(</span><span class="n">referenceSpectrum</span><span class="p">,</span> <span class="n">spectra</span><span class="p">,</span> <span class="n">referenceRegion</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;median&#39;</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    :param referenceSpectrum:</span>
 <span class="sd">    :param spectra:</span>
-<span class="sd">    :param referenceRegion:</span>
+<span class="sd">    :param referenceRegion: ppm regions</span>
 <span class="sd">    :param intensityFactor:</span>
 <span class="sd">    :param engine: one of &#39;median&#39;, &#39;mode&#39;, &#39;mean&#39;</span>
 <span class="sd">    :return: shift float</span>
 <span class="sd">    alignment of spectra. It aligns based on a specified region of the reference spectrum</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">shifts</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">point1</span><span class="p">,</span> <span class="n">point2</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">referenceRegion</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">referenceRegion</span><span class="p">)</span>
+    <span class="n">point1</span><span class="p">,</span> <span class="n">point2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">referenceRegion</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">referenceRegion</span><span class="p">)</span>
     <span class="n">xRef</span><span class="p">,</span> <span class="n">yRef</span> <span class="o">=</span> <span class="n">referenceSpectrum</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span> <span class="n">referenceSpectrum</span><span class="o">.</span><span class="n">intensities</span>
     <span class="n">ref_x_filtered</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">xRef</span> <span class="o">&lt;=</span> <span class="n">point1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">xRef</span> <span class="o">&gt;=</span> <span class="n">point2</span><span class="p">))</span>  <span class="c1">#only the region of interest for the reference spectrum</span>
 
     <span class="n">ref_y_filtered</span> <span class="o">=</span> <span class="n">yRef</span><span class="p">[</span><span class="n">ref_x_filtered</span><span class="p">]</span>
-    <span class="n">maxYRef</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">ref_y_filtered</span><span class="p">)</span>  <span class="c1">#Find the highest signal in the region of interest for the reference spectrum. All spectra will be aligned to this point.</span>
+    <span class="n">maxYRef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">ref_y_filtered</span><span class="p">)</span>  <span class="c1">#Find the highest signal in the region of interest for the reference spectrum. All spectra will be aligned to this point.</span>
     <span class="n">boolsRefMax</span> <span class="o">=</span> <span class="n">yRef</span> <span class="o">==</span> <span class="n">maxYRef</span>
     <span class="n">refIndices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">boolsRefMax</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">refIndices</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -157,13 +157,13 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectra</span><span class="p">)</span> <span class="k">if</span> <span class="n">engine</span> <span class="o">==</span> <span class="n">IndividualMode</span> <span class="k">else</span> <span class="mi">0</span>  <span class="c1"># cannot align without a reference intensity signal</span>
 
-    <span class="c1">#  find the shift for each spectrum for the selected region</span>
-    <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
-        <span class="n">xTarg</span><span class="p">,</span> <span class="n">yTarg</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">intensities</span>
-        <span class="n">x_TargetFilter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">xTarg</span> <span class="o">&lt;=</span> <span class="n">point1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">xTarg</span> <span class="o">&gt;=</span> <span class="n">point2</span><span class="p">))</span>  <span class="c1"># filter only the region of interest for the target spectrum</span>
+        <span class="c1">#  find the shift for each spectrum for the selected region</span>
+        <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
+            <span class="n">xTarg</span><span class="p">,</span> <span class="n">yTarg</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">intensities</span>
+            <span class="n">x_TargetFilter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">xTarg</span> <span class="o">&lt;=</span> <span class="n">point1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">xTarg</span> <span class="o">&gt;=</span> <span class="n">point2</span><span class="p">))</span>  <span class="c1"># filter only the region of interest for the target spectrum</span>
 
         <span class="n">y_TargetValues</span> <span class="o">=</span> <span class="n">yTarg</span><span class="p">[</span><span class="n">x_TargetFilter</span><span class="p">]</span>
-        <span class="n">maxYTarget</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">y_TargetValues</span><span class="p">)</span>
+        <span class="n">maxYTarget</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">y_TargetValues</span><span class="p">)</span>
         <span class="n">boolsMax</span> <span class="o">=</span> <span class="n">yTarg</span> <span class="o">==</span> <span class="n">maxYTarget</span>  <span class="c1">#Find the highest signal in the region of interest</span>
         <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">boolsMax</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -171,16 +171,16 @@
             <span class="n">shift</span> <span class="o">=</span> <span class="n">tarPos</span> <span class="o">-</span> <span class="n">refPos</span>
             <span class="n">shifts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shift</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shifts</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectra</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">engine</span> <span class="o">==</span> <span class="n">IndividualMode</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">shifts</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shifts</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectra</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">engine</span> <span class="o">==</span> <span class="n">IndividualMode</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">shifts</span>
 
-    <span class="c1"># get a common shift from all the shifts found</span>
-    <span class="k">if</span> <span class="n">engine</span> <span class="ow">in</span> <span class="n">EnginesCallables</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="n">shift</span> <span class="o">=</span> <span class="n">EnginesCallables</span><span class="p">[</span><span class="n">engine</span><span class="p">](</span><span class="n">shifts</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">shift</span><span class="p">,</span> <span class="n">stats</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">ModeResult</span><span class="p">):</span>
-            <span class="n">shift</span> <span class="o">=</span> <span class="n">shift</span><span class="o">.</span><span class="n">mode</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">shift</span><span class="p">)</span>
+        <span class="c1"># get a common shift from all the shifts found</span>
+        <span class="k">if</span> <span class="n">engine</span> <span class="ow">in</span> <span class="n">EnginesCallables</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">shift</span> <span class="o">=</span> <span class="n">EnginesCallables</span><span class="p">[</span><span class="n">engine</span><span class="p">](</span><span class="n">shifts</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">shift</span><span class="p">,</span> <span class="n">stats</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">ModeResult</span><span class="p">):</span>
+                <span class="n">shift</span> <span class="o">=</span> <span class="n">shift</span><span class="o">.</span><span class="n">mode</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">shift</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="addIndividualShiftToSpectra"><a class="viewcode-back" href="../../../ccpn/ccpn.pipes.html#ccpn.pipes.AlignSpectra.addIndividualShiftToSpectra">[docs]</a><span class="k">def</span> <span class="nf">addIndividualShiftToSpectra</span><span class="p">(</span><span class="n">spectra</span><span class="p">,</span> <span class="n">shifts</span><span class="p">):</span>
@@ -278,8 +278,8 @@
 
     <span class="n">_kwargs</span> <span class="o">=</span> <span class="p">{</span>
         <span class="n">ReferenceSpectrum</span><span class="p">:</span> <span class="s1">&#39;spectrum.pid&#39;</span><span class="p">,</span>
-        <span class="n">ReferenceRegion</span><span class="p">:</span> <span class="n">DefaultReferenceRegion</span><span class="p">,</span>
-        <span class="n">EnginesVar</span><span class="p">:</span> <span class="n">DefaultEngine</span>
+        <span class="n">ReferenceRegion</span>  <span class="p">:</span> <span class="n">DefaultReferenceRegion</span><span class="p">,</span>
+        <span class="n">EnginesVar</span>       <span class="p">:</span> <span class="n">DefaultEngine</span>
         <span class="p">}</span>
 
 <div class="viewcode-block" id="AlignSpectra.runPipe"><a class="viewcode-back" href="../../../ccpn/ccpn.pipes.html#ccpn.pipes.AlignSpectra.AlignSpectra.runPipe">[docs]</a>    <span class="k">def</span> <span class="nf">runPipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra</span><span class="p">):</span>

@@ -50,18 +50,18 @@
 <span></span><span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:46 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -83,6 +83,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Table</span> <span class="kn">import</span> <span class="n">ObjectTable</span><span class="p">,</span> <span class="n">Column</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib.CcpnSorting</span> <span class="kn">import</span> <span class="n">stringSortKey</span>
 
+
 <span class="c1"># from ccpn.ui.gui.base.assignmentModuleLogic import (getAllNmrAtoms, nmrAtomsForPeaks,</span>
 <span class="c1">#                                                       peaksAreOnLine, intersectionOfAll,</span>
 <span class="c1">#                                                       sameAxisCodes,</span>
@@ -92,208 +93,198 @@
 <span class="c1">#                                                       matchingNmrAtomsForDimensionOfPeaks)</span>
 
 <div class="viewcode-block" id="ObjectAssigner"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner">[docs]</a><span class="k">class</span> <span class="nc">ObjectAssigner</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">objects</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">objects</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
 
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">=</span> <span class="n">dim</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">opts</span> <span class="o">=</span> <span class="n">opts</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">objects</span> <span class="o">=</span> <span class="n">objects</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createEmptyWidgetLabel</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">objects</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">listWidget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createEmptyListWidget</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">objectTable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createEmptyNmrAtomsTable</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">assignmentWidget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createAssignmentWidget</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">assignmentWidget</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">=</span> <span class="n">dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opts</span> <span class="o">=</span> <span class="n">opts</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objects</span> <span class="o">=</span> <span class="n">objects</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createEmptyWidgetLabel</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">objects</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">listWidget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createEmptyListWidget</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objectTable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createEmptyNmrAtomsTable</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assignmentWidget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createAssignmentWidget</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">assignmentWidget</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
+<div class="viewcode-block" id="ObjectAssigner.createEmptyNmrAtomsTable"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createEmptyNmrAtomsTable">[docs]</a>    <span class="k">def</span> <span class="nf">createEmptyNmrAtomsTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Can be used to add a new table before setting</span>
+<span class="sd">           the content.</span>
 
+<span class="sd">        &#39;&#39;&#39;</span>
 
-<div class="viewcode-block" id="ObjectAssigner.createEmptyNmrAtomsTable"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createEmptyNmrAtomsTable">[docs]</a>  <span class="k">def</span> <span class="nf">createEmptyNmrAtomsTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Can be used to add a new table before setting</span>
-<span class="sd">       the content.</span>
+        <span class="n">columnHeadings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;objectTableColumnHeadings&#39;</span><span class="p">)</span>
+        <span class="n">columnFunctions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;objectTableColumnGetValues&#39;</span><span class="p">)</span>
+        <span class="n">callback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;objectTableCallBack&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">columnFunctions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">Column</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">columnHeadings</span><span class="p">,</span> <span class="n">columnFunctions</span><span class="p">)]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">Column</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">columnHeadings</span><span class="p">,</span> <span class="n">columnHeadings</span><span class="p">)]</span>
+        <span class="n">objectTable</span> <span class="o">=</span> <span class="n">ObjectTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">,</span> <span class="n">objects</span><span class="o">=</span><span class="p">[],</span> <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">)</span>
 
-<span class="sd">    &#39;&#39;&#39;</span>
+        <span class="n">objectTable</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">80</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">objectTable</span></div>
 
+<div class="viewcode-block" id="ObjectAssigner.createEmptyListWidget"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createEmptyListWidget">[docs]</a>    <span class="k">def</span> <span class="nf">createEmptyListWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">grid</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Can be used to add a new listWidget before</span>
+<span class="sd">           setting the content.</span>
 
-    <span class="n">columnHeadings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;objectTableColumnHeadings&#39;</span><span class="p">)</span>
-    <span class="n">columnFunctions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;objectTableColumnGetValues&#39;</span><span class="p">)</span>
-    <span class="n">callback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;objectTableCallBack&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">columnFunctions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">Column</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">columnHeadings</span><span class="p">,</span> <span class="n">columnFunctions</span><span class="p">)]</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">Column</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">columnHeadings</span><span class="p">,</span> <span class="n">columnHeadings</span><span class="p">)]</span>
-    <span class="n">objectTable</span> <span class="o">=</span> <span class="n">ObjectTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">,</span> <span class="n">objects</span><span class="o">=</span><span class="p">[],</span> <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">listWidget</span> <span class="o">=</span> <span class="n">ListWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getNmrAtom</span><span class="p">,</span>
+                                <span class="n">rightMouseCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="p">[</span><span class="s1">&#39;listWidgetCallback&#39;</span><span class="p">],</span> <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">)</span>
+        <span class="n">listWidget</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">80</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">listWidget</span></div>
+        <span class="c1"># self.listWidgets.append(listWidget)</span>
 
-    <span class="n">objectTable</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">80</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">objectTable</span></div>
+<div class="viewcode-block" id="ObjectAssigner.createEmptyWidgetLabel"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createEmptyWidgetLabel">[docs]</a>    <span class="k">def</span> <span class="nf">createEmptyWidgetLabel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">objects</span><span class="p">,</span> <span class="n">grid</span><span class="p">):</span>
 
-<div class="viewcode-block" id="ObjectAssigner.createEmptyListWidget"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createEmptyListWidget">[docs]</a>  <span class="k">def</span> <span class="nf">createEmptyListWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">grid</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Can be used to add a new listWidget before</span>
-<span class="sd">       setting the content.</span>
+        <span class="n">positions</span> <span class="o">=</span> <span class="p">[</span><span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">objects</span><span class="p">]</span>
+        <span class="n">avgPos</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">positions</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">axisCode</span> <span class="o">=</span> <span class="n">objects</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">axisCode</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">avgPos</span><span class="p">)</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">)</span>
+        <span class="c1"># label.setStyleSheet(&quot;border: 0px solid; color: #f7ffff;&quot;)</span>
+        <span class="k">return</span> <span class="n">label</span></div>
+        <span class="c1"># self.labels.append(label)</span>
 
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">listWidget</span> <span class="o">=</span> <span class="n">ListWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getNmrAtom</span><span class="p">,</span>
-                            <span class="n">rightMouseCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="p">[</span><span class="s1">&#39;listWidgetCallback&#39;</span><span class="p">],</span> <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">)</span>
-    <span class="n">listWidget</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">80</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">listWidget</span></div>
-    <span class="c1"># self.listWidgets.append(listWidget)</span>
+<div class="viewcode-block" id="ObjectAssigner.createAssignmentWidget"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createAssignmentWidget">[docs]</a>    <span class="k">def</span> <span class="nf">createAssignmentWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">):</span>
+        <span class="n">newAssignmentWidget</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">()</span>
+        <span class="n">newLayout</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
+        <span class="n">chainLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Chain&#39;</span><span class="p">,</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
+        <span class="n">seqCodeLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Sequence&#39;</span><span class="p">,</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
+        <span class="n">residueTypeLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
+        <span class="n">atomTypeLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Atom&#39;</span><span class="p">,</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
+        <span class="n">chainPulldown</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createChainPulldown</span><span class="p">()</span>
+        <span class="n">seqCodePulldown</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createSeqCodePulldown</span><span class="p">()</span>
+        <span class="n">residueTypePulldown</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createResTypePulldown</span><span class="p">()</span>
+        <span class="n">atomTypePulldown</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createAtomTypePulldown</span><span class="p">()</span>
+        <span class="n">newLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">chainLabel</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">newLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">chainPulldown</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">newLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">seqCodeLabel</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">newLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">seqCodePulldown</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">newLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">residueTypeLabel</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">newLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">residueTypePulldown</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">newLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">atomTypeLabel</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">newLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">atomTypePulldown</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">newAssignmentWidget</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">newLayout</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">newAssignmentWidget</span></div>
+        <span class="c1"># self.assignmentWidgets.append(newAssignmentWidget)</span>
 
-<div class="viewcode-block" id="ObjectAssigner.createEmptyWidgetLabel"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createEmptyWidgetLabel">[docs]</a>  <span class="k">def</span> <span class="nf">createEmptyWidgetLabel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">objects</span><span class="p">,</span> <span class="n">grid</span><span class="p">):</span>
+<div class="viewcode-block" id="ObjectAssigner.createChainPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createChainPulldown">[docs]</a>    <span class="k">def</span> <span class="nf">createChainPulldown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">pulldownList</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">pulldownList</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="c1"># pulldownList.lineEdit().editingFinished.connect(partial(self.addItemToPulldown, pulldownList))</span>
+        <span class="c1"># pulldownList.editTextChanged.connect(self.addItemToPulldown)</span>
+        <span class="c1"># pulldownList.setData([chain.pid for chain in self.project.nmrChains])</span>
+        <span class="c1"># self.chainPulldowns.append(pulldownList)</span>
+        <span class="k">return</span> <span class="n">pulldownList</span></div>
 
-    <span class="n">positions</span> <span class="o">=</span> <span class="p">[</span><span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">objects</span><span class="p">]</span>
-    <span class="n">avgPos</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">positions</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
-    <span class="n">axisCode</span> <span class="o">=</span> <span class="n">objects</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
-    <span class="n">text</span> <span class="o">=</span> <span class="n">axisCode</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">avgPos</span><span class="p">)</span>
-    <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">)</span>
-    <span class="c1"># label.setStyleSheet(&quot;border: 0px solid; color: #f7ffff;&quot;)</span>
-    <span class="k">return</span> <span class="n">label</span></div>
-    <span class="c1"># self.labels.append(label)</span>
+<div class="viewcode-block" id="ObjectAssigner.createSeqCodePulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createSeqCodePulldown">[docs]</a>    <span class="k">def</span> <span class="nf">createSeqCodePulldown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">pulldownList</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">pulldownList</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="c1"># pulldownList.editTextChanged.connect(self.addItemToPulldown)</span>
+        <span class="c1"># sequenceCodes = [nmrResidue.sequenceCode for nmrResidue in self.project.nmrResidues]</span>
+        <span class="c1"># pulldownList.setData(sorted(sequenceCodes, key=self.natural_key))</span>
+        <span class="c1"># self.seqCodePulldowns.append(pulldownList)</span>
+        <span class="k">return</span> <span class="n">pulldownList</span></div>
 
-<div class="viewcode-block" id="ObjectAssigner.createAssignmentWidget"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createAssignmentWidget">[docs]</a>  <span class="k">def</span> <span class="nf">createAssignmentWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">):</span>
-    <span class="n">newAssignmentWidget</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">()</span>
-    <span class="n">newLayout</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
-    <span class="n">chainLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Chain&#39;</span><span class="p">,</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
-    <span class="n">seqCodeLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Sequence&#39;</span><span class="p">,</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
-    <span class="n">residueTypeLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
-    <span class="n">atomTypeLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Atom&#39;</span><span class="p">,</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
-    <span class="n">chainPulldown</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createChainPulldown</span><span class="p">()</span>
-    <span class="n">seqCodePulldown</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createSeqCodePulldown</span><span class="p">()</span>
-    <span class="n">residueTypePulldown</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createResTypePulldown</span><span class="p">()</span>
-    <span class="n">atomTypePulldown</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createAtomTypePulldown</span><span class="p">()</span>
-    <span class="n">newLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">chainLabel</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="n">newLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">chainPulldown</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="n">newLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">seqCodeLabel</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">newLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">seqCodePulldown</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">newLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">residueTypeLabel</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-    <span class="n">newLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">residueTypePulldown</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-    <span class="n">newLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">atomTypeLabel</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-    <span class="n">newLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">atomTypePulldown</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-    <span class="n">newAssignmentWidget</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">newLayout</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">newAssignmentWidget</span></div>
-    <span class="c1"># self.assignmentWidgets.append(newAssignmentWidget)</span>
+<div class="viewcode-block" id="ObjectAssigner.createResTypePulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createResTypePulldown">[docs]</a>    <span class="k">def</span> <span class="nf">createResTypePulldown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">pulldownList</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="c1"># self.resTypePulldowns.append(pulldownList)</span>
+        <span class="n">pulldownList</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="c1"># pulldownList.editTextChanged.connect(self.addItemToPulldown)</span>
+        <span class="k">return</span> <span class="n">pulldownList</span></div>
 
+<div class="viewcode-block" id="ObjectAssigner.createAtomTypePulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createAtomTypePulldown">[docs]</a>    <span class="k">def</span> <span class="nf">createAtomTypePulldown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">pulldownList</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">pulldownList</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="c1"># pulldownList.editTextChanged.connect(self.addItemToPulldown)</span>
+        <span class="c1"># self.atomTypePulldowns.append(pulldownList)</span>
+        <span class="k">return</span> <span class="n">pulldownList</span></div>
 
-<div class="viewcode-block" id="ObjectAssigner.createChainPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createChainPulldown">[docs]</a>  <span class="k">def</span> <span class="nf">createChainPulldown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">pulldownList</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-    <span class="n">pulldownList</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-    <span class="c1"># pulldownList.lineEdit().editingFinished.connect(partial(self.addItemToPulldown, pulldownList))</span>
-    <span class="c1"># pulldownList.editTextChanged.connect(self.addItemToPulldown)</span>
-    <span class="c1"># pulldownList.setData([chain.pid for chain in self.project.nmrChains])</span>
-    <span class="c1"># self.chainPulldowns.append(pulldownList)</span>
-    <span class="k">return</span> <span class="n">pulldownList</span></div>
+<div class="viewcode-block" id="ObjectAssigner.setNmrChain"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.setNmrChain">[docs]</a>    <span class="k">def</span> <span class="nf">setNmrChain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="c1"># NBNB FIxed. Assumes that item is a chainCode. NBNB otherwise will BERAK!.  Rasmus Dec 2015</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">assignTo</span><span class="p">(</span><span class="n">chainCode</span><span class="o">=</span><span class="n">item</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ObjectAssigner.createSeqCodePulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createSeqCodePulldown">[docs]</a>  <span class="k">def</span> <span class="nf">createSeqCodePulldown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">pulldownList</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-    <span class="n">pulldownList</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-    <span class="c1"># pulldownList.editTextChanged.connect(self.addItemToPulldown)</span>
-    <span class="c1"># sequenceCodes = [nmrResidue.sequenceCode for nmrResidue in self.project.nmrResidues]</span>
-    <span class="c1"># pulldownList.setData(sorted(sequenceCodes, key=self.natural_key))</span>
-    <span class="c1"># self.seqCodePulldowns.append(pulldownList)</span>
-    <span class="k">return</span> <span class="n">pulldownList</span></div>
+<div class="viewcode-block" id="ObjectAssigner.setSequenceCode"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.setSequenceCode">[docs]</a>    <span class="k">def</span> <span class="nf">setSequenceCode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span> <span class="o">=</span> <span class="n">item</span></div>
 
+<div class="viewcode-block" id="ObjectAssigner.setResidueType"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.setResidueType">[docs]</a>    <span class="k">def</span> <span class="nf">setResidueType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">residueType</span> <span class="o">=</span> <span class="n">item</span></div>
 
-<div class="viewcode-block" id="ObjectAssigner.createResTypePulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createResTypePulldown">[docs]</a>  <span class="k">def</span> <span class="nf">createResTypePulldown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">pulldownList</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-    <span class="c1"># self.resTypePulldowns.append(pulldownList)</span>
-    <span class="n">pulldownList</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-    <span class="c1"># pulldownList.editTextChanged.connect(self.addItemToPulldown)</span>
-    <span class="k">return</span> <span class="n">pulldownList</span></div>
+<div class="viewcode-block" id="ObjectAssigner.setAtomType"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.setAtomType">[docs]</a>    <span class="k">def</span> <span class="nf">setAtomType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">item</span></div>
 
-<div class="viewcode-block" id="ObjectAssigner.createAtomTypePulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createAtomTypePulldown">[docs]</a>  <span class="k">def</span> <span class="nf">createAtomTypePulldown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">pulldownList</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-    <span class="n">pulldownList</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-    <span class="c1"># pulldownList.editTextChanged.connect(self.addItemToPulldown)</span>
-    <span class="c1"># self.atomTypePulldowns.append(pulldownList)</span>
-    <span class="k">return</span> <span class="n">pulldownList</span></div>
+    <span class="c1"># Obsolete, replaced by CcpnSorting.stringSortKey</span>
+    <span class="c1"># def natural_key(self, string_):</span>
+    <span class="c1">#   import re</span>
+    <span class="c1">#   &quot;&quot;&quot;See http://www.codinghorror.com/blog/archives/001018.html&quot;&quot;&quot;</span>
+    <span class="c1">#   return [int(s) if s.isdigit() else s for s in re.split(r&#39;(\d+)&#39;, string_)]</span>
 
-<div class="viewcode-block" id="ObjectAssigner.setNmrChain"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.setNmrChain">[docs]</a>  <span class="k">def</span> <span class="nf">setNmrChain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-    <span class="c1"># NBNB FIxed. Assumes that item is a chainCode. NBNB otherwise will BERAK!.  Rasmus Dec 2015</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">assignTo</span><span class="p">(</span><span class="n">chainCode</span><span class="o">=</span><span class="n">item</span><span class="p">)</span></div>
+<div class="viewcode-block" id="ObjectAssigner.getNmrAtom"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.getNmrAtom">[docs]</a>    <span class="k">def</span> <span class="nf">getNmrAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="c1"># print(item.text(), self.project.getById(item.text()))</span>
+        <span class="n">nmrAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getById</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtom</span> <span class="o">=</span> <span class="n">nmrAtom</span>
+        <span class="n">chain</span> <span class="o">=</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span>
+        <span class="n">sequenceCode</span> <span class="o">=</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span>
+        <span class="n">residueType</span> <span class="o">=</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">residueType</span>
+        <span class="n">atomType</span> <span class="o">=</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">assignedResidue</span><span class="p">:</span>
 
-<div class="viewcode-block" id="ObjectAssigner.setSequenceCode"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.setSequenceCode">[docs]</a>  <span class="k">def</span> <span class="nf">setSequenceCode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span> <span class="o">=</span> <span class="n">item</span></div>
+            <span class="c1"># TODO NBNB probably BROKEN!</span>
+            <span class="c1"># TODO wrapper NmrResidue has no attribute assignedResidue!</span>
 
-<div class="viewcode-block" id="ObjectAssigner.setResidueType"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.setResidueType">[docs]</a>  <span class="k">def</span> <span class="nf">setResidueType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">residueType</span> <span class="o">=</span> <span class="n">item</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chainPulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">([</span><span class="n">chain</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">chain</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">nmrChains</span><span class="p">])</span>
+            <span class="c1"># self.chainPulldowns[dim].setIndex(self.chainPulldowns[dim].texts.index(chain.id))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chainPulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setCallback</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setNmrChain</span><span class="p">))</span>
+            <span class="n">sequenceCodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span> <span class="k">for</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">seqCodePulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">sequenceCodes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">stringSortKey</span><span class="p">))</span>
+            <span class="c1"># self.seqCodePulldowns[dim].setIndex(self.seqCodePulldowns[dim].texts.index(sequenceCode))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">seqCodePulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setCallback</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setSequenceCode</span><span class="p">))</span>
+            <span class="n">residueTypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">code</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">CCP_CODES</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resTypePulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">residueTypes</span><span class="p">)</span>
+            <span class="c1"># self.resTypePulldowns[dim].setIndex(self.resTypePulldowns[dim].texts.index(residueType.upper()))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resTypePulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setCallback</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setResidueType</span><span class="p">))</span>
+            <span class="n">atomPrefix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">peaks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">isotopeCodes</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">atomNames</span> <span class="o">=</span> <span class="p">[</span><span class="n">atomName</span> <span class="k">for</span> <span class="n">atomName</span> <span class="ow">in</span> <span class="n">ATOM_NAMES</span> <span class="k">if</span> <span class="n">atomName</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">atomPrefix</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atomTypePulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">atomNames</span><span class="p">)</span>
+            <span class="c1"># self.atomTypePulldowns[dim].setIndex(self.atomTypePulldowns[dim].texts.index(nmrAtom.name))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atomTypePulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setCallback</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setAtomType</span><span class="p">))</span>
 
-<div class="viewcode-block" id="ObjectAssigner.setAtomType"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.setAtomType">[docs]</a>  <span class="k">def</span> <span class="nf">setAtomType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">item</span></div>
-
-  <span class="c1"># Obsolete, replaced by CcpnSorting.stringSortKey</span>
-  <span class="c1"># def natural_key(self, string_):</span>
-  <span class="c1">#   import re</span>
-  <span class="c1">#   &quot;&quot;&quot;See http://www.codinghorror.com/blog/archives/001018.html&quot;&quot;&quot;</span>
-  <span class="c1">#   return [int(s) if s.isdigit() else s for s in re.split(r&#39;(\d+)&#39;, string_)]</span>
-
-
-
-<div class="viewcode-block" id="ObjectAssigner.getNmrAtom"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.getNmrAtom">[docs]</a>  <span class="k">def</span> <span class="nf">getNmrAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-    <span class="c1"># print(item.text(), self.project.getById(item.text()))</span>
-    <span class="n">nmrAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getById</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtom</span> <span class="o">=</span> <span class="n">nmrAtom</span>
-    <span class="n">chain</span> <span class="o">=</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span>
-    <span class="n">sequenceCode</span> <span class="o">=</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span>
-    <span class="n">residueType</span> <span class="o">=</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">residueType</span>
-    <span class="n">atomType</span> <span class="o">=</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">name</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">assignedResidue</span><span class="p">:</span>
-
-      <span class="c1"># TODO NBNB probably BROKEN!</span>
-      <span class="c1"># TODO wrapper NmrResidue has no attribute assignedResidue!</span>
-
-      <span class="bp">self</span><span class="o">.</span><span class="n">chainPulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">([</span><span class="n">chain</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">chain</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">nmrChains</span><span class="p">])</span>
-      <span class="c1"># self.chainPulldowns[dim].setIndex(self.chainPulldowns[dim].texts.index(chain.id))</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">chainPulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setCallback</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setNmrChain</span><span class="p">))</span>
-      <span class="n">sequenceCodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span> <span class="k">for</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">]</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">seqCodePulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">sequenceCodes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">stringSortKey</span><span class="p">))</span>
-      <span class="c1"># self.seqCodePulldowns[dim].setIndex(self.seqCodePulldowns[dim].texts.index(sequenceCode))</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">seqCodePulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setCallback</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setSequenceCode</span><span class="p">))</span>
-      <span class="n">residueTypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">code</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">CCP_CODES</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">resTypePulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">residueTypes</span><span class="p">)</span>
-      <span class="c1"># self.resTypePulldowns[dim].setIndex(self.resTypePulldowns[dim].texts.index(residueType.upper()))</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">resTypePulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setCallback</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setResidueType</span><span class="p">))</span>
-      <span class="n">atomPrefix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">peaks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">isotopeCodes</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-      <span class="n">atomNames</span> <span class="o">=</span> <span class="p">[</span><span class="n">atomName</span> <span class="k">for</span> <span class="n">atomName</span> <span class="ow">in</span> <span class="n">ATOM_NAMES</span> <span class="k">if</span> <span class="n">atomName</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">atomPrefix</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">atomTypePulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">atomNames</span><span class="p">)</span>
-      <span class="c1"># self.atomTypePulldowns[dim].setIndex(self.atomTypePulldowns[dim].texts.index(nmrAtom.name))</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">atomTypePulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setCallback</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setAtomType</span><span class="p">))</span>
-
-    <span class="k">else</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">chainPulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">([])</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">seqCodePulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">([])</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">resTypePulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">([])</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">atomTypePulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">([])</span></div></div>
-
-
-
-
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chainPulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">([])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">seqCodePulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">([])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resTypePulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">([])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atomTypePulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">([])</span></div></div>
 
 
 <div class="viewcode-block" id="New"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.New">[docs]</a><span class="k">class</span> <span class="nc">New</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-  <span class="sd">&#39;&#39;&#39;Small &#39;fake&#39; object to get a non-nmrAtom in the objectTable.</span>
-<span class="sd">     Maybe this should be solved differently. It works well though.</span>
+    <span class="sd">&#39;&#39;&#39;Small &#39;fake&#39; object to get a non-nmrAtom in the objectTable.</span>
+<span class="sd">       Maybe this should be solved differently. It works well though.</span>
 
-<span class="sd">  &#39;&#39;&#39;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="s1">&#39;New NMR Atom&#39;</span></div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="s1">&#39;New NMR Atom&#39;</span></div>
 
 
 <div class="viewcode-block" id="NotOnLine"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.NotOnLine">[docs]</a><span class="k">class</span> <span class="nc">NotOnLine</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-  <span class="sd">&#39;&#39;&#39;Small &#39;fake&#39; object to get a message the user in the assignment</span>
-<span class="sd">     Table that a specific dimension can not be assigned in one go</span>
-<span class="sd">     since the frequencies of the peaks in this dimension are not on</span>
-<span class="sd">     one line (i.e. the C frequencies of the CA and CB in a strip for</span>
-<span class="sd">     instance).</span>
-<span class="sd">     Maybe this should be solved differently. It works well though.</span>
+    <span class="sd">&#39;&#39;&#39;Small &#39;fake&#39; object to get a message the user in the assignment</span>
+<span class="sd">       Table that a specific dimension can not be assigned in one go</span>
+<span class="sd">       since the frequencies of the peaks in this dimension are not on</span>
+<span class="sd">       one line (i.e. the C frequencies of the CA and CB in a strip for</span>
+<span class="sd">       instance).</span>
+<span class="sd">       Maybe this should be solved differently. It works well though.</span>
 
-<span class="sd">  &#39;&#39;&#39;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="s1">&#39;Multiple selected peaks not on line.&#39;</span></div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="s1">&#39;Multiple selected peaks not on line.&#39;</span></div>
+
 
 <span class="n">NEW</span> <span class="o">=</span> <span class="n">New</span><span class="p">()</span>
 <span class="n">NOL</span> <span class="o">=</span> <span class="n">NotOnLine</span><span class="p">()</span>

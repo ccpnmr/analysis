@@ -24,7 +24,6 @@ __date__ = "$Date: 2017-04-10 11:42:40 +0000 (Mon, April 10, 2017) $"
 # Start of code
 #=========================================================================================
 
-import collections
 from datetime import datetime
 from typing import Sequence, Tuple, Optional
 from functools import partial
@@ -38,11 +37,8 @@ from ccpn.core.lib import Pid
 from ccpn.util import Constants
 from ccpnmodel.ccpncore.api.ccp.lims.Sample import Sample as ApiSample
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
-from ccpnmodel.ccpncore.lib import Util as coreUtil
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
-    logCommandBlock, undoStackBlocking, renameObject
-from ccpn.util.Logging import getLogger
+from ccpn.core.lib.ContextManagers import newObject, renameObject
 
 
 class Sample(AbstractWrapperObject):

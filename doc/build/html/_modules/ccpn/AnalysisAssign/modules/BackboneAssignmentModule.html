@@ -53,18 +53,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:21 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -100,12 +100,14 @@
 <span class="kn">from</span> <span class="nn">ccpn.core.NmrAtom</span> <span class="kn">import</span> <span class="n">NmrAtom</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PlaneToolbar</span> <span class="kn">import</span> <span class="n">STRIPLABEL_CONNECTDIR</span><span class="p">,</span> <span class="n">STRIPLABEL_CONNECTNONE</span><span class="p">,</span> \
     <span class="n">STRIPCONNECT_LEFT</span><span class="p">,</span> <span class="n">STRIPCONNECT_RIGHT</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">undoBlock</span>
 
 
 <span class="n">ALL</span> <span class="o">=</span> <span class="s1">&#39;&lt;all&gt;&#39;</span>
 <span class="n">MINMATCHES</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">MAXMATCHES</span> <span class="o">=</span> <span class="mi">7</span>
 <span class="n">DEFAULTMATCHES</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">STRIPBACKBONE</span> <span class="o">=</span> <span class="s1">&#39;backboneAssignment&#39;</span>
 
 
 <div class="viewcode-block" id="BackboneAssignmentModule"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisAssign.modules.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.BackboneAssignmentModule">[docs]</a><span class="k">class</span> <span class="nc">BackboneAssignmentModule</span><span class="p">(</span><span class="n">NmrResidueTableModule</span><span class="p">):</span>
@@ -182,7 +184,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">shiftListWidget</span> <span class="o">=</span> <span class="n">ChemicalShiftListPulldown</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTableSettings</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span><span class="p">,</span>
                                                          <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">),</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span>
                                                          <span class="n">fixedWidths</span><span class="o">=</span><span class="p">(</span><span class="n">colWidth0</span><span class="p">,</span> <span class="n">colWidth0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-                                                         <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_setupShiftDicts</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span>
+                                                         <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_setupShiftDicts</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span>
                                                          <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setupShiftDicts</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_spacer</span> <span class="o">=</span> <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span>
@@ -214,6 +216,13 @@
             <span class="n">displays</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">getByGid</span><span class="p">(</span><span class="n">gid</span><span class="p">)</span> <span class="k">for</span> <span class="n">gid</span> <span class="ow">in</span> <span class="n">dGids</span> <span class="k">if</span> <span class="p">(</span><span class="n">gid</span> <span class="o">!=</span> <span class="n">ALL</span> <span class="ow">and</span> <span class="n">gid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">mGids</span><span class="p">)]</span>
         <span class="k">return</span> <span class="n">displays</span>
 
+    <span class="k">def</span> <span class="nf">_getMatchDisplays</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;return list of displays to display matches&quot;</span>
+        <span class="n">displays</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">mGids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matchWidget</span><span class="o">.</span><span class="n">getTexts</span><span class="p">()</span>  <span class="c1"># gid of the match displays</span>
+        <span class="n">displays</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">getByGid</span><span class="p">(</span><span class="n">gid</span><span class="p">)</span> <span class="k">for</span> <span class="n">gid</span> <span class="ow">in</span> <span class="n">mGids</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">displays</span>
+
 <div class="viewcode-block" id="BackboneAssignmentModule.navigateToNmrResidueCallBack"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisAssign.modules.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.BackboneAssignmentModule.navigateToNmrResidueCallBack">[docs]</a>    <span class="k">def</span> <span class="nf">navigateToNmrResidueCallBack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Navigate in selected displays to nmrResidue; skip if none defined</span>
@@ -241,9 +250,10 @@
             <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;startAssignment&#39;</span><span class="p">,</span> <span class="s1">&#39;Undefined match module;</span><span class="se">\n</span><span class="s1">select in settings first or unselect &quot;Find matches&quot;&#39;</span><span class="p">)</span>
             <span class="k">return</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">_startCommandBlock</span><span class="p">(</span>
-                <span class="s1">&#39;BackboneAssignmentModule.navigateToNmrResidue(project.getByPid(</span><span class="si">%r</span><span class="s1">))&#39;</span> <span class="o">%</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
+            <span class="c1"># self.application._startCommandBlock(</span>
+            <span class="c1">#         &#39;BackboneAssignmentModule.navigateToNmrResidue(project.getByPid(%r))&#39; % nmrResidue.pid)</span>
+            <span class="c1"># try:</span>
 
             <span class="c1"># optionally clear the marks</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTableSettings</span><span class="o">.</span><span class="n">autoClearMarksWidget</span><span class="o">.</span><span class="n">checkBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
@@ -258,6 +268,9 @@
             <span class="n">nr</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">mainNmrResidue</span>
             <span class="c1"># navigate the displays</span>
             <span class="k">for</span> <span class="n">display</span> <span class="ow">in</span> <span class="n">displays</span><span class="p">:</span>
+
+                <span class="n">display</span><span class="o">.</span><span class="n">showAllStripHeaders</span><span class="p">()</span>       <span class="c1"># tag all headers with backboneAssignment module as handler</span>
+
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
 
                     <span class="c1"># if contains 2D&#39;s (e.g. a hsqc) then keep zoom</span>
@@ -265,7 +278,7 @@
                         <span class="n">newWidths</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1">#_getCurrentZoomRatio(display.strips[0].viewBox.viewRange())</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="c1"># set the width in case of nD (n&gt;2)</span>
-                        <span class="n">_widths</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;H&#39;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+                        <span class="n">_widths</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;H&#39;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
                         <span class="n">_ac</span> <span class="o">=</span> <span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                         <span class="n">_w</span> <span class="o">=</span> <span class="n">_widths</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">_ac</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span>
                         <span class="n">newWidths</span> <span class="o">=</span> <span class="p">[</span><span class="n">_w</span><span class="p">,</span> <span class="s1">&#39;full&#39;</span><span class="p">]</span>
@@ -287,23 +300,19 @@
                             <span class="n">notifier</span> <span class="o">=</span> <span class="n">GuiNotifier</span><span class="p">(</span><span class="n">label</span><span class="p">,</span>  <span class="c1">#getStripLabel(),</span>
                                                    <span class="p">[</span><span class="n">GuiNotifier</span><span class="o">.</span><span class="n">DROPEVENT</span><span class="p">],</span> <span class="p">[</span><span class="n">DropBase</span><span class="o">.</span><span class="n">TEXT</span><span class="p">],</span>
                                                    <span class="bp">self</span><span class="o">.</span><span class="n">_processDroppedNmrResidueLabel</span><span class="p">,</span>
-                                                   <span class="c1"># nmrResidue=self.project.getByPid(strip.header.getLabelText(position=&#39;c&#39;)),</span>
                                                    <span class="n">toLabel</span><span class="o">=</span><span class="n">strip</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">getLabel</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">),</span>
-                                                   <span class="n">plusChain</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>  <span class="c1">#strip.getStripLabel().text()))</span>
+                                                   <span class="n">plusChain</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">_stripNotifiers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">notifier</span><span class="p">)</span>
                             <span class="n">label</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">getLabel</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
                             <span class="n">notifier</span> <span class="o">=</span> <span class="n">GuiNotifier</span><span class="p">(</span><span class="n">label</span><span class="p">,</span>  <span class="c1">#getStripLabel(),</span>
                                                    <span class="p">[</span><span class="n">GuiNotifier</span><span class="o">.</span><span class="n">DROPEVENT</span><span class="p">],</span> <span class="p">[</span><span class="n">DropBase</span><span class="o">.</span><span class="n">TEXT</span><span class="p">],</span>
                                                    <span class="bp">self</span><span class="o">.</span><span class="n">_processDroppedNmrResidueLabel</span><span class="p">,</span>
-                                                   <span class="c1"># nmrResidue=self.project.getByPid(strip.header.getLabelText(position=&#39;c&#39;)),</span>
                                                    <span class="n">toLabel</span><span class="o">=</span><span class="n">strip</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">getLabel</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">),</span>
-                                                   <span class="n">plusChain</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>  <span class="c1">#strip.getStripLabel().text()))</span>
+                                                   <span class="n">plusChain</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">_stripNotifiers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">notifier</span><span class="p">)</span>
 
-                            <span class="c1"># obj = strip.project.getByPid(nmrAtoms[0].nmrResidue.pid)</span>
-                            <span class="c1"># strip.header.setLabelText(position=&#39;l&#39;, text=&#39;&lt;&lt;&lt;&#39;)</span>
-                            <span class="c1"># strip.header.setLabelObject(position=&#39;c&#39;, obj=obj)</span>
-                            <span class="c1"># strip.header.setLabelText(position=&#39;r&#39;, text=&#39;&gt;&gt;&gt;&#39;)</span>
+                            <span class="n">strip</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">handle</span> <span class="o">=</span> <span class="n">STRIPBACKBONE</span>
+                            <span class="n">strip</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">headerVisible</span> <span class="o">=</span> <span class="bp">True</span>
 
                         <span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">setColumnStretches</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
 
@@ -338,10 +347,10 @@
 
             <span class="c1"># update current (should trigger SequenceGraph)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">nmrResidue</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrChain</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrChain</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span></div>
 
-        <span class="k">finally</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span></div>
+        <span class="c1"># finally:</span>
+        <span class="c1">#     self.application._endCommandBlock()</span>
 
 <div class="viewcode-block" id="BackboneAssignmentModule.findAndDisplayMatches"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisAssign.modules.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.BackboneAssignmentModule.findAndDisplayMatches">[docs]</a>    <span class="k">def</span> <span class="nf">findAndDisplayMatches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="p">):</span>
         <span class="s2">&quot;Find and displays the matches to nmrResidue&quot;</span>
@@ -352,8 +361,12 @@
         <span class="k">if</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">relativeOffset</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
             <span class="c1"># direction = &#39;-1&#39;</span>
             <span class="c1"># iNmrResidue = nmrResidue.mainNmrResidue</span>
-            <span class="n">queryShifts</span> <span class="o">=</span> <span class="p">[</span><span class="n">shift</span> <span class="k">for</span> <span class="n">shift</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">interShifts</span><span class="p">[</span><span class="n">nmrResidue</span><span class="p">]</span>
-                           <span class="k">if</span> <span class="n">shift</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">isotopeCode</span> <span class="o">==</span> <span class="s1">&#39;13C&#39;</span> <span class="ow">and</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">interShifts</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">nmrResidue</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">interShifts</span><span class="p">:</span>
+                <span class="n">queryShifts</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">queryShifts</span> <span class="o">=</span> <span class="p">[</span><span class="n">shift</span> <span class="k">for</span> <span class="n">shift</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">interShifts</span><span class="p">[</span><span class="n">nmrResidue</span><span class="p">]</span>
+                               <span class="k">if</span> <span class="n">shift</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">isotopeCode</span> <span class="o">==</span> <span class="s1">&#39;13C&#39;</span><span class="p">]</span>
             <span class="n">matchShifts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intraShifts</span>
 
         <span class="k">elif</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">relativeOffset</span><span class="p">:</span>
@@ -368,16 +381,19 @@
             <span class="c1"># relative offset is None or 0</span>
             <span class="c1"># direction = &#39;+1&#39;</span>
             <span class="c1"># iNmrResidue = nmrResidue</span>
-            <span class="n">queryShifts</span> <span class="o">=</span> <span class="p">[</span><span class="n">shift</span> <span class="k">for</span> <span class="n">shift</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">intraShifts</span><span class="p">[</span><span class="n">nmrResidue</span><span class="p">]</span>
-                           <span class="k">if</span> <span class="n">shift</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">isotopeCode</span> <span class="o">==</span> <span class="s1">&#39;13C&#39;</span> <span class="ow">and</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">intraShifts</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">nmrResidue</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">intraShifts</span><span class="p">:</span>
+                <span class="n">queryShifts</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">queryShifts</span> <span class="o">=</span> <span class="p">[</span><span class="n">shift</span> <span class="k">for</span> <span class="n">shift</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">intraShifts</span><span class="p">[</span><span class="n">nmrResidue</span><span class="p">]</span>
+                               <span class="k">if</span> <span class="n">shift</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">isotopeCode</span> <span class="o">==</span> <span class="s1">&#39;13C&#39;</span><span class="p">]</span>
             <span class="n">matchShifts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interShifts</span>
 
         <span class="n">assignMatrix</span> <span class="o">=</span> <span class="n">getNmrResidueMatches</span><span class="p">(</span><span class="n">queryShifts</span><span class="p">,</span> <span class="n">matchShifts</span><span class="p">,</span> <span class="s1">&#39;averageQScore&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">assignMatrix</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;No matches found for NmrResidue: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
             <span class="k">return</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_createMatchStrips</span><span class="p">(</span><span class="n">assignMatrix</span><span class="p">)</span>
-        <span class="k">return</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_createMatchStrips</span><span class="p">(</span><span class="n">assignMatrix</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_processDroppedNmrResidueLabel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">toLabel</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">plusChain</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">toLabel</span> <span class="ow">and</span> <span class="n">toLabel</span><span class="o">.</span><span class="n">obj</span><span class="p">:</span>
@@ -463,93 +479,93 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">progressText</span> <span class="o">=</span> <span class="s2">&quot;connecting  </span><span class="si">%s</span><span class="s2">  &lt;  </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
 
-        <span class="k">with</span> <span class="n">progressManager</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">progressText</span><span class="p">):</span>
-            <span class="c1"># nmrResidue._startCommandEchoBlock(&quot;connecting %s to %s&quot; % (droppedNmrResidue.pid, nmrResidue.pid))</span>
+        <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
+            <span class="k">with</span> <span class="n">progressManager</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">progressText</span><span class="p">):</span>
 
-            <span class="k">try</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">setUpdateSilence</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                    <span class="n">matchNmrResidue</span> <span class="o">=</span> <span class="bp">None</span>
+                    <span class="k">try</span><span class="p">:</span>  <span class="c1"># display popup warning</span>
+                        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;shiftLeftMouse&#39;</span><span class="p">]:</span>
+                            <span class="c1"># leftShift drag; connect to previous</span>
 
-                <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">setUpdateSilence</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-                <span class="n">matchNmrResidue</span> <span class="o">=</span> <span class="bp">None</span>
-                <span class="k">try</span><span class="p">:</span>  <span class="c1"># display popup warning</span>
-                    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;shiftLeftMouse&#39;</span><span class="p">]:</span>
-                        <span class="c1"># leftShift drag; connect to previous</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residue</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">residue</span><span class="p">:</span>
+                                <span class="n">nmrResidue</span><span class="o">.</span><span class="n">connectPrevious</span><span class="p">(</span><span class="n">droppedNmrResidue</span><span class="p">)</span>
 
-                        <span class="k">if</span> <span class="ow">not</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residue</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">residue</span><span class="p">:</span>
-                            <span class="n">nmrResidue</span><span class="o">.</span><span class="n">connectPrevious</span><span class="p">(</span><span class="n">droppedNmrResidue</span><span class="p">)</span>
+                            <span class="c1"># SPECIAL CASES</span>
+                            <span class="k">elif</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residue</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">residue</span><span class="p">:</span>
+                                <span class="c1"># connected an unassigned nmrChain to the current assigned chain</span>
+                                <span class="k">if</span> <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="s1">&#39;@-&#39;</span><span class="p">:</span>
+                                    <span class="c1"># assume that it is the only one</span>
+                                    <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">assignSingleResidue</span><span class="p">(</span><span class="n">droppedNmrResidue</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">previousResidue</span><span class="p">)</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">nRes</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residue</span>
+                                    <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">mainNmrResidues</span><span class="p">)):</span>
+                                        <span class="n">nRes</span> <span class="o">=</span> <span class="n">nRes</span><span class="o">.</span><span class="n">previousResidue</span>
+                                    <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">assignConnectedResidues</span><span class="p">(</span><span class="n">nRes</span><span class="p">)</span>
 
-                        <span class="c1"># SPECIAL CASES</span>
-                        <span class="k">elif</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residue</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">residue</span><span class="p">:</span>
-                            <span class="c1"># connected an unassigned nmrChain to the current assigned chain</span>
-                            <span class="k">if</span> <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="s1">&#39;@-&#39;</span><span class="p">:</span>
-                                <span class="c1"># assume that it is the only one</span>
-                                <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">assignSingleResidue</span><span class="p">(</span><span class="n">droppedNmrResidue</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">previousResidue</span><span class="p">)</span>
-                            <span class="k">else</span><span class="p">:</span>
-                                <span class="n">nRes</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residue</span>
-                                <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">mainNmrResidues</span><span class="p">)):</span>
-                                    <span class="n">nRes</span> <span class="o">=</span> <span class="n">nRes</span><span class="o">.</span><span class="n">previousResidue</span>
-                                <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">assignConnectedResidues</span><span class="p">(</span><span class="n">nRes</span><span class="p">)</span>
+                            <span class="k">elif</span> <span class="ow">not</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residue</span> <span class="ow">and</span> <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">residue</span><span class="p">:</span>
+                                <span class="c1"># connected an assigned chain to the current unassigned nmrChain</span>
 
-                        <span class="k">elif</span> <span class="ow">not</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residue</span> <span class="ow">and</span> <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">residue</span><span class="p">:</span>
-                            <span class="c1"># connected an assigned chain to the current unassigned nmrChain</span>
+                                <span class="k">if</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="s1">&#39;@-&#39;</span><span class="p">:</span>
+                                    <span class="c1"># assume that it is the only one</span>
+                                    <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">assignSingleResidue</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">nextResidue</span><span class="p">)</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">assignConnectedResidues</span><span class="p">(</span><span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">nexResidue</span><span class="p">)</span>
 
-                            <span class="k">if</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="s1">&#39;@-&#39;</span><span class="p">:</span>
-                                <span class="c1"># assume that it is the only one</span>
-                                <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">assignSingleResidue</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">nextResidue</span><span class="p">)</span>
-                            <span class="k">else</span><span class="p">:</span>
-                                <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">assignConnectedResidues</span><span class="p">(</span><span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">nexResidue</span><span class="p">)</span>
+                            <span class="n">matchNmrResidue</span> <span class="o">=</span> <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">getOffsetNmrResidue</span><span class="p">(</span><span class="n">offset</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">matchNmrResidue</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                                <span class="c1"># Non -1 residue - stay with current</span>
+                                <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;NmrResidue </span><span class="si">%s</span><span class="s2"> has no i-1 residue to display&quot;</span> <span class="o">%</span> <span class="n">droppedNmrResidue</span><span class="p">)</span>
+                                <span class="n">matchNmrResidue</span> <span class="o">=</span> <span class="n">nmrResidue</span>
+                        <span class="k">else</span><span class="p">:</span>
 
-                        <span class="n">matchNmrResidue</span> <span class="o">=</span> <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">getOffsetNmrResidue</span><span class="p">(</span><span class="n">offset</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-                        <span class="k">if</span> <span class="n">matchNmrResidue</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-                            <span class="c1"># Non -1 residue - stay with current</span>
-                            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;NmrResidue </span><span class="si">%s</span><span class="s2"> has no i-1 residue to display&quot;</span> <span class="o">%</span> <span class="n">droppedNmrResidue</span><span class="p">)</span>
-                            <span class="n">matchNmrResidue</span> <span class="o">=</span> <span class="n">nmrResidue</span>
-                    <span class="k">else</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residue</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">residue</span><span class="p">:</span>
+                                <span class="n">nmrResidue</span><span class="o">.</span><span class="n">connectNext</span><span class="p">(</span><span class="n">droppedNmrResidue</span><span class="p">)</span>
 
-                        <span class="k">if</span> <span class="ow">not</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residue</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">residue</span><span class="p">:</span>
-                            <span class="n">nmrResidue</span><span class="o">.</span><span class="n">connectNext</span><span class="p">(</span><span class="n">droppedNmrResidue</span><span class="p">)</span>
+                            <span class="c1"># SPECIAL CASES</span>
+                            <span class="k">elif</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residue</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">residue</span><span class="p">:</span>
+                                <span class="c1"># connected an unassigned nmrChain to the current assigned chain</span>
+                                <span class="k">if</span> <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="s1">&#39;@-&#39;</span><span class="p">:</span>
+                                    <span class="c1"># assume that it is the only one</span>
+                                    <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">assignSingleResidue</span><span class="p">(</span><span class="n">droppedNmrResidue</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">nextResidue</span><span class="p">)</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">assignConnectedResidues</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">nextResidue</span><span class="p">)</span>
 
-                        <span class="c1"># SPECIAL CASES</span>
-                        <span class="k">elif</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residue</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">residue</span><span class="p">:</span>
-                            <span class="c1"># connected an unassigned nmrChain to the current assigned chain</span>
-                            <span class="k">if</span> <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="s1">&#39;@-&#39;</span><span class="p">:</span>
-                                <span class="c1"># assume that it is the only one</span>
-                                <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">assignSingleResidue</span><span class="p">(</span><span class="n">droppedNmrResidue</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">nextResidue</span><span class="p">)</span>
-                            <span class="k">else</span><span class="p">:</span>
-                                <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">assignConnectedResidues</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">nextResidue</span><span class="p">)</span>
+                            <span class="k">elif</span> <span class="ow">not</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residue</span> <span class="ow">and</span> <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">residue</span><span class="p">:</span>
+                                <span class="c1"># connected an assigned chain to the current unassigned nmrChain</span>
 
-                        <span class="k">elif</span> <span class="ow">not</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residue</span> <span class="ow">and</span> <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">residue</span><span class="p">:</span>
-                            <span class="c1"># connected an assigned chain to the current unassigned nmrChain</span>
+                                <span class="k">if</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="s1">&#39;@-&#39;</span><span class="p">:</span>
+                                    <span class="c1"># assume that it is the only one</span>
+                                    <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">assignSingleResidue</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">previousResidue</span><span class="p">)</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">dropRes</span> <span class="o">=</span> <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">residue</span>
+                                    <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">mainNmrResidues</span><span class="p">)):</span>
+                                        <span class="n">dropRes</span> <span class="o">=</span> <span class="n">dropRes</span><span class="o">.</span><span class="n">previousResidue</span>
+                                    <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">assignConnectedResidues</span><span class="p">(</span><span class="n">dropRes</span><span class="p">)</span>
 
-                            <span class="k">if</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="s1">&#39;@-&#39;</span><span class="p">:</span>
-                                <span class="c1"># assume that it is the only one</span>
-                                <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">assignSingleResidue</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">previousResidue</span><span class="p">)</span>
-                            <span class="k">else</span><span class="p">:</span>
-                                <span class="n">dropRes</span> <span class="o">=</span> <span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">residue</span>
-                                <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">mainNmrResidues</span><span class="p">)):</span>
-                                    <span class="n">dropRes</span> <span class="o">=</span> <span class="n">dropRes</span><span class="o">.</span><span class="n">previousResidue</span>
-                                <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">assignConnectedResidues</span><span class="p">(</span><span class="n">dropRes</span><span class="p">)</span>
+                            <span class="n">matchNmrResidue</span> <span class="o">=</span> <span class="n">droppedNmrResidue</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
+                        <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Connect NmrResidue&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">))</span>
+                    <span class="k">finally</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">setUpdateSilence</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
 
-                        <span class="n">matchNmrResidue</span> <span class="o">=</span> <span class="n">droppedNmrResidue</span>
+                    <span class="c1"># update the NmrResidueTable</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">displayTableForNmrChain</span><span class="p">(</span><span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">matchNmrResidue</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">navigateToNmrResidue</span><span class="p">(</span><span class="n">matchNmrResidue</span><span class="p">)</span>
+
+                    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.OpenGL.CcpnOpenGL</span> <span class="kn">import</span> <span class="n">GLNotifier</span>
+
+                    <span class="n">GLSignals</span> <span class="o">=</span> <span class="n">GLNotifier</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+                    <span class="n">GLSignals</span><span class="o">.</span><span class="n">emitEvent</span><span class="p">(</span><span class="n">triggers</span><span class="o">=</span><span class="p">[</span><span class="n">GLNotifier</span><span class="o">.</span><span class="n">GLMARKS</span><span class="p">])</span>
+
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
-                    <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Connect NmrResidue&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">))</span>
+                    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">))</span>
+                    <span class="c1"># raise es</span>
                 <span class="k">finally</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">setUpdateSilence</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-
-                <span class="c1"># update the NmrResidueTable</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">displayTableForNmrChain</span><span class="p">(</span><span class="n">droppedNmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">matchNmrResidue</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">navigateToNmrResidue</span><span class="p">(</span><span class="n">matchNmrResidue</span><span class="p">)</span>
-
-                <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.OpenGL.CcpnOpenGL</span> <span class="kn">import</span> <span class="n">GLNotifier</span>
-                <span class="n">GLSignals</span> <span class="o">=</span> <span class="n">GLNotifier</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
-                <span class="n">GLSignals</span><span class="o">.</span><span class="n">emitEvent</span><span class="p">(</span><span class="n">triggers</span><span class="o">=</span><span class="p">[</span><span class="n">GLNotifier</span><span class="o">.</span><span class="n">GLMARKS</span><span class="p">])</span>
-
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
-                <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">))</span>
-                <span class="c1"># raise es</span>
-            <span class="k">finally</span><span class="p">:</span>
-                <span class="c1"># nmrResidue._endCommandEchoBlock()</span>
-                <span class="k">pass</span>
+                    <span class="c1"># nmrResidue._endCommandEchoBlock()</span>
+                    <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">_centreStripForNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="p">,</span> <span class="n">strip</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -578,6 +594,7 @@
                 <span class="n">strip</span><span class="o">.</span><span class="n">_CcpnGLWidget</span><span class="o">.</span><span class="n">_rescaleAllAxis</span><span class="p">()</span>
 
                 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.OpenGL.CcpnOpenGL</span> <span class="kn">import</span> <span class="n">GLNotifier</span>
+
                 <span class="n">GLSignals</span> <span class="o">=</span> <span class="n">GLNotifier</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
                 <span class="n">GLSignals</span><span class="o">.</span><span class="n">emitPaintEvent</span><span class="p">()</span>
 
@@ -683,8 +700,7 @@
         <span class="n">scoreAssignment</span> <span class="o">=</span> <span class="n">scoreAssignment</span><span class="p">[:</span><span class="n">numberOfMatches</span><span class="p">]</span>
         <span class="n">scoreLabelling</span> <span class="o">=</span> <span class="n">scoreLabelling</span><span class="p">[:</span><span class="n">numberOfMatches</span><span class="p">]</span>
 
-        <span class="k">for</span> <span class="n">modulePid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matchWidget</span><span class="o">.</span><span class="n">getTexts</span><span class="p">():</span>
-            <span class="n">module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">modulePid</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getMatchDisplays</span><span class="p">():</span>
 
             <span class="c1"># skip of the module if not defined - possibly in the case that spectrumDisplays have been closed</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">module</span><span class="p">:</span>
@@ -709,20 +725,32 @@
                 <span class="n">strip</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">setLabelConnectDir</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">connectDir</span><span class="o">=</span><span class="n">STRIPCONNECT_LEFT</span> <span class="k">if</span> <span class="n">scoreLabelling</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;i-1&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">STRIPCONNECT_RIGHT</span><span class="p">)</span>
                 <span class="n">strip</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">setLabelText</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">scoreAssignment</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span>
 
+                <span class="c1"># disable dropping onto these labels</span>
                 <span class="n">strip</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">setLabelObject</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
                 <span class="n">strip</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">setLabelObject</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
                 <span class="n">strip</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">setLabelObject</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
 
+                <span class="n">strip</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">handle</span> <span class="o">=</span> <span class="n">STRIPBACKBONE</span>
+                <span class="n">strip</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">headerVisible</span> <span class="o">=</span> <span class="bp">True</span>
+
             <span class="c1"># self._centreStripForNmrResidue(assignMatrix[assignmentScores[0]], module.strips[0])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_centreCcpnStripsForNmrResidue</span><span class="p">(</span><span class="n">assignMatrix</span><span class="p">[</span><span class="n">assignmentScores</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">module</span><span class="o">.</span><span class="n">strips</span><span class="p">)</span>
+            <span class="n">module</span><span class="o">.</span><span class="n">setColumnStretches</span><span class="p">(</span><span class="n">stretchValue</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_closeModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Re-implementation of the closeModule method of the CcpnModule class required</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># TODO: use proper subclassing</span>
+
+        <span class="k">for</span> <span class="n">display</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getDisplays</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getMatchDisplays</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">display</span><span class="p">:</span>
+                <span class="n">display</span><span class="o">.</span><span class="n">hideAllStripHeaders</span><span class="p">(</span><span class="n">handle</span><span class="o">=</span><span class="n">STRIPBACKBONE</span><span class="p">)</span>
+
         <span class="k">for</span> <span class="n">notifier</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stripNotifiers</span><span class="p">:</span>
-            <span class="n">notifier</span><span class="o">.</span><span class="n">unRegister</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">notifier</span><span class="p">:</span>
+                <span class="n">notifier</span><span class="o">.</span><span class="n">unRegister</span><span class="p">()</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_stripNotifiers</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">()</span></div>
 
@@ -787,10 +815,10 @@
             <span class="c1">#             positions.append(max(atomPos) - min(atomPos) / 2)</span>
             <span class="c1">#     else:</span>
             <span class="c1">#         positions.append(&#39;&#39;)</span>
-                <span class="c1"># navigateToPositionInStrip(strip, positions, widths=widths) # don&#39;t need to change display yet</span>
+            <span class="c1"># navigateToPositionInStrip(strip, positions, widths=widths) # don&#39;t need to change display yet</span>
 
-            <span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">markPositions</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">shiftDict</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
-                                                           <span class="nb">list</span><span class="p">(</span><span class="n">shiftDict</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span></div>
+            <span class="n">mainWindow</span><span class="o">.</span><span class="n">markPositions</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">shiftDict</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+                                     <span class="nb">list</span><span class="p">(</span><span class="n">shiftDict</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span></div>
 
 
 <span class="c1">#=====  Just some code to &#39;save&#39; =====</span>

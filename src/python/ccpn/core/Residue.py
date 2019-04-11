@@ -33,9 +33,7 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Residue as ApiResidue
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
-    logCommandBlock, undoStackBlocking, notificationBlanking, renameObject, undoBlock
-from ccpn.util.Logging import getLogger
+from ccpn.core.lib.ContextManagers import deleteObject, undoStackBlocking, renameObject, undoBlock
 
 
 class Residue(AbstractWrapperObject):

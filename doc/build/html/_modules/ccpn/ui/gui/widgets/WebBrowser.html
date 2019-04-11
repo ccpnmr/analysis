@@ -53,134 +53,133 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:57 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
+
 <span class="kn">import</span> <span class="nn">webbrowser</span> <span class="kn">as</span> <span class="nn">wb</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.WebView</span> <span class="kn">import</span> <span class="n">WebViewPopup</span>
 
-<span class="n">browserNames</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;firefox&#39;</span><span class="p">,</span><span class="s1">&#39;netscape&#39;</span><span class="p">,</span><span class="s1">&#39;mozilla&#39;</span><span class="p">,</span><span class="s1">&#39;konqueror&#39;</span><span class="p">,</span><span class="s1">&#39;kfm&#39;</span><span class="p">,</span><span class="s1">&#39;mosaic&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;grail&#39;</span><span class="p">,</span><span class="s1">&#39;w3m&#39;</span><span class="p">,</span><span class="s1">&#39;windows-default&#39;</span><span class="p">,</span><span class="s1">&#39;internet-config&#39;</span><span class="p">]</span>
+
+<span class="n">browserNames</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;firefox&#39;</span><span class="p">,</span> <span class="s1">&#39;netscape&#39;</span><span class="p">,</span> <span class="s1">&#39;mozilla&#39;</span><span class="p">,</span> <span class="s1">&#39;konqueror&#39;</span><span class="p">,</span> <span class="s1">&#39;kfm&#39;</span><span class="p">,</span> <span class="s1">&#39;mosaic&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;grail&#39;</span><span class="p">,</span> <span class="s1">&#39;w3m&#39;</span><span class="p">,</span> <span class="s1">&#39;windows-default&#39;</span><span class="p">,</span> <span class="s1">&#39;internet-config&#39;</span><span class="p">]</span>
+
 
 <div class="viewcode-block" id="WebBrowser"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.WebBrowser.WebBrowser">[docs]</a><span class="k">class</span> <span class="nc">WebBrowser</span><span class="p">:</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-  
-    <span class="n">names</span> <span class="o">=</span> <span class="n">getBrowserList</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">names</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">name</span><span class="p">):</span>
-      <span class="n">name</span> <span class="o">=</span> <span class="n">names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    
-    <span class="bp">self</span><span class="o">.</span><span class="n">name</span>   <span class="o">=</span> <span class="n">name</span>
-    
-    <span class="k">if</span> <span class="n">url</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
-  
-<div class="viewcode-block" id="WebBrowser.open"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.WebBrowser.WebBrowser.open">[docs]</a>  <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
-    
-    <span class="k">try</span><span class="p">:</span>
-      <span class="n">browser</span> <span class="o">=</span> <span class="n">wb</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-      <span class="n">browser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
-      
-    <span class="k">except</span><span class="p">:</span>
-      <span class="n">WebViewPopup</span><span class="p">(</span><span class="n">url</span><span class="p">)</span></div></div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+        <span class="n">names</span> <span class="o">=</span> <span class="n">getBrowserList</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">names</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">name</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+
+        <span class="k">if</span> <span class="n">url</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+
+<div class="viewcode-block" id="WebBrowser.open"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.WebBrowser.WebBrowser.open">[docs]</a>    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">browser</span> <span class="o">=</span> <span class="n">wb</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">browser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">WebViewPopup</span><span class="p">(</span><span class="n">url</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="WebBrowserPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.WebBrowser.WebBrowserPulldown">[docs]</a><span class="k">class</span> <span class="nc">WebBrowserPulldown</span><span class="p">(</span><span class="n">PulldownList</span><span class="p">):</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">browser</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">browser</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
 
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">browserList</span> <span class="o">=</span> <span class="n">getBrowserList</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">browserList</span> <span class="o">=</span> <span class="n">getBrowserList</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">browser</span><span class="p">:</span>
-      <span class="n">browser</span> <span class="o">=</span> <span class="n">getDefaultBrowser</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">browser</span><span class="p">:</span>
+            <span class="n">browser</span> <span class="o">=</span> <span class="n">getDefaultBrowser</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">browserList</span><span class="p">:</span>
-      <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">browser</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">browser</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">browserList</span><span class="p">):</span>
-        <span class="n">browser</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browserList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">browser</span> <span class="o">=</span> <span class="n">browser</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">browserList</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">browser</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">browser</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">browserList</span><span class="p">):</span>
+                <span class="n">browser</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browserList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">browser</span> <span class="o">=</span> <span class="n">browser</span>
 
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">browserList</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">browserList</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">browserList</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">browserList</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="p">))</span>
-    
-    <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setWebBrowser</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">browserList</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">browserList</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">browserList</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">browserList</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="p">))</span>
 
-<div class="viewcode-block" id="WebBrowserPulldown.setWebBrowser"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.WebBrowser.WebBrowserPulldown.setWebBrowser">[docs]</a>  <span class="k">def</span> <span class="nf">setWebBrowser</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setWebBrowser</span>
 
-    <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">browser</span> <span class="o">=</span> <span class="n">name</span></div>
+<div class="viewcode-block" id="WebBrowserPulldown.setWebBrowser"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.WebBrowser.WebBrowserPulldown.setWebBrowser">[docs]</a>    <span class="k">def</span> <span class="nf">setWebBrowser</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
 
-<div class="viewcode-block" id="WebBrowserPulldown.destroy"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.WebBrowser.WebBrowserPulldown.destroy">[docs]</a>  <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browser</span> <span class="o">=</span> <span class="n">name</span></div>
 
-    <span class="k">pass</span></div></div>
+<div class="viewcode-block" id="WebBrowserPulldown.destroy"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.WebBrowser.WebBrowserPulldown.destroy">[docs]</a>    <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">pass</span></div></div>
 
 
 <div class="viewcode-block" id="getBrowserList"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.WebBrowser.getBrowserList">[docs]</a><span class="k">def</span> <span class="nf">getBrowserList</span><span class="p">():</span>
+    <span class="n">browsers</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="n">getDefaultBrowser</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">default</span><span class="p">:</span>
+        <span class="n">browsers</span> <span class="o">=</span> <span class="p">[</span><span class="n">default</span><span class="p">,</span> <span class="p">]</span>
 
-  <span class="n">browsers</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">default</span>  <span class="o">=</span> <span class="n">getDefaultBrowser</span><span class="p">()</span>
-  <span class="k">if</span> <span class="n">default</span><span class="p">:</span>
-    <span class="n">browsers</span> <span class="o">=</span> <span class="p">[</span><span class="n">default</span><span class="p">,]</span>
-  
-  <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">browserNames</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">default</span><span class="p">:</span>
-      <span class="k">continue</span>
-  
-    <span class="k">try</span><span class="p">:</span>
-      <span class="n">wb</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-      <span class="n">browsers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-    <span class="k">except</span><span class="p">:</span>
-      
-      <span class="k">try</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">wb</span><span class="o">.</span><span class="n">_iscommand</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
-          <span class="n">wb</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">wb</span><span class="o">.</span><span class="n">Netscape</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
-          <span class="n">wb</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-          <span class="n">browsers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-      <span class="k">except</span><span class="p">:</span>
-        <span class="k">continue</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">browserNames</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">default</span><span class="p">:</span>
+            <span class="k">continue</span>
 
-  <span class="k">return</span> <span class="n">browsers</span></div>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">wb</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">browsers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">wb</span><span class="o">.</span><span class="n">_iscommand</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+                    <span class="n">wb</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">wb</span><span class="o">.</span><span class="n">Netscape</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+                    <span class="n">wb</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                    <span class="n">browsers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+    <span class="k">return</span> <span class="n">browsers</span></div>
 
 
 <div class="viewcode-block" id="getDefaultBrowser"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.WebBrowser.getDefaultBrowser">[docs]</a><span class="k">def</span> <span class="nf">getDefaultBrowser</span><span class="p">():</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">br</span> <span class="o">=</span> <span class="n">wb</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span>
 
-  <span class="k">try</span><span class="p">:</span>
-    <span class="n">br</span> <span class="o">=</span> <span class="n">wb</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
-  <span class="k">except</span><span class="p">:</span>
-    <span class="k">return</span>
-  
-  <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">br</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">):</span>
-    <span class="c1"># Max OS X</span>
-    <span class="k">return</span>
-  
-  <span class="k">try</span><span class="p">:</span>
-    <span class="n">wb</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">br</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-  <span class="k">except</span><span class="p">:</span>
-    <span class="n">wb</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">br</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">br</span><span class="p">)</span>
-  
-  <span class="k">return</span> <span class="n">br</span><span class="o">.</span><span class="n">name</span></div>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">br</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">):</span>
+        <span class="c1"># Max OS X</span>
+        <span class="k">return</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">wb</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">br</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">wb</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">br</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">br</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">br</span><span class="o">.</span><span class="n">name</span></div>
 </pre></div>
 
           </div>

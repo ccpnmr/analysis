@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import functools
 import os
 import typing
-from typing import Sequence, Tuple, Union
+from typing import Sequence, Tuple, Union, Optional
 import operator
 from collections import OrderedDict
 from time import time
@@ -866,18 +866,17 @@ class Project(AbstractWrapperObject):
     @logCommand('project.')
     def exportNef(self, path: str = None,
                   overwriteExisting: bool = False,
-                  skipPrefixes: typing.Sequence = (),
+                  skipPrefixes: typing.Sequence[str] = (),
                   expandSelection: bool = True,
-                  pidList: list = None):
+                  pidList: typing.Sequence[str] = None):
         """
         Export selected contents of the project to a Nef file.
 
-          skipPrefixes: ( 'ccpn', ..., <str> )
-          expandSelection: <bool> }
+        skipPrefixes: ( 'ccpn', ..., <str> )
+        expandSelection: <bool>
 
-          Include 'ccpn' in the skipPrefixes list will exclude ccpn specific items from the file
-          expandSelection = True  will include all data from the project, this may not be data that
-                                  is not defined in the Nef standard.
+        Include 'ccpn' in the skipPrefixes list will exclude ccpn specific items from the file
+        expandSelection = True; will include all data from the project, this may not be data that is not defined in the Nef standard.
 
         PidList is a list of <str>, e.g. 'NC:@-', obtained from the objects to be included.
         The Nef file may also contain further dependent items associated with the pidList.
@@ -1290,7 +1289,7 @@ class Project(AbstractWrapperObject):
     #===========================================================================================
 
     @logCommand('project.')
-    def newMark(self, colour: str, positions: Sequence[float], axisCodes: Sequence,
+    def newMark(self, colour: str, positions: Sequence[float], axisCodes: Sequence[str],
                 style: str = 'simple', units: Sequence[str] = (), labels: Sequence[str] = ()):
         """Create new Mark
 
@@ -1316,7 +1315,7 @@ class Project(AbstractWrapperObject):
             getLogger().warning('Mark already exists')
 
     @logCommand('project.')
-    def findMark(self, colour: str, positions: Sequence[float], axisCodes: Sequence, labels: Sequence[str] = ()):
+    def findMark(self, colour: str, positions: Sequence[float], axisCodes: Sequence[str], labels: Sequence[str] = ()):
         """Find existing Mark
 
         :param str colour: Mark colour
@@ -1477,7 +1476,7 @@ class Project(AbstractWrapperObject):
         return _newStructureEnsemble(self, name=name, data=data, comment=comment, **kwds)
 
     @logCommand('project.')
-    def newPeakCluster(self, peaks: ['Peak'] = None, **kwds):
+    def newPeakCluster(self, peaks: Sequence[Union['Peak', str]] = None, **kwds) -> Optional['PeakCluster']:
         """Create new PeakCluster.
 
         See the PeakCluster class for details.

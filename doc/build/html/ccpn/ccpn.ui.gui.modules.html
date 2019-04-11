@@ -110,6 +110,11 @@ super(&lt;YourModule&gt;, self)._closeModule()</dd>
 <code class="descname">className</code><em class="property"> = ''</em><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule.className" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModule.defaultSettingsState">
+<code class="descname">defaultSettingsState</code><em class="property"> = 0</em><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule.defaultSettingsState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModule.dragEnterEvent">
 <code class="descname">dragEnterEvent</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/CcpnModule.html#CcpnModule.dragEnterEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule.dragEnterEvent" title="Permalink to this definition">¶</a></dt>
@@ -185,16 +190,7 @@ This is called when the WindowStateChanges to maximises</p>
 <dl class="method">
 <dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModule.restoreWidgetsState">
 <code class="descname">restoreWidgetsState</code><span class="sig-paren">(</span><em>**widgetsState</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/CcpnModule.html#CcpnModule.restoreWidgetsState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule.restoreWidgetsState" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>widgetsState</strong> &#8211; </td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">&#8216;Restore the gui params. To Call it: _setParams(<a href="#id1"><span class="problematic" id="id2">**</span></a>{&#8220;variableName&#8221;:&#8221;value&#8221;})&#8217;</td>
-</tr>
-</tbody>
-</table>
+<dd><p>Restore the gui params. To Call it: _setParams(<a href="#id1"><span class="problematic" id="id2">**</span></a>{&#8220;variableName&#8221;:&#8221;value&#8221;})</p>
 <p>This is automatically called after every restoration and after the module has been initialised.
 Subclass this for a custom behaviour. for example custom callback after the widgets have been restored.
 Subclass like this:</p>
@@ -205,6 +201,14 @@ Subclass like this:</p>
 #  do some stuff</dd>
 </dl>
 </div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>widgetsState</strong> &#8211; </td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -306,7 +310,7 @@ tertiary version by Ejb 9/5/17</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.modules.ChemicalShiftTable.ChemicalShiftTable">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.ChemicalShiftTable.</code><code class="descname">ChemicalShiftTable</code><span class="sig-paren">(</span><em>parent=None, mainWindow=None, moduleParent=None, actionCallback=None, selectionCallback=None, chemicalShiftList=None, hiddenColumns=['Pid'], **kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftTable.html#ChemicalShiftTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftTable.ChemicalShiftTable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.QuickTable.QuickTable" title="ccpn.ui.gui.widgets.QuickTable.QuickTable"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.QuickTable.QuickTable</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.GuiTable.GuiTable" title="ccpn.ui.gui.widgets.GuiTable.GuiTable"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.GuiTable.GuiTable</span></code></a></p>
 <p>Class to present a NmrResidue Table and a NmrChain pulldown list, wrapped in a Widget</p>
 <dl class="method">
 <dt id="ccpn.ui.gui.modules.ChemicalShiftTable.ChemicalShiftTable.addWidgetToTop">
@@ -340,7 +344,7 @@ tertiary version by Ejb 9/5/17</p>
 
 <dl class="class">
 <dt id="ccpn.ui.gui.modules.ChemicalShiftTable.ChemicalShiftTableModule">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.ChemicalShiftTable.</code><code class="descname">ChemicalShiftTableModule</code><span class="sig-paren">(</span><em>mainWindow=None</em>, <em>name='Chemical Shift Table'</em>, <em>chemicalShiftList=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftTable.html#ChemicalShiftTableModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftTable.ChemicalShiftTableModule" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.ChemicalShiftTable.</code><code class="descname">ChemicalShiftTableModule</code><span class="sig-paren">(</span><em>mainWindow=None</em>, <em>name='Chemical Shift Table'</em>, <em>chemicalShiftList=None</em>, <em>selectFirstItem=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftTable.html#ChemicalShiftTableModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftTable.ChemicalShiftTableModule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
 <p>This class implements the module by wrapping a NmrResidueTable instance</p>
 <dl class="attribute">
@@ -386,7 +390,7 @@ tertiary version by Ejb 9/5/17</p>
 - now responsive to current.nmrResidues</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.modules.ChemicalShiftTableWithAssignment.ChemicalShiftTableWithAssignment">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.ChemicalShiftTableWithAssignment.</code><code class="descname">ChemicalShiftTableWithAssignment</code><span class="sig-paren">(</span><em>mainWindow</em>, <em>name='Chemical Shift Table'</em>, <em>chemicalShiftList=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftTableWithAssignment.html#ChemicalShiftTableWithAssignment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftTableWithAssignment.ChemicalShiftTableWithAssignment" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.ChemicalShiftTableWithAssignment.</code><code class="descname">ChemicalShiftTableWithAssignment</code><span class="sig-paren">(</span><em>mainWindow</em>, <em>name='Chemical Shift Table'</em>, <em>chemicalShiftList=None</em>, <em>selectFirstItem=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftTableWithAssignment.html#ChemicalShiftTableWithAssignment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftTableWithAssignment.ChemicalShiftTableWithAssignment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
 <p>This Module allows inspection of the NmrAtoms of a selected NmrResidue
 It responds to current.nmrResidues, taking the last added residue to this list
@@ -440,9 +444,72 @@ are displayed.</p>
 </div>
 <div class="section" id="module-ccpn.ui.gui.modules.ChemicalShiftsMappingModule">
 <span id="ccpn-ui-gui-modules-chemicalshiftsmappingmodule-module"></span><h2>ccpn.ui.gui.modules.ChemicalShiftsMappingModule module<a class="headerlink" href="#module-ccpn.ui.gui.modules.ChemicalShiftsMappingModule" title="Permalink to this headline">¶</a></h2>
-<p>Module Documentation here
-# TODO : when update module, keep focus on selected item in the table, keep same zoom on the plot
-check zoom</p>
+<p>Module Documentation</p>
+<blockquote>
+<div><blockquote>
+<div>This module has three sections plus settings:</div></blockquote>
+<div class="line-block">
+<div class="line-block">
+<div class="line">|    TABLE | PLOTS   |</div>
+</div>
+<div class="line">Settings |    &#8212;&#8212;&#8212;&#8212;-   |</div>
+<div class="line-block">
+<div class="line">|      BAR CHART     |
+&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;-</div>
+</div>
+</div>
+<blockquote>
+<div><p>This module plots a bar chart of NmrResidue number as function of delta shift for its (nmrAtoms) assigned peaks.</p>
+<dl class="docutils">
+<dt>** Only  NmrResidue with an integer as sequenceCode is allowed <a href="#id7"><span class="problematic" id="id8">**</span></a>.</dt>
+<dd><dl class="first last docutils">
+<dt>E.G.: OK  &#8211;&gt;  sequenceCode = 44;</dt>
+<dd>NO  &#8211;&gt;  sequenceCode = &#8216;44i-1&#8217;;</dd>
+</dl>
+</dd>
+<dt>There are four modes of Deltadelta calculation (Settings): POSITIONS, HEIGHT, VOLUME, LINEWIDTHS</dt>
+<dd><p class="first">The delta shift for POSITIONS and LINEWIDTHS is calculated from the peak properties as following,
+assuming the NmrAtoms of interest H and N:</p>
+<blockquote>
+<div>CSPi = √((Δδ_Hi )^2+α(Δδ_Ni )^2 )</div></blockquote>
+<dl class="last docutils">
+<dt>The delta shift for HEIGHT and VOLUME is calculated from the peak properties as following:</dt>
+<dd>CSPi = √((Δδ )^2</dd>
+</dl>
+</dd>
+</dl>
+<p>The peaks used are as default taken from the last peak list for the selected spectra (settings tab).
+Any sensible combination of NmrAtoms is allowed.
+See tutorials for more information.</p>
+<p>Macros:
+# Example 1: On a the TStar project with all peaks correctly fitted to their spectra, this macro will show how to</p>
+<blockquote>
+<div><blockquote>
+<div>extrapolate data from the CSM module and plot different properties.
+Paste into the Macro editor Module or directly into the PythonConsole Module and run it.</div></blockquote>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="go">&gt;&gt;&gt;</span>
+<span class="go">import numpy as np</span>
+<span class="go">from ccpn.util.Common import splitDataFrameWithinRange</span>
+<span class="go">from ccpn.ui.gui.widgets.PyPlotWidget import PyPlotWidget</span>
+<span class="go">from ccpn.ui.gui.modules.NmrResidueTable import KD, Deltas</span>
+<span class="go">from ccpn.core.lib.DataFrameObject import  DATAFRAME_OBJECT</span>
+</pre></div>
+</div>
+<p>moduleName = &#8216;Chemical Shift Mapping:1&#8217; # The displayed CSM module name you want to get information from.
+csm = mainWindow.moduleArea.modules[moduleName]
+tableData = csm.tableData # dataframe as the displayed table. See https://pandas.pydata.org for Pandas documentation.
+deltasColumn = tableData[Deltas] # name in the table column
+deltasROI = [np.std(deltasColumn), np.max(deltasColumn)] # Deltas Region of Interest. Min the std of all deltas.
+kdsROI = [0.01, 0.2]  # Kds Region of Interest.
+inner, outer =  splitDataFrameWithinRange(tableData, Deltas, KD, <a href="#id9"><span class="problematic" id="id10">*</span></a>deltasROI, <a href="#id11"><span class="problematic" id="id12">*</span></a>kdsROI) # Split the data based on ROIs
+inner.index = [nr.sequenceCode+&#8221; &#8220;+nr.residueType for nr in inner.index] # will be used to make labels on the plot.
+widget = PyPlotWidget()
+plot = widget.plotDataFrame(dataFrame=inner, kind=&#8217;bar&#8217;,title=&#8217;KDs and Deltas&#8217;) # See Pandas and Matplotlib for plots customisations.
+widget.show(windowTitle=&#8217;Macro CSM&#8217;, size=(500, 500))
+&gt;&gt;&gt;</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
 <dl class="class">
 <dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.ChemicalShiftsMappingModule.</code><code class="descname">ChemicalShiftsMapping</code><span class="sig-paren">(</span><em>mainWindow</em>, <em>name='Chemical Shift Mapping'</em>, <em>nmrChain=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#ChemicalShiftsMapping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping" title="Permalink to this definition">¶</a></dt>
@@ -455,7 +522,25 @@ check zoom</p>
 <dl class="method">
 <dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.close">
 <code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#ChemicalShiftsMapping.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.close" title="Permalink to this definition">¶</a></dt>
-<dd><p>Close the table from the commandline</p>
+<dd><p>Closes the CSM module</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.getBindingCurves">
+<code class="descname">getBindingCurves</code><span class="sig-paren">(</span><em>nmrResidues</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#ChemicalShiftsMapping.getBindingCurves"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.getBindingCurves" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets binding curve as dataFrame for specific NmrResidues.
+Returns a DataFrame as: Index -&gt; nmrResidue Object, columns: int or float, raw values: int or float</p>
+<blockquote>
+<div><div class="line-block">
+<div class="line">Columns    <a href="#id13"><span class="problematic" id="id14">|</span></a>as the concentration/time/etc value</div>
+</div>
+</div></blockquote>
+<div class="line-block">
+<div class="line">index          |    1   |   2   |</div>
+</div>
+<p><a href="#id17"><span class="problematic" id="id18">|&#8212;&#8212;&#8212;&#8212;&#8212;-+&#8212;&#8212;&#8211;|</span></a>&#8212;&#8212;-|
+| nmrResidue1    |    1.0 |   1.1 |
+| nmrResidue2    |    2.0 |   1.2 |</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -468,59 +553,54 @@ check zoom</p>
 <code class="descname">maxSettingsState</code><em class="property"> = 2</em><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.maxSettingsState" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.profile">
+<code class="descname">profile</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.profile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.refresh">
+<code class="descname">refresh</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#ChemicalShiftsMapping.refresh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.refresh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates all widgets and data in the CSM module</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.setThresholdValue">
+<code class="descname">setThresholdValue</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#ChemicalShiftsMapping.setThresholdValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.setThresholdValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the Threshold Line to a new value and updates the graph</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.settingsPosition">
 <code class="descname">settingsPosition</code><em class="property"> = 'left'</em><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.settingsPosition" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.updateBarGraph">
-<code class="descname">updateBarGraph</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#ChemicalShiftsMapping.updateBarGraph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.updateBarGraph" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.updateModule">
-<code class="descname">updateModule</code><span class="sig-paren">(</span><em>silent=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#ChemicalShiftsMapping.updateModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.updateModule" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>silent</strong> &#8211; if silent does not update the module!</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">deltas</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.updateTable">
-<code class="descname">updateTable</code><span class="sig-paren">(</span><em>nmrChain</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#ChemicalShiftsMapping.updateTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.updateTable" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.updateThresholdLineValue">
-<code class="descname">updateThresholdLineValue</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#ChemicalShiftsMapping.updateThresholdLineValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.updateThresholdLineValue" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.CustomNmrResidueTable">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.ChemicalShiftsMappingModule.</code><code class="descname">CustomNmrResidueTable</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>moduleParent=None</em>, <em>actionCallback=None</em>, <em>selectionCallback=None</em>, <em>checkBoxCallback=None</em>, <em>nmrChain=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#CustomNmrResidueTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.CustomNmrResidueTable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTable" title="ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTable"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTable</span></code></a></p>
-<p>Custon nmrResidue Table with extra Delta column</p>
 <dl class="attribute">
-<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.CustomNmrResidueTable.deltaShiftsColumn">
-<code class="descname">deltaShiftsColumn</code><em class="property"> = ('Deltas', &lt;function CustomNmrResidueTable.&lt;lambda&gt; at 0x121d0c9d8&gt;, '', None)</em><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.CustomNmrResidueTable.deltaShiftsColumn" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.tableData">
+<code class="descname">tableData</code><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.tableData" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>immutable</em> - 
+:return: dataFrame containing all data on the Chemical Shift Mapping Module table</p>
+<blockquote>
+<div><div class="line-block">
+<div class="line">Columns    | &#8220;as the displayed table&#8221;</div>
+</div>
+</div></blockquote>
+<div class="line-block">
+<div class="line">index          |    #   | Index | Pid, _object, Sequence, Deltas, Kd ...</div>
+</div>
+<p><a href="#id19"><span class="problematic" id="id20">|&#8212;&#8212;&#8212;&#8212;&#8212;-+&#8212;&#8212;&#8211;|</span></a>&#8212;&#8212;-|
+| 1              |    1   |   1   |
+| 2              |    2   |   2   |</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.chemicalShiftMappingPymolTemplate">
-<code class="descclassname">ccpn.ui.gui.modules.ChemicalShiftsMappingModule.</code><code class="descname">chemicalShiftMappingPymolTemplate</code><span class="sig-paren">(</span><em>filePath</em>, <em>pdbPath</em>, <em>aboveThresholdResidues</em>, <em>belowThresholdResidues</em>, <em>missingdResidues</em>, <em>colourMissing</em>, <em>colourAboveThreshold</em>, <em>colourBelowThreshold</em>, <em>selection</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#chemicalShiftMappingPymolTemplate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.chemicalShiftMappingPymolTemplate" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.thresholdValue">
+<code class="descname">thresholdValue</code><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.thresholdValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>immutable</em> - 
+Gets the threshold value currently displayed on the graph</p>
+</dd></dl>
+
+</dd></dl>
 
 </div>
 <div class="section" id="module-ccpn.ui.gui.modules.IntegralTable">
@@ -528,7 +608,7 @@ check zoom</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.modules.IntegralTable.IntegralTable">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.IntegralTable.</code><code class="descname">IntegralTable</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>moduleParent=None</em>, <em>integralList=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/IntegralTable.html#IntegralTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.IntegralTable.IntegralTable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.QuickTable.QuickTable" title="ccpn.ui.gui.widgets.QuickTable.QuickTable"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.QuickTable.QuickTable</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.GuiTable.GuiTable" title="ccpn.ui.gui.widgets.GuiTable.GuiTable"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.GuiTable.GuiTable</span></code></a></p>
 <p>Class to present a IntegralTable pulldown list, wrapped in a Widget</p>
 <dl class="attribute">
 <dt id="ccpn.ui.gui.modules.IntegralTable.IntegralTable.OBJECT">
@@ -566,7 +646,7 @@ check zoom</p>
 
 <dl class="class">
 <dt id="ccpn.ui.gui.modules.IntegralTable.IntegralTableModule">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.IntegralTable.</code><code class="descname">IntegralTableModule</code><span class="sig-paren">(</span><em>mainWindow=None</em>, <em>name='Integral Table'</em>, <em>integralList=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/IntegralTable.html#IntegralTableModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.IntegralTable.IntegralTableModule" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.IntegralTable.</code><code class="descname">IntegralTableModule</code><span class="sig-paren">(</span><em>mainWindow=None</em>, <em>name='Integral Table'</em>, <em>integralList=None</em>, <em>selectFirstItem=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/IntegralTable.html#IntegralTableModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.IntegralTable.IntegralTableModule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
 <p>This class implements the module by wrapping a integralTable instance</p>
 <dl class="attribute">
@@ -642,7 +722,7 @@ NB. If you open an existing file.py and modify it, the changes are not automatic
 <dl class="class">
 <dt id="ccpn.ui.gui.modules.MultipletListTable.MultipletListTableWidget">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.MultipletListTable.</code><code class="descname">MultipletListTableWidget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>moduleParent=None</em>, <em>multipletList=None</em>, <em>actionCallback=None</em>, <em>selectionCallback=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/MultipletListTable.html#MultipletListTableWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.MultipletListTable.MultipletListTableWidget" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.QuickTable.QuickTable" title="ccpn.ui.gui.widgets.QuickTable.QuickTable"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.QuickTable.QuickTable</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.GuiTable.GuiTable" title="ccpn.ui.gui.widgets.GuiTable.GuiTable"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.GuiTable.GuiTable</span></code></a></p>
 <p>Class to present a multipletList Table</p>
 <dl class="attribute">
 <dt id="ccpn.ui.gui.modules.MultipletListTable.MultipletListTableWidget.attributeName">
@@ -669,7 +749,7 @@ NB. If you open an existing file.py and modify it, the changes are not automatic
 
 <dl class="class">
 <dt id="ccpn.ui.gui.modules.MultipletListTable.MultipletTableModule">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.MultipletListTable.</code><code class="descname">MultipletTableModule</code><span class="sig-paren">(</span><em>mainWindow=None</em>, <em>name='Multiplet Table'</em>, <em>multipletList=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/MultipletListTable.html#MultipletTableModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.MultipletListTable.MultipletTableModule" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.MultipletListTable.</code><code class="descname">MultipletTableModule</code><span class="sig-paren">(</span><em>mainWindow=None</em>, <em>name='Multiplet Table'</em>, <em>multipletList=None</em>, <em>selectFirstItem=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/MultipletListTable.html#MultipletTableModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.MultipletListTable.MultipletTableModule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
 <p>This class implements the module by wrapping a MultipletListTable instance</p>
 <dl class="attribute">
@@ -717,7 +797,7 @@ NmrResidue.</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTable">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.NmrResidueTable.</code><code class="descname">NmrResidueTable</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>moduleParent=None</em>, <em>actionCallback=None</em>, <em>selectionCallback=None</em>, <em>checkBoxCallback=None</em>, <em>nmrChain=None</em>, <em>multiSelect=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/NmrResidueTable.html#NmrResidueTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.QuickTable.QuickTable" title="ccpn.ui.gui.widgets.QuickTable.QuickTable"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.QuickTable.QuickTable</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.GuiTable.GuiTable" title="ccpn.ui.gui.widgets.GuiTable.GuiTable"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.GuiTable.GuiTable</span></code></a></p>
 <p>Class to present a NmrResidue Table and a NmrChain pulldown list, wrapped in a Widget</p>
 <dl class="attribute">
 <dt id="ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTable.OBJECT">
@@ -774,7 +854,7 @@ If current strip contains the double clicked nmrResidue will navigateToPositionI
 
 <dl class="class">
 <dt id="ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTableModule">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.NmrResidueTable.</code><code class="descname">NmrResidueTableModule</code><span class="sig-paren">(</span><em>mainWindow=None</em>, <em>name='NmrResidue Table'</em>, <em>nmrChain=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/NmrResidueTable.html#NmrResidueTableModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTableModule" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.NmrResidueTable.</code><code class="descname">NmrResidueTableModule</code><span class="sig-paren">(</span><em>mainWindow=None</em>, <em>name='NmrResidue Table'</em>, <em>nmrChain=None</em>, <em>selectFirstItem=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/NmrResidueTable.html#NmrResidueTableModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTableModule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
 <p>This class implements the module by wrapping a NmrResidueTable instance</p>
 <dl class="attribute">
@@ -847,7 +927,7 @@ If current strip contains the double clicked nmrResidue will navigateToPositionI
 <span id="ccpn-ui-gui-modules-noteseditor-module"></span><h2>ccpn.ui.gui.modules.NotesEditor module<a class="headerlink" href="#module-ccpn.ui.gui.modules.NotesEditor" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="ccpn.ui.gui.modules.NotesEditor.NotesEditorModule">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.NotesEditor.</code><code class="descname">NotesEditorModule</code><span class="sig-paren">(</span><em>mainWindow=None</em>, <em>name='Notes Editor'</em>, <em>note=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/NotesEditor.html#NotesEditorModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.NotesEditor.NotesEditorModule" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.NotesEditor.</code><code class="descname">NotesEditorModule</code><span class="sig-paren">(</span><em>mainWindow=None</em>, <em>name='Notes Editor'</em>, <em>note=None</em>, <em>selectFirstItem=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/NotesEditor.html#NotesEditorModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.NotesEditor.NotesEditorModule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
 <p>This class implements the module for editing the NotesList.</p>
 <dl class="attribute">
@@ -994,7 +1074,7 @@ the content.</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.modules.PeakTable.PeakListTableWidget">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.PeakTable.</code><code class="descname">PeakListTableWidget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>moduleParent=None</em>, <em>peakList=None</em>, <em>actionCallback=None</em>, <em>selectionCallback=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PeakTable.html#PeakListTableWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PeakTable.PeakListTableWidget" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.QuickTable.QuickTable" title="ccpn.ui.gui.widgets.QuickTable.QuickTable"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.QuickTable.QuickTable</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.GuiTable.GuiTable" title="ccpn.ui.gui.widgets.GuiTable.GuiTable"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.GuiTable.GuiTable</span></code></a></p>
 <p>Class to present a peakList Table</p>
 <dl class="attribute">
 <dt id="ccpn.ui.gui.modules.PeakTable.PeakListTableWidget.attributeName">
@@ -1021,7 +1101,7 @@ the content.</p>
 
 <dl class="class">
 <dt id="ccpn.ui.gui.modules.PeakTable.PeakTableModule">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.PeakTable.</code><code class="descname">PeakTableModule</code><span class="sig-paren">(</span><em>mainWindow=None</em>, <em>name='Peak Table'</em>, <em>peakList=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PeakTable.html#PeakTableModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PeakTable.PeakTableModule" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.PeakTable.</code><code class="descname">PeakTableModule</code><span class="sig-paren">(</span><em>mainWindow=None</em>, <em>name='Peak Table'</em>, <em>peakList=None</em>, <em>selectFirstItem=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PeakTable.html#PeakTableModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PeakTable.PeakTableModule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
 <p>This class implements the module by wrapping a PeakListTable instance</p>
 <dl class="attribute">
@@ -1270,7 +1350,7 @@ The guiPipeline has its own mechanism for restoring</p>
 <dl class="method">
 <dt id="ccpn.ui.gui.modules.PluginModule.PluginModule.restoreWidgetsState">
 <code class="descname">restoreWidgetsState</code><span class="sig-paren">(</span><em>**widgetsState</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PluginModule.html#PluginModule.restoreWidgetsState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PluginModule.PluginModule.restoreWidgetsState" title="Permalink to this definition">¶</a></dt>
-<dd><p>Restore the gui params. To Call it: _setParams(<a href="#id7"><span class="problematic" id="id8">**</span></a>{&#8220;variableName&#8221;:&#8221;value&#8221;})</p>
+<dd><p>Restore the gui params. To Call it: _setParams(<a href="#id15"><span class="problematic" id="id16">**</span></a>{&#8220;variableName&#8221;:&#8221;value&#8221;})</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -1298,6 +1378,9 @@ return  {&#8220;variableName&#8221;:&#8221;value&#8221;}  of all gui Variables</
 
 </dd></dl>
 
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.PyMolUtil">
+<span id="ccpn-ui-gui-modules-pymolutil-module"></span><h2>ccpn.ui.gui.modules.PyMolUtil module<a class="headerlink" href="#module-ccpn.ui.gui.modules.PyMolUtil" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-ccpn.ui.gui.modules.PythonConsoleModule">
 <span id="ccpn-ui-gui-modules-pythonconsolemodule-module"></span><h2>ccpn.ui.gui.modules.PythonConsoleModule module<a class="headerlink" href="#module-ccpn.ui.gui.modules.PythonConsoleModule" title="Permalink to this headline">¶</a></h2>
@@ -1394,7 +1477,7 @@ return  {&#8220;variableName&#8221;:&#8221;value&#8221;}  of all gui Variables</
 <dl class="class">
 <dt id="ccpn.ui.gui.modules.ResidueTable.ResidueTable">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.ResidueTable.</code><code class="descname">ResidueTable</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>moduleParent=None</em>, <em>actionCallback=None</em>, <em>selectionCallback=None</em>, <em>checkBoxCallback=None</em>, <em>chain=None</em>, <em>multiSelect=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ResidueTable.html#ResidueTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ResidueTable.ResidueTable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.QuickTable.QuickTable" title="ccpn.ui.gui.widgets.QuickTable.QuickTable"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.QuickTable.QuickTable</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.GuiTable.GuiTable" title="ccpn.ui.gui.widgets.GuiTable.GuiTable"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.GuiTable.GuiTable</span></code></a></p>
 <p>Class to present a residue Table and a Chain pulldown list, wrapped in a Widget</p>
 <dl class="attribute">
 <dt id="ccpn.ui.gui.modules.ResidueTable.ResidueTable.OBJECT">
@@ -1443,7 +1526,7 @@ return  {&#8220;variableName&#8221;:&#8221;value&#8221;}  of all gui Variables</
 
 <dl class="class">
 <dt id="ccpn.ui.gui.modules.ResidueTable.ResidueTableModule">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.ResidueTable.</code><code class="descname">ResidueTableModule</code><span class="sig-paren">(</span><em>mainWindow=None</em>, <em>name='Residue Table'</em>, <em>chain=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ResidueTable.html#ResidueTableModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ResidueTable.ResidueTableModule" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.ResidueTable.</code><code class="descname">ResidueTableModule</code><span class="sig-paren">(</span><em>mainWindow=None</em>, <em>name='Residue Table'</em>, <em>chain=None</em>, <em>selectFirstItem=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ResidueTable.html#ResidueTableModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ResidueTable.ResidueTableModule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
 <p>This class implements the module by wrapping a ResidueTable instance</p>
 <dl class="attribute">
@@ -1497,7 +1580,7 @@ return  {&#8220;variableName&#8221;:&#8221;value&#8221;}  of all gui Variables</
 <dl class="class">
 <dt id="ccpn.ui.gui.modules.RestraintTable.RestraintTable">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.RestraintTable.</code><code class="descname">RestraintTable</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>moduleParent=None</em>, <em>restraintList=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/RestraintTable.html#RestraintTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.RestraintTable.RestraintTable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.QuickTable.QuickTable" title="ccpn.ui.gui.widgets.QuickTable.QuickTable"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.QuickTable.QuickTable</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.GuiTable.GuiTable" title="ccpn.ui.gui.widgets.GuiTable.GuiTable"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.GuiTable.GuiTable</span></code></a></p>
 <p>Class to present a RestraintTable pulldown list, wrapped in a Widget</p>
 <dl class="attribute">
 <dt id="ccpn.ui.gui.modules.RestraintTable.RestraintTable.OBJECT">
@@ -1547,7 +1630,7 @@ return  {&#8220;variableName&#8221;:&#8221;value&#8221;}  of all gui Variables</
 
 <dl class="class">
 <dt id="ccpn.ui.gui.modules.RestraintTable.RestraintTableModule">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.RestraintTable.</code><code class="descname">RestraintTableModule</code><span class="sig-paren">(</span><em>mainWindow=None</em>, <em>name='Restraint Table'</em>, <em>restraintList=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/RestraintTable.html#RestraintTableModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.RestraintTable.RestraintTableModule" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.RestraintTable.</code><code class="descname">RestraintTableModule</code><span class="sig-paren">(</span><em>mainWindow=None</em>, <em>name='Restraint Table'</em>, <em>restraintList=None</em>, <em>selectFirstItem=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/RestraintTable.html#RestraintTableModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.RestraintTable.RestraintTableModule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
 <p>This class implements the module by wrapping a restaintsTable instance</p>
 <dl class="attribute">
@@ -1589,7 +1672,7 @@ return  {&#8220;variableName&#8221;:&#8221;value&#8221;}  of all gui Variables</
 <dl class="method">
 <dt id="ccpn.ui.gui.modules.RestraintTable.RestraintTableModule.selectRestraintList">
 <code class="descname">selectRestraintList</code><span class="sig-paren">(</span><em>restraintList=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/RestraintTable.html#RestraintTableModule.selectRestraintList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.RestraintTable.RestraintTableModule.selectRestraintList" title="Permalink to this definition">¶</a></dt>
-<dd><p>Manually select a StructureEnsemble from the pullDown</p>
+<dd><p>Manually select a restraintTable from the pullDown</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -1739,16 +1822,16 @@ QGraphicsView instances provide the canvas on to which the amino acids represent
 <span id="ccpn-ui-gui-modules-structuretable-module"></span><h2>ccpn.ui.gui.modules.StructureTable module<a class="headerlink" href="#module-ccpn.ui.gui.modules.StructureTable" title="Permalink to this headline">¶</a></h2>
 <p>This file contains StructureTableModule and StructureTable classes</p>
 <dl class="class">
-<dt id="ccpn.ui.gui.modules.StructureTable.QuickTableStructure">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.StructureTable.</code><code class="descname">QuickTableStructure</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/StructureTable.html#QuickTableStructure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.StructureTable.QuickTableStructure" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.QuickTable.QuickTable" title="ccpn.ui.gui.widgets.QuickTable.QuickTable"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.QuickTable.QuickTable</span></code></a></p>
-<p>QuickTable specific to tables that only contain a single pid for the pandas dataframe</p>
+<dt id="ccpn.ui.gui.modules.StructureTable.GuiTableStructure">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.StructureTable.</code><code class="descname">GuiTableStructure</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/StructureTable.html#GuiTableStructure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.StructureTable.GuiTableStructure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.GuiTable.GuiTable" title="ccpn.ui.gui.widgets.GuiTable.GuiTable"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.GuiTable.GuiTable</span></code></a></p>
+<p>GuiTable specific to tables that only contain a single pid for the pandas dataframe</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="ccpn.ui.gui.modules.StructureTable.StructureTable">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.StructureTable.</code><code class="descname">StructureTable</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>moduleParent=None</em>, <em>structureEnsemble=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/StructureTable.html#StructureTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.StructureTable.StructureTable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.StructureTable.QuickTableStructure" title="ccpn.ui.gui.modules.StructureTable.QuickTableStructure"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.StructureTable.QuickTableStructure</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.StructureTable.GuiTableStructure" title="ccpn.ui.gui.modules.StructureTable.GuiTableStructure"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.StructureTable.GuiTableStructure</span></code></a></p>
 <p>Class to present a StructureTable and a StructureData pulldown list, wrapped in a Widget</p>
 <dl class="attribute">
 <dt id="ccpn.ui.gui.modules.StructureTable.StructureTable.OBJECT">
@@ -1815,7 +1898,7 @@ QGraphicsView instances provide the canvas on to which the amino acids represent
 
 <dl class="class">
 <dt id="ccpn.ui.gui.modules.StructureTable.StructureTableModule">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.StructureTable.</code><code class="descname">StructureTableModule</code><span class="sig-paren">(</span><em>mainWindow=None</em>, <em>name='Structure Table'</em>, <em>structureEnsemble=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/StructureTable.html#StructureTableModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.StructureTable.StructureTableModule" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.StructureTable.</code><code class="descname">StructureTableModule</code><span class="sig-paren">(</span><em>mainWindow=None</em>, <em>name='Structure Table'</em>, <em>structureEnsemble=None</em>, <em>selectFirstItem=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/StructureTable.html#StructureTableModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.StructureTable.StructureTableModule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
 <p>This class implements the module by wrapping a StructureTable instance</p>
 <dl class="attribute">
@@ -1893,6 +1976,7 @@ QGraphicsView instances provide the canvas on to which the amino acids represent
 <li><a class="reference internal" href="#module-ccpn.ui.gui.modules.PeakTable">ccpn.ui.gui.modules.PeakTable module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.modules.PipelineModule">ccpn.ui.gui.modules.PipelineModule module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.modules.PluginModule">ccpn.ui.gui.modules.PluginModule module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.PyMolUtil">ccpn.ui.gui.modules.PyMolUtil module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.modules.PythonConsoleModule">ccpn.ui.gui.modules.PythonConsoleModule module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.modules.ReferenceChemicalShifts">ccpn.ui.gui.modules.ReferenceChemicalShifts module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.modules.ResidueInformation">ccpn.ui.gui.modules.ResidueInformation module</a></li>

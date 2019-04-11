@@ -494,15 +494,16 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
     def restoreWidgetsState(self, **widgetsState):
         """
+        Restore the gui params. To Call it: _setParams(**{"variableName":"value"})
 
-        :param widgetsState:
-        :return: 'Restore the gui params. To Call it: _setParams(**{"variableName":"value"})'
         This is automatically called after every restoration and after the module has been initialised.
         Subclass this for a custom behaviour. for example custom callback after the widgets have been restored.
         Subclass like this:
                def restoreWidgetsState(self, **widgetsState):
                   super(TheModule, self).restoreWidgetsState(**widgetsState) #First restore as default
                   #  do some stuff
+
+        :param widgetsState:
         """
 
         self._setNestedWidgetsAttrToModule()

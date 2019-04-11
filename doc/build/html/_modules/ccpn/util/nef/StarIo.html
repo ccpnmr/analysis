@@ -82,26 +82,25 @@
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
 
+
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:33:02 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
@@ -111,13 +110,14 @@
 <span class="c1"># NB Assumes that file was parsed with lowercaseTags = True</span>
 
 
-
 <span class="c1"># TODO NBNB some longer variable names;</span>
 
 <span class="kn">import</span> <span class="nn">keyword</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">GenericStarParser</span>
+
+
 <span class="n">NULLSTRING</span> <span class="o">=</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">NULLSTRING</span>
 <span class="n">TRUESTRING</span> <span class="o">=</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">TRUESTRING</span>
 <span class="n">FALSESTRING</span> <span class="o">=</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">FALSESTRING</span>
@@ -128,77 +128,84 @@
 <span class="c1"># Unprintable characters map to &#39;_&#39;, bytes above 128 map to &#39;?&#39;</span>
 <span class="n">ll</span> <span class="o">=</span> <span class="mi">33</span> <span class="o">*</span> <span class="p">[</span><span class="s1">&#39;_&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">33</span><span class="p">,</span> <span class="mi">127</span><span class="p">))</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;_&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">128</span> <span class="o">*</span> <span class="p">[</span><span class="s1">&#39;?&#39;</span><span class="p">]</span>
 <span class="c1"># &quot;&#39;# (double quote, single quote, and pound sign) map to &#39;?&#39;</span>
-<span class="n">ll</span><span class="p">[</span><span class="mi">34</span><span class="p">]</span> <span class="o">=</span> <span class="n">ll</span><span class="p">[</span><span class="mi">35</span><span class="p">]</span> <span class="o">=</span>  <span class="n">ll</span><span class="p">[</span><span class="mi">39</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;?&#39;</span>
+<span class="n">ll</span><span class="p">[</span><span class="mi">34</span><span class="p">]</span> <span class="o">=</span> <span class="n">ll</span><span class="p">[</span><span class="mi">35</span><span class="p">]</span> <span class="o">=</span> <span class="n">ll</span><span class="p">[</span><span class="mi">39</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;?&#39;</span>
 <span class="n">latin_1_to_framecode_translator</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="parseNmrStar"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.parseNmrStar">[docs]</a><span class="k">def</span> <span class="nf">parseNmrStar</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;load NMRSTAR file&quot;&quot;&quot;</span>
-  <span class="n">dataExtent</span> <span class="o">=</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
-  <span class="n">converter</span> <span class="o">=</span> <span class="n">_StarDataConverter</span><span class="p">(</span><span class="n">dataExtent</span><span class="p">)</span>
-  <span class="n">converter</span><span class="o">.</span><span class="n">preValidate</span><span class="p">()</span>
-  <span class="n">result</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">convert</span><span class="p">()</span>
-  <span class="c1">#</span>
-  <span class="k">return</span> <span class="n">result</span></div>
+    <span class="sd">&quot;&quot;&quot;load NMRSTAR file&quot;&quot;&quot;</span>
+    <span class="n">dataExtent</span> <span class="o">=</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+    <span class="n">converter</span> <span class="o">=</span> <span class="n">_StarDataConverter</span><span class="p">(</span><span class="n">dataExtent</span><span class="p">)</span>
+    <span class="n">converter</span><span class="o">.</span><span class="n">preValidate</span><span class="p">()</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">convert</span><span class="p">()</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
 
 <div class="viewcode-block" id="parseNef"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.parseNef">[docs]</a><span class="k">def</span> <span class="nf">parseNef</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;load NEF from string&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;load NEF from string&quot;&quot;&quot;</span>
 
-  <span class="n">dataExtent</span> <span class="o">=</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
-  <span class="n">converter</span> <span class="o">=</span> <span class="n">_StarDataConverter</span><span class="p">(</span><span class="n">dataExtent</span><span class="p">,</span> <span class="n">fileType</span><span class="o">=</span><span class="s1">&#39;nef&#39;</span><span class="p">)</span>
-  <span class="n">converter</span><span class="o">.</span><span class="n">preValidate</span><span class="p">()</span>
-  <span class="n">result</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">convert</span><span class="p">()</span>
-  <span class="c1">#</span>
-  <span class="k">return</span> <span class="n">result</span></div>
+    <span class="n">dataExtent</span> <span class="o">=</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+    <span class="n">converter</span> <span class="o">=</span> <span class="n">_StarDataConverter</span><span class="p">(</span><span class="n">dataExtent</span><span class="p">,</span> <span class="n">fileType</span><span class="o">=</span><span class="s1">&#39;nef&#39;</span><span class="p">)</span>
+    <span class="n">converter</span><span class="o">.</span><span class="n">preValidate</span><span class="p">()</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">convert</span><span class="p">()</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
 
 <div class="viewcode-block" id="parseNmrStarFile"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.parseNmrStarFile">[docs]</a><span class="k">def</span> <span class="nf">parseNmrStarFile</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">,</span> <span class="n">wrapInDataBlock</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;parse NMRSTAR from file</span>
+    <span class="sd">&quot;&quot;&quot;parse NMRSTAR from file</span>
 
-<span class="sd">  if wrapInDataBlock missing DataBlock start will be provided&quot;&quot;&quot;</span>
-  <span class="n">text</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-  <span class="k">if</span> <span class="n">wrapInDataBlock</span> <span class="ow">and</span> <span class="s1">&#39;save_&#39;</span> <span class="ow">in</span> <span class="n">text</span> <span class="ow">and</span> <span class="ow">not</span> <span class="s1">&#39;data_&#39;</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
-    <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;data_dummy </span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">text</span>
-  <span class="n">dataExtent</span> <span class="o">=</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
-  <span class="n">converter</span> <span class="o">=</span> <span class="n">_StarDataConverter</span><span class="p">(</span><span class="n">dataExtent</span><span class="p">)</span>
-  <span class="n">converter</span><span class="o">.</span><span class="n">preValidate</span><span class="p">()</span>
-  <span class="n">result</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">convert</span><span class="p">()</span>
-  <span class="c1">#</span>
-  <span class="k">return</span> <span class="n">result</span></div>
-
-<div class="viewcode-block" id="parseNefFile"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.parseNefFile">[docs]</a><span class="k">def</span> <span class="nf">parseNefFile</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">,</span> <span class="n">wrapInDataBlock</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;parse NEF from file</span>
-
-<span class="sd">  if wrapInDataBlock missing DataBlock start will be provided&quot;&quot;&quot;</span>
-  <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span> <span class="k">as</span> <span class="n">inFile</span><span class="p">:</span>          <span class="c1"># ejb - fix not closing file correctly</span>
-    <span class="c1"># text = open(fileName).read()</span>
-    <span class="n">text</span> <span class="o">=</span> <span class="n">inFile</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="sd">    if wrapInDataBlock missing DataBlock start will be provided&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">wrapInDataBlock</span> <span class="ow">and</span> <span class="s1">&#39;save_&#39;</span> <span class="ow">in</span> <span class="n">text</span> <span class="ow">and</span> <span class="ow">not</span> <span class="s1">&#39;data_&#39;</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
-      <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;data_dummy </span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">text</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;data_dummy </span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">text</span>
+    <span class="n">dataExtent</span> <span class="o">=</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+    <span class="n">converter</span> <span class="o">=</span> <span class="n">_StarDataConverter</span><span class="p">(</span><span class="n">dataExtent</span><span class="p">)</span>
+    <span class="n">converter</span><span class="o">.</span><span class="n">preValidate</span><span class="p">()</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">convert</span><span class="p">()</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="parseNefFile"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.parseNefFile">[docs]</a><span class="k">def</span> <span class="nf">parseNefFile</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">,</span> <span class="n">wrapInDataBlock</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;parse NEF from file</span>
+
+<span class="sd">    if wrapInDataBlock missing DataBlock start will be provided&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">wrapInDataBlock</span> <span class="ow">and</span> <span class="s1">&#39;save_&#39;</span> <span class="ow">in</span> <span class="n">text</span> <span class="ow">and</span> <span class="ow">not</span> <span class="s1">&#39;data_&#39;</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;data_dummy </span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">text</span>
     <span class="n">dataExtent</span> <span class="o">=</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
     <span class="n">converter</span> <span class="o">=</span> <span class="n">_StarDataConverter</span><span class="p">(</span><span class="n">dataExtent</span><span class="p">,</span> <span class="n">fileType</span><span class="o">=</span><span class="s1">&#39;nef&#39;</span><span class="p">)</span>
     <span class="n">converter</span><span class="o">.</span><span class="n">preValidate</span><span class="p">()</span>
 
-  <span class="n">result</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">convert</span><span class="p">()</span>
-  <span class="c1">#</span>
-  <span class="k">return</span> <span class="n">result</span></div>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">convert</span><span class="p">()</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
 
 <div class="viewcode-block" id="string2FramecodeString"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.string2FramecodeString">[docs]</a><span class="k">def</span> <span class="nf">string2FramecodeString</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="c1"># Replace code points outside latin-1 range (more than one byte)  with &#39;?&#39;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;latin_1&#39;</span><span class="p">,</span> <span class="s1">&#39;replace&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;latin_1&#39;</span><span class="p">)</span>
 
-  <span class="c1"># Replace code points outside latin-1 range (more than one byte)  with &#39;?&#39;</span>
-  <span class="n">result</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;latin_1&#39;</span><span class="p">,</span> <span class="s1">&#39;replace&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;latin_1&#39;</span><span class="p">)</span>
+    <span class="c1"># Translate string, using preset translator</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">latin_1_to_framecode_translator</span><span class="p">)</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">result</span></div>
 
-  <span class="c1"># Translate string, using preset translator</span>
-  <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">latin_1_to_framecode_translator</span><span class="p">)</span>
-  <span class="c1">#</span>
-  <span class="k">return</span> <span class="n">result</span></div>
 
 <div class="viewcode-block" id="StarValidationError"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.StarValidationError">[docs]</a><span class="k">class</span> <span class="nc">StarValidationError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-  <span class="k">pass</span></div>
+    <span class="k">pass</span></div>
+
 
 <div class="viewcode-block" id="NmrDataExtent"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.NmrDataExtent">[docs]</a><span class="k">class</span> <span class="nc">NmrDataExtent</span><span class="p">(</span><span class="n">GenericStarParser</span><span class="o">.</span><span class="n">DataExtent</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Top level container (OrderedDict) for NMRSTAR/NEF object tree&quot;&quot;&quot;</span>
-  <span class="k">pass</span></div>
+    <span class="sd">&quot;&quot;&quot;Top level container (OrderedDict) for NMRSTAR/NEF object tree&quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
 
 <span class="c1"># # We insert these afterwards as we want the functions at the top of the file</span>
 <span class="c1"># # but can only annotate after DataExtent is created</span>
@@ -208,457 +215,458 @@
 <span class="c1"># parseNmrStarFile.__annotations__[&#39;return&#39;] = NmrDataExtent</span>
 
 <div class="viewcode-block" id="NmrLoop"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.NmrLoop">[docs]</a><span class="k">class</span> <span class="nc">NmrLoop</span><span class="p">(</span><span class="n">GenericStarParser</span><span class="o">.</span><span class="n">Loop</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Loop for NMRSTAR/NEF object tree</span>
+    <span class="sd">&quot;&quot;&quot;Loop for NMRSTAR/NEF object tree</span>
 
-<span class="sd">  The contents, self.data is a list of OrderedDicts matching the column names.</span>
-<span class="sd">  rows can be modified or deleted from data, but adding new rows directly is likely to</span>
-<span class="sd">  break - use the newRow function.&quot;&quot;&quot;</span>
+<span class="sd">    The contents, self.data is a list of OrderedDicts matching the column names.</span>
+<span class="sd">    rows can be modified or deleted from data, but adding new rows directly is likely to</span>
+<span class="sd">    break - use the newRow function.&quot;&quot;&quot;</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">category</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Loop category tag - synonym for name (unlike the case of SaveFrame)&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">category</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Loop category tag - synonym for name (unlike the case of SaveFrame)&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">tagPrefix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Prefix to use before item tags on output&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="s1">&#39;_</span><span class="si">%s</span><span class="s1">.&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span></div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tagPrefix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Prefix to use before item tags on output&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s1">&#39;_</span><span class="si">%s</span><span class="s1">.&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span></div>
+
 
 <div class="viewcode-block" id="NmrSaveFrame"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.NmrSaveFrame">[docs]</a><span class="k">class</span> <span class="nc">NmrSaveFrame</span><span class="p">(</span><span class="n">GenericStarParser</span><span class="o">.</span><span class="n">SaveFrame</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;SaveFrame (OrderedDict)for NMRSTAR/NEF object tree&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;SaveFrame (OrderedDict)for NMRSTAR/NEF object tree&quot;&quot;&quot;</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">NmrSaveFrame</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">category</span> <span class="o">=</span> <span class="n">category</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">NmrSaveFrame</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">category</span> <span class="o">=</span> <span class="n">category</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">tagPrefix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Prefix to use before item tags on output&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="s1">&#39;_</span><span class="si">%s</span><span class="s1">.&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">category</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tagPrefix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Prefix to use before item tags on output&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s1">&#39;_</span><span class="si">%s</span><span class="s1">.&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">category</span>
 
-<div class="viewcode-block" id="NmrSaveFrame.newLoop"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.NmrSaveFrame.newLoop">[docs]</a>  <span class="k">def</span> <span class="nf">newLoop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">columns</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Make new NmrLoop and add it to the NmrSaveFrame&quot;&quot;&quot;</span>
-    <span class="n">loop</span> <span class="o">=</span> <span class="n">NmrLoop</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">columns</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">loop</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">loop</span></div></div>
+<div class="viewcode-block" id="NmrSaveFrame.newLoop"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.NmrSaveFrame.newLoop">[docs]</a>    <span class="k">def</span> <span class="nf">newLoop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">columns</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Make new NmrLoop and add it to the NmrSaveFrame&quot;&quot;&quot;</span>
+        <span class="n">loop</span> <span class="o">=</span> <span class="n">NmrLoop</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">columns</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">loop</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">loop</span></div></div>
+
 
 <div class="viewcode-block" id="NmrDataBlock"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.NmrDataBlock">[docs]</a><span class="k">class</span> <span class="nc">NmrDataBlock</span><span class="p">(</span><span class="n">GenericStarParser</span><span class="o">.</span><span class="n">DataBlock</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;DataBlock (OrderedDict)for NMRSTAR/NEF object tree&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;DataBlock (OrderedDict)for NMRSTAR/NEF object tree&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="NmrDataBlock.newSaveFrame"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.NmrDataBlock.newSaveFrame">[docs]</a>  <span class="k">def</span> <span class="nf">newSaveFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">category</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Make new NmrSaveFrame and add it to the DataBlock&quot;&quot;&quot;</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="n">string2FramecodeString</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-    <span class="n">saveFrame</span> <span class="o">=</span> <span class="n">NmrSaveFrame</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">saveFrame</span><span class="p">)</span>
-    <span class="n">saveFrame</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s1">&#39;sf_category&#39;</span><span class="p">,</span> <span class="n">category</span><span class="p">)</span>
-    <span class="n">saveFrame</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s1">&#39;sf_framecode&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">saveFrame</span></div>
+<div class="viewcode-block" id="NmrDataBlock.newSaveFrame"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.NmrDataBlock.newSaveFrame">[docs]</a>    <span class="k">def</span> <span class="nf">newSaveFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">category</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Make new NmrSaveFrame and add it to the DataBlock&quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">string2FramecodeString</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">saveFrame</span> <span class="o">=</span> <span class="n">NmrSaveFrame</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">saveFrame</span><span class="p">)</span>
+        <span class="n">saveFrame</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s1">&#39;sf_category&#39;</span><span class="p">,</span> <span class="n">category</span><span class="p">)</span>
+        <span class="n">saveFrame</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s1">&#39;sf_framecode&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">saveFrame</span></div>
 
-<div class="viewcode-block" id="NmrDataBlock.addSaveFrame"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.NmrDataBlock.addSaveFrame">[docs]</a>  <span class="k">def</span> <span class="nf">addSaveFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">saveFrame</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Add existing NmrSaveFrame to the DataBlock&quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">saveFrame</span><span class="p">[</span><span class="s1">&#39;sf_framecode&#39;</span><span class="p">],</span> <span class="n">saveFrame</span><span class="p">)</span></div></div>
+<div class="viewcode-block" id="NmrDataBlock.addSaveFrame"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.NmrDataBlock.addSaveFrame">[docs]</a>    <span class="k">def</span> <span class="nf">addSaveFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">saveFrame</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add existing NmrSaveFrame to the DataBlock&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">saveFrame</span><span class="p">[</span><span class="s1">&#39;sf_framecode&#39;</span><span class="p">],</span> <span class="n">saveFrame</span><span class="p">)</span></div></div>
+
 
 <div class="viewcode-block" id="NmrLoopRow"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.NmrLoopRow">[docs]</a><span class="k">class</span> <span class="nc">NmrLoopRow</span><span class="p">(</span><span class="n">GenericStarParser</span><span class="o">.</span><span class="n">LoopRow</span><span class="p">):</span>
-  <span class="k">pass</span></div>
+    <span class="k">pass</span></div>
 
 
 <span class="k">class</span> <span class="nc">_StarDataConverter</span><span class="p">:</span>
-  <span class="sd">&quot;&quot;&quot;Converter from output of a GeneralStarParser to a NEF or NMRSTAR nested data structure</span>
+    <span class="sd">&quot;&quot;&quot;Converter from output of a GeneralStarParser to a NEF or NMRSTAR nested data structure</span>
 
-<span class="sd">  NB Function assumes valid data as output from GeneralStarParser with lowerCaseTags settings</span>
-<span class="sd">  and does not double check validity.&quot;&quot;&quot;</span>
+<span class="sd">    NB Function assumes valid data as output from GeneralStarParser with lowerCaseTags settings</span>
+<span class="sd">    and does not double check validity.&quot;&quot;&quot;</span>
 
+    <span class="n">validFileTypes</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;nef&#39;</span><span class="p">,</span> <span class="s1">&#39;star&#39;</span><span class="p">)</span>
 
-  <span class="n">validFileTypes</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;nef&#39;</span><span class="p">,</span> <span class="s1">&#39;star&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataExtent</span><span class="p">,</span> <span class="n">fileType</span><span class="o">=</span><span class="s1">&#39;star&#39;</span><span class="p">,</span>
+                 <span class="n">specification</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">convertColumnNames</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataExtent</span><span class="p">,</span> <span class="n">fileType</span><span class="o">=</span><span class="s1">&#39;star&#39;</span><span class="p">,</span>
-               <span class="n">specification</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">convertColumnNames</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
-
-    <span class="c1"># Set option settings</span>
-    <span class="k">if</span> <span class="n">specification</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">specification</span> <span class="o">=</span> <span class="bp">None</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;_StarDataConverter specification input not yet implemented&quot;</span><span class="p">)</span>
-    <span class="n">fileType</span> <span class="o">=</span> <span class="n">fileType</span> <span class="ow">and</span> <span class="n">fileType</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">fileType</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">validFileTypes</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="n">StarValidationError</span><span class="p">(</span><span class="s2">&quot;fileType </span><span class="si">%s</span><span class="s2"> must be one of </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fileType</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">validFileTypes</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">fileType</span> <span class="o">=</span> <span class="n">fileType</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">convertColumnNames</span> <span class="o">=</span> <span class="n">convertColumnNames</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">dataExtent</span> <span class="o">=</span> <span class="n">dataExtent</span>
-
-    <span class="c1"># Stack of objects parsed, to give context for error messages</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">stack</span> <span class="o">=</span> <span class="p">[]</span>
-
-  <span class="k">def</span> <span class="nf">preValidate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">stack</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">try</span><span class="p">:</span>
-      <span class="k">for</span> <span class="n">dataBlock</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataExtent</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">preValidateDataBlock</span><span class="p">(</span><span class="n">dataBlock</span><span class="p">)</span>
-    <span class="k">except</span> <span class="n">StarValidationError</span><span class="p">:</span>
-      <span class="k">raise</span>
-    <span class="k">except</span><span class="p">:</span>
-      <span class="k">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_errorMessage</span><span class="p">(</span><span class="s1">&#39;System error:&#39;</span><span class="p">))</span>
-      <span class="k">raise</span>
-
-  <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-    <span class="n">nmrDataExtent</span> <span class="o">=</span> <span class="n">NmrDataExtent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataExtent</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">stack</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">try</span><span class="p">:</span>
-      <span class="k">for</span> <span class="n">dataBlock</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataExtent</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-        <span class="n">newDataBlock</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">convertDataBlock</span><span class="p">(</span><span class="n">dataBlock</span><span class="p">)</span>
-        <span class="n">nmrDataExtent</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">newDataBlock</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">newDataBlock</span><span class="p">)</span>
-    <span class="k">except</span> <span class="n">StarValidationError</span><span class="p">:</span>
-      <span class="k">raise</span>
-    <span class="k">except</span><span class="p">:</span>
-      <span class="k">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_errorMessage</span><span class="p">(</span><span class="s1">&#39;System error:&#39;</span><span class="p">))</span>
-      <span class="k">raise</span>
-    <span class="c1">#</span>
-    <span class="k">return</span> <span class="n">nmrDataExtent</span>
-
-  <span class="k">def</span> <span class="nf">preValidateDataBlock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataBlock</span><span class="p">):</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dataBlock</span><span class="p">)</span>
-
-    <span class="n">name</span> <span class="o">=</span> <span class="n">dataBlock</span><span class="o">.</span><span class="n">name</span>
-    <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="s1">&#39;global_&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;data_&#39;</span><span class="p">):</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">raiseValidationError</span><span class="p">(</span><span class="s2">&quot;DataBlock name  must be &#39;global_&#39; or start with &#39;data_&#39;&quot;</span><span class="p">)</span>
-
-    <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">saveFrame</span> <span class="ow">in</span> <span class="n">dataBlock</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-
-      <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">saveFrame</span><span class="p">,</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">SaveFrame</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">preValidateSaveFrame</span><span class="p">(</span><span class="n">saveFrame</span><span class="p">)</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">raiseValidationError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> file DataBlock contains non-saveframe element </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2">&quot;</span>
-                         <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileType</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">saveFrame</span><span class="p">))</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-
-  <span class="k">def</span> <span class="nf">convertDataBlock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataBlock</span><span class="p">):</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dataBlock</span><span class="p">)</span>
-
-    <span class="c1"># get NmrDataBlock name</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="n">dataBlock</span><span class="o">.</span><span class="n">name</span>
-    <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;data_&#39;</span><span class="p">):</span>
-      <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">5</span><span class="p">:]</span> <span class="ow">or</span> <span class="s1">&#39;__MissingDataBlockName&#39;</span>
-    <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;global_&#39;</span><span class="p">:</span>
-      <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;global&#39;</span>
-
-    <span class="c1"># Make NmrDataBlock and connect it</span>
-    <span class="n">nmrDataBlock</span> <span class="o">=</span> <span class="n">NmrDataBlock</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-
-    <span class="k">for</span> <span class="n">saveFrame</span> <span class="ow">in</span> <span class="n">dataBlock</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-      <span class="n">nmrSaveFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertSaveFrame</span><span class="p">(</span><span class="n">saveFrame</span><span class="p">)</span>
-      <span class="n">nmrDataBlock</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">nmrSaveFrame</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">nmrSaveFrame</span><span class="p">)</span>
-    <span class="c1">#</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">nmrDataBlock</span>
-
-
-  <span class="k">def</span> <span class="nf">preValidateSaveFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">saveFrame</span><span class="p">):</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">saveFrame</span><span class="p">)</span>
-    <span class="n">commonPrefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">commonprefix</span><span class="p">([</span><span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-                                         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">str</span><span class="p">)])</span>
-    <span class="n">tt</span> <span class="o">=</span> <span class="n">commonPrefix</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tt</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-      <span class="n">prefix</span> <span class="o">=</span> <span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">raiseValidationError</span><span class="p">(</span>
-        <span class="s2">&quot;Saveframe tags do not start with a common dot-separated prefix: </span><span class="si">%s</span><span class="s2">&quot;</span>
-        <span class="o">%</span> <span class="p">[</span><span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">str</span><span class="p">)]</span>
-      <span class="p">)</span>
-
-    <span class="n">sf_category</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="s1">&#39;sf_category&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">sf_category</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">raiseValidationError</span><span class="p">(</span><span class="s2">&quot;SaveFrame lacks .sf_category item&quot;</span><span class="p">)</span>
-    <span class="n">sf_framecode</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span> <span class="n">prefix</span> <span class="o">+</span> <span class="s1">&#39;sf_framecode&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">sf_framecode</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">raiseValidationError</span><span class="p">(</span><span class="s2">&quot;SaveFrame lacks .sf_framecode item&quot;</span><span class="p">)</span>
-
-    <span class="n">sf_lowername</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">name</span>   <span class="c1"># NB tags are lower-cased from the parser</span>
-    <span class="k">if</span> <span class="n">sf_lowername</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;save_&#39;</span><span class="p">):</span>
-      <span class="n">sf_lowername</span> <span class="o">=</span> <span class="n">sf_lowername</span><span class="p">[</span><span class="mi">5</span><span class="p">:]</span>
-    <span class="k">if</span> <span class="n">sf_lowername</span> <span class="o">!=</span> <span class="n">sf_framecode</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">raiseValidationError</span><span class="p">(</span><span class="s2">&quot;Saveframe.name </span><span class="si">%s</span><span class="s2"> does not match sf_framecode </span><span class="si">%s</span><span class="s2">&quot;</span>
-                       <span class="o">%</span> <span class="p">(</span><span class="n">sf_lowername</span><span class="p">,</span> <span class="n">sf_framecode</span><span class="p">))</span>
-
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileType</span> <span class="o">==</span> <span class="s1">&#39;nef&#39;</span><span class="p">:</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="n">sf_framecode</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">sf_category</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">raiseValidationError</span><span class="p">(</span><span class="s2">&quot;NEF file sf_framecode </span><span class="si">%s</span><span class="s2"> does not start with the sf_category </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
-                         <span class="p">(</span><span class="n">sf_framecode</span><span class="p">,</span> <span class="n">sf_category</span><span class="p">))</span>
-      <span class="k">if</span> <span class="n">prefix</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">sf_category</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">raiseValidationError</span><span class="p">(</span><span class="s2">&quot;NEF file sf_category </span><span class="si">%s</span><span class="s2"> does not match tag prefix </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
-                         <span class="p">(</span><span class="n">sf_category</span><span class="p">,</span> <span class="n">prefix</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="c1"># NBNB TBD We do not check or store the tag prefix</span>
-      <span class="k">pass</span>
-
-    <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
-      <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">Loop</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="n">value</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">preValidateLoop</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-      <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">raiseValidationError</span><span class="p">(</span><span class="s2">&quot;Saveframe contains item value of wrong type: </span><span class="si">%s</span><span class="s2">&quot;</span>
-                                  <span class="o">%</span> <span class="n">value</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-
-  <span class="k">def</span> <span class="nf">convertSaveFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">saveFrame</span><span class="p">):</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">saveFrame</span><span class="p">)</span>
-
-    <span class="c1">#Get common dot-separated prefix from non-loop items</span>
-    <span class="n">commonPrefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">commonprefix</span><span class="p">([</span><span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-                                         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">str</span><span class="p">)])</span>
-    <span class="n">tt</span> <span class="o">=</span> <span class="n">commonPrefix</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tt</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-      <span class="n">prefix</span> <span class="o">=</span> <span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">raiseValidationError</span><span class="p">(</span>
-        <span class="s2">&quot;Saveframe tags do not start with a common dot-separated prefix: </span><span class="si">%s</span><span class="s2">&quot;</span>
-        <span class="o">%</span> <span class="p">[</span><span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">str</span><span class="p">)]</span>
-      <span class="p">)</span>
-
-    <span class="c1"># get category and framecode</span>
-    <span class="c1"># The prevalidation has already established that there is exactly one tag for each</span>
-    <span class="n">tags</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">saveFrame</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.sf_framecode&#39;</span><span class="p">)]</span>
-    <span class="n">sf_framecode</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="p">[</span><span class="n">tags</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
-    <span class="n">tags</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">saveFrame</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.sf_category&#39;</span><span class="p">)]</span>
-    <span class="n">sf_category</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="p">[</span><span class="n">tags</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
-
-    <span class="n">newSaveFrame</span> <span class="o">=</span> <span class="n">NmrSaveFrame</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">sf_framecode</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">sf_category</span><span class="p">)</span>
-
-    <span class="n">lowerCaseCategory</span> <span class="o">=</span> <span class="n">newSaveFrame</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-
-      <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
-
-      <span class="c1">#</span>
-      <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">UnquotedValue</span><span class="p">):</span>
-          <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertValue</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">lowerCaseCategory</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="n">tag</span><span class="p">)</span>
-        <span class="n">objname</span> <span class="o">=</span> <span class="n">tag</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">):]</span>
-        <span class="n">newSaveFrame</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">objname</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-
-      <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">Loop</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="n">value</span><span class="o">.</span><span class="n">_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-          <span class="c1"># Only add loop on first appearance</span>
-          <span class="n">nmrLoop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertLoop</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-          <span class="n">newSaveFrame</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">nmrLoop</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">nmrLoop</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-    <span class="c1">#</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">newSaveFrame</span>
-
-  <span class="k">def</span> <span class="nf">preValidateLoop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loop</span><span class="p">):</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loop</span><span class="p">)</span>
-
-    <span class="n">columns</span> <span class="o">=</span> <span class="n">loop</span><span class="o">.</span><span class="n">_columns</span>
-    <span class="n">commonPrefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">commonprefix</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">commonPrefix</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">raiseValidationError</span><span class="p">(</span>
-        <span class="s2">&quot;Column names of </span><span class="si">%s</span><span class="s2"> do not start with a common dot-separated prefix: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">columns</span><span class="p">)</span>
-      <span class="p">)</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-
-  <span class="k">def</span> <span class="nf">convertLoop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loop</span><span class="p">):</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loop</span><span class="p">)</span>
-
-    <span class="n">oldColumns</span> <span class="o">=</span> <span class="n">loop</span><span class="o">.</span><span class="n">columns</span>
-    <span class="n">commonPrefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">commonprefix</span><span class="p">(</span><span class="n">oldColumns</span><span class="p">)</span>
-    <span class="n">tt</span> <span class="o">=</span> <span class="n">commonPrefix</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tt</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-      <span class="n">category</span> <span class="o">=</span> <span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-      <span class="n">lenPrefix</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">category</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
-      <span class="k">if</span> <span class="n">category</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;_&#39;</span><span class="p">:</span>
-        <span class="n">category</span> <span class="o">=</span> <span class="n">category</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">raiseValidationError</span><span class="p">(</span>
-        <span class="s2">&quot;Column names of </span><span class="si">%s</span><span class="s2"> do not start with a common dot-separated prefix: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">loop</span><span class="p">,</span>
-                                                                                    <span class="n">oldColumns</span><span class="p">)</span>
-      <span class="p">)</span>
-
-    <span class="n">columns</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="n">oldColumns</span><span class="p">:</span>
-      <span class="n">tag</span> <span class="o">=</span> <span class="n">ss</span><span class="p">[</span><span class="n">lenPrefix</span><span class="p">:]</span>
-
-      <span class="c1"># Check for valid field names</span>
-      <span class="k">if</span> <span class="n">tag</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">tag</span><span class="o">.</span><span class="n">isalpha</span><span class="p">():</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertColumnNames</span><span class="p">:</span>
-          <span class="n">tag</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">x</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">isalnum</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;_&#39;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">tag</span><span class="p">)</span>
-          <span class="k">while</span> <span class="n">tag</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">tag</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isalpha</span><span class="p">():</span>
-            <span class="n">tag</span> <span class="o">=</span> <span class="n">tag</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="c1"># Set option settings</span>
+        <span class="k">if</span> <span class="n">specification</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">specification</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="k">else</span><span class="p">:</span>
-          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid column name 1: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">ss</span><span class="p">)</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="n">tag</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid column name 2: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">ss</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;_StarDataConverter specification input not yet implemented&quot;</span><span class="p">)</span>
+        <span class="n">fileType</span> <span class="o">=</span> <span class="n">fileType</span> <span class="ow">and</span> <span class="n">fileType</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">fileType</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">validFileTypes</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">StarValidationError</span><span class="p">(</span><span class="s2">&quot;fileType </span><span class="si">%s</span><span class="s2"> must be one of </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fileType</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">validFileTypes</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileType</span> <span class="o">=</span> <span class="n">fileType</span>
 
-      <span class="k">if</span> <span class="n">keyword</span><span class="o">.</span><span class="n">iskeyword</span><span class="p">(</span><span class="n">tag</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;column name (as modified) clashes with Python keyword: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">ss</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">convertColumnNames</span> <span class="o">=</span> <span class="n">convertColumnNames</span>
 
-      <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataExtent</span> <span class="o">=</span> <span class="n">dataExtent</span>
 
-    <span class="n">newLoop</span> <span class="o">=</span> <span class="n">NmrLoop</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">columns</span><span class="p">)</span>
-    <span class="n">ff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertValue</span> <span class="c1">#convertValue(value, category=lowerCaseCategory, tag=tag)</span>
-    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">loop</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
-      <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">ff</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">columns</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">UnquotedValue</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span>
-                <span class="k">for</span> <span class="n">ii</span><span class="p">,</span><span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-               <span class="p">]</span>
-      <span class="n">newLoop</span><span class="o">.</span><span class="n">newRow</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+        <span class="c1"># Stack of objects parsed, to give context for error messages</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="c1">#</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">newLoop</span>
+    <span class="k">def</span> <span class="nf">preValidate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack</span> <span class="o">=</span> <span class="p">[]</span>
 
-  <span class="k">def</span> <span class="nf">convertValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Convert unquoted string value.&quot;&quot;&quot;</span>
-
-    <span class="c1"># assert isinstance(value, GenericStarParser.UnquotedValue)</span>
-
-    <span class="c1"># if self.specification:</span>
-    <span class="c1">#   # Add specification-dependent processing here</span>
-    <span class="c1">#   #</span>
-    <span class="c1">#   return value</span>
-
-    <span class="c1"># Convert special values</span>
-    <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="n">NULLSTRING</span> <span class="p">:</span>
-      <span class="c1"># null  value</span>
-      <span class="n">value</span> <span class="o">=</span> <span class="bp">None</span>
-    <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="n">TRUESTRING</span><span class="p">:</span>
-      <span class="c1"># Boolean True</span>
-      <span class="n">value</span> <span class="o">=</span> <span class="bp">True</span>
-    <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="n">FALSESTRING</span><span class="p">:</span>
-      <span class="c1"># Boolean False</span>
-      <span class="n">value</span> <span class="o">=</span> <span class="bp">False</span>
-    <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="n">UNKNOWNSTRING</span><span class="p">:</span>
-      <span class="n">value</span> <span class="o">=</span> <span class="bp">None</span>
-    <span class="k">elif</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;$&#39;</span><span class="p">:</span>
-      <span class="c1"># SaveFrame reference</span>
-      <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">tag</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">:]</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;_code&#39;</span><span class="p">,</span> <span class="s1">&#39;_name&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;_code_&#39;</span> <span class="ow">in</span> <span class="n">tag</span> <span class="ow">or</span> <span class="s1">&#39;_name_&#39;</span> <span class="ow">in</span> <span class="n">tag</span><span class="p">):</span>
-        <span class="c1"># HACK - tags ending in &#39;_code&#39; or &#39;_name&#39; are assumed to be string type</span>
-        <span class="c1"># This takes care of e.g. &#39;sequence_code&#39;</span>
-        <span class="c1"># that often might evaluate to a number otherwise</span>
         <span class="k">try</span><span class="p">:</span>
-          <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-          <span class="k">try</span><span class="p">:</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-          <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">dataBlock</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataExtent</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">preValidateDataBlock</span><span class="p">(</span><span class="n">dataBlock</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">StarValidationError</span><span class="p">:</span>
+            <span class="k">raise</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_errorMessage</span><span class="p">(</span><span class="s1">&#39;System error:&#39;</span><span class="p">))</span>
+            <span class="k">raise</span>
+
+    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">nmrDataExtent</span> <span class="o">=</span> <span class="n">NmrDataExtent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataExtent</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">dataBlock</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataExtent</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">newDataBlock</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertDataBlock</span><span class="p">(</span><span class="n">dataBlock</span><span class="p">)</span>
+                <span class="n">nmrDataExtent</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">newDataBlock</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">newDataBlock</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">StarValidationError</span><span class="p">:</span>
+            <span class="k">raise</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_errorMessage</span><span class="p">(</span><span class="s1">&#39;System error:&#39;</span><span class="p">))</span>
+            <span class="k">raise</span>
+        <span class="c1">#</span>
+        <span class="k">return</span> <span class="n">nmrDataExtent</span>
+
+    <span class="k">def</span> <span class="nf">preValidateDataBlock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataBlock</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dataBlock</span><span class="p">)</span>
+
+        <span class="n">name</span> <span class="o">=</span> <span class="n">dataBlock</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="s1">&#39;global_&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;data_&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">raiseValidationError</span><span class="p">(</span><span class="s2">&quot;DataBlock name  must be &#39;global_&#39; or start with &#39;data_&#39;&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">saveFrame</span> <span class="ow">in</span> <span class="n">dataBlock</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">saveFrame</span><span class="p">,</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">SaveFrame</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">preValidateSaveFrame</span><span class="p">(</span><span class="n">saveFrame</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">raiseValidationError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> file DataBlock contains non-saveframe element </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2">&quot;</span>
+                                          <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileType</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">saveFrame</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">convertDataBlock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataBlock</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dataBlock</span><span class="p">)</span>
+
+        <span class="c1"># get NmrDataBlock name</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">dataBlock</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;data_&#39;</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">5</span><span class="p">:]</span> <span class="ow">or</span> <span class="s1">&#39;__MissingDataBlockName&#39;</span>
+        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;global_&#39;</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;global&#39;</span>
+
+        <span class="c1"># Make NmrDataBlock and connect it</span>
+        <span class="n">nmrDataBlock</span> <span class="o">=</span> <span class="n">NmrDataBlock</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">saveFrame</span> <span class="ow">in</span> <span class="n">dataBlock</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">nmrSaveFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertSaveFrame</span><span class="p">(</span><span class="n">saveFrame</span><span class="p">)</span>
+            <span class="n">nmrDataBlock</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">nmrSaveFrame</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">nmrSaveFrame</span><span class="p">)</span>
+        <span class="c1">#</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">nmrDataBlock</span>
+
+    <span class="k">def</span> <span class="nf">preValidateSaveFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">saveFrame</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">saveFrame</span><span class="p">)</span>
+        <span class="n">commonPrefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">commonprefix</span><span class="p">([</span><span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                                             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">str</span><span class="p">)])</span>
+        <span class="n">tt</span> <span class="o">=</span> <span class="n">commonPrefix</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tt</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">raiseValidationError</span><span class="p">(</span>
+                    <span class="s2">&quot;Saveframe tags do not start with a common dot-separated prefix: </span><span class="si">%s</span><span class="s2">&quot;</span>
+                    <span class="o">%</span> <span class="p">[</span><span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">str</span><span class="p">)]</span>
+                    <span class="p">)</span>
+
+        <span class="n">sf_category</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="s1">&#39;sf_category&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sf_category</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">raiseValidationError</span><span class="p">(</span><span class="s2">&quot;SaveFrame lacks .sf_category item&quot;</span><span class="p">)</span>
+        <span class="n">sf_framecode</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="s1">&#39;sf_framecode&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sf_framecode</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">raiseValidationError</span><span class="p">(</span><span class="s2">&quot;SaveFrame lacks .sf_framecode item&quot;</span><span class="p">)</span>
+
+        <span class="n">sf_lowername</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">name</span>  <span class="c1"># NB tags are lower-cased from the parser</span>
+        <span class="k">if</span> <span class="n">sf_lowername</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;save_&#39;</span><span class="p">):</span>
+            <span class="n">sf_lowername</span> <span class="o">=</span> <span class="n">sf_lowername</span><span class="p">[</span><span class="mi">5</span><span class="p">:]</span>
+        <span class="k">if</span> <span class="n">sf_lowername</span> <span class="o">!=</span> <span class="n">sf_framecode</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">raiseValidationError</span><span class="p">(</span><span class="s2">&quot;Saveframe.name </span><span class="si">%s</span><span class="s2"> does not match sf_framecode </span><span class="si">%s</span><span class="s2">&quot;</span>
+                                      <span class="o">%</span> <span class="p">(</span><span class="n">sf_lowername</span><span class="p">,</span> <span class="n">sf_framecode</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileType</span> <span class="o">==</span> <span class="s1">&#39;nef&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">sf_framecode</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">sf_category</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">raiseValidationError</span><span class="p">(</span><span class="s2">&quot;NEF file sf_framecode </span><span class="si">%s</span><span class="s2"> does not start with the sf_category </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
+                                          <span class="p">(</span><span class="n">sf_framecode</span><span class="p">,</span> <span class="n">sf_category</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">prefix</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">sf_category</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">raiseValidationError</span><span class="p">(</span><span class="s2">&quot;NEF file sf_category </span><span class="si">%s</span><span class="s2"> does not match tag prefix </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
+                                          <span class="p">(</span><span class="n">sf_category</span><span class="p">,</span> <span class="n">prefix</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># NBNB TBD We do not check or store the tag prefix</span>
             <span class="k">pass</span>
-    <span class="c1">#</span>
-    <span class="k">return</span> <span class="n">value</span>
 
-  <span class="k">def</span> <span class="nf">_errorMessage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Make standard error message&quot;&quot;&quot;</span>
-    <span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;Error in context: </span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span>
-    <span class="n">ll</span> <span class="o">=</span> <span class="p">[(</span><span class="n">x</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">template</span> <span class="o">%</span> <span class="p">(</span><span class="n">ll</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">Loop</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="n">value</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">preValidateLoop</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">raiseValidationError</span><span class="p">(</span><span class="s2">&quot;Saveframe contains item value of wrong type: </span><span class="si">%s</span><span class="s2">&quot;</span>
+                                          <span class="o">%</span> <span class="n">value</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
 
-  <span class="k">def</span> <span class="nf">raiseValidationError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
-    <span class="k">raise</span> <span class="n">StarValidationError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_errorMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">convertSaveFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">saveFrame</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">saveFrame</span><span class="p">)</span>
+
+        <span class="c1">#Get common dot-separated prefix from non-loop items</span>
+        <span class="n">commonPrefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">commonprefix</span><span class="p">([</span><span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                                             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">str</span><span class="p">)])</span>
+        <span class="n">tt</span> <span class="o">=</span> <span class="n">commonPrefix</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tt</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">raiseValidationError</span><span class="p">(</span>
+                    <span class="s2">&quot;Saveframe tags do not start with a common dot-separated prefix: </span><span class="si">%s</span><span class="s2">&quot;</span>
+                    <span class="o">%</span> <span class="p">[</span><span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">str</span><span class="p">)]</span>
+                    <span class="p">)</span>
+
+        <span class="c1"># get category and framecode</span>
+        <span class="c1"># The prevalidation has already established that there is exactly one tag for each</span>
+        <span class="n">tags</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">saveFrame</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.sf_framecode&#39;</span><span class="p">)]</span>
+        <span class="n">sf_framecode</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="p">[</span><span class="n">tags</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="n">tags</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">saveFrame</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.sf_category&#39;</span><span class="p">)]</span>
+        <span class="n">sf_category</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="p">[</span><span class="n">tags</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+
+        <span class="n">newSaveFrame</span> <span class="o">=</span> <span class="n">NmrSaveFrame</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">sf_framecode</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">sf_category</span><span class="p">)</span>
+
+        <span class="n">lowerCaseCategory</span> <span class="o">=</span> <span class="n">newSaveFrame</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+
+            <span class="c1">#</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">UnquotedValue</span><span class="p">):</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertValue</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">lowerCaseCategory</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="n">tag</span><span class="p">)</span>
+                <span class="n">objname</span> <span class="o">=</span> <span class="n">tag</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">):]</span>
+                <span class="n">newSaveFrame</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">objname</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">Loop</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="n">value</span><span class="o">.</span><span class="n">_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="c1"># Only add loop on first appearance</span>
+                    <span class="n">nmrLoop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertLoop</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                    <span class="n">newSaveFrame</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">nmrLoop</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">nmrLoop</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="c1">#</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">newSaveFrame</span>
+
+    <span class="k">def</span> <span class="nf">preValidateLoop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loop</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loop</span><span class="p">)</span>
+
+        <span class="n">columns</span> <span class="o">=</span> <span class="n">loop</span><span class="o">.</span><span class="n">_columns</span>
+        <span class="n">commonPrefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">commonprefix</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">commonPrefix</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">raiseValidationError</span><span class="p">(</span>
+                    <span class="s2">&quot;Column names of </span><span class="si">%s</span><span class="s2"> do not start with a common dot-separated prefix: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">columns</span><span class="p">)</span>
+                    <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">convertLoop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loop</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loop</span><span class="p">)</span>
+
+        <span class="n">oldColumns</span> <span class="o">=</span> <span class="n">loop</span><span class="o">.</span><span class="n">columns</span>
+        <span class="n">commonPrefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">commonprefix</span><span class="p">(</span><span class="n">oldColumns</span><span class="p">)</span>
+        <span class="n">tt</span> <span class="o">=</span> <span class="n">commonPrefix</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tt</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">category</span> <span class="o">=</span> <span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">lenPrefix</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">category</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">category</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;_&#39;</span><span class="p">:</span>
+                <span class="n">category</span> <span class="o">=</span> <span class="n">category</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">raiseValidationError</span><span class="p">(</span>
+                    <span class="s2">&quot;Column names of </span><span class="si">%s</span><span class="s2"> do not start with a common dot-separated prefix: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">loop</span><span class="p">,</span>
+                                                                                                <span class="n">oldColumns</span><span class="p">)</span>
+                    <span class="p">)</span>
+
+        <span class="n">columns</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="n">oldColumns</span><span class="p">:</span>
+            <span class="n">tag</span> <span class="o">=</span> <span class="n">ss</span><span class="p">[</span><span class="n">lenPrefix</span><span class="p">:]</span>
+
+            <span class="c1"># Check for valid field names</span>
+            <span class="k">if</span> <span class="n">tag</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">tag</span><span class="o">.</span><span class="n">isalpha</span><span class="p">():</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertColumnNames</span><span class="p">:</span>
+                    <span class="n">tag</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">x</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">isalnum</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;_&#39;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">tag</span><span class="p">)</span>
+                    <span class="k">while</span> <span class="n">tag</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">tag</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isalpha</span><span class="p">():</span>
+                        <span class="n">tag</span> <span class="o">=</span> <span class="n">tag</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid column name 1: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">ss</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">tag</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid column name 2: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">ss</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">keyword</span><span class="o">.</span><span class="n">iskeyword</span><span class="p">(</span><span class="n">tag</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;column name (as modified) clashes with Python keyword: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">ss</span><span class="p">)</span>
+
+            <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+
+        <span class="n">newLoop</span> <span class="o">=</span> <span class="n">NmrLoop</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">columns</span><span class="p">)</span>
+        <span class="n">ff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertValue</span>  <span class="c1">#convertValue(value, category=lowerCaseCategory, tag=tag)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">loop</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">ff</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">columns</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">UnquotedValue</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span>
+                      <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+                      <span class="p">]</span>
+            <span class="n">newLoop</span><span class="o">.</span><span class="n">newRow</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+
+        <span class="c1">#</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">newLoop</span>
+
+    <span class="k">def</span> <span class="nf">convertValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Convert unquoted string value.&quot;&quot;&quot;</span>
+
+        <span class="c1"># assert isinstance(value, GenericStarParser.UnquotedValue)</span>
+
+        <span class="c1"># if self.specification:</span>
+        <span class="c1">#   # Add specification-dependent processing here</span>
+        <span class="c1">#   #</span>
+        <span class="c1">#   return value</span>
+
+        <span class="c1"># Convert special values</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="n">NULLSTRING</span><span class="p">:</span>
+            <span class="c1"># null  value</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="n">TRUESTRING</span><span class="p">:</span>
+            <span class="c1"># Boolean True</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="n">FALSESTRING</span><span class="p">:</span>
+            <span class="c1"># Boolean False</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="n">UNKNOWNSTRING</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">elif</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;$&#39;</span><span class="p">:</span>
+            <span class="c1"># SaveFrame reference</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">tag</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">:]</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;_code&#39;</span><span class="p">,</span> <span class="s1">&#39;_name&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;_code_&#39;</span> <span class="ow">in</span> <span class="n">tag</span> <span class="ow">or</span> <span class="s1">&#39;_name_&#39;</span> <span class="ow">in</span> <span class="n">tag</span><span class="p">):</span>
+                <span class="c1"># HACK - tags ending in &#39;_code&#39; or &#39;_name&#39; are assumed to be string type</span>
+                <span class="c1"># This takes care of e.g. &#39;sequence_code&#39;</span>
+                <span class="c1"># that often might evaluate to a number otherwise</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="k">pass</span>
+        <span class="c1">#</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">_errorMessage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Make standard error message&quot;&quot;&quot;</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;Error in context: </span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span>
+        <span class="n">ll</span> <span class="o">=</span> <span class="p">[(</span><span class="n">x</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">template</span> <span class="o">%</span> <span class="p">(</span><span class="n">ll</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">raiseValidationError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">StarValidationError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_errorMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">))</span>
 
 
 <div class="viewcode-block" id="splitNefSequence"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.splitNefSequence">[docs]</a><span class="k">def</span> <span class="nf">splitNefSequence</span><span class="p">(</span><span class="n">rows</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Split a sequence of nef_sequence dicts assumed to belong to the same chain</span>
-<span class="sd">  into a list of lists of sequentially linked stretches following the NEF rules</span>
+    <span class="sd">&quot;&quot;&quot;Split a sequence of nef_sequence dicts assumed to belong to the same chain</span>
+<span class="sd">    into a list of lists of sequentially linked stretches following the NEF rules</span>
 
-<span class="sd">  Note that missing linkings are treated as &#39;middle&#39; and missing start/end tags</span>
-<span class="sd">  are ignored, with the first/last residue treated, effectively, as linking &#39;break&#39;</span>
+<span class="sd">    Note that missing linkings are treated as &#39;middle&#39; and missing start/end tags</span>
+<span class="sd">    are ignored, with the first/last residue treated, effectively, as linking &#39;break&#39;</span>
 
-<span class="sd">  Only unknown linking values and incorrect pairs of &#39;cyclic&#39; tags raise an error&quot;&quot;&quot;</span>
+<span class="sd">    Only unknown linking values and incorrect pairs of &#39;cyclic&#39; tags raise an error&quot;&quot;&quot;</span>
 
-  <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">stretch</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">inCyclic</span> <span class="o">=</span> <span class="bp">False</span>
-  <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
-    <span class="n">linking</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;linking&#39;</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">stretch</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">inCyclic</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+        <span class="n">linking</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;linking&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">inCyclic</span> <span class="ow">and</span> <span class="n">linking</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;middle&#39;</span><span class="p">,</span> <span class="s1">&#39;cyclic&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">):</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-          <span class="s2">&quot;Sequence contains &#39;cyclic&#39; residue(s) that do not form a closed, cyclic molecule&quot;</span>
-        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">inCyclic</span> <span class="ow">and</span> <span class="n">linking</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;middle&#39;</span><span class="p">,</span> <span class="s1">&#39;cyclic&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Sequence contains &#39;cyclic&#39; residue(s) that do not form a closed, cyclic molecule&quot;</span>
+                    <span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">linking</span> <span class="o">==</span> <span class="s1">&#39;cyclic&#39;</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">inCyclic</span><span class="p">:</span>
-        <span class="c1"># End of cycle</span>
-        <span class="n">inCyclic</span> <span class="o">=</span> <span class="bp">False</span>
-        <span class="n">stretch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">linking</span> <span class="o">==</span> <span class="s1">&#39;cyclic&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">inCyclic</span><span class="p">:</span>
+                <span class="c1"># End of cycle</span>
+                <span class="n">inCyclic</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="n">stretch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stretch</span><span class="p">)</span>
+                <span class="n">stretch</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1">#start of cycle</span>
+                <span class="n">inCyclic</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">if</span> <span class="n">stretch</span><span class="p">:</span>
+                    <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stretch</span><span class="p">)</span>
+                <span class="n">stretch</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="n">linking</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;single&#39;</span><span class="p">,</span> <span class="s1">&#39;nonlinear&#39;</span><span class="p">,</span> <span class="s1">&#39;dummy&#39;</span><span class="p">):</span>
+            <span class="c1"># Always isolated. And last stretch, add new one, and prepare for the next one</span>
+            <span class="k">if</span> <span class="n">stretch</span><span class="p">:</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stretch</span><span class="p">)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">row</span><span class="p">])</span>
+            <span class="n">stretch</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">elif</span> <span class="n">linking</span> <span class="o">==</span> <span class="s1">&#39;start&#39;</span><span class="p">:</span>
+            <span class="c1"># Start new stretch</span>
+            <span class="k">if</span> <span class="n">stretch</span><span class="p">:</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stretch</span><span class="p">)</span>
+            <span class="n">stretch</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="n">linking</span> <span class="o">==</span> <span class="s1">&#39;end&#39;</span><span class="p">:</span>
+            <span class="c1"># End stretch</span>
+            <span class="n">stretch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stretch</span><span class="p">)</span>
+            <span class="n">stretch</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">elif</span> <span class="n">linking</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;middle&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="c1"># Continuation (we treat None as &#39;middle&#39; as the most pragmatic approach</span>
+            <span class="c1"># Validation of the NEF standard must be done elsewhere</span>
+            <span class="n">stretch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">linking</span> <span class="o">==</span> <span class="s1">&#39;break&#39;</span><span class="p">:</span>
+
+            <span class="c1"># TODO NBNB This follows NEF spec as of July 2016 - which is rather confused</span>
+            <span class="c1"># Propose change so that &#39;break&#39; signals a chain break AFTER that residue,</span>
+            <span class="c1"># and is ONLY used if there is a break between two &#39;middle&#39; residues.</span>
+
+            <span class="k">if</span> <span class="n">stretch</span><span class="p">:</span>
+                <span class="c1"># inside stretch - end it</span>
+                <span class="n">stretch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stretch</span><span class="p">)</span>
+                <span class="n">stretch</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Start of stretch - put row on</span>
+                <span class="n">stretch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Illegal value of nef_sequence.linking: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">linking</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">stretch</span><span class="p">:</span>
+        <span class="c1"># Add final stretch if still open</span>
         <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stretch</span><span class="p">)</span>
-        <span class="n">stretch</span> <span class="o">=</span> <span class="p">[]</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="c1">#start of cycle</span>
-        <span class="n">inCyclic</span> <span class="o">=</span> <span class="bp">True</span>
-        <span class="k">if</span> <span class="n">stretch</span><span class="p">:</span>
-          <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stretch</span><span class="p">)</span>
-        <span class="n">stretch</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span><span class="p">]</span>
 
-    <span class="k">elif</span> <span class="n">linking</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;single&#39;</span><span class="p">,</span> <span class="s1">&#39;nonlinear&#39;</span><span class="p">,</span> <span class="s1">&#39;dummy&#39;</span><span class="p">):</span>
-      <span class="c1"># Always isolated. And last stretch, add new one, and prepare for the next one</span>
-      <span class="k">if</span> <span class="n">stretch</span><span class="p">:</span>
-        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stretch</span><span class="p">)</span>
-      <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">row</span><span class="p">])</span>
-      <span class="n">stretch</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">elif</span> <span class="n">linking</span> <span class="o">==</span> <span class="s1">&#39;start&#39;</span><span class="p">:</span>
-      <span class="c1"># Start new stretch</span>
-      <span class="k">if</span> <span class="n">stretch</span><span class="p">:</span>
-        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stretch</span><span class="p">)</span>
-      <span class="n">stretch</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span><span class="p">]</span>
-
-    <span class="k">elif</span> <span class="n">linking</span> <span class="o">==</span> <span class="s1">&#39;end&#39;</span><span class="p">:</span>
-      <span class="c1"># End stretch</span>
-      <span class="n">stretch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
-      <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stretch</span><span class="p">)</span>
-      <span class="n">stretch</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">elif</span> <span class="n">linking</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;middle&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">):</span>
-      <span class="c1"># Continuation (we treat None as &#39;middle&#39; as the most pragmatic approach</span>
-      <span class="c1"># Validation of the NEF standard must be done elsewhere</span>
-      <span class="n">stretch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
-
-    <span class="k">elif</span> <span class="n">linking</span> <span class="o">==</span> <span class="s1">&#39;break&#39;</span><span class="p">:</span>
-
-      <span class="c1"># TODO NBNB This follows NEF spec as of July 2016 - which is rather confused</span>
-      <span class="c1"># Propose change so that &#39;break&#39; signals a chain break AFTER that residue,</span>
-      <span class="c1"># and is ONLY used if there is a break between two &#39;middle&#39; residues.</span>
-
-      <span class="k">if</span> <span class="n">stretch</span><span class="p">:</span>
-        <span class="c1"># inside stretch - end it</span>
-        <span class="n">stretch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
-        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stretch</span><span class="p">)</span>
-        <span class="n">stretch</span> <span class="o">=</span> <span class="p">[]</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># Start of stretch - put row on</span>
-        <span class="n">stretch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
-
-
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Illegal value of nef_sequence.linking: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">linking</span><span class="p">)</span>
-
-  <span class="k">if</span> <span class="n">stretch</span><span class="p">:</span>
-    <span class="c1"># Add final stretch if still open</span>
-    <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stretch</span><span class="p">)</span>
-
-  <span class="k">if</span> <span class="n">inCyclic</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-          <span class="s2">&quot;Sequence contains &#39;cyclic&#39; residue that is not terminated by matching &#39;cyclic residue&quot;</span>
-        <span class="p">)</span>
-  <span class="c1">#</span>
-  <span class="k">return</span> <span class="n">result</span></div>
+    <span class="k">if</span> <span class="n">inCyclic</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Sequence contains &#39;cyclic&#39; residue that is not terminated by matching &#39;cyclic residue&quot;</span>
+                <span class="p">)</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">result</span></div>
 </pre></div>
 
           </div>

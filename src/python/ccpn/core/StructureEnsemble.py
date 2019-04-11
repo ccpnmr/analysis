@@ -29,12 +29,10 @@ from functools import partial
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
-from ccpn.core.lib import Undo
 from ccpn.util.StructureData import EnsembleData
 from ccpnmodel.ccpncore.api.ccp.molecule.MolStructure import StructureEnsemble as ApiStructureEnsemble
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
-    logCommandBlock, renameObject
+from ccpn.core.lib.ContextManagers import newObject, renameObject
 from ccpn.util.Logging import getLogger
 from ccpn.util import Common as commonUtil
 

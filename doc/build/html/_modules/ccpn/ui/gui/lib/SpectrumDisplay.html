@@ -55,89 +55,128 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.GuiSpectrumDisplay</span> <span class="kn">import</span> <span class="n">GuiSpectrumDisplay</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.Strip</span> <span class="kn">import</span> <span class="n">navigateToPositionInStrip</span><span class="p">,</span> <span class="n">navigateToNmrAtomsInStrip</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">undoBlock</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
 
 <div class="viewcode-block" id="navigateToCurrentPeakPosition"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.SpectrumDisplay.navigateToCurrentPeakPosition">[docs]</a><span class="k">def</span> <span class="nf">navigateToCurrentPeakPosition</span><span class="p">(</span><span class="n">application</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="sd">  Takes the current peak position and navigates (centres) to that position all strips and spectrum displays of the project.</span>
-<span class="sd">  Called by shortcut. For a more generic usage refer to:  &quot;navigateToPositionInStrip&quot;</span>
-<span class="sd">  instead</span>
-<span class="sd">  &quot;&quot;&quot;</span>
+<span class="sd">    Takes the current peak position and navigates (centres) to that position all strips and spectrum displays of the project.</span>
+<span class="sd">    Called by shortcut. For a more generic usage refer to:  &quot;navigateToPositionInStrip&quot;</span>
+<span class="sd">    instead</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-  <span class="n">project</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">project</span>
-  <span class="n">displays</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">spectrumDisplays</span>
-  <span class="n">peak</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peak</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">project</span>
+    <span class="n">displays</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">spectrumDisplays</span>
+    <span class="n">peak</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peak</span>
 
-  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peaks</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
-    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;More than one peak selected. Select only one for the &quot;navigateToCurrentPeakPosition&quot; command.&#39;</span><span class="p">)</span>
-    <span class="k">return</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peaks</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;More than one peak selected. Select only one for the &quot;navigateToCurrentPeakPosition&quot; command.&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
 
-  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">displays</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;No Displays where to navigate.&#39;</span><span class="p">)</span>
-    <span class="k">return</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">displays</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;No Displays where to navigate.&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
 
-  <span class="k">if</span> <span class="n">peak</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;No peak selected.&#39;</span><span class="p">)</span>
-    <span class="k">return</span>
+    <span class="k">if</span> <span class="n">peak</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;No peak selected.&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
 
-  <span class="k">for</span> <span class="n">display</span> <span class="ow">in</span> <span class="n">displays</span><span class="p">:</span>
-    <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">strip</span><span class="p">:</span>
-        <span class="n">navigateToPositionInStrip</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">,</span> <span class="n">peak</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">)</span></div>
+    <span class="k">for</span> <span class="n">display</span> <span class="ow">in</span> <span class="n">displays</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">strip</span><span class="p">:</span>
+                <span class="n">navigateToPositionInStrip</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">,</span> <span class="n">peak</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="makeStripPlot"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.SpectrumDisplay.makeStripPlot">[docs]</a><span class="k">def</span> <span class="nf">makeStripPlot</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="p">:</span> <span class="n">GuiSpectrumDisplay</span><span class="p">,</span> <span class="n">nmrAtomPairs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">NmrAtom</span><span class="p">]],</span> <span class="n">autoWidth</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">widths</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">nmrAtomPairs</span><span class="p">:</span>
+        <span class="k">return</span>
 
-<div class="viewcode-block" id="makeStripPlot"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.SpectrumDisplay.makeStripPlot">[docs]</a><span class="k">def</span> <span class="nf">makeStripPlot</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="p">:</span><span class="n">GuiSpectrumDisplay</span><span class="p">,</span> <span class="n">nmrAtomPairs</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">NmrAtom</span><span class="p">]],</span> <span class="n">autoWidth</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">widths</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
+        <span class="n">numberOfStrips</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">)</span>
 
-  <span class="k">if</span> <span class="ow">not</span> <span class="n">nmrAtomPairs</span><span class="p">:</span>
-    <span class="k">return</span>
+        <span class="c1"># Make sure there are enough strips to display nmrAtomPairs</span>
+        <span class="k">if</span> <span class="n">numberOfStrips</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">nmrAtomPairs</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numberOfStrips</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">nmrAtomPairs</span><span class="p">)):</span>
+                <span class="c1"># spectrumDisplay.strips[-1].clone()</span>
+                <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">addStrip</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># numberOfStrips &gt;= len(nmrAtomPairs):  # too many strips if &gt;</span>
+            <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nmrAtomPairs</span><span class="p">),</span> <span class="n">numberOfStrips</span><span class="p">):</span>
+                <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">deleteStrip</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="c1"># spectrumDisplay.removeLastStrip()</span>
 
-  <span class="n">project</span> <span class="o">=</span> <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">project</span>
-  <span class="n">project</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;makeStripPlot&#39;</span><span class="p">,</span> <span class="n">spectrumDisplay</span><span class="p">,</span> <span class="n">nmrAtomPairs</span><span class="p">,</span> <span class="n">autoWidth</span><span class="p">,</span> <span class="n">widths</span><span class="p">)</span>
-  <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># loop through strips and navigate to appropriate position in strip</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">strip</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">autoWidth</span><span class="p">:</span>
+                <span class="n">widths</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;default&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="n">widths</span><span class="p">:</span>
+                <span class="n">widths</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">navigateToNmrAtomsInStrip</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">nmrAtomPairs</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">widths</span><span class="o">=</span><span class="n">widths</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="makeStripPlotFromSingles"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.SpectrumDisplay.makeStripPlotFromSingles">[docs]</a><span class="k">def</span> <span class="nf">makeStripPlotFromSingles</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="p">:</span> <span class="n">GuiSpectrumDisplay</span><span class="p">,</span> <span class="n">nmrAtoms</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">NmrAtom</span><span class="p">],</span> <span class="n">autoWidth</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
     <span class="n">numberOfStrips</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">)</span>
 
     <span class="c1"># Make sure there are enough strips to display nmrAtomPairs</span>
-    <span class="k">if</span> <span class="n">numberOfStrips</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">nmrAtomPairs</span><span class="p">):</span>
-      <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numberOfStrips</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">nmrAtomPairs</span><span class="p">)):</span>
-        <span class="c1"># spectrumDisplay.strips[-1].clone()</span>
-        <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">addStrip</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>  <span class="c1"># numberOfStrips &gt;= len(nmrAtomPairs):  # too many strips if &gt;</span>
-      <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nmrAtomPairs</span><span class="p">),</span> <span class="n">numberOfStrips</span><span class="p">):</span>
-        <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">removeStrip</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-        <span class="c1"># spectrumDisplay.removeLastStrip()</span>
+    <span class="k">if</span> <span class="n">numberOfStrips</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">nmrAtoms</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numberOfStrips</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">nmrAtoms</span><span class="p">)):</span>
+            <span class="c1"># spectrumDisplay.strips[-1].clone()</span>
+            <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">addStrip</span><span class="p">()</span>
 
+    <span class="c1"># print(spectrumDisplay, nmrAtomPairs, len(nmrAtomPairs), len(spectrumDisplay.strips))</span>
     <span class="c1"># loop through strips and navigate to appropriate position in strip</span>
     <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">strip</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">):</span>
-      <span class="k">if</span> <span class="n">autoWidth</span><span class="p">:</span>
-        <span class="n">widths</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;default&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">)</span>
-      <span class="k">elif</span> <span class="ow">not</span> <span class="n">widths</span><span class="p">:</span>
-        <span class="n">widths</span> <span class="o">=</span> <span class="bp">None</span>
-      <span class="n">navigateToNmrAtomsInStrip</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">nmrAtomPairs</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">widths</span><span class="o">=</span><span class="n">widths</span><span class="p">)</span>
-  <span class="k">finally</span><span class="p">:</span>
-    <span class="n">project</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span></div>
+        <span class="k">if</span> <span class="n">autoWidth</span><span class="p">:</span>
+            <span class="n">widths</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;default&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">widths</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">navigateToNmrAtomsInStrip</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="p">[</span><span class="n">nmrAtoms</span><span class="p">[</span><span class="n">ii</span><span class="p">]],</span> <span class="n">widths</span><span class="o">=</span><span class="n">widths</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="makeStripPlotFromSingles"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.SpectrumDisplay.makeStripPlotFromSingles">[docs]</a><span class="k">def</span> <span class="nf">makeStripPlotFromSingles</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="p">:</span><span class="n">GuiSpectrumDisplay</span><span class="p">,</span> <span class="n">nmrAtoms</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="n">NmrAtom</span><span class="p">],</span> <span class="n">autoWidth</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="navigateToPeakInStrip"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.SpectrumDisplay.navigateToPeakInStrip">[docs]</a><span class="k">def</span> <span class="nf">navigateToPeakInStrip</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="p">:</span> <span class="n">GuiSpectrumDisplay</span><span class="p">,</span> <span class="n">strip</span><span class="p">,</span> <span class="n">peak</span><span class="p">,</span> <span class="n">widths</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
 
-  <span class="n">numberOfStrips</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">)</span>
+    <span class="n">newWidths</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.2</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">)</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">)</span>
+    <span class="n">mappedNewWidths</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;full&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">)</span>
+    <span class="n">newWidths</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;full&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">)</span>
 
-  <span class="c1"># Make sure there are enough strips to display nmrAtomPairs</span>
-  <span class="k">if</span> <span class="n">numberOfStrips</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">nmrAtoms</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numberOfStrips</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">nmrAtoms</span><span class="p">)):</span>
-      <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">widths</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="c1"># set the width in case of nD (n&gt;2)</span>
+        <span class="n">_widths</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;H&#39;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+        <span class="n">_ac</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">_w</span> <span class="o">=</span> <span class="n">_widths</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">_ac</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">newWidths</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">_w</span>
 
-  <span class="c1"># print(spectrumDisplay, nmrAtomPairs, len(nmrAtomPairs), len(spectrumDisplay.strips))</span>
-  <span class="c1"># loop through strips and navigate to appropriate position in strip</span>
-  <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">strip</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">autoWidth</span><span class="p">:</span>
-      <span class="n">widths</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;default&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">widths</span> <span class="o">=</span> <span class="bp">None</span>
-    <span class="n">navigateToNmrAtomsInStrip</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="p">[</span><span class="n">nmrAtoms</span><span class="p">[</span><span class="n">ii</span><span class="p">]],</span> <span class="n">widths</span><span class="o">=</span><span class="n">widths</span><span class="p">)</span></div>
+    <span class="n">indices</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">_getAxisCodeIndices</span><span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">indices</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ii</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">pos</span><span class="p">):</span>
+            <span class="n">pos</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+            <span class="n">mappedNewWidths</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">newWidths</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+
+    <span class="n">navigateToPositionInStrip</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">widths</span><span class="o">=</span><span class="n">mappedNewWidths</span><span class="p">)</span>
+    <span class="n">strip</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+    <span class="n">strip</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">setLabelText</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">peak</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+    <span class="n">strip</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">headerVisible</span> <span class="o">=</span> <span class="bp">True</span></div>
+
+
+<div class="viewcode-block" id="navigateToNmrResidueInStrip"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.SpectrumDisplay.navigateToNmrResidueInStrip">[docs]</a><span class="k">def</span> <span class="nf">navigateToNmrResidueInStrip</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="p">:</span> <span class="n">GuiSpectrumDisplay</span><span class="p">,</span> <span class="n">strip</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="p">,</span> <span class="n">widths</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">markPositions</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+    <span class="n">newWidths</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;default&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">widths</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="c1"># set the width in case of nD (n&gt;2)</span>
+        <span class="n">_widths</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;H&#39;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+        <span class="n">_ac</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">_w</span> <span class="o">=</span> <span class="n">_widths</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">_ac</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">newWidths</span> <span class="o">=</span> <span class="p">[</span><span class="n">_w</span><span class="p">,</span> <span class="s1">&#39;full&#39;</span><span class="p">]</span>
+
+    <span class="n">navigateToNmrAtomsInStrip</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">,</span>
+                              <span class="n">widths</span><span class="o">=</span><span class="n">newWidths</span><span class="p">,</span> <span class="n">markPositions</span><span class="o">=</span><span class="n">markPositions</span><span class="p">,</span> <span class="n">setNmrResidueLabel</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="n">strip</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+    <span class="n">strip</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">setLabelText</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+    <span class="n">strip</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">headerVisible</span> <span class="o">=</span> <span class="bp">True</span></div>
+
 </pre></div>
 
           </div>

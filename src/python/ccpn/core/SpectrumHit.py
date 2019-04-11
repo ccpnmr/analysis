@@ -25,15 +25,13 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import typing
-import collections
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.PseudoDimension import PseudoDimension
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import SpectrumHit as ApiSpectrumHit
 from ccpn.core.lib import Pid
 from ccpn.util import Constants
-from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
+from ccpn.core.lib.ContextManagers import newObject
 from ccpn.util.Logging import getLogger
 import numpy as np
 from ccpn.util.Common import makeIterableList

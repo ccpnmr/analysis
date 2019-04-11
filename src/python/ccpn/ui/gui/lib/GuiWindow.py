@@ -25,8 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-
+from PyQt5 import QtCore
 from ccpn.core.lib import AssignmentLib
 from ccpn.core.IntegralList import IntegralList
 from ccpn.ui.gui.widgets import MessageDialog
@@ -39,7 +38,7 @@ from ccpn.ui.gui.popups.ShortcutsPopup import UserShortcuts
 from ccpn.ui.gui.widgets.MessageDialog import progressManager
 from ccpn.ui.gui.lib.mouseEvents import MouseModes, setCurrentMouseMode, getCurrentMouseMode
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import logCommandBlock, undoBlock
+from ccpn.core.lib.ContextManagers import undoBlock
 
 
 #TODO:WAYNE: incorporate most functionality in GuiMainWindow. See also MainMenu

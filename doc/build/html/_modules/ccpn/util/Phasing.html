@@ -53,93 +53,93 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:59 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">signal</span>
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span>
 
-<div class="viewcode-block" id="phaseRealData"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Phasing.phaseRealData">[docs]</a><span class="k">def</span> <span class="nf">phaseRealData</span><span class="p">(</span><span class="n">data</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">ph0</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">ph1</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-                  <span class="n">pivot</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
-  <span class="c1"># data is the (1D) spectrum data (real)</span>
-  <span class="c1"># ph0 and ph1 are in degrees</span>
-  
-  <span class="n">data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-  <span class="n">data</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">hilbert</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="c1"># convert real to complex data in best way possible</span>
-  <span class="n">data</span> <span class="o">=</span> <span class="n">phaseComplexData</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">ph0</span><span class="p">,</span> <span class="n">ph1</span><span class="p">,</span> <span class="n">pivot</span><span class="p">)</span>
-  <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">real</span>
-  
-  <span class="k">return</span> <span class="n">data</span></div>
-  
-<div class="viewcode-block" id="phaseComplexData"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Phasing.phaseComplexData">[docs]</a><span class="k">def</span> <span class="nf">phaseComplexData</span><span class="p">(</span><span class="n">data</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">complex</span><span class="p">],</span> <span class="n">ph0</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">ph1</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-                     <span class="n">pivot</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">complex</span><span class="p">]:</span>
-  <span class="c1"># data is the (1D) spectrum data (complex)</span>
-  <span class="c1"># ph0 and ph1 are in degrees</span>
-  
-  <span class="n">data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-  
-  <span class="n">ph0</span> <span class="o">*=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
-  <span class="n">ph1</span> <span class="o">*=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
-  <span class="n">pivot</span> <span class="o">-=</span> <span class="mi">1</span> <span class="c1"># points start at 1 but code below assumes starts at 0</span>
- 
-  <span class="n">npts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-  <span class="n">angles</span> <span class="o">=</span> <span class="n">ph0</span> <span class="o">+</span> <span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">npts</span><span class="p">)</span> <span class="o">-</span> <span class="n">pivot</span><span class="p">)</span> <span class="o">*</span> <span class="n">ph1</span> <span class="o">/</span> <span class="n">npts</span>
-  <span class="n">multipliers</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1j</span> <span class="o">*</span> <span class="n">angles</span><span class="p">)</span>
-  
-  <span class="n">data</span> <span class="o">*=</span> <span class="n">multipliers</span>
-  
-  <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="phaseRealData"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Phasing.phaseRealData">[docs]</a><span class="k">def</span> <span class="nf">phaseRealData</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">ph0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">ph1</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+                  <span class="n">pivot</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+    <span class="c1"># data is the (1D) spectrum data (real)</span>
+    <span class="c1"># ph0 and ph1 are in degrees</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">hilbert</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>  <span class="c1"># convert real to complex data in best way possible</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">phaseComplexData</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">ph0</span><span class="p">,</span> <span class="n">ph1</span><span class="p">,</span> <span class="n">pivot</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">real</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="phaseComplexData"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Phasing.phaseComplexData">[docs]</a><span class="k">def</span> <span class="nf">phaseComplexData</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">complex</span><span class="p">],</span> <span class="n">ph0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">ph1</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+                     <span class="n">pivot</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">complex</span><span class="p">]:</span>
+    <span class="c1"># data is the (1D) spectrum data (complex)</span>
+    <span class="c1"># ph0 and ph1 are in degrees</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="n">ph0</span> <span class="o">*=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
+    <span class="n">ph1</span> <span class="o">*=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
+    <span class="n">pivot</span> <span class="o">-=</span> <span class="mi">1</span>  <span class="c1"># points start at 1 but code below assumes starts at 0</span>
+
+    <span class="n">npts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">angles</span> <span class="o">=</span> <span class="n">ph0</span> <span class="o">+</span> <span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">npts</span><span class="p">)</span> <span class="o">-</span> <span class="n">pivot</span><span class="p">)</span> <span class="o">*</span> <span class="n">ph1</span> <span class="o">/</span> <span class="n">npts</span>
+    <span class="n">multipliers</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1j</span> <span class="o">*</span> <span class="n">angles</span><span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">*=</span> <span class="n">multipliers</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
 
 
 <div class="viewcode-block" id="autoPhaseReal"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Phasing.autoPhaseReal">[docs]</a><span class="k">def</span> <span class="nf">autoPhaseReal</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">p0</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">p1</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  Automatic linear phase correction from NmrGlue</span>
-<span class="sd">  Parameters</span>
-<span class="sd">  ----------</span>
-<span class="sd">  data : ndarray</span>
-<span class="sd">      Array of NMR intensity data.</span>
-<span class="sd">  fn : str or function</span>
-<span class="sd">      Algorithm to use for phase scoring. Built in functions can be</span>
-<span class="sd">      specified by one of the following strings: &quot;acme&quot;, &quot;peak_minima&quot;</span>
-<span class="sd">  p0 : float</span>
-<span class="sd">      Initial zero order phase in degrees.</span>
-<span class="sd">  p1 : float</span>
-<span class="sd">      Initial first order phase in degrees.</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Automatic linear phase correction from NmrGlue</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : ndarray</span>
+<span class="sd">        Array of NMR intensity data.</span>
+<span class="sd">    fn : str or function</span>
+<span class="sd">        Algorithm to use for phase scoring. Built in functions can be</span>
+<span class="sd">        specified by one of the following strings: &quot;acme&quot;, &quot;peak_minima&quot;</span>
+<span class="sd">    p0 : float</span>
+<span class="sd">        Initial zero order phase in degrees.</span>
+<span class="sd">    p1 : float</span>
+<span class="sd">        Initial first order phase in degrees.</span>
 
-<span class="sd">  Returns</span>
-<span class="sd">  -------</span>
-<span class="sd">  ndata : ndarray</span>
-<span class="sd">      Phased NMR data.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndata : ndarray</span>
+<span class="sd">        Phased NMR data.</span>
 
-<span class="sd">  &quot;&quot;&quot;</span>
-  <span class="kn">import</span> <span class="nn">nmrglue</span> <span class="kn">as</span> <span class="nn">ng</span>
-  <span class="n">data</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">hilbert</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>  <span class="c1"># convert real to complex data in best way possible</span>
-  <span class="n">data</span> <span class="o">=</span> <span class="n">ng</span><span class="o">.</span><span class="n">proc_autophase</span><span class="o">.</span><span class="n">autops</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">p0</span><span class="o">=</span><span class="n">p0</span><span class="p">,</span> <span class="n">p1</span><span class="o">=</span><span class="n">p1</span><span class="p">)</span>
-  <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">real</span>
-  <span class="k">return</span> <span class="n">data</span></div>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">nmrglue</span> <span class="kn">as</span> <span class="nn">ng</span>
 
-  
+    <span class="n">data</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">hilbert</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>  <span class="c1"># convert real to complex data in best way possible</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">ng</span><span class="o">.</span><span class="n">proc_autophase</span><span class="o">.</span><span class="n">autops</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">p0</span><span class="o">=</span><span class="n">p0</span><span class="p">,</span> <span class="n">p1</span><span class="o">=</span><span class="n">p1</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">real</span>
+    <span class="k">return</span> <span class="n">data</span></div>
 </pre></div>
 
           </div>

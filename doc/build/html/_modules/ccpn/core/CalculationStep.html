@@ -53,18 +53,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:27 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -76,10 +76,10 @@
 
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span>
-<span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint</span> <span class="kn">import</span> <span class="n">CalculationStep</span> <span class="k">as</span> <span class="n">ApiCalculationStep</span>
 <span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.DataSet</span> <span class="kn">import</span> <span class="n">DataSet</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">newObject</span>
 
 
 <div class="viewcode-block" id="CalculationStep"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.CalculationStep.CalculationStep">[docs]</a><span class="k">class</span> <span class="nc">CalculationStep</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
@@ -207,13 +207,27 @@
     <span class="k">def</span> <span class="nf">outputDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">outputDataUuid</span> <span class="o">=</span> <span class="n">value</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">value</span><span class="o">.</span><span class="n">uuid</span>
 
+    <span class="c1">#=========================================================================================</span>
+    <span class="c1"># Implementation functions</span>
+    <span class="c1">#=========================================================================================</span>
+
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">DataSet</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;get wrappedData - all ConstraintList children of parent NmrConstraintStore&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedCalculationSteps</span><span class="p">()</span></div>
 
+    <span class="c1">#=========================================================================================</span>
+    <span class="c1"># CCPN functions</span>
+    <span class="c1">#=========================================================================================</span>
 
+    <span class="c1">#===========================================================================================</span>
+    <span class="c1"># new&#39;Object&#39; and other methods</span>
+    <span class="c1"># Call appropriate routines in their respective locations</span>
+    <span class="c1">#===========================================================================================</span>
+
+<span class="c1">#=========================================================================================</span>
 <span class="c1"># Connections to parents:</span>
+<span class="c1">#=========================================================================================</span>
 
 <span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DataSet</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">CalculationStep</span><span class="p">]:</span>
     <span class="n">uuid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uuid</span>
@@ -236,18 +250,29 @@
 <span class="k">del</span> <span class="n">getter</span>
 
 
+<span class="c1">#=========================================================================================</span>
+
+
+<span class="nd">@newObject</span><span class="p">(</span><span class="n">CalculationStep</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">_newCalculationStep</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DataSet</span><span class="p">,</span> <span class="n">programName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">programVersion</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
                         <span class="n">scriptName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">script</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
                         <span class="n">inputDataUuid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">outputDataUuid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
-                        <span class="n">inputDataSet</span><span class="p">:</span> <span class="n">DataSet</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">outputDataSet</span><span class="p">:</span> <span class="n">DataSet</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CalculationStep</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Create new CalculationStep within DataSet&quot;&quot;&quot;</span>
+                        <span class="n">inputDataSet</span><span class="p">:</span> <span class="n">DataSet</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">outputDataSet</span><span class="p">:</span> <span class="n">DataSet</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">serial</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CalculationStep</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Create new CalculationStep within DataSet.</span>
 
-    <span class="c1"># Default values for &#39;new&#39; function, as used for echoing to console</span>
-    <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span>
-            <span class="p">((</span><span class="s1">&#39;programName&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;programVersion&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;scriptName&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;script&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-             <span class="p">(</span><span class="s1">&#39;inputDataUuid&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;outputDataUuid&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
-             <span class="p">)</span>
-            <span class="p">)</span>
+<span class="sd">    See the CalculationStep class for details.</span>
+
+<span class="sd">    :param programName:</span>
+<span class="sd">    :param programVersion:</span>
+<span class="sd">    :param scriptName:</span>
+<span class="sd">    :param script:</span>
+<span class="sd">    :param inputDataUuid:</span>
+<span class="sd">    :param outputDataUuid:</span>
+<span class="sd">    :param inputDataSet:</span>
+<span class="sd">    :param outputDataSet:</span>
+<span class="sd">    :param serial: optional serial number.</span>
+<span class="sd">    :return: a new CalculationStep instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span>
     <span class="n">programName</span> <span class="o">=</span> <span class="n">programName</span> <span class="ow">or</span> <span class="n">project</span><span class="o">.</span><span class="n">programName</span>
@@ -266,20 +291,27 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either outputDataSet or inputDataUuid must be None - values were </span><span class="si">%s</span><span class="s2"> and </span><span class="si">%s</span><span class="s2">&quot;</span>
                              <span class="o">%</span> <span class="p">(</span><span class="n">outputDataSet</span><span class="p">,</span> <span class="n">outputDataUuid</span><span class="p">))</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;newCalculationStep&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
-                                <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newCalculationStep&#39;</span><span class="p">)</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">newCalculationStep</span><span class="p">(</span><span class="n">programName</span><span class="o">=</span><span class="n">programName</span><span class="p">,</span> <span class="n">programVersion</span><span class="o">=</span><span class="n">programVersion</span><span class="p">,</span>
-                                                   <span class="n">scriptName</span><span class="o">=</span><span class="n">scriptName</span><span class="p">,</span> <span class="n">script</span><span class="o">=</span><span class="n">script</span><span class="p">,</span>
-                                                   <span class="n">inputDataUuid</span><span class="o">=</span><span class="n">inputDataUuid</span><span class="p">,</span>
-                                                   <span class="n">outputDataUuid</span><span class="o">=</span><span class="n">outputDataUuid</span><span class="p">)</span>
-    <span class="k">finally</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">newCalculationStep</span><span class="p">(</span><span class="n">programName</span><span class="o">=</span><span class="n">programName</span><span class="p">,</span> <span class="n">programVersion</span><span class="o">=</span><span class="n">programVersion</span><span class="p">,</span>
+                                               <span class="n">scriptName</span><span class="o">=</span><span class="n">scriptName</span><span class="p">,</span> <span class="n">script</span><span class="o">=</span><span class="n">script</span><span class="p">,</span>
+                                               <span class="n">inputDataUuid</span><span class="o">=</span><span class="n">inputDataUuid</span><span class="p">,</span>
+                                               <span class="n">outputDataUuid</span><span class="o">=</span><span class="n">outputDataUuid</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Unable to generate new CalculationStep item&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">serial</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Could not reset serial of </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2"> - keeping original value&quot;</span>
+                                         <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">serial</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">result</span>
 
 
-<span class="n">DataSet</span><span class="o">.</span><span class="n">newCalculationStep</span> <span class="o">=</span> <span class="n">_newCalculationStep</span>
-<span class="k">del</span> <span class="n">_newCalculationStep</span>
+<span class="c1">#EJB 20181204: moved to DataSet</span>
+<span class="c1"># DataSet.newCalculationStep = _newCalculationStep</span>
+<span class="c1"># del _newCalculationStep</span>
 
 <span class="c1"># Notifiers:</span>
 </pre></div>

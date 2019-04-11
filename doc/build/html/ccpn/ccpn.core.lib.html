@@ -162,7 +162,7 @@ more filters can be specified in the future.</p>
 <code class="descclassname">ccpn.core.lib.AssignmentLib.</code><code class="descname">nmrAtomPairsByDimensionTransfer</code><span class="sig-paren">(</span><em>peakLists: Sequence[]</em><span class="sig-paren">)</span> &rarr; dict<a class="reference internal" href="../_modules/ccpn/core/lib/AssignmentLib.html#nmrAtomPairsByDimensionTransfer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.AssignmentLib.nmrAtomPairsByDimensionTransfer" title="Permalink to this definition">¶</a></dt>
 <dd><p>From one or more peakLists belonging to the same spectrum,
 get a dictionary of magnetisationTransferTuple (See Spectrum.magnetisationTransfers
-for documentation) to a set of NmrAtom pairs tha are coupled by the magnetisation transfer.
+for documentation) to a set of NmrAtom pairs that are coupled by the magnetisation transfer.
 If the two dimensions have the same nucleus, the NmrAtom pairs are sorted, otherwise
 they are in the dimension order.</p>
 <p>Peak.assignedNmrAtoms is used to determine which NmrAtoms are connected</p>
@@ -191,7 +191,7 @@ peaks.</p>
 
 <dl class="function">
 <dt id="ccpn.core.lib.AssignmentLib.refitPeaks">
-<code class="descclassname">ccpn.core.lib.AssignmentLib.</code><code class="descname">refitPeaks</code><span class="sig-paren">(</span><em>peaks: Sequence[]</em>, <em>method: str = 'gaussian'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/AssignmentLib.html#refitPeaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.AssignmentLib.refitPeaks" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.core.lib.AssignmentLib.</code><code class="descname">refitPeaks</code><span class="sig-paren">(</span><em>peaks: Sequence[]</em>, <em>method: str = 'gaussian'</em>, <em>singularMode=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/AssignmentLib.html#refitPeaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.AssignmentLib.refitPeaks" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -214,33 +214,29 @@ peak dimension.</p>
 <span id="ccpn-core-lib-cache-module"></span><h2>ccpn.core.lib.Cache module<a class="headerlink" href="#module-ccpn.core.lib.Cache" title="Permalink to this headline">¶</a></h2>
 <p>Cache object and cached / cached.clear decorators</p>
 <p>Typical usage:</p>
-<blockquote>
-<div><p>&#64;cached(&#8216;_myFuncCache&#8217;, maxItems=100)  # cache for 100 items gets created if it does not exist
-def myFunc(obj, arg1, arg2, kwd1=True)</p>
-<blockquote>
-<div># some action here
-return result</div></blockquote>
-</div></blockquote>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="nd">@cached</span><span class="p">(</span><span class="s1">&#39;_myFuncCache&#39;</span><span class="p">,</span> <span class="n">maxItems</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>  <span class="c1"># cache for 100 items gets created if it does not exist</span>
+<span class="k">def</span> <span class="nf">myFunc</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">arg1</span><span class="p">,</span> <span class="n">arg2</span><span class="p">,</span> <span class="n">kwd1</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># some action here</span>
+    <span class="k">return</span> <span class="n">result</span>
+</pre></div>
+</div>
 <p>On cleaning up:</p>
-<blockquote>
-<div><p>&#64;cached.clear(&#8216;_myFuncCache&#8217;)
-def cleaningUp(self)</p>
-<blockquote>
-<div># action here</div></blockquote>
-</div></blockquote>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="nd">@cached</span><span class="o">.</span><span class="n">clear</span><span class="p">(</span><span class="s1">&#39;_myFuncCache&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">cleaningUp</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="c1"># action here</span>
+</pre></div>
+</div>
 <p>or alternatively in your code:</p>
-<blockquote>
-<div><dl class="docutils">
-<dt>if hasattr(obj, &#8216;_myFuncCache&#8217;):</dt>
-<dd>cache = getattr(obj, &#8216;_myFuncCache&#8217;)
-cache.clear()</dd>
-</dl>
-</div></blockquote>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s1">&#39;_myFuncCache&#39;</span><span class="p">):</span>
+    <span class="n">cache</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s1">&#39;_myFuncCache&#39;</span><span class="p">)</span>
+    <span class="n">cache</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+</pre></div>
+</div>
 <dl class="class">
 <dt id="ccpn.core.lib.Cache.Cache">
 <em class="property">class </em><code class="descclassname">ccpn.core.lib.Cache.</code><code class="descname">Cache</code><span class="sig-paren">(</span><em>maxItems=None</em>, <em>name=''</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Cache.html#Cache"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Cache.Cache" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>A chache object;</p>
+<p>A cache object;</p>
 <ul class="simple">
 <li>Retains (item, value) pairs; item must be a hash-able object (e.g. tuple)</li>
 <li>Retains either maxItem or unlimited number of objects.</li>
@@ -391,7 +387,7 @@ with input None</p>
 
 <dl class="attribute">
 <dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.importers">
-<code class="descname">importers</code><em class="property"> = {'ccpn_spectrum_dimension': &lt;function CcpnNefReader.load_ccpn_spectrum_dimension at 0x11fad1048&gt;, 'ccpn_multiplet_list': &lt;function CcpnNefReader.load_ccpn_multiplet_list at 0x11fad1400&gt;, 'nef_dihedral_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x11facfd90&gt;, 'nef_rdc_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x11facfd08&gt;, 'ccpn_complex': &lt;function CcpnNefReader.load_ccpn_complex at 0x11fad1a60&gt;, 'ccpn_sample': &lt;function CcpnNefReader.load_ccpn_sample at 0x11fad1b70&gt;, 'ccpn_sample_component': &lt;function CcpnNefReader.load_ccpn_sample_component at 0x11fad1bf8&gt;, 'ccpn_group_spectrum': &lt;function CcpnNefReader.load_ccpn_group_spectrum at 0x11fad19d8&gt;, 'ccpn_substance': &lt;function CcpnNefReader.load_ccpn_substance at 0x11fad1c80&gt;, 'nef_peak_restraint_link': &lt;function CcpnNefReader.load_nef_peak_restraint_link at 0x11fad18c8&gt;, 'nef_molecular_system': &lt;function CcpnNefReader.load_nef_molecular_system at 0x11facf9d8&gt;, 'ccpn_dataset': &lt;function CcpnNefReader.load_ccpn_dataset at 0x11fad1f28&gt;, 'nef_distance_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x11facfd90&gt;, 'nef_peak': &lt;function CcpnNefReader.load_nef_peak at 0x11fad17b8&gt;, 'ccpn_notes': &lt;function CcpnNefReader.load_ccpn_notes at 0x11fad1e18&gt;, 'nef_nmr_spectrum': &lt;function CcpnNefReader.load_nef_nmr_spectrum at 0x11facfe18&gt;, 'nef_chemical_shift': &lt;function CcpnNefReader.load_nef_chemical_shift at 0x11facfc80&gt;, 'nef_distance_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x11facfd08&gt;, 'ccpn_substance_synonym': &lt;function CcpnNefReader.load_ccpn_substance_synonym at 0x11fad1d08&gt;, 'ccpn_assignment': &lt;function CcpnNefReader.load_ccpn_assignment at 0x11fad1d90&gt;, 'ccpn_spectrum_group': &lt;function CcpnNefReader.load_ccpn_spectrum_group at 0x11fad1950&gt;, 'nef_sequence': &lt;function CcpnNefReader.load_nef_sequence at 0x11facfa60&gt;, 'nef_dihedral_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x11facfd08&gt;, 'ccpn_multiplet_peaks': &lt;function CcpnNefReader.load_ccpn_multiplet_peaks at 0x11fad1268&gt;, 'ccpn_integral': &lt;function CcpnNefReader.load_ccpn_integral at 0x11fad1510&gt;, 'ccpn_integral_list': &lt;function CcpnNefReader.load_ccpn_integral_list at 0x11fad12f0&gt;, 'ccpn_additional_data': &lt;function CcpnNefReader.load_ccpn_additional_data at 0x11fad1ea0&gt;, 'nef_covalent_links': &lt;function CcpnNefReader.load_nef_covalent_links at 0x11facfae8&gt;, 'ccpn_peak_cluster_list': &lt;function CcpnNefReader.load_ccpn_peak_cluster_list at 0x11fad1730&gt;, 'ccpn_multiplet': &lt;function CcpnNefReader.load_ccpn_multiplet at 0x11fad1620&gt;, 'nef_rdc_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x11facfd90&gt;, 'ccpn_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x11facfd90&gt;, 'ccpn_complex_chain': &lt;function CcpnNefReader.load_ccpn_complex_chain at 0x11fad1ae8&gt;, 'nef_nmr_meta_data': &lt;function CcpnNefReader.load_nef_nmr_meta_data at 0x11facf950&gt;, 'ccpn_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x11facfd08&gt;, 'nef_chemical_shift_list': &lt;function CcpnNefReader.load_nef_chemical_shift_list at 0x11facfbf8&gt;, 'nef_peak_restraint_links': &lt;function CcpnNefReader.load_nef_peak_restraint_links at 0x11fad1840&gt;}</em><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.importers" title="Permalink to this definition">¶</a></dt>
+<code class="descname">importers</code><em class="property"> = {'nef_nmr_meta_data': &lt;function CcpnNefReader.load_nef_nmr_meta_data at 0x12458d158&gt;, 'nef_distance_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x12458d510&gt;, 'nef_dihedral_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x12458d598&gt;, 'ccpn_spectrum_group': &lt;function CcpnNefReader.load_ccpn_spectrum_group at 0x12458e158&gt;, 'ccpn_additional_data': &lt;function CcpnNefReader.load_ccpn_additional_data at 0x12458e6a8&gt;, 'nef_nmr_spectrum': &lt;function CcpnNefReader.load_nef_nmr_spectrum at 0x12458d620&gt;, 'nef_chemical_shift': &lt;function CcpnNefReader.load_nef_chemical_shift at 0x12458d488&gt;, 'ccpn_assignment': &lt;function CcpnNefReader.load_ccpn_assignment at 0x12458e598&gt;, 'nef_covalent_links': &lt;function CcpnNefReader.load_nef_covalent_links at 0x12458d2f0&gt;, 'ccpn_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x12458d598&gt;, 'ccpn_substance': &lt;function CcpnNefReader.load_ccpn_substance at 0x12458e488&gt;, 'nef_sequence': &lt;function CcpnNefReader.load_nef_sequence at 0x12458d268&gt;, 'nef_distance_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x12458d598&gt;, 'ccpn_group_spectrum': &lt;function CcpnNefReader.load_ccpn_group_spectrum at 0x12458e1e0&gt;, 'ccpn_multiplet_peaks': &lt;function CcpnNefReader.load_ccpn_multiplet_peaks at 0x12458d9d8&gt;, 'nef_rdc_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x12458d510&gt;, 'ccpn_complex_chain': &lt;function CcpnNefReader.load_ccpn_complex_chain at 0x12458e2f0&gt;, 'ccpn_dataset': &lt;function CcpnNefReader.load_ccpn_dataset at 0x12458e730&gt;, 'ccpn_integral': &lt;function CcpnNefReader.load_ccpn_integral at 0x12458dc80&gt;, 'ccpn_sample': &lt;function CcpnNefReader.load_ccpn_sample at 0x12458e378&gt;, 'ccpn_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x12458d510&gt;, 'ccpn_integral_list': &lt;function CcpnNefReader.load_ccpn_integral_list at 0x12458da60&gt;, 'nef_chemical_shift_list': &lt;function CcpnNefReader.load_nef_chemical_shift_list at 0x12458d400&gt;, 'ccpn_complex': &lt;function CcpnNefReader.load_ccpn_complex at 0x12458e268&gt;, 'nef_peak_restraint_links': &lt;function CcpnNefReader.load_nef_peak_restraint_links at 0x12458e048&gt;, 'nef_peak': &lt;function CcpnNefReader.load_nef_peak at 0x12458df28&gt;, 'ccpn_notes': &lt;function CcpnNefReader.load_ccpn_notes at 0x12458e620&gt;, 'nef_molecular_system': &lt;function CcpnNefReader.load_nef_molecular_system at 0x12458d1e0&gt;, 'nef_rdc_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x12458d598&gt;, 'ccpn_multiplet_list': &lt;function CcpnNefReader.load_ccpn_multiplet_list at 0x12458db70&gt;, 'ccpn_substance_synonym': &lt;function CcpnNefReader.load_ccpn_substance_synonym at 0x12458e510&gt;, 'ccpn_peak_cluster_list': &lt;function CcpnNefReader.load_ccpn_peak_cluster_list at 0x12458dea0&gt;, 'nef_dihedral_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x12458d510&gt;, 'ccpn_spectrum_dimension': &lt;function CcpnNefReader.load_ccpn_spectrum_dimension at 0x12458d7b8&gt;, 'ccpn_sample_component': &lt;function CcpnNefReader.load_ccpn_sample_component at 0x12458e400&gt;, 'ccpn_multiplet': &lt;function CcpnNefReader.load_ccpn_multiplet at 0x12458dd90&gt;, 'nef_peak_restraint_link': &lt;function CcpnNefReader.load_nef_peak_restraint_link at 0x12458e0d0&gt;}</em><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.importers" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -998,7 +994,16 @@ STAR special values (like null,  unknown, ...) are only recognised if unquoted s
 <em class="property">class </em><code class="descclassname">ccpn.core.lib.ContextManagers.</code><code class="descname">BlankedPartial</code><span class="sig-paren">(</span><em>func</em>, <em>obj=None</em>, <em>trigger=None</em>, <em>preExecution=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/ContextManagers.html#BlankedPartial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.ContextManagers.BlankedPartial" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Wrapper (like partial) to call func(<a href="#id1"><span class="problematic" id="id2">**</span></a>kwds) with blanking
-optionally trigger the notification of obj, either pre- or post execution</p>
+optionally trigger the notification of obj, either pre- or post execution.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.ContextManagers.catchExceptions">
+<code class="descclassname">ccpn.core.lib.ContextManagers.</code><code class="descname">catchExceptions</code><span class="sig-paren">(</span><em>application=None</em>, <em>errorStringTemplate='Error: &quot;%s&quot;'</em>, <em>popupAsWarning=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/ContextManagers.html#catchExceptions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.ContextManagers.catchExceptions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Catches exceptions in try except; logging it as warning;</p>
+<p>errorStringTemplate: string with one &#8216;%s&#8217;; used to output the exception to logger as warning
+popupAsWarning: flag to report output as a warning popup</p>
+<p>raises the error again in debug mode</p>
 </dd></dl>
 
 <dl class="function">
@@ -1009,126 +1014,18 @@ optionally trigger the notification of obj, either pre- or post execution</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ccpn.core.lib.ContextManagers.deleteBlockManager">
-<code class="descclassname">ccpn.core.lib.ContextManagers.</code><code class="descname">deleteBlockManager</code><span class="sig-paren">(</span><em>application=None</em>, <em>deleteBlockOnly=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/ContextManagers.html#deleteBlockManager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.ContextManagers.deleteBlockManager" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wrap all the following calls with a single undo/redo method.</p>
-</dd></dl>
-
-<dl class="function">
 <dt id="ccpn.core.lib.ContextManagers.deleteObject">
 <code class="descclassname">ccpn.core.lib.ContextManagers.</code><code class="descname">deleteObject</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/ContextManagers.html#deleteObject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.ContextManagers.deleteObject" title="Permalink to this definition">¶</a></dt>
 <dd><p>A decorator to wrap the delete(self) method of the V3 core classes
 calls self._finalise(&#8216;delete&#8217;) prior to deletion</p>
-<p>GWV first try</p>
+<p>GWV first try
+EJB 20181130: modified</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.core.lib.ContextManagers.echoCommand">
 <code class="descclassname">ccpn.core.lib.ContextManagers.</code><code class="descname">echoCommand</code><span class="sig-paren">(</span><em>obj</em>, <em>funcName</em>, <em>*params</em>, <em>*</em>, <em>values=None</em>, <em>defaults=None</em>, <em>parName=None</em>, <em>propertySetter=False</em>, <em>**objectParameters</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/ContextManagers.html#echoCommand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.ContextManagers.echoCommand" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
-
-<dl class="function">
-<dt id="ccpn.core.lib.ContextManagers.logCommandBlock">
-<code class="descclassname">ccpn.core.lib.ContextManagers.</code><code class="descname">logCommandBlock</code><span class="sig-paren">(</span><em>prefix=''</em>, <em>get=None</em>, <em>isProperty=False</em>, <em>showArguments=[]</em>, <em>logCommandOnly=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/ContextManagers.html#logCommandBlock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.ContextManagers.logCommandBlock" title="Permalink to this definition">¶</a></dt>
-<dd><p>Echo a command to the logger reflecting the python command required to call the function.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>prefix</strong> &#8211; string to be prepended to the echo command</li>
-<li><strong>get</strong> &#8211; function containing the function</li>
-<li><strong>isProperty</strong> &#8211; is the function a property</li>
-<li><strong>showArguments</strong> &#8211; list of string names for arguments that need to be included.
-By default, the parameters set to the defaults are not included.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-<p>Examples:</p>
-<ol class="arabic">
-<li><dl class="first docutils">
-<dt>def something(self, name=None, value=0):</dt>
-<dd><dl class="first last docutils">
-<dt>logCommandManager(prefix=&#8217;process.&#8217;) as log:</dt>
-<dd><p class="first">log(&#8216;something&#8217;)</p>
-<p class="last">... code here</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>call function                   echo command</p>
-<p>something(&#8216;Hello&#8217;)              process.something(name=&#8217;Hello&#8217;)
-something(&#8216;Hello&#8217;, 12)          process.something(name=&#8217;Hello&#8217;, value=12)</p>
-<p>Parameters are not required in the log() command, parameters are picked up from
-the containing function; however, changes can be inserted by including
-the parameter, e.g., log(&#8216;something&#8217;, name=name+&#8217;There&#8217;) will append &#8216;There&#8217; to the name.</p>
-<blockquote>
-<div><p>something(&#8216;Hello&#8217;)          process.something(name=&#8217;HelloThere&#8217;)</p>
-</div></blockquote>
-</li>
-<li><dl class="first docutils">
-<dt>def something(self, name=None, value=0):</dt>
-<dd><dl class="first last docutils">
-<dt>logCommandManager(get=&#8217;self&#8217;) as log:</dt>
-<dd><p class="first">log(&#8216;something&#8217;)</p>
-<p class="last">... code here</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>call function                   echo command</p>
-<p>something(&#8216;Hello&#8217;)              get(&#8216;parent:ID&#8217;).something(name=&#8217;Hello&#8217;)
-something(&#8216;Hello&#8217;, 12)          get(&#8216;parent:ID&#8217;).something(name=&#8217;Hello&#8217;, value=12)</p>
-</li>
-<li><p class="first">&#64;property
-def something(self, value=0):</p>
-<blockquote>
-<div><dl class="docutils">
-<dt>logCommandManager(get=&#8217;self&#8217;, isProperty=True) as log:</dt>
-<dd><p class="first">log(&#8216;something&#8217;, value=value)</p>
-<p class="last">... code here</p>
-</dd>
-</dl>
-</div></blockquote>
-<p>call function                   echo command</p>
-<p>something = 12                  get(&#8216;parent:ID&#8217;).something = 12</p>
-<p>functions of this type can only contain one parameter, and
-must be set as a keyword in the log.</p>
-</li>
-<li><p class="first">Mixing prefix and get:</p>
-<dl class="docutils">
-<dt>def something(self, value=0):</dt>
-<dd><dl class="first last docutils">
-<dt>logCommandManager(prefix=&#8217;process.&#8217;, get=&#8217;self&#8217;) as log:</dt>
-<dd><p class="first last">log(&#8216;something&#8217;)</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>if called from SpectrumDisplay:</p>
-<p>call function                   echo command</p>
-<p>spectrumDisplay.something(12)   process.get(&#8216;spectrumDisplay:1&#8217;).something(12)</p>
-</li>
-<li><p class="first">If the log command needs modifying, this can be included in the log command,
-e.g., if the pid of an object needs inserting</p>
-<dl class="docutils">
-<dt>def something(self, value=None):</dt>
-<dd><dl class="first last docutils">
-<dt>logCommandManager(prefix=&#8217;process.&#8217;, get=&#8217;self&#8217;) as log:</dt>
-<dd><p class="first last">log(&#8216;something&#8217;, value=value.pid)</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>if called from SpectrumDisplay:</p>
-<p>call function                   echo command</p>
-<p>spectrumDisplay.something(&lt;anObject&gt;)   process.get(&#8216;spectrumDisplay:1&#8217;).something(value=anObject:pid)</p>
-<p>To make quotes appear around the value use: log(&#8216;something&#8217;, value=repr(value.pid))</p>
-</li>
-</ol>
-</dd></dl>
 
 <dl class="function">
 <dt id="ccpn.core.lib.ContextManagers.newObject">
@@ -1141,6 +1038,12 @@ result._finalise(&#8216;create&#8217;)</p>
 <dt id="ccpn.core.lib.ContextManagers.notificationBlanking">
 <code class="descclassname">ccpn.core.lib.ContextManagers.</code><code class="descname">notificationBlanking</code><span class="sig-paren">(</span><em>application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/ContextManagers.html#notificationBlanking"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.ContextManagers.notificationBlanking" title="Permalink to this definition">¶</a></dt>
 <dd><p>Block all notifiers, re-enable at the end of the function block.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.ContextManagers.notificationEchoBlocking">
+<code class="descclassname">ccpn.core.lib.ContextManagers.</code><code class="descname">notificationEchoBlocking</code><span class="sig-paren">(</span><em>application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/ContextManagers.html#notificationEchoBlocking"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.ContextManagers.notificationEchoBlocking" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disable echoing of commands to the terminal, re-enable at the end of the function block.</p>
 </dd></dl>
 
 <dl class="function">
@@ -1157,6 +1060,20 @@ Used inside notificationBlanking if a notifier is required for a single event</p
 </dd></dl>
 
 <dl class="function">
+<dt id="ccpn.core.lib.ContextManagers.renameObject">
+<code class="descclassname">ccpn.core.lib.ContextManagers.</code><code class="descname">renameObject</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/ContextManagers.html#renameObject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.ContextManagers.renameObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>A decorator to wrap the rename(self) method of the V3 core classes
+calls self._finaliseAction(&#8216;rename&#8217;, &#8216;change&#8217;) after the rename</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.ContextManagers.renameObjectNoBlanking">
+<code class="descclassname">ccpn.core.lib.ContextManagers.</code><code class="descname">renameObjectNoBlanking</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/ContextManagers.html#renameObjectNoBlanking"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.ContextManagers.renameObjectNoBlanking" title="Permalink to this definition">¶</a></dt>
+<dd><p>A decorator to wrap the rename(self) method of the V3 core classes
+calls self._finaliseAction(&#8216;rename&#8217;, &#8216;change&#8217;) after the rename</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="ccpn.core.lib.ContextManagers.sidebarBlocking">
 <code class="descclassname">ccpn.core.lib.ContextManagers.</code><code class="descname">sidebarBlocking</code><span class="sig-paren">(</span><em>application=None</em>, <em>blockSidebarOnly=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/ContextManagers.html#sidebarBlocking"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.ContextManagers.sidebarBlocking" title="Permalink to this definition">¶</a></dt>
 <dd><p>Block updating of the sidebar (if present) until end of function block.</p>
@@ -1169,31 +1086,33 @@ Used inside notificationBlanking if a notifier is required for a single event</p
 </dd></dl>
 
 <dl class="function">
-<dt id="ccpn.core.lib.ContextManagers.undoBlockManager">
-<code class="descclassname">ccpn.core.lib.ContextManagers.</code><code class="descname">undoBlockManager</code><span class="sig-paren">(</span><em>application=None</em>, <em>undoBlockOnly=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/ContextManagers.html#undoBlockManager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.ContextManagers.undoBlockManager" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.core.lib.ContextManagers.undoBlockWithoutSideBar">
+<code class="descclassname">ccpn.core.lib.ContextManagers.</code><code class="descname">undoBlockWithoutSideBar</code><span class="sig-paren">(</span><em>application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/ContextManagers.html#undoBlockWithoutSideBar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.ContextManagers.undoBlockWithoutSideBar" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wrap all the contained operations into a single undo/redo event.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.core.lib.ContextManagers.undoStackBlocking">
 <code class="descclassname">ccpn.core.lib.ContextManagers.</code><code class="descname">undoStackBlocking</code><span class="sig-paren">(</span><em>application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/ContextManagers.html#undoStackBlocking"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.ContextManagers.undoStackBlocking" title="Permalink to this definition">¶</a></dt>
-<dd><p>Block addition of items to the undo stack, re-enable at the end of the function block.
-New user items can be added to the undo stack after blocking is re-enabled
-Example:</p>
-<blockquote>
-<div><dl class="docutils">
-<dt>with undoStackBlocking() as addUndoItem:</dt>
-<dd><p class="first">...
-do something here
-...
-addUndoItem(undo=partial(&lt;function&gt;, &lt;args and kwargs&gt;),</p>
-<blockquote>
-<div>redo=partial(&lt;function&gt;, &lt;args and kwargs&gt;))</div></blockquote>
-<p class="last">do more here</p>
-</dd>
-</dl>
-</div></blockquote>
+<dd><p>Block addition of items to the undo stack, re-enable at the end of the function block.</p>
+<p>New user items can be added to the undo stack after blocking is re-enabled.</p>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">undoStackBlocking</span><span class="p">()</span> <span class="k">as</span> <span class="n">addUndoItem</span><span class="p">:</span>
+    <span class="o">...</span>
+    <span class="n">do</span> <span class="n">something</span> <span class="n">here</span>
+    <span class="o">...</span>
+    <span class="n">addUndoItem</span><span class="p">(</span><span class="n">undo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="o">&lt;</span><span class="n">function</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">args</span> <span class="ow">and</span> <span class="n">kwargs</span><span class="o">&gt;</span><span class="p">),</span>
+                <span class="n">redo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="o">&lt;</span><span class="n">function</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">args</span> <span class="ow">and</span> <span class="n">kwargs</span><span class="o">&gt;</span><span class="p">))</span>
+    <span class="n">do</span> <span class="n">more</span> <span class="n">here</span>
+</pre></div>
+</div>
 <p>Multiple undoItems can be appended.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.ContextManagers.waypointBlocking">
+<code class="descclassname">ccpn.core.lib.ContextManagers.</code><code class="descname">waypointBlocking</code><span class="sig-paren">(</span><em>application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/ContextManagers.html#waypointBlocking"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.ContextManagers.waypointBlocking" title="Permalink to this definition">¶</a></dt>
+<dd><p>Block addition of new waypoints</p>
 </dd></dl>
 
 </div>
@@ -1664,8 +1583,8 @@ for some offset.</p>
 </div>
 <div class="section" id="ccpn-core-lib-notifiers-module">
 <h2>ccpn.core.lib.Notifiers module<a class="headerlink" href="#ccpn-core-lib-notifiers-module" title="Permalink to this headline">¶</a></h2>
-<span class="target" id="module-ccpn.core.lib.Notifiers"></span><p>Notifier extensions, wrapping it into a class that also acts as the called 
-function, displatching the &#8216;user&#8217; callback if required.</p>
+<span class="target" id="module-ccpn.core.lib.Notifiers"></span><p>Notifier extensions, wrapping it into a class that also acts as the called function,
+dispatching the &#8216;user&#8217; callback if required.</p>
 <p>The Notifier can be defined relative to any valid V3 core object, as well as the current
 object as it first checks if the triggered signature is valid.</p>
 <p>The triggers CREATE, DELETE, RENAME and CHANGE can be combined in the call signature,
@@ -1714,9 +1633,9 @@ trigger, notifier         NB: should only be used in isolation; i.e. not</p>
 TargetName does need to denote a valid child-class or attribute of theObject, except for Project instances
 which can be triggered by all classes (see Table).</p>
 <p>The callback provides a dict with several key, value pairs and optional arguments and/or keyword arguments if
-defined in the instantiation of the Notifier object. (idea following the Trailtlets concept).
+defined in the instantiation of the Notifier object. (idea following the Traitlets concept).
 Note that this dict also contains a reference to the Notifier object itself; this way it can be used
-to pass-on additional implementation specfic information to the callback function.</p>
+to pass-on additional implementation specific information to the callback function.</p>
 </div></blockquote>
 <dl class="attribute">
 <dt id="ccpn.core.lib.Notifiers.Notifier.ANY">
@@ -1853,7 +1772,7 @@ to pass-on additional implementation specfic information to the callback functio
 <dt id="ccpn.core.lib.Notifiers.NotifierBase">
 <em class="property">class </em><code class="descclassname">ccpn.core.lib.Notifiers.</code><code class="descname">NotifierBase</code><a class="reference internal" href="../_modules/ccpn/core/lib/Notifiers.html#NotifierBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Notifiers.NotifierBase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>A class confering notifier management routines;</p>
+<p>A class confering notifier management routines</p>
 <dl class="attribute">
 <dt id="ccpn.core.lib.Notifiers.NotifierBase.NOTIFIERSDICT">
 <code class="descname">NOTIFIERSDICT</code><em class="property"> = '_ccpNmrV3notifiersDict'</em><a class="headerlink" href="#ccpn.core.lib.Notifiers.NotifierBase.NOTIFIERSDICT" title="Permalink to this definition">¶</a></dt>
@@ -1875,7 +1794,7 @@ to pass-on additional implementation specfic information to the callback functio
 <dl class="method">
 <dt id="ccpn.core.lib.Notifiers.NotifierBase.hasNotifier">
 <code class="descname">hasNotifier</code><span class="sig-paren">(</span><em>notifier: ccpn.core.lib.Notifiers.Notifier = None</em><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="../_modules/ccpn/core/lib/Notifiers.html#NotifierBase.hasNotifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Notifiers.NotifierBase.hasNotifier" title="Permalink to this definition">¶</a></dt>
-<dd><p>return True if object has set notifier or
+<dd><p>return True if theObject has set notifier or
 has any notifier (when notifier==None)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1890,35 +1809,81 @@ has any notifier (when notifier==None)</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="ccpn.core.lib.Notifiers.NotifierBase.searchNotifiers">
+<code class="descname">searchNotifiers</code><span class="sig-paren">(</span><em>objects=[]</em>, <em>triggers=None</em>, <em>targetName=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Notifiers.html#NotifierBase.searchNotifiers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Notifiers.NotifierBase.searchNotifiers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search whether a notifier with the given parameters is already in the list.
+The triggers CREATE, DELETE, RENAME and CHANGE can be combined in the call signature</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>theObject</strong> &#8211; valid V3 core object or current object to watch</li>
+<li><strong>triggers</strong> &#8211; list of trigger keywords</li>
+<li><strong>targetName</strong> &#8211; valid className, attributeName or ANY</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None or list of existing notifiers</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="ccpn.core.lib.Notifiers.NotifierBase.setBlankingAllNotifiers">
 <code class="descname">setBlankingAllNotifiers</code><span class="sig-paren">(</span><em>flag</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Notifiers.html#NotifierBase.setBlankingAllNotifiers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Notifiers.NotifierBase.setBlankingAllNotifiers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set blanking of all the notifiers to flag</p>
+<dd><p>Set blanking of all the notifiers of theObject to flag</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.lib.Notifiers.NotifierBase.setGuiNotifier">
-<code class="descname">setGuiNotifier</code><span class="sig-paren">(</span><em>theObject: ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</em>, <em>triggers: list</em>, <em>targetName: str</em>, <em>callback: Callable[]</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span> &rarr; ccpn.core.lib.Notifiers.Notifier<a class="reference internal" href="../_modules/ccpn/core/lib/Notifiers.html#NotifierBase.setGuiNotifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Notifiers.NotifierBase.setGuiNotifier" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set Notifier for Ccpn V3 object theObject
-:param theObject: V3 object to register a notifier with
-:param triggers: list of triggers to trigger callback
-:param targetName: valid className, attributeName or None (See Notifier doc string for details)
-:param callback: callback function with signature: callback(obj, parameter2 [, <a href="#id7"><span class="problematic" id="id8">*</span></a>args] [, <a href="#id9"><span class="problematic" id="id10">**</span></a>kwargs])
-:param <a href="#id11"><span class="problematic" id="id12">*</span></a>args: optional arguments
-:param <a href="#id13"><span class="problematic" id="id14">**</span></a>kwargs: optional keyword,value arguments</p>
-<p>:returns GuiNotifier instance</p>
+<code class="descname">setGuiNotifier</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Notifiers.html#NotifierBase.setGuiNotifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Notifiers.NotifierBase.setGuiNotifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set Notifier for Ccpn V3 object theObject</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>theObject</strong> &#8211; V3 object to register a notifier with</li>
+<li><strong>triggers</strong> &#8211; list of triggers to trigger callback</li>
+<li><strong>targetName</strong> &#8211; valid className, attributeName or None (See Notifier doc string for details)</li>
+<li><strong>callback</strong> &#8211; callback function with signature: callback(obj, parameter2 [, <a href="#id7"><span class="problematic" id="id8">*</span></a>args] [, <a href="#id9"><span class="problematic" id="id10">**</span></a>kwargs])</li>
+<li><strong>kwargs</strong> &#8211; optional keyword,value arguments to callback</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a GuiNotifier instance</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.lib.Notifiers.NotifierBase.setNotifier">
-<code class="descname">setNotifier</code><span class="sig-paren">(</span><em>theObject: ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</em>, <em>triggers: list</em>, <em>targetName: str</em>, <em>callback: Callable[]</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span> &rarr; ccpn.core.lib.Notifiers.Notifier<a class="reference internal" href="../_modules/ccpn/core/lib/Notifiers.html#NotifierBase.setNotifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Notifiers.NotifierBase.setNotifier" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set Notifier for Ccpn V3 object theObject
-:param theObject: V3 object to register a notifier with
-:param triggers: list of triggers to trigger callback
-:param targetName: valid className, attributeName or None (See Notifier doc string for details)
-:param callback: callback function with signature: callback(obj, parameter2 [, <a href="#id15"><span class="problematic" id="id16">*</span></a>args] [, <a href="#id17"><span class="problematic" id="id18">**</span></a>kwargs])
-:param <a href="#id19"><span class="problematic" id="id20">*</span></a>args: optional arguments
-:param <a href="#id21"><span class="problematic" id="id22">**</span></a>kwargs: optional keyword,value arguments
-:returns Notifier instance</p>
+<code class="descname">setNotifier</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Notifiers.html#NotifierBase.setNotifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Notifiers.NotifierBase.setNotifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set Notifier for Ccpn V3 object theObject</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>theObject</strong> &#8211; V3 object to register a notifier with</li>
+<li><strong>triggers</strong> &#8211; list of triggers to trigger callback</li>
+<li><strong>targetName</strong> &#8211; valid className, attributeName or None (See Notifier doc string for details)</li>
+<li><strong>callback</strong> &#8211; callback function with signature: callback(obj, parameter2 [, <a href="#id11"><span class="problematic" id="id12">*</span></a>args] [, <a href="#id13"><span class="problematic" id="id14">**</span></a>kwargs])</li>
+<li><strong>**kwargs</strong> &#8211; <p>optional keyword,value arguments to call back</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a Notifier instance</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -1949,21 +1914,21 @@ strip.orderedSpectrumViews    returns tuple(spectrumViews) or None</dd>
 <dt id="ccpn.core.lib.OrderedSpectrumViews.OrderedSpectrumViews.getOrderedSpectrumViewsIndex">
 <code class="descname">getOrderedSpectrumViewsIndex</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/OrderedSpectrumViews.html#OrderedSpectrumViews.getOrderedSpectrumViewsIndex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.OrderedSpectrumViews.OrderedSpectrumViews.getOrderedSpectrumViewsIndex" title="Permalink to this definition">¶</a></dt>
 <dd><p>The current indexing list
-:return tuple of ints:</p>
+:return: tuple of ints</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.lib.OrderedSpectrumViews.OrderedSpectrumViews.orderedSpectrumViews">
 <code class="descname">orderedSpectrumViews</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/OrderedSpectrumViews.html#OrderedSpectrumViews.orderedSpectrumViews"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.OrderedSpectrumViews.OrderedSpectrumViews.orderedSpectrumViews" title="Permalink to this definition">¶</a></dt>
 <dd><p>The spectrumViews attached to the strip (ordered)
-:return tuple of SpectrumViews:</p>
+:return: tuple of SpectrumViews</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.lib.OrderedSpectrumViews.OrderedSpectrumViews.setOrderedSpectrumViewsIndex">
 <code class="descname">setOrderedSpectrumViewsIndex</code><span class="sig-paren">(</span><em>spectrumIndex: Tuple[]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/OrderedSpectrumViews.html#OrderedSpectrumViews.setOrderedSpectrumViewsIndex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.OrderedSpectrumViews.OrderedSpectrumViews.setOrderedSpectrumViewsIndex" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the ordering of the spectrumViews attached to the strip/spectrumDisplay
-:param spectrumIndex - tuple of ints:</p>
+:param spectrumIndex: tuple of ints</p>
 </dd></dl>
 
 </dd></dl>
@@ -2194,7 +2159,7 @@ Penalized least squares algorithm for background fitting</p>
 <dt>input</dt>
 <dd>x: input data (i.e. chromatogram of spectrum)
 w: binary masks (value of the mask is zero if a point belongs to peaks and one otherwise)
-<a href="#id23"><span class="problematic" id="id24">lambda_</span></a>: parameter that can be adjusted by user. The larger lambda is,  the smoother the resulting background
+<a href="#id17"><span class="problematic" id="id18">lambda_</span></a>: parameter that can be adjusted by user. The larger lambda is,  the smoother the resulting background
 differences: integer indicating the order of the difference of penalties</dd>
 <dt>output</dt>
 <dd>the fitted background vector</dd>
@@ -2209,7 +2174,7 @@ Adaptive iteratively reweighted penalized least squares for baseline fitting</p>
 <dl class="docutils">
 <dt>input</dt>
 <dd>x: input data (i.e. chromatogram of spectrum)
-<a href="#id25"><span class="problematic" id="id26">lambda_</span></a>: parameter that can be adjusted by user. The larger lambda is,  the smoother the resulting background, z
+<a href="#id19"><span class="problematic" id="id20">lambda_</span></a>: parameter that can be adjusted by user. The larger lambda is,  the smoother the resulting background, z
 porder: adaptive iteratively reweighted penalized least squares for baseline fitting</dd>
 <dt>output</dt>
 <dd>the fitted background vector</dd>
@@ -2246,7 +2211,7 @@ smoothing.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>y</strong> &#8211; The 1D spectrum</li>
 <li><strong>lambda</strong> &#8211; (Optional) Adjusts the balance between fitness and smoothness.
-A smaller <a href="#id27"><span class="problematic" id="id28">lamda_</span></a> favors fitness.
+A smaller <a href="#id21"><span class="problematic" id="id22">lamda_</span></a> favors fitness.
 Default is 1.e5.</li>
 <li><strong>ratio</strong> &#8211; (Optional) Iteration will stop when the weights stop changing.
 (weights_(i) - weights_(i+1)) / (weights_(i)) &lt; ratio.
@@ -2271,6 +2236,27 @@ interpolate: Where are the peaks: interpolate the points from neighbours otherwi
 </dd></dl>
 
 <dl class="function">
+<dt id="ccpn.core.lib.SpectrumLib.get1DdataInRange">
+<code class="descclassname">ccpn.core.lib.SpectrumLib.</code><code class="descname">get1DdataInRange</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>xRange</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/SpectrumLib.html#get1DdataInRange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.SpectrumLib.get1DdataInRange" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> &#8211; </li>
+<li><strong>y</strong> &#8211; </li>
+<li><strong>xRange</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">x,y within the xRange (minXrange,maxXrange)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="ccpn.core.lib.SpectrumLib.getDefaultSpectrumColours">
 <code class="descclassname">ccpn.core.lib.SpectrumLib.</code><code class="descname">getDefaultSpectrumColours</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/SpectrumLib.html#getDefaultSpectrumColours"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.SpectrumLib.getDefaultSpectrumColours" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get default positivecontourcolour, negativecontourcolour for Spectrum
@@ -2287,9 +2273,8 @@ Currently matches getDefaultColours in dataSource that is set through the api</p
 <dl class="function">
 <dt id="ccpn.core.lib.SpectrumLib.lowess">
 <code class="descclassname">ccpn.core.lib.SpectrumLib.</code><code class="descname">lowess</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/SpectrumLib.html#lowess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.SpectrumLib.lowess" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div>LOWESS (Locally Weighted Scatterplot Smoothing)</div></blockquote>
-<p>A lowess function that outs smoothed estimates of endog
+<dd><p>LOWESS (Locally Weighted Scatterplot Smoothing).
+A lowess function that outs smoothed estimates of endog
 at the given exog values from points (exog, endog)
 To use this, you need to install statsmodels in your miniconda:</p>
 <blockquote>
@@ -2384,6 +2369,8 @@ Sometimes-equivalent atom groups (rotating aromatic rings) count as equivalent</
 <div class="section" id="module-ccpn.core.lib.Undo">
 <span id="ccpn-core-lib-undo-module"></span><h2>ccpn.core.lib.Undo module<a class="headerlink" href="#module-ccpn.core.lib.Undo" title="Permalink to this headline">¶</a></h2>
 <p>General undo handle supporting undo/redo stack</p>
+<p>PyApiGen.py inserts the following line:</p>
+<p>from ccpn.core.lib.Undo import _deleteAllApiObjects, restoreOriginalLinks, no_op</p>
 <dl class="class">
 <dt id="ccpn.core.lib.Undo.Undo">
 <em class="property">class </em><code class="descclassname">ccpn.core.lib.Undo.</code><code class="descname">Undo</code><span class="sig-paren">(</span><em>maxWaypoints=20</em>, <em>maxOperations=10000</em>, <em>debug=False</em>, <em>application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Undo.html#Undo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Undo.Undo" title="Permalink to this definition">¶</a></dt>
@@ -2392,15 +2379,6 @@ Sometimes-equivalent atom groups (rotating aromatic rings) count as equivalent</
 A waypoint is the level at which an undo happens, and each of them could
 consist of multiple individual undo operations.</p>
 <p>To create a waypoint use newWaypoint().</p>
-<dl class="attribute">
-<dt id="ccpn.core.lib.Undo.Undo.blocking">
-<code class="descname">blocking</code><a class="headerlink" href="#ccpn.core.lib.Undo.Undo.blocking" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>immutable</em> - 
-Undo blocking. If true (non-zero) undo setting is blocked.
-Allows multiple external functions to set blocking without trampling each other</p>
-<p>Modify with increaseBlocking/decreaseBlocking only</p>
-</dd></dl>
-
 <dl class="method">
 <dt id="ccpn.core.lib.Undo.Undo.canRedo">
 <code class="descname">canRedo</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="../_modules/ccpn/core/lib/Undo.html#Undo.canRedo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Undo.Undo.canRedo" title="Permalink to this definition">¶</a></dt>
@@ -2472,6 +2450,24 @@ Allows multiple external functions to set blocking without trampling each other<
 <code class="descname">undo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Undo.html#Undo.undo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Undo.Undo.undo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Undo one operation - or one waypoint if waypoints are set</p>
 <p>For now errors are handled by printing a warning and clearing the undo object</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.lib.Undo.Undo.undoItemBlocking">
+<code class="descname">undoItemBlocking</code><a class="headerlink" href="#ccpn.core.lib.Undo.Undo.undoItemBlocking" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>immutable</em> - 
+Undo blocking. If true (non-zero) undo setting is blocked.
+Allows multiple external functions to set blocking without trampling each other</p>
+<p>Modify with increaseBlocking/decreaseBlocking only</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.lib.Undo.Undo.undoItemBlockingLevel">
+<code class="descname">undoItemBlockingLevel</code><a class="headerlink" href="#ccpn.core.lib.Undo.Undo.undoItemBlockingLevel" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>immutable</em> - 
+Undo blocking Level. If true (non-zero) undo setting is blocked.
+Allows multiple external functions to set blocking without trampling each other</p>
+<p>Modify with increaseBlocking/decreaseBlocking only</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -2598,7 +2594,7 @@ ordered dictionaries.</p>
 <dl class="function">
 <dt id="ccpn.core.lib.Util.expandDollarFilePath">
 <code class="descclassname">ccpn.core.lib.Util.</code><code class="descname">expandDollarFilePath</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Util.html#expandDollarFilePath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Util.expandDollarFilePath" title="Permalink to this definition">¶</a></dt>
-<dd><p>Expand paths that start with $REPOSITORY to full path</p>
+<dd><p>Expand paths that start with $REPOSITORY to full path.</p>
 <p>NBNB Should be moved to ccpnmodel.ccpncore.lib.ccp.general.DataLocation.DataLocationstore</p>
 </dd></dl>
 
@@ -2607,7 +2603,33 @@ ordered dictionaries.</p>
 <code class="descclassname">ccpn.core.lib.Util.</code><code class="descname">funcCaller</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Util.html#funcCaller"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Util.funcCaller" title="Permalink to this definition">¶</a></dt>
 <dd><p>return the name of the current function
 (actually the parent caller to this function, hence the index of &#8216;1&#8217;)
-:return string name:</p>
+:return: string name</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.Util.getParentObjectFromPid">
+<code class="descclassname">ccpn.core.lib.Util.</code><code class="descname">getParentObjectFromPid</code><span class="sig-paren">(</span><em>project</em>, <em>pid</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Util.html#getParentObjectFromPid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Util.getParentObjectFromPid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a parent object from a pid, which may represent a deleted object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Parent object or None on error/non-existence</td>
+</tr>
+</tbody>
+</table>
+<dl class="docutils">
+<dt>Example:</dt>
+<dd>pid = &#8216;NA:A.40.ALA.CB&#8217;
+getParentObjectFromPid(pid) -&gt; &#8216;NR:A.40.ALA&#8217;</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.Util.getParentPid">
+<code class="descclassname">ccpn.core.lib.Util.</code><code class="descname">getParentPid</code><span class="sig-paren">(</span><em>childPid</em><span class="sig-paren">)</span> &rarr; ccpn.core.lib.Pid.Pid<a class="reference internal" href="../_modules/ccpn/core/lib/Util.html#getParentPid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Util.getParentPid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the pid of parent of childPid; only uses Pid definitions (i.e. does not involve the actual objects)
+:returns Pid instance defining parent</p>
 </dd></dl>
 
 <dl class="function">
@@ -2620,6 +2642,17 @@ Unrecognised strings are returned unchanged</p>
 </div>
 <div class="section" id="module-ccpn.core.lib.peakUtils">
 <span id="ccpn-core-lib-peakutils-module"></span><h2>ccpn.core.lib.peakUtils module<a class="headerlink" href="#module-ccpn.core.lib.peakUtils" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ccpn.core.lib.peakUtils.Dictlist">
+<em class="property">class </em><code class="descclassname">ccpn.core.lib.peakUtils.</code><code class="descname">Dictlist</code><a class="reference internal" href="../_modules/ccpn/core/lib/peakUtils.html#Dictlist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.peakUtils.Dictlist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">dict</span></code></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.peakUtils.exponenial_func">
+<code class="descclassname">ccpn.core.lib.peakUtils.</code><code class="descname">exponenial_func</code><span class="sig-paren">(</span><em>x</em>, <em>a</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/peakUtils.html#exponenial_func"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.peakUtils.exponenial_func" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="function">
 <dt id="ccpn.core.lib.peakUtils.getMultipletLinewidth">
 <code class="descclassname">ccpn.core.lib.peakUtils.</code><code class="descname">getMultipletLinewidth</code><span class="sig-paren">(</span><em>peak</em>, <em>dim</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/peakUtils.html#getMultipletLinewidth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.peakUtils.getMultipletLinewidth" title="Permalink to this definition">¶</a></dt>
@@ -2633,6 +2666,27 @@ Unrecognised strings are returned unchanged</p>
 <dl class="function">
 <dt id="ccpn.core.lib.peakUtils.getNmrResidueDeltas">
 <code class="descclassname">ccpn.core.lib.peakUtils.</code><code class="descname">getNmrResidueDeltas</code><span class="sig-paren">(</span><em>nmrResidue</em>, <em>nmrAtomsNames</em>, <em>spectra</em>, <em>mode='positions'</em>, <em>atomWeights=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/peakUtils.html#getNmrResidueDeltas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.peakUtils.getNmrResidueDeltas" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>nmrResidue</strong> &#8211; </li>
+<li><strong>nmrAtomsNames</strong> &#8211; nmr Atoms to compare. str &#8216;H&#8217;, &#8216;N&#8217;, &#8216;CA&#8217; etc</li>
+<li><strong>spectra</strong> &#8211; compare peaks only from given spectra</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.peakUtils.getNmrResiduePeakHeight">
+<code class="descclassname">ccpn.core.lib.peakUtils.</code><code class="descname">getNmrResiduePeakHeight</code><span class="sig-paren">(</span><em>nmrResidue</em>, <em>nmrAtomsNames</em>, <em>spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/peakUtils.html#getNmrResiduePeakHeight"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.peakUtils.getNmrResiduePeakHeight" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -2667,8 +2721,13 @@ Unrecognised strings are returned unchanged</p>
 <dd></dd></dl>
 
 <dl class="function">
+<dt id="ccpn.core.lib.peakUtils.oneSiteBindingCurve">
+<code class="descclassname">ccpn.core.lib.peakUtils.</code><code class="descname">oneSiteBindingCurve</code><span class="sig-paren">(</span><em>x</em>, <em>kd</em>, <em>bmax</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/peakUtils.html#oneSiteBindingCurve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.peakUtils.oneSiteBindingCurve" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="ccpn.core.lib.peakUtils.peakdet">
-<code class="descclassname">ccpn.core.lib.peakUtils.</code><code class="descname">peakdet</code><span class="sig-paren">(</span><em>y</em>, <em>x</em>, <em>delta</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/peakUtils.html#peakdet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.peakUtils.peakdet" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.core.lib.peakUtils.</code><code class="descname">peakdet</code><span class="sig-paren">(</span><em>y</em>, <em>x</em>, <em>delta</em>, <em>negative=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/peakUtils.html#peakdet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.peakUtils.peakdet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converted from MATLAB script at <a class="reference external" href="http://billauer.co.il/peakdet.html">http://billauer.co.il/peakdet.html</a>
 % Eli Billauer, 3.4.05 (Explicitly not copyrighted).
 % This function is released to the public domain; Any use is allowed.</p>

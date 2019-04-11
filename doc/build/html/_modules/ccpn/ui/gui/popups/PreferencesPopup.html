@@ -53,18 +53,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:49 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -102,6 +102,9 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ColourDialog</span> <span class="kn">import</span> <span class="n">ColourDialog</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ScrollArea</span> <span class="kn">import</span> <span class="n">ScrollArea</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Spacer</span> <span class="kn">import</span> <span class="n">Spacer</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.PeakList</span> <span class="kn">import</span> <span class="n">GAUSSIANMETHOD</span><span class="p">,</span> <span class="n">PARABOLICMETHOD</span>
+
+<span class="n">PEAKFITTINGDEFAULTS</span> <span class="o">=</span> <span class="p">[</span><span class="n">PARABOLICMETHOD</span><span class="p">,</span> <span class="n">GAUSSIANMETHOD</span><span class="p">]</span>
 
 
 <span class="c1"># FIXME separate pure GUI to project/preferences properites</span>
@@ -149,12 +152,11 @@
             <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
                 <span class="n">strip</span><span class="o">.</span><span class="n">peakLabelling</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">annotationType</span>
                 <span class="n">strip</span><span class="o">.</span><span class="n">symbolType</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">symbolType</span>
-                <span class="k">if</span> <span class="n">display</span><span class="o">.</span><span class="n">is1D</span><span class="p">:</span>
-                    <span class="n">strip</span><span class="o">.</span><span class="n">symbolSize</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">symbolSize1d</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">strip</span><span class="o">.</span><span class="n">symbolSize</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">symbolSizeNd</span>
+                <span class="n">strip</span><span class="o">.</span><span class="n">symbolSize</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">symbolSizePixel</span>
+
                 <span class="n">strip</span><span class="o">.</span><span class="n">symbolThickness</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">symbolThickness</span>
                 <span class="n">strip</span><span class="o">.</span><span class="n">gridVisible</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">showGrid</span>
+                <span class="n">strip</span><span class="o">.</span><span class="n">_contourThickness</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">contourThickness</span>
                 <span class="n">strip</span><span class="o">.</span><span class="n">crosshairVisible</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">showCrosshair</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_oldColourScheme</span><span class="p">:</span>
@@ -234,7 +236,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">languageBox</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">languageBox</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">language</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">languageBox</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_changeLanguage</span><span class="p">)</span>
 
-        <span class="c1"># disabled for 3.0.b3</span>
+        <span class="c1"># disabled for 3.0.b5</span>
         <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">colourSchemeLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Colour Scheme &quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">colourSchemeBox</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
@@ -383,6 +385,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">dropFactorData</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%.1f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">peakDropFactor</span><span class="p">)))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dropFactorData</span><span class="o">.</span><span class="n">editingFinished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_setDropFactor</span><span class="p">)</span>
 
+        <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">peakFittingMethodLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Peak Region Fitting Method&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="n">peakFittingMethod</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">peakFittingMethod</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">peakFittingMethod</span> <span class="o">=</span> <span class="n">RadioButtons</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="n">PEAKFITTINGDEFAULTS</span><span class="p">,</span>
+                                          <span class="n">selectedInd</span><span class="o">=</span><span class="n">PEAKFITTINGDEFAULTS</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">peakFittingMethod</span><span class="p">),</span>
+                                          <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_setPeakFittingMethod</span><span class="p">,</span>
+                                          <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span>
+                                          <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span>
+                                          <span class="n">tipTexts</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                          <span class="p">)</span>
+
         <span class="c1">### Not fully Tested, Had some issues with $Path routines in setting the path of the copied spectra.</span>
         <span class="c1">###  Needs more testing for different spectra formats etc. Disabled until completion.</span>
         <span class="c1"># row += 1</span>
@@ -408,6 +421,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">showGridBox</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleGeneralOptions</span><span class="p">,</span> <span class="s1">&#39;showGrid&#39;</span><span class="p">))</span>
 
         <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">showCrosshairLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Show Crosshairs: &quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">showCrosshairBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">checked</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">showCrosshair</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">showCrosshairBox</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleGeneralOptions</span><span class="p">,</span> <span class="s1">&#39;showCrosshair&#39;</span><span class="p">))</span>
+
+        <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">showLastAxisOnlyLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Share Y Axis: &quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">showLastAxisOnlyBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">checked</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">lastAxisOnly</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">showLastAxisOnlyBox</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleGeneralOptions</span><span class="p">,</span> <span class="s1">&#39;lastAxisOnly&#39;</span><span class="p">))</span>
@@ -431,39 +449,6 @@
         <span class="c1"># TODO enable DoubleCursor</span>
         <span class="c1">#self.showDoubleCursorBox.setDisabled(True)</span>
         <span class="c1">## self.showDoubleCursorBox.toggled.connect(partial(self._toggleGeneralOptions, &#39;showDoubleCursor&#39;))</span>
-
-        <span class="c1"># row += 1</span>
-        <span class="c1"># Spacer(parent, row, 1,</span>
-        <span class="c1">#         QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,</span>
-        <span class="c1">#         grid=(row, 0), gridSpan=(row, 1))</span>
-
-        <span class="c1"># row += 1</span>
-        <span class="c1"># self.symbolsLabel = Label(parent, text=&quot;Peak Symbols&quot;, grid=(row, 0))</span>
-        <span class="c1"># symbol = self.preferences.general.symbolType</span>
-        <span class="c1"># self.symbol = RadioButtons(parent, texts=[&#39;Cross&#39;, &#39;lineWidths&#39;, &#39;Filled lineWidths&#39;],</span>
-        <span class="c1">#                                 selectedInd=symbol,</span>
-        <span class="c1">#                                 callback=self._setSymbol,</span>
-        <span class="c1">#                                 direction=&#39;v&#39;,</span>
-        <span class="c1">#                                 grid=(row, 1), hAlign=&#39;l&#39;,</span>
-        <span class="c1">#                                 tipTexts=None,</span>
-        <span class="c1">#                                 )</span>
-        <span class="c1"># row += 1</span>
-        <span class="c1"># self.symbolSizeLabel = Label(parent, text=&quot;Peak Symbol Size (ppm)&quot;, grid=(row, 0))</span>
-        <span class="c1"># self.symbolSizeData = DoubleSpinbox(parent, decimals=3, step=0.01,</span>
-        <span class="c1">#                                         min=0.01, max=1.0, grid=(row, 1), hAlign=&#39;l&#39;)</span>
-        <span class="c1"># self.symbolSizeData.setMinimumWidth(LineEditsMinimumWidth)</span>
-        <span class="c1"># symbolSize = self.preferences.general.symbolSize</span>
-        <span class="c1"># self.symbolSizeData.setValue(float(&#39;%.3f&#39; % symbolSize))</span>
-        <span class="c1"># self.symbolSizeData.editingFinished.connect(self._setSymbolSize)</span>
-        <span class="c1">#</span>
-        <span class="c1"># row += 1</span>
-        <span class="c1"># self.symbolThicknessLabel = Label(parent, text=&quot;Peak Symbol Thickness (point)&quot;, grid=(row, 0))</span>
-        <span class="c1"># self.symbolThicknessData = Spinbox(parent, step=1,</span>
-        <span class="c1">#                                         min=1, max=20, grid=(row, 1), hAlign=&#39;l&#39;)</span>
-        <span class="c1"># self.symbolThicknessData.setMinimumWidth(LineEditsMinimumWidth)</span>
-        <span class="c1"># symbolThickness = self.preferences.general.symbolThickness</span>
-        <span class="c1"># self.symbolThicknessData.setValue(int(symbolThickness))</span>
-        <span class="c1"># self.symbolThicknessData.editingFinished.connect(self._setSymbolThickness)</span>
 
         <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">zoomCentreLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Zoom Centre&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
@@ -555,7 +540,7 @@
         <span class="n">intensityLimit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">intensityLimit</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">showIntensityLimitLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Minimum Intensity Limit&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">showIntensityLimitBox</span> <span class="o">=</span> <span class="n">ScientificDoubleSpinBox</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span>  <span class="c1">#step=1,</span>
-                                                          <span class="nb">min</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
+                                                             <span class="nb">min</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">showIntensityLimitBox</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">intensityLimit</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">showIntensityLimitBox</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="n">LineEditsMinimumWidth</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">showIntensityLimitBox</span><span class="o">.</span><span class="n">editingFinished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_setIntensityLimit</span><span class="p">)</span>
@@ -587,32 +572,33 @@
                                    <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span>
                                    <span class="n">tipTexts</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                                    <span class="p">)</span>
-        <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">symbolSize1dLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Symbol Size 1d (ppm)&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">symbolSize1dData</span> <span class="o">=</span> <span class="n">DoubleSpinbox</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span>
-                                              <span class="nb">min</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">symbolSize1dData</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="n">LineEditsMinimumWidth</span><span class="p">)</span>
-        <span class="n">symbolSize1d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">symbolSize1d</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">symbolSize1dData</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%.3f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">symbolSize1d</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">symbolSize1dData</span><span class="o">.</span><span class="n">editingFinished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_setSymbolSize1d</span><span class="p">)</span>
 
         <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">symbolSizeNdLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Symbol Size Nd (ppm)&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">symbolSizeNdData</span> <span class="o">=</span> <span class="n">DoubleSpinbox</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
-                                              <span class="nb">min</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">symbolSizeNdData</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="n">LineEditsMinimumWidth</span><span class="p">)</span>
-        <span class="n">symbolSizeNd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">symbolSizeNd</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">symbolSizeNdData</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">symbolSizeNd</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">symbolSizeNdData</span><span class="o">.</span><span class="n">editingFinished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_setSymbolSizeNd</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">symbolSizePixelLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Symbol Size (pixels)&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">symbolSizePixelData</span> <span class="o">=</span> <span class="n">DoubleSpinbox</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                              <span class="nb">min</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">symbolSizePixelData</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="n">LineEditsMinimumWidth</span><span class="p">)</span>
+        <span class="n">symbolSizePixel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">symbolSizePixel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">symbolSizePixelData</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%i</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">symbolSizePixel</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">symbolSizePixelData</span><span class="o">.</span><span class="n">editingFinished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_setSymbolSizePixel</span><span class="p">)</span>
 
         <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">symbolThicknessLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Symbol Thickness (point)&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">symbolThicknessLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Symbol Thickness (points)&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">symbolThicknessData</span> <span class="o">=</span> <span class="n">Spinbox</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                                            <span class="nb">min</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">symbolThicknessData</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="n">LineEditsMinimumWidth</span><span class="p">)</span>
         <span class="n">symbolThickness</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">symbolThickness</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">symbolThicknessData</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">symbolThickness</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">symbolThicknessData</span><span class="o">.</span><span class="n">editingFinished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_setSymbolThickness</span><span class="p">)</span>
+
+        <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">contourThicknessLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Contour Thickness (points)&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">contourThicknessData</span> <span class="o">=</span> <span class="n">Spinbox</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                           <span class="nb">min</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">contourThicknessData</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="n">LineEditsMinimumWidth</span><span class="p">)</span>
+        <span class="n">contourThickness</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">contourThickness</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">contourThicknessData</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">contourThickness</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">contourThicknessData</span><span class="o">.</span><span class="n">editingFinished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_setContourThickness</span><span class="p">)</span>
 
         <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">HLine</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">colour</span><span class="o">=</span><span class="n">getColours</span><span class="p">()[</span><span class="n">DIVIDER</span><span class="p">],</span> <span class="n">height</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
@@ -865,25 +851,15 @@
             <span class="k">return</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">peakDropFactor</span> <span class="o">=</span> <span class="n">dropFactor</span>
 
-    <span class="k">def</span> <span class="nf">_setSymbolSize1d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_setSymbolSizePixel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Set the size of the 1d symbols (ppm)</span>
+<span class="sd">        Set the size of the symbols (pixels)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">symbolSize1d</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbolSize1dData</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+            <span class="n">symbolSizePixel</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbolSizePixelData</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="k">return</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">symbolSize1d</span> <span class="o">=</span> <span class="n">symbolSize1d</span>
-
-    <span class="k">def</span> <span class="nf">_setSymbolSizeNd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Set the size of the Nd symbols (ppm)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">symbolSizeNd</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbolSizeNdData</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="k">return</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">symbolSizeNd</span> <span class="o">=</span> <span class="n">symbolSizeNd</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">symbolSizePixel</span> <span class="o">=</span> <span class="n">symbolSizePixel</span>
 
     <span class="k">def</span> <span class="nf">_setSymbolThickness</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -894,6 +870,16 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">symbolThickness</span> <span class="o">=</span> <span class="n">symbolThickness</span>
+
+    <span class="k">def</span> <span class="nf">_setContourThickness</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the Thickness of the peak contours (ppm)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">contourThickness</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contourThicknessData</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">contourThickness</span> <span class="o">=</span> <span class="n">contourThickness</span>
 
     <span class="k">def</span> <span class="nf">_toggleSpectralOptions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">preference</span><span class="p">,</span> <span class="n">checked</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">preference</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">checked</span><span class="p">)</span>
@@ -957,6 +943,16 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">matchAxisCode</span> <span class="o">=</span> <span class="n">matchAxisCode</span>
+
+    <span class="k">def</span> <span class="nf">_setPeakFittingMethod</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the matching of the axis codes across different strips</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">peakFittingMethod</span> <span class="o">=</span> <span class="n">PEAKFITTINGDEFAULTS</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">peakFittingMethod</span><span class="o">.</span><span class="n">getIndex</span><span class="p">()]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">peakFittingMethod</span> <span class="o">=</span> <span class="n">peakFittingMethod</span>
 
     <span class="k">def</span> <span class="nf">_setAspect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aspect</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>

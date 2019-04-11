@@ -156,7 +156,7 @@ def _fetchDataUrl(memopsRoot, nameStore, filePath):
     # return dataUrl
 
 def expandDollarFilePath(project: 'Project', spectrum, filePath: str) -> str:
-    """Expand paths that start with $REPOSITORY to full path
+    """Expand paths that start with $REPOSITORY to full path.
 
     NBNB Should be moved to ccpnmodel.ccpncore.lib.ccp.general.DataLocation.DataLocationstore"""
 
@@ -285,7 +285,7 @@ def funcCaller() -> Optional[str]:
     """
     return the name of the current function
     (actually the parent caller to this function, hence the index of '1')
-    :return string name:
+    :return: string name
     """
     try:
         return inspect.stack()[1][3]

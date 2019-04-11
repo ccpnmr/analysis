@@ -65,11 +65,9 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import numpy as np
 import os
-import operator
 import sys
-from typing import Sequence, Tuple, Optional
+from typing import Sequence, Tuple, Optional, Union
 from functools import partial
-from ccpn.util import Common as commonUtil
 from ccpn.util import Constants
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
@@ -79,9 +77,8 @@ from ccpn.core.lib import Pid
 from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple, _getProjection
 from ccpn.core.lib.Cache import cached
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
-    logCommandBlock, undoStackBlocking, renameObject, undoBlock
-from ccpn.util.Logging import getLogger
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, \
+    undoStackBlocking, renameObject, undoBlock
 from ccpn.util.Common import axisCodeMapping
 from ccpn.util.Logging import getLogger
 
@@ -1981,21 +1978,20 @@ class Spectrum(AbstractWrapperObject):
     def newMultipletList(self, title: str = None,
                          symbolColour: str = None, textColour: str = None, lineColour: str = None,
                          multipletAveraging=0,
-                         comment: str = None, multiplets: ['Multiplet'] = None, **kwds):
-        """Create new MultipletList within Spectrum
+                         comment: str = None, multiplets: Sequence[Union['Multiplet', str]] = None, **kwds):
+        """Create new MultipletList within Spectrum.
 
         See the MultipletList class for details.
 
         Optional keyword arguments can be passed in; see MultipletList._newMultipletList for details.
 
-        :param self:
-        :param title:
+        :param title: title string
         :param symbolColour:
         :param textColour:
         :param lineColour:
         :param multipletAveraging:
-        :param comment:
-        :param multiplets:
+        :param comment: optional comment string
+        :param multiplets: optional list of multiplets as objects or pids
         :return: a new MultipletList attached to the Spectrum.
         """
         from ccpn.core.MultipletList import _newMultipletList

@@ -53,18 +53,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:58 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -80,6 +80,7 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">from</span> <span class="nn">inspect</span> <span class="kn">import</span> <span class="n">stack</span>
+
 
 <span class="n">DEBUG1</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span>  <span class="c1"># = 10</span>
 <span class="n">DEBUG2</span> <span class="o">=</span> <span class="mi">9</span>
@@ -108,129 +109,139 @@
 <span class="n">defaultLogger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;defaultLogger&#39;</span><span class="p">)</span>
 <span class="n">defaultLogger</span><span class="o">.</span><span class="n">propagate</span> <span class="o">=</span> <span class="bp">False</span>
 
+
 <div class="viewcode-block" id="getLogger"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Logging.getLogger">[docs]</a><span class="k">def</span> <span class="nf">getLogger</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">logger</span><span class="p">,</span> <span class="n">defaultLogger</span>
 
-  <span class="k">global</span> <span class="n">logger</span><span class="p">,</span> <span class="n">defaultLogger</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">logger</span><span class="p">:</span>
+        <span class="n">defaultLogger</span><span class="o">.</span><span class="n">_loggingCommandBlock</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="n">defaultLogger</span>
 
-  <span class="k">if</span> <span class="ow">not</span> <span class="n">logger</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">defaultLogger</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">_loggingCommandBlock</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="n">logger</span></div>
 
-  <span class="k">return</span> <span class="n">logger</span></div>
 
 <span class="k">def</span> <span class="nf">_debugGLError</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-  <span class="n">stk</span> <span class="o">=</span> <span class="n">stack</span><span class="p">()</span>
-  <span class="n">stk</span> <span class="o">=</span> <span class="p">[</span><span class="n">stk</span><span class="p">[</span><span class="n">st</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">st</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">stk</span><span class="p">)),</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
-  <span class="n">fmsg</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;[&#39;</span><span class="o">+</span><span class="s1">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">stk</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;] &#39;</span> <span class="o">+</span> <span class="n">msg</span><span class="p">]</span>
-  <span class="k">if</span> <span class="n">args</span><span class="p">:</span> <span class="n">fmsg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">]))</span>
-  <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span> <span class="n">fmsg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">ky</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;=&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">ky</span><span class="p">])</span> <span class="k">for</span> <span class="n">ky</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()]))</span>
-  <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">DEBUG1</span><span class="p">,</span> <span class="s1">&#39;; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fmsg</span><span class="p">))</span>
+    <span class="n">stk</span> <span class="o">=</span> <span class="n">stack</span><span class="p">()</span>
+    <span class="n">stk</span> <span class="o">=</span> <span class="p">[</span><span class="n">stk</span><span class="p">[</span><span class="n">st</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">st</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">stk</span><span class="p">)),</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+    <span class="n">fmsg</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;[&#39;</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">stk</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;] &#39;</span> <span class="o">+</span> <span class="n">msg</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">args</span><span class="p">:</span> <span class="n">fmsg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">]))</span>
+    <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span> <span class="n">fmsg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">ky</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">ky</span><span class="p">])</span> <span class="k">for</span> <span class="n">ky</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()]))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">DEBUG1</span><span class="p">,</span> <span class="s1">&#39;; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fmsg</span><span class="p">))</span>
+
 
 <span class="k">def</span> <span class="nf">_debug1</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-  <span class="n">fmsg</span> <span class="o">=</span> <span class="p">[</span><span class="n">msg</span><span class="p">]</span>
-  <span class="k">if</span> <span class="n">args</span><span class="p">:</span> <span class="n">fmsg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">]))</span>
-  <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span> <span class="n">fmsg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">ky</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;=&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">ky</span><span class="p">])</span> <span class="k">for</span> <span class="n">ky</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()]))</span>
-  <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">DEBUG1</span><span class="p">,</span> <span class="s1">&#39;; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fmsg</span><span class="p">))</span>
+    <span class="n">fmsg</span> <span class="o">=</span> <span class="p">[</span><span class="n">msg</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">args</span><span class="p">:</span> <span class="n">fmsg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">]))</span>
+    <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span> <span class="n">fmsg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">ky</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">ky</span><span class="p">])</span> <span class="k">for</span> <span class="n">ky</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()]))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">DEBUG1</span><span class="p">,</span> <span class="s1">&#39;; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fmsg</span><span class="p">))</span>
+
 
 <span class="k">def</span> <span class="nf">_debug2</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-  <span class="n">fmsg</span> <span class="o">=</span> <span class="p">[</span><span class="n">msg</span><span class="p">]</span>
-  <span class="k">if</span> <span class="n">args</span><span class="p">:</span> <span class="n">fmsg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">]))</span>
-  <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span> <span class="n">fmsg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">ky</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;=&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">ky</span><span class="p">])</span> <span class="k">for</span> <span class="n">ky</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()]))</span>
-  <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">DEBUG2</span><span class="p">,</span> <span class="s1">&#39;; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fmsg</span><span class="p">))</span>
+    <span class="n">fmsg</span> <span class="o">=</span> <span class="p">[</span><span class="n">msg</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">args</span><span class="p">:</span> <span class="n">fmsg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">]))</span>
+    <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span> <span class="n">fmsg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">ky</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">ky</span><span class="p">])</span> <span class="k">for</span> <span class="n">ky</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()]))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">DEBUG2</span><span class="p">,</span> <span class="s1">&#39;; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fmsg</span><span class="p">))</span>
+
 
 <span class="k">def</span> <span class="nf">_debug3</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-  <span class="n">fmsg</span> <span class="o">=</span> <span class="p">[</span><span class="n">msg</span><span class="p">]</span>
-  <span class="k">if</span> <span class="n">args</span><span class="p">:</span> <span class="n">fmsg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">]))</span>
-  <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span> <span class="n">fmsg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">ky</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;=&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">ky</span><span class="p">])</span> <span class="k">for</span> <span class="n">ky</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()]))</span>
-  <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">DEBUG3</span><span class="p">,</span> <span class="s1">&#39;; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fmsg</span><span class="p">))</span>
+    <span class="n">fmsg</span> <span class="o">=</span> <span class="p">[</span><span class="n">msg</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">args</span><span class="p">:</span> <span class="n">fmsg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">]))</span>
+    <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span> <span class="n">fmsg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">ky</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">ky</span><span class="p">])</span> <span class="k">for</span> <span class="n">ky</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()]))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">DEBUG3</span><span class="p">,</span> <span class="s1">&#39;; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fmsg</span><span class="p">))</span>
+
 
 <span class="k">def</span> <span class="nf">_info</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-  <span class="n">fmsg</span> <span class="o">=</span> <span class="p">[</span><span class="n">msg</span><span class="p">]</span>
-  <span class="k">if</span> <span class="n">args</span><span class="p">:</span> <span class="n">fmsg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">]))</span>
-  <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span> <span class="n">fmsg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">ky</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;=&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">ky</span><span class="p">])</span> <span class="k">for</span> <span class="n">ky</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()]))</span>
-  <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">INFO</span><span class="p">,</span> <span class="s1">&#39;; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fmsg</span><span class="p">))</span>
+    <span class="n">fmsg</span> <span class="o">=</span> <span class="p">[</span><span class="n">msg</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">args</span><span class="p">:</span> <span class="n">fmsg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">]))</span>
+    <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span> <span class="n">fmsg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">ky</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">ky</span><span class="p">])</span> <span class="k">for</span> <span class="n">ky</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()]))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">INFO</span><span class="p">,</span> <span class="s1">&#39;; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fmsg</span><span class="p">))</span>
 
 
 <div class="viewcode-block" id="createLogger"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Logging.createLogger">[docs]</a><span class="k">def</span> <span class="nf">createLogger</span><span class="p">(</span><span class="n">loggerName</span><span class="p">,</span> <span class="n">memopsRoot</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">,</span>
                  <span class="n">removeOldLogsDays</span><span class="o">=</span><span class="n">MAX_LOG_FILE_DAYS</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Return a (unique) logger for this memopsRoot and with given programName, if any.</span>
-<span class="sd">     Puts log output into a log file but also optionally can have output go to</span>
-<span class="sd">     another, specified, stream (e.g. a console)</span>
-<span class="sd">  &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Return a (unique) logger for this memopsRoot and with given programName, if any.</span>
+<span class="sd">       Puts log output into a log file but also optionally can have output go to</span>
+<span class="sd">       another, specified, stream (e.g. a console)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-  <span class="k">global</span> <span class="n">logger</span>
+    <span class="k">global</span> <span class="n">logger</span>
 
-  <span class="k">assert</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">),</span> <span class="s1">&#39;for now mode must be &quot;a&quot; or &quot;w&quot;&#39;</span>
+    <span class="k">assert</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">),</span> <span class="s1">&#39;for now mode must be &quot;a&quot; or &quot;w&quot;&#39;</span>
 
-  <span class="c1">#TODO: remove Api calls</span>
-  <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.Io</span> <span class="kn">import</span> <span class="n">Api</span> <span class="k">as</span> <span class="n">apiIo</span>
-  <span class="n">repositoryPath</span> <span class="o">=</span> <span class="n">apiIo</span><span class="o">.</span><span class="n">getRepositoryPath</span><span class="p">(</span><span class="n">memopsRoot</span><span class="p">,</span> <span class="s1">&#39;userData&#39;</span><span class="p">)</span>
-  <span class="n">logDirectory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">repositoryPath</span><span class="p">,</span> <span class="s1">&#39;logs&#39;</span><span class="p">)</span>
+    <span class="c1">#TODO: remove Api calls</span>
+    <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.Io</span> <span class="kn">import</span> <span class="n">Api</span> <span class="k">as</span> <span class="n">apiIo</span>
 
-  <span class="n">today</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
-  <span class="n">fileName</span> <span class="o">=</span> <span class="s1">&#39;log_</span><span class="si">%s</span><span class="s1">_</span><span class="si">%02d%02d%02d</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">loggerName</span><span class="p">,</span> <span class="n">today</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">today</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="n">today</span><span class="o">.</span><span class="n">day</span><span class="p">)</span>
+    <span class="n">repositoryPath</span> <span class="o">=</span> <span class="n">apiIo</span><span class="o">.</span><span class="n">getRepositoryPath</span><span class="p">(</span><span class="n">memopsRoot</span><span class="p">,</span> <span class="s1">&#39;userData&#39;</span><span class="p">)</span>
+    <span class="n">logDirectory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">repositoryPath</span><span class="p">,</span> <span class="s1">&#39;logs&#39;</span><span class="p">)</span>
 
-  <span class="n">logPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">logDirectory</span><span class="p">,</span> <span class="n">fileName</span><span class="p">)</span>
+    <span class="n">today</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
+    <span class="n">fileName</span> <span class="o">=</span> <span class="s1">&#39;log_</span><span class="si">%s</span><span class="s1">_</span><span class="si">%02d%02d%02d</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">loggerName</span><span class="p">,</span> <span class="n">today</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">today</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="n">today</span><span class="o">.</span><span class="n">day</span><span class="p">)</span>
 
-  <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">logDirectory</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">logPath</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">logPath</span><span class="p">):</span>
-      <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;log file &quot;</span><span class="si">%s</span><span class="s1">&quot; is a directory&#39;</span> <span class="o">%</span> <span class="n">logPath</span><span class="p">)</span>
-  <span class="k">else</span><span class="p">:</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">logDirectory</span><span class="p">)</span>
+    <span class="n">logPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">logDirectory</span><span class="p">,</span> <span class="n">fileName</span><span class="p">)</span>
 
-  <span class="n">_removeOldLogFiles</span><span class="p">(</span><span class="n">logPath</span><span class="p">,</span> <span class="n">removeOldLogsDays</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">logDirectory</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">logPath</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">logPath</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;log file &quot;</span><span class="si">%s</span><span class="s1">&quot; is a directory&#39;</span> <span class="o">%</span> <span class="n">logPath</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">logDirectory</span><span class="p">)</span>
 
-  <span class="k">if</span> <span class="n">logger</span><span class="p">:</span>
-    <span class="c1"># there seems no way to close the logger itself</span>
-    <span class="c1"># and just closing the handler does not work</span>
-    <span class="c1"># (and certainly do not want to close stdout or stderr)</span>
-    <span class="k">for</span> <span class="n">handler</span> <span class="ow">in</span> <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">:</span>
-      <span class="n">logger</span><span class="o">.</span><span class="n">removeHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
-  <span class="k">else</span><span class="p">:</span>
-    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">loggerName</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">propagate</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">_removeOldLogFiles</span><span class="p">(</span><span class="n">logPath</span><span class="p">,</span> <span class="n">removeOldLogsDays</span><span class="p">)</span>
 
-  <span class="n">logger</span><span class="o">.</span><span class="n">logPath</span> <span class="o">=</span> <span class="n">logPath</span>  <span class="c1"># just for convenience</span>
-  <span class="n">logger</span><span class="o">.</span><span class="n">shutdown</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">shutdown</span>  <span class="c1"># just for convenience but tricky</span>
+    <span class="k">if</span> <span class="n">logger</span><span class="p">:</span>
+        <span class="c1"># there seems no way to close the logger itself</span>
+        <span class="c1"># and just closing the handler does not work</span>
+        <span class="c1"># (and certainly do not want to close stdout or stderr)</span>
+        <span class="k">for</span> <span class="n">handler</span> <span class="ow">in</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">removeHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">loggerName</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">propagate</span> <span class="o">=</span> <span class="bp">False</span>
 
-  <span class="k">if</span> <span class="n">level</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-    <span class="n">level</span> <span class="o">=</span> <span class="n">defaultLogLevel</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">logPath</span> <span class="o">=</span> <span class="n">logPath</span>  <span class="c1"># just for convenience</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">shutdown</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">shutdown</span>  <span class="c1"># just for convenience but tricky</span>
 
-  <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">level</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">level</span> <span class="o">=</span> <span class="n">defaultLogLevel</span>
 
-  <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span><span class="n">logPath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
-  <span class="n">_setupHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
 
-  <span class="k">if</span> <span class="n">stream</span><span class="p">:</span>
-    <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
+    <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span><span class="n">logPath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
     <span class="n">_setupHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
 
-  <span class="c1"># logger.debug1 = logger.debug</span>
-  <span class="n">logger</span><span class="o">.</span><span class="n">info</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">_info</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
-  <span class="n">logger</span><span class="o">.</span><span class="n">debug1</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">_debug1</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
-  <span class="n">logger</span><span class="o">.</span><span class="n">debug</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">debug1</span>
-  <span class="n">logger</span><span class="o">.</span><span class="n">debug2</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">_debug2</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
-  <span class="n">logger</span><span class="o">.</span><span class="n">debug3</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">_debug3</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
-  <span class="n">logger</span><span class="o">.</span><span class="n">debugGL</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">_debugGLError</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">stream</span><span class="p">:</span>
+        <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
+        <span class="n">_setupHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
 
-  <span class="n">logging</span><span class="o">.</span><span class="n">addLevelName</span><span class="p">(</span><span class="n">DEBUG2</span><span class="p">,</span> <span class="s1">&#39;DEBUG2&#39;</span><span class="p">)</span>
-  <span class="n">logging</span><span class="o">.</span><span class="n">addLevelName</span><span class="p">(</span><span class="n">DEBUG3</span><span class="p">,</span> <span class="s1">&#39;DEBUG3&#39;</span><span class="p">)</span>
+    <span class="c1"># logger.debug1 = logger.debug</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">_info</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug1</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">_debug1</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">debug1</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug2</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">_debug2</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug3</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">_debug3</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debugGL</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">_debugGLError</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
 
-  <span class="k">return</span> <span class="n">logger</span></div>
+    <span class="n">logging</span><span class="o">.</span><span class="n">addLevelName</span><span class="p">(</span><span class="n">DEBUG2</span><span class="p">,</span> <span class="s1">&#39;DEBUG2&#39;</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">addLevelName</span><span class="p">(</span><span class="n">DEBUG3</span><span class="p">,</span> <span class="s1">&#39;DEBUG3&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">logger</span></div>
+
 
 <span class="k">def</span> <span class="nf">_setupHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Add a stream handler for this logger.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Add a stream handler for this logger.&quot;&quot;&quot;</span>
 
-  <span class="c1"># handler = logging.StreamHandler(stream)</span>
-  <span class="n">handler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+    <span class="c1"># handler = logging.StreamHandler(stream)</span>
+    <span class="n">handler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
 
-  <span class="c1">#format = &#39;%(levelname)s: %(module)s:%(funcName)s:%(asctime)s:%(message)s&#39;</span>
-  <span class="c1">#format = &#39;%(levelname)-7s: %(module)s.%(funcName)s : %(message)s&#39;</span>
-  <span class="n">format</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%(levelname)-7s</span><span class="s1">: </span><span class="si">%(message)-90s</span><span class="s1">    (</span><span class="si">%(module)s</span><span class="s1">.</span><span class="si">%(funcName)s</span><span class="s1">:</span><span class="si">%(lineno)s</span><span class="s1">)&#39;</span>
+    <span class="c1">#format = &#39;%(levelname)s: %(module)s:%(funcName)s:%(asctime)s:%(message)s&#39;</span>
+    <span class="c1">#format = &#39;%(levelname)-7s: %(module)s.%(funcName)s : %(message)s&#39;</span>
+    <span class="n">format</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%(levelname)-7s</span><span class="s1">: </span><span class="si">%(message)-90s</span><span class="s1">    (</span><span class="si">%(module)s</span><span class="s1">.</span><span class="si">%(funcName)s</span><span class="s1">:</span><span class="si">%(lineno)s</span><span class="s1">)&#39;</span>
 
-  <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="n">format</span><span class="p">)</span>
-  <span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+    <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="n">format</span><span class="p">)</span>
+    <span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
 
-  <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+
 
 <span class="c1"># def _addStreamHandler(logger, stream, level=logging.WARNING):</span>
 <span class="c1">#   &quot;&quot;&quot;Add a stream handler for this logger.&quot;&quot;&quot;</span>
@@ -245,26 +256,27 @@
 <span class="c1">#   logger.addHandler(handler)</span>
 
 <span class="k">def</span> <span class="nf">_removeOldLogFiles</span><span class="p">(</span><span class="n">logPath</span><span class="p">,</span> <span class="n">removeOldLogsDays</span><span class="o">=</span><span class="n">MAX_LOG_FILE_DAYS</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Remove old log files.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Remove old log files.&quot;&quot;&quot;</span>
 
-  <span class="n">logDirectory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">logPath</span><span class="p">)</span>
-  <span class="n">logFiles</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">logDirectory</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">logDirectory</span><span class="p">)]</span>
-  <span class="n">logFiles</span> <span class="o">=</span> <span class="p">[</span><span class="n">logFile</span> <span class="k">for</span> <span class="n">logFile</span> <span class="ow">in</span> <span class="n">logFiles</span> <span class="k">if</span> <span class="n">logFile</span> <span class="o">!=</span> <span class="n">logPath</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">logFile</span><span class="p">)]</span>
+    <span class="n">logDirectory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">logPath</span><span class="p">)</span>
+    <span class="n">logFiles</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">logDirectory</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">logDirectory</span><span class="p">)]</span>
+    <span class="n">logFiles</span> <span class="o">=</span> <span class="p">[</span><span class="n">logFile</span> <span class="k">for</span> <span class="n">logFile</span> <span class="ow">in</span> <span class="n">logFiles</span> <span class="k">if</span> <span class="n">logFile</span> <span class="o">!=</span> <span class="n">logPath</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">logFile</span><span class="p">)]</span>
 
-  <span class="n">currentTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-  <span class="n">removeTime</span> <span class="o">=</span> <span class="n">currentTime</span> <span class="o">-</span> <span class="n">removeOldLogsDays</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">3600</span>
-  <span class="k">for</span> <span class="n">logFile</span> <span class="ow">in</span> <span class="n">logFiles</span><span class="p">:</span>
-    <span class="c1"># print (&#39;### checking&#39;, logFile)</span>
-    <span class="n">mtime</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">logFile</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">mtime</span> <span class="o">&lt;</span> <span class="n">removeTime</span><span class="p">:</span>
-      <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">logFile</span><span class="p">)</span>
+    <span class="n">currentTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">removeTime</span> <span class="o">=</span> <span class="n">currentTime</span> <span class="o">-</span> <span class="n">removeOldLogsDays</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">3600</span>
+    <span class="k">for</span> <span class="n">logFile</span> <span class="ow">in</span> <span class="n">logFiles</span><span class="p">:</span>
+        <span class="c1"># print (&#39;### checking&#39;, logFile)</span>
+        <span class="n">mtime</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">logFile</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mtime</span> <span class="o">&lt;</span> <span class="n">removeTime</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">logFile</span><span class="p">)</span>
+
 
 <div class="viewcode-block" id="setLevel"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Logging.setLevel">[docs]</a><span class="k">def</span> <span class="nf">setLevel</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Set the logger level (including for the handlers)&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Set the logger level (including for the handlers)&quot;&quot;&quot;</span>
 
-  <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
-  <span class="k">for</span> <span class="n">handler</span> <span class="ow">in</span> <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">:</span>
-    <span class="n">handler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span></div>
+    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">handler</span> <span class="ow">in</span> <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">:</span>
+        <span class="n">handler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span></div>
 </pre></div>
 
           </div>

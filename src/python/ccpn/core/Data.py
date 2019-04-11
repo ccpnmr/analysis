@@ -25,8 +25,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from typing import Optional
-import collections
-from functools import partial
 from ccpnmodel.ccpncore.lib import Util as coreUtil
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import Data as ApiData
@@ -35,8 +33,7 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.Project import Project
 from ccpn.core.DataSet import DataSet
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
-    logCommandBlock, undoStackBlocking, renameObject
+from ccpn.core.lib.ContextManagers import newObject, renameObject
 from ccpn.util.Logging import getLogger
 from functools import partial
 

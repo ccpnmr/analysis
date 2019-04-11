@@ -50,18 +50,18 @@
 <span></span><span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:23 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -85,70 +85,72 @@
 <span class="n">spectrum_x_ppm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">CENTER</span> <span class="o">+</span> <span class="n">SW_PPM</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">CENTER</span> <span class="o">-</span> <span class="n">SW_PPM</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">POINTS</span><span class="p">)</span>
 <span class="n">spectrum_x_hz</span> <span class="o">=</span> <span class="n">spectrum_x_ppm</span> <span class="o">*</span> <span class="n">FIELD</span>
 
-
-<span class="n">procs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;BYTORDP&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="c1"># Byte order, little (0) or big (1) endian</span>
-         <span class="s1">&#39;NC_proc&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="c1"># Data scaling factor, -3 means data were multiplied by 2**3, 4 means divided by 2**4</span>
-         <span class="s1">&#39;SI&#39;</span><span class="p">:</span> <span class="n">POINTS</span><span class="p">,</span> <span class="c1"># Size of processed data</span>
-         <span class="s1">&#39;XDIM&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="c1"># Block size for 2D &amp; 3D data</span>
-         <span class="s1">&#39;FTSIZE&#39;</span><span class="p">:</span> <span class="n">POINTS</span><span class="p">,</span> <span class="c1"># Size of FT output.  Same as SI except for strip plotting.</span>
-         <span class="s1">&#39;SW_p&#39;</span><span class="p">:</span> <span class="n">SW_PPM</span> <span class="o">*</span> <span class="n">FIELD</span><span class="p">,</span> <span class="c1"># Spectral width of processed data in Hz</span>
-         <span class="s1">&#39;SF&#39;</span><span class="p">:</span> <span class="n">FIELD</span><span class="p">,</span> <span class="c1"># Spectral reference position (center of spectrum)</span>
-         <span class="s1">&#39;OFFSET&#39;</span><span class="p">:</span> <span class="n">SW_PPM</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">CENTER</span><span class="p">,</span> <span class="c1"># ppm value of left-most point in spectrum</span>
+<span class="n">procs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;BYTORDP&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  <span class="c1"># Byte order, little (0) or big (1) endian</span>
+         <span class="s1">&#39;NC_proc&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  <span class="c1"># Data scaling factor, -3 means data were multiplied by 2**3, 4 means divided by 2**4</span>
+         <span class="s1">&#39;SI&#39;</span><span class="p">:</span> <span class="n">POINTS</span><span class="p">,</span>  <span class="c1"># Size of processed data</span>
+         <span class="s1">&#39;XDIM&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  <span class="c1"># Block size for 2D &amp; 3D data</span>
+         <span class="s1">&#39;FTSIZE&#39;</span><span class="p">:</span> <span class="n">POINTS</span><span class="p">,</span>  <span class="c1"># Size of FT output.  Same as SI except for strip plotting.</span>
+         <span class="s1">&#39;SW_p&#39;</span><span class="p">:</span> <span class="n">SW_PPM</span> <span class="o">*</span> <span class="n">FIELD</span><span class="p">,</span>  <span class="c1"># Spectral width of processed data in Hz</span>
+         <span class="s1">&#39;SF&#39;</span><span class="p">:</span> <span class="n">FIELD</span><span class="p">,</span>  <span class="c1"># Spectral reference position (center of spectrum)</span>
+         <span class="s1">&#39;OFFSET&#39;</span><span class="p">:</span> <span class="n">SW_PPM</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">CENTER</span><span class="p">,</span>  <span class="c1"># ppm value of left-most point in spectrum</span>
          <span class="s1">&#39;AXNUC&#39;</span><span class="p">:</span> <span class="s1">&#39;&lt;1H&gt;&#39;</span><span class="p">,</span>
-         <span class="s1">&#39;LB&#39;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span> <span class="c1"># Lorentzian broadening size (Hz)</span>
-         <span class="s1">&#39;GB&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="c1"># Gaussian broadening factor</span>
-         <span class="s1">&#39;SSB&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="c1"># Sine bell shift pi/ssb.  =1 for sine and =2 for cosine.  values &lt;2 default to sine</span>
-         <span class="s1">&#39;WDW&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="c1"># Window multiplication mode</span>
-         <span class="s1">&#39;TM1&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="c1"># End of the rising edge of trapezoidal, takes a value from 0-1, must be less than TM2</span>
-         <span class="s1">&#39;TM2&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="c1"># Beginings of the falling edge of trapezoidal, takes a value from 0-1, must be greater than TM1</span>
-         <span class="s1">&#39;BC_mod&#39;</span><span class="p">:</span> <span class="mi">0</span> <span class="c1"># Baseline correction mode (em, gm, sine, qsine, trap, user(?), sinc, qsinc, traf, trafs(JMR 71 1987, 237))</span>
-        <span class="p">}</span>
+         <span class="s1">&#39;LB&#39;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span>  <span class="c1"># Lorentzian broadening size (Hz)</span>
+         <span class="s1">&#39;GB&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  <span class="c1"># Gaussian broadening factor</span>
+         <span class="s1">&#39;SSB&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  <span class="c1"># Sine bell shift pi/ssb.  =1 for sine and =2 for cosine.  values &lt;2 default to sine</span>
+         <span class="s1">&#39;WDW&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># Window multiplication mode</span>
+         <span class="s1">&#39;TM1&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  <span class="c1"># End of the rising edge of trapezoidal, takes a value from 0-1, must be less than TM2</span>
+         <span class="s1">&#39;TM2&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># Beginings of the falling edge of trapezoidal, takes a value from 0-1, must be greater than TM1</span>
+         <span class="s1">&#39;BC_mod&#39;</span><span class="p">:</span> <span class="mi">0</span>  <span class="c1"># Baseline correction mode (em, gm, sine, qsine, trap, user(?), sinc, qsinc, traf, trafs(JMR 71 1987, 237))</span>
+         <span class="p">}</span>
+
 
 <div class="viewcode-block" id="Borg"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisMetabolomics.lib.html#ccpn.AnalysisMetabolomics.lib.persistence.Borg">[docs]</a><span class="k">class</span> <span class="nc">Borg</span><span class="p">:</span>
     <span class="n">_shared_state</span> <span class="o">=</span> <span class="p">{}</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shared_state</span></div>
 
 
 <div class="viewcode-block" id="MetabolomicsPersistenceDict"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisMetabolomics.lib.html#ccpn.AnalysisMetabolomics.lib.persistence.MetabolomicsPersistenceDict">[docs]</a><span class="k">class</span> <span class="nc">MetabolomicsPersistenceDict</span><span class="p">(</span><span class="n">OrderedDict</span><span class="p">):</span>
-  <span class="k">class</span> <span class="nc">__Inner</span><span class="p">(</span><span class="n">OrderedDict</span><span class="p">):</span>
-    <span class="k">pass</span>
-  <span class="n">instance</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">class</span> <span class="nc">__Inner</span><span class="p">(</span><span class="n">OrderedDict</span><span class="p">):</span>
+        <span class="k">pass</span>
 
-  <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">instance</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">cls</span><span class="o">.</span><span class="n">instance</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__Inner</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">instance</span></div>
+
+    <span class="n">instance</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">instance</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">instance</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__Inner</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">instance</span></div>
 
 
 <div class="viewcode-block" id="bruker1dDict"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisMetabolomics.lib.html#ccpn.AnalysisMetabolomics.lib.persistence.bruker1dDict">[docs]</a><span class="k">def</span> <span class="nf">bruker1dDict</span><span class="p">(</span><span class="n">refDF</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">SF</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">FTSIZE</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">SW_p</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">OFFSET</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-  <span class="n">procs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;BYTORDP&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="c1"># Byte order, little (0) or big (1) endian</span>
-           <span class="s1">&#39;XDIM&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="c1"># Block size for 2D &amp; 3D data</span>
-           <span class="s1">&#39;SF&#39;</span><span class="p">:</span> <span class="n">SF</span><span class="p">,</span> <span class="c1"># Spectral reference frequency (center of spectrum)</span>
-           <span class="s1">&#39;FTSIZE&#39;</span><span class="p">:</span> <span class="n">FTSIZE</span><span class="p">,</span> <span class="c1"># Size of FT output.  Same as SI except for strip plotting.</span>
-           <span class="s1">&#39;AXNUC&#39;</span><span class="p">:</span> <span class="s1">&#39;&lt;1H&gt;&#39;</span><span class="p">,</span>
-           <span class="s1">&#39;WDW&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="c1"># Window multiplication mode</span>
-           <span class="s1">&#39;BC_mod&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="c1"># Baseline correction mode (em, gm, sine, qsine, trap, user(?), sinc, qsinc, traf, trafs(JMR 71 1987, 237))</span>
-           <span class="s1">&#39;LB&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="c1"># Lorentzian broadening size (Hz)</span>
-           <span class="s1">&#39;GB&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="c1"># Gaussian broadening factor</span>
-           <span class="s1">&#39;SSB&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="c1"># Sine bell shift pi/ssb.  =1 for sine and =2 for cosine.  values &lt;2 default to sine</span>
-           <span class="s1">&#39;TM1&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="c1"># End of the rising edge of trapezoidal, takes a value from 0-1, must be less than TM2</span>
-           <span class="s1">&#39;TM2&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="c1"># Beginings of the falling edge of trapezoidal, takes a value from 0-1, must be greater than TM1</span>
-          <span class="p">}</span>
-  <span class="n">procs</span><span class="p">[</span><span class="s1">&#39;SW_p&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">SW_p</span> <span class="c1"># Spectral width of processed data in Hz</span>
-  <span class="n">procs</span><span class="p">[</span><span class="s1">&#39;OFFSET&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">OFFSET</span> <span class="c1"># ppm value of left-most point in spectrum</span>
-  <span class="n">procs</span><span class="p">[</span><span class="s1">&#39;SI&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">FTSIZE</span>
+    <span class="n">procs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;BYTORDP&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  <span class="c1"># Byte order, little (0) or big (1) endian</span>
+             <span class="s1">&#39;XDIM&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  <span class="c1"># Block size for 2D &amp; 3D data</span>
+             <span class="s1">&#39;SF&#39;</span><span class="p">:</span> <span class="n">SF</span><span class="p">,</span>  <span class="c1"># Spectral reference frequency (center of spectrum)</span>
+             <span class="s1">&#39;FTSIZE&#39;</span><span class="p">:</span> <span class="n">FTSIZE</span><span class="p">,</span>  <span class="c1"># Size of FT output.  Same as SI except for strip plotting.</span>
+             <span class="s1">&#39;AXNUC&#39;</span><span class="p">:</span> <span class="s1">&#39;&lt;1H&gt;&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;WDW&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># Window multiplication mode</span>
+             <span class="s1">&#39;BC_mod&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  <span class="c1"># Baseline correction mode (em, gm, sine, qsine, trap, user(?), sinc, qsinc, traf, trafs(JMR 71 1987, 237))</span>
+             <span class="s1">&#39;LB&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>  <span class="c1"># Lorentzian broadening size (Hz)</span>
+             <span class="s1">&#39;GB&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>  <span class="c1"># Gaussian broadening factor</span>
+             <span class="s1">&#39;SSB&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>  <span class="c1"># Sine bell shift pi/ssb.  =1 for sine and =2 for cosine.  values &lt;2 default to sine</span>
+             <span class="s1">&#39;TM1&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>  <span class="c1"># End of the rising edge of trapezoidal, takes a value from 0-1, must be less than TM2</span>
+             <span class="s1">&#39;TM2&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>  <span class="c1"># Beginings of the falling edge of trapezoidal, takes a value from 0-1, must be greater than TM1</span>
+             <span class="p">}</span>
+    <span class="n">procs</span><span class="p">[</span><span class="s1">&#39;SW_p&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">SW_p</span>  <span class="c1"># Spectral width of processed data in Hz</span>
+    <span class="n">procs</span><span class="p">[</span><span class="s1">&#39;OFFSET&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">OFFSET</span>  <span class="c1"># ppm value of left-most point in spectrum</span>
+    <span class="n">procs</span><span class="p">[</span><span class="s1">&#39;SI&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">FTSIZE</span>
 
-  <span class="k">if</span> <span class="n">refDF</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-    <span class="n">ppmMin</span><span class="p">,</span> <span class="n">ppmMax</span> <span class="o">=</span> <span class="n">refDF</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">refDF</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
-    <span class="n">swPpm</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ppmMax</span><span class="p">)</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">ppmMin</span><span class="p">)</span>
-    <span class="n">procs</span><span class="p">[</span><span class="s1">&#39;SW_p&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">swPpm</span> <span class="o">*</span> <span class="n">procs</span><span class="p">[</span><span class="s1">&#39;SF&#39;</span><span class="p">]</span>
-    <span class="n">procs</span><span class="p">[</span><span class="s1">&#39;OFFSET&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ppmMax</span>
-    <span class="n">procs</span><span class="p">[</span><span class="s1">&#39;FTSIZE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">refDF</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
-    <span class="n">procs</span><span class="p">[</span><span class="s1">&#39;SI&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">refDF</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">refDF</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">ppmMin</span><span class="p">,</span> <span class="n">ppmMax</span> <span class="o">=</span> <span class="n">refDF</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">refDF</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="n">swPpm</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ppmMax</span><span class="p">)</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">ppmMin</span><span class="p">)</span>
+        <span class="n">procs</span><span class="p">[</span><span class="s1">&#39;SW_p&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">swPpm</span> <span class="o">*</span> <span class="n">procs</span><span class="p">[</span><span class="s1">&#39;SF&#39;</span><span class="p">]</span>
+        <span class="n">procs</span><span class="p">[</span><span class="s1">&#39;OFFSET&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ppmMax</span>
+        <span class="n">procs</span><span class="p">[</span><span class="s1">&#39;FTSIZE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">refDF</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="n">procs</span><span class="p">[</span><span class="s1">&#39;SI&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">refDF</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
 
-  <span class="k">return</span> <span class="n">procs</span></div>
-
+    <span class="k">return</span> <span class="n">procs</span></div>
 
 
 <div class="viewcode-block" id="writeBruker"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisMetabolomics.lib.html#ccpn.AnalysisMetabolomics.lib.persistence.writeBruker">[docs]</a><span class="k">def</span> <span class="nf">writeBruker</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">dic</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
@@ -160,8 +162,8 @@
         <span class="k">pass</span>
 
     <span class="n">specMax2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
-    <span class="n">factor</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">29</span><span class="o">-</span><span class="n">specMax2</span><span class="p">)</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="n">factor</span>
+    <span class="n">factor</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">29</span> <span class="o">-</span> <span class="n">specMax2</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">**</span> <span class="n">factor</span>
     <span class="n">dic</span><span class="p">[</span><span class="s1">&#39;NC_proc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">factor</span>
 
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">procDir</span><span class="p">,</span> <span class="s1">&#39;procs&#39;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
@@ -173,15 +175,14 @@
 
 
 <div class="viewcode-block" id="spectraDicToBrukerExperiment"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisMetabolomics.lib.html#ccpn.AnalysisMetabolomics.lib.persistence.spectraDicToBrukerExperiment">[docs]</a><span class="k">def</span> <span class="nf">spectraDicToBrukerExperiment</span><span class="p">(</span><span class="n">spectraDF</span><span class="p">,</span> <span class="n">directoryName</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spectraDF</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-    <span class="n">l</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">spectraDF</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="n">spectraDF</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-         <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">spectraDF</span><span class="o">.</span><span class="n">keys</span><span class="p">())]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spectraDF</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">spectraDF</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="n">spectraDF</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+             <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">spectraDF</span><span class="o">.</span><span class="n">keys</span><span class="p">())]</span>
 
-    <span class="n">spectraDF</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-  <span class="n">procs</span> <span class="o">=</span> <span class="n">bruker1dDict</span><span class="p">(</span><span class="n">spectraDF</span><span class="p">,</span> <span class="n">SF</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
-  <span class="k">for</span> <span class="n">pcName</span> <span class="ow">in</span> <span class="n">spectraDF</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
-    <span class="n">writeBruker</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directoryName</span><span class="p">,</span> <span class="n">pcName</span><span class="p">),</span> <span class="n">procs</span><span class="p">,</span> <span class="n">spectraDF</span><span class="o">.</span><span class="n">ix</span><span class="p">[</span><span class="n">pcName</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span></div>
-
+        <span class="n">spectraDF</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">procs</span> <span class="o">=</span> <span class="n">bruker1dDict</span><span class="p">(</span><span class="n">spectraDF</span><span class="p">,</span> <span class="n">SF</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">pcName</span> <span class="ow">in</span> <span class="n">spectraDF</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+        <span class="n">writeBruker</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directoryName</span><span class="p">,</span> <span class="n">pcName</span><span class="p">),</span> <span class="n">procs</span><span class="p">,</span> <span class="n">spectraDF</span><span class="o">.</span><span class="n">ix</span><span class="p">[</span><span class="n">pcName</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span></div>
 </pre></div>
 
           </div>

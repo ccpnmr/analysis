@@ -53,18 +53,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Wayne Boucher $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:49 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -91,9 +91,11 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
 <span class="c1"># from ccpn.ui.gui.widgets.Table import ObjectTable, Column</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>  <span class="c1"># ejb</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.QuickTable</span> <span class="kn">import</span> <span class="n">QuickTable</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.GuiTable</span> <span class="kn">import</span> <span class="n">GuiTable</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Column</span> <span class="kn">import</span> <span class="n">Column</span><span class="p">,</span> <span class="n">ColumnClass</span>
 
+
+<span class="n">MINHEIGHT</span> <span class="o">=</span> <span class="mi">100</span>
 
 <div class="viewcode-block" id="ProjectSummaryPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.ProjectSummaryPopup.ProjectSummaryPopup">[docs]</a><span class="k">class</span> <span class="nc">ProjectSummaryPopup</span><span class="p">(</span><span class="n">CcpnDialog</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Project Summary&#39;</span><span class="p">,</span> <span class="n">modal</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
@@ -120,7 +122,7 @@
         <span class="c1"># SPECTRA</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">spectrumFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectrumLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Spectra&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spectrumLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Spectra&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
         <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="n">columnsSpectrum</span> <span class="o">=</span> <span class="n">ColumnClass</span><span class="p">([</span>
@@ -137,21 +139,22 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">dataFrameSpectrum</span> <span class="o">=</span> <span class="bp">None</span>
 
         <span class="c1"># initialise the table</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectrumTable</span> <span class="o">=</span> <span class="n">QuickTable</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumFrame</span><span class="p">,</span>
-                                        <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span>
-                                        <span class="n">dataFrameObject</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                                        <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                                        <span class="n">autoResize</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                                        <span class="n">enableDelete</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                                        <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-                                        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spectrumTable</span> <span class="o">=</span> <span class="n">GuiTable</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumFrame</span><span class="p">,</span>
+                                      <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span>
+                                      <span class="n">dataFrameObject</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                      <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                      <span class="n">autoResize</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                      <span class="n">enableDelete</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                                      <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                                      <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spectrumTable</span><span class="o">.</span><span class="n">setMinimumHeight</span><span class="p">(</span><span class="n">MINHEIGHT</span><span class="p">)</span>
         <span class="c1"># self.spectrumTable = ObjectTable(self.spectrumFrame, columns=columns, objects=self.spectra, grid=(1, 0))</span>
         <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="c1"># PEAKLISTS</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">peakListFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">peakListLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peakListFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;PeakLists&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">peakListLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peakListFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;PeakLists&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
         <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="n">columnsPeakList</span> <span class="o">=</span> <span class="n">ColumnClass</span><span class="p">([</span>
@@ -173,21 +176,22 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">dataFramePeakList</span> <span class="o">=</span> <span class="bp">None</span>
 
         <span class="c1"># initialise the table</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">peakListTable</span> <span class="o">=</span> <span class="n">QuickTable</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">peakListFrame</span><span class="p">,</span>
-                                        <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span>
-                                        <span class="n">dataFrameObject</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                                        <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                                        <span class="n">autoResize</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                                        <span class="n">enableDelete</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                                        <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-                                        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">peakListTable</span> <span class="o">=</span> <span class="n">GuiTable</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">peakListFrame</span><span class="p">,</span>
+                                      <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span>
+                                      <span class="n">dataFrameObject</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                      <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                      <span class="n">autoResize</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                      <span class="n">enableDelete</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                                      <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                                      <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">peakListTable</span><span class="o">.</span><span class="n">setMinimumHeight</span><span class="p">(</span><span class="n">MINHEIGHT</span><span class="p">)</span>
         <span class="c1"># self.peakListTable = ObjectTable(self.peakListFrame, columns=columns, objects=self.peakLists, grid=(1, 0))</span>
         <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="c1"># CHAINS</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">chainFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">chainLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chainFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Chains&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chainLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chainFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Chains&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
         <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="n">columnsChain</span> <span class="o">=</span> <span class="n">ColumnClass</span><span class="p">([</span>
@@ -207,19 +211,22 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">dataFrameChains</span> <span class="o">=</span> <span class="bp">None</span>
 
         <span class="c1"># initialise the table</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">chainTable</span> <span class="o">=</span> <span class="n">QuickTable</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chainFrame</span><span class="p">,</span>
-                                     <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span>
-                                     <span class="n">dataFrameObject</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                                     <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                                     <span class="n">autoResize</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                                     <span class="n">enableDelete</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                                     <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-                                     <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chainTable</span> <span class="o">=</span> <span class="n">GuiTable</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chainFrame</span><span class="p">,</span>
+                                   <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span>
+                                   <span class="n">dataFrameObject</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                   <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                   <span class="n">autoResize</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                   <span class="n">enableDelete</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                                   <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                                   <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chainTable</span><span class="o">.</span><span class="n">setMinimumHeight</span><span class="p">(</span><span class="n">MINHEIGHT</span><span class="p">)</span>
         <span class="c1"># self.chainTable = ObjectTable(self.chainFrame, columns=columns, objects=self.chains, grid=(1, 0))</span>
         <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
 
-        <span class="c1"># buttons</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span><span class="o">.</span><span class="n">addSpacer</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+        <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
 
+        <span class="c1"># Buttons</span>
         <span class="n">buttonFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
         <span class="n">button</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="n">buttonFrame</span><span class="p">,</span> <span class="s1">&#39;Save to Excel&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_saveToExcel</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
         <span class="n">button</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="n">buttonFrame</span><span class="p">,</span> <span class="s1">&#39;Save to PDF&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_saveToPdf</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>

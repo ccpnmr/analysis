@@ -47,7 +47,34 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.ui.gui.popups.NmrAtomPopup</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module Documentation here</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:48 +0100 (Fri, July 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Created</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
@@ -61,16 +88,17 @@
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.assignment.ChemicalShift</span> <span class="kn">import</span> <span class="n">PROTEIN_ATOM_NAMES</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Common</span> <span class="kn">import</span> <span class="n">isotopeCode2Nucleus</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">undoBlock</span>
 
 
 <span class="c1">###from ccpn.framework.Framework import createFramework  # see note below</span>
 
 <div class="viewcode-block" id="NmrAtomPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.NmrAtomPopup.NmrAtomPopup">[docs]</a><span class="k">class</span> <span class="nc">NmrAtomPopup</span><span class="p">(</span><span class="n">CcpnDialog</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">nmrAtom</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Nmr Atom&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">nmrAtom</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialise the widget</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">CcpnDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="n">CcpnDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="s1">&#39;Edit NmrAtom&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
@@ -106,6 +134,9 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">atomNames</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">PROTEIN_ATOM_NAMES</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y</span><span class="p">]))</span>
 
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">atomNames</span><span class="p">:</span>
+            <span class="n">atomNames</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomNamePulldown</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">texts</span><span class="o">=</span><span class="n">atomNames</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
@@ -122,6 +153,9 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">atomNames</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">PROTEIN_ATOM_NAMES</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y</span><span class="p">]))</span>
 
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">atomNames</span><span class="p">:</span>
+            <span class="n">atomNames</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomNamePulldown</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">texts</span><span class="o">=</span><span class="n">atomNames</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
@@ -136,10 +170,9 @@
 <span class="sd">          repopulate the popup widgets</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">applyAccept</span> <span class="o">=</span> <span class="bp">False</span>
-        <span class="n">oldUndo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">numItems</span><span class="p">()</span>
+        <span class="n">oldUndoItems</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">numItems</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;_applyChanges&#39;</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomNamePulldown</span><span class="o">.</span><span class="n">currentText</span><span class="p">():</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomNamePulldown</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
 
@@ -156,22 +189,17 @@
                                           <span class="n">sequenceCode</span><span class="o">=</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">,</span>
                                           <span class="n">residueType</span><span class="o">=</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">residueType</span><span class="p">,</span>
                                           <span class="n">mergeToExisting</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mergeBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">())</span>
-                    <span class="c1"># self.nmrResidue._finaliseAction(&#39;change&#39;)</span>
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;NmrAtom: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 
             <span class="n">applyAccept</span> <span class="o">=</span> <span class="bp">True</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
-            <span class="n">showWarning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">windowTitle</span><span class="p">()),</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">))</span>
-        <span class="k">finally</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">applyAccept</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
             <span class="c1"># should only undo if something new has been added to the undo deque</span>
             <span class="c1"># may cause a problem as some things may be set with the same values</span>
             <span class="c1"># and still be added to the change list, so only undo if length has changed</span>
             <span class="n">errorName</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">oldUndo</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">numItems</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">oldUndoItems</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">numItems</span><span class="p">():</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">undo</span><span class="p">()</span>
                 <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt;Undo.</span><span class="si">%s</span><span class="s1">._applychanges&#39;</span> <span class="o">%</span> <span class="n">errorName</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>

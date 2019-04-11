@@ -66,4 +66,12 @@ ccpn.framework.Version module
     :undoc-members:
     :show-inheritance:
 
+ccpn.framework.constants module
+-------------------------------
+
+.. automodule:: ccpn.framework.constants
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 

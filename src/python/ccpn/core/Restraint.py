@@ -24,17 +24,15 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from typing import Sequence, Tuple
+from typing import Sequence, Tuple, Union
 import collections
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.RestraintList import RestraintList
 from ccpn.core.Peak import Peak
 from ccpnmodel.ccpncore.api.ccp.nmr import NmrConstraint
-from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, logCommandBlock
-from ccpn.util.Logging import getLogger
+from ccpn.core.lib.ContextManagers import newObject
 
 
 class Restraint(AbstractWrapperObject):
@@ -250,7 +248,7 @@ class Restraint(AbstractWrapperObject):
                                   additionalUpperLimit: float = None, additionalLowerLimit: float = None,
                                   scale: float = 1.0, isDistanceDependent: bool = False, combinationId: int = None,
                                   restraintItems: Sequence = (), **kwds):
-        """Create new RestraintContribution within Restraint
+        """Create new RestraintContribution within Restraint.
 
         See the RestraintContribution class for details.
 
@@ -310,7 +308,7 @@ del setter
 
 @newObject(Restraint)
 def _newRestraint(self: RestraintList, figureOfMerit: float = None, comment: str = None,
-                  peaks: Sequence = (), vectorLength: float = None, serial: int = None) -> Restraint:
+                  peaks: Sequence[Union['Peak', str]] = (), vectorLength: float = None, serial: int = None) -> Restraint:
     """Create new Restraint within RestraintList.
 
     ADVANCED: Note that you just create at least one RestraintContribution afterwards in order to
@@ -320,8 +318,8 @@ def _newRestraint(self: RestraintList, figureOfMerit: float = None, comment: str
     See the Restraint class for details.
 
     :param figureOfMerit:
-    :param comment:
-    :param peaks:
+    :param comment: optional comment string
+    :param peaks: optional list of peaks as objects or pids
     :param vectorLength:
     :param serial: optional serial number.
     :return: a new Restraint instance.

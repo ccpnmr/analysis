@@ -53,19 +53,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:40 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -82,12 +81,14 @@
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui._implementation</span> <span class="kn">import</span> <span class="n">_uiImportOrder</span>
 <span class="kn">from</span> <span class="nn">ccpn.core</span> <span class="kn">import</span> <span class="n">_coreClassMap</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.Notifiers</span> <span class="kn">import</span> <span class="n">NotifierBase</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Register</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Update</span> <span class="kn">import</span> <span class="n">installUpdates</span><span class="p">,</span> <span class="n">UpdateAgent</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
 
-<div class="viewcode-block" id="Ui"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.Ui">[docs]</a><span class="k">class</span> <span class="nc">Ui</span><span class="p">:</span>
+<div class="viewcode-block" id="Ui"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.Ui">[docs]</a><span class="k">class</span> <span class="nc">Ui</span><span class="p">(</span><span class="n">NotifierBase</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Superclass for all user interface classes&quot;&quot;&quot;</span>
 
     <span class="c1"># Factory functions for UI-specific instantiation of wrapped graphics classes</span>
@@ -96,9 +97,7 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">application</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">None</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">pluginModules</span> <span class="o">=</span> <span class="p">[]</span>
 
 <div class="viewcode-block" id="Ui.addMenu"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.Ui.addMenu">[docs]</a>    <span class="k">def</span> <span class="nf">addMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -138,13 +137,16 @@
         <span class="c1"># sys.stderr.write(&#39;==&gt; Checking registration ... \n&#39;)</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>  <span class="c1"># It seems to be necessary as without the output comes after the registration screen</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isRegistered</span><span class="p">:</span>
-
             <span class="c1"># call the subclassed register method</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_registerDetails</span><span class="p">()</span>
-
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isRegistered</span><span class="p">:</span>
-                <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">### INVALID REGISTRATION, terminating</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-                <span class="k">return</span> <span class="bp">False</span>
+                <span class="n">days</span> <span class="o">=</span> <span class="n">Register</span><span class="o">.</span><span class="n">_graceCounter</span><span class="p">(</span><span class="n">Register</span><span class="o">.</span><span class="n">_fetchGraceFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">days</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">### Please register within </span><span class="si">%s</span><span class="s1"> day(s)</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span><span class="n">days</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="bp">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">### INVALID REGISTRATION, terminating</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="bp">False</span>
 
         <span class="c1">#     # sys.stderr.write(&#39;==&gt; Registered to: %s (%s)\n&#39; %</span>
         <span class="c1">#     #                  (self.application._registrationDict.get(&#39;name&#39;),</span>
@@ -162,14 +164,12 @@
         <span class="sd">&quot;&quot;&quot;Echo commands strings, one by one, to logger.</span>
 <span class="sd">        Overwritten in subclasses to handle e.g. console putput</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span>
-
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">command</span> <span class="ow">in</span> <span class="n">commands</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">command</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_execUpdates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">raise</span><span class="p">(</span><span class="s1">&#39;ERROR: ..to be subclassed by ui types&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="p">(</span><span class="s1">&#39;ERROR: ..to be subclassed by ui types&#39;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_checkUpdates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">applicationVersion</span> <span class="o">=</span> <span class="n">__version__</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># ejb - read from the header</span>
@@ -206,6 +206,7 @@
         <span class="c1"># sys.stderr.write(&#39;\n### Please register, using another application, or in Gui Mode\n&#39;)</span>
 
         <span class="kn">from</span> <span class="nn">ccpn.framework.PathsAndUrls</span> <span class="kn">import</span> <span class="n">licensePath</span>
+
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">showLicense</span><span class="p">()</span>
         <span class="k">except</span><span class="p">:</span>
@@ -263,6 +264,7 @@
         <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Please restart the program to apply the updates</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
 
+
 <div class="viewcode-block" id="TestUi"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.TestUi">[docs]</a><span class="k">class</span> <span class="nc">TestUi</span><span class="p">(</span><span class="n">NoUi</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span><span class="p">):</span>
@@ -274,12 +276,9 @@
 <span class="sd">        and store them in internal list for perusal</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">_consoleOutput</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">commands</span><span class="p">)</span>
-
-        <span class="n">logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span>
-
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">command</span> <span class="ow">in</span> <span class="n">commands</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">command</span><span class="p">)</span></div></div>
-
 </pre></div>
 
           </div>

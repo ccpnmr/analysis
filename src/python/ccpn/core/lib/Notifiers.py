@@ -177,9 +177,9 @@ class Notifier(NotifierABC):
       which can be triggered by all classes (see Table).
 
       The callback provides a dict with several key, value pairs and optional arguments and/or keyword arguments if
-      defined in the instantiation of the Notifier object. (idea following the Trailtlets concept).
+      defined in the instantiation of the Notifier object. (idea following the Traitlets concept).
       Note that this dict also contains a reference to the Notifier object itself; this way it can be used
-      to pass-on additional implementation specfic information to the callback function.
+      to pass-on additional implementation specific information to the callback function.
 
     """
 
@@ -454,7 +454,7 @@ class _NotifiersDict(OrderedDict):
 
 class NotifierBase(object):
     """
-    A class confering notifier management routines;
+    A class confering notifier management routines
     """
     NOTIFIERSDICT = '_ccpNmrV3notifiersDict'  # attribute name for storing notifiers in Ccpn objects
 
@@ -500,7 +500,7 @@ class NotifierBase(object):
         :param triggers: list of triggers to trigger callback
         :param targetName: valid className, attributeName or None (See Notifier doc string for details)
         :param callback: callback function with signature: callback(obj, parameter2 [, *args] [, **kwargs])
-        :param **kwargs: optional keyword,value arguments to callback
+        :param kwargs: optional keyword,value arguments to callback
 
         :return: a GuiNotifier instance
 

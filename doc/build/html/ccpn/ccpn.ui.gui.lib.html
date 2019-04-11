@@ -79,7 +79,7 @@
 <li class="toctree-l2"><a class="reference internal" href="ccpn.ui.gui.lib.OpenGL.html#module-ccpn.ui.gui.lib.OpenGL.CcpnOpenGLShader">ccpn.ui.gui.lib.OpenGL.CcpnOpenGLShader module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.ui.gui.lib.OpenGL.html#module-ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports">ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.ui.gui.lib.OpenGL.html#module-ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets">ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ccpn.ui.gui.lib.OpenGL.html#ccpn-ui-gui-lib-opengl-setup-module">ccpn.ui.gui.lib.OpenGL.setup module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ccpn.ui.gui.lib.OpenGL.html#module-ccpn.ui.gui.lib.OpenGL.setup">ccpn.ui.gui.lib.OpenGL.setup module</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="ccpn.ui.gui.lib.chemometrics.html">ccpn.ui.gui.lib.chemometrics package</a><ul>
@@ -115,20 +115,32 @@
 <dl class="class">
 <dt id="ccpn.ui.gui.lib.GuiIntegralListView.GuiIntegralListView">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.lib.GuiIntegralListView.</code><code class="descname">GuiIntegralListView</code><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiIntegralListView.html#GuiIntegralListView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiIntegralListView.GuiIntegralListView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.lib.GuiListView.GuiListViewABC" title="ccpn.ui.gui.lib.GuiListView.GuiListViewABC"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.lib.GuiListView.GuiListViewABC</span></code></a></p>
+<p>integralList is the CCPN wrapper object</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.lib.GuiListView">
+<span id="ccpn-ui-gui-lib-guilistview-module"></span><h2>ccpn.ui.gui.lib.GuiListView module<a class="headerlink" href="#module-ccpn.ui.gui.lib.GuiListView" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation here</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.lib.GuiListView.GuiListViewABC">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.lib.GuiListView.</code><code class="descname">GuiListViewABC</code><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiListView.html#GuiListViewABC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiListView.GuiListViewABC" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt5.QtWidgets.QGraphicsItem</span></code></p>
+<p>Base class for gui&lt;Type&gt;ListView objects</p>
 <dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiIntegralListView.GuiIntegralListView.boundingRect">
-<code class="descname">boundingRect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiIntegralListView.html#GuiIntegralListView.boundingRect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiIntegralListView.GuiIntegralListView.boundingRect" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.ui.gui.lib.GuiListView.GuiListViewABC.boundingRect">
+<code class="descname">boundingRect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiListView.html#GuiListViewABC.boundingRect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiListView.GuiListViewABC.boundingRect" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiIntegralListView.GuiIntegralListView.paint">
-<code class="descname">paint</code><span class="sig-paren">(</span><em>painter</em>, <em>option</em>, <em>widget</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiIntegralListView.html#GuiIntegralListView.paint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiIntegralListView.GuiIntegralListView.paint" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.ui.gui.lib.GuiListView.GuiListViewABC.paint">
+<code class="descname">paint</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiListView.html#GuiListViewABC.paint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiListView.GuiListViewABC.paint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiIntegralListView.GuiIntegralListView.setVisible">
-<code class="descname">setVisible</code><span class="sig-paren">(</span><em>visible</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiIntegralListView.html#GuiIntegralListView.setVisible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiIntegralListView.GuiIntegralListView.setVisible" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.ui.gui.lib.GuiListView.GuiListViewABC.setVisible">
+<code class="descname">setVisible</code><span class="sig-paren">(</span><em>visible</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiListView.html#GuiListViewABC.setVisible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiListView.GuiListViewABC.setVisible" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -141,7 +153,7 @@ It works in concert with a wrapper object for storing/retrieving attibute values
 <dl class="class">
 <dt id="ccpn.ui.gui.lib.GuiMainWindow.GuiMainWindow">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.lib.GuiMainWindow.</code><code class="descname">GuiMainWindow</code><span class="sig-paren">(</span><em>application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiMainWindow.html#GuiMainWindow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiMainWindow.GuiMainWindow" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.lib.GuiWindow.GuiWindow" title="ccpn.ui.gui.lib.GuiWindow.GuiWindow"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.lib.GuiWindow.GuiWindow</span></code></a>, <a class="reference internal" href="ccpn.core.lib.html#ccpn.core.lib.Notifiers.NotifierBase" title="ccpn.core.lib.Notifiers.NotifierBase"><code class="xref py py-class docutils literal"><span class="pre">ccpn.core.lib.Notifiers.NotifierBase</span></code></a>, <code class="xref py py-class docutils literal"><span class="pre">PyQt5.QtWidgets.QMainWindow</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.lib.GuiWindow.GuiWindow" title="ccpn.ui.gui.lib.GuiWindow.GuiWindow"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.lib.GuiWindow.GuiWindow</span></code></a>, <code class="xref py py-class docutils literal"><span class="pre">PyQt5.QtWidgets.QMainWindow</span></code></p>
 <dl class="method">
 <dt id="ccpn.ui.gui.lib.GuiMainWindow.GuiMainWindow.changeEvent">
 <code class="descname">changeEvent</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiMainWindow.html#GuiMainWindow.changeEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiMainWindow.GuiMainWindow.changeEvent" title="Permalink to this definition">¶</a></dt>
@@ -226,22 +238,8 @@ Return tuple of modules currently displayed</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.lib.GuiMultipletListView.GuiMultipletListView">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.lib.GuiMultipletListView.</code><code class="descname">GuiMultipletListView</code><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiMultipletListView.html#GuiMultipletListView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiMultipletListView.GuiMultipletListView" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt5.QtWidgets.QGraphicsItem</span></code></p>
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiMultipletListView.GuiMultipletListView.boundingRect">
-<code class="descname">boundingRect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiMultipletListView.html#GuiMultipletListView.boundingRect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiMultipletListView.GuiMultipletListView.boundingRect" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiMultipletListView.GuiMultipletListView.paint">
-<code class="descname">paint</code><span class="sig-paren">(</span><em>painter</em>, <em>option</em>, <em>widget</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiMultipletListView.html#GuiMultipletListView.paint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiMultipletListView.GuiMultipletListView.paint" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiMultipletListView.GuiMultipletListView.setVisible">
-<code class="descname">setVisible</code><span class="sig-paren">(</span><em>visible</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiMultipletListView.html#GuiMultipletListView.setVisible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiMultipletListView.GuiMultipletListView.setVisible" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.lib.GuiListView.GuiListViewABC" title="ccpn.ui.gui.lib.GuiListView.GuiListViewABC"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.lib.GuiListView.GuiListViewABC</span></code></a></p>
+<p>multipletList is the CCPN wrapper object</p>
 </dd></dl>
 
 </div>
@@ -324,181 +322,8 @@ as defined in DropBase, from which each Ccpn-Widget derives.</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.lib.GuiPeakListView.GuiPeakListView">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.lib.GuiPeakListView.</code><code class="descname">GuiPeakListView</code><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#GuiPeakListView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.GuiPeakListView" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt5.QtWidgets.QGraphicsItem</span></code></p>
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.GuiPeakListView.boundingRect">
-<code class="descname">boundingRect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#GuiPeakListView.boundingRect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.GuiPeakListView.boundingRect" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.GuiPeakListView.paint">
-<code class="descname">paint</code><span class="sig-paren">(</span><em>painter</em>, <em>option</em>, <em>widget</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#GuiPeakListView.paint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.GuiPeakListView.paint" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.GuiPeakListView.setVisible">
-<code class="descname">setVisible</code><span class="sig-paren">(</span><em>visible</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#GuiPeakListView.setVisible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.GuiPeakListView.setVisible" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.Peak1d">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.lib.GuiPeakListView.</code><code class="descname">Peak1d</code><span class="sig-paren">(</span><em>peak</em>, <em>peakListView</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#Peak1d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.Peak1d" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt5.QtWidgets.QGraphicsItem</span></code></p>
-<p>A GraphicsItem that is not actually drawn itself,
-but is the parent of the peak symbol and peak annotation.</p>
-<blockquote>
-<div>TODO: Add hover effect for 1D peaks.</div></blockquote>
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.Peak1d.boundingRect">
-<code class="descname">boundingRect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#Peak1d.boundingRect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.Peak1d.boundingRect" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.Peak1d.mousePressEvent">
-<code class="descname">mousePressEvent</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#Peak1d.mousePressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.Peak1d.mousePressEvent" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.Peak1d.paint">
-<code class="descname">paint</code><span class="sig-paren">(</span><em>painter</em>, <em>option</em>, <em>widget</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#Peak1d.paint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.Peak1d.paint" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.Peak1d.setupPeakItem">
-<code class="descname">setupPeakItem</code><span class="sig-paren">(</span><em>peakListView</em>, <em>peak</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#Peak1d.setupPeakItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.Peak1d.setupPeakItem" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.Peak1dAnnotation">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.lib.GuiPeakListView.</code><code class="descname">Peak1dAnnotation</code><span class="sig-paren">(</span><em>peakItem</em>, <em>scene</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#Peak1dAnnotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.Peak1dAnnotation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt5.QtWidgets.QGraphicsSimpleTextItem</span></code></p>
-<p>A text annotation of a peak.
-The text rotation is currently always +-45 degrees (depending on peak height).</p>
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.Peak1dAnnotation.clearPeakAnnotationItem">
-<code class="descname">clearPeakAnnotationItem</code><span class="sig-paren">(</span><em>peakItem</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#Peak1dAnnotation.clearPeakAnnotationItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.Peak1dAnnotation.clearPeakAnnotationItem" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.Peak1dAnnotation.mousePressEvent">
-<code class="descname">mousePressEvent</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#Peak1dAnnotation.mousePressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.Peak1dAnnotation.mousePressEvent" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.Peak1dAnnotation.paint">
-<code class="descname">paint</code><span class="sig-paren">(</span><em>painter</em>, <em>option</em>, <em>widget</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#Peak1dAnnotation.paint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.Peak1dAnnotation.paint" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.Peak1dAnnotation.sceneEventFilter">
-<code class="descname">sceneEventFilter</code><span class="sig-paren">(</span><em>watched</em>, <em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#Peak1dAnnotation.sceneEventFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.Peak1dAnnotation.sceneEventFilter" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.Peak1dAnnotation.setColour">
-<code class="descname">setColour</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#Peak1dAnnotation.setColour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.Peak1dAnnotation.setColour" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.Peak1dAnnotation.setupPeakAnnotation">
-<code class="descname">setupPeakAnnotation</code><span class="sig-paren">(</span><em>peakItem</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#Peak1dAnnotation.setupPeakAnnotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.Peak1dAnnotation.setupPeakAnnotation" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.Peak1dAnnotation.setupPeakAnnotationItem">
-<code class="descname">setupPeakAnnotationItem</code><span class="sig-paren">(</span><em>peakItem</em>, <em>clearLabel=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#Peak1dAnnotation.setupPeakAnnotationItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.Peak1dAnnotation.setupPeakAnnotationItem" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.Peak1dAnnotation.updatePos">
-<code class="descname">updatePos</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#Peak1dAnnotation.updatePos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.Peak1dAnnotation.updatePos" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.Peak1dSymbol">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.lib.GuiPeakListView.</code><code class="descname">Peak1dSymbol</code><span class="sig-paren">(</span><em>scene</em>, <em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#Peak1dSymbol"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.Peak1dSymbol" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt5.QtWidgets.QGraphicsItem</span></code></p>
-<p>A graphical symbol representing the peak.
-Currently only a dashed line from the peak to the peak annotation is used. This can be improved.
-The length of the line is related to the height of the peak.</p>
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.Peak1dSymbol.boundingRect">
-<code class="descname">boundingRect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#Peak1dSymbol.boundingRect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.Peak1dSymbol.boundingRect" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.Peak1dSymbol.mousePressEvent">
-<code class="descname">mousePressEvent</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#Peak1dSymbol.mousePressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.Peak1dSymbol.mousePressEvent" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.Peak1dSymbol.paint">
-<code class="descname">paint</code><span class="sig-paren">(</span><em>painter</em>, <em>option</em>, <em>widget</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#Peak1dSymbol.paint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.Peak1dSymbol.paint" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.Peak1dSymbol.setBbox">
-<code class="descname">setBbox</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#Peak1dSymbol.setBbox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.Peak1dSymbol.setBbox" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.PeakNd">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.lib.GuiPeakListView.</code><code class="descname">PeakNd</code><span class="sig-paren">(</span><em>peakListView</em>, <em>peak</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#PeakNd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.PeakNd" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt5.QtWidgets.QGraphicsItem</span></code></p>
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.PeakNd.boundingRect">
-<code class="descname">boundingRect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#PeakNd.boundingRect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.PeakNd.boundingRect" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.PeakNd.hz">
-<code class="descname">hz</code><em class="property"> = None</em><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.PeakNd.hz" title="Permalink to this definition">¶</a></dt>
-<dd><p>self.rectItem = QtWidgets.QGraphicsRectItem(-hz, -hz, sz, sz, self.peakLayer, scene)
-color = QtGui.QColor(&#8216;cyan&#8217;)
-self.rectItem.setBrush(QtGui.QBrush(color))</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.PeakNd.paint">
-<code class="descname">paint</code><span class="sig-paren">(</span><em>painter</em>, <em>option</em>, <em>widget</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#PeakNd.paint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.PeakNd.paint" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.PeakNd.setupPeakItem">
-<code class="descname">setupPeakItem</code><span class="sig-paren">(</span><em>peakListView</em>, <em>peak</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#PeakNd.setupPeakItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.PeakNd.setupPeakItem" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.PeakNdAnnotation">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.lib.GuiPeakListView.</code><code class="descname">PeakNdAnnotation</code><span class="sig-paren">(</span><em>peakItem</em>, <em>scene</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#PeakNdAnnotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.PeakNdAnnotation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt5.QtWidgets.QGraphicsSimpleTextItem</span></code></p>
-<p>A text annotation of a peak.
-The text rotation is currently always +-45 degrees (depending on peak height).</p>
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.PeakNdAnnotation.clearPeakAnnotationItem">
-<code class="descname">clearPeakAnnotationItem</code><span class="sig-paren">(</span><em>peakItem</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#PeakNdAnnotation.clearPeakAnnotationItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.PeakNdAnnotation.clearPeakAnnotationItem" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.PeakNdAnnotation.mousePressEvent">
-<code class="descname">mousePressEvent</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#PeakNdAnnotation.mousePressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.PeakNdAnnotation.mousePressEvent" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiPeakListView.PeakNdAnnotation.setupPeakAnnotationItem">
-<code class="descname">setupPeakAnnotationItem</code><span class="sig-paren">(</span><em>peakItem</em>, <em>clearLabel=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiPeakListView.html#PeakNdAnnotation.setupPeakAnnotationItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiPeakListView.PeakNdAnnotation.setupPeakAnnotationItem" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.lib.GuiListView.GuiListViewABC" title="ccpn.ui.gui.lib.GuiListView.GuiListViewABC"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.lib.GuiListView.GuiListViewABC</span></code></a></p>
+<p>peakList is the CCPN wrapper object</p>
 </dd></dl>
 
 </div>
@@ -594,6 +419,12 @@ findAxis          Find axis</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.autoRange">
+<code class="descname">autoRange</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiSpectrumDisplay.html#GuiSpectrumDisplay.autoRange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.autoRange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Zooms Y axis of current strip to show entire region.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.close">
 <code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiSpectrumDisplay.html#GuiSpectrumDisplay.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.close" title="Permalink to this definition">¶</a></dt>
 <dd><p>Close the module from the commandline</p>
@@ -610,6 +441,20 @@ findAxis          Find axis</p>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.deleteStrip">
+<code class="descname">deleteStrip</code><span class="sig-paren">(</span><em>strip</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiSpectrumDisplay.html#GuiSpectrumDisplay.deleteStrip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.deleteStrip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete a strip from the spectrumDisplay</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>strip</strong> &#8211; strip to delete as object or pid</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.displaySpectrum">
 <code class="descname">displaySpectrum</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiSpectrumDisplay.html#GuiSpectrumDisplay.displaySpectrum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.displaySpectrum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Display additional spectrum, with spectrum axes ordered according ton axisOrder</p>
@@ -619,6 +464,12 @@ findAxis          Find axis</p>
 <dt id="ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.getSettings">
 <code class="descname">getSettings</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiSpectrumDisplay.html#GuiSpectrumDisplay.getSettings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.getSettings" title="Permalink to this definition">¶</a></dt>
 <dd><p>get the settings dict from the settingsWidget</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.hideAllStripHeaders">
+<code class="descname">hideAllStripHeaders</code><span class="sig-paren">(</span><em>handle=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiSpectrumDisplay.html#GuiSpectrumDisplay.hideAllStripHeaders"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.hideAllStripHeaders" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience to hide headers of all strips</p>
 </dd></dl>
 
 <dl class="method">
@@ -642,6 +493,13 @@ findAxis          Find axis</p>
 <code class="descname">increaseTraceScale</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiSpectrumDisplay.html#GuiSpectrumDisplay.increaseTraceScale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.increaseTraceScale" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="attribute">
+<dt id="ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.isGrouped">
+<code class="descname">isGrouped</code><a class="headerlink" href="#ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.isGrouped" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>mutable</em> - 
+Return whether the spectrumDisplay contains grouped spectra</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.makeStripPlot">
 <code class="descname">makeStripPlot</code><span class="sig-paren">(</span><em>peaks=None</em>, <em>nmrResidues=None</em>, <em>autoClearMarks=True</em>, <em>sequentialStrips=True</em>, <em>markPositions=True</em>, <em>widths=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiSpectrumDisplay.html#GuiSpectrumDisplay.makeStripPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.makeStripPlot" title="Permalink to this definition">¶</a></dt>
@@ -662,9 +520,14 @@ Can only choose either peaks or nmrResidues, peaks chosen will override any sele
 </dd></dl>
 
 <dl class="method">
+<dt id="ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.profile">
+<code class="descname">profile</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.profile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.removeCurrentStrip">
 <code class="descname">removeCurrentStrip</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiSpectrumDisplay.html#GuiSpectrumDisplay.removeCurrentStrip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.removeCurrentStrip" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove current.strip if it belongs to self</p>
+<dd><p>Remove current.strip if it belongs to self.</p>
 </dd></dl>
 
 <dl class="method">
@@ -674,21 +537,15 @@ Can only choose either peaks or nmrResidues, peaks chosen will override any sele
 </dd></dl>
 
 <dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.removeStrip">
-<code class="descname">removeStrip</code><span class="sig-paren">(</span><em>strip</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiSpectrumDisplay.html#GuiSpectrumDisplay.removeStrip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.removeStrip" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove strip if it belongs to self</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.resetXZooms">
 <code class="descname">resetXZooms</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiSpectrumDisplay.html#GuiSpectrumDisplay.resetXZooms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.resetXZooms" title="Permalink to this definition">¶</a></dt>
-<dd><p>Zooms X axis of current strip to show entire region</p>
+<dd><p>Zooms X axis of current strip to show entire region.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.resetYZooms">
 <code class="descname">resetYZooms</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiSpectrumDisplay.html#GuiSpectrumDisplay.resetYZooms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.resetYZooms" title="Permalink to this definition">¶</a></dt>
-<dd><p>Zooms Y axis of current strip to show entire region</p>
+<dd><p>Zooms Y axis of current strip to show entire region.</p>
 </dd></dl>
 
 <dl class="method">
@@ -698,8 +555,10 @@ Can only choose either peaks or nmrResidues, peaks chosen will override any sele
 
 <dl class="method">
 <dt id="ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.setColumnStretches">
-<code class="descname">setColumnStretches</code><span class="sig-paren">(</span><em>stretchValue=False</em>, <em>scaleFactor=1.0</em>, <em>widths=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiSpectrumDisplay.html#GuiSpectrumDisplay.setColumnStretches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.setColumnStretches" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">setColumnStretches</code><span class="sig-paren">(</span><em>stretchValue=False</em>, <em>scaleFactor=1.0</em>, <em>widths=True</em>, <em>minimumWidth=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiSpectrumDisplay.html#GuiSpectrumDisplay.setColumnStretches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.setColumnStretches" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the column widths of the strips so that the last strip accommodates the axis bar
+if necessary.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.setHorizontalTraces">
@@ -733,8 +592,14 @@ Can only choose either peaks or nmrResidues, peaks chosen will override any sele
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.showAllStripHeaders">
+<code class="descname">showAllStripHeaders</code><span class="sig-paren">(</span><em>handle=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiSpectrumDisplay.html#GuiSpectrumDisplay.showAllStripHeaders"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.showAllStripHeaders" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience to show headers of all strips</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.showAxes">
-<code class="descname">showAxes</code><span class="sig-paren">(</span><em>strips=None</em>, <em>stretchValue=False</em>, <em>widths=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiSpectrumDisplay.html#GuiSpectrumDisplay.showAxes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.showAxes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">showAxes</code><span class="sig-paren">(</span><em>strips=None</em>, <em>stretchValue=False</em>, <em>widths=True</em>, <em>minimumWidth=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiSpectrumDisplay.html#GuiSpectrumDisplay.showAxes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.showAxes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -744,8 +609,8 @@ Can only choose either peaks or nmrResidues, peaks chosen will override any sele
 </dd></dl>
 
 <dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.toggleCrossHair">
-<code class="descname">toggleCrossHair</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiSpectrumDisplay.html#GuiSpectrumDisplay.toggleCrossHair"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.toggleCrossHair" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.toggleCrosshair">
+<code class="descname">toggleCrosshair</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiSpectrumDisplay.html#GuiSpectrumDisplay.toggleCrosshair"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay.toggleCrosshair" title="Permalink to this definition">¶</a></dt>
 <dd><p>Toggles whether cross hair is displayed in all strips of spectrum display.</p>
 </dd></dl>
 
@@ -865,11 +730,6 @@ Can only choose either peaks or nmrResidues, peaks chosen will override any sele
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiSpectrumView1d.GuiSpectrumView1d.setSliceColour">
-<code class="descname">setSliceColour</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiSpectrumView1d.html#GuiSpectrumView1d.setSliceColour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiSpectrumView1d.GuiSpectrumView1d.setSliceColour" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
 <dt id="ccpn.ui.gui.lib.GuiSpectrumView1d.GuiSpectrumView1d.update">
 <code class="descname">update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiSpectrumView1d.html#GuiSpectrumView1d.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiSpectrumView1d.GuiSpectrumView1d.update" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -909,12 +769,17 @@ Scale for trace in this spectrumView</p>
 <p>Module Documentation here</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.lib.GuiStrip.GuiStrip">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.lib.GuiStrip.</code><code class="descname">GuiStrip</code><span class="sig-paren">(</span><em>spectrumDisplay</em>, <em>useOpenGL=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiStrip.html#GuiStrip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip.GuiStrip" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.core.lib.html#ccpn.core.lib.Notifiers.NotifierBase" title="ccpn.core.lib.Notifiers.NotifierBase"><code class="xref py py-class docutils literal"><span class="pre">ccpn.core.lib.Notifiers.NotifierBase</span></code></a>, <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Frame.Frame" title="ccpn.ui.gui.widgets.Frame.Frame"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Frame.Frame</span></code></a></p>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.lib.GuiStrip.</code><code class="descname">GuiStrip</code><span class="sig-paren">(</span><em>spectrumDisplay</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiStrip.html#GuiStrip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip.GuiStrip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Frame.Frame" title="ccpn.ui.gui.widgets.Frame.Frame"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Frame.Frame</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.lib.GuiStrip.GuiStrip.autoRange">
+<code class="descname">autoRange</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiStrip.html#GuiStrip.autoRange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip.GuiStrip.autoRange" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="ccpn.ui.gui.lib.GuiStrip.GuiStrip.axisRegionChanged">
 <code class="descname">axisRegionChanged</code><span class="sig-paren">(</span><em>axis</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiStrip.html#GuiStrip.axisRegionChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip.GuiStrip.axisRegionChanged" title="Permalink to this definition">¶</a></dt>
-<dd><p>Notifier function: Update strips etc. for when axis position or width changes</p>
+<dd><p>Notifier function: Update strips etc. for when axis position or width changes.</p>
 </dd></dl>
 
 <dl class="method">
@@ -941,28 +806,22 @@ Scale for trace in this spectrumView</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="ccpn.ui.gui.lib.GuiStrip.GuiStrip.crossHairIsVisible">
-<code class="descname">crossHairIsVisible</code><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip.GuiStrip.crossHairIsVisible" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>immutable</em> - 
-True if crosshair is visible</p>
+<dt id="ccpn.ui.gui.lib.GuiStrip.GuiStrip.crosshairVisible">
+<code class="descname">crosshairVisible</code><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip.GuiStrip.crosshairVisible" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>mutable</em> - 
+True if crosshair is visible.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.ui.gui.lib.GuiStrip.GuiStrip.cyclePeakLabelling">
 <code class="descname">cyclePeakLabelling</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiStrip.html#GuiStrip.cyclePeakLabelling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip.GuiStrip.cyclePeakLabelling" title="Permalink to this definition">¶</a></dt>
-<dd><p>Toggles whether peak labelling is minimal is visible in the strip</p>
+<dd><p>Toggles whether peak labelling is minimal is visible in the strip.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.ui.gui.lib.GuiStrip.GuiStrip.cyclePeakSymbols">
 <code class="descname">cyclePeakSymbols</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiStrip.html#GuiStrip.cyclePeakSymbols"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip.GuiStrip.cyclePeakSymbols" title="Permalink to this definition">¶</a></dt>
-<dd><p>Cycle through peak symbol types</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiStrip.GuiStrip.deleteStrip">
-<code class="descname">deleteStrip</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiStrip.html#GuiStrip.deleteStrip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip.GuiStrip.deleteStrip" title="Permalink to this definition">¶</a></dt>
-<dd><p>Overrides normal delete</p>
+<dd><p>Cycle through peak symbol types.</p>
 </dd></dl>
 
 <dl class="method">
@@ -971,23 +830,29 @@ True if crosshair is visible</p>
 <dd><p>Estimate noise in the current region</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="ccpn.ui.gui.lib.GuiStrip.GuiStrip.firstVisibleSpectrum">
+<code class="descname">firstVisibleSpectrum</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiStrip.html#GuiStrip.firstVisibleSpectrum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip.GuiStrip.firstVisibleSpectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the first visible spectrum in the strip, or the first if none are visible.</p>
+</dd></dl>
+
 <dl class="attribute">
-<dt id="ccpn.ui.gui.lib.GuiStrip.GuiStrip.gridIsVisible">
-<code class="descname">gridIsVisible</code><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip.GuiStrip.gridIsVisible" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>immutable</em> - 
-True if grid is visible</p>
+<dt id="ccpn.ui.gui.lib.GuiStrip.GuiStrip.gridVisible">
+<code class="descname">gridVisible</code><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip.GuiStrip.gridVisible" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>mutable</em> - 
+True if grid is visible.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.ui.gui.lib.GuiStrip.GuiStrip.makeStripPlot">
-<code class="descname">makeStripPlot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiStrip.html#GuiStrip.makeStripPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip.GuiStrip.makeStripPlot" title="Permalink to this definition">¶</a></dt>
+<code class="descname">makeStripPlot</code><span class="sig-paren">(</span><em>includePeakLists=True</em>, <em>includeNmrChains=True</em>, <em>includeSpectrumTable=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiStrip.html#GuiStrip.makeStripPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip.GuiStrip.makeStripPlot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make a strip plot in the current spectrumDisplay</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.ui.gui.lib.GuiStrip.GuiStrip.moveTo">
 <code class="descname">moveTo</code><span class="sig-paren">(</span><em>newIndex: int</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiStrip.html#GuiStrip.moveTo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip.GuiStrip.moveTo" title="Permalink to this definition">¶</a></dt>
-<dd><p>Move strip to index newIndex in orderedStrips</p>
+<dd><p>Move strip to index newIndex in orderedStrips.</p>
 </dd></dl>
 
 <dl class="method">
@@ -1004,6 +869,12 @@ True if grid is visible</p>
 <dt id="ccpn.ui.gui.lib.GuiStrip.GuiStrip.pythonConsole">
 <code class="descname">pythonConsole</code><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip.GuiStrip.pythonConsole" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>immutable</em> -</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.lib.GuiStrip.GuiStrip.refreshDevicePixelRatio">
+<code class="descname">refreshDevicePixelRatio</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiStrip.html#GuiStrip.refreshDevicePixelRatio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip.GuiStrip.refreshDevicePixelRatio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the devicePixel ratio in the GL window</p>
 </dd></dl>
 
 <dl class="method">
@@ -1024,9 +895,39 @@ True if grid is visible</p>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="ccpn.ui.gui.lib.GuiStrip.GuiStrip.setPeakLabelling">
+<code class="descname">setPeakLabelling</code><span class="sig-paren">(</span><em>labelling</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiStrip.html#GuiStrip.setPeakLabelling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip.GuiStrip.setPeakLabelling" title="Permalink to this definition">¶</a></dt>
+<dd><p>Toggles whether peak labelling is minimal is visible in the strip.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.lib.GuiStrip.GuiStrip.setPeakSymbols">
+<code class="descname">setPeakSymbols</code><span class="sig-paren">(</span><em>symbolNum</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiStrip.html#GuiStrip.setPeakSymbols"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip.GuiStrip.setPeakSymbols" title="Permalink to this definition">¶</a></dt>
+<dd><p>set the peak symbol type.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.lib.GuiStrip.GuiStrip.setStripNotifiers">
+<code class="descname">setStripNotifiers</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiStrip.html#GuiStrip.setStripNotifiers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip.GuiStrip.setStripNotifiers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the notifiers for the strip.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ccpn.ui.gui.lib.GuiStrip.GuiStrip.setTraceScale">
 <code class="descname">setTraceScale</code><span class="sig-paren">(</span><em>traceScale</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiStrip.html#GuiStrip.setTraceScale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip.GuiStrip.setTraceScale" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.lib.GuiStrip.GuiStrip.symbolSize">
+<code class="descname">symbolSize</code><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip.GuiStrip.symbolSize" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>mutable</em> -</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.lib.GuiStrip.GuiStrip.symbolThickness">
+<code class="descname">symbolThickness</code><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip.GuiStrip.symbolThickness" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>mutable</em> -</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ccpn.ui.gui.lib.GuiStrip.GuiStrip.toggleGrid">
@@ -1052,7 +953,7 @@ True if grid is visible</p>
 <dl class="method">
 <dt id="ccpn.ui.gui.lib.GuiStrip.GuiStrip.zoom">
 <code class="descname">zoom</code><span class="sig-paren">(</span><em>xRegion: Tuple[]</em>, <em>yRegion: Tuple[]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiStrip.html#GuiStrip.zoom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip.GuiStrip.zoom" title="Permalink to this definition">¶</a></dt>
-<dd><p>Zooms strip to the specified region</p>
+<dd><p>Zooms strip to the specified region.</p>
 </dd></dl>
 
 <dl class="method">
@@ -1166,6 +1067,23 @@ findAxis          Find axis</p>
 </dd>
 </dl>
 <dl class="method">
+<dt id="ccpn.ui.gui.lib.GuiStrip1d.GuiStrip1d.autoRange">
+<code class="descname">autoRange</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiStrip1d.html#GuiStrip1d.autoRange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip1d.GuiStrip1d.autoRange" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.lib.GuiStrip1d.GuiStrip1d.cyclePeakLabelling">
+<code class="descname">cyclePeakLabelling</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiStrip1d.html#GuiStrip1d.cyclePeakLabelling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip1d.GuiStrip1d.cyclePeakLabelling" title="Permalink to this definition">¶</a></dt>
+<dd><p>Toggles whether peak labelling is minimal is visible in the strip.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.lib.GuiStrip1d.GuiStrip1d.cyclePeakSymbols">
+<code class="descname">cyclePeakSymbols</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiStrip1d.html#GuiStrip1d.cyclePeakSymbols"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip1d.GuiStrip1d.cyclePeakSymbols" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cycle through peak symbol types.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ccpn.ui.gui.lib.GuiStrip1d.GuiStrip1d.flipXYAxis">
 <code class="descname">flipXYAxis</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiStrip1d.html#GuiStrip1d.flipXYAxis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip1d.GuiStrip1d.flipXYAxis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flip the X and Y axes</p>
@@ -1184,6 +1102,11 @@ findAxis          Find axis</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="ccpn.ui.gui.lib.GuiStrip1d.GuiStrip1d.getStackingMode">
+<code class="descname">getStackingMode</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiStrip1d.html#GuiStrip1d.getStackingMode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip1d.GuiStrip1d.getStackingMode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="ccpn.ui.gui.lib.GuiStrip1d.GuiStrip1d.resetXZoom">
 <code class="descname">resetXZoom</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiStrip1d.html#GuiStrip1d.resetXZoom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip1d.GuiStrip1d.resetXZoom" title="Permalink to this definition">¶</a></dt>
 <dd><p>Zooms x axis to maximum value of data.</p>
@@ -1194,6 +1117,11 @@ findAxis          Find axis</p>
 <code class="descname">resetYZoom</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiStrip1d.html#GuiStrip1d.resetYZoom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip1d.GuiStrip1d.resetYZoom" title="Permalink to this definition">¶</a></dt>
 <dd><p>Zooms y axis to maximum of data.</p>
 </dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.lib.GuiStrip1d.GuiStrip1d.setStackingMode">
+<code class="descname">setStackingMode</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiStrip1d.html#GuiStrip1d.setStackingMode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip1d.GuiStrip1d.setStackingMode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.ui.gui.lib.GuiStrip1d.GuiStrip1d.showExportDialog">
@@ -1215,20 +1143,6 @@ findAxis          Find axis</p>
 <dt id="ccpn.ui.gui.lib.GuiStrip1d.GuiStrip1d.toggleHorizontalTrace">
 <code class="descname">toggleHorizontalTrace</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiStrip1d.html#GuiStrip1d.toggleHorizontalTrace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip1d.GuiStrip1d.toggleHorizontalTrace" title="Permalink to this definition">¶</a></dt>
 <dd><p>Toggles whether or not horizontal trace is displayed.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiStrip1d.GuiStrip1d.toggleStack">
-<code class="descname">toggleStack</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiStrip1d.html#GuiStrip1d.toggleStack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip1d.GuiStrip1d.toggleStack" title="Permalink to this definition">¶</a></dt>
-<dd><p>Toggle stacking mode for 1d spectra
-This vertically stacks the spectra for clarity</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiStrip1d.GuiStrip1d.toggleStackPhase">
-<code class="descname">toggleStackPhase</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiStrip1d.html#GuiStrip1d.toggleStackPhase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiStrip1d.GuiStrip1d.toggleStackPhase" title="Permalink to this definition">¶</a></dt>
-<dd><p>Toggle stacking mode for 1d spectra
-This vertically stacks the spectra for clarity</p>
 </dd></dl>
 
 <dl class="method">
@@ -1480,7 +1394,7 @@ on which is specified.</p>
 <dl class="method">
 <dt id="ccpn.ui.gui.lib.GuiWindow.GuiWindow.add1DIntegral">
 <code class="descname">add1DIntegral</code><span class="sig-paren">(</span><em>peak=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiWindow.html#GuiWindow.add1DIntegral"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiWindow.GuiWindow.add1DIntegral" title="Permalink to this definition">¶</a></dt>
-<dd><p>Peak: take self.currentPeak as default</p>
+<dd><p>Peak: take self.application.currentPeak as default</p>
 </dd></dl>
 
 <dl class="method">
@@ -1572,8 +1486,20 @@ on which is specified.</p>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="ccpn.ui.gui.lib.GuiWindow.GuiWindow.nextZoom">
+<code class="descname">nextZoom</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiWindow.html#GuiWindow.nextZoom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiWindow.GuiWindow.nextZoom" title="Permalink to this definition">¶</a></dt>
+<dd><p>change to the next stored zoom</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.lib.GuiWindow.GuiWindow.previousZoom">
+<code class="descname">previousZoom</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiWindow.html#GuiWindow.previousZoom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiWindow.GuiWindow.previousZoom" title="Permalink to this definition">¶</a></dt>
+<dd><p>change to the previous stored zoom</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ccpn.ui.gui.lib.GuiWindow.GuiWindow.refitCurrentPeaks">
-<code class="descname">refitCurrentPeaks</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiWindow.html#GuiWindow.refitCurrentPeaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiWindow.GuiWindow.refitCurrentPeaks" title="Permalink to this definition">¶</a></dt>
+<code class="descname">refitCurrentPeaks</code><span class="sig-paren">(</span><em>singularMode=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiWindow.html#GuiWindow.refitCurrentPeaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiWindow.GuiWindow.refitCurrentPeaks" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1637,14 +1563,14 @@ on which is specified.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiWindow.GuiWindow.toggleCrossHair">
-<code class="descname">toggleCrossHair</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiWindow.html#GuiWindow.toggleCrossHair"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiWindow.GuiWindow.toggleCrossHair" title="Permalink to this definition">¶</a></dt>
-<dd><p>Toggles whether crosshairs are displayed in all spectrum di</p>
+<dt id="ccpn.ui.gui.lib.GuiWindow.GuiWindow.toggleCrosshair">
+<code class="descname">toggleCrosshair</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiWindow.html#GuiWindow.toggleCrosshair"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiWindow.GuiWindow.toggleCrosshair" title="Permalink to this definition">¶</a></dt>
+<dd><p>Toggles whether crosshairs are displayed in all spectrum displays</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="ccpn.ui.gui.lib.GuiWindow.GuiWindow.toggleCrossHairAll">
-<code class="descname">toggleCrossHairAll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiWindow.html#GuiWindow.toggleCrossHairAll"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiWindow.GuiWindow.toggleCrossHairAll" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.ui.gui.lib.GuiWindow.GuiWindow.toggleCrosshairAll">
+<code class="descname">toggleCrosshairAll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiWindow.html#GuiWindow.toggleCrosshairAll"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiWindow.GuiWindow.toggleCrosshairAll" title="Permalink to this definition">¶</a></dt>
 <dd><p>Toggles whether crosshairs are displayed in all windows.</p>
 </dd></dl>
 
@@ -1713,6 +1639,107 @@ on which is specified.</p>
 <code class="descname">zoomOut</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiWindow.html#GuiWindow.zoomOut"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiWindow.GuiWindow.zoomOut" title="Permalink to this definition">¶</a></dt>
 <dd><p>zoom out of the currently selected strip</p>
 </dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.lib.MenuActions">
+<span id="ccpn-ui-gui-lib-menuactions-module"></span><h2>ccpn.ui.gui.lib.MenuActions module<a class="headerlink" href="#module-ccpn.ui.gui.lib.MenuActions" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation here</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.lib.MenuActions.CreateNewObjectABC">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.lib.MenuActions.</code><code class="descname">CreateNewObjectABC</code><span class="sig-paren">(</span><em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/MenuActions.html#CreateNewObjectABC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.MenuActions.CreateNewObjectABC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>An ABC to implement an abstract callback function to create new object
+The __call__(self, dataPid, node) method acts as the callback function</p>
+<dl class="method">
+<dt id="ccpn.ui.gui.lib.MenuActions.CreateNewObjectABC.getObj">
+<code class="descname">getObj</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/MenuActions.html#CreateNewObjectABC.getObj"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.MenuActions.CreateNewObjectABC.getObj" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns obj from node or None</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.lib.MenuActions.CreateNewObjectABC.parentMethodName">
+<code class="descname">parentMethodName</code><em class="property"> = None</em><a class="headerlink" href="#ccpn.ui.gui.lib.MenuActions.CreateNewObjectABC.parentMethodName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.lib.MenuActions.OpenItemABC">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.lib.MenuActions.</code><code class="descname">OpenItemABC</code><span class="sig-paren">(</span><em>useNone=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/MenuActions.html#OpenItemABC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.MenuActions.OpenItemABC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>An ABC to implement an abstract openItem in moduleArea class
+The __call__(self, dataPid, node) method acts as the callback function</p>
+<dl class="attribute">
+<dt id="ccpn.ui.gui.lib.MenuActions.OpenItemABC.contextMenuText">
+<code class="descname">contextMenuText</code><em class="property"> = 'Open as a Module'</em><a class="headerlink" href="#ccpn.ui.gui.lib.MenuActions.OpenItemABC.contextMenuText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.lib.MenuActions.OpenItemABC.getObj">
+<code class="descname">getObj</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/MenuActions.html#OpenItemABC.getObj"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.MenuActions.OpenItemABC.getObj" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns obj from node or None</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.lib.MenuActions.OpenItemABC.hasOpenMethod">
+<code class="descname">hasOpenMethod</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.ui.gui.lib.MenuActions.OpenItemABC.hasOpenMethod" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.lib.MenuActions.OpenItemABC.objectArgumentName">
+<code class="descname">objectArgumentName</code><em class="property"> = 'obj'</em><a class="headerlink" href="#ccpn.ui.gui.lib.MenuActions.OpenItemABC.objectArgumentName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.lib.MenuActions.OpenItemABC.openItemDirectMethod">
+<code class="descname">openItemDirectMethod</code><em class="property"> = None</em><a class="headerlink" href="#ccpn.ui.gui.lib.MenuActions.OpenItemABC.openItemDirectMethod" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.lib.MenuActions.OpenItemABC.openItemMethod">
+<code class="descname">openItemMethod</code><em class="property"> = None</em><a class="headerlink" href="#ccpn.ui.gui.lib.MenuActions.OpenItemABC.openItemMethod" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.lib.MenuActions.OpenItemABC.useApplication">
+<code class="descname">useApplication</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.ui.gui.lib.MenuActions.OpenItemABC.useApplication" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.lib.MenuActions.OpenItemABC.validActionTargets">
+<code class="descname">validActionTargets</code><em class="property"> = (&lt;class 'ccpn.core.Spectrum.Spectrum'&gt;, &lt;class 'ccpn.core.PeakList.PeakList'&gt;, &lt;class 'ccpn.core.MultipletList.MultipletList'&gt;, &lt;class 'ccpn.core.IntegralList.IntegralList'&gt;, &lt;class 'ccpn.core.NmrChain.NmrChain'&gt;, &lt;class 'ccpn.core.Chain.Chain'&gt;, &lt;class 'ccpn.core.SpectrumGroup.SpectrumGroup'&gt;, &lt;class 'ccpn.core.Sample.Sample'&gt;, &lt;class 'ccpn.core.ChemicalShiftList.ChemicalShiftList'&gt;, &lt;class 'ccpn.core.RestraintList.RestraintList'&gt;, &lt;class 'ccpn.core.Note.Note'&gt;, &lt;class 'ccpn.core.StructureEnsemble.StructureEnsemble'&gt;)</em><a class="headerlink" href="#ccpn.ui.gui.lib.MenuActions.OpenItemABC.validActionTargets" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.lib.MenuActions.RaisePopupABC">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.lib.MenuActions.</code><code class="descname">RaisePopupABC</code><span class="sig-paren">(</span><em>useParent=False</em>, <em>useNone=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/MenuActions.html#RaisePopupABC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.MenuActions.RaisePopupABC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>An ABC to implement an abstract popup class
+The __call__(self, dataPid, node) method acts as the callback function</p>
+<dl class="method">
+<dt id="ccpn.ui.gui.lib.MenuActions.RaisePopupABC.getObj">
+<code class="descname">getObj</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/MenuActions.html#RaisePopupABC.getObj"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.MenuActions.RaisePopupABC.getObj" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns obj from node or None</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.lib.MenuActions.RaisePopupABC.objectArgumentName">
+<code class="descname">objectArgumentName</code><em class="property"> = 'obj'</em><a class="headerlink" href="#ccpn.ui.gui.lib.MenuActions.RaisePopupABC.objectArgumentName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.lib.MenuActions.RaisePopupABC.parentObjectArgumentName">
+<code class="descname">parentObjectArgumentName</code><em class="property"> = None</em><a class="headerlink" href="#ccpn.ui.gui.lib.MenuActions.RaisePopupABC.parentObjectArgumentName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.lib.MenuActions.RaisePopupABC.popupClass">
+<code class="descname">popupClass</code><em class="property"> = None</em><a class="headerlink" href="#ccpn.ui.gui.lib.MenuActions.RaisePopupABC.popupClass" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -1804,6 +1831,16 @@ Called by shortcut. For a more generic usage refer to:  &#8220;navigateToPositio
 instead</p>
 </dd></dl>
 
+<dl class="function">
+<dt id="ccpn.ui.gui.lib.SpectrumDisplay.navigateToNmrResidueInStrip">
+<code class="descclassname">ccpn.ui.gui.lib.SpectrumDisplay.</code><code class="descname">navigateToNmrResidueInStrip</code><span class="sig-paren">(</span><em>spectrumDisplay: ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay</em>, <em>strip</em>, <em>nmrResidue</em>, <em>widths=None</em>, <em>markPositions=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/SpectrumDisplay.html#navigateToNmrResidueInStrip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.SpectrumDisplay.navigateToNmrResidueInStrip" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.ui.gui.lib.SpectrumDisplay.navigateToPeakInStrip">
+<code class="descclassname">ccpn.ui.gui.lib.SpectrumDisplay.</code><code class="descname">navigateToPeakInStrip</code><span class="sig-paren">(</span><em>spectrumDisplay: ccpn.ui.gui.lib.GuiSpectrumDisplay.GuiSpectrumDisplay</em>, <em>strip</em>, <em>peak</em>, <em>widths=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/SpectrumDisplay.html#navigateToPeakInStrip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.SpectrumDisplay.navigateToPeakInStrip" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </div>
 <div class="section" id="module-ccpn.ui.gui.lib.Strip">
 <span id="ccpn-ui-gui-lib-strip-module"></span><h2>ccpn.ui.gui.lib.Strip module<a class="headerlink" href="#module-ccpn.ui.gui.lib.Strip" title="Permalink to this headline">¶</a></h2>
@@ -1834,15 +1871,15 @@ and spectrum displays to the positions specified by the peak.</p>
 <dt id="ccpn.ui.gui.lib.Strip.navigateToNmrResidueInDisplay">
 <code class="descclassname">ccpn.ui.gui.lib.Strip.</code><code class="descname">navigateToNmrResidueInDisplay</code><span class="sig-paren">(</span><em>nmrResidue</em>, <em>display</em>, <em>stripIndex=0</em>, <em>widths=None</em>, <em>showSequentialResidues=False</em>, <em>markPositions=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/Strip.html#navigateToNmrResidueInDisplay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.Strip.navigateToNmrResidueInDisplay" title="Permalink to this definition">¶</a></dt>
 <dd><p>Navigate in to nmrResidue in strip[stripIndex] of display, with optionally-1, +1 residues in
-strips[stripIndex-1] and strips[stripIndex+1]
+strips[stripIndex-1] and strips[stripIndex+1].
 return list of strips</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>nmrResidue</strong> &#8211; </li>
-<li><strong>display</strong> &#8211; </li>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>nmrResidue</strong> &#8211; nmrResidue to display</li>
+<li><strong>display</strong> &#8211; target spectrumDisplay for nmrResidue</li>
 <li><strong>stripIndex</strong> &#8211; location of strip in display (assumed 0 if connected and showSequentialResidues)</li>
 <li><strong>widths</strong> &#8211; ignored (for now)</li>
 <li><strong>showSequentialResidues</strong> &#8211; boolean selecting if sequential strips are displayed</li>
@@ -1850,9 +1887,11 @@ return list of strips</p>
 </ul>
 </td>
 </tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">list of strips</p>
+</td>
+</tr>
 </tbody>
 </table>
-<p>:return list of strips</p>
 </dd></dl>
 
 <dl class="function">
@@ -1870,13 +1909,6 @@ to the positions in the displayed axis order of the strip.</p>
 <div class="section" id="module-ccpn.ui.gui.lib.guiDecorators">
 <span id="ccpn-ui-gui-lib-guidecorators-module"></span><h2>ccpn.ui.gui.lib.guiDecorators module<a class="headerlink" href="#module-ccpn.ui.gui.lib.guiDecorators" title="Permalink to this headline">¶</a></h2>
 <p>Module Documentation here</p>
-<dl class="function">
-<dt id="ccpn.ui.gui.lib.guiDecorators.suspendSideBarNotifications">
-<code class="descclassname">ccpn.ui.gui.lib.guiDecorators.</code><code class="descname">suspendSideBarNotifications</code><span class="sig-paren">(</span><em>project</em>, <em>funcName='suspendSideBarNotifications'</em>, <em>*args</em>, <em>*</em>, <em>quiet=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/guiDecorators.html#suspendSideBarNotifications"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.guiDecorators.suspendSideBarNotifications" title="Permalink to this definition">¶</a></dt>
-<dd><p>Context manager to wrap the function with a command block and suspend notifications
-to the sideBar until commandBlock has finished</p>
-</dd></dl>
-
 </div>
 <div class="section" id="module-ccpn.ui.gui.lib.mouseEvents">
 <span id="ccpn-ui-gui-lib-mouseevents-module"></span><h2>ccpn.ui.gui.lib.mouseEvents module<a class="headerlink" href="#module-ccpn.ui.gui.lib.mouseEvents" title="Permalink to this headline">¶</a></h2>
@@ -1978,6 +2010,7 @@ to the sideBar until commandBlock has finished</p>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.lib.GuiGenerator">ccpn.ui.gui.lib.GuiGenerator module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.lib.GuiIntegralListView">ccpn.ui.gui.lib.GuiIntegralListView module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.lib.GuiListView">ccpn.ui.gui.lib.GuiListView module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.lib.GuiMainWindow">ccpn.ui.gui.lib.GuiMainWindow module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.lib.GuiMultipletListView">ccpn.ui.gui.lib.GuiMultipletListView module</a></li>
 <li><a class="reference internal" href="#ccpn-ui-gui-lib-guinotifier-module">ccpn.ui.gui.lib.GuiNotifier module</a></li>
@@ -1991,6 +2024,7 @@ to the sideBar until commandBlock has finished</p>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.lib.GuiStripContextMenus">ccpn.ui.gui.lib.GuiStripContextMenus module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.lib.GuiStripNd">ccpn.ui.gui.lib.GuiStripNd module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.lib.GuiWindow">ccpn.ui.gui.lib.GuiWindow module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.lib.MenuActions">ccpn.ui.gui.lib.MenuActions module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.lib.PeakList">ccpn.ui.gui.lib.PeakList module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.lib.Shortcuts">ccpn.ui.gui.lib.Shortcuts module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.lib.SpectrumDisplay">ccpn.ui.gui.lib.SpectrumDisplay module</a></li>

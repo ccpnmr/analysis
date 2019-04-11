@@ -52,23 +52,21 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Wayne Boucher $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:30 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
@@ -81,9 +79,11 @@
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Spectrum</span> <span class="kn">import</span> <span class="n">Spectrum</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr</span> <span class="kn">import</span> <span class="n">Nmr</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">newObject</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
 
-<div class="viewcode-block" id="SpectrumReference"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Spectrum.SpectrumReference">[docs]</a><span class="k">class</span> <span class="nc">SpectrumReference</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
+<div class="viewcode-block" id="SpectrumReference"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.SpectrumReference.SpectrumReference">[docs]</a><span class="k">class</span> <span class="nc">SpectrumReference</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; ADVANCED. A **SpectrumReference** holds detailed information about axes and referencing</span>
 <span class="sd">    needed for e.g. multple-quantum, projection, and reduced-dimensionality experiments.</span>
 
@@ -284,11 +284,11 @@
     <span class="k">def</span> <span class="nf">isAcquisition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">dataDim</span><span class="o">.</span><span class="n">expDim</span><span class="o">.</span><span class="n">isAquisition</span> <span class="o">=</span> <span class="n">value</span>
 
-<div class="viewcode-block" id="SpectrumReference.pointToValue"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Spectrum.SpectrumReference.pointToValue">[docs]</a>    <span class="k">def</span> <span class="nf">pointToValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<div class="viewcode-block" id="SpectrumReference.pointToValue"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.SpectrumReference.SpectrumReference.pointToValue">[docs]</a>    <span class="k">def</span> <span class="nf">pointToValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Axis (ppm) value corresponding to point&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">pointToValue</span><span class="p">(</span><span class="n">point</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SpectrumReference.valueToPoint"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Spectrum.SpectrumReference.valueToPoint">[docs]</a>    <span class="k">def</span> <span class="nf">valueToPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<div class="viewcode-block" id="SpectrumReference.valueToPoint"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.SpectrumReference.SpectrumReference.valueToPoint">[docs]</a>    <span class="k">def</span> <span class="nf">valueToPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; Point number (float) corresponding to (ppm) value&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">valueToPoint</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 
@@ -308,13 +308,45 @@
             <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">peaks</span><span class="p">:</span>
                 <span class="n">peak</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;change&#39;</span><span class="p">)</span></div>
 
+    <span class="c1">#=========================================================================================</span>
+    <span class="c1"># CCPN functions</span>
+    <span class="c1">#=========================================================================================</span>
 
+    <span class="c1">#===========================================================================================</span>
+    <span class="c1"># new&#39;Object&#39; and other methods</span>
+    <span class="c1"># Call appropriate routines in their respective locations</span>
+    <span class="c1">#===========================================================================================</span>
+
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Connections to parents:</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="nd">@newObject</span><span class="p">(</span><span class="n">SpectrumReference</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">_newSpectrumReference</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Spectrum</span><span class="p">,</span> <span class="n">dimension</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">spectrometerFrequency</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
                           <span class="n">isotopeCodes</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">axisCode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">measurementType</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Shift&#39;</span><span class="p">,</span>
                           <span class="n">maxAliasedFrequency</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">minAliasedFrequency</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
                           <span class="n">foldingMode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">axisUnit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">referencePoint</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
-                          <span class="n">referenceValue</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SpectrumReference</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Create new SpectrumReference within Spectrum&quot;&quot;&quot;</span>
+                          <span class="n">referenceValue</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">serial</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SpectrumReference</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Create new SpectrumReference.</span>
+
+<span class="sd">    See the SpectrumReference class for details.</span>
+
+<span class="sd">    :param dimension:</span>
+<span class="sd">    :param spectrometerFrequency:</span>
+<span class="sd">    :param isotopeCodes:</span>
+<span class="sd">    :param axisCode:</span>
+<span class="sd">    :param measurementType:</span>
+<span class="sd">    :param maxAliasedFrequency:</span>
+<span class="sd">    :param minAliasedFrequency:</span>
+<span class="sd">    :param foldingMode:</span>
+<span class="sd">    :param axisUnit:</span>
+<span class="sd">    :param referencePoint:</span>
+<span class="sd">    :param referenceValue:</span>
+<span class="sd">    :param serial: optional serial number.</span>
+<span class="sd">    :return: a new SpectrumReference instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">dataSource</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
     <span class="n">dataDim</span> <span class="o">=</span> <span class="n">dataSource</span><span class="o">.</span><span class="n">findFirstDataDim</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="n">dimension</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">dataDim</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -326,19 +358,28 @@
                                             <span class="n">unit</span><span class="o">=</span><span class="n">axisUnit</span><span class="p">,</span> <span class="n">minAliasedFreq</span><span class="o">=</span><span class="n">minAliasedFrequency</span><span class="p">,</span>
                                             <span class="n">maxAliasedFreq</span><span class="o">=</span><span class="n">maxAliasedFrequency</span><span class="p">,</span> <span class="p">)</span>
 
-    <span class="n">dataDimRef</span> <span class="o">=</span> <span class="n">dataDim</span><span class="o">.</span><span class="n">newDataDimRef</span><span class="p">(</span><span class="n">expDimRef</span><span class="o">=</span><span class="n">expDimRef</span><span class="p">,</span> <span class="n">refPoint</span><span class="o">=</span><span class="n">referencePoint</span><span class="p">,</span>
+    <span class="n">apiDataDimRef</span> <span class="o">=</span> <span class="n">dataDim</span><span class="o">.</span><span class="n">newDataDimRef</span><span class="p">(</span><span class="n">expDimRef</span><span class="o">=</span><span class="n">expDimRef</span><span class="p">,</span> <span class="n">refPoint</span><span class="o">=</span><span class="n">referencePoint</span><span class="p">,</span>
                                        <span class="n">refValue</span><span class="o">=</span><span class="n">referenceValue</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">apiDataDimRef</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Unable to generate new SpectrumReference item&#39;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">dataDimRef</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">serial</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Could not reset serial of </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2"> - keeping original value&quot;</span>
+                                <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">serial</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">result</span>
 
 
-<span class="c1"># Connections to parents:</span>
+<span class="c1">#EJB 20181205: moved to Spectrum</span>
+<span class="c1"># Spectrum.newSpectrumReference = _newSpectrumReference</span>
+<span class="c1"># del _newSpectrumReference</span>
 
-<span class="n">Spectrum</span><span class="o">.</span><span class="n">newSpectrumReference</span> <span class="o">=</span> <span class="n">_newSpectrumReference</span>
-<span class="k">del</span> <span class="n">_newSpectrumReference</span>
 
-
-<div class="viewcode-block" id="getter"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Spectrum.getter">[docs]</a><span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Spectrum</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">SpectrumReference</span><span class="p">]]:</span>
+<div class="viewcode-block" id="getter"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.SpectrumReference.getter">[docs]</a><span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Spectrum</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">SpectrumReference</span><span class="p">]]:</span>
     <span class="n">data2Obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span>
     <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="k">else</span> <span class="bp">None</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mainDataDimRefs</span><span class="p">())</span></div>
 

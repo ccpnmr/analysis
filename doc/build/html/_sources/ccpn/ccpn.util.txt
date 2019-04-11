@@ -57,14 +57,6 @@ ccpn.util.Constants module
     :undoc-members:
     :show-inheritance:
 
-ccpn.util.ContextManagers module
---------------------------------
-
-.. automodule:: ccpn.util.ContextManagers
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ccpn.util.ExcelReader module
 ----------------------------
 

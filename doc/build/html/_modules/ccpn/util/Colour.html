@@ -53,18 +53,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:57 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -73,6 +73,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
+
 <span class="sd">&quot;&quot;&quot;Color specification&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
@@ -85,6 +86,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="s2">&quot;{0:#0{1}x}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
 
+
 <div class="viewcode-block" id="rgbaToHex"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Colour.rgbaToHex">[docs]</a><span class="k">def</span> <span class="nf">rgbaToHex</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mi">255</span><span class="p">):</span>
     <span class="k">return</span> <span class="s1">&#39;#&#39;</span> <span class="o">+</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">_ccpnHex</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">)])</span></div>
 
@@ -95,15 +97,15 @@
 
 <div class="viewcode-block" id="rgbaRatioToHex"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Colour.rgbaRatioToHex">[docs]</a><span class="k">def</span> <span class="nf">rgbaRatioToHex</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
     <span class="k">return</span> <span class="s1">&#39;#&#39;</span> <span class="o">+</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">_ccpnHex</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mf">255.0</span> <span class="o">*</span> <span class="n">r</span><span class="p">),</span>
-                                               <span class="nb">int</span><span class="p">(</span><span class="mf">255.0</span> <span class="o">*</span> <span class="n">g</span><span class="p">),</span>
-                                               <span class="nb">int</span><span class="p">(</span><span class="mf">255.0</span> <span class="o">*</span> <span class="n">b</span><span class="p">),</span>
-                                               <span class="nb">int</span><span class="p">(</span><span class="mf">255.0</span> <span class="o">*</span> <span class="n">a</span><span class="p">))])</span></div>
+                                                    <span class="nb">int</span><span class="p">(</span><span class="mf">255.0</span> <span class="o">*</span> <span class="n">g</span><span class="p">),</span>
+                                                    <span class="nb">int</span><span class="p">(</span><span class="mf">255.0</span> <span class="o">*</span> <span class="n">b</span><span class="p">),</span>
+                                                    <span class="nb">int</span><span class="p">(</span><span class="mf">255.0</span> <span class="o">*</span> <span class="n">a</span><span class="p">))])</span></div>
 
 
 <div class="viewcode-block" id="rgbRatioToHex"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Colour.rgbRatioToHex">[docs]</a><span class="k">def</span> <span class="nf">rgbRatioToHex</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
     <span class="k">return</span> <span class="s1">&#39;#&#39;</span> <span class="o">+</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">_ccpnHex</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mf">255.0</span> <span class="o">*</span> <span class="n">r</span><span class="p">),</span>
-                                               <span class="nb">int</span><span class="p">(</span><span class="mf">255.0</span> <span class="o">*</span> <span class="n">g</span><span class="p">),</span>
-                                               <span class="nb">int</span><span class="p">(</span><span class="mf">255.0</span> <span class="o">*</span> <span class="n">b</span><span class="p">))])</span></div>
+                                                    <span class="nb">int</span><span class="p">(</span><span class="mf">255.0</span> <span class="o">*</span> <span class="n">g</span><span class="p">),</span>
+                                                    <span class="nb">int</span><span class="p">(</span><span class="mf">255.0</span> <span class="o">*</span> <span class="n">b</span><span class="p">))])</span></div>
 
 
 <div class="viewcode-block" id="hexToRgb"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Colour.hexToRgb">[docs]</a><span class="k">def</span> <span class="nf">hexToRgb</span><span class="p">(</span><span class="n">hx</span><span class="p">):</span>
@@ -130,7 +132,7 @@
 <span class="n">gY</span> <span class="o">=</span> <span class="mf">0.715158</span>
 <span class="n">bY</span> <span class="o">=</span> <span class="mf">0.072187</span>
 <span class="n">COLOUR_LIGHT_THRESHOLD</span> <span class="o">=</span> <span class="mi">80</span>
-<span class="n">COLOUR_DARK_THRESHOLD</span> <span class="o">=</span> <span class="p">(</span><span class="mi">256</span><span class="o">-</span><span class="n">COLOUR_LIGHT_THRESHOLD</span><span class="p">)</span>
+<span class="n">COLOUR_DARK_THRESHOLD</span> <span class="o">=</span> <span class="p">(</span><span class="mi">256</span> <span class="o">-</span> <span class="n">COLOUR_LIGHT_THRESHOLD</span><span class="p">)</span>
 <span class="n">COLOUR_THRESHOLD</span> <span class="o">=</span> <span class="mi">60</span>
 
 
@@ -201,10 +203,10 @@
     <span class="c1"># rgbprimeIn r, g, b in range 0-255</span>
     <span class="n">cie</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">COLORMATRIXJPEG</span><span class="p">,</span> <span class="n">rgbprimeIn</span><span class="p">)</span>
     <span class="n">ycbcr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">cie</span><span class="p">,</span> <span class="n">COLORMATRIXJPEGCONST</span><span class="p">)</span>
-    <span class="n">ycbcr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">ycbcr</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">])</span>
+    <span class="n">ycbcr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">ycbcr</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">])</span>
 
     <span class="c1"># invert the luma</span>
-    <span class="n">ycbcr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">256</span><span class="o">-</span><span class="n">ycbcr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">ycbcr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">256</span> <span class="o">-</span> <span class="n">ycbcr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">ycbcr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ycbcr</span><span class="p">,</span> <span class="n">COLORMATRIXJPEGINVOFFSET</span><span class="p">)</span>
 
     <span class="n">rgbprimeOut</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">COLORMATRIXJPEGINV</span><span class="p">,</span> <span class="n">ycbcr</span><span class="p">)</span>
@@ -213,17 +215,20 @@
     <span class="c1"># return tuple([255*inv_gam_sRGB(col) for col in rgbprimeOut])</span>
 
     <span class="c1"># clip the colours</span>
-    <span class="n">rgbprimeOut</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">rgbprimeOut</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">])</span>
+    <span class="n">rgbprimeOut</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">rgbprimeOut</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">])</span>
     <span class="k">return</span> <span class="nb">tuple</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">col</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">rgbprimeOut</span><span class="p">])</span></div>
 
+<span class="k">def</span> <span class="nf">_getRandomColours</span><span class="p">(</span><span class="n">numberOfColors</span><span class="p">):</span>
+  <span class="kn">import</span> <span class="nn">random</span>
+  <span class="k">return</span>  <span class="p">[</span><span class="s2">&quot;#&quot;</span> <span class="o">+</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="s1">&#39;0123456789ABCDEF&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">)])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numberOfColors</span><span class="p">)]</span>
 
 <span class="n">colourNameToHexDict</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;red&#39;</span><span class="p">:</span> <span class="s1">&#39;#ff0000&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;green&#39;</span><span class="p">:</span> <span class="s1">&#39;#00ff00&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;blue&#39;</span><span class="p">:</span> <span class="s1">&#39;#0000ff&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;yellow&#39;</span><span class="p">:</span> <span class="s1">&#39;#ffff00&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;red&#39;</span>    <span class="p">:</span> <span class="s1">&#39;#ff0000&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;green&#39;</span>  <span class="p">:</span> <span class="s1">&#39;#00ff00&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;blue&#39;</span>   <span class="p">:</span> <span class="s1">&#39;#0000ff&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;yellow&#39;</span> <span class="p">:</span> <span class="s1">&#39;#ffff00&#39;</span><span class="p">,</span>
     <span class="s1">&#39;magenta&#39;</span><span class="p">:</span> <span class="s1">&#39;#ff00ff&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;cyan&#39;</span><span class="p">:</span> <span class="s1">&#39;#ffff00&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cyan&#39;</span>   <span class="p">:</span> <span class="s1">&#39;#ffff00&#39;</span><span class="p">,</span>
     <span class="p">}</span>
 
 <span class="n">spectrumColours</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">([(</span><span class="s1">&#39;#cb1400&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">),</span>
@@ -558,7 +563,7 @@
     <span class="n">rgb</span> <span class="o">=</span> <span class="n">hexToRgb</span><span class="p">(</span><span class="n">referenceHexColour</span><span class="p">)</span>
     <span class="n">gRef</span> <span class="o">=</span> <span class="n">gray</span><span class="p">(</span><span class="o">*</span><span class="n">rgb</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">g</span><span class="o">-</span><span class="n">gRef</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">COLOUR_THRESHOLD</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">g</span> <span class="o">-</span> <span class="n">gRef</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">COLOUR_THRESHOLD</span><span class="p">:</span>
         <span class="n">newCol</span> <span class="o">=</span> <span class="n">invertRGB</span><span class="p">(</span><span class="o">*</span><span class="n">hexToRgb</span><span class="p">(</span><span class="n">colour</span><span class="p">))</span>
         <span class="n">hx</span> <span class="o">=</span> <span class="n">rgbToHex</span><span class="p">(</span><span class="o">*</span><span class="n">newCol</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">addNewColour</span><span class="p">:</span>
@@ -566,6 +571,7 @@
         <span class="k">return</span> <span class="n">hx</span>
 
     <span class="k">return</span> <span class="n">colour</span></div>
+
 
 <span class="c1"># def _setNewColour(colList, newCol:str):</span>
 <span class="c1">#</span>

@@ -25,27 +25,19 @@ __date__ = "$Date: 2018-02-07 15:28:41 +0000 (Wed, February 02, 2018) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets, QtCore
-
-from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.RadioButton import RadioButton
-from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown, ChainPulldown, SELECT, SubstancePulldown, ComplexPulldown
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.Chain import Chain
 from ccpn.core.Substance import Substance
 from ccpn.core.Complex import Complex
-from ccpn.util.Logging import getLogger
-from ccpn.core.lib.ContextManagers import logCommandBlock, undoBlock
+from ccpn.core.lib.ContextManagers import undoBlock
 
 
 CHAIN = Chain.className

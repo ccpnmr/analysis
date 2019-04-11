@@ -52,18 +52,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:28 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -80,6 +80,8 @@
 <span class="kn">from</span> <span class="nn">ccpn.core.StructureEnsemble</span> <span class="kn">import</span> <span class="n">StructureEnsemble</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.StructureData</span> <span class="kn">import</span> <span class="n">EnsembleData</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.molecule.MolStructure</span> <span class="kn">import</span> <span class="n">Model</span> <span class="k">as</span> <span class="n">ApiModel</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.decorators</span> <span class="kn">import</span> <span class="n">logCommand</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">newObject</span><span class="p">,</span> <span class="n">deleteObject</span><span class="p">,</span> <span class="n">ccpNmrV3CoreSetter</span><span class="p">,</span> <span class="n">undoBlock</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
 
@@ -94,7 +96,7 @@
 <span class="sd">    If it doesn&#39;t, please report it as a bug.</span>
 
 <span class="sd">    Note that ModelData objects are only valid when linked to an existing StructureEnsemble</span>
-<span class="sd">    and that self._modelNumber must match</span>
+<span class="sd">    and that self._modelNumber must match.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="s1">&#39;Model&#39;</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
@@ -109,11 +111,11 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_ensemble</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EnsembleData</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;EnsembleData object on which the ModelData are a view&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;EnsembleData object on which the ModelData are a view.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">structureEnsemble</span><span class="o">.</span><span class="n">data</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">_modelNumberIndices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+    <span class="k">def</span> <span class="nf">_modelNumberIndices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
         <span class="sd">&quot;&quot;&quot;Get indices (in the pandas sense, elements of the index column,</span>
 <span class="sd">        in theory need not be integers). These should be used with self._ensemble.loc&quot;&quot;&quot;</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span>
@@ -269,51 +271,29 @@
         <span class="c1">#</span>
         <span class="k">return</span> <span class="n">result</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Free-form text comment&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span>
-
-    <span class="nd">@comment.setter</span>
-    <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="c1"># @property</span>
+    <span class="c1"># def comment(self) -&gt; str:</span>
+    <span class="c1">#     &quot;&quot;&quot;Free-form text comment&quot;&quot;&quot;</span>
+    <span class="c1">#     return self._wrappedData.details</span>
+    <span class="c1">#</span>
+    <span class="c1"># @comment.setter</span>
+    <span class="c1"># def comment(self, value: str):</span>
+    <span class="c1">#     self._wrappedData.details = value</span>
 
 <div class="viewcode-block" id="Model.clearData"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Model.Model.clearData">[docs]</a>    <span class="k">def</span> <span class="nf">clearData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Remove all data for model by successively calling the deleteRow method</span>
+        <span class="sd">&quot;&quot;&quot;Remove all data for model by successively calling the deleteRow method</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structureEnsemble</span><span class="o">.</span><span class="n">data</span>
         <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="c1"># data.drop(modelNumber=data._modelsSelector(self.serial))      # ejb - old - already seems to be empty</span>
 
-            <span class="c1"># need iterrecords to check the modeNumber against the list and delete each individually</span>
-
-            <span class="c1"># containingObject = self._containingObject</span>
             <span class="n">containingObject</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">_containingObject</span>  <span class="c1"># supresses the creation of intermediate</span>
-            <span class="k">if</span> <span class="n">containingObject</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>  <span class="c1"># wayPoints - this becomes a single undo event</span>
-                <span class="c1"># undo and echoing</span>
-                <span class="n">containingObject</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;clearData&#39;</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
 
-            <span class="c1"># Found = True</span>
-            <span class="c1"># while Found:</span>
-            <span class="c1">#   Found = False                             # set to False for the next iteration</span>
-            <span class="c1">#   self.itRec = data.records()</span>
-            <span class="c1">#   for rNum, rec in enumerate(self.itRec):</span>
-            <span class="c1">#     if int(rec[&#39;modelNumber&#39;]) == self.serial:</span>
-            <span class="c1">#       data.deleteRow(rNum+1)          # should also be able to undo this</span>
-            <span class="c1">#       Found = True</span>
-            <span class="c1">#       break                                 # break out for the next repeat</span>
-
-            <span class="k">try</span><span class="p">:</span>
                 <span class="k">if</span> <span class="s1">&#39;modelNumber&#39;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
                     <span class="c1"># If there are no modelNumbers, we must be in the process of deleting</span>
                     <span class="c1"># the modelNumbers column, or some similar shenanigans.</span>
                     <span class="c1"># Anyway, you do not clear the data if there are none to clear. OK.</span>
-                    <span class="n">data</span><span class="o">.</span><span class="n">deleteSelectedRows</span><span class="p">(</span><span class="n">modelNumbers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">serial</span><span class="p">)</span>
-
-            <span class="k">finally</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">containingObject</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                    <span class="n">containingObject</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
+                    <span class="n">data</span><span class="o">.</span><span class="n">deleteSelectedRows</span><span class="p">(</span><span class="n">modelNumbers</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serial</span><span class="p">))</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;StructureEnsemble </span><span class="si">%s</span><span class="s1"> contains no data for </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structureEnsemble</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">))</span></div>
@@ -327,42 +307,59 @@
         <span class="sd">&quot;&quot;&quot;get wrappedData - all Model children of parent StructureEnsemble&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedModels</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">_finaliseAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="c1"># clean up the model</span>
-        <span class="k">if</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;delete&#39;</span><span class="p">]:</span>
+<div class="viewcode-block" id="Model.delete"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Model.Model.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete should notify structureEnsemble of a delete.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">clearData</span><span class="p">()</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span></div>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span></div></div>
+
+    <span class="c1">#=========================================================================================</span>
+    <span class="c1"># CCPN functions</span>
+    <span class="c1">#=========================================================================================</span>
+
+    <span class="c1">#===========================================================================================</span>
+    <span class="c1"># new&#39;Object&#39; and other methods</span>
+    <span class="c1"># Call appropriate routines in their respective locations</span>
+    <span class="c1">#===========================================================================================</span>
 
 
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Connections to parents:</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="nd">@newObject</span><span class="p">(</span><span class="n">Model</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">_newModel</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">StructureEnsemble</span><span class="p">,</span> <span class="n">serial</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Model</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Create new Model&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Create new Model.</span>
 
-    <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="s1">&#39;serial&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;label&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)))</span>
+<span class="sd">    See the Model class for details.</span>
+
+<span class="sd">    :param label:</span>
+<span class="sd">    :param comment:</span>
+<span class="sd">    :param serial: optional serial number.</span>
+<span class="sd">    :return: a new Model instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">structureEnsemble</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;newModel&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
-                                <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newModel&#39;</span><span class="p">)</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">newApiModel</span> <span class="o">=</span> <span class="n">structureEnsemble</span><span class="o">.</span><span class="n">newModel</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">details</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">newApiModel</span><span class="p">)</span>
+    <span class="n">newApiModel</span> <span class="o">=</span> <span class="n">structureEnsemble</span><span class="o">.</span><span class="n">newModel</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">details</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">newApiModel</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Unable to generate new Model item&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">result</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">serial</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Could not reset serial of </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2"> - keeping original value&quot;</span>
-                               <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">serial</span><span class="p">))</span>
-            <span class="n">result</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">)</span>
-    <span class="k">finally</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
-    <span class="c1">#</span>
+    <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">serial</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Could not reset serial of </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2"> - keeping original value&quot;</span>
+                                         <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">serial</span><span class="p">))</span>
+
     <span class="k">return</span> <span class="n">result</span>
 
 
-<span class="c1"># Connections to parents:</span>
-<span class="n">StructureEnsemble</span><span class="o">.</span><span class="n">newModel</span> <span class="o">=</span> <span class="n">_newModel</span>
-<span class="k">del</span> <span class="n">_newModel</span>
+<span class="c1">#EJB 20181204: moved to StructureEnsemble</span>
+<span class="c1"># StructureEnsemble.newModel = _newModel</span>
+<span class="c1"># del _newModel</span>
 
 <span class="c1">#EJB 20181122: moved to _finaliseAction</span>
 <span class="c1"># Notifiers:</span>

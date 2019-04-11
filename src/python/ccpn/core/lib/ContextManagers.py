@@ -88,12 +88,14 @@ def echoCommand(obj, funcName, *params, values=None, defaults=None,
 
 
 def _resumeNotification(application):
-    """A check here because resume Notification can cause fatal errors
+    """A try/except here because resume Notification MAY in exceptions circumstances
+    cause fatal errors.
     """
     try:
         application.project.resumeNotification()
     except Exception as es:
         getLogger().warn('*** ERROR: in resume Notification - %s' % str(es))
+
 
 @contextmanager
 def undoBlock(application=None):
@@ -265,181 +267,181 @@ def undoBlockWithoutSideBar(application=None):
 # """
 
 
-@contextmanager
-def logCommandBlock(prefix='', get=None, isProperty=False, showArguments=[], logCommandOnly=False, withSideBar=True):
-    """
-    Echo a command to the logger reflecting the python command required to call the function.
-
-    :param prefix: string to be prepended to the echo command
-    :param get: function containing the function
-    :param isProperty: is the function a property
-    :param showArguments: list of string names for arguments that need to be included.
-                        By default, the parameters set to the defaults are not included.
-
-    Examples:
-
-    ::
-
-    1)  def something(self, name=None, value=0):
-            logCommandManager(prefix='process.') as log:
-                log('something')
-
-                ... code here
-
-        call function                   echo command
-
-        something('Hello')              process.something(name='Hello')
-        something('Hello', 12)          process.something(name='Hello', value=12)
-
-        Parameters are not required in the log() command, parameters are picked up from
-        the containing function; however, changes can be inserted by including
-        the parameter, e.g., log('something', name=name+'There') will append 'There' to the name.
-
-            something('Hello')          process.something(name='HelloThere')
-
-    2)  def something(self, name=None, value=0):
-            logCommandManager(get='self') as log:
-                log('something')
-
-                ... code here
-
-        call function                   echo command
-
-        something('Hello')              get('parent:ID').something(name='Hello')
-        something('Hello', 12)          get('parent:ID').something(name='Hello', value=12)
-
-    3)  @property
-        def something(self, value=0):
-            logCommandManager(get='self', isProperty=True) as log:
-                log('something', value=value)
-
-                ... code here
-
-
-        call function                   echo command
-
-        something = 12                  get('parent:ID').something = 12
-
-        functions of this type can only contain one parameter, and
-        must be set as a keyword in the log.
-
-    4)  Mixing prefix and get:
-
-        def something(self, value=0):
-            logCommandManager(prefix='process.', get='self') as log:
-                log('something')
-
-        if called from SpectrumDisplay:
-
-        call function                   echo command
-
-        spectrumDisplay.something(12)   process.get('spectrumDisplay:1').something(12)
-
-    5)  If the log command needs modifying, this can be included in the log command,
-        e.g., if the pid of an object needs inserting
-
-        def something(self, value=None):
-            logCommandManager(prefix='process.', get='self') as log:
-                log('something', value=value.pid)
-
-        if called from SpectrumDisplay:
-
-        call function                   echo command
-
-        spectrumDisplay.something(<anObject>)   process.get('spectrumDisplay:1').something(value=anObject:pid)
-
-        To make quotes appear around the value use: log('something', value=repr(value.pid))
-
-    """
-
-    # get the current application
-    application = getApplication()
-
-    def log(funcName, *args, **kwargs):  # remember _undoBlocked, as first parameter
-        if application._echoBlocking > 1:  # already increased before entry
-            return
-
-        # get the caller from the getframe stack
-        fr1 = sys._getframe(1)
-        selfCaller = fr1.f_locals[get] if get else None
-        pid = selfCaller.pid if selfCaller is not None and hasattr(selfCaller, 'pid') else ''
-
-        # make a list for modifying the log string with more readable labels
-        checkList = [(application, 'application.'),
-                     (application.ui.mainWindow, 'mainWindow.'),
-                     (application.project, 'project.'),
-                     (application.current, 'current.')]
-        for obj, label in checkList:
-            if selfCaller is obj:
-                getPrefix = label
-                break
-        else:
-            getPrefix = "get('%s')." % pid if (get and pid) else ''
-
-        # search if caller matches the main items in the application namespace, e.g., 'application', 'project', etc.
-        # nameSpace = application._getNamespace()
-        # for k in nameSpace.keys():
-        #     if selfCaller == nameSpace[k]:
-        #         getPrefix = k+'.'
-        #         break
-        # else:
-        #     getPrefix = "get('%s')." % pid if get else ''
-
-        # construct the new log string
-        if isProperty:
-            logs = prefix + getPrefix + funcName + ' = ' + repr(list(kwargs.values())[0])
-        else:
-
-            # build the log command from the parameters of the caller function
-            # only those that are not in the default list are added, i.e. those defined
-            # explicitly by the caller
-            if selfCaller is not None:
-                selfFunc = getattr(selfCaller, funcName)
-                sig0 = [(k, v) for k, v in signature(selfFunc).parameters.items()]
-                sig1 = [k for k, v in signature(selfFunc).parameters.items()
-                        if v.default is Parameter.empty
-                        or k in showArguments
-                        or k in kwargs]
-                # or (k in fr1.f_locals and (repr(fr1.f_locals[k]) != repr(v.default)))]
-            else:
-                sig1 = {}
-
-            # create the log string
-            logs = prefix + getPrefix + funcName + '('
-            for k in sig1:
-                if k != 'self':
-                    kval = str(kwargs[k]) if k in kwargs else repr(fr1.f_locals[k])
-                    logs += str(k) + '=' + kval + ', '
-            logs = logs.rstrip(', ')
-            logs += ')'
-
-        # logger.log(logs)
-        logger.info(logs)
-
-    # log commands to the registered outputs
-    logger = getLogger()
-    application._increaseNotificationBlocking()
-
-    try:
-        if logCommandOnly:
-            # only execute the calling function
-            yield log
-        else:
-            # transfer control to the calling function, create an undo waypoint
-            if withSideBar:
-                with undoBlock(application=application):  # as _undoBlocking:
-                    yield log  # partial(log, _undoBlocking)
-
-            else:
-                with undoBlockWithoutSideBar(application=application):  # as _undoBlocking:
-                    yield log  # partial(log, _undoBlocking)
-
-    except AttributeError as es:
-        raise
-
-    finally:
-        # clean up log command block
-        application._decreaseNotificationBlocking()
+# @contextmanager
+# def logCommandBlock(prefix='', get=None, isProperty=False, showArguments=[], logCommandOnly=False, withSideBar=True):
+#     """
+#     Echo a command to the logger reflecting the python command required to call the function.
+#
+#     :param prefix: string to be prepended to the echo command
+#     :param get: function containing the function
+#     :param isProperty: is the function a property
+#     :param showArguments: list of string names for arguments that need to be included.
+#                         By default, the parameters set to the defaults are not included.
+#
+#     Examples:
+#
+#     ::
+#
+#     1)  def something(self, name=None, value=0):
+#             logCommandManager(prefix='process.') as log:
+#                 log('something')
+#
+#                 ... code here
+#
+#         call function                   echo command
+#
+#         something('Hello')              process.something(name='Hello')
+#         something('Hello', 12)          process.something(name='Hello', value=12)
+#
+#         Parameters are not required in the log() command, parameters are picked up from
+#         the containing function; however, changes can be inserted by including
+#         the parameter, e.g., log('something', name=name+'There') will append 'There' to the name.
+#
+#             something('Hello')          process.something(name='HelloThere')
+#
+#     2)  def something(self, name=None, value=0):
+#             logCommandManager(get='self') as log:
+#                 log('something')
+#
+#                 ... code here
+#
+#         call function                   echo command
+#
+#         something('Hello')              get('parent:ID').something(name='Hello')
+#         something('Hello', 12)          get('parent:ID').something(name='Hello', value=12)
+#
+#     3)  @property
+#         def something(self, value=0):
+#             logCommandManager(get='self', isProperty=True) as log:
+#                 log('something', value=value)
+#
+#                 ... code here
+#
+#
+#         call function                   echo command
+#
+#         something = 12                  get('parent:ID').something = 12
+#
+#         functions of this type can only contain one parameter, and
+#         must be set as a keyword in the log.
+#
+#     4)  Mixing prefix and get:
+#
+#         def something(self, value=0):
+#             logCommandManager(prefix='process.', get='self') as log:
+#                 log('something')
+#
+#         if called from SpectrumDisplay:
+#
+#         call function                   echo command
+#
+#         spectrumDisplay.something(12)   process.get('spectrumDisplay:1').something(12)
+#
+#     5)  If the log command needs modifying, this can be included in the log command,
+#         e.g., if the pid of an object needs inserting
+#
+#         def something(self, value=None):
+#             logCommandManager(prefix='process.', get='self') as log:
+#                 log('something', value=value.pid)
+#
+#         if called from SpectrumDisplay:
+#
+#         call function                   echo command
+#
+#         spectrumDisplay.something(<anObject>)   process.get('spectrumDisplay:1').something(value=anObject:pid)
+#
+#         To make quotes appear around the value use: log('something', value=repr(value.pid))
+#
+#     """
+#
+#     # get the current application
+#     application = getApplication()
+#
+#     def log(funcName, *args, **kwargs):  # remember _undoBlocked, as first parameter
+#         if application._echoBlocking > 1:  # already increased before entry
+#             return
+#
+#         # get the caller from the getframe stack
+#         fr1 = sys._getframe(1)
+#         selfCaller = fr1.f_locals[get] if get else None
+#         pid = selfCaller.pid if selfCaller is not None and hasattr(selfCaller, 'pid') else ''
+#
+#         # make a list for modifying the log string with more readable labels
+#         checkList = [(application, 'application.'),
+#                      (application.ui.mainWindow, 'mainWindow.'),
+#                      (application.project, 'project.'),
+#                      (application.current, 'current.')]
+#         for obj, label in checkList:
+#             if selfCaller is obj:
+#                 getPrefix = label
+#                 break
+#         else:
+#             getPrefix = "get('%s')." % pid if (get and pid) else ''
+#
+#         # search if caller matches the main items in the application namespace, e.g., 'application', 'project', etc.
+#         # nameSpace = application._getNamespace()
+#         # for k in nameSpace.keys():
+#         #     if selfCaller == nameSpace[k]:
+#         #         getPrefix = k+'.'
+#         #         break
+#         # else:
+#         #     getPrefix = "get('%s')." % pid if get else ''
+#
+#         # construct the new log string
+#         if isProperty:
+#             logs = prefix + getPrefix + funcName + ' = ' + repr(list(kwargs.values())[0])
+#         else:
+#
+#             # build the log command from the parameters of the caller function
+#             # only those that are not in the default list are added, i.e. those defined
+#             # explicitly by the caller
+#             if selfCaller is not None:
+#                 selfFunc = getattr(selfCaller, funcName)
+#                 sig0 = [(k, v) for k, v in signature(selfFunc).parameters.items()]
+#                 sig1 = [k for k, v in signature(selfFunc).parameters.items()
+#                         if v.default is Parameter.empty
+#                         or k in showArguments
+#                         or k in kwargs]
+#                 # or (k in fr1.f_locals and (repr(fr1.f_locals[k]) != repr(v.default)))]
+#             else:
+#                 sig1 = {}
+#
+#             # create the log string
+#             logs = prefix + getPrefix + funcName + '('
+#             for k in sig1:
+#                 if k != 'self':
+#                     kval = str(kwargs[k]) if k in kwargs else repr(fr1.f_locals[k])
+#                     logs += str(k) + '=' + kval + ', '
+#             logs = logs.rstrip(', ')
+#             logs += ')'
+#
+#         # logger.log(logs)
+#         logger.info(logs)
+#
+#     # log commands to the registered outputs
+#     logger = getLogger()
+#     application._increaseNotificationBlocking()
+#
+#     try:
+#         if logCommandOnly:
+#             # only execute the calling function
+#             yield log
+#         else:
+#             # transfer control to the calling function, create an undo waypoint
+#             if withSideBar:
+#                 with undoBlock(application=application):  # as _undoBlocking:
+#                     yield log  # partial(log, _undoBlocking)
+#
+#             else:
+#                 with undoBlockWithoutSideBar(application=application):  # as _undoBlocking:
+#                     yield log  # partial(log, _undoBlocking)
+#
+#     except AttributeError as es:
+#         raise
+#
+#     finally:
+#         # clean up log command block
+#         application._decreaseNotificationBlocking()
 
 
 @contextmanager
@@ -992,7 +994,7 @@ def renameObjectNoBlanking(self):
 
 class BlankedPartial(object):
     """Wrapper (like partial) to call func(**kwds) with blanking
-    optionally trigger the notification of obj, either pre- or post execution
+    optionally trigger the notification of obj, either pre- or post execution.
     """
 
     def __init__(self, func, obj=None, trigger=None, preExecution=False, **kwds):

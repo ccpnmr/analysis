@@ -91,10 +91,10 @@ def _resumeNotification(application):
     """A try/except here because resume Notification MAY in exceptions circumstances
     cause fatal errors.
     """
-    try:
+    with catchExceptions(application=application,
+                         errorStringTemplate='*** ERROR in resumeNotification: "%s"',
+                         popupAsWarning=False):
         application.project.resumeNotification()
-    except Exception as es:
-        getLogger().warn('*** ERROR: in resume Notification - %s' % str(es))
 
 
 @contextmanager

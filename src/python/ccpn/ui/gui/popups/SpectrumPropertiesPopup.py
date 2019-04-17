@@ -27,6 +27,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 
 from functools import partial
 from PyQt5 import QtWidgets, QtCore
+from itertools import permutations
 from ccpn.core.lib import Util as ccpnUtil
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
@@ -50,6 +51,10 @@ from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock
 from ccpn.ui.gui.popups.ValidateSpectraPopup import SpectrumValidator
+from ccpn.ui.gui.guiSettings import getColours, DIVIDER
+from ccpn.ui.gui.widgets.HLine import HLine
+from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
+from ccpn.ui.gui.widgets.Spacer import Spacer
 
 
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
@@ -106,12 +111,18 @@ class SpectrumPropertiesPopup(CcpnDialog):
             self.tabWidget.addTab(self._contoursTab, "Contours")
         self.layout().addWidget(self.tabWidget, 0, 0, 2, 4)
 
+        Spacer(self, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
+               grid=(3, 1), gridSpan=(1, 1))
+
         self.applyButtons = ButtonList(self, texts=['Cancel', 'Apply', 'Ok'],
                                        callbacks=[self.reject, self._applyChanges, self._okButton],
                                        tipTexts=['', '', '', None], direction='h',
-                                       hAlign='r', grid=(2, 1), gridSpan=(1, 4))
+                                       hAlign='r', grid=(4, 1), gridSpan=(1, 4))
 
         self._fillPullDowns()
+
+        # self.setFixedWidth(self.sizeHint().width())
+        self.setFixedSize(self.sizeHint())
 
     def _fillPullDowns(self):
         if self.spectrum.dimensionCount == 1:
@@ -446,6 +457,10 @@ class GeneralTab(Widget):
             doubleCrosshairCheckBox.setChecked(spectrum.showDoubleCrosshair)
             self.layout().addItem(QtWidgets.QSpacerItem(0, 10), 0, 0)
             doubleCrosshairCheckBox.stateChanged.connect(self._queueChangeDoubleCrosshair)
+
+        Spacer(self, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
+               grid=(12, 1), gridSpan=(1, 1))
+
 
     def _setPathData(self, spectrum):
         """Set the pathData widgets from the spectrum.
@@ -852,6 +867,53 @@ class DimensionsTab(Widget):
             self.spectralDoubleCursorOffset[i].textChanged.connect(partial(self._queueSetDoubleCursorOffset,
                                                                            self.spectralDoubleCursorOffset[i].text, i))
 
+        row += 1
+        HLine(self, grid=(row, 0), gridSpan=(1, dimensions+1), colour=getColours()[DIVIDER], height=15)
+
+        row += 1
+        self.preferredAxisOrderPulldown = PulldownListCompoundWidget(self, labelText="Preferred Axis Order",
+                                                             grid=(row, 0), gridSpan=(1,dimensions+1), vAlign='t',
+                                                            callback=self._setSpectrumOrdering)
+        self.preferredAxisOrderPulldown.setPreSelect(self._fillPreferredWidget)
+        self._fillPreferredWidget()
+
+        row += 1
+        Spacer(self, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
+               grid=(row, dimensions+1), gridSpan=(1, 1))
+
+    def _fillPreferredWidget(self):
+        """Fill the pullDown with the currently available permutations of the axis codes
+        """
+        specOrder = tuple(self.spectrum.preferredAxisOrdering) if self.spectrum.preferredAxisOrdering is not None else None
+
+        ll = ['<None>']
+        axisPerms = []
+        axisOrder = []
+        if self.mainWindow:
+
+            # add permutations for the axes
+            axisPerms = permutations([axisCode for axisCode in self.spectrum.axisCodes])
+            axisOrder = tuple(permutations(list(range(len(self.spectrum.axisCodes)))))
+            ll += ["".join(ax for ax in perm) for perm in axisPerms]
+
+        self.preferredAxisOrderPulldown.pulldownList.setData(ll)
+
+        if specOrder is not None and self.mainWindow:
+
+            specIndex = axisOrder.index(specOrder)+1
+            self.preferredAxisOrderPulldown.setIndex(specIndex)
+
+    def _setSpectrumOrdering(self, value):
+        """Set the preferred axis orderin from the pullDown selection
+        """
+        index = self.preferredAxisOrderPulldown.getIndex()
+
+        axisOrder = tuple(permutations(list(range(len(self.spectrum.axisCodes)))))
+        if index > 0:
+            self.spectrum.preferredAxisOrdering = tuple(axisOrder[index-1])
+        else:
+            self.spectrum.preferredAxisOrdering = None
+
     def _repopulate(self):
         for i in range(self.dimensions):
             value = self.spectrum.referenceValues[i]
@@ -1067,6 +1129,9 @@ class ContoursTab(Widget):
         self.negativeColourButton = Button(self, grid=(10, 2), icon='icons/colours', hPolicy='fixed',
                                            vAlign='t', hAlign='l')
         self.negativeColourButton.clicked.connect(partial(self._queueChangeNegSpectrumColour, self.spectrum))
+
+        Spacer(self, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
+               grid=(12, 1), gridSpan=(1, 1))
 
     def _repopulate(self):
         # don't need anything here as can't generate any errors
@@ -1375,6 +1440,8 @@ class SpectrumDisplayPropertiesPopup1d(CcpnDialog):
         tabs = self._generalTab
         for t in tabs:
             t._changes = dict()
+
+        self.setFixedSize(self.sizeHint())
 
     def _fillPullDowns(self):
         for aTab in self._generalTab:

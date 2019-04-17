@@ -26,6 +26,7 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 # Start of code
 #=========================================================================================
 
+from PyQt5 import QtCore
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.core.lib.Notifiers import Notifier
 
@@ -158,3 +159,22 @@ class CompoundBaseWidget(Frame):
             self.deleteNotifiers()
         except:
             pass
+
+    def setPreSelect(self, callBack=None):
+        """
+        Add a user callback to the pulldown that fires on a mouse click.
+        facilitates populating the pulldown list just before it opens
+        :param callBack = method to call on click:
+        """
+        if callBack:
+            self.pulldownList.installEventFilter(self)
+            self._preSelectCallBack = callBack
+
+    def eventFilter(self, target, event):
+        """
+        call the user callback when the pulldown has been clicked
+        """
+        if target == self.pulldownList and event.type() == QtCore.QEvent.MouseButtonPress:
+            self._preSelectCallBack()
+        return False
+

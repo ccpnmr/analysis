@@ -117,7 +117,7 @@ class ListCompoundWidget(CompoundBaseWidget):
         self._addWidget(self.label)
 
         # pulldown
-        texts = ['> select-to-add <'] + list(texts)
+        texts = ['> select-to-add <'] + list(texts) if texts else ['> select-to-add <']
         self.pulldownList = PulldownList(parent=self, texts=texts, callback=self._addToListWidget, index=0)
         self.pulldownList.setObjectName(labelText)
         self._addWidget(self.pulldownList)
@@ -139,23 +139,23 @@ class ListCompoundWidget(CompoundBaseWidget):
         if fixedWidths is not None:
             self.setFixedWidths(fixedWidths)
 
-    def setPreSelect(self, callBack=None):
-        """
-        Add a user callback to the pulldown that fires on a mouse click.
-        facilitates populating the pulldown list just before it opens
-        :param callBack = method to call on click:
-        """
-        if callBack:
-            self.pulldownList.installEventFilter(self)
-            self._callBack = callBack
-
-    def eventFilter(self, target, event):
-        """
-        call the user callback when the pulldown has been clicked
-        """
-        if target == self.pulldownList and event.type() == QtCore.QEvent.MouseButtonPress:
-            self._callBack()
-        return False
+    # def setPreSelect(self, callBack=None):
+    #     """
+    #     Add a user callback to the pulldown that fires on a mouse click.
+    #     facilitates populating the pulldown list just before it opens
+    #     :param callBack = method to call on click:
+    #     """
+    #     if callBack:
+    #         self.pulldownList.installEventFilter(self)
+    #         self._preSelectCallBack = callBack
+    #
+    # def eventFilter(self, target, event):
+    #     """
+    #     call the user callback when the pulldown has been clicked
+    #     """
+    #     if target == self.pulldownList and event.type() == QtCore.QEvent.MouseButtonPress:
+    #         self._preSelectCallBack()
+    #     return False
 
     def setItems(self, list):
         """

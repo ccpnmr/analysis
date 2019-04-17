@@ -391,6 +391,18 @@ class PreferencesPopup(CcpnDialog):
                                           grid=(row, 1), hAlign='l',
                                           tipTexts=None,
                                           )
+
+        row += 1
+        self.axisOrderingOptionsLabel = Label(parent, text="Axis Ordering", grid=(row, 0))
+        axisOrderingOptions = self.preferences.general.axisOrderingOptions
+        self.axisOrderingOptions = RadioButtons(parent, texts=['Use Spectrum Settings', 'Always Ask'],
+                                          selectedInd=axisOrderingOptions,
+                                          callback=self._setAxisOrderingOptions,
+                                          direction='h',
+                                          grid=(row, 1), hAlign='l',
+                                          tipTexts=None,
+                                          )
+
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
 
@@ -894,6 +906,16 @@ class PreferencesPopup(CcpnDialog):
         except:
             return
         self.preferences.general.matchAxisCode = matchAxisCode
+
+    def _setAxisOrderingOptions(self):
+        """
+        Set the option for the axis ordering of strips when opening a new display
+        """
+        try:
+            axisOrderingOptions = self.axisOrderingOptions.getIndex()
+        except:
+            return
+        self.preferences.general.axisOrderingOptions = axisOrderingOptions
 
     def _setPeakFittingMethod(self):
         """

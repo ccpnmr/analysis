@@ -3387,18 +3387,32 @@ class CcpnGLWidget(QOpenGLWidget):
             mark.updateTextArrayVBOAttribs(enableVBO=True)
 
     def rescaleMarksRulers(self):
+        """rescale the marks
+        """
         self._rescaleMarksRulers()
         for mark in self._marksAxisCodes:
             self._rescaleMarksAxisCode(mark)
 
     def setRightAxisVisible(self, axisVisible=True):
+        """Set the visibility of the right axis
+        """
         self._drawRightAxis = axisVisible
         self.rescale(rescaleStaticHTraces=False)
         self.update()
 
     def setBottomAxisVisible(self, axisVisible=True):
+        """Set the visibility of the bottom axis
+        """
         self._drawBottomAxis = axisVisible
         self.rescale(rescaleStaticVTraces=False)
+        self.update()
+
+    def setAxesVisible(self, rightAxisVisible=True, bottomAxisVisible=False):
+        """Set the visibility of the axes
+        """
+        self._drawRightAxis = rightAxisVisible
+        self._drawBottomAxis = bottomAxisVisible
+        self.rescale()
         self.update()
 
     @property
@@ -4520,10 +4534,9 @@ class CcpnGLWidget(QOpenGLWidget):
         labelsChanged = False
 
         # check if the width is too small to draw too many grid levels
-        if self._drawRightAxis:
-            scaleBounds = (self.w - self.AXIS_MARGINRIGHT, self.h)
-        else:
-            scaleBounds = (self.w, self.h)
+        boundX = (self.w - self.AXIS_MARGINRIGHT) if self._drawRightAxis else self.w
+        boundY = (self.h - self.AXIS_MARGINBOTTOM) if self._drawBottomAxis else self.h
+        scaleBounds = (boundX, boundY)
 
         if gridGLList.renderMode == GLRENDERMODE_REBUILD:
 
@@ -4929,14 +4942,34 @@ class CcpnGLWidget(QOpenGLWidget):
 
             if self._widthsChangedEnough([axisB, self.axisB], [axisT, self.axisT]) and \
                     self._widthsChangedEnough([axisL, self.axisL], [axisR, self.axisR]):
-                diff = (axisR - axisL) / 2.0
-                mid = (self.axisR + self.axisL) / 2.0
-                self.axisL = mid - diff
-                self.axisR = mid + diff
-                self.axisB = axisB
-                self.axisT = axisT
+
+                if self.spectrumDisplay.stripDirection == 'Y':
+
+                    # strips are arranged in a row
+                    diff = (axisR - axisL) / 2.0
+                    mid = (self.axisR + self.axisL) / 2.0
+                    self.axisL = mid - diff
+                    self.axisR = mid + diff
+                    self.axisB = axisB
+                    self.axisT = axisT
+
+                elif self.spectrumDisplay.stripDirection == 'X':
+
+                    # strips are arranged in a column
+                    diff = (axisT - axisB) / 2.0
+                    mid = (self.axisT + self.axisB) / 2.0
+                    self.axisB = mid - diff
+                    self.axisT = mid + diff
+                    self.axisL = axisL
+                    self.axisR = axisR
+
+                else:
+                    # currently ignore - warnings will be logged elsewhere
+                    pass
+
                 self._rescaleAllAxes()
                 self._storeZoomHistory()
+
 
     @pyqtSlot(dict)
     def _glMouseMoved(self, aDict):

@@ -62,6 +62,8 @@ class SpectrumDisplaySettings(Widget):
     settingsChanged = pyqtSignal(dict)
     symbolsChanged = pyqtSignal(dict)
 
+    # stripArrangementChanged = pyqtSignal(int)
+
     def __init__(self, parent=None,
                  mainWindow=None,
                  spectrumDisplay=None,
@@ -70,6 +72,7 @@ class SpectrumDisplaySettings(Widget):
                  yAxisUnits=0, yTexts=[], showYAxis=True,
                  lockAspect=False,
                  symbolType=0, annotationType=0, symbolSize=9, symbolThickness=2,
+                 # stripArrangement=0,
                  **kwds):
         super().__init__(parent, setLayout=True, **kwds)
 
@@ -169,6 +172,17 @@ class SpectrumDisplaySettings(Widget):
         self.symbolThicknessData.setValue(int(symbolThickness))
         self.symbolThicknessData.valueChanged.connect(self._symbolsChanged)
 
+        # row += 1
+        # self.stripArrangementLabel = Label(parent, text="Strip Arrangement", grid=(row, 0))
+        # self.stripArrangementButtons = RadioButtons(parent, texts=['Row', 'Column'],
+        #                                             objectNames=['stripSDS_Row', 'stripSDS_Column'],
+        #                                             selectedInd=stripArrangement,
+        #                                             callback=self._stripArrangementChanged,
+        #                                             direction='horizontal',
+        #                                             grid=(row, 1), hAlign='l',
+        #                                             tipTexts=None,
+        #                                             )
+
         # not needed anymore
         # row += 1
         # self.displaysWidget = SpectrumDisplaySelectionWidget(parent, mainWindow=self.mainWindow, grid=(row, 0), gridSpan=(1, 2), texts=[ALL], displayText=[])
@@ -228,6 +242,11 @@ class SpectrumDisplaySettings(Widget):
             self.symbolSizePixelData.set(values[SYMBOLSIZE])
             self.symbolThicknessData.set(values[SYMBOLTHICKNESS])
             self.blockSignals(False)
+
+    # def _stripArrangementChanged(self):
+    #     """Emit a signal if the strip arrangement buttons have been pressed
+    #     """
+    #     self.stripArrangementChanged.emit(self.stripArrangementButtons.getIndex())
 
     def doCallback(self):
         """Handle the user callback
@@ -442,10 +461,10 @@ class StripPlot(Widget):
     # def _fillDisplayWidget(self):
     #     """Fill the display box with the currently available spectrumDisplays
     #     """
-    #     list = ['> select-to-add <'] + [ALL]
+    #     ll = ['> select-to-add <'] + [ALL]
     #     if self.mainWindow:
-    #         list += [display.pid for display in self.mainWindow.spectrumDisplays]
-    #     self.displaysWidget.pulldownList.setData(texts=list)
+    #         ll += [display.pid for display in self.mainWindow.spectrumDisplays]
+    #     self.displaysWidget.pulldownList.setData(texts=ll)
 
     # def _getDisplays(self):
     #     """Return list of displays to navigate - if needed
@@ -852,10 +871,10 @@ class SequenceGraphSettings(Widget):
     # def _fillDisplayWidget(self):
     #     """Fill the display box with the currently available spectrumDisplays
     #     """
-    #     list = ['> select-to-add <'] + [ALL]
+    #     ll = ['> select-to-add <'] + [ALL]
     #     if self.mainWindow:
-    #         list += [display.pid for display in self.mainWindow.spectrumDisplays]
-    #     self.displaysWidget.pulldownList.setData(texts=list)
+    #         ll += [display.pid for display in self.mainWindow.spectrumDisplays]
+    #     self.displaysWidget.pulldownList.setData(texts=ll)
     #
     # def _getDisplays(self):
     #     """Return list of displays to navigate - if needed
@@ -1147,10 +1166,10 @@ class SpectrumDisplaySelectionWidget(ListCompoundWidget):
     def _fillDisplayWidget(self):
         """Fill the display box with the currently available spectrumDisplays
         """
-        list = ['> select-to-add <'] + [ALL]
+        ll = ['> select-to-add <'] + [ALL]
         if self.mainWindow:
-            list += [display.pid for display in self.mainWindow.spectrumDisplays]
-        self.pulldownList.setData(texts=list)
+            ll += [display.pid for display in self.mainWindow.spectrumDisplays]
+        self.pulldownList.setData(texts=ll)
 
     def _getDisplays(self):
         """Return list of displays to navigate - if needed

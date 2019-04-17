@@ -1124,7 +1124,33 @@ class GuiStrip(Frame):
           NB notifier is executed after deletion is final but before the wrapper is updated.
           len() > 1 check is correct also for delete
         """
-        pass  # GWV: poor soultion self.spectrumDisplay._resetRemoveStripAction()
+        pass  # GWV: poor solution self.spectrumDisplay._resetRemoveStripAction()
+
+    def setRightAxisVisible(self, axisVisible=False):
+        """Set the visibility of the right axis
+        """
+        self._CcpnGLWidget.setRightAxisVisible(axisVisible=axisVisible)
+
+    def setBottomAxisVisible(self, axisVisible=False):
+        """Set the visibility of the bottom axis
+        """
+        self._CcpnGLWidget.setBottomAxisVisible(axisVisible=axisVisible)
+
+    def setAxesVisible(self, rightAxisVisible=True, bottomAxisVisible=False):
+        """Set the visibility of strip axes
+        """
+        self._CcpnGLWidget.setAxesVisible(rightAxisVisible=rightAxisVisible,
+                                          bottomAxisVisible=bottomAxisVisible)
+
+    def getRightAxisWidth(self):
+        """return the width of the right axis margin
+        """
+        return self._CcpnGLWidget.AXIS_MARGINRIGHT
+
+    def getBottomAxisHeight(self):
+        """return the height of the bottom axis margin
+        """
+        return self._CcpnGLWidget.AXIS_MARGINBOTTOM
 
     def _moveToNextSpectrumView(self):
 

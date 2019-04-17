@@ -44,7 +44,8 @@
         "multipletAveraging": 0,
         "showSpectraOnPhasing": false,
         "xAxisUnits": 0,
-        "yAxisUnits": 0
+        "yAxisUnits": 0,
+        "axisOrderingOptions": 0
     },
 
     "externalPrograms": {

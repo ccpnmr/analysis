@@ -733,9 +733,13 @@ class Framework(NotifierBase):
             strips = spectrumDisplay.orderedStrips
             for si, strip in enumerate(strips):
 
-                # move to the correct place in the widget
-                stripIndex = strips.index(strip)
-                spectrumDisplay.stripFrame.layout().addWidget(strip, 0, si)  #stripIndex)
+                # move to the correct place in the widget - check stripDirection to display as row or column
+                if spectrumDisplay.stripDirection == 'Y':
+                    spectrumDisplay.stripFrame.layout().addWidget(strip, 0, si)  #stripIndex)
+                elif spectrumDisplay.stripDirection == 'X':
+                    spectrumDisplay.stripFrame.layout().addWidget(strip, si, 0)  #stripIndex)
+                else:
+                    getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(spectrumDisplay))
 
                 if not spectrumDisplay.isGrouped:
 

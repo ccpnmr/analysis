@@ -87,6 +87,8 @@ from ccpnmodel.ccpncore.lib.Io import Formats
 
 INCLUDEPOSITIVECONTOURS = 'includePositiveContours'
 INCLUDENEGATIVECONTOURS = 'includeNegativeContours'
+SPECTRUMAXES = 'spectrumAxesOrdering'
+SPECTRUMPREFERREDAXISORDERING = 'spectrumPreferredAxisOrdering'
 
 
 def _cumulativeArray(array):
@@ -1884,6 +1886,24 @@ class Spectrum(AbstractWrapperObject):
         """
         if self._wrappedData.experiment:
             self._wrappedData.experiment.temperature = value
+
+    @property
+    def preferredAxisOrdering(self):
+        """Return the preferred ordering for the axis codes when opening a new spectrumDisplay
+        """
+        order = self.getParameter(SPECTRUMAXES, SPECTRUMPREFERREDAXISORDERING)
+        if order is not None:
+            return order
+
+        # set default ordering
+        self.setParameter(SPECTRUMAXES, SPECTRUMPREFERREDAXISORDERING, None)
+        return None
+
+    @preferredAxisOrdering.setter
+    def preferredAxisOrdering(self, order):
+        """Set the preferred ordering for the axis codes when opening a new spectrumDisplay
+        """
+        self.setParameter(SPECTRUMAXES, SPECTRUMPREFERREDAXISORDERING, order)
 
     #=========================================================================================
     # Implementation functions

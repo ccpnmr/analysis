@@ -227,8 +227,8 @@ class ChemicalShiftTableWithAssignment(CcpnModule):
         self.installMaximiseEventHandler(self._maximise, self._closeModule)
 
     def _fillDisplayWidget(self):
-        list = ['> select-to-add <'] + [ALL] + [display.pid for display in self.mainWindow.spectrumDisplays]
-        self.displaysWidget.pulldownList.setData(texts=list)
+        ll = ['> select-to-add <'] + [ALL] + [display.pid for display in self.mainWindow.spectrumDisplays]
+        self.displaysWidget.pulldownList.setData(texts=ll)
 
     def _maximise(self):
         """

@@ -484,7 +484,16 @@ class Strip1d(coreClass, _GuiStrip1d):
         _GuiStrip1d.__init__(self, self.spectrumDisplay)
 
         stripIndex = self.spectrumDisplay.orderedStrips.index(self)
-        self.spectrumDisplay.stripFrame.layout().addWidget(self, 0, stripIndex)
+
+        if self.spectrumDisplay.stripDirection == 'Y':
+
+            # strip are arranged in a row
+            self.spectrumDisplay.stripFrame.layout().addWidget(self, 0, stripIndex)
+
+        elif self.spectrumDisplay.stripDirection == 'X':
+
+            # strip are arranged in a column
+            self.spectrumDisplay.stripFrame.layout().addWidget(self, stripIndex, 0)
 
 
 from ccpn.ui.gui.lib.GuiStripNd import GuiStripNd as _GuiStripNd
@@ -503,7 +512,16 @@ class StripNd(coreClass, _GuiStripNd):
 
         # cannot add the Frame until fully done
         stripIndex = self.spectrumDisplay.orderedStrips.index(self)
-        self.spectrumDisplay.stripFrame.layout().addWidget(self, 0, stripIndex)
+
+        if self.spectrumDisplay.stripDirection == 'Y':
+
+            # strip are arranged in a row
+            self.spectrumDisplay.stripFrame.layout().addWidget(self, 0, stripIndex)
+
+        elif self.spectrumDisplay.stripDirection == 'X':
+
+            # strip are arranged in a column
+            self.spectrumDisplay.stripFrame.layout().addWidget(self, stripIndex, 0)
 
 
 def _factoryFunction(project: Project, wrappedData) -> coreClass:

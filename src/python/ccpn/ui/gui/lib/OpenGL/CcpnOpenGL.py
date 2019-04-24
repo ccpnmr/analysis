@@ -4744,6 +4744,38 @@ class CcpnGLWidget(QOpenGLWidget):
                                 gridGLList.numVertices += 2
                                 index += 2
 
+                # # draw the diagonal x=y if required - need to determine the origin
+                # # OR draw on the spectrum bounding box
+                # if self._includeDiagonal:
+                #
+                #     diag = ()
+                #
+                #     if self.between(axisLimitB, axisLimitL, axisLimitR):
+                #         diag += (valueToRatio(axisLimitB, axisLimitL, axisLimitR),
+                #                  0.0)
+                #
+                #     if self.between(axisLimitL, axisLimitB, axisLimitT):
+                #         diag += (0.0,
+                #                  valueToRatio(axisLimitL, axisLimitB, axisLimitT))
+                #
+                #     if self.between(axisLimitT, axisLimitL, axisLimitR):
+                #         diag += (valueToRatio(axisLimitT, axisLimitL, axisLimitR),
+                #                  1.0)
+                #
+                #     if self.between(axisLimitR, axisLimitB, axisLimitT):
+                #         diag += (1.0,
+                #                  valueToRatio(axisLimitR, axisLimitB, axisLimitT))
+                #
+                #     if len(diag) == 4:
+                #         indexList += (index, index + 1)
+                #         vertexList += diag
+                #
+                #         alpha = min([1.0, (30.0 + (len(scaleGrid) * 20)) / transparency])
+                #         colorList += (r, g, b, alpha, r, g, b, alpha)
+                #
+                #         gridGLList.numVertices += 2
+                #         index += 2
+
                 # copy the arrays the the GLstore
                 gridGLList.vertices = np.array(vertexList, dtype=np.float32)
                 gridGLList.indices = np.array(indexList, dtype=np.uint32)

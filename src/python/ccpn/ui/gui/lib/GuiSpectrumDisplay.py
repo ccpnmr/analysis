@@ -1221,7 +1221,33 @@ class GuiSpectrumDisplay(CcpnModule):
                 # spawn a redraw of the strip
                 strip._updatePivot()
 
-    def increaseStripWidth(self):
+    def increaseStripSize(self):
+        """Increase the width/height of the strips depending on the orientation
+        """
+        if self.stripDirection == 'Y':
+
+            # strips are arranged in a row
+            self._increaseStripWidth()
+
+        elif self.stripDirection == 'X':
+
+            # strips are arranged in a column
+            self._increaseStripHeight()
+
+    def decreaseStripSize(self):
+        """Decrease the width/height of the strips depending on the orientation
+        """
+        if self.stripDirection == 'Y':
+
+            # strips are arranged in a row
+            self._decreaseStripWidth()
+
+        elif self.stripDirection == 'X':
+
+            # strips are arranged in a column
+            self._decreaseStripHeight()
+
+    def _increaseStripWidth(self):
         strips = self.orderedStrips
         currentWidth = strips[0].width() * (100.0 + self.application.preferences.general.stripWidthZoomPercent) / 100.0
         AXIS_WIDTH = strips[0].getRightAxisWidth()
@@ -1238,7 +1264,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
         self.stripFrame.show()
 
-    def decreaseStripWidth(self):
+    def _decreaseStripWidth(self):
         strips = self.orderedStrips
         currentWidth = strips[0].width() * 100.0 / (100.0 + self.application.preferences.general.stripWidthZoomPercent)
         AXIS_WIDTH = strips[0].getRightAxisWidth()
@@ -1255,7 +1281,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
         self.stripFrame.show()
 
-    def increaseStripHeight(self):
+    def _increaseStripHeight(self):
         strips = self.orderedStrips
         currentHeight = strips[0].height() * (100.0 + self.application.preferences.general.stripWidthZoomPercent) / 100.0
         AXIS_HEIGHT = strips[0].getBottomAxisHeight()
@@ -1272,7 +1298,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
         self.stripFrame.show()
 
-    def decreaseStripHeight(self):
+    def _decreaseStripHeight(self):
         strips = self.orderedStrips
         currentHeight = strips[0].height() * 100.0 / (100.0 + self.application.preferences.general.stripWidthZoomPercent)
         AXIS_HEIGHT = strips[0].getBottomAxisHeight()

@@ -106,10 +106,10 @@ class SpectrumDisplay1d(GuiSpectrumDisplay):
 
         # ('Increase Strip Width', 'icons/range-expand', 'Increase the width of strips in display', True, self.increaseStripWidth),
         # ('Decrease Strip Width', 'icons/range-contract', 'Decrease the width of strips in display', True, self.decreaseStripWidth),
-        increaseStripWidthAction = spectrumUtilToolBar.addAction("Increase Strip Width", self.increaseStripWidth)
+        increaseStripWidthAction = spectrumUtilToolBar.addAction("Increase Strip Width", self.increaseStripSize)
         increaseStripWidthIcon = Icon('icons/range-expand')
         increaseStripWidthAction.setIcon(increaseStripWidthIcon)
-        decreaseStripWidthAction = spectrumUtilToolBar.addAction("Decrease Strip Width", self.decreaseStripWidth)
+        decreaseStripWidthAction = spectrumUtilToolBar.addAction("Decrease Strip Width", self.decreaseStripSize)
         decreaseStripWidthIcon = Icon('icons/range-contract')
         decreaseStripWidthAction.setIcon(decreaseStripWidthIcon)
 

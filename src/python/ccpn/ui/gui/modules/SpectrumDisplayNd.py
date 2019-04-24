@@ -84,8 +84,8 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
             #  action name     icon                    tooltip                     active     callback
             ('Increase Trace Scale', 'icons/tracescale-up', 'Increase trace scale of strips in display', True, self.increaseTraceScale),
             ('Decrease Trace Scale', 'icons/tracescale-down', 'Decrease trace scale of strips in display', True, self.decreaseTraceScale),
-            ('Increase Strip Width', 'icons/range-expand', 'Increase the width of strips in display', True, self.increaseStripWidth),
-            ('Decrease Strip Width', 'icons/range-contract', 'Decrease the width of strips in display', True, self.decreaseStripWidth),
+            ('Increase Strip Width', 'icons/range-expand', 'Increase the width of strips in display', True, self.increaseStripSize),
+            ('Decrease Strip Width', 'icons/range-contract', 'Decrease the width of strips in display', True, self.decreaseStripSize),
             ('Add Strip', 'icons/plus', 'Duplicate the rightmost strip', True, self.addStrip),
             ('Remove Strip', 'icons/minus', 'Remove the current strip', True, self.removeCurrentStrip),
             ]

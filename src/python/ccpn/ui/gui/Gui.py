@@ -451,6 +451,8 @@ class SpectrumDisplayNd(coreClass, _SpectrumDisplayNd):
             # where is created. E.g. and not hardcoded on the "right" and coupled with api calls!
             self.application.ui.mainWindow.moduleArea.addModule(self, position='right',
                                                                 relativeTo=self.application.ui.mainWindow.moduleArea)
+        # else:
+        #     print('NOT OPENING SPECTRUMDISPLAY')
 
 
 #old name
@@ -487,12 +489,12 @@ class Strip1d(coreClass, _GuiStrip1d):
 
         if self.spectrumDisplay.stripDirection == 'Y':
 
-            # strip are arranged in a row
+            # strips are arranged in a row
             self.spectrumDisplay.stripFrame.layout().addWidget(self, 0, stripIndex)
 
         elif self.spectrumDisplay.stripDirection == 'X':
 
-            # strip are arranged in a column
+            # strips are arranged in a column
             self.spectrumDisplay.stripFrame.layout().addWidget(self, stripIndex, 0)
 
 
@@ -515,12 +517,12 @@ class StripNd(coreClass, _GuiStripNd):
 
         if self.spectrumDisplay.stripDirection == 'Y':
 
-            # strip are arranged in a row
+            # strips are arranged in a row
             self.spectrumDisplay.stripFrame.layout().addWidget(self, 0, stripIndex)
 
         elif self.spectrumDisplay.stripDirection == 'X':
 
-            # strip are arranged in a column
+            # strips are arranged in a column
             self.spectrumDisplay.stripFrame.layout().addWidget(self, stripIndex, 0)
 
 

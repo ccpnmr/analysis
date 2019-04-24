@@ -1339,6 +1339,9 @@ class Framework(NotifierBase):
         self._initialiseProject(project)
         project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
 
+        # 20190424:ED reset the flag so that spectrumDisplays open correctly again
+        project._isNew = None
+
         return project
 
     def openProject(self, path=None):

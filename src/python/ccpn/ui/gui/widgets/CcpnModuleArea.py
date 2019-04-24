@@ -132,6 +132,11 @@ class CcpnModuleArea(ModuleArea, DropBase):  #, DropBase):
         if DropBase.PIDS in data and isinstance(data['event'].source(), SideBar):      #(SideBar, SideBar)):
             pids = data[DropBase.PIDS]
             objs = [self.mainWindow.project.getByPid(pid) for pid in pids]
+
+            # check whether a new spectrumDisplay is needed, and check axisOrdering
+            from ccpn.ui.gui.popups.AxisOrderingPopup import checkSpectraToOpen
+            checkSpectraToOpen(self.mainWindow, objs)
+
             _openItemObject(self.mainWindow, objs, position=self.dropArea)
 
             # # reset the dock area

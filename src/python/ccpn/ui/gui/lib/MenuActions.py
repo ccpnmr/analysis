@@ -535,6 +535,10 @@ class _openItemSpectrumDisplay(OpenItemABC):
     def _openSpectrumDisplay(self, spectrum=None, position=None, relativeTo=None):
         mainWindow = self.mainWindow
 
+        # check whether a new spectrumDisplay is needed, and check axisOrdering
+        from ccpn.ui.gui.popups.AxisOrderingPopup import checkSpectraToOpen
+        checkSpectraToOpen(mainWindow, [spectrum])
+
         spectrumDisplay = mainWindow.createSpectrumDisplay(spectrum)
 
         if len(spectrumDisplay.strips) > 0:
@@ -569,6 +573,11 @@ class _openItemSpectrumGroupDisplay(OpenItemABC):
         mainWindow = self.mainWindow
 
         if len(spectrumGroup.spectra) > 0:
+
+            # check whether a new spectrumDisplay is needed, and check axisOrdering
+            from ccpn.ui.gui.popups.AxisOrderingPopup import checkSpectraToOpen
+            checkSpectraToOpen(mainWindow, [spectrumGroup])
+
             spectrumDisplay = mainWindow.createSpectrumDisplay(spectrumGroup.spectra[0])
             mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
 

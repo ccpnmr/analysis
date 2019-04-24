@@ -243,6 +243,9 @@ class CcpnGLWidget(QOpenGLWidget):
         self.lastPos = QPoint()
         self._mouseX = 0
         self._mouseY = 0
+        self._mouseStart = (0.0, 0.0)
+        self._mouseEnd = (0.0, 0.0)
+
         self.pixelX = 1.0
         self.pixelY = 1.0
         self.deltaX = 1.0
@@ -3177,8 +3180,9 @@ class CcpnGLWidget(QOpenGLWidget):
         if self._crosshairVisible:  # and (not self._updateHTrace or not self._updateVTrace):
             GL.glBegin(GL.GL_LINES)
 
-            # map the cursor to the ratio coordinates
+            # map the cursor to the ratio coordinates - double cursor is flipped about the line x=y
             newCoords = self._scaleAxisToRatio(self.cursorCoordinate[0:2])
+            doubleCoords = self._scaleAxisToRatio(self.cursorCoordinate[1::-1])
 
             if getCurrentMouseMode() == PICK and self.underMouse():
                 GL.glColor4f(*self.mousePickColour)
@@ -3217,12 +3221,25 @@ class CcpnGLWidget(QOpenGLWidget):
 
             phasingFrame = self.spectrumDisplay.phasingFrame
             if not phasingFrame.isVisible():
+                _drawDouble = any([specView.spectrum.showDoubleCrosshair == True for specView in self._ordering])
+
                 if not self._updateVTrace and newCoords[0] is not None:
                     GL.glVertex2d(newCoords[0], 1.0)
                     GL.glVertex2d(newCoords[0], 0.0)
+
+                    # add the double cursor
+                    if _drawDouble:
+                        GL.glVertex2d(doubleCoords[0], 1.0)
+                        GL.glVertex2d(doubleCoords[0], 0.0)
+
                 if not self._updateHTrace and newCoords[1] is not None:
                     GL.glVertex2d(0.0, newCoords[1])
                     GL.glVertex2d(1.0, newCoords[1])
+
+                    # add the double cursor
+                    if _drawDouble:
+                        GL.glVertex2d(0.0, doubleCoords[1])
+                        GL.glVertex2d(1.0, doubleCoords[1])
 
             GL.glEnd()
 

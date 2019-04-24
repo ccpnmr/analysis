@@ -1,5 +1,5 @@
-"""Module Documentation here
-
+"""
+Module Documentation here
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -26,21 +26,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import sys
-
-from PyQt5 import QtGui, QtWidgets, QtCore
-from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.RadioButton import RadioButton
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
-from ccpn.ui.gui.widgets import MessageDialog
-
+from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.util.floatUtils import fRound
 
 

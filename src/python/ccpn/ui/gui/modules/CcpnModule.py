@@ -802,6 +802,10 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                 pids = data[DropBase.PIDS]
                 objs = [self.mainWindow.project.getByPid(pid) for pid in pids]
 
+                # check whether a new spectrumDisplay is needed, and check axisOrdering
+                from ccpn.ui.gui.popups.AxisOrderingPopup import checkSpectraToOpen
+                checkSpectraToOpen(self.mainWindow, objs)
+
                 with undoBlock():
                     _openItemObject(self.mainWindow, objs, position=self.dropArea, relativeTo=self)
 

@@ -904,7 +904,7 @@ class DimensionsTab(Widget):
             self.preferredAxisOrderPulldown.setIndex(specIndex)
 
     def _setSpectrumOrdering(self, value):
-        """Set the preferred axis orderin from the pullDown selection
+        """Set the preferred axis ordering from the pullDown selection
         """
         index = self.preferredAxisOrderPulldown.getIndex()
 

@@ -70,6 +70,7 @@ def _createMenu(strip, items):
     """
     strip._spectrumUtilActions = {}
     menu = strip.contextMenu = Menu('', strip, isFloatWidget=True)  # generate new menu
+
     for i in items:
         try:
             ff = getattr(menu, i.typeItem)
@@ -216,7 +217,7 @@ def _makeStripPlot(strip):
 def _printItem(strip):
     return _SCMitem(name='Print to File...',
                     typeItem=ItemTypes.get(ITEM), icon='icons/print', toolTip='Print SpectrumDisplay to File',
-                    shortcut='PT', callback=strip.showExportDialog)
+                    shortcut='⌃p', callback=strip.showExportDialog)
 
 
 def _separator():

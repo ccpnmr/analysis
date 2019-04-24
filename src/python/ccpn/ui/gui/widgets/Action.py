@@ -42,8 +42,19 @@ class Action(Base, QtWidgets.QAction):
             text = translator.translate(text)
 
         if shortcut:
-            if type(shortcut) == type(''):
-                shortcut = QtGui.QKeySequence(", ".join(tuple(shortcut)))
+            if isinstance(shortcut, str):
+
+                if shortcut.startswith('⌃'):  # Unicode U+2303, NOT the carrot on your keyboard.
+
+                    # may need to add extras for alt and option
+                    shortcut = QtGui.QKeySequence('Ctrl+{}'.format(shortcut[1]))
+
+                else:
+                    shortcut = QtGui.QKeySequence(", ".join(tuple(shortcut)))
+
+            elif not isinstance(shortcut, QtGui.QKeySequence):
+                raise TypeError('Shortcut type must be a string or a keySequence')
+
             QtWidgets.QAction.__init__(self, text, parent, shortcut=shortcut, checkable=checkable)
             self.setShortcutContext(QtCore.Qt.ApplicationShortcut)
 

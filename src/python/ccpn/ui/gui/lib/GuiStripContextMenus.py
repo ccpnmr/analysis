@@ -94,6 +94,13 @@ def _toolBarItem(strip):
                     checkable=True, checked=True, shortcut='TB', stripMethodName='toolbarAction')
 
 
+def _spectrumToolBarItem(strip):
+    return _SCMitem(name='SpectrumToolBar',
+                    typeItem=ItemTypes.get(ITEM), toolTip='spectrumtoolbarAction',
+                    callback=strip.spectrumDisplay.toggleSpectrumToolbar,
+                    checkable=True, checked=True, shortcut='SB', stripMethodName='spectrumToolbarAction')
+
+
 def _crosshairItem(strip):
     return _SCMitem(name='Crosshair',
                     typeItem=ItemTypes.get(ITEM), toolTip='Crosshair Action',
@@ -122,9 +129,9 @@ def _cyclePeakSymbolsItem(strip):
 
 
 def _shareYAxisItem(strip):
-    return _SCMitem(name='Share Y Axis',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Share Y axis among strips', checkable=True, checked=True,
-                    callback=strip._toggleLastAxisOnly, shortcut='TA', stripMethodName='lastAxisOnlyCheckBox')
+    return _SCMitem(name='Share Last Axis',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Share last axis among strips', checkable=True, checked=True,
+                    callback=strip._toggleLastAxisOnly, shortcut='LA', stripMethodName='lastAxisOnlyCheckBox')
 
 
 def _contoursItem(strip):
@@ -367,7 +374,7 @@ def _hidePeaksSingleActionItems(strip, menu):
 def _addTraceItem(strip):
     return _SCMitem(name='Add Trace',
                     typeItem=ItemTypes.get(ITEM), toolTip='Add new trace',
-                    shortcut='PT', callback=strip._newPhasingTrace)
+                    shortcut='TA', callback=strip._newPhasingTrace)
 
 
 def _removeAllTracesItem(strip):
@@ -425,6 +432,7 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
     """
     items = [
         _toolBarItem(guiStrip1d),
+        _spectrumToolBarItem(guiStrip1d),
         _crosshairItem(guiStrip1d),
         _gridItem(guiStrip1d),
         _cyclePeakLabelsItem(guiStrip1d),
@@ -539,6 +547,7 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
     """
     items = [
         _toolBarItem(guiStripNd),
+        _spectrumToolBarItem(guiStripNd),
         _crosshairItem(guiStripNd),
         _gridItem(guiStripNd),
         _shareYAxisItem(guiStripNd),

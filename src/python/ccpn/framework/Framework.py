@@ -1204,7 +1204,7 @@ class Framework(NotifierBase):
             ("NmrResidue Table", partial(self.showNmrResidueTable, selectFirstItem=True), [('shortcut', 'nt')]),
             # ("Structure Table", partial(self.showStructureTable, selectFirstItem=True), [('shortcut', 'st')]),
             ("Residue Table", partial(self.showResidueTable, selectFirstItem=True)),
-            ("Peak Table", partial(self.showPeakTable, selectFirstItem=True), [('shortcut', 'lt')]),
+            ("Peak Table", partial(self.showPeakTable, selectFirstItem=True), [('shortcut', 'pt')]),
             ("Integral Table", partial(self.showIntegralTable, selectFirstItem=True), [('shortcut', 'it')]),
             ("Multiplet Table", partial(self.showMultipletTable, selectFirstItem=True), [('shortcut', 'mt')]),
             ("Restraint Table", partial(self.showRestraintTable, selectFirstItem=True), [('shortcut', 'rt')]),
@@ -1225,15 +1225,16 @@ class Framework(NotifierBase):
             #                                               ]),
             (),
             ("Current", (("Show/Hide Toolbar", self.toggleToolbar, [('shortcut', 'tb')]),
+                         ("Show/Hide Spectrum Toolbar", self.toggleSpectrumToolbar, [('shortcut', 'sb')]),
                          ("Show/Hide Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')]),
                          (),
                          ("Set Zoom...", self._setZoomPopup, [('shortcut', 'sz')]),
                          ("Reset Zoom", self.resetZoom, [('shortcut', 'rz')]),
                          (),
                          ("New SpectrumDisplay with strip", self.copyStrip, []),
-                         ("Flip X-Y Axis", self.flipXYAxis, [('shortcut', 'xy')]),
-                         ("Flip X-Z Axis", self.flipXZAxis, [('shortcut', 'xz')]),
-                         ("Flip Y-Z Axis", self.flipYZAxis, [('shortcut', 'yz')])
+                         ("Copy with X-Y Axes flipped", self.flipXYAxis, [('shortcut', 'xy')]),
+                         ("Copy with X-Z Axes flipped", self.flipXZAxis, [('shortcut', 'xz')]),
+                         ("Copy with Y-Z Axes flipped", self.flipYZAxis, [('shortcut', 'yz')])
                          )),
             (),
             ("Show/hide Modules", ([
@@ -2509,6 +2510,12 @@ class Framework(NotifierBase):
     def toggleToolbar(self):
         if self.current.strip is not None:
             self.current.strip.spectrumDisplay.toggleToolbar()
+        else:
+            getLogger().warning('No strip selected')
+
+    def toggleSpectrumToolbar(self):
+        if self.current.strip is not None:
+            self.current.strip.spectrumDisplay.toggleSpectrumToolbar()
         else:
             getLogger().warning('No strip selected')
 

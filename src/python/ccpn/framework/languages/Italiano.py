@@ -104,7 +104,7 @@ translationDict = {
     "Submit Feedback ..."         : "Lascia feedback ...",
 
     "Assign"                      : "Assegna",
-    "Setup NmrResidues"           : "Imposta residui Nmr",
+    "Set up NmrResidues"           : "Imposta residui Nmr",
     "Pick and Assign"             : "Mappa e assegna picchi",
     "Backbone Assignment"         : "Assegna \"backbone\"",
     "Sidechain Assignment"        : "Assegna catena laterale",

@@ -80,11 +80,11 @@ class GuiWindow():
         addShortCut("t, d", self, partial(self.traceScaleDown, self), context=context)
         addShortCut("t, h", self, partial(self.toggleHTrace, self), context=context)
         addShortCut("t, v", self, partial(self.toggleVTrace, self), context=context)
-        addShortCut("t, a", self, partial(self.toggleLastAxisOnly, self), context=context)
+        addShortCut("l, a", self, partial(self.toggleLastAxisOnly, self), context=context)
         addShortCut("p, v", self, self.setPhasingPivot, context=context)
         addShortCut("t, r", self, self.removePhasingTraces, context=context)
         addShortCut("a, m", self, self.addMultiplet, context=context)
-        addShortCut("p, t", self, self.newPhasingTrace, context=context)
+        addShortCut("t, a", self, self.newPhasingTrace, context=context)
         addShortCut("i, 1", self, self.add1DIntegral, context=context)
         addShortCut("w, 1", self, self.getCurrentPositionAndStrip, context=context)
         addShortCut("r, p", self, partial(self.refitCurrentPeaks, singularMode=True), context=context)
@@ -339,7 +339,11 @@ class GuiWindow():
         """
         Changes the scale of a trace in all spectrum displays of the window.
         """
-        for spectrumDisplay in window.spectrumDisplays:
+        # for spectrumDisplay in window.spectrumDisplays:
+
+        if self.application.current.strip:
+            spectrumDisplay = self.application.current.strip.spectrumDisplay
+
             if not spectrumDisplay.is1D:
                 for strip in spectrumDisplay.strips:
                     for spectrumView in strip.spectrumViews:
@@ -390,13 +394,13 @@ class GuiWindow():
 
     def newPhasingTrace(self):
         strip = self.application.current.strip
-        if strip and (strip.spectrumDisplay.window is self):
+        if strip:               # and (strip.spectrumDisplay.window is self):
             strip._newPhasingTrace()
 
     def setPhasingPivot(self):
 
         strip = self.application.current.strip
-        if strip and (strip.spectrumDisplay.window is self):
+        if strip:               # and (strip.spectrumDisplay.window is self):
             strip._setPhasingPivot()
 
     def removePhasingTraces(self):
@@ -404,7 +408,7 @@ class GuiWindow():
         Removes all phasing traces from all strips.
         """
         strip = self.application.current.strip
-        if strip and (strip.spectrumDisplay.window is self):
+        if strip:               # and (strip.spectrumDisplay.window is self):
             # strip.removePhasingTraces()
             for strip in strip.spectrumDisplay.strips:
                 strip.removePhasingTraces()

@@ -61,8 +61,7 @@ class SpectrumDisplaySettings(Widget):
     # signal for parentWidgets to respond to changes in the widget
     settingsChanged = pyqtSignal(dict)
     symbolsChanged = pyqtSignal(dict)
-
-    # stripArrangementChanged = pyqtSignal(int)
+    stripArrangementChanged = pyqtSignal(int)
 
     def __init__(self, parent=None,
                  mainWindow=None,
@@ -72,7 +71,7 @@ class SpectrumDisplaySettings(Widget):
                  yAxisUnits=0, yTexts=[], showYAxis=True,
                  lockAspect=False,
                  symbolType=0, annotationType=0, symbolSize=9, symbolThickness=2,
-                 # stripArrangement=0,
+                 stripArrangement=0,
                  **kwds):
         super().__init__(parent, setLayout=True, **kwds)
 
@@ -172,16 +171,16 @@ class SpectrumDisplaySettings(Widget):
         self.symbolThicknessData.setValue(int(symbolThickness))
         self.symbolThicknessData.valueChanged.connect(self._symbolsChanged)
 
-        # row += 1
-        # self.stripArrangementLabel = Label(parent, text="Strip Arrangement", grid=(row, 0))
-        # self.stripArrangementButtons = RadioButtons(parent, texts=['Row', 'Column'],
-        #                                             objectNames=['stripSDS_Row', 'stripSDS_Column'],
-        #                                             selectedInd=stripArrangement,
-        #                                             callback=self._stripArrangementChanged,
-        #                                             direction='horizontal',
-        #                                             grid=(row, 1), hAlign='l',
-        #                                             tipTexts=None,
-        #                                             )
+        row += 1
+        self.stripArrangementLabel = Label(parent, text="Strip Arrangement", grid=(row, 0))
+        self.stripArrangementButtons = RadioButtons(parent, texts=['Row', 'Column'],
+                                                    objectNames=['stripSDS_Row', 'stripSDS_Column'],
+                                                    selectedInd=stripArrangement,
+                                                    callback=self._stripArrangementChanged,
+                                                    direction='horizontal',
+                                                    grid=(row, 1), hAlign='l',
+                                                    tipTexts=None,
+                                                    )
 
         # not needed anymore
         # row += 1
@@ -243,10 +242,10 @@ class SpectrumDisplaySettings(Widget):
             self.symbolThicknessData.set(values[SYMBOLTHICKNESS])
             self.blockSignals(False)
 
-    # def _stripArrangementChanged(self):
-    #     """Emit a signal if the strip arrangement buttons have been pressed
-    #     """
-    #     self.stripArrangementChanged.emit(self.stripArrangementButtons.getIndex())
+    def _stripArrangementChanged(self):
+        """Emit a signal if the strip arrangement buttons have been pressed
+        """
+        self.stripArrangementChanged.emit(self.stripArrangementButtons.getIndex())
 
     def doCallback(self):
         """Handle the user callback

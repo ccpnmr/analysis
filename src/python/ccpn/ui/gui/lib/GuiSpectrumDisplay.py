@@ -82,6 +82,7 @@ AXISUNITS = ['ppm', 'Hz', 'points']
 SPECTRUMGROUPS = 'spectrumGroups'
 SPECTRUMISGROUPED = 'spectrumIsGrouped'
 SPECTRUMGROUPLIST = 'spectrumGroupList'
+STRIPDIRECTIONS = ['Y', 'X']
 
 
 class GuiSpectrumDisplay(CcpnModule):
@@ -193,6 +194,9 @@ class GuiSpectrumDisplay(CcpnModule):
                                                                     showYAxis=False)
 
         self._spectrumDisplaySettings.settingsChanged.connect(self._settingsChanged)
+
+        # respond to values changed in the containing spectrumDisplay settings widget
+        self._spectrumDisplaySettings.stripArrangementChanged.connect(self._stripDirectionChangedInSettings)
 
         # GWV: Not sure what the widget argument is for
         # LM: is the spectrumDisplay, used in the widget to set actions/callbacks to the buttons
@@ -396,6 +400,18 @@ class GuiSpectrumDisplay(CcpnModule):
         GLSignals = GLNotifier(parent=None)
         GLSignals._emitAxisUnitsChanged(source=None, strip=self.strips[0], dataDict=dataDict)
 
+    def _stripDirectionChangedInSettings(self, value):
+        """Handle changing the stripDirection from the settings widget
+        """
+        if value not in range(len(STRIPDIRECTIONS)):
+            raise ValueError('stripDirection not in ', STRIPDIRECTIONS)
+
+        newDirection = STRIPDIRECTIONS[value]
+
+        # set the new stripDirection, and redraw
+        self.stripDirection = newDirection
+        self._redrawLayout(self)
+
     def _listViewChanged(self, data):
         """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame
         """
@@ -413,7 +429,6 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         # Using AbstractWrapperObject because there seems to already be a setParameter
         # belonging to spectrumDisplay
-        # TODO:ED check this out
         grouped = AbstractWrapperObject.getParameter(self, SPECTRUMGROUPS, SPECTRUMISGROUPED)
         if grouped is not None:
             return grouped
@@ -930,6 +945,41 @@ class GuiSpectrumDisplay(CcpnModule):
         else:
             self.hideToolbar()
 
+    def showSpectrumToolbar(self):
+        """show the spectrum toolbar"""
+        # showing the spectrum toolbar, but we need to update the checkboxes of all strips as well.
+        if self.isGrouped:
+            self.spectrumGroupToolBar.show()
+        else:
+            self.spectrumToolBar.show()
+
+        for strip in self.strips:
+            strip.spectrumToolbarAction.setChecked(True)
+
+    def hideSpectrumToolbar(self):
+        """hide the spectrum toolbar"""
+        # hiding the spectrum toolbar, but we need to update the checkboxes of all strips as well.
+        if self.isGrouped:
+            self.spectrumGroupToolBar.hide()
+        else:
+            self.spectrumToolBar.hide()
+
+        for strip in self.strips:
+            strip.spectrumToolbarAction.setChecked(False)
+
+    def toggleSpectrumToolbar(self):
+        """Toggle the spectrum toolbar """
+        if self.isGrouped:
+            if not self.spectrumGroupToolBar.isVisible():
+                self.showSpectrumToolbar()
+            else:
+                self.hideSpectrumToolbar()
+        else:
+            if not self.spectrumToolBar.isVisible():
+                self.showSpectrumToolbar()
+            else:
+                self.hideSpectrumToolbar()
+
     def close(self):
         """
         Close the module from the commandline
@@ -966,6 +1016,53 @@ class GuiSpectrumDisplay(CcpnModule):
 
     def _removeIndexStrip(self, value):
         self.deleteStrip(self.strips[value])
+
+    def _redrawLayout(self, spectrumDisplay):
+        """Redraw the stripFrame with the new stripDirection
+        """
+        layout = spectrumDisplay.stripFrame.getLayout()
+
+        if layout and layout.count() > 1:
+            spectrumDisplay.stripFrame.blockSignals(True)
+            spectrumDisplay.stripFrame.setUpdatesEnabled(False)
+
+            # clear the layout and rebuild
+            _widgets = []
+
+            # need to be removed if not using QObjectCleanupHandler before creating new layout
+            while layout.count():
+                _widgets.append(layout.takeAt(0).widget())
+
+            # remember necessary layout info and create a new layout - ensures clean for new widgets
+            margins = layout.getContentsMargins()
+            space = layout.spacing()
+            QtWidgets.QWidget().setLayout(layout)
+            layout = QtWidgets.QGridLayout()
+            spectrumDisplay.stripFrame.setLayout(layout)
+            layout.setContentsMargins(*margins)
+            layout.setSpacing(space)
+
+            # reinsert strips in new order - reset minimum widths
+            if spectrumDisplay.stripDirection == 'Y':
+
+                # horizontal strip layout
+                for m, widgStrip in enumerate(_widgets):
+                    layout.addWidget(widgStrip, 0, m)
+
+            elif spectrumDisplay.stripDirection == 'X':
+
+                # vertical strip layout
+                for m, widgStrip in enumerate(_widgets):
+                    layout.addWidget(widgStrip, m, 0)
+
+            spectrumDisplay.stripFrame.setUpdatesEnabled(True)
+            spectrumDisplay.stripFrame.blockSignals(False)
+
+            self.showAxes()
+            self.setColumnStretches(stretchValue=True)
+
+        else:
+            raise RuntimeError('Error, stripFrame layout in invalid state')
 
     def _removeStripFromLayout(self, spectrumDisplay, strip):
         """Remove the current strip from the layout
@@ -1425,7 +1522,8 @@ class GuiSpectrumDisplay(CcpnModule):
 
         if widgets:
             thisLayout = self.stripFrame.layout()
-            thisLayoutWidth = self._stripFrameScrollArea.width()
+            # thisLayoutWidth = self._stripFrameScrollArea.width()
+            thisLayoutWidth = self.stripFrame.width()
 
             if not thisLayout.itemAt(0):
                 return
@@ -1461,6 +1559,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     self.stripFrame.setMinimumWidth((firstStripWidth + STRIP_SPACING) * len(self.orderedStrips) - STRIP_SPACING)
                 else:
                     self.stripFrame.setMinimumWidth(self.stripFrame.minimumSizeHint().width())
+                self.stripFrame.setMinimumHeight(50)
 
             else:
 
@@ -1492,6 +1591,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     self.stripFrame.setMinimumWidth((firstWidth + STRIP_SPACING) * len(self.orderedStrips) + AXIS_WIDTH)
                 else:
                     self.stripFrame.setMinimumWidth(self.stripFrame.minimumSizeHint().width())
+                self.stripFrame.setMinimumHeight(50)
 
             self.stripFrame.show()
 
@@ -1510,7 +1610,8 @@ class GuiSpectrumDisplay(CcpnModule):
 
         if widgets:
             thisLayout = self.stripFrame.layout()
-            thisLayoutHeight = self._stripFrameScrollArea.height()
+            # thisLayoutHeight = self._stripFrameScrollArea.height()
+            thisLayoutHeight = self.stripFrame.height()
 
             if not thisLayout.itemAt(0):
                 return
@@ -1546,6 +1647,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     self.stripFrame.setMinimumHeight((firstStripHeight + STRIP_SPACING) * len(self.orderedStrips) - STRIP_SPACING)
                 else:
                     self.stripFrame.setMinimumHeight(self.stripFrame.minimumSizeHint().height())
+                self.stripFrame.setMinimumWidth(50)
 
             else:
 
@@ -1576,6 +1678,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     self.stripFrame.setMinimumHeight((firstHeight + STRIP_SPACING) * len(self.orderedStrips) + AXIS_HEIGHT)
                 else:
                     self.stripFrame.setMinimumHeight(self.stripFrame.minimumSizeHint().height())
+                self.stripFrame.setMinimumWidth(50)
 
             self.stripFrame.show()
 

@@ -35,7 +35,7 @@ from ccpn.core.lib.ContextManagers import undoBlock
 
 class SetupNmrResiduesPopup(CcpnDialog):
     def __init__(self, parent=None, mainWindow=None,
-                 title='Setup nmrResidues', **kwds):
+                 title='Set up nmrResidues', **kwds):
         CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
         self._parent = parent

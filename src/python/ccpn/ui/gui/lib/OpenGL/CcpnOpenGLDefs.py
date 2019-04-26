@@ -56,16 +56,16 @@ FULLVIEW = 'fullView'
 AXISCORNER = 'axisCorner'
 
 GLLINE_STYLES = {
-    'solid': 0xFFFF,
+    'solid' : 0xFFFF,
     'dashed': 0xF0F0,
     'dotted': 0xAAAA
-}
+    }
 
 GLLINE_STYLES_ARRAY = {
-    'solid': None,
+    'solid' : None,
     'dashed': [5, 5],
     'dotted': [1, 1]
-}
+    }
 
 GLLINETYPE = 'line'
 GLREGIONTYPE = 'region'
@@ -88,6 +88,7 @@ LENSQ4 = 4 * LENSQ
 DEFAULTFADE = 0.3
 OUTOFPLANEFADE = 1.0
 
+# export to file settings
 GLFILENAME = 'filename'
 GLSPECTRUMDISPLAY = 'spectrumDisplay'
 GLSTRIP = 'strip'
@@ -95,16 +96,21 @@ GLWIDGET = 'glWidget'
 GLPRINTTYPE = 'printType'
 GLPAGETYPE = 'pageType'
 GLSELECTEDPIDS = 'selectedPids'
-GLPEAKSYMBOLS = 'peakSymbols'
-GLPEAKLABELS = 'peakLabels'
-GLINTEGRALSYMBOLS = 'integralSymbols'
-GLINTEGRALLABELS = 'integralLabels'
-GLMULTIPLETSYMBOLS = 'multipletSymbols'
-GLMULTIPLETLABELS = 'multipletLabels'
+
+# check box items
+GLPEAKSYMBOLS = 'Peak Symbols'
+GLPEAKLABELS = 'Peak Labels'
+GLINTEGRALSYMBOLS = 'Integral Symbols'
+GLINTEGRALLABELS = 'Integral Labels'
+GLMULTIPLETSYMBOLS = 'Multiplet Symbols'
+GLMULTIPLETLABELS = 'Multiplet Labels'
 GLGRIDLINES = 'Grid Lines'
+GLAXISTITLES = 'Axis Titles'
 GLAXISLINES = 'Axis Lines'
 GLAXISMARKS = 'Axis Marks'
+GLAXISMARKSINSIDE = 'Axis Marks Inside'
 GLAXISLABELS = 'Axis Labels'
+GLAXISUNITS = 'Axis Units'
 GLSPECTRUMCONTOURS = 'Spectrum Contours'
 GLSPECTRUMBORDERS = 'Spectrum Borders'
 GLMARKLINES = 'Mark Lines'
@@ -113,13 +119,59 @@ GLTRACES = 'Traces'
 GLSHOWSPECTRAONPHASE = 'Spectra on Phasing'
 GLOTHERLINES = 'Other Lines'
 GLSTRIPLABELLING = 'Strip Labelling'
-GLREGIONS = 'regions'
-GLPLOTBORDER = 'plotBorder'
-GLFOREGROUND = 'foregroundColour'
-GLBACKGROUND = 'backgroundColour'
-GLBASETHICKNESS = 'baseThickness'
-GLSYMBOLTHICKNESS = 'symbolThickness'
-GLCONTOURTHICKNESS = 'contourThickness'
+GLREGIONS = 'Regions'
+GLPLOTBORDER = 'Plot Border'
+
+# export to file user settings
+GLFOREGROUND = 'Foreground Colour'
+GLBACKGROUND = 'Background Colour'
+GLBASETHICKNESS = 'Base Thickness'
+GLSYMBOLTHICKNESS = 'Symbol Thickness'
+GLCONTOURTHICKNESS = 'Contour Thickness'
+GLSTRIPDIRECTION = 'Strip Direction'
+GLSTRIPPADDING = 'Strip Padding'
+
+GLFULLLIST = (GLPEAKSYMBOLS,
+              GLPEAKLABELS,
+              GLINTEGRALSYMBOLS,
+              GLINTEGRALLABELS,
+              GLMULTIPLETSYMBOLS,
+              GLMULTIPLETLABELS,
+              GLGRIDLINES,
+              GLAXISTITLES,
+              GLAXISLINES,
+              GLAXISMARKS,
+              GLAXISMARKSINSIDE,
+              GLAXISLABELS,
+              GLAXISUNITS,
+              GLSPECTRUMCONTOURS,
+              GLSPECTRUMBORDERS,
+              GLMARKLINES,
+              GLMARKLABELS,
+              GLTRACES,
+              GLSHOWSPECTRAONPHASE,
+              GLOTHERLINES,
+              GLSTRIPLABELLING,
+              GLREGIONS,
+              GLPLOTBORDER)
+
+GLEXTENDEDLIST = (GLGRIDLINES,
+                  GLAXISTITLES,
+                  GLAXISLINES,
+                  GLAXISMARKS,
+                  GLAXISMARKSINSIDE,
+                  GLAXISLABELS,
+                  GLAXISUNITS,
+                  GLSPECTRUMCONTOURS,
+                  GLSPECTRUMBORDERS,
+                  GLMARKLINES,
+                  GLMARKLABELS,
+                  GLTRACES,
+                  GLSHOWSPECTRAONPHASE,
+                  GLOTHERLINES,
+                  GLSTRIPLABELLING,
+                  GLREGIONS,
+                  GLPLOTBORDER)
 
 LEFTBORDER = 1
 RIGHTBORDER = 1

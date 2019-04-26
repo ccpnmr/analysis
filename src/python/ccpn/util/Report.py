@@ -44,65 +44,66 @@ from reportlab.lib.units import mm
 
 
 class Report():
-  """
-  Class container for generating pdf reports
-  """
-  def __init__(self, parent, project, filename, pagesize=A4,
-               leftMargin=(2*cm), rightMargin=(2*cm), topMargin=(2*cm), bottomMargin=(2*cm)):
     """
-    Initialise a new pdf report
-
-    :param parent:
-    :param project - current project:
-    :param filename - filename to save pdf as:
-    :param pagesize - pagesize; e.g. LETTER, A4:
-    :param leftMargin:
-    :param rightMargin:
-    :param topMargin:
-    :param bottomMargin:
+    Class container for generating pdf reports
     """
 
-    # set the class attributes
-    self._parent = parent
-    self.project = project
-    self.filename = filename
-    self.canv = None
-    self.defaultMargin = 2.0*cm
+    def __init__(self, parent, project, filename, pagesize=A4,
+                 leftMargin=(2 * cm), rightMargin=(2 * cm), topMargin=(2 * cm), bottomMargin=(2 * cm)):
+        """
+        Initialise a new pdf report
 
-    # buffer for exporting
-    self.buf = io.BytesIO()
+        :param parent:
+        :param project - current project:
+        :param filename - filename to save pdf as:
+        :param pagesize - pagesize; e.g. LETTER, A4:
+        :param leftMargin:
+        :param rightMargin:
+        :param topMargin:
+        :param bottomMargin:
+        """
 
-    self.doc = SimpleDocTemplate(
-      self.buf,
-      rightMargin=rightMargin,
-      leftMargin=leftMargin,
-      topMargin=topMargin,
-      bottomMargin=bottomMargin,
-      pagesize=pagesize,
-    )
+        # set the class attributes
+        self._parent = parent
+        self.project = project
+        self.filename = filename
+        self.canv = None
+        self.defaultMargin = 2.0 * cm
 
-    # Styling paragraphs
-    styles = getSampleStyleSheet()
+        # buffer for exporting
+        self.buf = io.BytesIO()
 
-    # initialise a new story - the items that are to be added to the document
-    self.story = []
+        self.doc = SimpleDocTemplate(
+                self.buf,
+                rightMargin=rightMargin,
+                leftMargin=leftMargin,
+                topMargin=topMargin,
+                bottomMargin=bottomMargin,
+                pagesize=pagesize,
+                )
 
-  def addItemToStory(self, item):
-    """
-    Add a new item to the current story
-    :param item; e.g., paragraph or drawing:
-    """
-    self.story.append(item)
+        # Styling paragraphs
+        styles = getSampleStyleSheet()
 
-  def buildDocument(self):
-    """
-    Build the document from the story
-    """
-    self.doc.build(self.story)
+        # initialise a new story - the items that are to be added to the document
+        self.story = []
 
-  def writeDocument(self):
-    """
-    Write the document to the file
-    """
-    with open(self.filename, 'wb') as fn:
-      fn.write(self.buf.getvalue())
+    def addItemToStory(self, item):
+        """
+        Add a new item to the current story
+        :param item; e.g., paragraph or drawing:
+        """
+        self.story.append(item)
+
+    def buildDocument(self):
+        """
+        Build the document from the story
+        """
+        self.doc.build(self.story)
+
+    def writeDocument(self):
+        """
+        Write the document to the file
+        """
+        with open(self.filename, 'wb') as fn:
+            fn.write(self.buf.getvalue())

@@ -1061,9 +1061,6 @@ class GuiSpectrumDisplay(CcpnModule):
             self.showAxes()
             self.setColumnStretches(stretchValue=True)
 
-        else:
-            raise RuntimeError('Error, stripFrame layout in invalid state')
-
     def _removeStripFromLayout(self, spectrumDisplay, strip):
         """Remove the current strip from the layout
         CCPN Internal

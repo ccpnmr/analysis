@@ -61,7 +61,9 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXI
     GLMULTIPLETSYMBOLS, GLOTHERLINES, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLSELECTEDPIDS, \
     GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSTRIP, GLSTRIPLABELLING, GLTRACES, GLWIDGET, GLPLOTBORDER, \
     GLPAGETYPE, GLSPECTRUMDISPLAY, GLAXISLINES, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS, \
-    GLCONTOURTHICKNESS, GLFOREGROUND, GLSHOWSPECTRAONPHASE
+    GLCONTOURTHICKNESS, GLFOREGROUND, GLSHOWSPECTRAONPHASE, \
+    GLAXISTITLES, GLAXISUNITS, GLAXISMARKSINSIDE, GLSTRIPDIRECTION, GLSTRIPPADDING, \
+    GLFULLLIST, GLEXTENDEDLIST
 from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPDF, EXPORTSVG, EXPORTTYPES, \
     PAGEPORTRAIT, PAGELANDSCAPE, PAGETYPES
 from ccpn.util.Logging import getLogger
@@ -82,6 +84,7 @@ PDFSTROKE = 'stroke'
 PDFSTROKEDASHARRAY = 'strokeDashArray'
 PDFCLOSEPATH = 'closePath'
 PDFLINES = 'lines'
+FRAMEPADDING = 12
 
 
 def alphaClip(value):
@@ -110,7 +113,8 @@ class GLExporter():
             pageType = portrait
         else:
             pageType = landscape
-        self._report = Report(self, self.project, filename, pagesize=pageType(A4))
+        self._report = Report(self, self.project, filename, pagesize=pageType(A4),
+                              leftMargin=(1 * cm), rightMargin=(1 * cm), topMargin=(1 * cm), bottomMargin=(1 * cm))
 
         self._ordering = []
         self._importFonts()
@@ -130,13 +134,16 @@ class GLExporter():
         # build all the sections of the pdf
         self.stripReports = []
         self.stripWidths = []
+        self.stripHeights = []
         self.stripSpacing = 0
 
         if self.params[GLSPECTRUMDISPLAY]:
             spectrumDisplay = self.params[GLSPECTRUMDISPLAY]
 
             self.numStrips = len(spectrumDisplay.strips)
-            for strip in spectrumDisplay.orderedStrips:
+            for strNum, strip in enumerate(spectrumDisplay.orderedStrips):
+                self.stripNumber = strNum
+
                 # point to the correct strip
                 self.strip = strip
                 self._parent = strip._CcpnGLWidget
@@ -146,6 +153,9 @@ class GLExporter():
                 self._addDrawingToStory()
         else:
             self.numStrips = 1
+            self.stripNumber = 0
+
+            # point to the correct strip
             self.strip = self.params[GLSTRIP]
             self._parent = self.strip._CcpnGLWidget
 
@@ -185,89 +195,126 @@ class GLExporter():
         self.rAxis = self._parent._drawRightAxis
         self.bAxis = self._parent._drawBottomAxis
 
+        frame = self.strip.spectrumDisplay.stripFrame
+        if self.params[GLSTRIPDIRECTION] == 'Y':
+            docHeight = self._report.doc.height - (2 * FRAMEPADDING)
+            docWidth = self._report.doc.width - (2 * FRAMEPADDING)
+            fh = frame.height()
+            fw = frame.width()
+            _parentH = self._parent.h
+            _parentW = self._parent.w
+            fw += (self.numStrips-1)*self.params[GLSTRIPPADDING]
+
+        else:
+            docHeight = self._report.doc.height - (2 * FRAMEPADDING)
+            docWidth = self._report.doc.width - (2 * FRAMEPADDING)
+            fh = frame.height()
+            fw = frame.width()
+            _parentH = self._parent.h
+            _parentW = self._parent.w
+            fh += (self.numStrips-1)*self.params[GLSTRIPPADDING]
+
         if not self.rAxis and not self.bAxis:
             # no axes visible
-            self.mainH = self._parent.h
-            self.mainW = self._parent.w
+            self.mainH = _parentH
+            self.mainW = _parentW
             self.mainL = 0
             self.mainB = 0
 
         elif self.rAxis and not self.bAxis:
             # right axis visible
             self.rAxisW = self._parent.AXIS_MARGINRIGHT
-            self.rAxisH = self._parent.h
-            self.rAxisL = self._parent.w - self._parent.AXIS_MARGINRIGHT
+            self.rAxisH = _parentH
+            self.rAxisL = _parentW - self._parent.AXIS_MARGINRIGHT
             self.rAxisB = 0
-            self.mainW = self._parent.w - self._parent.AXIS_MARGINRIGHT
-            self.mainH = self._parent.h
+            self.mainW = _parentW - self._parent.AXIS_MARGINRIGHT
+            self.mainH = _parentH
             self.mainL = 0
             self.mainB = 0
 
         elif not self.rAxis and self.bAxis:
             # bottom axis visible
-            self.bAxisW = self._parent.w
+            self.bAxisW = _parentW
             self.bAxisH = self._parent.AXIS_MARGINBOTTOM
             self.bAxisL = 0
             self.bAxisB = 0
-            self.mainW = self._parent.w
-            self.mainH = self._parent.h - self._parent.AXIS_MARGINBOTTOM
+            self.mainW = _parentW
+            self.mainH = _parentH - self._parent.AXIS_MARGINBOTTOM
             self.mainL = 0
             self.mainB = self._parent.AXIS_MARGINBOTTOM
 
         else:
             # both axes visible
             self.rAxisW = self._parent.AXIS_MARGINRIGHT
-            self.rAxisH = self._parent.h - self._parent.AXIS_MARGINBOTTOM
-            self.rAxisL = self._parent.w - self._parent.AXIS_MARGINRIGHT
+            self.rAxisH = _parentH - self._parent.AXIS_MARGINBOTTOM
+            self.rAxisL = _parentW - self._parent.AXIS_MARGINRIGHT
             self.rAxisB = self._parent.AXIS_MARGINBOTTOM
-            self.bAxisW = self._parent.w - self._parent.AXIS_MARGINRIGHT
+            self.bAxisW = _parentW - self._parent.AXIS_MARGINRIGHT
             self.bAxisH = self._parent.AXIS_MARGINBOTTOM
             self.bAxisL = 0
             self.bAxisB = 0
-            self.mainW = self._parent.w - self._parent.AXIS_MARGINRIGHT
-            self.mainH = self._parent.h - self._parent.AXIS_MARGINBOTTOM
+            self.mainW = _parentW - self._parent.AXIS_MARGINRIGHT
+            self.mainH = _parentH - self._parent.AXIS_MARGINBOTTOM
             self.mainL = 0
             self.mainB = self._parent.AXIS_MARGINBOTTOM
 
         # stripFrame ratio
-        frame = self.strip.spectrumDisplay.stripFrame
-        fh = frame.height()
-        fw = frame.width()
         frameRatio = fh / fw
 
-        self.pixHeight = self._report.doc.height - (2.0 * cm)
-        self.pixWidth = self.pixHeight / frameRatio
-        # self.fontScale = 1.025 * self.pixHeight / self._parent.h
-        self.fontScale = self.pixHeight / self._parent.h
-
-        # strip axis ratio
-        ratio = self._parent.h / self._parent.w
+        # self.pixHeight = docHeight
+        # self.pixWidth = self.pixHeight / frameRatio
+        # # self.fontScale = 1.025 * self.pixHeight / _parentH
+        # self.fontScale = self.pixHeight / _parentH
 
         # translate to size of drawing Flowable
-        self.pixWidth = self._report.doc.width / (fw / self._parent.w)  #self.numStrips
-        self.pixHeight = self.pixWidth * ratio
+        if self.params[GLSTRIPDIRECTION] == 'Y':
+            # strip axis ratio
+            ratio = _parentH / _parentW
 
-        # scale fonts to appear the correct size
-        self.fontScale = 1.0 * self.pixWidth / self._parent.w  #   1.1
+            self.pixWidth = docWidth / (fw / _parentW)
+            self.pixHeight = self.pixWidth * ratio
 
-        # if too tall then flip the scaling
-        if self.pixHeight > (self._report.doc.height - 2 * cm):
-            self.pixHeight = self._report.doc.height - (2 * cm)
+            # scale fonts to appear the correct size
+            self.fontScale = 1.0 * self.pixWidth / _parentW  #   1.1
+
+            # if too tall then reduce scaling
+            if self.pixHeight > docHeight:
+                modRatio = docHeight / self.pixHeight
+
+                self.pixWidth *= modRatio
+                self.pixHeight *= modRatio
+                self.fontScale *= modRatio
+
+        else:
+            # strip axis ratio
+            ratio = _parentH / _parentW
+
+            self.pixHeight = docHeight / (fh / _parentH)
             self.pixWidth = self.pixHeight / ratio
-            self.fontScale = 1.0 * self.pixHeight / self._parent.h  # 1.025
+
+            # scale fonts to appear the correct size
+            self.fontScale = 1.0 * self.pixWidth / _parentW  #   1.1
+
+            # if too wide then reduce scaling
+            if self.pixWidth > docWidth:
+                modRatio = docWidth / self.pixWidth
+
+                self.pixWidth *= modRatio
+                self.pixHeight *= modRatio
+                self.fontScale *= modRatio
 
         self.fontXOffset = 0.75
         self.fontYOffset = 3.0
 
         # pixWidth/self.pixHeight are now the dimensions in points for the Flowable
-        self.displayScale = self.pixHeight / self._parent.h
+        self.displayScale = self.pixHeight / _parentH
 
         # don't think these are needed
         pixBottom = pageHeight - self.pixHeight - self.margin
         pixLeft = self.margin
 
-        # assume that the spacing between strips is 5 pixels
-        self.stripSpacing = 5.0 * self.displayScale
+        # read the strip spacing form the params
+        self.stripSpacing = self.params[GLSTRIPPADDING] * self.displayScale
 
     def _buildStrip(self):
         # create an object that can be added to a report
@@ -337,7 +384,7 @@ class GLExporter():
 
         self._addAxisMask()
         self._addGridTickMarks()
-        if self.params[GLAXISLABELS]: self._addGridLabels()
+        if self.params[GLAXISLABELS] or self.params[GLAXISUNITS] or self.params[GLAXISTITLES]: self._addGridLabels()
 
     def _addGridLines(self):
         """
@@ -992,7 +1039,7 @@ class GLExporter():
                         # overwrite with just the line for the border of the grid
                         if self.params[GLPLOTBORDER] or self.params[GLAXISLINES]:
                             list(colourGroups.values())[0][PDFLINES] = [[self.displayScale * self.mainW, self.displayScale * self.mainB,
-                                                                             self.displayScale * self.mainW, self.pixHeight]]
+                                                                         self.displayScale * self.mainW, self.pixHeight]]
 
 
                 elif self.params[GLPLOTBORDER] or self.params[GLAXISLINES]:
@@ -1058,7 +1105,7 @@ class GLExporter():
                         # overwrite with just the line for the border of the grid
                         if self.params[GLPLOTBORDER] or self.params[GLAXISLINES]:
                             list(colourGroups.values())[0][PDFLINES] = [[0.0, self.displayScale * self.bAxisH,
-                                                                             self.displayScale * self.mainW, self.displayScale * self.bAxisH]]
+                                                                         self.displayScale * self.mainW, self.displayScale * self.bAxisH]]
 
 
                 elif self.params[GLPLOTBORDER] or self.params[GLAXISLINES]:
@@ -1108,11 +1155,13 @@ class GLExporter():
 
     def _addGridLabels(self):
         """
-        Add marks to the right/bottom axis areas.
+        Add labels/titles/units to the right/bottom axis areas.
         """
         if self.rAxis or self.bAxis:
             colourGroups = OrderedDict()
             if self.rAxis:
+                numStrs = len(self._parent._axisYLabelling)
+
                 for strNum, drawString in enumerate(self._parent._axisYLabelling):
 
                     # skip empty strings
@@ -1141,11 +1190,23 @@ class GLExporter():
                         if colourPath not in colourGroups:
                             colourGroups[colourPath] = Group()
 
-                        # set box around the last 2 elements (name and dimensions)
-                        self._addString(colourGroups, colourPath, drawString, newLine, colour,
-                                        boxed=False if strNum < len(self._parent._axisYLabelling) - 2 else True)
+                        # set box around the last 2 elements (axis title and units), and skip if not needed
+                        if strNum == numStrs - 1 and self.params[GLAXISUNITS]:
+                            # draw units
+                            self._addString(colourGroups, colourPath, drawString, newLine, colour,
+                                            boxed=True)
+                        elif strNum == numStrs - 2 and self.params[GLAXISTITLES]:
+                            # draw axis title
+                            self._addString(colourGroups, colourPath, drawString, newLine, colour,
+                                            boxed=True)
+                        elif strNum < numStrs - 2 and self.params[GLAXISLABELS]:
+                            # draw labels
+                            self._addString(colourGroups, colourPath, drawString, newLine, colour,
+                                            boxed=False)
 
             if self.bAxis:
+                numStrs = len(self._parent._axisXLabelling)
+
                 for strNum, drawString in enumerate(self._parent._axisXLabelling):
 
                     # skip empty strings
@@ -1174,9 +1235,19 @@ class GLExporter():
                         if colourPath not in colourGroups:
                             colourGroups[colourPath] = Group()
 
-                        # set box around the last 2 elements (name and dimensions)
-                        self._addString(colourGroups, colourPath, drawString, newLine, colour,
-                                        boxed=False if strNum < len(self._parent._axisXLabelling) - 2 else True)
+                        # set box around the last 2 elements (axis title and units), and skip if not needed
+                        if strNum == numStrs - 1 and self.params[GLAXISUNITS]:
+                            # draw units
+                            self._addString(colourGroups, colourPath, drawString, newLine, colour,
+                                            boxed=True)
+                        elif strNum == numStrs - 2 and self.params[GLAXISTITLES]:
+                            # draw axis title
+                            self._addString(colourGroups, colourPath, drawString, newLine, colour,
+                                            boxed=True)
+                        elif strNum < numStrs - 2 and self.params[GLAXISLABELS]:
+                            # draw labels
+                            self._addString(colourGroups, colourPath, drawString, newLine, colour,
+                                            boxed=False)
 
             for colourGroup in colourGroups.values():
                 self._mainPlot.add(colourGroup)
@@ -1204,14 +1275,44 @@ class GLExporter():
         """
         report = self.report()
         self.stripReports.append(report)
-        self.stripWidths.append(report.width + self.stripSpacing)
-        # report = self.report()
-        # table = ((report, report, report, report),)
-        # self._report.story.append(self.report())
+        self._appendStripSize(report)
+
+    def _appendStripSize(self, report):
+        # if self.stripNumber < (self.numStrips-1):
+        #     self.stripWidths.append(self.pixWidth + self.stripSpacing)
+        #     self.stripHeights.append(self.pixHeight + self.stripSpacing)
+        # else:
+        #     self.stripWidths.append(self.pixWidth)
+        #     self.stripHeights.append(self.pixHeight)
+
+        if self.params[GLSTRIPDIRECTION] == 'Y':
+            if self.stripNumber < (self.numStrips-1):
+                self.stripWidths.append(report.width + self.stripSpacing)
+                self.stripHeights.append(report.height + self.stripSpacing)
+            else:
+                self.stripWidths.append(report.width)
+                self.stripHeights.append(report.height)
+
+        else:
+            if self.stripNumber > 0:
+                self.stripWidths.append(report.width + self.stripSpacing)
+                self.stripHeights.append(report.height + self.stripSpacing)
+            else:
+                self.stripWidths.append(report.width)
+                self.stripHeights.append(report.height)
 
     def _addTableToStory(self):
-        table = (self.stripReports,)  # tuple
-        self._report.story.append(Table(table, colWidths=self.stripWidths))
+        if self.params[GLSTRIPDIRECTION] == 'Y':
+            
+            # arrange as a row
+            table = (self.stripReports,)
+            self._report.story.append(Table(table, colWidths=self.stripWidths))
+        else:
+            
+            # arrange as a column
+            table = tuple((rep,) for rep in self.stripReports)
+            heights = self.stripHeights[:]
+            self._report.story.append(Table(table, rowHeights=heights))
 
     def writeSVGFile(self):
         """
@@ -1411,9 +1512,8 @@ class Clipped_Flowable(Flowable):
             # draw the drawing into the canvas
             self.mainPlot.drawOn(self.canv, self.mainDim[PLOTLEFT], self.mainDim[PLOTBOTTOM])
 
-        # restore preclipping state
-        self.canv.restoreState()
-        # draw the axes
+            # restore preclipping state
+            self.canv.restoreState()
 
 
 if __name__ == '__main__':

@@ -68,7 +68,9 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXI
     GLMULTIPLETSYMBOLS, GLOTHERLINES, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLPAGETYPE, GLSELECTEDPIDS, \
     GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSPECTRUMDISPLAY, GLSTRIP, GLSTRIPLABELLING, GLTRACES, \
     GLWIDGET, GLPLOTBORDER, GLAXISLINES, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS, GLFOREGROUND, \
-    GLCONTOURTHICKNESS, GLSHOWSPECTRAONPHASE
+    GLCONTOURTHICKNESS, GLSHOWSPECTRAONPHASE, \
+    GLAXISTITLES, GLAXISUNITS, GLAXISMARKSINSIDE, GLSTRIPDIRECTION, GLSTRIPPADDING, \
+    GLFULLLIST, GLEXTENDEDLIST
 
 
 class ExportStripToFilePopup(ExportDialog):
@@ -101,26 +103,7 @@ class ExportStripToFilePopup(ExportDialog):
             showWarning(str(self.windowTitle()), 'No strips selected')
             self.reject()
 
-        self.fullList = (GLPEAKSYMBOLS,
-                         GLPEAKLABELS,
-                         GLINTEGRALSYMBOLS,
-                         GLINTEGRALLABELS,
-                         GLMULTIPLETSYMBOLS,
-                         GLMULTIPLETLABELS,
-                         GLGRIDLINES,
-                         GLAXISLINES,
-                         GLAXISMARKS,
-                         GLAXISLABELS,
-                         GLSPECTRUMCONTOURS,
-                         GLSPECTRUMBORDERS,
-                         GLMARKLINES,
-                         GLMARKLABELS,
-                         GLTRACES,
-                         GLSHOWSPECTRAONPHASE,
-                         GLOTHERLINES,
-                         GLSTRIPLABELLING,
-                         GLREGIONS,
-                         GLPLOTBORDER)
+        self.fullList = GLFULLLIST
 
     def initialise(self, userFrame):
         for strip in self.strips:
@@ -264,9 +247,14 @@ class ExportStripToFilePopup(ExportDialog):
         self.baseThicknessBox.setFixedHeight(25)
 
         row += 1
-        # self.spacer = Spacer(userFrame, 5, 5,
-        #                      QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
-        #                      grid=(row, 0), gridSpan=(1, 1))
+        self.stripPaddingBox = DoubleSpinBoxCompoundWidget(
+                userFrame, grid=(row, 0), gridSpan=(1, 3), hAlign='left',
+                labelText='Strip Padding',
+                value=5,
+                decimals=0, step=5, range=(0, 100))
+        self.stripPaddingBox.setFixedHeight(25)
+
+        row += 1
         userFrame.addSpacer(0, 10, grid=(row, 0))
 
         row += 1
@@ -290,7 +278,8 @@ class ExportStripToFilePopup(ExportDialog):
         currentPath = os.path.expanduser(self.project.path)
         self.updateFilename(os.path.join(currentPath, self.objectPulldown.getText() + exportExtension))
 
-        self.setMinimumSize(self.sizeHint())
+        self.setFixedWidth(self.sizeHint().width())
+        self.setMinimumHeight(self.sizeHint().height())
 
     def _changeForegroundPulldown(self, int):
         newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(self.foregroundColourBox.currentText())]
@@ -462,21 +451,7 @@ class ExportStripToFilePopup(ExportDialog):
 
         self.treeView.selectObjects(pidList)
 
-        printItems.extend((GLGRIDLINES,
-                           GLAXISLINES,
-                           GLAXISMARKS,
-                           GLAXISLABELS,
-                           GLSPECTRUMCONTOURS,
-                           GLSPECTRUMBORDERS,
-                           GLMARKLINES,
-                           GLMARKLABELS,
-                           GLTRACES,
-                           GLSHOWSPECTRAONPHASE,
-                           GLOTHERLINES,
-                           GLSTRIPLABELLING,
-                           GLREGIONS,
-                           GLPLOTBORDER)
-                          )
+        printItems.extend(GLEXTENDEDLIST)
 
         if selectList is None:
             selectList = {GLSPECTRUMBORDERS   : QtCore.Qt.Checked if self.application.preferences.general.showSpectrumBorder else QtCore.Qt.Unchecked,
@@ -544,9 +519,11 @@ class ExportStripToFilePopup(ExportDialog):
         if 'SpectrumDisplay' in selected:
             spectrumDisplay = self.objects[selected][0]
             strip = spectrumDisplay.strips[0]
+            stripDirection = self.spectrumDisplay.stripDirection
         else:
             spectrumDisplay = None
             strip = self.objects[selected][0]
+            stripDirection = 'Y'
 
         # prIndex = self.exportType.getIndex()
         # prType = EXPORTTYPES[prIndex]
@@ -557,6 +534,7 @@ class ExportStripToFilePopup(ExportDialog):
         baseThickness = self.baseThicknessBox.getValue()
         symbolThickness = self.application.preferences.general.symbolThickness
         contourThickness = self.application.preferences.general.contourThickness
+        stripPadding = self.stripPaddingBox.getValue()
 
         if strip:
             # return the parameters
@@ -571,6 +549,8 @@ class ExportStripToFilePopup(ExportDialog):
                       GLBASETHICKNESS   : baseThickness,
                       GLSYMBOLTHICKNESS : symbolThickness,
                       GLCONTOURTHICKNESS: contourThickness,
+                      GLSTRIPDIRECTION  : stripDirection,
+                      GLSTRIPPADDING    : stripPadding,
                       GLSELECTEDPIDS    : self.treeView.getSelectedObjectsPids()
                       }
             selectedList = self.treeView.getSelectedItems()

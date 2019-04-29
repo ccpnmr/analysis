@@ -421,6 +421,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._firstVisible = None
         self.visiblePlaneList = {}
         self._visibleSpectrumViewsChange = False
+        self._matchingIsotopeCodes = False
 
         self._glClientIndex = 0
         self.glReady = True
@@ -2745,12 +2746,29 @@ class CcpnGLWidget(QOpenGLWidget):
         GL.glLineWidth(1.0)
 
     def buildGrid(self):
+        """Build the grids for the mainGrid and the bottom/right axes
+        """
+
+        # determine whether the isotopeCodes of the first two visible axes are matching
+        self._matchingIsotopeCodes = False
+
+        for specView in self._ordering:
+            spec = specView.spectrum
+            pIndex = self._spectrumSettings[specView][GLDefs.SPECTRUM_POINTINDEX]
+
+            if spec.isotopeCodes[pIndex[0]] == spec.isotopeCodes[pIndex[1]]:
+                self._matchingIsotopeCodes = True
+                break
+
+
+        # build the axes
         self.axisLabelling, self.labelsChanged = self._buildAxes(self.gridList[0], axisList=[0, 1],
                                                                  scaleGrid=[1, 0],
                                                                  r=self.foreground[0],
                                                                  g=self.foreground[1],
                                                                  b=self.foreground[2],
-                                                                 transparency=300.0)
+                                                                 transparency=300.0,
+                                                                 _includeDiagonal=self._matchingIsotopeCodes)
 
         if self.highlighted:
             self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1, 0], r=self.highlightColour[0],
@@ -4581,7 +4599,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.update()
 
-    def _buildAxes(self, gridGLList, axisList=None, scaleGrid=None, r=0.0, g=0.0, b=0.0, transparency=256.0):
+    def _buildAxes(self, gridGLList, axisList=None, scaleGrid=None, r=0.0, g=0.0, b=0.0, transparency=256.0, _includeDiagonal=False):
         """Build the grid
         """
 
@@ -4809,37 +4827,37 @@ class CcpnGLWidget(QOpenGLWidget):
                                 gridGLList.numVertices += 2
                                 index += 2
 
-                # # draw the diagonal x=y if required - need to determine the origin
-                # # OR draw on the spectrum bounding box
-                # if self._includeDiagonal:
-                #
-                #     diag = ()
-                #
-                #     if self.between(axisLimitB, axisLimitL, axisLimitR):
-                #         diag += (valueToRatio(axisLimitB, axisLimitL, axisLimitR),
-                #                  0.0)
-                #
-                #     if self.between(axisLimitL, axisLimitB, axisLimitT):
-                #         diag += (0.0,
-                #                  valueToRatio(axisLimitL, axisLimitB, axisLimitT))
-                #
-                #     if self.between(axisLimitT, axisLimitL, axisLimitR):
-                #         diag += (valueToRatio(axisLimitT, axisLimitL, axisLimitR),
-                #                  1.0)
-                #
-                #     if self.between(axisLimitR, axisLimitB, axisLimitT):
-                #         diag += (1.0,
-                #                  valueToRatio(axisLimitR, axisLimitB, axisLimitT))
-                #
-                #     if len(diag) == 4:
-                #         indexList += (index, index + 1)
-                #         vertexList += diag
-                #
-                #         alpha = min([1.0, (30.0 + (len(scaleGrid) * 20)) / transparency])
-                #         colorList += (r, g, b, alpha, r, g, b, alpha)
-                #
-                #         gridGLList.numVertices += 2
-                #         index += 2
+                # draw the diagonal x=y if required - need to determine the origin
+                # OR draw on the spectrum bounding box
+                if _includeDiagonal:
+
+                    diag = ()
+
+                    if self.between(axisLimitB, axisLimitL, axisLimitR):
+                        diag += (valueToRatio(axisLimitB, axisLimitL, axisLimitR),
+                                 0.0)
+
+                    if self.between(axisLimitL, axisLimitB, axisLimitT):
+                        diag += (0.0,
+                                 valueToRatio(axisLimitL, axisLimitB, axisLimitT))
+
+                    if self.between(axisLimitT, axisLimitL, axisLimitR):
+                        diag += (valueToRatio(axisLimitT, axisLimitL, axisLimitR),
+                                 1.0)
+
+                    if self.between(axisLimitR, axisLimitB, axisLimitT):
+                        diag += (1.0,
+                                 valueToRatio(axisLimitR, axisLimitB, axisLimitT))
+
+                    if len(diag) == 4:
+                        indexList += (index, index + 1)
+                        vertexList += diag
+
+                        alpha = min([1.0, (30.0 + (len(scaleGrid) * 20)) / transparency])
+                        colorList += (r, g, b, alpha, r, g, b, alpha)
+
+                        gridGLList.numVertices += 2
+                        index += 2
 
                 # copy the arrays the the GLstore
                 gridGLList.vertices = np.array(vertexList, dtype=np.float32)

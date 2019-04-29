@@ -2857,13 +2857,17 @@ def isValidPath(projectName, stripFullPath=True, stripExtension=True):
     if not projectName:
         return
 
-    name = os.path.basename(projectName) if stripFullPath else projectName
-    name = os.path.splitext(name)[0] if stripExtension else name
+    if isinstance(projectName, str):
 
-    STRIPCHARS = '_'
+        name = os.path.basename(projectName) if stripFullPath else projectName
+        name = os.path.splitext(name)[0] if stripExtension else name
 
-    if isinstance(name, str) and name.strip(STRIPCHARS).isalnum():
-        return True
+        STRIPCHARS = '_'
+        for ss in STRIPCHARS:
+            name = name.replace(ss, '')
+
+        if name.isalnum():
+            return True
 
 
 def getSaveDirectory(parent, preferences=None):

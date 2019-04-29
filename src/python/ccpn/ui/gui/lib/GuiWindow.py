@@ -64,6 +64,7 @@ class GuiWindow():
 
         context = QtCore.Qt.WidgetWithChildrenShortcut
         addShortCut("c, h", self, self.toggleCrosshairAll, context=context)
+        addShortCut("c, d", self, self.toggleDoubleCrosshairAll, context=context)
         addShortCut("g, s", self, self.toggleGridAll, context=context)
         addShortCut("Del", self, partial(self.deleteSelectedItems), context=context)
         addShortCut("m, k", self, self.createMark, context=context)
@@ -434,6 +435,18 @@ class GuiWindow():
         # toggle crosshairs for the spectrum displays in this window
         for spectrumDisplay in self.spectrumDisplays:
             spectrumDisplay.toggleCrosshair()
+
+    def toggleDoubleCrosshairAll(self):
+        """
+        Toggles whether double crosshairs are displayed in all windows.
+        """
+        self.application.preferences.general.showDoubleCrosshair = not self.application.preferences.general.showDoubleCrosshair
+
+        # repaint all windows
+        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
+        GLSignals = GLNotifier(parent=self)
+        GLSignals.emitPaintEvent()
 
     def createMark(self):
         """

@@ -251,7 +251,7 @@ class ExportStripToFilePopup(ExportDialog):
                 userFrame, grid=(row, 0), gridSpan=(1, 3), hAlign='left',
                 labelText='Strip Padding',
                 value=5,
-                decimals=0, step=5, range=(0, 100))
+                decimals=0, step=1, range=(0, 50))
         self.stripPaddingBox.setFixedHeight(25)
 
         row += 1

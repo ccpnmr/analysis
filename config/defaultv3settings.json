@@ -35,6 +35,7 @@
         "lastAxisOnly": true,
         "showGrid": true,
         "showCrosshair": true,
+        "showDoubleCrosshair": false,
         "matchAxisCode": 0,
         "restoreLayoutOnOpening":true,
         "lockAspectRatio": false,

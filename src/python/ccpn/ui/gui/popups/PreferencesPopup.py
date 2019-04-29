@@ -110,6 +110,7 @@ class PreferencesPopup(CcpnDialog):
                 strip._contourThickness = self.preferences.general.contourThickness
                 strip.crosshairVisible = self.preferences.general.showCrosshair
 
+
         if self.preferences.general.colourScheme != self._oldColourScheme:
             setColourScheme(self.preferences.general.colourScheme)
             self.application.correctColours()
@@ -375,6 +376,11 @@ class PreferencesPopup(CcpnDialog):
         self.showCrosshairLabel = Label(parent, text="Show Crosshairs: ", grid=(row, 0))
         self.showCrosshairBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.showCrosshair)
         self.showCrosshairBox.toggled.connect(partial(self._toggleGeneralOptions, 'showCrosshair'))
+
+        row += 1
+        self.showDoubleCrosshairLabel = Label(parent, text="Show Double Crosshairs: ", grid=(row, 0))
+        self.showDoubleCrosshairBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.showDoubleCrosshair)
+        self.showDoubleCrosshairBox.toggled.connect(partial(self._toggleGeneralOptions, 'showDoubleCrosshair'))
 
         row += 1
         self.showLastAxisOnlyLabel = Label(parent, text="Share Y Axis: ", grid=(row, 0))

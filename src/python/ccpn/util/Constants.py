@@ -34,6 +34,9 @@ from collections import OrderedDict
 AXIS_MATCHATOMTYPE = 0
 AXIS_FULLATOMNAME = 1
 AXIS_ACTIVEAXES = 'activeAxes'
+DOUBLEAXIS_MATCHATOMTYPE = 2
+DOUBLEAXIS_FULLATOMNAME = 3
+DOUBLEAXIS_ACTIVEAXES = 'doubleActiveAxes'
 
 POSINFINITY = float('Infinity')
 NEGINFINITY = float('-Infinity')

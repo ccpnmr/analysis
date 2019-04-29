@@ -115,6 +115,7 @@ GLSPECTRUMCONTOURS = 'Spectrum Contours'
 GLSPECTRUMBORDERS = 'Spectrum Borders'
 GLMARKLINES = 'Mark Lines'
 GLMARKLABELS = 'Mark Labels'
+GLCURSORS = 'Show Cursors'
 GLTRACES = 'Traces'
 GLSHOWSPECTRAONPHASE = 'Spectra on Phasing'
 GLOTHERLINES = 'Other Lines'
@@ -148,6 +149,7 @@ GLFULLLIST = (GLPEAKSYMBOLS,
               GLSPECTRUMBORDERS,
               GLMARKLINES,
               GLMARKLABELS,
+              GLCURSORS,
               GLTRACES,
               GLSHOWSPECTRAONPHASE,
               GLOTHERLINES,
@@ -166,6 +168,7 @@ GLEXTENDEDLIST = (GLGRIDLINES,
                   GLSPECTRUMBORDERS,
                   GLMARKLINES,
                   GLMARKLABELS,
+                  GLCURSORS,
                   GLTRACES,
                   GLSHOWSPECTRAONPHASE,
                   GLOTHERLINES,

@@ -172,6 +172,8 @@ class GuiStrip(Frame):
         self._CcpnGLWidget.xUnits = settings[AXISXUNITS]
         self._CcpnGLWidget.yUnits = settings[AXISYUNITS]
         self._CcpnGLWidget.axisLocked = settings[AXISLOCKASPECTRATIO]
+        self._CcpnGLWidget._doubleCrosshairVisible = self.application.preferences.general.showDoubleCrosshair
+
 
         # initialise the notifiers
         self.setStripNotifiers()

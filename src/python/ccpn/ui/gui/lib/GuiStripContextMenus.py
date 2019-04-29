@@ -108,6 +108,13 @@ def _crosshairItem(strip):
                     callback=strip.spectrumDisplay.toggleCrosshair, stripMethodName='crosshairAction')
 
 
+def _doubleCrosshairItem(strip):
+    return _SCMitem(name='DoubleCrosshair',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Double Crosshair Action',
+                    checkable=True, checked=True, shortcut='CD',
+                    callback=strip.spectrumDisplay.mainWindow.toggleDoubleCrosshairAll, stripMethodName='doubleCrosshairAction')
+
+
 def _gridItem(strip):
     return _SCMitem(name='Grid',
                     typeItem=ItemTypes.get(ITEM), toolTip='gridAction', callback=strip.spectrumDisplay.toggleGrid,
@@ -549,6 +556,7 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
         _toolBarItem(guiStripNd),
         _spectrumToolBarItem(guiStripNd),
         _crosshairItem(guiStripNd),
+        _doubleCrosshairItem(guiStripNd),
         _gridItem(guiStripNd),
         _shareYAxisItem(guiStripNd),
         _cyclePeakLabelsItem(guiStripNd),

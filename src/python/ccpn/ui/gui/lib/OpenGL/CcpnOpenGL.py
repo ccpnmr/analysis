@@ -135,7 +135,8 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import GLExporter
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
 # from ccpn.util.Common import makeIterableList
 from typing import Tuple
-from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE, AXIS_ACTIVEAXES
+from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE, AXIS_ACTIVEAXES, \
+    DOUBLEAXIS_ACTIVEAXES, DOUBLEAXIS_FULLATOMNAME, DOUBLEAXIS_MATCHATOMTYPE
 from ccpn.ui.gui.guiSettings import textFont, getColours, STRIPHEADER_BACKGROUND, \
     STRIPHEADER_FOREGROUND, GUINMRRESIDUE
 
@@ -278,6 +279,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._startCoordinate = None
         self._endCoordinate = None
         self.cursorCoordinate = np.zeros((4,), dtype=np.float32)
+        self.doubleCursorCoordinate = np.zeros((4,), dtype=np.float32)
 
         self._shift = False
         self._command = False
@@ -306,6 +308,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self.gridList = []
         self._gridVisible = self._preferences.showGrid
         self._crosshairVisible = self._preferences.showCrosshair
+        # self._doubleCrosshairVisible = self._preferences.showDoubleCrosshair
+
         self._axesVisible = True
         self._axisLocked = False
         self._showSpectraOnPhasing = False
@@ -403,7 +407,6 @@ class CcpnGLWidget(QOpenGLWidget):
         self._background = np.zeros((4,), dtype=np.float32)
         self._parameterList = np.zeros((4,), dtype=np.int32)
         self._view = np.zeros((4,), dtype=np.float32)
-        self.cursorCoordinate = np.zeros((4,), dtype=np.float32)
 
         # get information from the parent class (strip)
         self.orderedAxes = self.strip.orderedAxes
@@ -2150,32 +2153,55 @@ class CcpnGLWidget(QOpenGLWidget):
         # translate from screen (0..w, 0..h) to NDC (-1..1, -1..1) to axes (axisL, axisR, axisT, axisB)
         self.cursorCoordinate = self.mouseTransform.dot([self._mouseX, self._mouseY, 0.0, 1.0])
 
+        # flip cursor about x=y to get double cursor
+        self.doubleCursorCoordinate[0:4] = [self.cursorCoordinate[1],
+                                            self.cursorCoordinate[0],
+                                            self.cursorCoordinate[2],
+                                            self.cursorCoordinate[3]
+                                            ]
+
         try:
             mouseMovedDict = self.current.mouseMovedDict
         except:
             # initialise a new mouse moved dict
-            mouseMovedDict = {'strip'           : self.strip,
-                              AXIS_MATCHATOMTYPE: {},
-                              AXIS_FULLATOMNAME : {}}  #     dict(strip=self.strip)   #strip)
+            mouseMovedDict = {'strip'                 : self.strip,
+                              AXIS_MATCHATOMTYPE      : {},
+                              AXIS_FULLATOMNAME       : {},
+                              AXIS_ACTIVEAXES         : (),
+                              DOUBLEAXIS_MATCHATOMTYPE: {},
+                              DOUBLEAXIS_FULLATOMNAME : {},
+                              DOUBLEAXIS_ACTIVEAXES   : ()
+                              }
 
         xPos = yPos = 0
+        dxPos = dyPos = dPos = 0
         activeOther = []
         for n, axisCode in enumerate(self._axisCodes):
             if n == 0:
                 xPos = pos = self.cursorCoordinate[0]
                 activeX = axisCode[0]
+
+                # double cursor
+                dxPos = dPos = self.cursorCoordinate[1]
             elif n == 1:
                 yPos = pos = self.cursorCoordinate[1]
                 activeY = axisCode[0]
+
+                # double cursor
+                dyPos = dPos = self.cursorCoordinate[0]
+
             else:
-                pos = self._orderedAxes[n].position  # if n in self._orderedAxes else 0
+                dPos = pos = self._orderedAxes[n].position  # if n in self._orderedAxes else 0
                 activeOther.append(axisCode[0])
 
             # populate the mouse moved dict
             mouseMovedDict[AXIS_MATCHATOMTYPE][axisCode[0]] = pos
             mouseMovedDict[AXIS_FULLATOMNAME][axisCode] = pos
+            mouseMovedDict[DOUBLEAXIS_MATCHATOMTYPE][axisCode[0]] = dPos
+            mouseMovedDict[DOUBLEAXIS_FULLATOMNAME][axisCode] = dPos
 
         mouseMovedDict[AXIS_ACTIVEAXES] = (activeX, activeY) + tuple(activeOther)
+        mouseMovedDict[DOUBLEAXIS_ACTIVEAXES] = (activeY, activeX) + tuple(activeOther)
 
         self.current.cursorPosition = (xPos, yPos)
         self.current.mouseMovedDict = mouseMovedDict
@@ -3182,7 +3208,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # map the cursor to the ratio coordinates - double cursor is flipped about the line x=y
             newCoords = self._scaleAxisToRatio(self.cursorCoordinate[0:2])
-            doubleCoords = self._scaleAxisToRatio(self.cursorCoordinate[1::-1])
+            doubleCoords = self._scaleAxisToRatio(self.doubleCursorCoordinate[0:2])
 
             if getCurrentMouseMode() == PICK and self.underMouse():
                 GL.glColor4f(*self.mousePickColour)
@@ -3221,7 +3247,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             phasingFrame = self.spectrumDisplay.phasingFrame
             if not phasingFrame.isVisible():
-                _drawDouble = any([specView.spectrum.showDoubleCrosshair == True for specView in self._ordering])
+                _drawDouble = self._preferences.showDoubleCrosshair          # any([specView.spectrum.showDoubleCrosshair == True for specView in self._ordering])
 
                 if not self._updateVTrace and newCoords[0] is not None:
                     GL.glVertex2d(newCoords[0], 1.0)
@@ -3470,6 +3496,19 @@ class CcpnGLWidget(QOpenGLWidget):
     def toggleCrosshair(self):
         self._crosshairVisible = not self._crosshairVisible
         self.update()
+
+    # @property
+    # def doubleCrosshairVisible(self):
+    #     return self._doubleCrosshairVisible
+    #
+    # @doubleCrosshairVisible.setter
+    # def doubleCrosshairVisible(self, visible):
+    #     self._doubleCrosshairVisible = visible
+    #     self.update()
+    #
+    # def toggleDoubleCrosshair(self):
+    #     self._doubleCrosshairVisible = not self._doubleCrosshairVisible
+    #     self.update()
 
     @property
     def showSpectraOnPhasing(self):
@@ -5019,7 +5058,6 @@ class CcpnGLWidget(QOpenGLWidget):
                 self._rescaleAllAxes()
                 self._storeZoomHistory()
 
-
     @pyqtSlot(dict)
     def _glMouseMoved(self, aDict):
         if self.strip.isDeleted:
@@ -5038,18 +5076,26 @@ class CcpnGLWidget(QOpenGLWidget):
                         for ax in mouseMovedDict[AXIS_MATCHATOMTYPE].keys():
                             if ax and axis and ax[0] == axis[0] and axis[0] in mouseMovedDict[AXIS_ACTIVEAXES]:
                                 self.cursorCoordinate[n] = mouseMovedDict[AXIS_MATCHATOMTYPE][ax]
+
+                                # double cursor
+                                self.doubleCursorCoordinate[n] = mouseMovedDict[DOUBLEAXIS_MATCHATOMTYPE][ax]
                                 break
                         else:
                             self.cursorCoordinate[n] = None
+                            self.doubleCursorCoordinate[n] = None
 
                 elif self._preferences.matchAxisCode == AXIS_FULLATOMNAME:
                     for n, axis in enumerate(self._axisOrder[:2]):
                         for ax in mouseMovedDict[AXIS_FULLATOMNAME].keys():
                             if axis in mouseMovedDict[AXIS_FULLATOMNAME].keys():
                                 self.cursorCoordinate[n] = mouseMovedDict[AXIS_FULLATOMNAME][axis]
+
+                                # double cursor
+                                self.doubleCursorCoordinate[n] = mouseMovedDict[DOUBLEAXIS_FULLATOMNAME][axis]
                                 break
                         else:
                             self.cursorCoordinate[n] = None
+                            self.doubleCursorCoordinate[n] = None
 
                 self.current.cursorPosition = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
@@ -5399,6 +5445,9 @@ class CcpnGLWidget(QOpenGLWidget):
         # set the checkboxes to the correct settings
         strip.toolbarAction.setChecked(strip.spectrumDisplay.spectrumUtilToolBar.isVisible())
         strip.crosshairAction.setChecked(self._crosshairVisible)
+        if hasattr(strip, 'doubleCrosshairAction'):
+            strip.doubleCrosshairAction.setChecked(self._preferences.showDoubleCrosshair)
+
         strip.gridAction.setChecked(self._gridVisible)
         if hasattr(strip, 'lastAxisOnlyCheckBox'):
             strip.lastAxisOnlyCheckBox.setChecked(strip.spectrumDisplay.lastAxisOnly)

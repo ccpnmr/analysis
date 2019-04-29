@@ -201,6 +201,15 @@ class GuiWindow():
     #     if MessageDialog.showYesNo(title, msg, parent):
     #       current.project.deleteObjects(*multiplets)
 
+    def setPeakAliasing(self):
+        """Set the aliasing for the currently selected peaks
+        """
+        if self.current.peaks:
+            from ccpn.ui.gui.popups.SetPeakAliasing import SetPeakAliasingPopup
+
+            popup = SetPeakAliasingPopup(parent=self, mainWindow=self, items=self.current.peaks)
+            popup.exec_()
+
     def getCurrentPositionAndStrip(self):
         current = self.application.current
         # """

@@ -379,7 +379,7 @@ class GuiStrip(Frame):
                                                                                          positions=self.current.peak.position,
                                                                                          axisCodes=self.current.peak.axisCodes),
                                                                         toolTip=toolTip)
-                                self.navigateToPeakMenu.addSeparator()
+                            self.navigateToPeakMenu.addSeparator()
                     else:
                         self.navigateToPeakMenu.setEnabled(False)
 
@@ -407,7 +407,7 @@ class GuiStrip(Frame):
                                                                     callback=partial(navigateToPositionInStrip, strip=strip,
                                                                                      positions=position, axisCodes=currentStrip.axisCodes, ),
                                                                     toolTip=toolTip)
-                            self.navigateCursorMenu.addSeparator()
+                        self.navigateCursorMenu.addSeparator()
                 else:
                     self.navigateCursorMenu.setEnabled(False)
 
@@ -435,7 +435,7 @@ class GuiStrip(Frame):
                                                                                      positions=self.current.peak.position,
                                                                                      axisCodes=self.current.peak.axisCodes),
                                                                     toolTip=toolTip)
-                                self.markInPeakMenu.addSeparator()
+                            self.markInPeakMenu.addSeparator()
                     else:
                         self.markInPeakMenu.setEnabled(False)
 
@@ -462,7 +462,7 @@ class GuiStrip(Frame):
                                                                   callback=partial(self._createMarkAtPosition,
                                                                                    positions=position, axisCodes=currentStrip.axisCodes, ),
                                                                   toolTip=toolTip)
-                            self.markInCursorMenu.addSeparator()
+                        self.markInCursorMenu.addSeparator()
                 else:
                     self.markInCursorMenu.setEnabled(False)
 

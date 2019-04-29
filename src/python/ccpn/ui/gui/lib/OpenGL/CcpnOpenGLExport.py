@@ -203,7 +203,7 @@ class GLExporter():
             fw = frame.width()
             _parentH = self._parent.h
             _parentW = self._parent.w
-            fw += (self.numStrips-1)*self.params[GLSTRIPPADDING]
+            fw += (self.numStrips - 1) * self.params[GLSTRIPPADDING]
 
         else:
             docHeight = self._report.doc.height - (2 * FRAMEPADDING)
@@ -212,7 +212,7 @@ class GLExporter():
             fw = frame.width()
             _parentH = self._parent.h
             _parentW = self._parent.w
-            fh += (self.numStrips-1)*self.params[GLSTRIPPADDING]
+            fh += (self.numStrips - 1) * self.params[GLSTRIPPADDING]
 
         if not self.rAxis and not self.bAxis:
             # no axes visible
@@ -221,12 +221,29 @@ class GLExporter():
             self.mainL = 0
             self.mainB = 0
 
+            # extra
+            self.rAxisW = 0
+            self.rAxisH = _parentH
+            self.rAxisL = _parentW
+            self.rAxisB = 0
+            self.bAxisW = _parentW
+            self.bAxisH = 0
+            self.bAxisL = 0
+            self.bAxisB = 0
+
         elif self.rAxis and not self.bAxis:
             # right axis visible
             self.rAxisW = self._parent.AXIS_MARGINRIGHT
             self.rAxisH = _parentH
             self.rAxisL = _parentW - self._parent.AXIS_MARGINRIGHT
             self.rAxisB = 0
+
+            # extra
+            self.bAxisW = _parentW - self._parent.AXIS_MARGINRIGHT
+            self.bAxisH = 0
+            self.bAxisL = 0
+            self.bAxisB = 0
+
             self.mainW = _parentW - self._parent.AXIS_MARGINRIGHT
             self.mainH = _parentH
             self.mainL = 0
@@ -238,6 +255,13 @@ class GLExporter():
             self.bAxisH = self._parent.AXIS_MARGINBOTTOM
             self.bAxisL = 0
             self.bAxisB = 0
+
+            # extra
+            self.rAxisW = 0
+            self.rAxisH = _parentH - self._parent.AXIS_MARGINBOTTOM
+            self.rAxisL = _parentW
+            self.rAxisB = self._parent.AXIS_MARGINBOTTOM
+
             self.mainW = _parentW
             self.mainH = _parentH - self._parent.AXIS_MARGINBOTTOM
             self.mainL = 0
@@ -1015,6 +1039,8 @@ class GLExporter():
         """
         if self.rAxis or self.bAxis:
             colourGroups = OrderedDict()
+
+            # add the right axis if visible
             if self.rAxis:
                 if self.params[GLAXISMARKS]:
                     indArray = self._parent.gridList[1]
@@ -1023,61 +1049,37 @@ class GLExporter():
 
                         # add the vertices for the grid lines
                         self._appendIndexLineGroup(indArray=indArray,
-                                                   colourGroups=colourGroups,
-                                                   plotDim={PLOTLEFT  : self.displayScale * (self.mainW - self._parent.AXIS_LINE),
-                                                            PLOTBOTTOM: self.displayScale * self.mainB,
-                                                            PLOTWIDTH : self.displayScale * self._parent.AXIS_LINE,
-                                                            PLOTHEIGHT: self.displayScale * self.mainH},
-                                                   name='gridAxes',
-                                                   setColour=self.foregroundColour,
-                                                   ratioLine=True)
-                        if self.params[GLPLOTBORDER] or self.params[GLAXISLINES]:
-                            list(colourGroups.values())[0][PDFLINES].append([self.displayScale * self.mainW, self.displayScale * self.mainB,
-                                                                             self.displayScale * self.mainW, self.pixHeight])
-                    else:
+                                                              colourGroups=colourGroups,
+                                                              plotDim={PLOTLEFT  : self.displayScale * (self.mainW - self._parent.AXIS_LINE),
+                                                                       PLOTBOTTOM: self.displayScale * self.mainB,
+                                                                       PLOTWIDTH : self.displayScale * self._parent.AXIS_LINE,
+                                                                       PLOTHEIGHT: self.displayScale * self.mainH},
+                                                              name='gridAxes',
+                                                              setColour=self.foregroundColour,
+                                                              ratioLine=True)
 
-                        # make a dummy colourGroup to add the border line to
-                        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray
+            # add the right axis border line if needed
+            if self.params[GLPLOTBORDER] or (self.rAxis and self.params[GLAXISLINES]):
+                from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray
 
-                        tempVertexArray = GLVertexArray(numLists=1, drawMode=GL.GL_LINE, dimension=2)
-                        tempVertexArray.indices = [0, 1]
-                        tempVertexArray.vertices = [0.0, 0.0, 0.0, 0.0]
+                tempVertexArray = GLVertexArray(numLists=1, drawMode=GL.GL_LINE, dimension=2)
+                tempVertexArray.indices = [0, 1]
+                tempVertexArray.vertices = [0.0, 0.0, 0.0, 0.0]
 
-                        self._appendIndexLineGroup(indArray=tempVertexArray,
-                                                   colourGroups=colourGroups,
-                                                   plotDim={PLOTLEFT  : self.displayScale * (self.mainW - self._parent.AXIS_LINE),
-                                                            PLOTBOTTOM: self.displayScale * self.mainB,
-                                                            PLOTWIDTH : self.displayScale * self._parent.AXIS_LINE,
-                                                            PLOTHEIGHT: self.displayScale * self.mainH},
-                                                   name='gridAxes',
-                                                   setColour=self.foregroundColour,
-                                                   ratioLine=True)
+                setGroup = self._appendIndexLineGroup(indArray=tempVertexArray,
+                                                      colourGroups=colourGroups,
+                                                      plotDim={PLOTLEFT  : self.displayScale * (self.mainW - self._parent.AXIS_LINE),
+                                                               PLOTBOTTOM: self.displayScale * self.mainB,
+                                                               PLOTWIDTH : self.displayScale * self._parent.AXIS_LINE,
+                                                               PLOTHEIGHT: self.displayScale * self.mainH},
+                                                      name='gridAxes',
+                                                      setColour=self.foregroundColour,
+                                                      ratioLine=True)
+                if setGroup in colourGroups:
+                    colourGroups[setGroup][PDFLINES].append([self.displayScale * self.mainW, self.displayScale * self.mainB,
+                                                            self.displayScale * self.mainW, self.pixHeight])
 
-                        # overwrite with just the line for the border of the grid
-                        if self.params[GLPLOTBORDER] or self.params[GLAXISLINES]:
-                            list(colourGroups.values())[0][PDFLINES] = [[self.displayScale * self.mainW, self.displayScale * self.mainB,
-                                                                         self.displayScale * self.mainW, self.pixHeight]]
-
-
-                elif self.params[GLPLOTBORDER] or self.params[GLAXISLINES]:
-                    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray
-
-                    tempVertexArray = GLVertexArray(numLists=1, drawMode=GL.GL_LINE, dimension=2)
-                    tempVertexArray.indices = [0, 1]
-                    tempVertexArray.vertices = [0.0, 0.0, 0.0, 0.0]
-
-                    self._appendIndexLineGroup(indArray=tempVertexArray,
-                                               colourGroups=colourGroups,
-                                               plotDim={PLOTLEFT  : self.displayScale * (self.mainW - self._parent.AXIS_LINE),
-                                                        PLOTBOTTOM: self.displayScale * self.mainB,
-                                                        PLOTWIDTH : self.displayScale * self._parent.AXIS_LINE,
-                                                        PLOTHEIGHT: self.displayScale * self.mainH},
-                                               name='gridAxes',
-                                               setColour=self.foregroundColour,
-                                               ratioLine=True)
-                    list(colourGroups.values())[0][PDFLINES] = [[self.displayScale * self.mainW, self.displayScale * self.mainB,
-                                                                 self.displayScale * self.mainW, self.pixHeight]]
-
+            # add the bottom axis if visible
             if self.bAxis:
                 if self.params[GLAXISMARKS]:
                     indArray = self._parent.gridList[2]
@@ -1086,67 +1088,36 @@ class GLExporter():
 
                         # add the vertices for the grid lines
                         self._appendIndexLineGroup(indArray=indArray,
-                                                   colourGroups=colourGroups,
-                                                   plotDim={PLOTLEFT  : 0.0,
-                                                            PLOTBOTTOM: self.displayScale * self.mainB,
-                                                            PLOTWIDTH : self.displayScale * self.mainW,
-                                                            PLOTHEIGHT: self.displayScale * self._parent.AXIS_LINE},
-                                                   name='gridAxes',
-                                                   setColour=self.foregroundColour,
-                                                   ratioLine=True)
+                                                              colourGroups=colourGroups,
+                                                              plotDim={PLOTLEFT  : 0.0,
+                                                                       PLOTBOTTOM: self.displayScale * self.mainB,
+                                                                       PLOTWIDTH : self.displayScale * self.mainW,
+                                                                       PLOTHEIGHT: self.displayScale * self._parent.AXIS_LINE},
+                                                              name='gridAxes',
+                                                              setColour=self.foregroundColour,
+                                                              ratioLine=True)
 
-                        # append the line for the border of the grid
-                        if self.params[GLPLOTBORDER] or self.params[GLAXISLINES]:
-                            list(colourGroups.values())[0][PDFLINES].append([0.0, self.displayScale * self.bAxisH,
-                                                                             self.displayScale * self.mainW, self.displayScale * self.bAxisH])
+            # add the bottom axis border line if needed
+            if self.params[GLPLOTBORDER] or (self.bAxis and self.params[GLAXISLINES]):
+                from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray
 
-                    else:
+                tempVertexArray = GLVertexArray(numLists=1, drawMode=GL.GL_LINE, dimension=2)
+                tempVertexArray.indices = [0, 1]
+                tempVertexArray.vertices = [0.0, 0.0, 0.0, 0.0]
 
-                        # make a dummy colourGroup to add the border line to
-                        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray
+                setGroup = self._appendIndexLineGroup(indArray=tempVertexArray,
+                                                      colourGroups=colourGroups,
+                                                      plotDim={PLOTLEFT  : self.displayScale * (self.mainW - self._parent.AXIS_LINE),
+                                                               PLOTBOTTOM: self.displayScale * self.mainB,
+                                                               PLOTWIDTH : self.displayScale * self._parent.AXIS_LINE,
+                                                               PLOTHEIGHT: self.displayScale * self.mainH},
+                                                      name='gridAxes',
+                                                      setColour=self.foregroundColour,
+                                                      ratioLine=True)
 
-                        tempVertexArray = GLVertexArray(numLists=1, drawMode=GL.GL_LINE, dimension=2)
-                        tempVertexArray.indices = [0, 1]
-                        tempVertexArray.vertices = [0.0, 0.0, 0.0, 0.0]
-
-                        self._appendIndexLineGroup(indArray=tempVertexArray,
-                                                   colourGroups=colourGroups,
-                                                   plotDim={PLOTLEFT  : 0.0,
-                                                            PLOTBOTTOM: self.displayScale * self.mainB,
-                                                            PLOTWIDTH : self.displayScale * self.mainW,
-                                                            PLOTHEIGHT: self.displayScale * self._parent.AXIS_LINE},
-                                                   name='gridAxes',
-                                                   setColour=self.foregroundColour,
-                                                   ratioLine=True)
-
-                        # overwrite with just the line for the border of the grid
-                        if self.params[GLPLOTBORDER] or self.params[GLAXISLINES]:
-                            list(colourGroups.values())[0][PDFLINES].append([0.0, self.displayScale * self.bAxisH,
-                                                                         self.displayScale * self.mainW, self.displayScale * self.bAxisH])
-
-
-                elif self.params[GLPLOTBORDER] or self.params[GLAXISLINES]:
-                    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray
-
-                    tempVertexArray = GLVertexArray(numLists=1, drawMode=GL.GL_LINE, dimension=2)
-                    tempVertexArray.indices = [0, 1]
-                    tempVertexArray.vertices = [0.0, 0.0, 0.0, 0.0]
-
-                    self._appendIndexLineGroup(indArray=tempVertexArray,
-                                               colourGroups=colourGroups,
-                                               plotDim={PLOTLEFT  : self.displayScale * (self.mainW - self._parent.AXIS_LINE),
-                                                        PLOTBOTTOM: self.displayScale * self.mainB,
-                                                        PLOTWIDTH : self.displayScale * self._parent.AXIS_LINE,
-                                                        PLOTHEIGHT: self.displayScale * self.mainH},
-                                               name='gridAxes',
-                                               setColour=self.foregroundColour,
-                                               ratioLine=True)
-
-                    # if the rAxis is not visible then just set this line, otherwise append to the above line
-                    if not self.rAxis:
-                        list(colourGroups.values())[0][PDFLINES] = []
-                    list(colourGroups.values())[0][PDFLINES].append([0.0, self.displayScale * self.bAxisH,
-                                                                     self.displayScale * self.mainW, self.displayScale * self.bAxisH])
+                if setGroup in colourGroups:
+                    colourGroups[setGroup][PDFLINES].append([0.0, self.displayScale * self.bAxisH,
+                                                             self.displayScale * self.mainW, self.displayScale * self.bAxisH])
 
             self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='gridAxes')
 
@@ -1303,7 +1274,7 @@ class GLExporter():
         #     self.stripHeights.append(self.pixHeight)
 
         if self.params[GLSTRIPDIRECTION] == 'Y':
-            if self.stripNumber < (self.numStrips-1):
+            if self.stripNumber < (self.numStrips - 1):
                 self.stripWidths.append(report.width + self.stripSpacing)
                 self.stripHeights.append(report.height + self.stripSpacing)
             else:
@@ -1320,12 +1291,12 @@ class GLExporter():
 
     def _addTableToStory(self):
         if self.params[GLSTRIPDIRECTION] == 'Y':
-            
+
             # arrange as a row
             table = (self.stripReports,)
             self._report.story.append(Table(table, colWidths=self.stripWidths))
         else:
-            
+
             # arrange as a column
             table = tuple((rep,) for rep in self.stripReports)
             heights = self.stripHeights[:]
@@ -1381,6 +1352,9 @@ class GLExporter():
             if newLine:
                 colourGroups[colourPath][PDFLINES].append(newLine)
 
+    def _colourID(self, name, colour):
+        return 'spectrumView%s%s%s%s%s' % (name, colour.red, colour.green, colour.blue, colour.alpha)
+
     def _appendIndexLineGroup(self, indArray, colourGroups, plotDim, name,
                               fillMode=None, splitGroups=False,
                               setColour=None, lineWidth=0.5, ratioLine=False):
@@ -1410,8 +1384,8 @@ class GLExporter():
                     newLine.extend([indArray.vertices[vv * 2], indArray.vertices[vv * 2 + 1]])
 
             colour = (setColour or colors.Color(*indArray.colors[ii0[0] * 4:ii0[0] * 4 + 3], alpha=alphaClip(indArray.colors[ii0[0] * 4 + 3])))
-            colourPath = 'spectrumView%s%s%s%s%s' % (name,
-                                                     colour.red, colour.green, colour.blue, colour.alpha)
+            colourPath = self._colourID(name, colour)  # 'spectrumView%s%s%s%s%s' % (name,
+            # colour.red, colour.green, colour.blue, colour.alpha)
 
             # # override so that each element is a new group
             # if splitGroups:
@@ -1442,6 +1416,9 @@ class GLExporter():
         # override so that each element is a new group
         if splitGroups:
             self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name=name)
+
+        if setColour is not None:
+            return self._colourID(name, setColour)
 
     def _appendIndexLineGroupFill(self, indArray=None, listView=None, colourGroups=None, plotDim=None, name=None,
                                   fillMode=None, splitGroups=False, lineWidth=0.5):

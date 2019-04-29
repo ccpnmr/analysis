@@ -1034,7 +1034,6 @@ class GLExporter():
                         if self.params[GLPLOTBORDER] or self.params[GLAXISLINES]:
                             list(colourGroups.values())[0][PDFLINES].append([self.displayScale * self.mainW, self.displayScale * self.mainB,
                                                                              self.displayScale * self.mainW, self.pixHeight])
-
                     else:
 
                         # make a dummy colourGroup to add the border line to
@@ -1122,8 +1121,8 @@ class GLExporter():
 
                         # overwrite with just the line for the border of the grid
                         if self.params[GLPLOTBORDER] or self.params[GLAXISLINES]:
-                            list(colourGroups.values())[0][PDFLINES] = [[0.0, self.displayScale * self.bAxisH,
-                                                                         self.displayScale * self.mainW, self.displayScale * self.bAxisH]]
+                            list(colourGroups.values())[0][PDFLINES].append([0.0, self.displayScale * self.bAxisH,
+                                                                         self.displayScale * self.mainW, self.displayScale * self.bAxisH])
 
 
                 elif self.params[GLPLOTBORDER] or self.params[GLAXISLINES]:

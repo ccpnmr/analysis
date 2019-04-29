@@ -1568,6 +1568,13 @@ class CcpnGLWidget(QOpenGLWidget):
                                                dimension=2,
                                                GLContext=self))
 
+        self._cursorList = GLVertexArray(numLists=1,
+                                              renderMode=GLRENDERMODE_REBUILD,
+                                              blendMode=False,
+                                              drawMode=GL.GL_LINES,
+                                              dimension=2,
+                                              GLContext=self)
+
         self._externalRegions = GLExternalRegion(project=self.project, GLContext=self, spectrumView=None,
                                                  integralListView=None)
 
@@ -3200,74 +3207,76 @@ class CcpnGLWidget(QOpenGLWidget):
                 ((values[1] - self.axisB) / (self.axisT - self.axisB)) if values[1] is not None else None]
 
     def drawCursors(self):
-        # draw the cursors
-        # need to change to VBOs
+        """Build and draw the cursors/doubleCursors
+        """
 
         if self._crosshairVisible:  # and (not self._updateHTrace or not self._updateVTrace):
-            GL.glBegin(GL.GL_LINES)
+
+            drawList = self._cursorList
+
+            vertices = []
+            indices = []
+            index = 0
 
             # map the cursor to the ratio coordinates - double cursor is flipped about the line x=y
             newCoords = self._scaleAxisToRatio(self.cursorCoordinate[0:2])
             doubleCoords = self._scaleAxisToRatio(self.doubleCursorCoordinate[0:2])
 
             if getCurrentMouseMode() == PICK and self.underMouse():
-                GL.glColor4f(*self.mousePickColour)
-
-                # x = self.pixelX * 8
-                # y = self.pixelY * 8
-                # GL.glVertex2d(self.cursorCoordinate[0] - x, self.cursorCoordinate[1] - y)
-                # GL.glVertex2d(self.cursorCoordinate[0] + x, self.cursorCoordinate[1] - y)
-                # GL.glVertex2d(self.cursorCoordinate[0] + x, self.cursorCoordinate[1] - y)
-                # GL.glVertex2d(self.cursorCoordinate[0] + x, self.cursorCoordinate[1] + y)
-                # GL.glVertex2d(self.cursorCoordinate[0] + x, self.cursorCoordinate[1] + y)
-                # GL.glVertex2d(self.cursorCoordinate[0] - x, self.cursorCoordinate[1] + y)
-                # GL.glVertex2d(self.cursorCoordinate[0] - x, self.cursorCoordinate[1] + y)
-                # GL.glVertex2d(self.cursorCoordinate[0] - x, self.cursorCoordinate[1] - y)
 
                 x = self.deltaX * 8
                 y = self.deltaY * 8
-                GL.glVertex2d(newCoords[0] - x, newCoords[1] - y)
-                GL.glVertex2d(newCoords[0] + x, newCoords[1] - y)
-                GL.glVertex2d(newCoords[0] + x, newCoords[1] - y)
-                GL.glVertex2d(newCoords[0] + x, newCoords[1] + y)
-                GL.glVertex2d(newCoords[0] + x, newCoords[1] + y)
-                GL.glVertex2d(newCoords[0] - x, newCoords[1] + y)
-                GL.glVertex2d(newCoords[0] - x, newCoords[1] + y)
-                GL.glVertex2d(newCoords[0] - x, newCoords[1] - y)
+
+                vertices = [newCoords[0] - x, newCoords[1] - y,
+                            newCoords[0] + x, newCoords[1] - y,
+                            newCoords[0] + x, newCoords[1] - y,
+                            newCoords[0] + x, newCoords[1] + y,
+                            newCoords[0] + x, newCoords[1] + y,
+                            newCoords[0] - x, newCoords[1] + y,
+                            newCoords[0] - x, newCoords[1] + y,
+                            newCoords[0] - x, newCoords[1] - y
+                            ]
+                indices = [0, 1, 2, 3, 4, 5, 6, 7]
+                col = self.mousePickColour
+                index = 8
 
             else:
-                GL.glColor4f(*self.foreground)
-
-            # # if not self._updateVTrace:
-            # GL.glVertex2d(self.cursorCoordinate[0], self.axisT)
-            # GL.glVertex2d(self.cursorCoordinate[0], self.axisB)
-            # # if not self._updateHTrace:
-            # GL.glVertex2d(self.axisL, self.cursorCoordinate[1])
-            # GL.glVertex2d(self.axisR, self.cursorCoordinate[1])
+                col = self.foreground
 
             phasingFrame = self.spectrumDisplay.phasingFrame
             if not phasingFrame.isVisible():
-                _drawDouble = self._preferences.showDoubleCrosshair          # any([specView.spectrum.showDoubleCrosshair == True for specView in self._ordering])
+                _drawDouble = self._preferences.showDoubleCrosshair  # any([specView.spectrum.showDoubleCrosshair == True for specView in self._ordering])
 
                 if not self._updateVTrace and newCoords[0] is not None:
-                    GL.glVertex2d(newCoords[0], 1.0)
-                    GL.glVertex2d(newCoords[0], 0.0)
+                    vertices.extend([newCoords[0], 1.0, newCoords[0], 0.0])
+                    indices.extend([index, index+1])
+                    index += 2
 
                     # add the double cursor
                     if _drawDouble:
-                        GL.glVertex2d(doubleCoords[0], 1.0)
-                        GL.glVertex2d(doubleCoords[0], 0.0)
+                        vertices.extend([doubleCoords[0], 1.0, doubleCoords[0], 0.0])
+                        indices.extend([index, index+1])
+                        index += 2
 
                 if not self._updateHTrace and newCoords[1] is not None:
-                    GL.glVertex2d(0.0, newCoords[1])
-                    GL.glVertex2d(1.0, newCoords[1])
+                    vertices.extend([0.0, newCoords[1], 1.0, newCoords[1]])
+                    indices.extend([index, index + 1])
+                    index += 2
 
                     # add the double cursor
                     if _drawDouble:
-                        GL.glVertex2d(0.0, doubleCoords[1])
-                        GL.glVertex2d(1.0, doubleCoords[1])
+                        vertices.extend([0.0, doubleCoords[1], 1.0, doubleCoords[1]])
+                        indices.extend([index, index+1])
+                        index += 2
 
-            GL.glEnd()
+            drawList.vertices = np.array(vertices, dtype=np.float32)
+            drawList.indices = np.array(indices, dtype=np.int32)
+            drawList.numVertices = len(vertices) // 2
+            drawList.colors = np.array(col * drawList.numVertices, dtype=np.float32)
+
+            # build and draw the VBO
+            drawList.defineIndexVBO(enableVBO=True)
+            drawList.drawIndexVBO(enableVBO=True)
 
     def drawDottedCursor(self):
         # draw the cursors

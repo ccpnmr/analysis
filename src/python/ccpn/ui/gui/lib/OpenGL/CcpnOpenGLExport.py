@@ -63,7 +63,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXI
     GLPAGETYPE, GLSPECTRUMDISPLAY, GLAXISLINES, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS, \
     GLCONTOURTHICKNESS, GLFOREGROUND, GLSHOWSPECTRAONPHASE, \
     GLAXISTITLES, GLAXISUNITS, GLAXISMARKSINSIDE, GLSTRIPDIRECTION, GLSTRIPPADDING, \
-    GLFULLLIST, GLEXTENDEDLIST
+    GLFULLLIST, GLEXTENDEDLIST, GLCURSORS
 from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPDF, EXPORTSVG, EXPORTTYPES, \
     PAGEPORTRAIT, PAGELANDSCAPE, PAGETYPES
 from ccpn.util.Logging import getLogger
@@ -384,6 +384,8 @@ class GLExporter():
 
         self._addAxisMask()
         self._addGridTickMarks()
+        if self.params[GLCURSORS]: self._addCursors()
+
         if self.params[GLAXISLABELS] or self.params[GLAXISUNITS] or self.params[GLAXISTITLES]: self._addGridLabels()
 
     def _addGridLines(self):
@@ -401,6 +403,22 @@ class GLExporter():
                                        name='grid',
                                        ratioLine=True)
             self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='grid')
+
+    def _addCursors(self):
+        """
+        Add cursors/double cursor to the main drawing area.
+        """
+        if self.strip.gridVisible:
+            colourGroups = OrderedDict()
+            self._appendIndexLineGroup(indArray=self._parent._cursorList,
+                                       colourGroups=colourGroups,
+                                       plotDim={PLOTLEFT  : self.displayScale * self.mainL,
+                                                PLOTBOTTOM: self.displayScale * self.mainB,
+                                                PLOTWIDTH : self.displayScale * self.mainW,
+                                                PLOTHEIGHT: self.displayScale * self.mainH},
+                                       name='cursors',
+                                       ratioLine=True)
+            self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='cursors')
 
     def _addSpectrumContours(self):
         """

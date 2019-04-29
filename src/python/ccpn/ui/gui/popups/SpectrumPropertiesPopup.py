@@ -452,11 +452,12 @@ class GeneralTab(Widget):
             # else:
             #     self.noiseLevelData.setText('%.3d' % spectrum.noiseLevel)
 
-            doubleCrosshairLabel = Label(self, text="Show Second Cursor", grid=(11, 0), vAlign='t', hAlign='l')
-            doubleCrosshairCheckBox = CheckBox(self, grid=(11, 1), checked=True, vAlign='t', hAlign='l')
-            doubleCrosshairCheckBox.setChecked(spectrum.showDoubleCrosshair)
+            # doubleCrosshairLabel = Label(self, text="Show Second Cursor", grid=(11, 0), vAlign='t', hAlign='l')
+            # doubleCrosshairCheckBox = CheckBox(self, grid=(11, 1), checked=True, vAlign='t', hAlign='l')
+            # doubleCrosshairCheckBox.setChecked(spectrum.showDoubleCrosshair)
+            # doubleCrosshairCheckBox.stateChanged.connect(self._queueChangeDoubleCrosshair)
+
             self.layout().addItem(QtWidgets.QSpacerItem(0, 10), 0, 0)
-            doubleCrosshairCheckBox.stateChanged.connect(self._queueChangeDoubleCrosshair)
 
         Spacer(self, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(12, 1), gridSpan=(1, 1))

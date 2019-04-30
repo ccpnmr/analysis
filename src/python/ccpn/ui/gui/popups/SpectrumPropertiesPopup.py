@@ -29,6 +29,7 @@ from functools import partial
 from PyQt5 import QtWidgets, QtCore
 from itertools import permutations
 from ccpn.core.lib import Util as ccpnUtil
+from ccpn.core.Spectrum import MAXALIASINGRANGE
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
@@ -754,6 +755,10 @@ class DimensionsTab(Widget):
         self.spectralAssignmentToleranceData = [i for i in range(dimensions)]
         self.spectralDoubleCursorOffset = [i for i in range(dimensions)]
 
+        self.aliasInvertedCheckBox = [i for i in range(dimensions)]
+        self.aliasMaxPullDowns = [i for i in range(dimensions)]
+        self.aliasMinPullDowns = [i for i in range(dimensions)]
+
         row = 2
         Label(self, text="Axis Code ", grid=(row, 0), vAlign='t', hAlign='l')
 
@@ -786,6 +791,16 @@ class DimensionsTab(Widget):
 
         row += 1
         Label(self, text="Second cursor offset (Hz) ", grid=(row, 0), hAlign='l')
+
+        row += 1
+        Label(self, text="Spectrum inverted in aliasing dimension ", grid=(row, 0), hAlign='l')
+
+        row += 1
+        Label(self, text="Maximum displayed aliasing ", grid=(row, 0), hAlign='l')
+
+        row += 1
+        Label(self, text="Minimum displayed aliasing ", grid=(row, 0), hAlign='l')
+
 
         for i in range(dimensions):
             row = 2
@@ -867,6 +882,39 @@ class DimensionsTab(Widget):
                                                           grid=(row, i + 1), hAlign='l')
             self.spectralDoubleCursorOffset[i].textChanged.connect(partial(self._queueSetDoubleCursorOffset,
                                                                            self.spectralDoubleCursorOffset[i].text, i))
+
+
+            row += 1
+            fModes = spectrum.foldingModes
+            self.foldingModesCheckBox[i] = CheckBox(self, grid=(row, i + 1), vAlign='t')
+            self.foldingModesCheckBox[i].setChecked(fModes[i] if fModes[i] is not None else False)
+
+            # pullDown for min/max aliasing
+            aliasLim = spectrum.aliasingLimits
+
+            # min aliasing
+            row += 1
+            aliasRange = list(range(-MAXALIASINGRANGE, MAXALIASINGRANGE+1))
+            self.minAliasingPullDowns[i] = PulldownList(self, grid=(row, i + 1), vAlign='t',
+                                                        texts=[str(tt) for tt in aliasRange])
+            if aliasLim[i][0] in aliasRange:
+                index = aliasRange.index(aliasLim[i][0])
+                self.minAliasingPullDowns[i].setIndex(index)
+
+            self.minAliasingPullDowns[i].currentIndexChanged.connect(partial(self._queueSetMinAliasing, self.minAliasingPullDowns[i].getText, i))
+
+            # max aliasing
+            row += 1
+            aliasRange = list(range(-MAXALIASINGRANGE, MAXALIASINGRANGE+1))
+            self.maxAliasingPullDowns[i] = PulldownList(self, grid=(row, i + 1), vAlign='t',
+                                                        texts=[str(tt) for tt in aliasRange])
+            if aliasLim[i][1] in aliasRange:
+                index = aliasRange.index(aliasLim[i][1])
+                self.maxAliasingPullDowns[i].setIndex(index)
+
+            self.maxAliasingPullDowns[i].currentIndexChanged.connect(partial(self._queueSetMaxAliasing, self.maxAliasingPullDowns[i].getText, i))
+
+
 
         row += 1
         HLine(self, grid=(row, 0), gridSpan=(1, dimensions+1), colour=getColours()[DIVIDER], height=15)
@@ -1001,6 +1049,30 @@ class DimensionsTab(Widget):
         spectrum.referencePoints = spectrumReferencing
         self.pythonConsole.writeConsoleCommand("spectrum.referencePoints = {0}".format(spectrumReferencing), spectrum=spectrum)
         self._writeLoggingMessage("spectrum.referencePoints = {0}".format(spectrumReferencing))
+
+    def _queueSetMinAliasing(self, valueGetter, dim):
+        self._changes['minAliasing{}'.format(dim)] = partial(self._setMinAliasing,
+                                                              self.spectrum, dim, valueGetter())
+
+    def _setMinAliasing(self, spectrum, dim, value):
+        alias = list(spectrum.aliasingLimits)
+        alias[dim] = (value, max(alias[dim][1], value))
+        spectrum.aliasingLimits = tuple(alias)
+
+        self.pythonConsole.writeConsoleCommand("spectrum.aliasingLimits = {0}".format(tuple(alias)), spectrum=spectrum)
+        self._writeLoggingMessage("spectrum.aliasingLimits = {0}".format(tuple(alias)))
+
+    def _queueSetMaxAliasing(self, valueGetter, dim):
+        self._changes['maxAliasing{}'.format(dim)] = partial(self._setMaxAliasing,
+                                                             self.spectrum, dim, valueGetter())
+
+    def _setMaxAliasing(self, spectrum, dim, value):
+        alias = list(spectrum.aliasingLimits)
+        alias[dim] = (min(alias[dim][0], value), value)
+        spectrum.aliasingLimits = tuple(alias)
+
+        self.pythonConsole.writeConsoleCommand("spectrum.aliasingLimits = {0}".format(tuple(alias)), spectrum=spectrum)
+        self._writeLoggingMessage("spectrum.aliasingLimits = {0}".format(tuple(alias)))
 
 
 class ContoursTab(Widget):

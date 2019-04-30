@@ -89,6 +89,9 @@ INCLUDEPOSITIVECONTOURS = 'includePositiveContours'
 INCLUDENEGATIVECONTOURS = 'includeNegativeContours'
 SPECTRUMAXES = 'spectrumAxesOrdering'
 SPECTRUMPREFERREDAXISORDERING = 'spectrumPreferredAxisOrdering'
+SPECTRUMALIASING = 'spectrumAliasing'
+ALIASINGLIMITS = 'aliasingLimits'
+MAXALIASINGRANGE = 3
 
 
 def _cumulativeArray(array):
@@ -867,13 +870,19 @@ class Spectrum(AbstractWrapperObject):
         return tuple(dd[x and x.isFolded] for x in self._mainExpDimRefs())
 
     @foldingModes.setter
-    def foldingModes(self, value):
+    def foldingModes(self, values):
 
         # TODO For NEF we should support both True, False, and None
         # That requires an API change
 
         dd = {'circular': False, 'mirror': True, None: False}
-        self._setExpDimRefAttribute('isFolded', [dd[x] for x in value])
+
+        if len(values) != len(self._wrappedData.sortedPeakDims()):
+            raise ValueError("Length of %s does not match number of dimensions." % str(values))
+        if not all(isinstance(dimVal, str) and dimVal in dd.keys() for dimVal in values):
+            raise ValueError("Folding modes must be 'circular', 'mirror'")
+
+        self._setExpDimRefAttribute('isFolded', [dd[x] for x in values])
 
     @property
     def axisCodes(self) -> Tuple[Optional[str], ...]:
@@ -1227,6 +1236,61 @@ class Spectrum(AbstractWrapperObject):
         # temporary hack for showing straight the result of intensities change
         for spectrumView in self.spectrumViews:
             spectrumView.refreshData()
+
+    @property
+    def aliasingRange(self) -> Optional[Tuple[Tuple, ...]]:
+        """Return a tuple of the aliasing range in each dimension, or None of not set
+        """
+        alias = self.getParameter(SPECTRUMALIASING, ALIASINGLIMITS)
+        if alias is not None:
+            return alias
+
+        # set default values in the ccpnInternal store
+        self.setParameter(SPECTRUMALIASING, ALIASINGLIMITS, None)
+        return None
+
+    @aliasingRange.setter
+    def aliasingRange(self, values: Tuple[Tuple, ...]):
+        """Set the aliasing range for each of the spectrum dimensions
+        Must be a tuple matching the number of dimension.
+        Each element is a tuple of the form (min, max)
+        where min/max are integer in the range -3 -> +3
+        """
+
+        # error checking that the tuples are correctly defined
+        if len(values) != len(self._wrappedData.sortedPeakDims()):
+            raise ValueError("Length of %s does not match number of dimensions." % str(values))
+        if not all(isinstance(dimVal, Tuple) and len(dimVal) == 2 for dimVal in values):
+            raise ValueError("Aliasing values must be tuple(min, max).")
+
+        for alias in values:
+            if not (isinstance(alias[0], int) and isinstance(alias[1], int)
+                    and alias[0] >= -MAXALIASINGRANGE and alias[1] <= MAXALIASINGRANGE and alias[0] <= alias[1]):
+                raise ValueError("Aliasing values must be tuple(min >= -%i, max <= %i) of integer." % \
+                                 (MAXALIASINGRANGE, MAXALIASINGRANGE))
+
+        self.setParameter(SPECTRUMALIASING, ALIASINGLIMITS, values)
+
+    # @property
+    # def folding(self) -> Tuple:
+    #     """return a tuple of folding values for dimensions
+    #     """
+    #     result = ()
+    #     for dataDim in self._wrappedData.sortedDataDims():
+    #         expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
+    #         if expDimRef is None:
+    #             result += (None,)
+    #         else:
+    #             result += (expDimRef.isFolded,)
+    #
+    #     return result
+    #
+    # @folding.setter
+    # def folding(self, values):
+    #     if len(values) != len(self._wrappedData.sortedPeakDims()):
+    #         raise ValueError("Length of %s does not match number of dimensions." % str(values))
+    #     if not all(isinstance(dimVal, bool) for dimVal in values):
+    #         raise ValueError("Folding values must be True/False.")
 
     #=========================================================================================
     # Library functions

@@ -23,22 +23,23 @@ __date__ = "$Date$"
 # Start of code
 #=========================================================================================
 
+import numpy as np
 from collections import OrderedDict
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.HLine import HLine
+from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
+from ccpn.core.Spectrum import MAXALIASINGRANGE
 
-
-MINALIASING = -3
-MAXALIASING = 3
-DEFAULTALIASING = 0 - MINALIASING
+DEFAULTALIASING = MAXALIASINGRANGE
 COLWIDTH = 140
 
 
@@ -61,30 +62,40 @@ class SetPeakAliasingPopup(CcpnDialog):
         row = 0
         self.spectra = OrderedDict()
         self.spectraPulldowns = OrderedDict()
+        Label(self, text='Set aliasing for currently selected peaks', grid=(row,0), gridSpan=(1,2))
+        row += 1
 
         spectrumFrame = Frame(self, setLayout=True, showBorder=False, grid=(row, 0), gridSpan=(1,2))
+
+        specRow = 0
         for peak in self.current.peaks:
 
             if peak.peakList.spectrum not in self.spectra:
+
                 spectrum = peak.peakList.spectrum
                 self.spectra[spectrum] = set()
+                dims = spectrum.dimensionCount
+
+                if specRow > 0:
+                    # add divider
+                    HLine(spectrumFrame, grid=(specRow, 0), gridSpan=(1, dims+2), colour=getColours()[DIVIDER], height=15)
+                    specRow += 1
 
                 # add pulldown widget
-                Label(spectrumFrame, text='Spectrum: %s' % str(spectrum.pid), grid=(row, 0), bold=True)
-                Label(spectrumFrame, text=' axisCodes:', grid=(row, 1))
+                Label(spectrumFrame, text='Spectrum: %s' % str(spectrum.pid), grid=(specRow, 0), bold=True)
+                Label(spectrumFrame, text=' axisCodes:', grid=(specRow, 1))
 
-                dims = spectrum.dimensionCount
                 for dim in range(dims):
-                    Label(spectrumFrame, text=spectrum.axisCodes[dim], grid=(row, dim+2))
+                    Label(spectrumFrame, text=spectrum.axisCodes[dim], grid=(specRow, dim+2))
+                specRow += 1
 
-                row += 1
                 self.spectraPulldowns[spectrum] = []
-                Label(spectrumFrame, text=' aliasing:', grid=(row, 1))
+                Label(spectrumFrame, text=' aliasing:', grid=(specRow, 1))
                 for dim in range(dims):
-                    self.spectraPulldowns[spectrum].append(PulldownList(spectrumFrame, texts=[str(tt) for tt in range(MINALIASING, MAXALIASING+1)],
-                                                           grid=(row, dim+2)))  #, index=DEFAULTALIASING))
+                    self.spectraPulldowns[spectrum].append(PulldownList(spectrumFrame, texts=[str(tt) for tt in range(-MAXALIASINGRANGE, MAXALIASINGRANGE+1)],
+                                                           grid=(specRow, dim+2)))  #, index=DEFAULTALIASING))
+                specRow += 1
 
-                row += 1
             self.spectra[peak.peakList.spectrum].add(peak)
 
         row += 1
@@ -106,14 +117,45 @@ class SetPeakAliasingPopup(CcpnDialog):
             for dim in range(dims):
                 if len(dimAlias[dim]) == 1:
                     self.spectraPulldowns[spectrum][dim].select(str(dimAlias[dim].pop()))
+                elif len(dimAlias[dim]) > 1:
+                    self.spectraPulldowns[spectrum][dim].select('0')        # change to the most
                 else:
                     self.spectraPulldowns[spectrum][dim].select('0')
+
 
         self.setFixedSize(self.sizeHint())
 
         self.GLSignals = GLNotifier(parent=self)
 
     def _refreshGLItems(self):
+
+        # change aliasing contour limits for selected peaks
+
+        # iterate through spectra
+            # through peaks
+                # get aliasing limits for each peak
+                # set aliasing limits in spectrum properties
+
+                # update values in strips
+
+        for spectrum in self.project.spectra:
+            dims = spectrum.dimensionCount
+
+            aliasMin = [3] * dims
+            aliasMax = [-3] * dims
+
+            alias = None
+            for peakList in spectrum.peakLists:
+                for peak in peakList.peaks:
+                    alias = peak.aliasing
+                    aliasMax = np.maximum(aliasMax, alias)
+                    aliasMin = np.minimum(aliasMin, alias)
+
+            if alias is not None:
+                # set min/max in spectrum here
+                pass
+
+
         # emit a signal to rebuild all peaks
         self.GLSignals.emitEvent(triggers=[GLNotifier.GLALLPEAKS, GLNotifier.GLALLMULTIPLETS])
 

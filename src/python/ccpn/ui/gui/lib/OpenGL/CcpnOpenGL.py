@@ -2651,6 +2651,13 @@ class CcpnGLWidget(QOpenGLWidget):
                                                             self._spectrumSettings[spectrumView][
                                                                 GLDefs.SPECTRUM_MATRIX])
 
+                        # values store in spectrum settings - can be used for drawing multiple contours
+
+                        # self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_DXAF] = dxAF
+                        # self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_DYAF] = dyAF
+                        # self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_XSCALE] = xScale
+                        # self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YSCALE] = yScale
+
                         # draw the spectrum - call the existing glCallList
                         # spectrumView._paintContoursNoClip()
 

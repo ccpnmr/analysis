@@ -95,8 +95,13 @@ class SetPeakAliasingPopup(CcpnDialog):
                 self.spectraPulldowns[spectrum] = []
                 Label(spectrumFrame, text=' aliasing:', grid=(specRow, 1))
                 for dim in range(dims):
+
                     self.spectraPulldowns[spectrum].append(PulldownList(spectrumFrame, texts=aliasText,
                                                            grid=(specRow, dim+2)))  #, index=DEFAULTALIASING))
+
+                    # may cause a problem if the peak dimension does not correspond to a visible XY axis
+                    # peaks could disappear from all views
+
                 specRow += 1
 
             self.spectra[peak.peakList.spectrum].add(peak)
@@ -108,23 +113,37 @@ class SetPeakAliasingPopup(CcpnDialog):
 
         for spectrum in self.spectra.keys():
             dims = spectrum.dimensionCount
+            aliasCount = []
             dimAlias = []
             for dim in range(dims):
                 dimAlias.append(set())
+                aliasCount.append({})
 
             for peak in self.spectra[spectrum]:
                 pa = peak.aliasing
                 for dim in range(dims):
                     dimAlias[dim].add(pa[dim])
 
+                    if pa[dim] not in aliasCount[dim]:
+                        aliasCount[dim][pa[dim]] = 0
+                    aliasCount[dim][pa[dim]] += 1
+
             for dim in range(dims):
                 if len(dimAlias[dim]) == 1:
                     self.spectraPulldowns[spectrum][dim].select(str(dimAlias[dim].pop()))
+
                 elif len(dimAlias[dim]) > 1:
-                    self.spectraPulldowns[spectrum][dim].select('0')        # change to the most
-                else:
                     self.spectraPulldowns[spectrum][dim].select('0')
 
+                    # set to the most common aliasing
+                    maxAlias = max(aliasCount[dim].values())
+                    maxKey = [k for k, v in aliasCount[dim].items() if v == maxAlias]
+                    if maxKey:
+                        self.spectraPulldowns[spectrum][dim].select(str(maxKey[0]))
+
+                else:
+                    # just set to 0
+                    self.spectraPulldowns[spectrum][dim].select('0')
 
         self.setFixedSize(self.sizeHint())
 
@@ -144,8 +163,8 @@ class SetPeakAliasingPopup(CcpnDialog):
         for spectrum in self.project.spectra:
             dims = spectrum.dimensionCount
 
-            aliasMin = [3] * dims
-            aliasMax = [-3] * dims
+            aliasMin = [0] * dims
+            aliasMax = [0] * dims
 
             alias = None
             for peakList in spectrum.peakLists:

@@ -877,7 +877,7 @@ class Spectrum(AbstractWrapperObject):
 
         dd = {'circular': False, 'mirror': True, None: False}
 
-        if len(values) != len(self._wrappedData.sortedPeakDims()):
+        if len(values) != self.dimensionCount:
             raise ValueError("Length of %s does not match number of dimensions." % str(values))
         if not all(isinstance(dimVal, str) and dimVal in dd.keys() for dimVal in values):
             raise ValueError("Folding modes must be 'circular', 'mirror'")
@@ -1246,8 +1246,9 @@ class Spectrum(AbstractWrapperObject):
             return alias
 
         # set default values in the ccpnInternal store
-        self.setParameter(SPECTRUMALIASING, ALIASINGLIMITS, None)
-        return None
+        alias = ((0, 0),) * self.dimensionCount
+        self.setParameter(SPECTRUMALIASING, ALIASINGLIMITS, alias)
+        return alias
 
     @aliasingRange.setter
     def aliasingRange(self, values: Tuple[Tuple, ...]):
@@ -1258,7 +1259,7 @@ class Spectrum(AbstractWrapperObject):
         """
 
         # error checking that the tuples are correctly defined
-        if len(values) != len(self._wrappedData.sortedPeakDims()):
+        if len(values) != self.dimensionCount:
             raise ValueError("Length of %s does not match number of dimensions." % str(values))
         if not all(isinstance(dimVal, Tuple) and len(dimVal) == 2 for dimVal in values):
             raise ValueError("Aliasing values must be tuple(min, max).")

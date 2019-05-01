@@ -755,9 +755,9 @@ class DimensionsTab(Widget):
         self.spectralAssignmentToleranceData = [i for i in range(dimensions)]
         self.spectralDoubleCursorOffset = [i for i in range(dimensions)]
 
-        self.aliasInvertedCheckBox = [i for i in range(dimensions)]
-        self.aliasMaxPullDowns = [i for i in range(dimensions)]
-        self.aliasMinPullDowns = [i for i in range(dimensions)]
+        self.foldingModesCheckBox = [i for i in range(dimensions)]
+        self.minAliasingPullDowns = [i for i in range(dimensions)]
+        self.maxAliasingPullDowns = [i for i in range(dimensions)]
 
         row = 2
         Label(self, text="Axis Code ", grid=(row, 0), vAlign='t', hAlign='l')
@@ -793,7 +793,7 @@ class DimensionsTab(Widget):
         Label(self, text="Second cursor offset (Hz) ", grid=(row, 0), hAlign='l')
 
         row += 1
-        Label(self, text="Spectrum inverted in aliasing dimension ", grid=(row, 0), hAlign='l')
+        Label(self, text="Dimension is folded", grid=(row, 0), hAlign='l')
 
         row += 1
         Label(self, text="Maximum displayed aliasing ", grid=(row, 0), hAlign='l')
@@ -886,33 +886,38 @@ class DimensionsTab(Widget):
 
             row += 1
             fModes = spectrum.foldingModes
+            dd = {'circular': False, 'mirror': True, None: False}
             self.foldingModesCheckBox[i] = CheckBox(self, grid=(row, i + 1), vAlign='t')
-            self.foldingModesCheckBox[i].setChecked(fModes[i] if fModes[i] is not None else False)
+            self.foldingModesCheckBox[i].setChecked(dd[fModes[i]])
+
+            self.foldingModesCheckBox[i].clicked.connect(partial(self._queueSetFoldingModes, self.foldingModesCheckBox[i].isChecked, i))
 
             # pullDown for min/max aliasing
-            aliasLim = spectrum.aliasingLimits
-
-            # min aliasing
-            row += 1
-            aliasRange = list(range(-MAXALIASINGRANGE, MAXALIASINGRANGE+1))
-            self.minAliasingPullDowns[i] = PulldownList(self, grid=(row, i + 1), vAlign='t',
-                                                        texts=[str(tt) for tt in aliasRange])
-            if aliasLim[i][0] in aliasRange:
-                index = aliasRange.index(aliasLim[i][0])
-                self.minAliasingPullDowns[i].setIndex(index)
-
-            self.minAliasingPullDowns[i].currentIndexChanged.connect(partial(self._queueSetMinAliasing, self.minAliasingPullDowns[i].getText, i))
+            aliasLim = spectrum.aliasingRange
+            aliasMaxRange = list(range(MAXALIASINGRANGE, -1, -1))
+            aliasMinRange = list(range(0, -MAXALIASINGRANGE-1, -1))
+            aliasMaxText = [str(aa) for aa in aliasMaxRange]
+            aliasMinText = [str(aa) for aa in aliasMinRange]
 
             # max aliasing
             row += 1
-            aliasRange = list(range(-MAXALIASINGRANGE, MAXALIASINGRANGE+1))
             self.maxAliasingPullDowns[i] = PulldownList(self, grid=(row, i + 1), vAlign='t',
-                                                        texts=[str(tt) for tt in aliasRange])
-            if aliasLim[i][1] in aliasRange:
-                index = aliasRange.index(aliasLim[i][1])
+                                                        texts=aliasMaxText)
+            if aliasLim[i][1] in aliasMaxRange:
+                index = aliasMaxRange.index(aliasLim[i][1])
                 self.maxAliasingPullDowns[i].setIndex(index)
 
             self.maxAliasingPullDowns[i].currentIndexChanged.connect(partial(self._queueSetMaxAliasing, self.maxAliasingPullDowns[i].getText, i))
+
+            # min aliasing
+            row += 1
+            self.minAliasingPullDowns[i] = PulldownList(self, grid=(row, i + 1), vAlign='t',
+                                                        texts=aliasMinText)
+            if aliasLim[i][0] in aliasMinRange:
+                index = aliasMinRange.index(aliasLim[i][0])
+                self.minAliasingPullDowns[i].setIndex(index)
+
+            self.minAliasingPullDowns[i].currentIndexChanged.connect(partial(self._queueSetMinAliasing, self.minAliasingPullDowns[i].getText, i))
 
 
 
@@ -923,7 +928,7 @@ class DimensionsTab(Widget):
         self.preferredAxisOrderPulldown = PulldownListCompoundWidget(self, labelText="Preferred Axis Order",
                                                              grid=(row, 0), gridSpan=(1,dimensions+1), vAlign='t',
                                                             callback=self._setSpectrumOrdering)
-        self.preferredAxisOrderPulldown.setPreSelect(self._fillPreferredWidget)
+        self.preferredAxisOrderPulldown.setPreSelect(self._fillPreferredWidgetFromAxisTexts)
         self._fillPreferredWidget()
 
         row += 1
@@ -943,6 +948,29 @@ class DimensionsTab(Widget):
             # add permutations for the axes
             axisPerms = permutations([axisCode for axisCode in self.spectrum.axisCodes])
             axisOrder = tuple(permutations(list(range(len(self.spectrum.axisCodes)))))
+            ll += ["".join(ax for ax in perm) for perm in axisPerms]
+
+        self.preferredAxisOrderPulldown.pulldownList.setData(ll)
+
+        if specOrder is not None and self.mainWindow:
+
+            specIndex = axisOrder.index(specOrder)+1
+            self.preferredAxisOrderPulldown.setIndex(specIndex)
+
+    def _fillPreferredWidgetFromAxisTexts(self):
+        """Fill the pullDown with the currently available permutations of the axis codes
+        """
+        specOrder = tuple(self.spectrum.preferredAxisOrdering) if self.spectrum.preferredAxisOrdering is not None else None
+
+        axisCodeTexts = tuple([ss.text() for ss in self.axisCodes])
+        ll = ['<None>']
+        axisPerms = []
+        axisOrder = []
+        if self.mainWindow:
+
+            # add permutations for the axes
+            axisPerms = permutations([axisCode for axisCode in axisCodeTexts])
+            axisOrder = tuple(permutations(list(range(len(axisCodeTexts)))))
             ll += ["".join(ax for ax in perm) for perm in axisPerms]
 
         self.preferredAxisOrderPulldown.pulldownList.setData(ll)
@@ -1004,6 +1032,9 @@ class DimensionsTab(Widget):
         self._changes['AxisCodes{}'.format(dim)] = partial(self._setAxisCodes,
                                                            self.spectrum, dim, valueGetter())
 
+        # repopulate the preferred axis order pulldown
+        self._fillPreferredWidgetFromAxisTexts()
+
     def _setAxisCodes(self, spectrum, dim, value):
         axisCodes = list(spectrum.axisCodes)
         axisCodes[dim] = str(value)
@@ -1053,26 +1084,52 @@ class DimensionsTab(Widget):
     def _queueSetMinAliasing(self, valueGetter, dim):
         self._changes['minAliasing{}'.format(dim)] = partial(self._setMinAliasing,
                                                               self.spectrum, dim, valueGetter())
+        minValue = int(valueGetter())
+        maxValue = int(self.maxAliasingPullDowns[dim].getText())
+        if minValue > maxValue:
+            self.maxAliasingPullDowns[dim].select(str(minValue))
 
     def _setMinAliasing(self, spectrum, dim, value):
-        alias = list(spectrum.aliasingLimits)
+        alias = list(spectrum.aliasingRange)
+        value = int(value)
+        
         alias[dim] = (value, max(alias[dim][1], value))
-        spectrum.aliasingLimits = tuple(alias)
+        spectrum.aliasingRange = tuple(alias)
 
-        self.pythonConsole.writeConsoleCommand("spectrum.aliasingLimits = {0}".format(tuple(alias)), spectrum=spectrum)
-        self._writeLoggingMessage("spectrum.aliasingLimits = {0}".format(tuple(alias)))
+        self.pythonConsole.writeConsoleCommand("spectrum.aliasingRange = {0}".format(tuple(alias)), spectrum=spectrum)
+        self._writeLoggingMessage("spectrum.aliasingRange = {0}".format(tuple(alias)))
 
     def _queueSetMaxAliasing(self, valueGetter, dim):
         self._changes['maxAliasing{}'.format(dim)] = partial(self._setMaxAliasing,
                                                              self.spectrum, dim, valueGetter())
+        maxValue = int(valueGetter())
+        minValue = int(self.minAliasingPullDowns[dim].getText())
+        if maxValue < minValue:
+            self.minAliasingPullDowns[dim].select(str(maxValue))
 
     def _setMaxAliasing(self, spectrum, dim, value):
-        alias = list(spectrum.aliasingLimits)
+        alias = list(spectrum.aliasingRange)
+        value = int(value)
         alias[dim] = (min(alias[dim][0], value), value)
-        spectrum.aliasingLimits = tuple(alias)
+        spectrum.aliasingRange = tuple(alias)
 
-        self.pythonConsole.writeConsoleCommand("spectrum.aliasingLimits = {0}".format(tuple(alias)), spectrum=spectrum)
+        self.pythonConsole.writeConsoleCommand("spectrum.aliasingRange = {0}".format(tuple(alias)), spectrum=spectrum)
         self._writeLoggingMessage("spectrum.aliasingLimits = {0}".format(tuple(alias)))
+
+
+    def _queueSetFoldingModes(self, valueGetter, dim):
+        self._changes['foldingModes{}'.format(dim)] = partial(self._setFoldingModes,
+                                                             self.spectrum, dim, valueGetter())
+
+    def _setFoldingModes(self, spectrum, dim, value):
+        dd = {True: 'mirror', False: 'circular', None: None}
+
+        folding = list(spectrum.foldingModes)
+        folding[dim] = dd[bool(value)]
+        spectrum.foldingModes = tuple(folding)
+
+        self.pythonConsole.writeConsoleCommand("spectrum.foldingModes = {0}".format(tuple(folding)), spectrum=spectrum)
+        self._writeLoggingMessage("spectrum.foldingModes = {0}".format(tuple(folding)))
 
 
 class ContoursTab(Widget):

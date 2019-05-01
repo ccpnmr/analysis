@@ -68,6 +68,9 @@ class SetPeakAliasingPopup(CcpnDialog):
         spectrumFrame = Frame(self, setLayout=True, showBorder=False, grid=(row, 0), gridSpan=(1,2))
 
         specRow = 0
+        aliasRange = list(range(MAXALIASINGRANGE, -MAXALIASINGRANGE-1, -1))
+        aliasText = [str(aa) for aa in aliasRange]
+
         for peak in self.current.peaks:
 
             if peak.peakList.spectrum not in self.spectra:
@@ -92,7 +95,7 @@ class SetPeakAliasingPopup(CcpnDialog):
                 self.spectraPulldowns[spectrum] = []
                 Label(spectrumFrame, text=' aliasing:', grid=(specRow, 1))
                 for dim in range(dims):
-                    self.spectraPulldowns[spectrum].append(PulldownList(spectrumFrame, texts=[str(tt) for tt in range(-MAXALIASINGRANGE, MAXALIASINGRANGE+1)],
+                    self.spectraPulldowns[spectrum].append(PulldownList(spectrumFrame, texts=aliasText,
                                                            grid=(specRow, dim+2)))  #, index=DEFAULTALIASING))
                 specRow += 1
 

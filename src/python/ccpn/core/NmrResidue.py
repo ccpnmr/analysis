@@ -1501,7 +1501,6 @@ def _fetchNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None
 # del _newNmrResidue
 # NmrChain.fetchNmrResidue = _fetchNmrResidue
 
-
 def _renameNmrResidue(self: Project, apiResonanceGroup: ApiResonanceGroup):
     """Reset pid for NmrResidue and all offset NmrResidues"""
     nmrResidue = self._data2Obj.get(apiResonanceGroup)
@@ -1509,6 +1508,9 @@ def _renameNmrResidue(self: Project, apiResonanceGroup: ApiResonanceGroup):
     for xx in nmrResidue.offsetNmrResidues:
         xx._finaliseAction('rename')
 
+# 20190501:ED haven't investigated this properly, but think all these can be removed
+# and placed into _finaliseAction, I've already written this and changed the renameObject accordingly
+# but not tested fully
 
 # Notifiers:
 #NBNB TBD We must make Resonance.ResonanceGroup 1..1 when we move beyond transition model

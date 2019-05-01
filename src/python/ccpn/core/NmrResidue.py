@@ -1510,7 +1510,7 @@ def _renameNmrResidue(self: Project, apiResonanceGroup: ApiResonanceGroup):
 
 # 20190501:ED haven't investigated this properly, but think all these can be removed
 # and placed into _finaliseAction, I've already written this and changed the renameObject accordingly
-# but not tested fully
+# but not tested fully - can possibly just remove the offsetNmrResidue._finaliseAction for the minute
 
 # Notifiers:
 #NBNB TBD We must make Resonance.ResonanceGroup 1..1 when we move beyond transition model

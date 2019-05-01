@@ -71,7 +71,7 @@ def navigateToPositionInStrip(strip, positions: typing.List[float], axisCodes: t
         except ValueError as e:
             continue
         if len(positions) > ii:  # this used to say 1 rather than ii (coupled with the else below)
-            if positions[ii]:
+            if positions[ii]:       # and strip.orderedAxes[stripAxisIndex]:
                 strip.orderedAxes[stripAxisIndex].position = positions[ii]
 
         #else: # what in the world is the case this is trying to deal with??
@@ -159,12 +159,18 @@ def matchAxesAndNmrAtoms(strip: GuiStrip, nmrAtoms: typing.List[NmrAtom]):
     shiftDict = {}
     shiftList = strip.spectra[0].chemicalShiftList
     for axis in strip.orderedAxes:
-        shiftDict[axis.code] = []
-        for atom in nmrAtoms:
-            if atom.isotopeCode == commonUtil.name2IsotopeCode(axis.code):
-                shift = shiftList.getChemicalShift(atom.id)
-                if shift is not None and isPositionWithinfBounds(strip, shift, axis):
-                    shiftDict[axis.code].append(shift)
+
+        # axis may not exist in Nd
+        if axis:
+            shiftDict[axis.code] = []
+            for atom in nmrAtoms:
+                if atom.isotopeCode == commonUtil.name2IsotopeCode(axis.code):
+                    shift = shiftList.getChemicalShift(atom.id)
+                    if shift is not None and isPositionWithinfBounds(strip, shift, axis):
+                        shiftDict[axis.code].append(shift)
+
+        else:
+            raise RuntimeError('strip %s contains undefined axes' % str(strip))
 
     return shiftDict
 
@@ -217,7 +223,7 @@ def navigateToNmrAtomsInStrip(strip: GuiStrip, nmrAtoms: typing.List[NmrAtom], w
 
     shiftDict = matchAxesAndNmrAtoms(strip, nmrAtoms)
     # atomPositions = shiftDict[strip.axisOrder[2]]
-    atomPositions = [[x.value for x in shiftDict[axisCode]] for axisCode in strip.axisOrder]
+    atomPositions = [[x.value for x in shiftDict[axisCode]] for axisCode in strip.axisOrder if axisCode in shiftDict]
     #print('shiftDict>>', shiftDict)
     #print('atomPositions', atomPositions)
 

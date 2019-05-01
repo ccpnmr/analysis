@@ -891,7 +891,8 @@ GuiTable::item::selected {
                         if hasattr(obj, 'pid'):
                             obj.delete()
 
-        self.clearSelection()
+                self.clearSelection()
+                return True
 
     def refreshTable(self):
         self.setTableFromDataFrameObject(self._dataFrameObject)

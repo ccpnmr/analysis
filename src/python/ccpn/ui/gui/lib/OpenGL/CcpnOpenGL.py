@@ -2761,12 +2761,14 @@ class CcpnGLWidget(QOpenGLWidget):
 
         for specView in self._ordering:
             spec = specView.spectrum
-            pIndex = self._spectrumSettings[specView][GLDefs.SPECTRUM_POINTINDEX]
 
-            if spec.isotopeCodes[pIndex[0]] == spec.isotopeCodes[pIndex[1]]:
-                self._matchingIsotopeCodes = True
-                break
+            # inside the paint event, so sometimes specView may not exist
+            if specView in self._spectrumSettings:
+                pIndex = self._spectrumSettings[specView][GLDefs.SPECTRUM_POINTINDEX]
 
+                if spec.isotopeCodes[pIndex[0]] == spec.isotopeCodes[pIndex[1]]:
+                    self._matchingIsotopeCodes = True
+                    break
 
         # build the axes
         self.axisLabelling, self.labelsChanged = self._buildAxes(self.gridList[0], axisList=[0, 1],

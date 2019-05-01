@@ -36,7 +36,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGro
 from ccpnmodel.ccpncore.lib.Constants import defaultNmrChainCode
 from ccpn.core import _importOrder
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, renameObjectNoBlanking, undoBlock
+from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, renameObject, renameObjectNoBlanking, undoBlock
 from ccpn.util.Logging import getLogger
 
 
@@ -1128,8 +1128,28 @@ class NmrResidue(AbstractWrapperObject):
     def _reverseChainForDelete(self, apiNmrChain):
         """Reverse the chain.
         """
-        print('>>>FLIP CHAIN')
         apiNmrChain.__dict__['mainResonanceGroups'].reverse()
+
+    # def _finaliseAction(self, action: str):
+    #     """Subclassed to handle associated ChemicalShift instances
+    #     """
+    #     super()._finaliseAction(action=action)
+    #     # propagate the rename to associated ChemicalShift instances
+    #     if action == 'rename':
+    #         for cs in self.chemicalShifts:
+    #             cs._finaliseAction(action=action)
+
+    # nmrResidue._finaliseAction('rename')
+    # for xx in nmrResidue.offsetNmrResidues:
+    #     xx._finaliseAction('rename')
+
+    def _finaliseAction(self, action: str):
+        """Subclassed to handle associated offsetNMrResidues
+        """
+        super()._finaliseAction(action=action)
+        if action in ['rename']:
+            for xx in self.offsetNmrResidues:
+                xx._finaliseAction('rename')
 
     def _delete(self):
         """Delete object, with all contained objects and underlying data.
@@ -1199,7 +1219,8 @@ class NmrResidue(AbstractWrapperObject):
 
         oldName = '.'.join((apiResonanceGroup.sequenceCode, apiResonanceGroup.residueType or ''))
 
-        with renameObjectNoBlanking(self) as addUndoItem:
+        with renameObject(self) as addUndoItem:
+        # with renameObjectNoBlanking(self) as addUndoItem:
             apiResonanceGroup.sequenceCode = sequenceCode
             apiResonanceGroup.resetResidueType(residueType)
 

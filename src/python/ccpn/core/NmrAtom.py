@@ -331,7 +331,9 @@ class NmrAtom(AbstractWrapperObject):
                 cs._finaliseAction(action=action)
 
     def _setIsotopeCode(self, value):
-        self._wrappedData.isotopeCode = value
+        # value must be defined, if not set then can set to arbitrary value '?'
+        # this means it can still be set at any isotopeCode later, otherwise need to undo or create new nmrAtom
+        self._wrappedData.isotopeCode = value if value else '?'
 
     @logCommand(get='self')
     def rename(self, value: str = None):
@@ -351,7 +353,7 @@ class NmrAtom(AbstractWrapperObject):
 
             else:
                 isotopeCode = self._wrappedData.isotopeCode
-                newIsotopeCode = name2IsotopeCode(value)
+                newIsotopeCode = name2IsotopeCode(value)            # this could be None for undefined
                 if newIsotopeCode is not None:
                     if isotopeCode == '?':
                         self._wrappedData.isotopeCode = newIsotopeCode

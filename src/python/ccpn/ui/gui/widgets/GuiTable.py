@@ -66,7 +66,7 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.util.Common import makeIterableList
 from functools import partial
-from collections import OrderedDict
+from ccpn.util.OrderedSet import OrderedSet
 
 from collections import OrderedDict
 from ccpn.util.Logging import getLogger
@@ -871,8 +871,20 @@ GuiTable::item::selected {
         selected = self.getSelectedObjects()
         if selected:
             n = len(selected)
+
+            # make a list of the types of objects to delete
+            objNames = OrderedSet()
+            for obj in selected:
+                if hasattr(obj, 'pid'):
+                    objNames.add('%s%s' % (obj.className, '' if n == 1 else 's'))
+            objStr = ', '.join(objNames)
+
+            # put into the dialog message
             title = 'Delete Item%s' % ('' if n == 1 else 's')
-            msg = 'Delete %sselected item%s from the project?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
+            if objStr:
+                msg = 'Delete %s %s from the project?' % ('' if n == 1 else '%d' % n, objStr)
+            else:
+                msg = 'Delete %sselected item%s from the project?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
             if MessageDialog.showYesNo(title, msg):
 
                 if hasattr(selected[0], 'project'):

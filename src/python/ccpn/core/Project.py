@@ -345,7 +345,8 @@ class Project(AbstractWrapperObject):
         """undo stack for Project. Implementation attribute"""
         return self._wrappedData.root._undo
 
-    def _resetUndo(self, maxWaypoints: int = 20, maxOperations: int = 10000,
+    def _resetUndo(self, maxWaypoints: int = Undo.MAXUNDOWAYPOINTS,
+                   maxOperations: int = Undo.MAXUNDOOPERATIONS,
                    debug: bool = False, application=None):
         """Reset undo stack, using passed-in parameters.
         NB setting either parameter to 0 removes the undo stack."""

@@ -34,52 +34,18 @@ from collections import deque
 from ccpn.util.Logging import getLogger
 
 
-# def deleteAll(objects):
-#   """Delete each object in objects - utility for undoing multi-object creation functions"""
-#   for obj in objects:
-#     obj.delete()
+MAXUNDOWAYPOINTS = 3
+MAXUNDOOPERATIONS = 10000
 
-
-# def _getApiObjectTree(apiObject) -> tuple:
-#     """Retrieve the apiObject tree contained by this object
-#     CCPN Internal    should be in the model
-#     """
-#     #EJB 20181127: taken from memops.Implementation.DataObject.delete
-#     #                   should be in the model??
-#
-#     from ccpn.util.OrderedSet import OrderedSet
-#
-#     apiObjectlist = OrderedSet()
-#     # objects still to be checked
-#     objsToBeChecked = list()
-#     # counter keyed on (obj, roleName) for how many objects at other end of link
-#     linkCounter = {}
-#
-#     # topObjects to check if modifiable
-#     topObjectsToCheck = set()
-#
-#     objsToBeChecked.append(apiObject)
-#     while len(objsToBeChecked) > 0:
-#         obj = objsToBeChecked.pop()
-#         obj._checkDelete(apiObjectlist, objsToBeChecked, linkCounter, topObjectsToCheck)  # This builds the list/set
-#
-#     for topObjectToCheck in topObjectsToCheck:
-#         if (not (topObjectToCheck.__dict__.get('isModifiable'))):
-#             raise ValueError("""%s.delete:
-#        Storage not modifiable""" % apiObject.qualifiedName
-#                            + ": %s" % (topObjectToCheck,)
-#                            )
-#
-#     return tuple(apiObjectlist)
 
 def _deleteAllApiObjects(objsToBeDeleted):
     """Delete all API objects in collection, together.
     Does NOT look for additional deletes or do any checks. Programmer beware!!!
-    Does NOT do undo handling, as it is designed to be used within the Undo machinery"""
+    Does NOT do undo handling, as it is designed to be used within the Undo machinery
+    """
 
-    ##CCPNINTERNAL
-
-    # NBNB USee with EXTREME CARE, and make sure you get ALL API objects being created
+    # CCPNINTERNAL
+    # NBNB Use with EXTREME CARE, and make sure you get ALL API objects being created
 
     for obj in objsToBeDeleted:
         if (obj.__dict__.get('isDeleted')):
@@ -95,7 +61,7 @@ def _deleteAllApiObjects(objsToBeDeleted):
         # objsToBeDeleted is passed in so that the references to the children of object are severed
         obj._singleDelete(objsToBeDeleted)
 
-    # doNotifies
+    # do Notifiers
     for obj in objsToBeDeleted:
         for notify in obj.__class__._notifies.get('delete', ()):
             notify(obj)
@@ -112,7 +78,7 @@ def no_op():
     return
 
 
-def resetUndo(memopsRoot, maxWaypoints=20, maxOperations=10000,
+def resetUndo(memopsRoot, maxWaypoints=MAXUNDOWAYPOINTS, maxOperations=MAXUNDOOPERATIONS,
               debug: bool = False, application=None):
     """Set or reset undo stack, using passed-in parameters.
     NB setting either parameter to 0 removes the undo stack."""
@@ -137,7 +103,7 @@ class Undo(deque):
     """
 
     # TODO: get rid of debug and use logging function instead
-    def __init__(self, maxWaypoints=20, maxOperations=10000, debug=False, application=None):
+    def __init__(self, maxWaypoints=MAXUNDOWAYPOINTS, maxOperations=MAXUNDOOPERATIONS, debug=False, application=None):
         """Create Undo object with maximum stack length maxUndoCount"""
 
         self.maxWaypoints = maxWaypoints
@@ -147,11 +113,7 @@ class Undo(deque):
         self._blocked = False  # Block/unblock switch - internal use only
         self._undoItemBlockingLevel = 0  # Blocking level - modify with increase/decreaseBlocking only
         self._waypointBlockingLevel = 0  # Waypoint blocking - modify with increase/decreaseWaypointBlocking/ only
-
-        # self._checkNewItemAddedAfterWaypoint = False
-        # self._newWaypointAdded = False
-        # self._newItemAdded = False
-        # self._lastWaypoints = {}
+        self._newItemCount = 0  # the number of new items that have been added since the last new waypoint
 
         if maxWaypoints:
             self.newWaypoint()  # DO NOT CHANGE THIS ONE
@@ -198,6 +160,7 @@ class Undo(deque):
                          self._blocked,
                          self.undoItemBlocking,
                          len(self),
+                         self._newItemCount,
                          self[-1],
                          [(undoFunc[0].__name__, undoFunc[1].__name__) for undoFunc in self],
                          [undoFunc[0].__name__ for undoFunc in self],
@@ -210,6 +173,7 @@ class Undo(deque):
                          self._blocked,
                          self.undoItemBlocking,
                          len(self),
+                         self._newItemCount,
                          None, None, None, None)
         return undoState
 
@@ -230,79 +194,39 @@ class Undo(deque):
         if self.waypointBlocking:
             self._waypointBlockingLevel -= 1
 
-    # def _undoNewWaypoint(self):
-    #     """Remove new waypoint if nothing has been added to the stack
-    #     """
-    #     if self._lastWaypoints:
-    #         print('>>>removing redundant waypoint')
-    #         self.waypoints = self._lastWaypoints['waypoints']
-    #         self.nextIndex = self._lastWaypoints['nextIndex']
-    #
-    #         while self._lastWaypoints['popLeft']:
-    #             _popLeftItem = self._lastWaypoints['popLeft'].pop()
-    #             self.insert(0, _popLeftItem)
-    #
-    #         # remove to get rid of any memory leaks
-    #         self._lastWaypoints = {}
-    #
-    # def _checkWaypoints(self):
-    #     """Check whether we can rollback the undo stack
-    #     """
-    #     if self._blocked:
-    #         return
-    #
-    #     if self._newItemAdded:
-    #         print('>>>_checkWaypoints - new items have been added to the waypoint')
-    #     else:
-    #         self._undoNewWaypoint()
-
     def newWaypoint(self):
-        """Start new waypoint"""
+        """Start new waypoint
+        """
         if self.maxWaypoints < 1:
-            raise ValueError("Attempt to set waypoint on Undo object that does not allow them ")
+            raise ValueError("Attempt to set waypoint on Undo object that does not allow them")
 
         waypoints = self.waypoints
+
+        if self._blocked or self._undoItemBlockingLevel or self.waypointBlocking:  # ejb - added self._blocked 9/6/17
+            return
+
+        # set the number of items added to the undo deque since the new waypoint was created
+        self._newItemCount = 0
 
         if self.nextIndex < 1:
             return
 
-        elif self._blocked or self._undoItemBlockingLevel or self.waypointBlocking:  # ejb - added self._blocked 9/6/17
-            return
-
-        elif waypoints and waypoints[-1] == self.nextIndex - 1:  # don't need to add a new waypoint
+        if waypoints and waypoints[-1] == self.nextIndex - 1:  # don't need to add a new waypoint
             return  # if is the same as the last one
-
-        # print('>>> logging lastNewWaypoint')
-        # # remember the last waypoint list
-        # self._lastWaypoints = {'waypoints'           : list(waypoints),
-        #                        'nextIndex'           : self.nextIndex,
-        #                        'exceededMaxWaypoints': False,
-        #                        'popLeft'             : []}
-        # self._newItemAdded = False
 
         waypoints.append(self.nextIndex - 1)  # add the new waypoint to the end
 
         # if the list is too big then cull the first item
-
         if len(waypoints) > self.maxWaypoints:
             nRemove = waypoints[0]
             self.nextIndex -= nRemove
             for ii in range(nRemove):
                 _popLeftItem = self.popleft()
 
-            #     # remember for empty undo items stacking
-            #     self._lastWaypoints['popLeft'].append(_popLeftItem)
-            # self._lastWaypoints['exceededMaxWaypoints'] = True
-
             del waypoints[0]
             for ii, junk in enumerate(waypoints):
                 waypoints[ii] -= nRemove
 
-            # need to remove waypoints from the left that are negative
-            # while waypoints and waypoints[0]<0:
-            #   del waypoints[0]
-
-        # waypoints.append(self.nextIndex-1)
 
     def _wrappedPartial(self, func, *args, **kwargs):
         partial_func = partial(func, *args, **kwargs)
@@ -323,12 +247,9 @@ class Undo(deque):
         for n in range(len(self) - self.nextIndex):
             self.pop()
 
-        # add new undo/redo methods
+        # add new undo/redo methods to the deque - keep a count
         self.append((undoPartial, redoPartial))
-
-        # if self._checkNewItemAddedAfterWaypoint:
-        #     self._newItemAdded = True
-        #     self._checkNewItemAddedAfterWaypoint = False
+        self._newItemCount += 1
 
         # fix waypoints:
         ll = self.waypoints
@@ -378,11 +299,10 @@ class Undo(deque):
             redoCall = self._wrappedPartial(redoMethod, *redoArgs)
         else:
             redoCall = self._wrappedPartial(redoMethod, *redoArgs, **redoKwargs)
-        self.append((undoCall, redoCall))
 
-        # if self._checkNewItemAddedAfterWaypoint:
-        #     self._newItemAdded = True
-        #     self._checkNewItemAddedAfterWaypoint = False
+        # add new undo/redo methods to the deque - keep a count
+        self.append((undoCall, redoCall))
+        self._newItemCount += 1
 
         # fix waypoints:
         ll = self.waypoints
@@ -401,50 +321,15 @@ class Undo(deque):
         else:
             self.nextIndex += 1
 
-    # def newItem(self, undoMethod, undoData, redoMethod, redoData=None):
-    #   """Add item to the undo stack.
-    #      Note that might not know redoData until after we do undo.
-    #      NBNB NO, we should know, so resetting facility disabled. Rasmus
-    #   """
-    #
-    #   if self._blocked:
-    #     return
-    #
-    #   # clear out redos that are no longer going to be doable
-    #   for n in range(len(self)-self.nextIndex):
-    #     self.pop()
-    #
-    #   # add new data
-    #   self.append((undoMethod, undoData, redoMethod, redoData))
-    #
-    #   # fix waypoints:
-    #   ll = self.waypoints
-    #   while ll and ll[-1] >= self.nextIndex:
-    #     ll.pop()
-    #
-    #   # correct for maxOperations
-    #   if len(self) > self.maxOperations:
-    #     self.popleft()
-    #     ll = self.waypoints
-    #     if ll:
-    #       for n,val in enumerate(ll):
-    #         ll[n] = val - 1
-    #       if ll[0] < 0:
-    #         del ll[0]
-    #   else:
-    #     self.nextIndex += 1
-
     def undo(self):
         """Undo one operation - or one waypoint if waypoints are set
 
-        For now errors are handled by printing a warning and clearing the undo object"""
+        For now errors are handled by printing a warning and clearing the undo object
+        """
 
         # TBD: what should we do if undoMethod() throws an exception?
 
-        # print('@~@~ Undo.undo', self.nextIndex, self.maxWaypoints, self.waypoints, self._debug)
-
         if self.nextIndex == 0:
-            # print ('>>> NOTHING TO UNDO')
             return
 
         elif self.maxWaypoints:
@@ -458,7 +343,6 @@ class Undo(deque):
         else:
             undoTo = max(self.nextIndex - 2, -1)
 
-        # print('@~@~ undoTo', self.nextIndex-1, undoTo)
         # block addition of items while operating
         self._blocked = True
         from ccpn.core.lib.ContextManagers import undoBlock
@@ -468,8 +352,6 @@ class Undo(deque):
                 undoCall = redoCall = None
                 for n in range(self.nextIndex - 1, undoTo, -1):
                     undoCall, redoCall = self[n]
-                    # if self._debug:
-                    #   print ("undoing", undoCall)
 
                     if undoCall:
                         undoCall()
@@ -490,12 +372,10 @@ class Undo(deque):
     def redo(self):
         """Redo one waypoint - or one operation if waypoints are not set.
 
-        For now errors are handled by printing a warning and clearing the undo object"""
-
-        # TODO: what should we do if redoMethod() throws an exception?
+        For now errors are handled by printing a warning and clearing the undo object
+        """
 
         if self.nextIndex >= len(self):
-            # print ('>>> NOTHING TO REDO')
             return
 
         elif self.maxWaypoints:
@@ -516,14 +396,8 @@ class Undo(deque):
         try:
             with undoBlock():
                 for n in range(self.nextIndex, redoTo + 1):
-                    # undoMethod, undoData, redoMethod, redoData = self[n]
-                    # if redoData is None:
-                    #   redoMethod()
-                    # else:, axis=1, inplace=True
-                    #   redoMethod(redoData)
                     undoCall, redoCall = self[n]
-                    # if self._debug:
-                    #   print ("@~@~ redoing", redoCall)
+
                     if redoCall:
                         redoCall()
                 self.nextIndex = redoTo + 1
@@ -541,9 +415,8 @@ class Undo(deque):
             self._blocked = False
 
     def clear(self):
-        """Clear and reset undo object """
-        # if self._debug:
-        #   print ('@~@~ CLEAR undo')
+        """Clear and reset undo object
+        """
         self.nextIndex = 0
         self.waypoints.clear()
         self._blocked = False
@@ -551,12 +424,32 @@ class Undo(deque):
         deque.clear(self)
 
     def canUndo(self) -> bool:
-        """True if an undo operation can be performed?"""
+        """True if an undo operation can be performed
+        """
         return self.nextIndex > 0
 
     def canRedo(self) -> bool:
-        """True if a redo operation can be performed"""
+        """True if a redo operation can be performed
+        """
         return self.nextIndex < len(self)
 
     def numItems(self):
+        """Return the number of undo items currently on the undo deque
+        """
         return len(self)
+
+    @property
+    def newItemsAdded(self):
+        """Return the number of new items that have been added to the undo deque since
+        the last new waypoint was created
+        """
+        return self._newItemCount
+
+    def clearRedoItems(self):
+        """Clear the items above the current next index, if there has been an error adding items
+        """
+        # remove unwanted items from the top of the undo deque
+        while self.numItems() > self.nextIndex:
+            self.pop()
+
+        self._newItemCount = 0

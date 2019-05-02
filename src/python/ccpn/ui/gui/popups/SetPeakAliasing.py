@@ -31,13 +31,12 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
-from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.core.Spectrum import MAXALIASINGRANGE
+from ccpn.core.lib.ContextManagers import undoBlock, undoStackBlocking
 
 DEFAULTALIASING = MAXALIASINGRANGE
 COLWIDTH = 140
@@ -185,15 +184,11 @@ class SetPeakAliasingPopup(CcpnDialog):
         """
         When ok button pressed: update and exit
         """
-        applyAccept = False
         undo = self.project._undo
-        oldUndo = undo.numItems()
 
-        from ccpn.core.lib.ContextManagers import undoBlock, undoStackBlocking
-        from functools import partial
+        try:
+            with undoBlock():
 
-        with undoBlock():
-            try:
                 # add item here to redraw items
                 with undoStackBlocking() as addUndoItem:
                     addUndoItem(undo=self._refreshGLItems)
@@ -208,21 +203,24 @@ class SetPeakAliasingPopup(CcpnDialog):
                 with undoStackBlocking() as addUndoItem:
                     addUndoItem(redo=self._refreshGLItems)
 
-                applyAccept = True
-            except Exception as es:
-                showWarning(str(self.windowTitle()), str(es))
+                # redraw the items
+                self._refreshGLItems()
 
-        # redraw the items
-        self._refreshGLItems()
+        except Exception as es:
+            showWarning(str(self.windowTitle()), str(es))
 
-        if applyAccept is False:
             # should only undo if something new has been added to the undo deque
             # may cause a problem as some things may be set with the same values
             # and still be added to the change list, so only undo if length has changed
             errorName = str(self.__class__.__name__)
 
-            if oldUndo != undo.numItems():
-                self.project._undo.undo()
+            # if oldUndo != undo.numItems():
+            if undo.newItemsAdded:
+
+                # undo any valid items and clear the stack above the current undo point
+                undo.undo()
+                undo.clearRedoItems()
+
                 getLogger().debug('>>>Undo.%s._applychanges' % errorName)
             else:
                 getLogger().debug('>>>Undo.%s._applychanges nothing to remove' % errorName)

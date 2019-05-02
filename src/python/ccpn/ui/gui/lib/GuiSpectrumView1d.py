@@ -260,8 +260,8 @@ class GuiSpectrumView1d(GuiSpectrumView):
     #     pass
     #     # self.borderItem.setVisible(self._application.preferences.general.showSpectrumBorder and self.isVisible())
 
-    def update(self):
-        self.plot.curve.setData(self.data[0], self.data[1])
+    # def update(self):
+    #     self.plot.curve.setData(self.data[0], self.data[1])
 
     def refreshData(self):
         # self.spectrum._intensities = None  # UGLY, but need to force data to be reloaded

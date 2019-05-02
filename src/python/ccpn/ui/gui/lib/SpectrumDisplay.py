@@ -40,6 +40,36 @@ def navigateToCurrentPeakPosition(application):
                 navigateToPositionInStrip(strip, peak.position, peak.axisCodes)
 
 
+def navigateToCurrentNmrResiduePosition(application):
+    """
+
+    Takes the current nmrResidue and navigates (centres) to that position all strips and spectrum displays of the project.
+    Called by shortcut. For a more generic usage refer to:  "navigateToPositionInStrip"
+    instead
+    """
+
+    project = application.project
+    displays = project.spectrumDisplays
+    nmrResidue = application.current.nmrResidue
+
+    if len(application.current.nmrResidues) > 1:
+        getLogger().warning('More than one nmrResidue selected. Select only one for the "navigateToCurrentNmrResiduePosition" command.')
+        return
+
+    if len(displays) < 1:
+        getLogger().warning('No Displays where to navigate.')
+        return
+
+    if nmrResidue is None:
+        getLogger().warning('No nmrResidue selected.')
+        return
+
+    for display in displays:
+        for strip in display.strips:
+            if strip:
+                navigateToNmrResidueInStrip(display, strip, nmrResidue=nmrResidue)
+
+
 def makeStripPlot(spectrumDisplay: GuiSpectrumDisplay, nmrAtomPairs: List[List[NmrAtom]], autoWidth=True, widths=None):
     if not nmrAtomPairs:
         return

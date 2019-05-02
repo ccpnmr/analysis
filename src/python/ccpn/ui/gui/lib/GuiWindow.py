@@ -29,7 +29,7 @@ from PyQt5 import QtCore
 from ccpn.core.lib import AssignmentLib
 from ccpn.core.IntegralList import IntegralList
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.lib.SpectrumDisplay import navigateToCurrentPeakPosition
+from ccpn.ui.gui.lib.SpectrumDisplay import navigateToCurrentPeakPosition, navigateToCurrentNmrResiduePosition
 from ccpn.ui.gui import guiSettings
 from ccpn.util.Logging import getLogger
 from functools import partial
@@ -69,13 +69,9 @@ class GuiWindow():
         addShortCut("Del", self, partial(self.deleteSelectedItems), context=context)
         addShortCut("m, k", self, self.createMark, context=context)
         addShortCut("m, c", self, self.clearMarks, context=context)
-        # addShortCut("f, n", self, partial(navigateToNmrResidue, self._parent.project), context=context)
-        addShortCut("f, p", self,
-                    partial(navigateToCurrentPeakPosition, self.application),
-                    context=context)
-        addShortCut("c, a", self,
-                    partial(AssignmentLib.propagateAssignments, current=self.application.current),
-                    context=context)
+        addShortCut("f, n", self, partial(navigateToCurrentNmrResiduePosition, self.application), context=context)
+        addShortCut("f, p", self, partial(navigateToCurrentPeakPosition, self.application), context=context)
+        addShortCut("c, a", self, partial(AssignmentLib.propagateAssignments, current=self.application.current), context=context)
         addShortCut("c, z", self, self._clearCurrentPeaks, context=context)
         addShortCut("t, u", self, partial(self.traceScaleUp, self), context=context)
         addShortCut("t, d", self, partial(self.traceScaleDown, self), context=context)

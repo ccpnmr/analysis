@@ -89,7 +89,7 @@ def dialogErrorReport(self, undo, es):
 def handleDialogApply(self):
     """Context manager to wrap the apply button for dialogs
     Error trapping is contained inside the undoBlock, any error raised is placed in
-    the errorValue of the yielded object
+    the errorValue of the yielded object and a warning popup is raised
 
     e.g.
 
@@ -111,12 +111,17 @@ def handleDialogApply(self):
     try:
         with undoBlock():
 
+            # transfer control to the calling function
             error = errorContent()
             yield error
 
     except Exception as es:
 
-        # if an error occurs, report as a warning popup and return to the calling method
+        # if an error occurs, report as a warning popup and return error to the calling method
         dialogErrorReport(self, undo, es)
         error.errorValue = es
+
+        # re-raise the error if in debug mode
+        if self.application._isInDebugMode:
+            raise es
 

@@ -30,9 +30,9 @@ from ccpn.ui.gui.widgets.MessageDialog import MessageDialog
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.popups.Dialog import CcpnDialog
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+from ccpn.core.lib.ContextManagers import undoStackBlocking
 
 
 class PeakListPropertiesPopup(CcpnDialog):
@@ -106,6 +106,11 @@ class PeakListPropertiesPopup(CcpnDialog):
         colour = Colour.getSpectrumColour(value, defaultReturn='#')
         self.peakList.textColour = colour
 
+    def _refreshGLItems(self):
+        # emit a signal to rebuild all peaks and multiplets
+        self.GLSignals.emitEvent(targets=[self.peakList], triggers=[GLNotifier.GLPEAKLISTS,
+                                                                       GLNotifier.GLPEAKLISTLABELS])
+
     def _applyChanges(self):
         """
         The apply button has been clicked
@@ -114,49 +119,22 @@ class PeakListPropertiesPopup(CcpnDialog):
           If anything has been added to the undo queue then remove it with application.undo()
           repopulate the popup widgets
         """
-        while self.numUndos > 0:  # remove any previous undo from this popup
-            # self.application.undo()     # so only the last colour change is kept
-            self.project._undo.undo()  # this doesn't popup the undo progressManager
-            self.numUndos -= 1
+        with handleDialogApply(self) as error:
 
-        applyAccept = False
-        oldUndo = self.project._undo.numItems()
+            # add item here to redraw items
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(undo=self._refreshGLItems)
 
-        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+            self._changeColours()
 
-        GLSignals = GLNotifier(parent=self)
+            # add item here to redraw items
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(redo=self._refreshGLItems)
 
-        from ccpn.core.lib.ContextManagers import undoBlock
+            # redraw the items
+            self._refreshGLItems()
 
-        with undoBlock():
-            try:
-                self._changeColours()
-
-                # repaint
-                GLSignals.emitEvent(targets=[self.peakList], triggers=[GLNotifier.GLPEAKLISTS,
-                                                                       GLNotifier.GLPEAKLISTLABELS])
-
-                applyAccept = True
-            except Exception as es:
-                showWarning(str(self.windowTitle()), str(es))
-                if self.application._isInDebugMode:
-                    raise es
-
-        if applyAccept is False:
-            # should only undo if something new has been added to the undo deque
-            # may cause a problem as some things may be set with the same values
-            # and still be added to the change list, so only undo if length has changed
-            errorName = str(self.__class__.__name__)
-            if oldUndo != self.project._undo.numItems():
-                self.project._undo.undo()
-                getLogger().debug('>>>Undo.%s._applychanges' % errorName)
-            else:
-                getLogger().debug('>>>Undo.%s._applychanges nothing to remove' % errorName)
-
-            return False
-        else:
-            self.numUndos += 1
-            return True
+        return error.errorValue is None
 
     def _okButton(self):
         if self._applyChanges() is True:

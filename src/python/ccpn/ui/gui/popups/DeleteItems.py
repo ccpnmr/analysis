@@ -28,9 +28,9 @@ __date__ = "$Date: 9/05/2017 $"
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
-from ccpn.ui.gui.popups.Dialog import CcpnDialog, dialogErrorReport
+from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-from ccpn.core.lib.ContextManagers import undoBlock, undoStackBlocking
+from ccpn.core.lib.ContextManagers import undoStackBlocking
 
 
 class DeleteItemsPopup(CcpnDialog):
@@ -83,27 +83,21 @@ class DeleteItemsPopup(CcpnDialog):
         """
         When ok button pressed: delete and exit
         """
-        undo = self.project._undo
+        with handleDialogApply(self):
 
-        try:
-            with undoBlock():
+            # add item here to redraw items
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(undo=self._refreshGLItems)
 
-                # add item here to redraw items
-                with undoStackBlocking() as addUndoItem:
-                    addUndoItem(undo=self._refreshGLItems)
+            for delItem in self.deleteList:
+                if delItem[2].isChecked():
+                    self.project.deleteObjects(*delItem[1])
 
-                for delItem in self.deleteList:
-                    if delItem[2].isChecked():
-                        self.project.deleteObjects(*delItem[1])
+            # add item here to redraw items
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(redo=self._refreshGLItems)
 
-                # add item here to redraw items
-                with undoStackBlocking() as addUndoItem:
-                    addUndoItem(redo=self._refreshGLItems)
-
-                # redraw the items
-                self._refreshGLItems()
-
-        except Exception as es:
-            dialogErrorReport(self, undo, es)
+            # redraw the items
+            self._refreshGLItems()
 
         self.accept()

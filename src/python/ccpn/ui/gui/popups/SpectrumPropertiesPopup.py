@@ -44,7 +44,6 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.popups.ExperimentTypePopup import _getExperimentTypes
 from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString
-from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.util.Logging import getLogger
@@ -56,6 +55,8 @@ from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
+from ccpn.core.lib.ContextManagers import undoStackBlocking
 
 
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
@@ -158,15 +159,8 @@ class SpectrumPropertiesPopup(CcpnDialog):
         """
         tabs = (self._generalTab, self._dimensionsTab, self._contoursTab)
 
-        applyAccept = False
-        _undo = self.project._undo
-        oldUndo = _undo.numItems()
+        with handleDialogApply(self) as error:
 
-        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-
-        GLSignals = GLNotifier(parent=self)
-
-        with undoBlock():
             spectrumList = []
             for t in tabs:
                 if t is not None:
@@ -189,28 +183,14 @@ class SpectrumPropertiesPopup(CcpnDialog):
             for spec in spectrumList:
                 for specViews in spec.spectrumViews:
                     specViews.buildContours = True
+            _updateGl(self, spectrumList)
 
-            # repaint
-            GLSignals.emitPaintEvent()
-
-            applyAccept = True
-
-        if applyAccept is False:
-            # should only undo if something new has been added to the undo deque
-            # may cause a problem as some things may be set with the same values
-            # and still be added to the change list, so only undo if length has changed
-            errorName = str(self.__class__.__name__)
-            if oldUndo != self.project._undo.numItems():
-                self.project._undo.undo()
-                getLogger().debug('>>>Undo.%s._applychanges' % errorName)
-            else:
-                getLogger().debug('>>>Undo.%s._applychanges nothing to remove' % errorName)
-
-            # repopulate popup
+        if error.errorValue:
+            # repopulate popup on an error
             self._repopulate()
             return False
-        else:
-            return True
+
+        return True
 
     def _okButton(self):
         if self._applyChanges() is True:
@@ -1466,17 +1446,8 @@ class SpectrumDisplayPropertiesPopupNd(CcpnDialog):
           If anything has been added to the undo queue then remove it with application.undo()
           repopulate the popup widgets
         """
-        tabs = self._contoursTab
+        with handleDialogApply(self) as error:
 
-        applyAccept = False
-        _undo = self.project._undo
-        oldUndo = _undo.numItems()
-
-        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-
-        GLSignals = GLNotifier(parent=self)
-
-        with undoBlock():
             spectrumList = []
             for t in tabs:
                 if t is not None:
@@ -1499,28 +1470,14 @@ class SpectrumDisplayPropertiesPopupNd(CcpnDialog):
             for spec in spectrumList:
                 for specViews in spec.spectrumViews:
                     specViews.buildContours = True
+            _updateGl(self, spectrumList)
 
-            # repaint
-            GLSignals.emitPaintEvent()
-
-            applyAccept = True
-
-        if applyAccept is False:
-            # should only undo if something new has been added to the undo deque
-            # may cause a problem as some things may be set with the same values
-            # and still be added to the change list, so only undo if length has changed
-            errorName = str(self.__class__.__name__)
-            if oldUndo != self.project._undo.numItems():
-                self.project._undo.undo()
-                getLogger().debug('>>>Undo.%s._applychanges' % errorName)
-            else:
-                getLogger().debug('>>>Undo.%s._applychanges nothing to remove' % errorName)
-
+        if error.errorValue:
             # repopulate popup
             self._repopulate()
             return False
-        else:
-            return True
+
+        return True
 
     def _okButton(self):
         if self._applyChanges() is True:
@@ -1604,15 +1561,8 @@ class SpectrumDisplayPropertiesPopup1d(CcpnDialog):
         # ejb - error above, need to set the tabs explicitly
         tabs = self._generalTab
 
-        applyAccept = False
-        _undo = self.project._undo
-        oldUndo = _undo.numItems()
+        with handleDialogApply(self) as error:
 
-        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-
-        GLSignals = GLNotifier(parent=self)
-
-        with undoBlock():
             spectrumList = []
             for t in tabs:
                 if t is not None:
@@ -1635,28 +1585,14 @@ class SpectrumDisplayPropertiesPopup1d(CcpnDialog):
             for spec in spectrumList:
                 for specViews in spec.spectrumViews:
                     specViews.buildContours = True
+            _updateGl(self, spectrumList)
 
-            # repaint
-            GLSignals.emitPaintEvent()
-
-            applyAccept = True
-
-        if applyAccept is False:
-            # should only undo if something new has been added to the undo deque
-            # may cause a problem as some things may be set with the same values
-            # and still be added to the change list, so only undo if length has changed
-            errorName = str(self.__class__.__name__)
-            if oldUndo != self.project._undo.numItems():
-                self.project._undo.undo()
-                getLogger().debug('>>>Undo.%s._applychanges' % errorName)
-            else:
-                getLogger().debug('>>>Undo.%s._applychanges nothing to remove' % errorName)
-
+        if error.errorValue:
             # repopulate popup
             self._repopulate()
             return False
-        else:
-            return True
+
+        return True
 
     def _okButton(self):
         if self._applyChanges() is True:

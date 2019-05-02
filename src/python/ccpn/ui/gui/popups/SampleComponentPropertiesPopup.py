@@ -25,18 +25,18 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import time
 from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.MessageDialog import showInfo
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
-from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import concentrationUnits
+from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+from ccpn.core.lib.ContextManagers import undoStackBlocking
 
 SELECT = '> Select <'
 
@@ -370,56 +370,31 @@ class SampleComponentPopup(CcpnDialog):
           If anything has been added to the undo queue then remove it with application.undo()
           repopulate the popup widgets
         """
-        applyAccept = False
-        oldUndo = self.project._undo.numItems()
 
-        from ccpn.core.lib.ContextManagers import undoBlock
+        with handleDialogApply(self) as error:
 
-        with undoBlock():
-            try:
-                if self.newSampleComponentToCreate:
-                    self.sampleComponent = self.sample.newSampleComponent(
-                            name=str(self.nameComponentLineEdit.text()),
-                            labelling=str(self.labellingPulldownList.currentText()),
-                            role=str(self.typePulldownList.get()),
-                            concentration=float(self.concentrationLineEdit.text()),
-                            concentrationUnit=str(self.concentrationUnitPulldownList.get()),
-                            comment=str(self.commentLineEdit.text()))
-                else:
-                    for property, value in self._getCallBacksDict().items():
-                        # if value or type(value) is str and value is not 'None':
-                        property(value)
-
-                self.nameComponentLineEdit.setReadOnly(True)
-                self.labellingPulldownList.setEnabled(False)
-
-                applyAccept = True
-
-            except Exception as es:
-                if 'pre-existing object' in str(es):
-                    # this catches api trying to duplicate object
-                    applyAccept = True
-                else:
-                    showWarning(str(self.windowTitle()), str(es))
-                    if self.application._isInDebugMode:
-                        raise es
-
-        if applyAccept is False:
-            # should only undo if something new has been added to the undo deque
-            # may cause a problem as some things may be set with the same values
-            # and still be added to the change list, so only undo if length has changed
-            errorName = str(self.__class__.__name__)
-            if oldUndo != self.project._undo.numItems():
-                self.project._undo.undo()
-                getLogger().debug('>>>Undo.%s._applychanges' % errorName)
+            if self.newSampleComponentToCreate:
+                self.sampleComponent = self.sample.newSampleComponent(
+                        name=str(self.nameComponentLineEdit.text()),
+                        labelling=str(self.labellingPulldownList.currentText()),
+                        role=str(self.typePulldownList.get()),
+                        concentration=float(self.concentrationLineEdit.text()),
+                        concentrationUnit=str(self.concentrationUnitPulldownList.get()),
+                        comment=str(self.commentLineEdit.text()))
             else:
-                getLogger().debug('>>>Undo.%s._applychanges nothing to remove' % errorName)
+                for property, value in self._getCallBacksDict().items():
+                    # if value or type(value) is str and value is not 'None':
+                    property(value)
 
-            # repopulate popup
+            self.nameComponentLineEdit.setReadOnly(True)
+            self.labellingPulldownList.setEnabled(False)
+
+        if error.errorValue:
+            # repopulate popup on an error
             self._repopulate()
             return False
-        else:
-            return True
+
+        return True
 
     def _okButton(self):
         if self._applyChanges() is True:

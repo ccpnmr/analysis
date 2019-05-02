@@ -31,7 +31,7 @@ from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.popups.Dialog import CcpnDialog, dialogErrorReport
+from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.core.lib.ContextManagers import undoBlock, undoStackBlocking
 
@@ -168,29 +168,24 @@ class MultipletListPropertiesPopup(CcpnDialog):
           If anything has been added to the undo queue then remove it with application.undo()
           repopulate the popup widgets
         """
-        undo = self.project._undo
 
-        try:
-            with undoBlock():
-                # add item here to redraw items
-                with undoStackBlocking() as addUndoItem:
-                    addUndoItem(undo=self._refreshGLItems)
+        with handleDialogApply(self) as error:
 
-                self._changeColours()
-                self._setAttributes()
+            # add item here to redraw items
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(undo=self._refreshGLItems)
 
-                # add item here to redraw items
-                with undoStackBlocking() as addUndoItem:
-                    addUndoItem(redo=self._refreshGLItems)
+            self._changeColours()
+            self._setAttributes()
 
-                # redraw the items
-                self._refreshGLItems()
+            # add item here to redraw items
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(redo=self._refreshGLItems)
 
-        except Exception as es:
-            dialogErrorReport(self, undo, es)
-            return False
+            # redraw the items
+            self._refreshGLItems()
 
-        return True
+        return error.errorValue is None     # return True for no errors
 
     def _okButton(self):
         if self._applyChanges() is True:

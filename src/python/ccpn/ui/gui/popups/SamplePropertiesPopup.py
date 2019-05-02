@@ -26,18 +26,14 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtGui, QtWidgets, QtCore
-from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.DateTime import DateTime
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
-from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
 
 
 OTHER_UNIT = ['µ', 'm', 'n', 'p']
@@ -340,38 +336,17 @@ class SamplePropertiesPopup(CcpnDialog):
           If anything has been added to the undo queue then remove it with application.undo()
           repopulate the popup widgets
         """
-        applyAccept = False
-        oldUndoItems = self.project._undo.numItems()
+        with handleDialogApply(self) as error:
 
-        from ccpn.core.lib.ContextManagers import undoBlock
+            for property, value in self._getCallBacksDict().items():
+                property(value)
 
-        with undoBlock():
-            try:
-                for property, value in self._getCallBacksDict().items():
-                    property(value)
-
-                applyAccept = True
-            except Exception as es:
-                showWarning(str(self.windowTitle()), str(es))
-                if self.application._isInDebugMode:
-                    raise es
-
-        if not applyAccept:
-            # should only undo if something new has been added to the undo deque
-            # may cause a problem as some things may be set with the same values
-            # and still be added to the change list, so only undo if length has changed
-            errorName = str(self.__class__.__name__)
-            if oldUndoItems < self.project._undo.numItems():
-                self.project._undo.undo()
-                getLogger().debug('>>>Undo.%s._applychanges' % errorName)
-            else:
-                getLogger().debug('>>>Undo.%s._applychanges nothing to remove' % errorName)
-
-            # repopulate popup
+        if error.errorValue:
+            # repopulate popup on an error
             self._repopulate()
             return False
-        else:
-            return True
+
+        return True
 
     def _okButton(self):
         if self._applyChanges() is True:

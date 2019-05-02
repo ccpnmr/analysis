@@ -181,37 +181,23 @@ class SetPeakAliasingPopup(CcpnDialog):
         """
         When ok button pressed: update and exit
         """
+        with handleDialogApply(self):
 
-        with handleDialogApply(self) as error:
-            print('>>>errorContent inside dialog', error.errorValue)
+            # add item here to redraw items
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(undo=self._refreshGLItems)
 
-        print ('>>>dialogError', error.errorValue)
+            for spec in self.spectra.keys():
+                newAlias = tuple([int(pullDown.get()) for pullDown in self.spectraPulldowns[spec]])
 
+                for peak in self.spectra[spec]:
+                    peak.aliasing = newAlias
 
+            # add item here to redraw items
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(redo=self._refreshGLItems)
 
-        undo = self.project._undo
-
-        try:
-            with undoBlock():
-
-                # add item here to redraw items
-                with undoStackBlocking() as addUndoItem:
-                    addUndoItem(undo=self._refreshGLItems)
-
-                for spec in self.spectra.keys():
-                    newAlias = tuple([int(pullDown.get()) for pullDown in self.spectraPulldowns[spec]])
-
-                    for peak in self.spectra[spec]:
-                        peak.aliasing = newAlias
-
-                # add item here to redraw items
-                with undoStackBlocking() as addUndoItem:
-                    addUndoItem(redo=self._refreshGLItems)
-
-                # redraw the items
-                self._refreshGLItems()
-
-        except Exception as es:
-            dialogErrorReport(self, undo, es)
+            # redraw the items
+            self._refreshGLItems()
 
         self.accept()

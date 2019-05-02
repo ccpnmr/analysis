@@ -34,9 +34,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
-from ccpn.ui.gui.popups.Dialog import CcpnDialog, dialogErrorReport
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-from ccpn.core.lib.ContextManagers import undoBlock, undoStackBlocking
+from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
 
 from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import PROTEIN_ATOM_NAMES
 from ccpn.util.Common import isotopeCode2Nucleus
@@ -121,34 +119,30 @@ class NmrAtomPopup(CcpnDialog):
           If anything has been added to the undo queue then remove it with application.undo()
           repopulate the popup widgets
         """
-        undo = self.project._undo
 
-        try:
-            with undoBlock():
+        with handleDialogApply(self) as error:
 
-                if self.nmrAtom.name != self.nmrAtomNamePulldown.currentText():
-                    self.nmrAtom.rename(self.nmrAtomNamePulldown.currentText())
+            if self.nmrAtom.name != self.nmrAtomNamePulldown.currentText():
+                self.nmrAtom.rename(self.nmrAtomNamePulldown.currentText())
 
-                if self.nmrAtom.nmrResidue.id != self.nmrResiduePulldown.currentText():
-                    nmrResidue = self.project.getByPid('NR:%s' % self.nmrResiduePulldown.currentText())
+            if self.nmrAtom.nmrResidue.id != self.nmrResiduePulldown.currentText():
+                nmrResidue = self.project.getByPid('NR:%s' % self.nmrResiduePulldown.currentText())
 
-                    if not self.mergeBox.isChecked() and self.project.getByPid('NA:%s.%s' %
-                                                                               (nmrResidue.id, self.nmrAtomNamePulldown.currentText())):
-                        showWarning('Merge must be selected', 'Cannot re-assign NmrAtom to an existing '
-                                                              'NmrAtom of another NmrResidue without merging')
+                if not self.mergeBox.isChecked() and self.project.getByPid('NA:%s.%s' %
+                                                                           (nmrResidue.id, self.nmrAtomNamePulldown.currentText())):
+                    showWarning('Merge must be selected', 'Cannot re-assign NmrAtom to an existing '
+                                                          'NmrAtom of another NmrResidue without merging')
 
-                    else:
-                        self.nmrAtom.assignTo(chainCode=nmrResidue.nmrChain.shortName,
-                                              sequenceCode=nmrResidue.sequenceCode,
-                                              residueType=nmrResidue.residueType,
-                                              mergeToExisting=self.mergeBox.isChecked())
+                else:
+                    self.nmrAtom.assignTo(chainCode=nmrResidue.nmrChain.shortName,
+                                          sequenceCode=nmrResidue.sequenceCode,
+                                          residueType=nmrResidue.residueType,
+                                          mergeToExisting=self.mergeBox.isChecked())
 
-                    self.nmrAtomLabel.setText("NmrAtom: %s" % self.nmrAtom.id)
+                self.nmrAtomLabel.setText("NmrAtom: %s" % self.nmrAtom.id)
 
-        except Exception as es:
-            dialogErrorReport(self, undo, es)
-
-            # repopulate popup
+        if error.errorValue:
+            # repopulate popup on an error
             self._repopulate()
             return False
 

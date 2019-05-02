@@ -28,10 +28,9 @@ __date__ = "$Date: 9/05/2017 $"
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
-from ccpn.ui.gui.popups.Dialog import CcpnDialog
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.popups.Dialog import CcpnDialog, dialogErrorReport
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+from ccpn.core.lib.ContextManagers import undoBlock, undoStackBlocking
 
 
 class DeleteItemsPopup(CcpnDialog):
@@ -84,41 +83,27 @@ class DeleteItemsPopup(CcpnDialog):
         """
         When ok button pressed: delete and exit
         """
-        applyAccept = False
         undo = self.project._undo
-        oldUndo = undo.numItems()
 
-        from ccpn.core.lib.ContextManagers import undoBlock, undoStackBlocking
-        from functools import partial
+        try:
+            with undoBlock():
 
-        with undoBlock():
-            try:
+                # add item here to redraw items
+                with undoStackBlocking() as addUndoItem:
+                    addUndoItem(undo=self._refreshGLItems)
+
                 for delItem in self.deleteList:
                     if delItem[2].isChecked():
                         self.project.deleteObjects(*delItem[1])
 
                 # add item here to redraw items
                 with undoStackBlocking() as addUndoItem:
-                    addUndoItem(undo=partial(self._refreshGLItems),
-                                redo=partial(self._refreshGLItems))
+                    addUndoItem(redo=self._refreshGLItems)
 
-                applyAccept = True
-            except Exception as es:
-                showWarning(str(self.windowTitle()), str(es))
+                # redraw the items
+                self._refreshGLItems()
 
-        # redraw the items
-        self._refreshGLItems()
-
-        if applyAccept is False:
-            # should only undo if something new has been added to the undo deque
-            # may cause a problem as some things may be set with the same values
-            # and still be added to the change list, so only undo if length has changed
-            errorName = str(self.__class__.__name__)
-
-            if oldUndo != undo.numItems():
-                self.project._undo.undo()
-                getLogger().debug('>>>Undo.%s._applychanges' % errorName)
-            else:
-                getLogger().debug('>>>Undo.%s._applychanges nothing to remove' % errorName)
+        except Exception as es:
+            dialogErrorReport(self, undo, es)
 
         self.accept()

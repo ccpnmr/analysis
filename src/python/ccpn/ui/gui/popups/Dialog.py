@@ -27,6 +27,8 @@ __date__ = "$Date: 2017-07-04 15:21:16 +0000 (Tue, July 04, 2017) $"
 
 from PyQt5 import QtGui, QtWidgets
 from ccpn.ui.gui.widgets.Base import Base
+from ccpn.util.Logging import getLogger
+from contextlib import contextmanager
 
 
 def _updateGl(self, spectrumList):
@@ -58,3 +60,63 @@ class CcpnDialog(QtWidgets.QDialog, Base):
         self.setSizePolicy(self.sizePolicy)
         self.setFixedSize(self.maximumWidth(), self.maximumHeight())
         self.setSizeGripEnabled(False)
+
+def dialogErrorReport(self, undo, es):
+    """Show warning popup and check the undo stack for items that need to be culled
+    """
+    from ccpn.ui.gui.widgets.MessageDialog import showWarning
+
+    showWarning(str(self.windowTitle()), str(es))
+
+    # should only undo if something new has been added to the undo deque
+    # may cause a problem as some things may be set with the same values
+    # and still be added to the change list, so only undo if length has changed
+
+    # get the name of the class propagating the error
+    errorName = str(self.__class__.__name__)
+
+    if undo.newItemsAdded:
+        # undo any valid items and clear the stack above the current undo point
+        undo.undo()
+        undo.clearRedoItems()
+
+        getLogger().debug('>>>Undo.%s._applychanges' % errorName)
+    else:
+        getLogger().debug('>>>Undo.%s._applychanges nothing to remove' % errorName)
+
+
+@contextmanager
+def handleDialogApply(self):
+    """Context manager to wrap the apply button for dialogs
+    Error trapping is contained inside the undoBlock, any error raised is placed in
+    the errorValue of the yielded object
+
+    e.g.
+
+        with handleDialogApply(self) as error:
+            ...  code block here ...
+
+        if error.errorValue:
+            # an error occurred in the code block
+    """
+
+    from ccpn.core.lib.ContextManagers import undoBlock
+    undo = self.project._undo
+
+    # object to hold the error value
+    class errorContent():
+        def __init__(self):
+            self.errorValue = None
+
+    try:
+        with undoBlock():
+
+            error = errorContent()
+            yield error
+
+    except Exception as es:
+
+        # if an error occurs, report as a warning popup and return to the calling method
+        dialogErrorReport(self, undo, es)
+        error.errorValue = es
+

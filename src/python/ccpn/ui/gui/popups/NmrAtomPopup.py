@@ -34,12 +34,13 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
-from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog, dialogErrorReport
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+from ccpn.core.lib.ContextManagers import undoBlock, undoStackBlocking
 
 from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import PROTEIN_ATOM_NAMES
 from ccpn.util.Common import isotopeCode2Nucleus
 from ccpn.util.Logging import getLogger
-from ccpn.core.lib.ContextManagers import undoBlock
 
 
 ###from ccpn.framework.Framework import createFramework  # see note below
@@ -120,11 +121,11 @@ class NmrAtomPopup(CcpnDialog):
           If anything has been added to the undo queue then remove it with application.undo()
           repopulate the popup widgets
         """
-        applyAccept = False
-        oldUndoItems = self.project._undo.numItems()
+        undo = self.project._undo
 
-        with undoBlock():
-            try:
+        try:
+            with undoBlock():
+
                 if self.nmrAtom.name != self.nmrAtomNamePulldown.currentText():
                     self.nmrAtom.rename(self.nmrAtomNamePulldown.currentText())
 
@@ -144,29 +145,14 @@ class NmrAtomPopup(CcpnDialog):
 
                     self.nmrAtomLabel.setText("NmrAtom: %s" % self.nmrAtom.id)
 
-                applyAccept = True
-
-            except Exception as es:
-                showWarning(str(self.windowTitle()), str(es))
-                if self.application._isInDebugMode:
-                    raise es
-
-        if applyAccept is False:
-            # should only undo if something new has been added to the undo deque
-            # may cause a problem as some things may be set with the same values
-            # and still be added to the change list, so only undo if length has changed
-            errorName = str(self.__class__.__name__)
-            if oldUndoItems != self.project._undo.numItems():
-                self.project._undo.undo()
-                getLogger().debug('>>>Undo.%s._applychanges' % errorName)
-            else:
-                getLogger().debug('>>>Undo.%s._applychanges nothing to remove' % errorName)
+        except Exception as es:
+            dialogErrorReport(self, undo, es)
 
             # repopulate popup
             self._repopulate()
             return False
-        else:
-            return True
+
+        return True
 
     def _okButton(self):
         if self._applyChanges() is True:

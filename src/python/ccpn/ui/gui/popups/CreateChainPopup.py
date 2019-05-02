@@ -35,7 +35,7 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
-from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog, dialogErrorReport
 from ccpn.ui.gui.widgets.ListWidget import ListWidgetSelector
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.util.Logging import getLogger
@@ -174,32 +174,19 @@ class CreateChainPopup(CcpnDialog):
           If anything has been added to the undo queue then remove it with application.undo()
           repopulate the popup widgets
         """
-        applyAccept = False
-        oldUndo = self.project._undo.numItems()
+        undo = self.project._undo
 
         try:
             self._createSequence()
 
-            applyAccept = True
         except Exception as es:
-            showWarning(str(self.windowTitle()), str(es))
-
-        if applyAccept is False:
-            # should only undo if something new has been added to the undo deque
-            # may cause a problem as some things may be set with the same values
-            # and still be added to the change list, so only undo if length has changed
-            errorName = str(self.__class__.__name__)
-            if oldUndo != self.project._undo.numItems():
-                self.project._undo.undo()
-                getLogger().debug('>>>Undo.%s._applychanges' % errorName)
-            else:
-                getLogger().debug('>>>Undo.%s._applychanges nothing to remove' % errorName)
+            dialogErrorReport(self, undo, es)
 
             # repopulate popup
             self._repopulate()
             return False
-        else:
-            return True
+
+        return True
 
     def _okButton(self):
         if self._applyChanges() is True:

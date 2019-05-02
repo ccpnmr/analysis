@@ -2759,16 +2759,17 @@ class CcpnGLWidget(QOpenGLWidget):
         # determine whether the isotopeCodes of the first two visible axes are matching
         self._matchingIsotopeCodes = False
 
-        for specView in self._ordering:
-            spec = specView.spectrum
+        if not self.spectrumDisplay.is1D:
+            for specView in self._ordering:
+                spec = specView.spectrum
 
-            # inside the paint event, so sometimes specView may not exist
-            if specView in self._spectrumSettings:
-                pIndex = self._spectrumSettings[specView][GLDefs.SPECTRUM_POINTINDEX]
+                # inside the paint event, so sometimes specView may not exist
+                if specView in self._spectrumSettings:
+                    pIndex = self._spectrumSettings[specView][GLDefs.SPECTRUM_POINTINDEX]
 
-                if spec.isotopeCodes[pIndex[0]] == spec.isotopeCodes[pIndex[1]]:
-                    self._matchingIsotopeCodes = True
-                    break
+                    if spec.isotopeCodes[pIndex[0]] == spec.isotopeCodes[pIndex[1]]:
+                        self._matchingIsotopeCodes = True
+                        break
 
         # build the axes
         self.axisLabelling, self.labelsChanged = self._buildAxes(self.gridList[0], axisList=[0, 1],
@@ -5221,28 +5222,26 @@ class CcpnGLWidget(QOpenGLWidget):
                         self._GLPeaks.updateHighlightSymbols()
 
                     if GLNotifier.GLINTEGRALLISTS in triggers:
-
                         for spectrumView in self._ordering:  # strip.spectrumViews:
 
                             if spectrumView.isDeleted:
                                 continue
 
                             for integralListView in spectrumView.integralListViews:
-
-                                if integralListView in self._GLIntegralLists.keys():
-                                    integralListView.buildSymbols = True
+                                for integralList in targets:
+                                    if integralList == integralListView.integralList:
+                                        integralListView.buildSymbols = True
 
                     if GLNotifier.GLINTEGRALLISTLABELS in triggers:
-
                         for spectrumView in self._ordering:  # strip.spectrumViews:
 
                             if spectrumView.isDeleted:
                                 continue
 
                             for integralListView in spectrumView.integralListViews:
-
-                                if integralListView in self._GLIntegralLists.keys():
-                                    integralListView.buildLabels = True
+                                for integralList in targets:
+                                    if integralList == integralListView.integralList:
+                                        integralListView.buildLabels = True
 
                     if GLNotifier.GLMULTIPLETLISTS in triggers:
                         for spectrumView in self._ordering:  # strip.spectrumViews:
@@ -5254,7 +5253,6 @@ class CcpnGLWidget(QOpenGLWidget):
                                 for multipletList in targets:
                                     if multipletList == multipletListView.multipletList:
                                         multipletListView.buildSymbols = True
-                        # self.buildMultipletLists()
 
                     if GLNotifier.GLMULTIPLETLISTLABELS in triggers:
                         for spectrumView in self._ordering:  # strip.spectrumViews:
@@ -5266,14 +5264,6 @@ class CcpnGLWidget(QOpenGLWidget):
                                 for multipletList in targets:
                                     if multipletList == multipletListView.multipletList:
                                         multipletListView.buildLabels = True
-                            # self.buildMultipletListLabels()
-
-                        # for ils in self._GLIntegralLists.values():
-                        #   if ils.integralListView.peakList in targets:
-                        #     # ils.renderMode = GLRENDERMODE_REBUILD
-                        #     ils.integralListView.buildPeakLists = True
-
-                        # self._processPeakNotifier(targets)
 
                     if GLNotifier.GLCLEARPHASING in triggers:
                         if self.spectrumDisplay == aDict[GLNotifier.GLSPECTRUMDISPLAY]:

@@ -95,7 +95,7 @@ class IntegralListPropertiesPopup(CcpnDialog):
 
             self.closeButton = Button(self, text='Close', grid=(6, 1), callback=self._accept)
 
-        self.numUndos = 0
+        self.GLSignals = GLNotifier(parent=self)
 
     def _changeColours(self):
         value = self.symbolColourPulldownList.currentText()

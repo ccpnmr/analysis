@@ -132,7 +132,7 @@ class MultipletListPropertiesPopup(CcpnDialog):
             row += 1
             self.closeButton = Button(self, text='Close', grid=(row, 1), callback=self._accept)
 
-        self.numUndos = 0
+        self.GLSignals = GLNotifier(parent=self)
 
     def _changeColours(self):
         """set the colours from the pulldowns

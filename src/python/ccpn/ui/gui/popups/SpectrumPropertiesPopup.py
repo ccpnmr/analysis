@@ -1446,6 +1446,8 @@ class SpectrumDisplayPropertiesPopupNd(CcpnDialog):
           If anything has been added to the undo queue then remove it with application.undo()
           repopulate the popup widgets
         """
+        tabs = self._contoursTab
+
         with handleDialogApply(self) as error:
 
             spectrumList = []

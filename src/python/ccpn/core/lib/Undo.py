@@ -33,8 +33,7 @@ from functools import partial, update_wrapper
 from collections import deque
 from ccpn.util.Logging import getLogger
 
-
-MAXUNDOWAYPOINTS = 3
+MAXUNDOWAYPOINTS = 25
 MAXUNDOOPERATIONS = 10000
 
 
@@ -449,7 +448,12 @@ class Undo(deque):
         """Clear the items above the current next index, if there has been an error adding items
         """
         # remove unwanted items from the top of the undo deque
-        while self.numItems() > self.nextIndex:
+        while len(self) > self.nextIndex:
             self.pop()
+
+        # fix waypoints - remove any that are left beyond the new end of the undo deque:
+        ll = self.waypoints
+        while ll and ll[-1] >= self.nextIndex - 1:
+            ll.pop()
 
         self._newItemCount = 0

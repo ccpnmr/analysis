@@ -1131,8 +1131,8 @@ class CcpnGLWidget(QOpenGLWidget):
             self.update()
 
     def _testAxisLimits(self, setLimits=False):
-        xRange = abs(self.axisL - self.axisR) / 2.0
-        yRange = abs(self.axisT - self.axisB) / 2.0
+        xRange = abs(self.axisL - self.axisR) / 3.0
+        yRange = abs(self.axisT - self.axisB) / 3.0
         self._minXReached = False
         self._minYReached = False
         self._maxXReached = False
@@ -2677,14 +2677,26 @@ class CcpnGLWidget(QOpenGLWidget):
                         specMatrix = np.array(specSettings[GLDefs.SPECTRUM_MATRIX], dtype=np.float32)
 
                         alias = spectrumView.spectrum.aliasingRange
+                        folding = spectrumView.spectrum.foldingModes
                         pIndex = specSettings[GLDefs.SPECTRUM_POINTINDEX]
 
                         for ii in range(alias[pIndex[0]][0], alias[pIndex[0]][1]+1, 1):
                             for jj in range(alias[pIndex[1]][0], alias[pIndex[1]][1]+1, 1):
-                                specMatrix[0:16] = [xScale, 0.0, 0.0, 0.0,
-                                                    0.0, yScale, 0.0, 0.0,
+
+                                foldX = foldY = 1.0
+                                foldXOffset = foldYOffset = 0
+                                if folding[pIndex[0]] == 'mirror':
+                                    foldX = pow(-1,ii)
+                                    foldXOffset = -dxAF if foldX < 0 else 0
+
+                                if folding[pIndex[1]] == 'mirror':
+                                    foldY = pow(-1,jj)
+                                    foldYOffset = -dyAF if foldY < 0 else 0
+
+                                specMatrix[0:16] = [xScale*foldX, 0.0, 0.0, 0.0,
+                                                    0.0, yScale*foldY, 0.0, 0.0,
                                                     0.0, 0.0, 1.0, 0.0,
-                                                    fx0+(dxAF*ii), fy0+(dyAF*jj), 0.0, 1.0]
+                                                    fx0+(ii*dxAF)+foldXOffset, fy0+(jj*dyAF)+foldYOffset, 0.0, 1.0]
 
                                 # flipping in the same GL region -  xScale = -xScale
                                 #                                   offset = fx0-dxAF

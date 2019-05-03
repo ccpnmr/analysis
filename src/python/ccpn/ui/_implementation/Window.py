@@ -142,6 +142,16 @@ class Window(AbstractWrapperObject):
                 specAxisOrder = spectrum.axisCodes
                 axisOrder = [specAxisOrder[ii] for ii in preferredAxisOrder]
 
+            else:
+
+                # sets an Nd default to HCN (or possibly 2d to HC)
+                specAxisOrder = spectrum.axisCodes
+                pOrder = spectrum.searchAxisCodePermutations(('H', 'C', 'N'))
+                if pOrder:
+                    spectrum.preferredAxisOrdering = pOrder
+                    axisOrder = [specAxisOrder[ii] for ii in pOrder]
+                    getLogger().debug('setting default axisOrdering: ', str(axisOrder))
+
             # elif axisOption == 1:
             #
             #     # always ask

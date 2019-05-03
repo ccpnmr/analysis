@@ -1968,7 +1968,39 @@ class Spectrum(AbstractWrapperObject):
     def preferredAxisOrdering(self, order):
         """Set the preferred ordering for the axis codes when opening a new spectrumDisplay
         """
+        if not order:
+            raise ValueError('order is not defined')
+        if not isinstance(order, tuple):
+            raise TypeError('order is not a tuple')
+        if len(order) != self.dimensionCount:
+            raise TypeError('order is not the correct length')
+        if not all(isinstance(ss, int) and ss >= 0 and ss < self.dimensionCount for ss in order):
+            raise TypeError('order elements must be integer and in (0 .. %d)' % (self.dimensionCount-1))
+        if len(set(order)) != len(order):
+            raise ValueError('order must contain unique elements')
+
         self.setParameter(SPECTRUMAXES, SPECTRUMPREFERREDAXISORDERING, order)
+
+    def searchAxisCodePermutations(self, checkCodes: Tuple[str]) -> Optional[Tuple[int]]:
+        """Generate the permutations of the current axisCodes
+        """
+        if not checkCodes:
+            raise ValueError('checkCodes is not defined')
+        if not isinstance(checkCodes, (tuple, list)):
+            raise TypeError('checkCodes is not a list/tuple')
+        if not all(isinstance(ss, str) for ss in checkCodes):
+            raise TypeError('checkCodes elements must be strings')
+
+        from itertools import permutations
+
+        # add permutations for the axes
+        axisPerms = tuple(permutations([axisCode for axisCode in self.axisCodes]))
+        axisOrder = tuple(permutations(list(range(len(self.axisCodes)))))
+
+        for ii, perm in enumerate(axisPerms):
+            n = min(len(checkCodes), len(perm))
+            if n and all(pCode[0] == cCode[0] for pCode, cCode in zip(perm[:n], checkCodes[:n])):
+                return axisOrder[ii]
 
     #=========================================================================================
     # Implementation functions

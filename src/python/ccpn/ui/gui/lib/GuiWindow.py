@@ -99,6 +99,7 @@ class GuiWindow():
         addShortCut("z, n", self, self.nextZoom, context=context)
         addShortCut("z, i", self, self.zoomIn, context=context)
         addShortCut("z, o", self, self.zoomOut, context=context)
+        addShortCut("z, a", self, self.resetAllZoom, context=context)
         addShortCut("p, l", self, self.cyclePeakLabelling, context=context)
         addShortCut("p, s", self, self.cyclePeakSymbols, context=context)
         # addShortCut("Space, Space", self, self.toggleConsole, context=context) # this is not needed here, already set on Menus!!
@@ -642,6 +643,15 @@ class GuiWindow():
         """
         if self.current.strip:
             self.current.strip.spectrumDisplay._zoomOut()
+        else:
+            getLogger().warning('No current strip. Select a strip first.')
+
+    def resetAllZoom(self):
+        """
+        zoom out of the currently selected strip
+        """
+        if self.current.strip:
+            self.current.strip.spectrumDisplay._resetAllZooms()
         else:
             getLogger().warning('No current strip. Select a strip first.')
 

@@ -1058,37 +1058,64 @@ class GuiStrip(Frame):
     #                          maxYRange=None
     #                          )
 
+    def _resetAllZoom(self):
+        """
+        Zooms x/y axes to maximum of data.
+        """
+        try:
+            self._CcpnGLWidget.resetAllZoom()
+        except Exception as es:
+            getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
+
+    def _resetYZoom(self):
+        """
+        Zooms y axis to maximum of data.
+        """
+        try:
+            self._CcpnGLWidget.resetYZoom()
+        except Exception as es:
+            getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
+
+    def _resetXZoom(self):
+        """
+        Zooms x axis to maximum value of data.
+        """
+        try:
+            self._CcpnGLWidget.resetXZoom()
+        except Exception as es:
+            getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
+
     def _storeZoom(self):
         """Adds current region to the zoom stack for the strip.
         """
         try:
             self._CcpnGLWidget.storeZoom()
-        except:
-            getLogger().debugGL('OpenGL widget not instantiated')
+        except Exception as es:
+            getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
 
     def _restoreZoom(self):
         """Restores last saved region to the zoom stack for the strip.
         """
         try:
             self._CcpnGLWidget.restoreZoom()
-        except:
-            getLogger().debugGL('OpenGL widget not instantiated')
+        except Exception as es:
+            getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
 
     def _previousZoom(self):
         """Changes to the previous zoom for the strip.
         """
         try:
             self._CcpnGLWidget.previousZoom()
-        except:
-            getLogger().debugGL('OpenGL widget not instantiated')
+        except Exception as es:
+            getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
 
     def _nextZoom(self):
         """Changes to the next zoom for the strip.
         """
         try:
             self._CcpnGLWidget.nextZoom()
-        except:
-            getLogger().debugGL('OpenGL widget not instantiated')
+        except Exception as es:
+            getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
 
     def _setZoomPopup(self):
         from ccpn.ui.gui.popups.ZoomPopup import ZoomPopup
@@ -1101,24 +1128,24 @@ class GuiStrip(Frame):
             self._CcpnGLWidget.resetZoom()
             self.pythonConsole.writeConsoleCommand("strip.resetZoom()", strip=self)
             getLogger().info("strip = application.getByGid('%s')\nstrip.resetZoom()" % self.pid)
-        except:
-            getLogger().debugGL('OpenGL widget not instantiated')
+        except Exception as es:
+            getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
 
     def _zoomIn(self):
         """Zoom in to the strip.
         """
         try:
             self._CcpnGLWidget.zoomIn()
-        except:
-            getLogger().debugGL('OpenGL widget not instantiated')
+        except Exception as es:
+            getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
 
     def _zoomOut(self):
         """Zoom out of the strip.
         """
         try:
             self._CcpnGLWidget.zoomOut()
-        except:
-            getLogger().debugGL('OpenGL widget not instantiated')
+        except Exception as es:
+            getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
 
     def _resetRemoveStripAction(self):
         """Update interface when a strip is created or deleted.

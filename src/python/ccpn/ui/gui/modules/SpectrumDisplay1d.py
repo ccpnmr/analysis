@@ -113,12 +113,12 @@ class SpectrumDisplay1d(GuiSpectrumDisplay):
         decreaseStripWidthIcon = Icon('icons/range-contract')
         decreaseStripWidthAction.setIcon(decreaseStripWidthIcon)
 
-        autoScaleAction = spectrumUtilToolBar.addAction("AutoScale", self.resetYZooms)
+        autoScaleAction = spectrumUtilToolBar.addAction("AutoScale", self._resetYZooms)
         autoScaleActionIcon = Icon('icons/zoom-best-fit-1d')
         # autoScaleActionIcon.actualSize(QtCore.QSize(10, 10))
         autoScaleAction.setIcon(autoScaleActionIcon)
         # autoScaleAction.setText("AutoScale")
-        fullZoomAction = spectrumUtilToolBar.addAction("Full", self.resetXZooms)
+        fullZoomAction = spectrumUtilToolBar.addAction("Maximise Width", self._resetXZooms)
         fullZoomIcon = Icon('icons/zoom-full-1d')
         fullZoomAction.setIcon(fullZoomIcon)
         storeZoomAction = spectrumUtilToolBar.addAction("Store Zoom", self._storeZoom)
@@ -129,6 +129,15 @@ class SpectrumDisplay1d(GuiSpectrumDisplay):
         restoreZoomIcon = Icon('icons/zoom-restore')
         restoreZoomAction.setIcon(restoreZoomIcon)
         restoreZoomAction.setToolTip('Restore Zoom')
+        
+        undoZoomAction = spectrumUtilToolBar.addAction("Undo Zoom", self._previousZoom)
+        undoZoomIcon = Icon('icons/zoom-undo')
+        undoZoomAction.setIcon(undoZoomIcon)
+        undoZoomAction.setToolTip('Undo Zoom')
+        redoZoomAction = spectrumUtilToolBar.addAction("Redo Zoom", self._nextZoom)
+        redoZoomIcon = Icon('icons/zoom-redo')
+        redoZoomAction.setIcon(redoZoomIcon)
+        redoZoomAction.setToolTip('Redo Zoom')
 
     def processSpectra(self, pids: Sequence[str], event):
         """Display spectra defined by list of Pid strings"""

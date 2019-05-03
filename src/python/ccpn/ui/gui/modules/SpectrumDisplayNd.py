@@ -95,10 +95,11 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
             #  ('-1',           'icons/contour-remove', 'Remove one contour level',  True,     self.removeContourLevel),
             ('*1.4', 'icons/contour-base-up', 'Raise Contour Base Level', True, self.raiseContourBase),
             ('/1.4', 'icons/contour-base-down', 'Lower Contour Base Level', True, self.lowerContourBase),
+            ('Maximise Zoom', 'icons/zoom-full', 'Maximum Zoom', True, self._resetAllZooms),
             ('Store Zoom', 'icons/zoom-store', 'Store Zoom', True, self._storeZoom),
             ('Restore Zoom', 'icons/zoom-restore', 'Restore Zoom', True, self._restoreZoom),
-            ('Undo Zoom', 'icons/zoom-undo', 'Previous Zoom', True, self._previousZoom),
-            ('Redo Zoom', 'icons/zoom-redo', 'Next Zoom', True, self._nextZoom),
+            ('Undo Zoom', 'icons/zoom-undo', 'Undo Zoom', True, self._previousZoom),
+            ('Redo Zoom', 'icons/zoom-redo', 'Redo Zoom', True, self._nextZoom),
             ]
 
         for aName, icon, tooltip, active, callback in toolBarItemsForBoth + toolBarItemsForNd:

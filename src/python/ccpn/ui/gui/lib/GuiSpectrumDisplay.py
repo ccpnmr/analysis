@@ -1685,17 +1685,23 @@ class GuiSpectrumDisplay(CcpnModule):
         for strip in self.strips:
             strip.autoRange()
 
-    def resetYZooms(self):
+    def _resetYZooms(self):
         """Zooms Y axis of current strip to show entire region.
         """
         for strip in self.strips:
-            strip.resetYZoom()
+            strip._resetYZoom()
 
-    def resetXZooms(self):
+    def _resetXZooms(self):
         """Zooms X axis of current strip to show entire region.
         """
         for strip in self.strips:
-            strip.resetXZoom()
+            strip._resetXZoom()
+
+    def _resetAllZooms(self):
+        """Zooms X/Y axes of current strip to show entire region.
+        """
+        for strip in self.strips:
+            strip._resetAllZoom()
 
     def _restoreZoom(self):
         """Restores last saved zoom of current strip.

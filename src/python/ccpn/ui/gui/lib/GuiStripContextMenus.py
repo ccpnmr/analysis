@@ -455,11 +455,11 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
 
         _SCMitem(name='Zoom best Y fit',
                  typeItem=ItemTypes.get(ITEM), icon='icons/zoom-best-fit-1d', toolTip='Y Auto Scale',
-                 callback=guiStrip1d.resetYZoom),
+                 callback=guiStrip1d._resetYZoom),
 
         _SCMitem(name='Zoom best X fit',
                  typeItem=ItemTypes.get(ITEM), icon='icons/zoom-full-1d', toolTip='X Auto Scale',
-                 callback=guiStrip1d.resetXZoom),
+                 callback=guiStrip1d._resetXZoom),
         _separator(),
         _SCMitem(name='Calibrate X',
                  typeItem=ItemTypes.get(ITEM), toolTip='calibrate X points', checkable=True, checked=False,

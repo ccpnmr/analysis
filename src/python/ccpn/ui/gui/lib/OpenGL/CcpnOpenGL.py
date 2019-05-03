@@ -1371,11 +1371,27 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def resetXZoom(self):
         self._resetAxisRange(xAxis=True, yAxis=False)
+
+        self._zoomHistoryCurrent = self._zoomHistoryHead
+        self._storeZoomHistory()
+
         self._rescaleXAxis()
 
     def resetYZoom(self):
         self._resetAxisRange(xAxis=False, yAxis=True)
+
+        self._zoomHistoryCurrent = self._zoomHistoryHead
+        self._storeZoomHistory()
+
         self._rescaleYAxis()
+
+    def resetAllZoom(self):
+        self._resetAxisRange(xAxis=True, yAxis=True)
+
+        self._zoomHistoryCurrent = self._zoomHistoryHead
+        self._storeZoomHistory()
+
+        self._rescaleAllAxes()
 
     def _storeZoomHistory(self):
         """Store the current axis state to the zoom history
@@ -2836,18 +2852,22 @@ class CcpnGLWidget(QOpenGLWidget):
         """return an exponential with trailing zeroes removed
         """
         s = '%.*e' % (prec, f)
-        mantissa, exp = s.split('e')
-        mantissa = mantissa.rstrip('0')
-        if mantissa.endswith('.'):
-            mantissa += '0'
-        exp = exp.lstrip('0+')
-        if exp:
-            if exp.startswith('-'):
-                return '%se%d' % (mantissa, int(exp))
+        if 'e' in s:
+            mantissa, exp = s.split('e')
+            mantissa = mantissa.rstrip('0')
+            if mantissa.endswith('.'):
+                mantissa += '0'
+            exp = exp.lstrip('0+')
+            if exp:
+                if exp.startswith('-'):
+                    return '%se%d' % (mantissa, int(exp))
+                else:
+                    return '%se+%d' % (mantissa, int(exp))
             else:
-                return '%se+%d' % (mantissa, int(exp))
+                return '%s' % mantissa
+
         else:
-            return '%s' % mantissa
+            return ''
 
     def buildAxisLabels(self, refresh=False):
         # build axes labelling

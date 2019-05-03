@@ -1587,11 +1587,11 @@ class CcpnGLWidget(QOpenGLWidget):
                                                GLContext=self))
 
         self._cursorList = GLVertexArray(numLists=1,
-                                              renderMode=GLRENDERMODE_REBUILD,
-                                              blendMode=False,
-                                              drawMode=GL.GL_LINES,
-                                              dimension=2,
-                                              GLContext=self)
+                                         renderMode=GLRENDERMODE_REBUILD,
+                                         blendMode=False,
+                                         drawMode=GL.GL_LINES,
+                                         dimension=2,
+                                         GLContext=self)
 
         self._externalRegions = GLExternalRegion(project=self.project, GLContext=self, spectrumView=None,
                                                  integralListView=None)
@@ -2663,23 +2663,44 @@ class CcpnGLWidget(QOpenGLWidget):
                     if spectrumView in self._spectrumSettings.keys():
                         # set correct transform when drawing this contour
 
-                        currentShader.setGLUniformMatrix4fv('mvMatrix',
-                                                            1, GL.GL_FALSE,
-                                                            self._spectrumSettings[spectrumView][
-                                                                GLDefs.SPECTRUM_MATRIX])
+                        specSettings = self._spectrumSettings[spectrumView]
 
-                        # values store in spectrum settings - can be used for drawing multiple contours
+                        fx0 = specSettings[GLDefs.SPECTRUM_MAXXALIAS]
+                        fx1 = specSettings[GLDefs.SPECTRUM_MINXALIAS]
+                        fy0 = specSettings[GLDefs.SPECTRUM_MAXYALIAS]
+                        fy1 = specSettings[GLDefs.SPECTRUM_MINYALIAS]
+                        dxAF = specSettings[GLDefs.SPECTRUM_DXAF]
+                        dyAF = specSettings[GLDefs.SPECTRUM_DYAF]
+                        xScale = specSettings[GLDefs.SPECTRUM_XSCALE]
+                        yScale = specSettings[GLDefs.SPECTRUM_YSCALE]
 
-                        # self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_DXAF] = dxAF
-                        # self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_DYAF] = dyAF
-                        # self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_XSCALE] = xScale
-                        # self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YSCALE] = yScale
+                        specMatrix = np.array(specSettings[GLDefs.SPECTRUM_MATRIX], dtype=np.float32)
 
-                        # draw the spectrum - call the existing glCallList
-                        # spectrumView._paintContoursNoClip()
+                        alias = spectrumView.spectrum.aliasingRange
+                        pIndex = specSettings[GLDefs.SPECTRUM_POINTINDEX]
 
-                        # self._contourList[spectrumView].drawIndexArray()
-                        self._contourList[spectrumView].drawIndexVBO(enableVBO=True)
+                        for ii in range(alias[pIndex[0]][0], alias[pIndex[0]][1]+1, 1):
+                            for jj in range(alias[pIndex[1]][0], alias[pIndex[1]][1]+1, 1):
+                                specMatrix[0:16] = [xScale, 0.0, 0.0, 0.0,
+                                                    0.0, yScale, 0.0, 0.0,
+                                                    0.0, 0.0, 1.0, 0.0,
+                                                    fx0+(dxAF*ii), fy0+(dyAF*jj), 0.0, 1.0]
+
+                                # flipping in the same GL region -  xScale = -xScale
+                                #                                   offset = fx0-dxAF
+                                # circular -    offset = fx0 + dxAF*alias, alias = min->max
+                                currentShader.setGLUniformMatrix4fv('mvMatrix',
+                                                                    1, GL.GL_FALSE, specMatrix)
+
+                                self._contourList[spectrumView].drawIndexVBO(enableVBO=True)
+
+                        # # set the scaling/offset for a single spectrum GL contour
+                        # currentShader.setGLUniformMatrix4fv('mvMatrix',
+                        #                                     1, GL.GL_FALSE,
+                        #                                     self._spectrumSettings[spectrumView][
+                        #                                         GLDefs.SPECTRUM_MATRIX])
+                        #
+                        # self._contourList[spectrumView].drawIndexVBO(enableVBO=True)
                 else:
 
                     # only draw the traces for the spectra that are visible
@@ -3298,13 +3319,13 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 if not self._updateVTrace and newCoords[0] is not None:
                     vertices.extend([newCoords[0], 1.0, newCoords[0], 0.0])
-                    indices.extend([index, index+1])
+                    indices.extend([index, index + 1])
                     index += 2
 
                     # add the double cursor
                     if _drawDouble:
                         vertices.extend([doubleCoords[0], 1.0, doubleCoords[0], 0.0])
-                        indices.extend([index, index+1])
+                        indices.extend([index, index + 1])
                         index += 2
 
                 if not self._updateHTrace and newCoords[1] is not None:
@@ -3315,7 +3336,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     # add the double cursor
                     if _drawDouble:
                         vertices.extend([0.0, doubleCoords[1], 1.0, doubleCoords[1]])
-                        indices.extend([index, index+1])
+                        indices.extend([index, index + 1])
                         index += 2
 
             drawList.vertices = np.array(vertices, dtype=np.float32)

@@ -170,9 +170,10 @@ class SetPeakAliasingPopup(CcpnDialog):
                     aliasMax = np.maximum(aliasMax, alias)
                     aliasMin = np.minimum(aliasMin, alias)
 
-            if alias is not None:
+            if alias:
                 # set min/max in spectrum here
-                pass
+                aliasRange = tuple((int(mn), int(mx)) for mn, mx in zip(aliasMin,aliasMax))
+                spectrum.aliasingRange = aliasRange
 
         # emit a signal to rebuild all peaks
         self.GLSignals.emitEvent(triggers=[GLNotifier.GLALLPEAKS, GLNotifier.GLALLMULTIPLETS])

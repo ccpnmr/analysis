@@ -132,10 +132,6 @@ class Window(AbstractWrapperObject):
         if not axisOrder:
             axisOption = self.application.preferences.general.axisOrderingOptions
 
-            # either popup the options window, or use spectrum defaults
-            # if axisOption == 0:
-                # use spectrum defaults
-
             preferredAxisOrder = spectrum.preferredAxisOrdering
             if preferredAxisOrder is not None:
 
@@ -151,20 +147,6 @@ class Window(AbstractWrapperObject):
                     spectrum.preferredAxisOrdering = pOrder
                     axisOrder = [specAxisOrder[ii] for ii in pOrder]
                     getLogger().debug('setting default axisOrdering: ', str(axisOrder))
-
-            # elif axisOption == 1:
-            #
-            #     # always ask
-            #     from ccpn.ui.gui.popups.AxisOrderingPopup import AxisOrderingPopup
-            #
-            #     popup = AxisOrderingPopup(parent=self, mainWindow=self, spectrum=spectrum)
-            #     popup.exec_()
-            #
-            #     preferredAxisOrder = spectrum.preferredAxisOrdering
-            #     if preferredAxisOrder is not None:
-            #
-            #         specAxisOrder = spectrum.axisCodes
-            #         axisOrder = [specAxisOrder[ii] for ii in preferredAxisOrder]
 
         display = _createSpectrumDisplay(self, spectrum, displayAxisCodes=displayAxisCodes, axisOrder=axisOrder,
                                       title=title, positions=positions, widths=widths, units=units,

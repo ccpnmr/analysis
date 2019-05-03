@@ -148,6 +148,17 @@ class Window(AbstractWrapperObject):
                     axisOrder = [specAxisOrder[ii] for ii in pOrder]
                     getLogger().debug('setting default axisOrdering: ', str(axisOrder))
 
+                else:
+                    # try permutations of repeated codes
+                    duplicates = [('H','H'), ('C','C'), ('N','N')]
+                    for dCode in duplicates:
+                        pOrder = spectrum.searchAxisCodePermutations(dCode)
+                        if pOrder:
+                            spectrum.preferredAxisOrdering = pOrder
+                            axisOrder = [specAxisOrder[ii] for ii in pOrder]
+                            getLogger().debug('setting duplicate axisOrdering: ', str(axisOrder))
+                            break
+
         display = _createSpectrumDisplay(self, spectrum, displayAxisCodes=displayAxisCodes, axisOrder=axisOrder,
                                       title=title, positions=positions, widths=widths, units=units,
                                       stripDirection=stripDirection, is1D=is1D, **kwds)

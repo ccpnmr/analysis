@@ -1460,6 +1460,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self._resetAxisRange()
 
         self._zoomHistoryCurrent = self._zoomHistoryHead
+        self._storeZoomHistory()
 
         # use this because it rescales all the symbols
         self._rescaleXAxis()

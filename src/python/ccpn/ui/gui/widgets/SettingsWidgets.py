@@ -186,17 +186,6 @@ class SpectrumDisplaySettings(Widget):
                                                            ],
                                                     )
 
-        # self.stripArrangementButtons.radioButtons[0].setIcon(Icon('icons/strip-row'))
-        # self.stripArrangementButtons.radioButtons[0].setIconSize(QtCore.QSize(24, 24))
-        # self.stripArrangementButtons.radioButtons[1].setIcon(Icon('icons/strip-column'))
-        # self.stripArrangementButtons.radioButtons[1].setIconSize(QtCore.QSize(24, 24))
-
-        #[Icon('icons/strip-row'), Icon('icons/strip-column')
-
-        # not needed anymore
-        # row += 1
-        # self.displaysWidget = SpectrumDisplaySelectionWidget(parent, mainWindow=self.mainWindow, grid=(row, 0), gridSpan=(1, 2), texts=[ALL], displayText=[])
-
         row += 1
         self._spacer = Spacer(parent, 5, 5,
                               QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,

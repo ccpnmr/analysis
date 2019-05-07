@@ -27,8 +27,9 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import functools
 import os
 import typing
-from typing import Sequence, Tuple, Union, Optional
 import operator
+import numpy as np
+from typing import Sequence, Tuple, Union, Optional
 from collections import OrderedDict
 from time import time
 from datetime import datetime
@@ -1191,6 +1192,15 @@ class Project(AbstractWrapperObject):
             # TODO:ED another nasty _appBase
 
             # estimate base contour level here
+
+            # get specLimits for all dimensions
+            specLimits = list(spectrum.spectrumLimits)
+            dims = spectrum.dimensionCount
+
+            # set dimensions above 1 to just the centre of the spectrum
+            for ii in range(2, dims):
+                k = np.mean(specLimits[ii])
+                specLimits[ii] = (k, k)
 
             # if there is a gui then check the colours
             if self._appBase.ui:

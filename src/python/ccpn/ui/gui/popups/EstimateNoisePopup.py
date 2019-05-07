@@ -43,7 +43,7 @@ class EstimateNoisePopup(CcpnDialog):
     MINIMUM_WIDTH_PER_TAB = 120
     MINIMUM_WIDTH = 400
 
-    def __init__(self, parent=None, mainWindow=None, title='EstimateNoise',
+    def __init__(self, parent=None, mainWindow=None, title='Estimate Noise',
                  strip=None, orderedSpectrumViews=None, **kwds):
         """
         Initialise the widget
@@ -148,7 +148,12 @@ class NoiseTab(Widget):
         axisCodeDict = self.strip._getAxisCodeDict(self.spectrum, selectedRegion)
         indices = self.strip._getAxisCodeIndices(self.spectrum)
 
-        foundRegions = self.spectrum.getRegionData(**axisCodeDict)
+        # add an exclusion buffer to ensure that getRegionData always returns a region,
+        # otherwise region may be 1 plain thick which will contradict error trapping for peak fitting
+        # (which requires at least 3 points in each dimension)
+        exclusionBuffer = [1] * len(axisCodeDict)
+
+        foundRegions = self.spectrum.getRegionData(exclusionBuffer=exclusionBuffer, **axisCodeDict)
         if not foundRegions:
             return
 

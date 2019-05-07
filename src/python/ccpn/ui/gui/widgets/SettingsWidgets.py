@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.ui.gui.widgets.Widget import Widget
@@ -35,6 +35,7 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.CheckBoxes import CheckBoxes
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget, DoubleSpinBoxCompoundWidget
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.widgets.HLine import HLine
@@ -173,14 +174,24 @@ class SpectrumDisplaySettings(Widget):
 
         row += 1
         self.stripArrangementLabel = Label(parent, text="Strip Arrangement", grid=(row, 0))
-        self.stripArrangementButtons = RadioButtons(parent, texts=['Row', 'Column'],
+        self.stripArrangementButtons = RadioButtons(parent, texts=['    ', '    '],
                                                     objectNames=['stripSDS_Row', 'stripSDS_Column'],
                                                     selectedInd=stripArrangement,
                                                     callback=self._stripArrangementChanged,
                                                     direction='horizontal',
                                                     grid=(row, 1), hAlign='l',
                                                     tipTexts=None,
+                                                    icons=[('icons/strip-row', (24, 24)),
+                                                           ('icons/strip-column', (24, 24))
+                                                           ],
                                                     )
+
+        # self.stripArrangementButtons.radioButtons[0].setIcon(Icon('icons/strip-row'))
+        # self.stripArrangementButtons.radioButtons[0].setIconSize(QtCore.QSize(24, 24))
+        # self.stripArrangementButtons.radioButtons[1].setIcon(Icon('icons/strip-column'))
+        # self.stripArrangementButtons.radioButtons[1].setIconSize(QtCore.QSize(24, 24))
+
+        #[Icon('icons/strip-row'), Icon('icons/strip-column')
 
         # not needed anymore
         # row += 1

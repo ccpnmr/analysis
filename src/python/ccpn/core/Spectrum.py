@@ -91,6 +91,7 @@ SPECTRUMAXES = 'spectrumAxesOrdering'
 SPECTRUMPREFERREDAXISORDERING = 'spectrumPreferredAxisOrdering'
 SPECTRUMALIASING = 'spectrumAliasing'
 ALIASINGLIMITS = 'aliasingLimits'
+UPDATEALIASINGRANGE = '_updateAliasingRange'
 MAXALIASINGRANGE = 3
 
 
@@ -1238,6 +1239,30 @@ class Spectrum(AbstractWrapperObject):
             spectrumView.refreshData()
 
     @property
+    def _updateAliasingRange(self):
+        """Return whether the aliasingRange needs to be updated when aliasing
+        of peaks has changed
+        """
+        alias = self.getParameter(SPECTRUMALIASING, UPDATEALIASINGRANGE)
+        if alias is not None:
+            return alias
+
+        # set default values in the ccpnInternal store
+        alias = True
+        self.setParameter(SPECTRUMALIASING, UPDATEALIASINGRANGE, alias)
+        return alias
+
+    @_updateAliasingRange.setter
+    def _updateAliasingRange(self, value):
+        """Set whether the aliasingRange needs to be updated when aliasing
+        of peaks has changed
+        """
+        if not isinstance(value, bool):
+            raise ValueError("_updateAliasingRange must be True/False.")
+
+        self.setParameter(SPECTRUMALIASING, UPDATEALIASINGRANGE, value)
+
+    @property
     def aliasingRange(self) -> Optional[Tuple[Tuple, ...]]:
         """Return a tuple of the aliasing range in each dimension, or None of not set
         """
@@ -1256,6 +1281,8 @@ class Spectrum(AbstractWrapperObject):
         Must be a tuple matching the number of dimension.
         Each element is a tuple of the form (min, max)
         where min/max are integer in the range -3 -> +3
+
+            e.g. aliasingRange = ((0, 0), (-1, 1), ...)
         """
 
         # error checking that the tuples are correctly defined

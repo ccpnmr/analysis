@@ -25,16 +25,19 @@ __date__ = "$Date$"
 
 import numpy as np
 from collections import OrderedDict
+from functools import partial
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.HLine import HLine
+from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
-from ccpn.ui.gui.popups.Dialog import CcpnDialog, dialogErrorReport, handleDialogApply
+from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.core.Spectrum import MAXALIASINGRANGE
-from ccpn.core.lib.ContextManagers import undoBlock, undoStackBlocking
+from ccpn.core.lib.ContextManagers import undoStackBlocking
+
 
 DEFAULTALIASING = MAXALIASINGRANGE
 COLWIDTH = 140
@@ -59,13 +62,15 @@ class SetPeakAliasingPopup(CcpnDialog):
         row = 0
         self.spectra = OrderedDict()
         self.spectraPulldowns = OrderedDict()
-        Label(self, text='Set aliasing for currently selected peaks', grid=(row,0), gridSpan=(1,2))
+        self.spectraCheckBoxes = OrderedDict()
+
+        Label(self, text='Set aliasing for currently selected peaks', grid=(row, 0), gridSpan=(1, 2))
         row += 1
 
-        spectrumFrame = Frame(self, setLayout=True, showBorder=False, grid=(row, 0), gridSpan=(1,2))
+        spectrumFrame = Frame(self, setLayout=True, showBorder=False, grid=(row, 0), gridSpan=(1, 2))
 
         specRow = 0
-        aliasRange = list(range(MAXALIASINGRANGE, -MAXALIASINGRANGE-1, -1))
+        aliasRange = list(range(MAXALIASINGRANGE, -MAXALIASINGRANGE - 1, -1))
         aliasText = [str(aa) for aa in aliasRange]
 
         for peak in self.current.peaks:
@@ -78,7 +83,7 @@ class SetPeakAliasingPopup(CcpnDialog):
 
                 if specRow > 0:
                     # add divider
-                    HLine(spectrumFrame, grid=(specRow, 0), gridSpan=(1, dims+2), colour=getColours()[DIVIDER], height=15)
+                    HLine(spectrumFrame, grid=(specRow, 0), gridSpan=(1, dims + 2), colour=getColours()[DIVIDER], height=15)
                     specRow += 1
 
                 # add pulldown widget
@@ -86,19 +91,28 @@ class SetPeakAliasingPopup(CcpnDialog):
                 Label(spectrumFrame, text=' axisCodes:', grid=(specRow, 1))
 
                 for dim in range(dims):
-                    Label(spectrumFrame, text=spectrum.axisCodes[dim], grid=(specRow, dim+2))
+                    Label(spectrumFrame, text=spectrum.axisCodes[dim], grid=(specRow, dim + 2))
                 specRow += 1
 
                 self.spectraPulldowns[spectrum] = []
                 Label(spectrumFrame, text=' aliasing:', grid=(specRow, 1))
                 for dim in range(dims):
-
                     self.spectraPulldowns[spectrum].append(PulldownList(spectrumFrame, texts=aliasText,
-                                                           grid=(specRow, dim+2)))  #, index=DEFAULTALIASING))
+                                                                        grid=(specRow, dim + 2)))  #, index=DEFAULTALIASING))
 
                     # may cause a problem if the peak dimension does not correspond to a visible XY axis
                     # peaks could disappear from all views
 
+                specRow += 1
+
+                self.spectraCheckBoxes[spectrum] = CheckBoxCompoundWidget(spectrumFrame,
+                                                                          grid=(specRow, 0), gridSpan=(1, dims + 2),  #vAlign='top', hAlign='left',
+                                                                          fixedWidths=(COLWIDTH, 30),
+                                                                          orientation='left',
+                                                                          labelText='Update aliasing range:',
+                                                                          checked=spectrum._updateAliasingRange,
+                                                                          callback=partial(self._updateAliasingRange, spectrum)
+                                                                          )
                 specRow += 1
 
             self.spectra[peak.peakList.spectrum].add(peak)
@@ -146,18 +160,30 @@ class SetPeakAliasingPopup(CcpnDialog):
 
         self.GLSignals = GLNotifier(parent=self)
 
+    def _updateAliasingRange(self, spectrum, updateValue):
+        """Set the upateAliasingRange flag for spectra
+        """
+        if spectrum:
+            spectrum._updateAliasingRange = updateValue
+
     def _refreshGLItems(self):
 
         # change aliasing contour limits for selected peaks
 
         # iterate through spectra
-            # through peaks
-                # get aliasing limits for each peak
-                # set aliasing limits in spectrum properties
+        # through peaks
+        # get aliasing limits for each peak
+        # set aliasing limits in spectrum properties
 
-                # update values in strips
+        # update values in strips
 
         for spectrum in self.project.spectra:
+
+            # check whether the aliasingRange needs to be updated
+            if not spectrum._updateAliasingRange:
+                continue
+
+            # calculate the min/max aliasing values for the spectrum
             dims = spectrum.dimensionCount
 
             aliasMin = [0] * dims
@@ -171,8 +197,8 @@ class SetPeakAliasingPopup(CcpnDialog):
                     aliasMin = np.minimum(aliasMin, alias)
 
             if alias:
-                # set min/max in spectrum here
-                aliasRange = tuple((int(mn), int(mx)) for mn, mx in zip(aliasMin,aliasMax))
+                # set min/max in spectrum here if a peak has been found
+                aliasRange = tuple((int(mn), int(mx)) for mn, mx in zip(aliasMin, aliasMax))
                 spectrum.aliasingRange = aliasRange
 
         # emit a signal to rebuild all peaks

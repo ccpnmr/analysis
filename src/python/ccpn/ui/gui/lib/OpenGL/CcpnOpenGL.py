@@ -2665,6 +2665,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
                         specSettings = self._spectrumSettings[spectrumView]
 
+                        # should move this to buildSpectrumDSettings
+                        # and emit a signal when aliasingRange or foldingModes are changed
+
                         fx0 = specSettings[GLDefs.SPECTRUM_MAXXALIAS]
                         fx1 = specSettings[GLDefs.SPECTRUM_MINXALIAS]
                         fy0 = specSettings[GLDefs.SPECTRUM_MAXYALIAS]

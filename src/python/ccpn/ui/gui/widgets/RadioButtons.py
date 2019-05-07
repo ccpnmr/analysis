@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.RadioButton import RadioButton
-
+from ccpn.ui.gui.widgets.Icon import Icon
 
 CHECKED = QtCore.Qt.Checked
 UNCHECKED = QtCore.Qt.Unchecked
@@ -34,7 +34,9 @@ UNCHECKED = QtCore.Qt.Unchecked
 class RadioButtons(QtWidgets.QWidget, Base):
 
     def __init__(self, parent, texts=None, selectedInd=None, exclusive=True,
-                 callback=None, direction='h', tipTexts=None, objectNames=None, **kwds):
+                 callback=None, direction='h', tipTexts=None, objectNames=None,
+                 icons=None,
+                 **kwds):
 
         super().__init__(parent)
         Base._init(self, setLayout=True, **kwds)
@@ -53,8 +55,22 @@ class RadioButtons(QtWidgets.QWidget, Base):
         if not objectNames:
             objectNames = [None] * len(texts)
 
+        # added functionality for icons
+        # icons is a list of str/tuple
+        #
+        #   e.g. icons = ('icons/strip-row', 'strip-column')
+        #       icons = ( ('icons/strip-row', (24,24)),
+        #                 ('strip-column', (24,24))
+        #               )
+        #       where (24,24) is the size of the bounding box containing the icon
+
+        if not icons:
+            icons = [None] * len(texts)
+
         self.radioButtons = []
-        self.setButtons(texts, selectedInd, direction, tipTexts, objectNames)
+        self.setButtons(texts, selectedInd, direction, tipTexts, objectNames,
+                        icons=icons)
+
         # for i, text in enumerate(texts):
         #   if 'h' in direction:
         #     grid = (0, i)
@@ -74,7 +90,8 @@ class RadioButtons(QtWidgets.QWidget, Base):
 
         self.setCallback(callback)
 
-    def setButtons(self, texts=None, selectedInd=None, direction='h', tipTexts=None, objectNames=None, silent=False):
+    def setButtons(self, texts=None, selectedInd=None, direction='h', tipTexts=None, objectNames=None, silent=False,
+                   icons=None):
         """Change the buttons in the button group
         """
         # clear the original buttons
@@ -98,6 +115,31 @@ class RadioButtons(QtWidgets.QWidget, Base):
             self.buttonGroup.setId(button, i)
             if objectNames and objectNames[i]:
                 button.setObjectName(objectNames[i])
+
+            # set icons if required - these will automatically go to the left of the text
+            if icons and icons[i]:
+                thisIcon = icons[i]
+
+                if isinstance(thisIcon, str):
+                    # icon list item only contains a name
+                    button.setIcon(Icon(thisIcon))
+
+                elif isinstance(thisIcon, (list, tuple)):
+
+                    # icon item contains a list/tuple
+                    if thisIcon and isinstance(thisIcon[0], str):
+                        #first item is a string name
+                        button.setIcon(Icon(thisIcon[0]))
+
+                        # second value must be tuple of integer, length == 2
+                        if len(thisIcon) == 2:
+                            iconSize = thisIcon[1]
+
+                            if isinstance(iconSize, (list,tuple)) and len(iconSize) == 2 and \
+                                all(isinstance(iconVal, int) for iconVal in iconSize):
+
+                                # set the iconSize
+                                button.setIconSize(QtCore.QSize(*iconSize))
 
         self.texts = texts
         if selectedInd is not None:

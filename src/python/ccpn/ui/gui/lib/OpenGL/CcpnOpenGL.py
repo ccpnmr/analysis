@@ -2663,59 +2663,61 @@ class CcpnGLWidget(QOpenGLWidget):
                     if spectrumView in self._spectrumSettings.keys():
                         # set correct transform when drawing this contour
 
-                        specSettings = self._spectrumSettings[spectrumView]
+                        if spectrumView.spectrum.displayFoldedContours:
+                            specSettings = self._spectrumSettings[spectrumView]
 
-                        # should move this to buildSpectrumDSettings
-                        # and emit a signal when aliasingRange or foldingModes are changed
+                            # should move this to buildSpectrumDSettings
+                            # and emit a signal when aliasingRange or foldingModes are changed
 
-                        fx0 = specSettings[GLDefs.SPECTRUM_MAXXALIAS]
-                        fx1 = specSettings[GLDefs.SPECTRUM_MINXALIAS]
-                        fy0 = specSettings[GLDefs.SPECTRUM_MAXYALIAS]
-                        fy1 = specSettings[GLDefs.SPECTRUM_MINYALIAS]
-                        dxAF = specSettings[GLDefs.SPECTRUM_DXAF]
-                        dyAF = specSettings[GLDefs.SPECTRUM_DYAF]
-                        xScale = specSettings[GLDefs.SPECTRUM_XSCALE]
-                        yScale = specSettings[GLDefs.SPECTRUM_YSCALE]
+                            fx0 = specSettings[GLDefs.SPECTRUM_MAXXALIAS]
+                            fx1 = specSettings[GLDefs.SPECTRUM_MINXALIAS]
+                            fy0 = specSettings[GLDefs.SPECTRUM_MAXYALIAS]
+                            fy1 = specSettings[GLDefs.SPECTRUM_MINYALIAS]
+                            dxAF = specSettings[GLDefs.SPECTRUM_DXAF]
+                            dyAF = specSettings[GLDefs.SPECTRUM_DYAF]
+                            xScale = specSettings[GLDefs.SPECTRUM_XSCALE]
+                            yScale = specSettings[GLDefs.SPECTRUM_YSCALE]
 
-                        specMatrix = np.array(specSettings[GLDefs.SPECTRUM_MATRIX], dtype=np.float32)
+                            specMatrix = np.array(specSettings[GLDefs.SPECTRUM_MATRIX], dtype=np.float32)
 
-                        alias = spectrumView.spectrum.aliasingRange
-                        folding = spectrumView.spectrum.foldingModes
-                        pIndex = specSettings[GLDefs.SPECTRUM_POINTINDEX]
+                            alias = spectrumView.spectrum.aliasingRange
+                            folding = spectrumView.spectrum.foldingModes
+                            pIndex = specSettings[GLDefs.SPECTRUM_POINTINDEX]
 
-                        for ii in range(alias[pIndex[0]][0], alias[pIndex[0]][1]+1, 1):
-                            for jj in range(alias[pIndex[1]][0], alias[pIndex[1]][1]+1, 1):
+                            for ii in range(alias[pIndex[0]][0], alias[pIndex[0]][1]+1, 1):
+                                for jj in range(alias[pIndex[1]][0], alias[pIndex[1]][1]+1, 1):
 
-                                foldX = foldY = 1.0
-                                foldXOffset = foldYOffset = 0
-                                if folding[pIndex[0]] == 'mirror':
-                                    foldX = pow(-1,ii)
-                                    foldXOffset = -dxAF if foldX < 0 else 0
+                                    foldX = foldY = 1.0
+                                    foldXOffset = foldYOffset = 0
+                                    if folding[pIndex[0]] == 'mirror':
+                                        foldX = pow(-1,ii)
+                                        foldXOffset = -dxAF if foldX < 0 else 0
 
-                                if folding[pIndex[1]] == 'mirror':
-                                    foldY = pow(-1,jj)
-                                    foldYOffset = -dyAF if foldY < 0 else 0
+                                    if folding[pIndex[1]] == 'mirror':
+                                        foldY = pow(-1,jj)
+                                        foldYOffset = -dyAF if foldY < 0 else 0
 
-                                specMatrix[0:16] = [xScale*foldX, 0.0, 0.0, 0.0,
-                                                    0.0, yScale*foldY, 0.0, 0.0,
-                                                    0.0, 0.0, 1.0, 0.0,
-                                                    fx0+(ii*dxAF)+foldXOffset, fy0+(jj*dyAF)+foldYOffset, 0.0, 1.0]
+                                    specMatrix[0:16] = [xScale*foldX, 0.0, 0.0, 0.0,
+                                                        0.0, yScale*foldY, 0.0, 0.0,
+                                                        0.0, 0.0, 1.0, 0.0,
+                                                        fx0+(ii*dxAF)+foldXOffset, fy0+(jj*dyAF)+foldYOffset, 0.0, 1.0]
 
-                                # flipping in the same GL region -  xScale = -xScale
-                                #                                   offset = fx0-dxAF
-                                # circular -    offset = fx0 + dxAF*alias, alias = min->max
-                                currentShader.setGLUniformMatrix4fv('mvMatrix',
-                                                                    1, GL.GL_FALSE, specMatrix)
+                                    # flipping in the same GL region -  xScale = -xScale
+                                    #                                   offset = fx0-dxAF
+                                    # circular -    offset = fx0 + dxAF*alias, alias = min->max
+                                    currentShader.setGLUniformMatrix4fv('mvMatrix',
+                                                                        1, GL.GL_FALSE, specMatrix)
 
-                                self._contourList[spectrumView].drawIndexVBO(enableVBO=True)
+                                    self._contourList[spectrumView].drawIndexVBO(enableVBO=True)
 
-                        # # set the scaling/offset for a single spectrum GL contour
-                        # currentShader.setGLUniformMatrix4fv('mvMatrix',
-                        #                                     1, GL.GL_FALSE,
-                        #                                     self._spectrumSettings[spectrumView][
-                        #                                         GLDefs.SPECTRUM_MATRIX])
-                        #
-                        # self._contourList[spectrumView].drawIndexVBO(enableVBO=True)
+                        else:
+                            # set the scaling/offset for a single spectrum GL contour
+                            currentShader.setGLUniformMatrix4fv('mvMatrix',
+                                                                1, GL.GL_FALSE,
+                                                                self._spectrumSettings[spectrumView][
+                                                                    GLDefs.SPECTRUM_MATRIX])
+
+                            self._contourList[spectrumView].drawIndexVBO(enableVBO=True)
                 else:
 
                     # only draw the traces for the spectra that are visible

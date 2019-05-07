@@ -1190,6 +1190,8 @@ class Project(AbstractWrapperObject):
             # make sure the colour brightness is not too close to the colourScheme background
             # TODO:ED another nasty _appBase
 
+            # estimate base contour level here
+
             # if there is a gui then check the colours
             if self._appBase.ui:
                 if self._appBase.preferences and self._appBase.preferences.general.autoCorrectColours:

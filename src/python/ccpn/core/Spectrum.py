@@ -92,6 +92,7 @@ SPECTRUMPREFERREDAXISORDERING = 'spectrumPreferredAxisOrdering'
 SPECTRUMALIASING = 'spectrumAliasing'
 ALIASINGLIMITS = 'aliasingLimits'
 UPDATEALIASINGRANGE = '_updateAliasingRange'
+DISPLAYFOLDEDCONTOURS = 'displayFoldedContours'
 MAXALIASINGRANGE = 3
 
 
@@ -1239,6 +1240,28 @@ class Spectrum(AbstractWrapperObject):
             spectrumView.refreshData()
 
     @property
+    def displayFoldedContours(self):
+        """Return whether the folded spectrum contours are to be displayed
+        """
+        alias = self.getParameter(SPECTRUMALIASING, DISPLAYFOLDEDCONTOURS)
+        if alias is not None:
+            return alias
+
+        # set default values in the ccpnInternal store
+        alias = True
+        self.setParameter(SPECTRUMALIASING, DISPLAYFOLDEDCONTOURS, alias)
+        return alias
+
+    @displayFoldedContours.setter
+    def displayFoldedContours(self, value):
+        """Set whether the folded spectrum contours are to be displayed
+        """
+        if not isinstance(value, bool):
+            raise ValueError("displayFoldedContours must be True/False.")
+
+        self.setParameter(SPECTRUMALIASING, DISPLAYFOLDEDCONTOURS, value)
+
+    @property
     def _updateAliasingRange(self):
         """Return whether the aliasingRange needs to be updated when aliasing
         of peaks has changed
@@ -1268,7 +1291,7 @@ class Spectrum(AbstractWrapperObject):
         """
         alias = self.getParameter(SPECTRUMALIASING, ALIASINGLIMITS)
         if alias is not None:
-            return alias
+            return tuple(tuple(rr) for rr in alias)
 
         # set default values in the ccpnInternal store
         alias = ((0, 0),) * self.dimensionCount

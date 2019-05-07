@@ -107,9 +107,9 @@ class SetPeakAliasingPopup(CcpnDialog):
 
                 self.spectraCheckBoxes[spectrum] = CheckBoxCompoundWidget(spectrumFrame,
                                                                           grid=(specRow, 0), gridSpan=(1, dims + 2),  #vAlign='top', hAlign='left',
-                                                                          fixedWidths=(COLWIDTH, 30),
+                                                                          # fixedWidths=(COLWIDTH, 30),
                                                                           orientation='left',
-                                                                          labelText='Update aliasing range:',
+                                                                          labelText='Update spectrum aliasing parameters:',
                                                                           checked=spectrum._updateAliasingRange,
                                                                           callback=partial(self._updateAliasingRange, spectrum)
                                                                           )
@@ -200,6 +200,7 @@ class SetPeakAliasingPopup(CcpnDialog):
                 # set min/max in spectrum here if a peak has been found
                 aliasRange = tuple((int(mn), int(mx)) for mn, mx in zip(aliasMin, aliasMax))
                 spectrum.aliasingRange = aliasRange
+                spectrum.displayFoldedContours = True
 
         # emit a signal to rebuild all peaks
         self.GLSignals.emitEvent(triggers=[GLNotifier.GLALLPEAKS, GLNotifier.GLALLMULTIPLETS])

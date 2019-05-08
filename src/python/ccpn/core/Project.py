@@ -1217,18 +1217,14 @@ class Project(AbstractWrapperObject):
                         if not data.size:
                             continue
 
-                        try:
-                            # calculate the noise values
-                            flatData = data.flatten()
+                        # calculate the noise values
+                        flatData = data.flatten()
 
-                            SD = np.std(flatData)
-                            max = np.max(flatData)
-                            min = np.min(flatData)
-                            mn = np.mean(flatData)
-                            noiseLevel = mn + 3.0 * SD
-                        except Exception as es:
-                            pass
-
+                        SD = np.std(flatData)
+                        max = np.max(flatData)
+                        min = np.min(flatData)
+                        mn = np.mean(flatData)
+                        noiseLevel = mn + 3.0 * SD
 
                         # print('>>>iterate', ii, data.shape, SD, max, min, mn, noiseLevel, '*' if noiseLevel > max else '-')
                         if not startCondition:
@@ -1246,8 +1242,6 @@ class Project(AbstractWrapperObject):
                         if ii < 3:
                             _recurseData(ii+1, newData, startCondition, endCondition)
 
-                print('>>> ~~~~~~~~~~~~~~~~~~~~~~')
-
                 # just use the first region
                 for region in foundRegions[:1]:
                     dataArray, intRegion, *rest = region
@@ -1255,22 +1249,19 @@ class Project(AbstractWrapperObject):
                     if dataArray.size:
 
                         # iterate over the array to calculate noise at each level
-
                         dataList = [dataArray]
                         startCondition = []
                         endCondition = []
                         _recurseData(0, dataList, startCondition, endCondition)
 
-                        print('>>>found', startCondition, endCondition)
-
                         levels = 10
-                        base = 2.5 * endCondition[6]                      # 3 * noiseLevel
-                        mx = startCondition[3]                          # global array max
+                        base = endCondition[5] + 3.0 * endCondition[6]      # mean + (3 * noiseLevel)
+                        mx = startCondition[3]                              # global array max
 
-                        mult = pow((mx / base), 1/(levels+1))
+                        # calculate multiplier to give contours across range of spectrum
+                        mult = pow((mx / base), 1/levels)
 
-                        print('>>>estimated levels', levels, base, mx, mult)
-
+                        # put the new values into the spectrum
                         spectrum.noiseLevel = base
                         spectrum.positiveContourBase = base
                         spectrum.positiveContourFactor = mult

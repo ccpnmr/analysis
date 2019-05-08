@@ -1178,6 +1178,7 @@ class Project(AbstractWrapperObject):
 
     def loadSpectrum(self, path: str, subType: str) -> list:
         """Load spectrum from file into application"""
+        from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
 
         # #TODO:RASMUS FIXME check for rename
 
@@ -1188,92 +1189,14 @@ class Project(AbstractWrapperObject):
             spectrum = self._data2Obj[apiDataSource]
             spectrum.assignmentTolerances = spectrum.defaultAssignmentTolerances
 
+            # estimate new base contour levels
+            setContourLevelsFromNoise(spectrum)
+
             # make sure the colour brightness is not too close to the colourScheme background
-            # TODO:ED another nasty _appBase
-
-            # estimate base contour level here
-
-            # get specLimits for all dimensions
-            specLimits = list(spectrum.spectrumLimits)
-            dims = spectrum.dimensionCount
-
-            # set dimensions above 1 to just the centre of the spectrum
-            for ii in range(2, dims):
-                k = np.mean(specLimits[ii])
-                specLimits[ii] = (k, k)
-
-            axisCodeDict = dict((k, v) for k, v in zip(spectrum.axisCodes, specLimits))
-            exclusionBuffer = [1] * len(axisCodeDict)
-
-            foundRegions = spectrum.getRegionData(exclusionBuffer=exclusionBuffer, minimumDimensionSize=1, **axisCodeDict)
-            if foundRegions:
-
-
-                def _recurseData(ii, dataList, startCondition, endCondition):
-                    """Iterate over the dataArray
-                    """
-                    for data in dataList:
-
-                        if not data.size:
-                            continue
-
-                        # calculate the noise values
-                        flatData = data.flatten()
-
-                        SD = np.std(flatData)
-                        max = np.max(flatData)
-                        min = np.min(flatData)
-                        mn = np.mean(flatData)
-                        noiseLevel = mn + 3.0 * SD
-
-                        # print('>>>iterate', ii, data.shape, SD, max, min, mn, noiseLevel, '*' if noiseLevel > max else '-')
-                        if not startCondition:
-                            startCondition[:] = [ii, data.shape, SD, max, min, mn, noiseLevel]
-                            endCondition[:] = startCondition[:]
-
-                        if SD < endCondition[2]:
-                            endCondition[:] = [ii, data.shape, SD, max, min, mn, noiseLevel]
-
-                        newData = [data]
-                        for jj in range(len(data.shape)):
-                            newData = [np.array_split(dd, 2, axis=jj) for dd in newData]
-                            newData = [val for sublist in newData for val in sublist]
-
-                        if ii < 3:
-                            _recurseData(ii+1, newData, startCondition, endCondition)
-
-                # just use the first region
-                for region in foundRegions[:1]:
-                    dataArray, intRegion, *rest = region
-
-                    if dataArray.size:
-
-                        # iterate over the array to calculate noise at each level
-                        dataList = [dataArray]
-                        startCondition = []
-                        endCondition = []
-                        _recurseData(0, dataList, startCondition, endCondition)
-
-                        levels = 10
-                        base = endCondition[5] + 3.0 * endCondition[6]      # mean + (3 * noiseLevel)
-                        mx = startCondition[3]                              # global array max
-
-                        # calculate multiplier to give contours across range of spectrum
-                        mult = pow((mx / base), 1/levels)
-
-                        # put the new values into the spectrum
-                        spectrum.noiseLevel = base
-                        spectrum.positiveContourBase = base
-                        spectrum.positiveContourFactor = mult
-                        spectrum.positiveContourCount = levels
-
-                        spectrum.negativeContourBase = -base
-                        spectrum.negativeContourFactor = mult
-                        spectrum.negativeContourCount = levels
 
             # if there is a gui then check the colours
-            if self._appBase.ui:
-                if self._appBase.preferences and self._appBase.preferences.general.autoCorrectColours:
+            if self.application.ui:
+                if self.application.preferences and self.application.preferences.general.autoCorrectColours:
                     from ccpn.ui.gui.guiSettings import autoCorrectHexColour, getColours, CCPNGLWIDGET_HEXBACKGROUND
                     from ccpn.core.lib.SpectrumLib import getDefaultSpectrumColours
 

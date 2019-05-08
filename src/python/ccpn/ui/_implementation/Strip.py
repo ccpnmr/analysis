@@ -580,7 +580,7 @@ class Strip(AbstractWrapperObject):
                 indices = spectrum.getByAxisCodes('indices', stripAxisCodes)
             except Exception as es:
 
-                # spectrum possibly no compatible here, may be 2d overlaid onto Nd
+                # spectrum possibly not compatible here, may be 2d overlaid onto Nd
                 indices = spectrum.getByAxisCodes('indices', stripAxisCodes[0:2])
 
             # sort the axis limits by spectrum axis order

@@ -1202,6 +1202,84 @@ class Project(AbstractWrapperObject):
                 k = np.mean(specLimits[ii])
                 specLimits[ii] = (k, k)
 
+            axisCodeDict = dict((k, v) for k, v in zip(spectrum.axisCodes, specLimits))
+            exclusionBuffer = [1] * len(axisCodeDict)
+
+            foundRegions = spectrum.getRegionData(exclusionBuffer=exclusionBuffer, minimumDimensionSize=1, **axisCodeDict)
+            if foundRegions:
+
+
+                def _recurseData(ii, dataList, startCondition, endCondition):
+                    """Iterate over the dataArray
+                    """
+                    for data in dataList:
+
+                        if not data.size:
+                            continue
+
+                        try:
+                            # calculate the noise values
+                            flatData = data.flatten()
+
+                            SD = np.std(flatData)
+                            max = np.max(flatData)
+                            min = np.min(flatData)
+                            mn = np.mean(flatData)
+                            noiseLevel = mn + 3.0 * SD
+                        except Exception as es:
+                            pass
+
+
+                        # print('>>>iterate', ii, data.shape, SD, max, min, mn, noiseLevel, '*' if noiseLevel > max else '-')
+                        if not startCondition:
+                            startCondition[:] = [ii, data.shape, SD, max, min, mn, noiseLevel]
+                            endCondition[:] = startCondition[:]
+
+                        if SD < endCondition[2]:
+                            endCondition[:] = [ii, data.shape, SD, max, min, mn, noiseLevel]
+
+                        newData = [data]
+                        for jj in range(len(data.shape)):
+                            newData = [np.array_split(dd, 2, axis=jj) for dd in newData]
+                            newData = [val for sublist in newData for val in sublist]
+
+                        if ii < 3:
+                            _recurseData(ii+1, newData, startCondition, endCondition)
+
+                print('>>> ~~~~~~~~~~~~~~~~~~~~~~')
+
+                # just use the first region
+                for region in foundRegions[:1]:
+                    dataArray, intRegion, *rest = region
+
+                    if dataArray.size:
+
+                        # iterate over the array to calculate noise at each level
+
+                        dataList = [dataArray]
+                        startCondition = []
+                        endCondition = []
+                        _recurseData(0, dataList, startCondition, endCondition)
+
+                        print('>>>found', startCondition, endCondition)
+
+                        levels = 10
+                        base = 2.5 * endCondition[6]                      # 3 * noiseLevel
+                        mx = startCondition[3]                          # global array max
+
+                        mult = pow((mx / base), 1/(levels+1))
+
+                        print('>>>estimated levels', levels, base, mx, mult)
+
+                        spectrum.noiseLevel = base
+                        spectrum.positiveContourBase = base
+                        spectrum.positiveContourFactor = mult
+                        spectrum.positiveContourCount = levels
+
+                        spectrum.negativeContourBase = -base
+                        spectrum.negativeContourFactor = mult
+                        spectrum.negativeContourCount = levels
+
             # if there is a gui then check the colours
             if self._appBase.ui:
                 if self._appBase.preferences and self._appBase.preferences.general.autoCorrectColours:

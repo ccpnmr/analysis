@@ -189,7 +189,7 @@ class Spectrum(AbstractWrapperObject):
         return self._wrappedData.name
 
     @name.setter
-    def name(self, value:str):
+    def name(self, value: str):
         """set name of Spectrum."""
         self.rename(value)
 
@@ -404,7 +404,6 @@ class Spectrum(AbstractWrapperObject):
         """Stored in Internal """
         propertyName = sys._getframe().f_code.co_name
         self.setParameter(self._AdditionalAttribute, propertyName, value)
-
 
     @property
     def synonym(self) -> str:
@@ -1603,7 +1602,7 @@ class Spectrum(AbstractWrapperObject):
                                  (axisCode, newAxisCodeOrder, self.axisCodes))
         return newValues
 
-    def getRegionData(self, exclusionBuffer=None, **axisDict):
+    def getRegionData(self, exclusionBuffer:Optional[Sequence], minimumDimensionSize: int = 3, **axisDict):
         """Return the region of the spectrum data defined by the axis limits.
 
         Axis limits are passed in as a dict containing the axis codes and the required limits.
@@ -1633,7 +1632,14 @@ class Spectrum(AbstractWrapperObject):
                             extends the region by 1 index point in all axes.
                             Default is 1 in all axis directions.
 
+        minimumDimensionSize:   defines the minimum number if elements in each dimension that are needed
+                                for the region to be valid.
+
+                                default is 3, as mostly used for parabolic curve fitting which
+                                requires 3 points in any given dimension
+
         :param exclusionBuffer: array of int
+        :param minimumDimensionSize: int
         :param axisDict: dict of axis limits
         :return: numpy data array
         """
@@ -1791,7 +1797,9 @@ class Spectrum(AbstractWrapperObject):
                 numPointInt = endPointInt - startPointInt
                 startPointBuffer = np.maximum(startPointBuffer, startPointInt)
                 endPointBuffer = np.minimum(endPointBuffer, endPointInt)
-                if np.any(numPointInt <= 2):  # return if any of the dimensions has <= 2 points
+
+                # check that the number of elements in each dimension, skip if too small
+                if np.any(numPointInt < minimumDimensionSize):
                     continue
 
                 result += ((dataArray, intRegion,
@@ -2025,7 +2033,7 @@ class Spectrum(AbstractWrapperObject):
         if len(order) != self.dimensionCount:
             raise TypeError('order is not the correct length')
         if not all(isinstance(ss, int) and ss >= 0 and ss < self.dimensionCount for ss in order):
-            raise TypeError('order elements must be integer and in (0 .. %d)' % (self.dimensionCount-1))
+            raise TypeError('order elements must be integer and in (0 .. %d)' % (self.dimensionCount - 1))
         if len(set(order)) != len(order):
             raise ValueError('order must contain unique elements')
 

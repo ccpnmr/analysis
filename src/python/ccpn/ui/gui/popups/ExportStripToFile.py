@@ -41,7 +41,7 @@ from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString
-from ccpn.util.Colour import rgbRatioToHex, hexToRgbRatio
+from ccpn.util.Colour import rgbRatioToHex, hexToRgbRatio, colourNameNoSpace
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.Frame import Frame
@@ -282,7 +282,7 @@ class ExportStripToFilePopup(ExportDialog):
         self.setMinimumHeight(self.sizeHint().height())
 
     def _changeForegroundPulldown(self, int):
-        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(self.foregroundColourBox.currentText())]
+        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.foregroundColourBox.currentText()))]
         if newColour:
             self.foregroundColour = newColour
 
@@ -298,7 +298,7 @@ class ExportStripToFilePopup(ExportDialog):
             self.foregroundColour = newColour.name()
 
     def _changeBackgroundPulldown(self, int):
-        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(self.backgroundColourBox.currentText())]
+        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.backgroundColourBox.currentText()))]
         if newColour:
             self.backgroundColour = newColour
 

@@ -144,6 +144,44 @@ COLORMATRIXJPEGINV = [[1.0, 0.0, 1.402],
                       [1.0, 1.772, 0.0]]
 
 
+def colourNameNoSpace(name):
+    """remove spaces from the colourname
+    """
+    return name             # currently no effect until sorted
+
+    # return ''.join(name.split())
+
+
+def colourNameWithSpace(name):
+    """insert spaces into the colourname
+    """
+
+    # list of all possible words that are in the colour names
+    nounList = ['dark', 'dim', 'medium', 'light', 'pale', 'white', 'rosy', 'indian', 'misty',
+                'red', 'orange', 'burly', 'antique', 'navajo', 'blanched', 'papaya', 'floral',
+                'lemon', 'olive', 'yellow', 'green', 'lawn', 'sea', 'forest', 'lime', 'spring',
+                'slate', 'cadet', 'powder', 'sky', 'steel', 'royal', 'ghost', 'midnight', 'navy', 'rebecca', 'blue',
+                'violet', 'deep', 'hot', 'lavender', 'cornflower', 'dodger', 'alice',
+                'sandy', 'saddle'
+                ]
+    subsetNouns = ['goldenrod', 'golden', 'old']
+
+    # insert spaces after found nouns
+    colName = name
+    for noun in nounList:
+        if noun in colName:
+            colName = colName.replace(noun, noun + ' ')
+
+    # check for nouns that also contain shorter nouns
+    for noun in subsetNouns:
+        if noun in colName:
+            colName = colName.replace(noun, noun + ' ')
+            break
+
+    # return the new name without trailing spaces, too many spaces
+    return " ".join(colName.split())
+
+
 def invertRGB(r, g, b):
     """Invert the rgb colour using the ycbcr method by inverting the luma
     rgb input r, g, b in range 0-255
@@ -169,9 +207,12 @@ def invertRGB(r, g, b):
     rgbprimeOut = np.clip(rgbprimeOut, [0, 0, 0], [255, 255, 255])
     return tuple([float(col) for col in rgbprimeOut])
 
+
 def _getRandomColours(numberOfColors):
-  import random
-  return  ["#" + ''.join([random.choice('0123456789ABCDEF') for j in range(6)]) for i in range(numberOfColors)]
+    import random
+
+    return ["#" + ''.join([random.choice('0123456789ABCDEF') for j in range(6)]) for i in range(numberOfColors)]
+
 
 colourNameToHexDict = {
     'red'    : '#ff0000',
@@ -182,48 +223,47 @@ colourNameToHexDict = {
     'cyan'   : '#ffff00',
     }
 
-spectrumColours = OrderedDict([('#cb1400', 'red'),
-                               ('#860700', 'dark red'),
-                               ('#933355', 'burgundy'),
-                               ('#947676', 'bazaar'),
+shortSpectrumColours = OrderedDict([('#cb1400', 'red'),
+                                    ('#860700', 'dark red'),
+                                    ('#933355', 'burgundy'),
+                                    ('#947676', 'bazaar'),
 
-                               ('#d231cb', 'pink'),
-                               ('#df2950', 'pastel pink'),
-                               ('#f9609c', 'mid pink'),
-                               ('#ff8eff', 'light pink'),
-                               ('#f9609c', 'mid pink'),
+                                    ('#d231cb', 'pink'),
+                                    ('#df2950', 'pastel pink'),
+                                    ('#ff8eff', 'light pink'),
+                                    ('#f9609c', 'mid pink'),
 
-                               ('#d24c23', 'dark orange'),
-                               ('#fe6c11', 'orange'),
-                               ('#ff932e', 'light pastel orange'),
-                               ('#ecfc00', 'yellow'),
-                               ('#ffff5a', 'light yellow'),
+                                    ('#d24c23', 'dark orange'),
+                                    ('#fe6c11', 'orange'),
+                                    ('#ff932e', 'light pastel orange'),
+                                    ('#ecfc00', 'yellow'),
+                                    ('#ffff5a', 'light yellow'),
 
-                               ('#50ae56', 'mid green'),
-                               ('#3fe945', 'light green'),
-                               ('#097a27', 'pastel green'),
-                               ('#064a1a', 'dark green'),
-                               ('#80ff00', 'chartreuse'),
+                                    ('#50ae56', 'mid green'),
+                                    ('#3fe945', 'light green'),
+                                    ('#097a27', 'pastel green'),
+                                    ('#064a1a', 'dark green'),
+                                    ('#80ff00', 'chartreuse'),
 
-                               ('#1530ff', 'blue'),
-                               ('#1020aa', 'dark blue'),
-                               ('#4080ff', 'light blue'),
-                               ('#318290', 'pastel blue'),
-                               ('#2d5175', 'mid blue'),
-                               ('#4f9caa', 'light pastel blue'),
-                               ('#957eff', 'heliotrope'),
+                                    ('#1530ff', 'blue'),
+                                    ('#1020aa', 'dark blue'),
+                                    ('#4080ff', 'light blue'),
+                                    ('#318290', 'pastel blue'),
+                                    ('#2d5175', 'mid blue'),
+                                    ('#4f9caa', 'light pastel blue'),
+                                    ('#957eff', 'heliotrope'),
 
-                               ('#2f2373', 'dark purple'),
-                               ('#5846d6', 'purple'),
-                               ('#7866f8', 'light purple'),
-                               ('#d8e1cf', 'light seashell'),
+                                    ('#2f2373', 'dark purple'),
+                                    ('#5846d6', 'purple'),
+                                    ('#7866f8', 'light purple'),
+                                    ('#d8e1cf', 'light seashell'),
 
-                               ('#3a4e5c', 'dark grey'),
-                               ('#7a7a7a', 'mid grey'),
-                               ('#b0b0b0', 'light grey'),
+                                    ('#3a4e5c', 'dark grey'),
+                                    ('#7a7a7a', 'mid grey'),
+                                    ('#b0b0b0', 'light grey'),
 
-                               ('#ffffff', 'white'),
-                               ('#000000', 'black')])
+                                    ('#ffffff', 'white'),
+                                    ('#000000', 'black')])
 
 allColours = OrderedDict([('#000000', 'black'),
                           ('#696969', 'dimgray'),
@@ -375,6 +415,11 @@ allColours = OrderedDict([('#000000', 'black'),
                           ('#FFB6C1', 'lightpink')
                           ])
 
+allColoursWithSpaces = OrderedDict([(k, colourNameWithSpace(v)) for k, v in allColours.items()])
+
+# set the spectrum colours to all, override minimum set above
+spectrumColours = allColours            # shortSpectrumColours
+
 # split the colour palettes into light and dark for different colour schemes
 spectrumDarkColours = OrderedDict()
 spectrumLightColours = OrderedDict()
@@ -408,6 +453,7 @@ spectrumHexColours = tuple(ky for ky in spectrumColours.keys() if ky != '#')
 
 
 # Note that Colour strings are not re-used
+
 
 class Colour(str):
     """ A class to make colour manipulation easier and more transparent.
@@ -517,6 +563,7 @@ def autoCorrectHexColour(colour, referenceHexColour='#ffffff', addNewColour=True
     if abs(g - gRef) < COLOUR_THRESHOLD:
         newCol = invertRGB(*hexToRgb(colour))
         hx = rgbToHex(*newCol)
+
         if addNewColour:
             addNewColourString(hx)
         return hx
@@ -559,12 +606,15 @@ def fillColourPulldown(pulldown, allowAuto=False):
         pulldown.addItem(text='<auto>')
     for item in spectrumColours.items():
         # if item[1] not in pulldown.texts:
+
+        colName = item[1]           # colourNameWithSpace(item[1])
+
         if item[0] != '#':
             pix = QtGui.QPixmap(QtCore.QSize(20, 20))
             pix.fill(QtGui.QColor(item[0]))
-            pulldown.addItem(icon=QtGui.QIcon(pix), text=item[1])
+            pulldown.addItem(icon=QtGui.QIcon(pix), text=colName)
         elif allowAuto:
-            pulldown.addItem(text=item[1])
+            pulldown.addItem(text=colName)
 
     pulldown.setCurrentText(currText)
 
@@ -574,7 +624,9 @@ def getSpectrumColour(colourName, defaultReturn=None):
     return the hex colour of the named colour
     """
     try:
-        col = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourName)]
+        colName = colourName            # colourNameNoSpace(colourName)
+
+        col = list(spectrumColours.keys())[list(spectrumColours.values()).index(colName)]
         return col
     except:
         # colour not found in the list
@@ -588,8 +640,29 @@ def getAutoColourRgbRatio(inColour=None, sourceObject=None, colourAttribute=None
     return hexToRgbRatio(listColour)
 
 
+def findNearestHex(hexCol):
+    weights = (0.3, 0.59, 0.11)  # assuming rgb
+    rgbIn = hexToRgb(hexCol)
+
+    lastCol = None
+    for k, v in allColours.items():
+
+        rgbTest = hexToRgb(k)
+
+        # use euclidean to find closest colour
+        num = 0.0
+        for a, b, w in zip(rgbIn, rgbTest, weights):
+            num += pow((a - b) * w, 2)
+
+        if lastCol is None or num < lastDiff:
+            lastDiff = num
+            lastCol = (k, v, num)
+
+    return lastCol
+
+
 if __name__ == '__main__':
-    """Simple routine to plot all th enamed colors in the matplotlib colorspace
+    """Simple routine to plot all the named colors in the matplotlib colorspace
     """
     import matplotlib.pyplot as plt
     from matplotlib import colors as mcolors
@@ -609,7 +682,9 @@ if __name__ == '__main__':
     # print the colors to generate full colorList
     for col in sorted_names:
         if isinstance(colors[col], str):
-            print('(' + repr(colors[col]) + ', ' + repr(col) + '),')
+            readableCol = colourNameWithSpace(col)
+
+            print('(' + repr(colors[col]) + ', ' + repr(readableCol) + '),')
 
     fig, ax = plt.subplots(figsize=(16, 9))
 
@@ -642,3 +717,19 @@ if __name__ == '__main__':
                         top=1, bottom=0,
                         hspace=0, wspace=0)
     plt.show()
+
+    print('>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+
+    # find nearest colours to hex
+    for k, v in spectrumColours.items():
+        nearestCol = findNearestHex(k)
+        print('>>>nearest', k, v, nearestCol)
+
+    print('>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+
+    # find nearest opposite intensity colours to hex
+    for k, v in allColours.items():
+        col = autoCorrectHexColour(k, referenceHexColour=k, addNewColour=False)
+        nearestCol = findNearestHex(col)
+
+        print('>>>opposite', k, v, nearestCol)

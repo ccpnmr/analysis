@@ -543,14 +543,16 @@ def getDefaultSpectrumColours(self: 'DataSource') -> Tuple[str, str]:
     spectrumHexColours = getColours().get(SPECTRUM_HEXCOLOURS)
     colorCount = len(spectrumHexColours)
     step = ((colorCount // 2 - 1) // 2)
+    kk = colorCount // 5
     index = self.experiment.serial - 1 + step * (self._serial - 1)
 
+    # larger jump between colours - may not match though
     if self._numDim == 1:
-        ii = (2 * index) % colorCount
+        ii = (kk * index)            # % colorCount
     else:
-        ii = (2 * index) % colorCount
+        ii = (kk * index)            # % colorCount
     #
-    return (spectrumHexColours[ii], spectrumHexColours[ii + 1])
+    return (spectrumHexColours[ii % colorCount], spectrumHexColours[(ii + (kk // 2)) % colorCount])
 
 
 def get1DdataInRange(x, y, xRange):
@@ -570,12 +572,59 @@ def get1DdataInRange(x, y, xRange):
 
     return x_filtered, y_filtered
 
+
+def _recurseData(ii, dataList, startCondition, endCondition):
+    """Iterate over the dataArray, subdividing each iteration
+    """
+    for data in dataList:
+
+        if not data.size:
+            continue
+
+        # calculate the noise values
+        flatData = data.flatten()
+
+        SD = np.std(flatData)
+        max = np.max(flatData)
+        min = np.min(flatData)
+        mn = np.mean(flatData)
+        noiseLevel = mn + 3.0 * SD
+
+        # print('>>>iterate', ii, data.shape, SD, max, min, mn, noiseLevel, '*' if noiseLevel > max else '-')
+        if not startCondition:
+            startCondition[:] = [ii, data.shape, SD, max, min, mn, noiseLevel]
+            endCondition[:] = startCondition[:]
+
+        if SD < endCondition[2]:
+            endCondition[:] = [ii, data.shape, SD, max, min, mn, noiseLevel]
+
+        # stop iterating when all dimensions are <= 64 elements
+        if any(dim > 64 for dim in data.shape):
+
+            newData = [data]
+            for jj in range(len(data.shape)):
+                newData = [np.array_split(dd, 2, axis=jj) for dd in newData]
+                newData = [val for sublist in newData for val in sublist]
+
+            _recurseData(ii + 1, newData, startCondition, endCondition)
+
+
 def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
                               setPositiveContours=True, setNegativeContours=True,
                               useSameMultiplier=False):
 
     """Calculate the noise level, base contour level and positive/negative multipliers for the given spectrum
     """
+
+    # parameter error checking
+    if not isinstance(setNegativeContours, bool):
+        raise TypeError('setNoiseLevel is not boolean.')
+    if not isinstance(setPositiveContours, bool):
+        raise TypeError('setPositiveContours is not boolean.')
+    if not isinstance(setNegativeContours, bool):
+        raise TypeError('setNegativeContours is not boolean.')
+    if not isinstance(useSameMultiplier, bool):
+        raise TypeError('useSameMultiplier is not boolean.')
 
     # get specLimits for all dimensions
     specLimits = list(spectrum.spectrumLimits)
@@ -592,44 +641,12 @@ def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
     foundRegions = spectrum.getRegionData(exclusionBuffer=exclusionBuffer, minimumDimensionSize=1, **axisCodeDict)
     if foundRegions:
 
-        def _recurseData(ii, dataList, startCondition, endCondition):
-            """Iterate over the dataArray
-            """
-            for data in dataList:
-
-                if not data.size:
-                    continue
-
-                # calculate the noise values
-                flatData = data.flatten()
-
-                SD = np.std(flatData)
-                max = np.max(flatData)
-                min = np.min(flatData)
-                mn = np.mean(flatData)
-                noiseLevel = mn + 3.0 * SD
-
-                # print('>>>iterate', ii, data.shape, SD, max, min, mn, noiseLevel, '*' if noiseLevel > max else '-')
-                if not startCondition:
-                    startCondition[:] = [ii, data.shape, SD, max, min, mn, noiseLevel]
-                    endCondition[:] = startCondition[:]
-
-                if SD < endCondition[2]:
-                    endCondition[:] = [ii, data.shape, SD, max, min, mn, noiseLevel]
-
-                newData = [data]
-                for jj in range(len(data.shape)):
-                    newData = [np.array_split(dd, 2, axis=jj) for dd in newData]
-                    newData = [val for sublist in newData for val in sublist]
-
-                if ii < 3:
-                    _recurseData(ii + 1, newData, startCondition, endCondition)
-
         # just use the first region
         for region in foundRegions[:1]:
             dataArray, intRegion, *rest = region
 
             if dataArray.size:
+
                 # iterate over the array to calculate noise at each level
                 dataList = [dataArray]
                 startCondition = []
@@ -661,4 +678,3 @@ def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
                     spectrum.negativeContourBase = -base
                     spectrum.negativeContourFactor = negMult
                     spectrum.negativeContourCount = levels
-

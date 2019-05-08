@@ -43,7 +43,7 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.popups.ExperimentTypePopup import _getExperimentTypes
-from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString
+from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString, colourNameNoSpace
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.util.Logging import getLogger
@@ -701,7 +701,7 @@ class GeneralTab(Widget):
 
     def _changedSliceComboIndex(self, spectrum, value):
         # newColour = list(spectrumColours.keys())[value]
-        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(self.colourBox.currentText())]
+        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.colourBox.currentText()))]
         if newColour:
             spectrum.sliceColour = newColour
             self._writeLoggingMessage("spectrum.sliceColour = '%s'" % newColour)
@@ -801,7 +801,7 @@ class DimensionsTab(Widget):
             self.isotopeCodePullDowns[i] = PulldownList(self, grid=(row, i + 1), vAlign='t')
             isotopeList = [code for code in DEFAULT_ISOTOPE_DICT.values() if code]
             self.isotopeCodePullDowns[i].setData(isotopeList)
-            self.isotopeCodePullDowns[i].setMaxVisibleItems(10)
+            # self.isotopeCodePullDowns[i].setMaxVisibleItems(10)
 
             if spectrum.isotopeCodes[i] in isotopeList:
                 index = isotopeList.index(spectrum.isotopeCodes[i])
@@ -1368,7 +1368,7 @@ class ContoursTab(Widget):
 
     def _changePosColourComboIndex(self, spectrum, value):
         # newColour = list(spectrumColours.keys())[value]
-        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(self.positiveColourBox.currentText())]
+        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.positiveColourBox.currentText()))]
         if newColour:
             spectrum.positiveContourColour = newColour
             self._writeLoggingMessage("spectrum.positiveContourColour = '%s'" % newColour)
@@ -1379,7 +1379,7 @@ class ContoursTab(Widget):
 
     def _changeNegColourComboIndex(self, spectrum, value):
         # newColour = list(spectrumColours.keys())[value]
-        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(self.negativeColourBox.currentText())]
+        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.negativeColourBox.currentText()))]
         if newColour:
             spectrum._apiDataSource.negativeContourColour = newColour
             self._writeLoggingMessage("spectrum.negativeContourColour = %s" % newColour)
@@ -1689,7 +1689,7 @@ class ColourTab(Widget):
 
     def _changedSliceComboIndex(self, spectrum, value):
         # newColour = list(spectrumColours.keys())[value]
-        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(self.colourBox.currentText())]
+        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.colourBox.currentText()))]
         if newColour:
             spectrum.sliceColour = newColour
             self._writeLoggingMessage("spectrum.sliceColour = '%s'" % newColour)

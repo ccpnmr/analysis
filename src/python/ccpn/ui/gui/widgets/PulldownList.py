@@ -43,7 +43,8 @@ class PulldownList(QtWidgets.QComboBox, Base):
                  icons=None, callback=None, index=0,
                  backgroundText=None, headerText=None,
                  headerEnabled=False, headerIcon=None,
-                 editable=False, **kwds):
+                 editable=False, maxVisibleItems=16,
+                 **kwds):
         """
 
         :param parent:
@@ -89,6 +90,9 @@ class PulldownList(QtWidgets.QComboBox, Base):
       combobox-popup: 0;
     }
     """)
+
+        self.setMaxVisibleItems(maxVisibleItems)
+
         # self.connect(self, QtCore.SIGNAL('currentIndexChanged(int)'), self._callback)
         self.currentIndexChanged.connect(self._callback)
 
@@ -291,7 +295,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
             elif self.texts:
                 self.callback(self.texts[index])
 
-    def setMaxVisibleItems(self, maxItems: int):
+    def setMaxVisibleItems(self, maxItems: int = 16):
         """Set the maximum height of the combobox when opened
         """
         super(PulldownList, self).setMaxVisibleItems(maxItems)

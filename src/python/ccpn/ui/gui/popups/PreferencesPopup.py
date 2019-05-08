@@ -49,7 +49,7 @@ from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.util.Logging import getLogger
-from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString
+from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString, colourNameNoSpace
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Spacer import Spacer
@@ -623,7 +623,7 @@ class PreferencesPopup(CcpnDialog):
     def _changeMarksColour(self):
         """Change the default maerks colour in the preferences
         """
-        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(self.marksDefaultColourBox.currentText())]
+        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.marksDefaultColourBox.currentText()))]
         if newColour:
             self.preferences.general.defaultMarksColour = newColour
 

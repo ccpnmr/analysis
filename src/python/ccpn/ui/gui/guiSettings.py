@@ -30,7 +30,8 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Font import Font
 from ccpn.util.decorators import singleton
 from ccpn.util.Logging import getLogger
-from ccpn.util.Colour import allColours, hexToRgbRatio, autoCorrectHexColour, spectrumHexDarkColours, spectrumHexLightColours
+from ccpn.util.Colour import allColours, hexToRgbRatio, autoCorrectHexColour, \
+    spectrumHexDarkColours, spectrumHexLightColours
 
 
 # fonts
@@ -96,6 +97,7 @@ MARKS_COLOURS = 'marksColours'
 COLOUR_SCHEMES = (LIGHT, DARK, DEFAULT)
 
 SPECTRUM_HEXCOLOURS = 'spectrumHexColours'
+SPECTRUMCOLOURS = 'spectrumColours'
 
 MARK_LINE_COLOUR_DICT = {
     'CA'   : '#0080FF',  # aqua

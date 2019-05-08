@@ -1190,7 +1190,9 @@ class Project(AbstractWrapperObject):
             spectrum.assignmentTolerances = spectrum.defaultAssignmentTolerances
 
             # estimate new base contour levels
-            setContourLevelsFromNoise(spectrum)
+            setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
+                              setPositiveContours=True, setNegativeContours=True,
+                              useSameMultiplier=False)
 
             # make sure the colour brightness is not too close to the colourScheme background
 

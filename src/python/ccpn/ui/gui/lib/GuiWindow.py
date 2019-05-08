@@ -65,6 +65,7 @@ class GuiWindow():
         context = QtCore.Qt.WidgetWithChildrenShortcut
         addShortCut("c, h", self, self.toggleCrosshairAll, context=context)
         addShortCut("c, d", self, self.toggleDoubleCrosshairAll, context=context)
+        addShortCut("e, n", self, self.estimateNoise, context=context)
         addShortCut("g, s", self, self.toggleGridAll, context=context)
         addShortCut("Del", self, partial(self.deleteSelectedItems), context=context)
         addShortCut("m, k", self, self.createMark, context=context)
@@ -453,6 +454,13 @@ class GuiWindow():
 
         GLSignals = GLNotifier(parent=self)
         GLSignals.emitPaintEvent()
+
+    def estimateNoise(self):
+        """estimate the noise in the visible region of the current strip
+        """
+        strip = self.application.current.strip
+        if strip:
+            strip.estimateNoise()
 
     def createMark(self):
         """

@@ -570,7 +570,10 @@ def get1DdataInRange(x, y, xRange):
 
     return x_filtered, y_filtered
 
-def setContourLevelsFromNoise(spectrum):
+def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
+                              setPositiveContours=True, setNegativeContours=True,
+                              useSameMultiplier=False):
+
     """Calculate the noise level, base contour level and positive/negative multipliers for the given spectrum
     """
 
@@ -640,15 +643,22 @@ def setContourLevelsFromNoise(spectrum):
 
                 # calculate multiplier to give contours across range of spectrum
                 posMult = pow(abs(mx / base), 1 / levels)
-                negMult = pow(abs(mn / base), 1 / levels)
+                if useSameMultiplier:
+                    negMult = posMult
+                else:
+                    negMult = pow(abs(mn / base), 1 / levels)
 
                 # put the new values into the spectrum
-                spectrum.noiseLevel = base
-                spectrum.positiveContourBase = base
-                spectrum.positiveContourFactor = posMult
-                spectrum.positiveContourCount = levels
+                if setNoiseLevel:
+                    spectrum.noiseLevel = base
 
-                spectrum.negativeContourBase = -base
-                spectrum.negativeContourFactor = negMult
-                spectrum.negativeContourCount = levels
+                if setPositiveContours:
+                    spectrum.positiveContourBase = base
+                    spectrum.positiveContourFactor = posMult
+                    spectrum.positiveContourCount = levels
+
+                if setNegativeContours:
+                    spectrum.negativeContourBase = -base
+                    spectrum.negativeContourFactor = negMult
+                    spectrum.negativeContourCount = levels
 

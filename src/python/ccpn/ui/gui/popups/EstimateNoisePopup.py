@@ -169,7 +169,7 @@ class NoiseTab(Widget):
                 self.max = np.max(flatData)
                 self.min = np.min(flatData)
                 self.mean = np.mean(flatData)
-                self.noiseLevel = self.mean + 3.0 * self.SD
+                self.noiseLevel = abs(self.mean) + 3.0 * self.SD
 
                 # populate the widgets
                 for ii, ind in enumerate(indices):

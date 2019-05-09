@@ -31,7 +31,7 @@ from ccpn.ui.gui.widgets.Font import Font
 from ccpn.util.decorators import singleton
 from ccpn.util.Logging import getLogger
 from ccpn.util.Colour import allColours, hexToRgbRatio, autoCorrectHexColour, \
-    spectrumHexDarkColours, spectrumHexLightColours
+    spectrumHexDarkColours, spectrumHexLightColours, spectrumHexMediumColours
 
 
 # fonts
@@ -97,6 +97,7 @@ MARKS_COLOURS = 'marksColours'
 COLOUR_SCHEMES = (LIGHT, DARK, DEFAULT)
 
 SPECTRUM_HEXCOLOURS = 'spectrumHexColours'
+SPECTRUM_HEXMEDIUMCOLOURS = 'spectrumHexMediumColours'
 SPECTRUMCOLOURS = 'spectrumColours'
 
 MARK_LINE_COLOUR_DICT = {
@@ -259,7 +260,8 @@ colourSchemes = {
         STRIPHEADER_BACKGROUND        : '#ebebeb',
 
         MARKS_COLOURS                 : MARK_LINE_COLOUR_DICT,
-        SPECTRUM_HEXCOLOURS           : spectrumHexDarkColours
+        SPECTRUM_HEXCOLOURS           : spectrumHexDarkColours,
+        SPECTRUM_HEXMEDIUMCOLOURS     : spectrumHexMediumColours
         },
 
     # Overridden for dark colour scheme
@@ -276,7 +278,8 @@ colourSchemes = {
         CCPNGLWIDGET_ZOOMLINE     : (1.0, 0.9, 0.2, 1.0),
         CCPNGLWIDGET_MULTIPLETLINK: LIGHTCORAL,
 
-        SPECTRUM_HEXCOLOURS       : spectrumHexLightColours
+        SPECTRUM_HEXCOLOURS       : spectrumHexLightColours,
+        SPECTRUM_HEXMEDIUMCOLOURS : spectrumHexMediumColours
         },
 
     # Overridden for light colour scheme

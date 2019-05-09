@@ -83,7 +83,7 @@ rY = 0.212655
 gY = 0.715158
 bY = 0.072187
 COLOUR_LIGHT_THRESHOLD = 80
-COLOUR_DARK_THRESHOLD = (256 - COLOUR_LIGHT_THRESHOLD)
+COLOUR_DARK_THRESHOLD = 190  #(256 - COLOUR_LIGHT_THRESHOLD)
 COLOUR_THRESHOLD = 60
 
 
@@ -147,7 +147,7 @@ COLORMATRIXJPEGINV = [[1.0, 0.0, 1.402],
 def colourNameNoSpace(name):
     """remove spaces from the colourname
     """
-    return name             # currently no effect until sorted
+    return name  # currently no effect until sorted
 
     # return ''.join(name.split())
 
@@ -223,6 +223,7 @@ colourNameToHexDict = {
     'cyan'   : '#ffff00',
     }
 
+# small set of colours
 shortSpectrumColours = OrderedDict([('#cb1400', 'red'),
                                     ('#860700', 'dark red'),
                                     ('#933355', 'burgundy'),
@@ -265,6 +266,116 @@ shortSpectrumColours = OrderedDict([('#cb1400', 'red'),
                                     ('#ffffff', 'white'),
                                     ('#000000', 'black')])
 
+# set of colours that have higher saturation
+brightColours = OrderedDict([('#000000', 'black'),
+                             ('#696969', 'dim gray'),
+                             ('#696969', 'dim grey'),
+                             ('#808080', 'gray'),
+                             ('#808080', 'grey'),
+                             ('#A9A9A9', 'dark gray'),
+                             ('#A9A9A9', 'dark grey'),
+                             ('#C0C0C0', 'silver'),
+                             ('#D3D3D3', 'light gray'),
+                             ('#D3D3D3', 'light grey'),
+                             ('#DCDCDC', 'gainsboro'),
+                             ('#F5F5F5', 'white smoke'),
+                             ('#FFFFFF', 'white'),
+                             ('#F08080', 'light coral'),
+                             ('#CD5C5C', 'indian red'),
+                             ('#A52A2A', 'brown'),
+                             ('#B22222', 'firebrick'),
+                             ('#800000', 'maroon'),
+                             ('#8B0000', 'dark red'),
+                             ('#FF0000', 'red'),
+                             ('#FA8072', 'salmon'),
+                             ('#FF6347', 'tomato'),
+                             ('#E9967A', 'dark salmon'),
+                             ('#FF7F50', 'coral'),
+                             ('#FF4500', 'orange red'),
+                             ('#FFA07A', 'light salmon'),
+                             ('#A0522D', 'sienna'),
+                             ('#D2691E', 'chocolate'),
+                             ('#8B4513', 'saddle brown'),
+                             ('#F4A460', 'sandy brown'),
+                             ('#CD853F', 'peru'),
+                             ('#FF8C00', 'dark orange'),
+                             ('#DEB887', 'burly wood'),
+                             ('#D2B48C', 'tan'),
+                             ('#FFDEAD', 'navajo white'),
+                             ('#FFA500', 'orange'),
+                             ('#B8860B', 'dark goldenrod'),
+                             ('#DAA520', 'goldenrod'),
+                             ('#FFD700', 'gold'),
+                             ('#F0E68C', 'khaki'),
+                             ('#BDB76B', 'dark khaki'),
+                             ('#808000', 'olive'),
+                             ('#FFFF00', 'yellow'),
+                             ('#6B8E23', 'olive drab'),
+                             ('#9ACD32', 'yellow green'),
+                             ('#556B2F', 'dark olive green'),
+                             ('#ADFF2F', 'green yellow'),
+                             ('#7FFF00', 'chartreuse'),
+                             ('#7CFC00', 'lawn green'),
+                             ('#98FB98', 'pale green'),
+                             ('#90EE90', 'light green'),
+                             ('#228B22', 'forest green'),
+                             ('#32CD32', 'lime green'),
+                             ('#006400', 'dark green'),
+                             ('#008000', 'green'),
+                             ('#00FF00', 'lime'),
+                             ('#2E8B57', 'sea green'),
+                             ('#3CB371', 'medium sea green'),
+                             ('#00FF7F', 'spring green'),
+                             ('#00FA9A', 'medium spring green'),
+                             ('#66CDAA', 'medium aquamarine'),
+                             ('#7FFFD4', 'aquamarine'),
+                             ('#40E0D0', 'turquoise'),
+                             ('#20B2AA', 'light sea green'),
+                             ('#48D1CC', 'medium turquoise'),
+                             ('#2F4F4F', 'dark slate gray'),
+                             ('#2F4F4F', 'dark slate grey'),
+                             ('#008080', 'teal'),
+                             ('#008B8B', 'dark cyan'),
+                             ('#00FFFF', 'aqua'),
+                             ('#00FFFF', 'cyan'),
+                             ('#00CED1', 'dark turquoise'),
+                             ('#5F9EA0', 'cadet blue'),
+                             ('#00BFFF', 'deep sky blue'),
+                             ('#87CEEB', 'sky blue'),
+                             ('#87CEFA', 'light sky blue'),
+                             ('#4682B4', 'steel blue'),
+                             ('#1E90FF', 'dodger blue'),
+                             ('#6495ED', 'cornflower blue'),
+                             ('#4169E1', 'royal blue'),
+                             ('#191970', 'midnight blue'),
+                             ('#000080', 'navy'),
+                             ('#00008B', 'dark blue'),
+                             ('#0000CD', 'medium blue'),
+                             ('#0000FF', 'blue'),
+                             ('#6A5ACD', 'slate blue'),
+                             ('#483D8B', 'dark slate blue'),
+                             ('#7B68EE', 'medium slate blue'),
+                             ('#9370DB', 'medium purple'),
+                             ('#663399', 'rebecca purple'),
+                             ('#8A2BE2', 'blue violet'),
+                             ('#4B0082', 'indigo'),
+                             ('#9932CC', 'dark orchid'),
+                             ('#9400D3', 'dark violet'),
+                             ('#BA55D3', 'medium orchid'),
+                             ('#EE82EE', 'violet'),
+                             ('#800080', 'purple'),
+                             ('#8B008B', 'dark magenta'),
+                             ('#FF00FF', 'fuchsia'),
+                             ('#FF00FF', 'magenta'),
+                             ('#DA70D6', 'orchid'),
+                             ('#C71585', 'medium violet red'),
+                             ('#FF1493', 'deep pink'),
+                             ('#FF69B4', 'hot pink'),
+                             ('#DB7093', 'pale violet red'),
+                             ('#DC143C', 'crimson'),
+                             ])
+
+# all colours defined in the matplotlib colourspace
 allColours = OrderedDict([('#000000', 'black'),
                           ('#696969', 'dimgray'),
                           ('#696969', 'dimgrey'),
@@ -418,11 +529,12 @@ allColours = OrderedDict([('#000000', 'black'),
 allColoursWithSpaces = OrderedDict([(k, colourNameWithSpace(v)) for k, v in allColours.items()])
 
 # set the spectrum colours to all, override minimum set above
-spectrumColours = allColours            # shortSpectrumColours
+spectrumColours = brightColours
 
 # split the colour palettes into light and dark for different colour schemes
 spectrumDarkColours = OrderedDict()
 spectrumLightColours = OrderedDict()
+spectrumMediumColours = OrderedDict()
 
 for k, v in spectrumColours.items():
     h = hexToRgb(k)
@@ -432,9 +544,12 @@ for k, v in spectrumColours.items():
         spectrumLightColours[k] = v
     if gray(*h) < COLOUR_DARK_THRESHOLD:
         spectrumDarkColours[k] = v
+    if gray(*h) > COLOUR_LIGHT_THRESHOLD and gray(*h) < COLOUR_DARK_THRESHOLD:
+        spectrumMediumColours[k] = v
 
 allDarkColours = OrderedDict()
 allLightColours = OrderedDict()
+allMediumColours = OrderedDict()
 
 for k, v in allColours.items():
     h = hexToRgb(k)
@@ -444,9 +559,12 @@ for k, v in allColours.items():
         allLightColours[k] = v
     if gray(*h) < COLOUR_DARK_THRESHOLD:
         allDarkColours[k] = v
+    if gray(*h) > COLOUR_LIGHT_THRESHOLD and gray(*h) < COLOUR_DARK_THRESHOLD:
+        allMediumColours[k] = v
 
 spectrumHexLightColours = tuple(ky for ky in spectrumLightColours.keys() if ky != '#')
 spectrumHexDarkColours = tuple(ky for ky in spectrumDarkColours.keys() if ky != '#')
+spectrumHexMediumColours = tuple(ky for ky in spectrumMediumColours.keys() if ky != '#')
 
 # override this with spectrumLight/DarkColours when colourScheme is changed
 spectrumHexColours = tuple(ky for ky in spectrumColours.keys() if ky != '#')
@@ -607,7 +725,7 @@ def fillColourPulldown(pulldown, allowAuto=False):
     for item in spectrumColours.items():
         # if item[1] not in pulldown.texts:
 
-        colName = item[1]           # colourNameWithSpace(item[1])
+        colName = item[1]  # colourNameWithSpace(item[1])
 
         if item[0] != '#':
             pix = QtGui.QPixmap(QtCore.QSize(20, 20))
@@ -624,7 +742,7 @@ def getSpectrumColour(colourName, defaultReturn=None):
     return the hex colour of the named colour
     """
     try:
-        colName = colourName            # colourNameNoSpace(colourName)
+        colName = colourName  # colourNameNoSpace(colourName)
 
         col = list(spectrumColours.keys())[list(spectrumColours.values()).index(colName)]
         return col
@@ -673,7 +791,8 @@ if __name__ == '__main__':
     # Sort colors by hue, saturation, value and name.
     by_hsv = sorted((tuple(mcolors.rgb_to_hsv(mcolors.to_rgba(color)[:3])), name)
                     for name, color in colors.items())
-    sorted_names = [name for hsv, name in by_hsv]
+    sorted_names = [name for hsv, name in by_hsv
+                    if (hsv[0] == 0.0 and hsv[1] == 0.0) or hsv[1] > 0.3]
 
     n = len(sorted_names)
     ncols = 4
@@ -694,8 +813,9 @@ if __name__ == '__main__':
     w = X / ncols
 
     for i, name in enumerate(sorted_names):
-        col = i % ncols
-        row = i // ncols
+        row = i % nrows
+        col = i // nrows
+
         y = Y - (row * h) - h
 
         xi_line = w * (col + 0.05)

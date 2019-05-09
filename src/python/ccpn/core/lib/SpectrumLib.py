@@ -531,28 +531,46 @@ def nmrGlueBaselineCorrector(data, wd=20):
 from typing import Tuple
 
 
-def getDefaultSpectrumColours(self: 'DataSource') -> Tuple[str, str]:
+def _getDefaultApiSpectrumColours(self: 'DataSource') -> Tuple[str, str]:
+    """Get the default colours from the core spectrum class
+    """
+    # this shouldn't need to be called now, but if it is, it will return (red, red)
+    return ('#FF0000', '#FF0000')
+
+
+def getDefaultSpectrumColours(self: 'Spectrum') -> Tuple[str, str]:
     """Get default positivecontourcolour, negativecontourcolour for Spectrum
     (calculated by hashing spectrum properties to avoid always getting the same colours
     Currently matches getDefaultColours in dataSource that is set through the api
     """
 
     # from ccpn.util.Colour import spectrumHexColours
-    from ccpn.ui.gui.guiSettings import getColours, getColourScheme, SPECTRUM_HEXCOLOURS
+    from ccpn.ui.gui.guiSettings import getColours, getColourScheme, SPECTRUM_HEXCOLOURS, SPECTRUM_HEXMEDIUMCOLOURS
 
     spectrumHexColours = getColours().get(SPECTRUM_HEXCOLOURS)
+    spectrumHexMediumColours = getColours().get(SPECTRUM_HEXMEDIUMCOLOURS)
+
     colorCount = len(spectrumHexColours)
+    step = ((colorCount // 2 - 1) // 2)
+    kk = colorCount // 7
+    index = self.experiment.serial - 1 + step * (self._serial - 1)
+    posCol = spectrumHexColours[(kk * index) % colorCount]
+
+    colorCount = len(spectrumHexMediumColours)
     step = ((colorCount // 2 - 1) // 2)
     kk = colorCount // 5
     index = self.experiment.serial - 1 + step * (self._serial - 1)
+    negCol = spectrumHexMediumColours[(kk * index) % colorCount]
 
-    # larger jump between colours - may not match though
-    if self._numDim == 1:
-        ii = (kk * index)            # % colorCount
-    else:
-        ii = (kk * index)            # % colorCount
-    #
-    return (spectrumHexColours[ii % colorCount], spectrumHexColours[(ii + (kk // 2)) % colorCount])
+    return (posCol, negCol)
+
+    # # larger jump between colours - may not match though
+    # if self._numDim == 1:
+    #     ii = (kk * index)            # % colorCount
+    # else:
+    #     ii = (kk * index)            # % colorCount
+    # #
+    # return (spectrumHexColours[ii % colorCount], spectrumHexColours[(ii + (kk // 2)) % colorCount])
 
 
 def get1DdataInRange(x, y, xRange):
@@ -654,9 +672,9 @@ def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
                 _recurseData(0, dataList, startCondition, endCondition)
 
                 levels = 10
-                base = endCondition[5] + 3.0 * endCondition[6]  # mean + (3 * noiseLevel)
-                mx = startCondition[3]                          # global array max
-                mn = startCondition[4]                          # global array min
+                base = abs(endCondition[5]) + 3.0 * endCondition[6]     # abs(mean) + (3 * noiseLevel)
+                mx = startCondition[3]                                  # global array max
+                mn = startCondition[4]                                  # global array min
 
                 # calculate multiplier to give contours across range of spectrum
                 posMult = pow(abs(mx / base), 1 / levels)

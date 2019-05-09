@@ -1182,7 +1182,13 @@ class Project(AbstractWrapperObject):
 
         # #TODO:RASMUS FIXME check for rename
 
-        apiDataSource = self._wrappedData.loadDataSource(path, subType)
+        try:
+            apiDataSource = self._wrappedData.loadDataSource(path, subType)
+        except Exception as es:
+            getLogger().warning('ERROR here')
+            raise es
+
+
         if apiDataSource is None:
             return []
         else:
@@ -1194,23 +1200,12 @@ class Project(AbstractWrapperObject):
                               setPositiveContours=True, setNegativeContours=True,
                               useSameMultiplier=False)
 
-            # make sure the colour brightness is not too close to the colourScheme background
+            # set the positive/negative/slice colours
 
-            # if there is a gui then check the colours
-            if self.application.ui:
-                if self.application.preferences and self.application.preferences.general.autoCorrectColours:
-                    from ccpn.ui.gui.guiSettings import autoCorrectHexColour, getColours, CCPNGLWIDGET_HEXBACKGROUND
-                    from ccpn.core.lib.SpectrumLib import getDefaultSpectrumColours
+            from ccpn.core.lib.SpectrumLib import getDefaultSpectrumColours
 
-                    (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
-                    spectrum.sliceColour = spectrum.positiveContourColour
-
-                    # spectrum.positiveContourColour = autoCorrectHexColour(spectrum.positiveContourColour,
-                    #                                                       getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-                    # spectrum.negativeContourColour = autoCorrectHexColour(spectrum.negativeContourColour,
-                    #                                                       getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-                    # spectrum.sliceColour = autoCorrectHexColour(spectrum.sliceColour,
-                    #                                                       getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+            (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
+            spectrum.sliceColour = spectrum.positiveContourColour
 
             # if there are no peakLists then create a new one - taken from Spectrum _spectrumMakeFirstPeakList notifier
             if not spectrum.peakLists:

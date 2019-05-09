@@ -896,7 +896,10 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 _selected = False
                 # unselected
                 if _isInPlane or _isInFlankingPlane:
-                    iCount, _selected = self._makeSquareSymbol(drawList, indexPtr, index, planeIndex, obj)
+                    if symbolType == 0:             # cross
+                        iCount, _selected = self._makeSquareSymbol(drawList, indexPtr, index, planeIndex, obj)
+                    else:
+                        iCount, _selected = self._makePlusSymbol(drawList, indexPtr, index, planeIndex, obj)
 
                 # add extra indices for the peak
                 # extraIndices = self.appendExtraIndices(drawList, index + 9, obj)
@@ -1117,7 +1120,10 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 _selected = False
                 # unselected
                 if _isInPlane or _isInFlankingPlane:
-                    _selected = self._appendSquareSymbol(drawList, indexPtr, index, planeIndex, obj)
+                    if symbolType == 0:             # cross
+                        _selected = self._appendSquareSymbol(drawList, indexPtr, index, planeIndex, obj)
+                    else:                           # plus
+                        _selected = self._appendPlusSymbol(drawList, indexPtr, index, planeIndex, obj)
 
                 # add extra indices for the multiplet
                 extraIndices = self.appendExtraIndices(drawList, index + GLDefs.LENSQ, obj)
@@ -1430,7 +1436,10 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                     _isInPlane, _isInFlankingPlane, planeIndex, fade = self.objIsInVisiblePlanes(spectrumView, obj)
 
                     if _isInPlane or _isInFlankingPlane:
-                        _selected = self._appendSquareSymbol(drawList, indexPtr, index, planeIndex, obj)
+                        if symbolType == 0:  # cross
+                            _selected = self._appendSquareSymbol(drawList, indexPtr, index, planeIndex, obj)
+                        else:   # plus
+                            _selected = self._appendPlusSymbol(drawList, indexPtr, index, planeIndex, obj)
 
                         if _selected:
                             cols = self._GLParent.highlightColour[:3]
@@ -1656,9 +1665,18 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         if not _isInPlane and not _isInFlankingPlane:
             return 0, 0
 
-        if symbolType == 0 or symbolType == 3:  # draw a cross/plus symbol
+        if symbolType == 0:  # draw a cross symbol
 
             ind = self._getSquareSymbolCount(planeIndex, obj)
+            ind += self.extraIndicesCount(obj)
+            extraVertices = self.extraVerticesCount(obj)
+
+            vert = (GLDefs.LENSQ + extraVertices)
+            return ind, vert
+
+        elif symbolType == 3:  # draw a plus symbol
+
+            ind = self._getPlusSymbolCount(planeIndex, obj)
             ind += self.extraIndicesCount(obj)
             extraVertices = self.extraVerticesCount(obj)
 

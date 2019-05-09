@@ -134,27 +134,28 @@ class SpectrumDisplaySettings(Widget):
         self.lockAspectCheckBox = CheckBox(parent, grid=(row, 1), checked=lockAspect, objectName='SDS_lockAspect')
         self.lockAspectCheckBox.toggled.connect(self._settingsChanged)
 
-        row += 1
-        self.symbolsLabel = Label(parent, text="Symbol Type", grid=(row, 0))
-        self.symbol = RadioButtons(parent, texts=['Cross', 'lineWidths', 'Filled lineWidths', 'Plus'],
-                                   objectNames=['symSDS_Cross', 'symSDS_lineWidths', 'symSDS_Filled lineWidths', 'symSDS_Plus'],
-                                   selectedInd=symbolType,
-                                   callback=self._symbolsChanged,
-                                   direction='h',
-                                   grid=(row, 1), hAlign='l',
-                                   tipTexts=None,
-                                   )
+        if not self._spectrumDisplay.is1D:
+            row += 1
+            self.symbolsLabel = Label(parent, text="Symbol Type", grid=(row, 0))
+            self.symbol = RadioButtons(parent, texts=['Cross', 'lineWidths', 'Filled lineWidths', 'Plus'],
+                                       objectNames=['symSDS_Cross', 'symSDS_lineWidths', 'symSDS_Filled lineWidths', 'symSDS_Plus'],
+                                       selectedInd=symbolType,
+                                       callback=self._symbolsChanged,
+                                       direction='h',
+                                       grid=(row, 1), hAlign='l',
+                                       tipTexts=None,
+                                       )
 
-        row += 1
-        self.annotationsLabel = Label(parent, text="Symbol Annotation", grid=(row, 0))
-        self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid', 'Minimal'],
-                                            objectNames=['annSDS_Short', 'annSDS_Full', 'annSDS_Pid', 'annSDS_Minimal'],
-                                            selectedInd=annotationType,
-                                            callback=self._symbolsChanged,
-                                            direction='horizontal',
-                                            grid=(row, 1), hAlign='l',
-                                            tipTexts=None,
-                                            )
+            row += 1
+            self.annotationsLabel = Label(parent, text="Symbol Annotation", grid=(row, 0))
+            self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid', 'Minimal'],
+                                                objectNames=['annSDS_Short', 'annSDS_Full', 'annSDS_Pid', 'annSDS_Minimal'],
+                                                selectedInd=annotationType,
+                                                callback=self._symbolsChanged,
+                                                direction='horizontal',
+                                                grid=(row, 1), hAlign='l',
+                                                tipTexts=None,
+                                                )
 
         row += 1
         self.symbolSizePixelLabel = Label(parent, text="Symbol Size (pixel)", grid=(row, 0))
@@ -204,8 +205,8 @@ class SpectrumDisplaySettings(Widget):
         return {AXISXUNITS         : self.xAxisUnitsButtons.getIndex(),
                 AXISYUNITS         : self.yAxisUnitsButtons.getIndex(),
                 AXISLOCKASPECTRATIO: self.lockAspectCheckBox.isChecked(),
-                SYMBOLTYPES        : self.symbol.getIndex(),
-                ANNOTATIONTYPES    : self.annotationsData.getIndex(),
+                SYMBOLTYPES        : self.symbol.getIndex() if not self._spectrumDisplay.is1D else 0,
+                ANNOTATIONTYPES    : self.annotationsData.getIndex() if not self._spectrumDisplay.is1D else 0,
                 SYMBOLSIZE         : int(self.symbolSizePixelData.text()),
                 SYMBOLTHICKNESS    : int(self.symbolThicknessData.text())
                 }
@@ -236,8 +237,12 @@ class SpectrumDisplaySettings(Widget):
         if aDict[GLNotifier.GLSPECTRUMDISPLAY] == self._spectrumDisplay:
             values = aDict[GLNotifier.GLVALUES]
             self.blockSignals(True)
-            self.symbol.setIndex(values[SYMBOLTYPES])
-            self.annotationsData.setIndex(values[ANNOTATIONTYPES])
+
+            if not self._spectrumDisplay.is1D:
+                # only update if Nd
+                self.symbol.setIndex(values[SYMBOLTYPES])
+                self.annotationsData.setIndex(values[ANNOTATIONTYPES])
+
             self.symbolSizePixelData.set(values[SYMBOLSIZE])
             self.symbolThicknessData.set(values[SYMBOLTHICKNESS])
             self.blockSignals(False)

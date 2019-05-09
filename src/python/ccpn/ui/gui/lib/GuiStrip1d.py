@@ -30,7 +30,7 @@ from PyQt5 import QtWidgets
 from ccpn.core.PeakList import PeakList
 from ccpn.util import Phasing
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, \
-    IntegralMenu, MultipletMenu, PhasingMenu
+    IntegralMenu, MultipletMenu, PhasingMenu, MAXPEAKLABELTYPES
 
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Menu import Menu
@@ -437,22 +437,7 @@ class GuiStrip1d(GuiStrip):
     def cyclePeakLabelling(self):
         """Toggles whether peak labelling is minimal is visible in the strip.
         """
-        self.peakLabelling += 1
-        if self.peakLabelling > 2:
-            self.peakLabelling = 0
-
-        if self.spectrumViews:
-            for sV in self.spectrumViews:
-
-                for peakListView in sV.peakListViews:
-                    # peakListView.buildSymbols = True
-                    peakListView.buildLabels = True
-
-            # spawn a redraw of the GL windows
-            from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-
-            GLSignals = GLNotifier(parent=None)
-            GLSignals.emitPaintEvent()
+        pass
 
     def cyclePeakSymbols(self):
         """Cycle through peak symbol types.

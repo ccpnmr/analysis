@@ -707,3 +707,4 @@ class LocalFormatter(string.Formatter):
 
 
 stdLocalFormatter = LocalFormatter()
+

@@ -620,7 +620,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 offset = drawList.pids[pp + 1]
                 numPoints = drawList.pids[pp + 2]
 
-                if symbolType != 0:
+                if symbolType != 0 and symbolType != 3:     # not a cross/plus
                     numPoints = 2 * numPoints + 5
 
                 # _isInPlane = drawList.pids[pp + 3]
@@ -750,7 +750,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         type of planeIndex - currently 0/1/2 indicating whether normal, infront or behind
         currently visible planes
         """
-        _selectedCount = [12, 12, 12]
+        _selectedCount = [12, 14, 14]
         _unSelectedCount = [4, 6, 6]
 
         if self._isSelected(obj):
@@ -764,28 +764,28 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         _selected = False
         if planeIndex == 1:
 
-            # arrow indicating in the front flanking plane
+            # arrow indicating in the front flanking plane - pointing to the left
             if self._isSelected(obj):
                 _selected = True
-                drawList.indices[indexPtr:indexPtr + 12] = (index, index + 4, index + 4, index + 3, index + 3, index,
+                drawList.indices[indexPtr:indexPtr + 14] = (index + 6, index + 4, index + 4, index + 5, index + 4, index + 7,
                                                             index, index + 2, index + 2, index + 1,
-                                                            index + 3, index + 1)
-                iCount = 12
+                                                            index + 3, index + 1, index, index + 3)
+                iCount = 14
             else:
-                drawList.indices[indexPtr:indexPtr + 6] = (index, index + 4, index + 4, index + 3, index + 3, index)
+                drawList.indices[indexPtr:indexPtr + 6] = (index + 6, index + 4, index + 4, index + 5, index + 4, index + 7)
                 iCount = 6
 
         elif planeIndex == 2:
 
-            # arrow indicating in the back flanking plane
+            # arrow indicating in the back flanking plane - pointing to the right
             if self._isSelected(obj):
                 _selected = True
-                drawList.indices[indexPtr:indexPtr + 12] = (index + 2, index + 4, index + 4, index + 1, index + 1, index + 2,
-                                                            index, index + 2,
-                                                            index, index + 3, index + 3, index + 1)
-                iCount = 12
+                drawList.indices[indexPtr:indexPtr + 14] = (index + 6, index + 4, index + 4, index + 5, index + 4, index + 8,
+                                                            index, index + 2, index + 2, index + 1,
+                                                            index + 3, index + 1, index, index + 3)
+                iCount = 14
             else:
-                drawList.indices[indexPtr:indexPtr + 6] = (index + 2, index + 4, index + 4, index + 1, index + 1, index + 2)
+                drawList.indices[indexPtr:indexPtr + 6] = (index + 6, index + 4, index + 4, index + 5, index + 4, index + 8)
                 iCount = 6
 
         else:
@@ -809,25 +809,25 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         _selected = False
         if planeIndex == 1:
 
-            # arrow indicating in the front flanking plane
+            # arrow indicating in the front flanking plane - pointing to the left
             if self._isSelected(obj):
                 _selected = True
-                drawList.indices = np.append(drawList.indices, np.array((index, index + 4, index + 4, index + 3, index + 3, index,
+                drawList.indices = np.append(drawList.indices, np.array((index + 6, index + 4, index + 4, index + 5, index + 4, index + 7,
                                                                          index, index + 2, index + 2, index + 1,
-                                                                         index + 3, index + 1), dtype=np.uint32))
+                                                                         index + 3, index + 1, index, index + 3), dtype=np.uint32))
             else:
-                drawList.indices = np.append(drawList.indices, np.array((index, index + 4, index + 4, index + 3, index + 3, index), dtype=np.uint32))
+                drawList.indices = np.append(drawList.indices, np.array((index + 6, index + 4, index + 4, index + 5, index + 4, index + 7), dtype=np.uint32))
 
         elif planeIndex == 2:
 
-            # arrow indicating in the back flanking plane
+            # arrow indicating in the back flanking plane - pointing to the right
             if self._isSelected(obj):
                 _selected = True
-                drawList.indices = np.append(drawList.indices, np.array((index + 2, index + 4, index + 4, index + 1, index + 1, index + 2,
-                                                                         index, index + 2,
-                                                                         index, index + 3, index + 3, index + 1), dtype=np.uint32))
+                drawList.indices = np.append(drawList.indices, np.array((index + 6, index + 4, index + 4, index + 5, index + 4, index + 8,
+                                                                         index, index + 2, index + 2, index + 1,
+                                                                         index + 3, index + 1, index, index + 3), dtype=np.uint32))
             else:
-                drawList.indices = np.append(drawList.indices, np.array((index + 2, index + 4, index + 4, index + 1, index + 1, index + 2), dtype=np.uint32))
+                drawList.indices = np.append(drawList.indices, np.array((index + 6, index + 4, index + 4, index + 5, index + 4, index + 8), dtype=np.uint32))
 
         else:
 
@@ -896,7 +896,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 _selected = False
                 # unselected
                 if _isInPlane or _isInFlankingPlane:
-                    if symbolType == 0:             # cross
+                    if symbolType == 0:  # cross
                         iCount, _selected = self._makeSquareSymbol(drawList, indexPtr, index, planeIndex, obj)
                     else:
                         iCount, _selected = self._makePlusSymbol(drawList, indexPtr, index, planeIndex, obj)
@@ -1120,9 +1120,9 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 _selected = False
                 # unselected
                 if _isInPlane or _isInFlankingPlane:
-                    if symbolType == 0:             # cross
+                    if symbolType == 0:  # cross
                         _selected = self._appendSquareSymbol(drawList, indexPtr, index, planeIndex, obj)
-                    else:                           # plus
+                    else:  # plus
                         _selected = self._appendPlusSymbol(drawList, indexPtr, index, planeIndex, obj)
 
                 # add extra indices for the multiplet
@@ -1438,7 +1438,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                     if _isInPlane or _isInFlankingPlane:
                         if symbolType == 0:  # cross
                             _selected = self._appendSquareSymbol(drawList, indexPtr, index, planeIndex, obj)
-                        else:   # plus
+                        else:  # plus
                             _selected = self._appendPlusSymbol(drawList, indexPtr, index, planeIndex, obj)
 
                         if _selected:

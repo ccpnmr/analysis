@@ -49,6 +49,9 @@ STRIPLABEL_ISPLUS = 'stripLabel_isPlus'
 STRIPMINIMUMWIDTH = 100
 STRIPPLOTMINIMUMWIDTH = 100
 
+MAXPEAKLABELTYPES = 3
+MAXPEAKSYMBOLTYPES = 3
+
 DefaultMenu = 'DefaultMenu'
 PeakMenu = 'PeakMenu'
 IntegralMenu = 'IntegralMenu'
@@ -800,7 +803,7 @@ class GuiStrip(Frame):
         """Toggles whether peak labelling is minimal is visible in the strip.
         """
         self.peakLabelling += 1
-        if self.peakLabelling > 2:
+        if self.peakLabelling > MAXPEAKLABELTYPES:
             self.peakLabelling = 0
 
         self._setPeakLabelling()
@@ -811,7 +814,7 @@ class GuiStrip(Frame):
         """Toggles whether peak labelling is minimal is visible in the strip.
         """
         self.peakLabelling = labelling
-        if self.peakLabelling > 2:
+        if self.peakLabelling > MAXPEAKLABELTYPES:
             self.peakLabelling = 0
 
         self._setPeakLabelling()
@@ -844,7 +847,7 @@ class GuiStrip(Frame):
         """Cycle through peak symbol types.
         """
         self.symbolType += 1
-        if self.symbolType > 2:
+        if self.symbolType > MAXPEAKSYMBOLTYPES:
             self.symbolType = 0
 
         self._setPeakSymbols()
@@ -855,7 +858,7 @@ class GuiStrip(Frame):
         """set the peak symbol type.
         """
         self.symbolType = symbolNum
-        if self.symbolType > 2:
+        if self.symbolType > MAXPEAKSYMBOLTYPES:
             self.symbolType = 0
 
         self._setPeakSymbols()

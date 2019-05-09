@@ -136,8 +136,8 @@ class SpectrumDisplaySettings(Widget):
 
         row += 1
         self.symbolsLabel = Label(parent, text="Symbol Type", grid=(row, 0))
-        self.symbol = RadioButtons(parent, texts=['Cross', 'lineWidths', 'Filled lineWidths'],
-                                   objectNames=['symSDS_Cross', 'symSDS_lineWidths', 'symSDS_Filled lineWidths'],
+        self.symbol = RadioButtons(parent, texts=['Cross', 'lineWidths', 'Filled lineWidths', 'Plus'],
+                                   objectNames=['symSDS_Cross', 'symSDS_lineWidths', 'symSDS_Filled lineWidths', 'symSDS_Plus'],
                                    selectedInd=symbolType,
                                    callback=self._symbolsChanged,
                                    direction='h',
@@ -147,8 +147,8 @@ class SpectrumDisplaySettings(Widget):
 
         row += 1
         self.annotationsLabel = Label(parent, text="Symbol Annotation", grid=(row, 0))
-        self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid'],
-                                            objectNames=['annSDS_Short', 'annSDS_Full', 'annSDS_Pid'],
+        self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid', 'Minimal'],
+                                            objectNames=['annSDS_Short', 'annSDS_Full', 'annSDS_Pid', 'annSDS_Minimal'],
                                             selectedInd=annotationType,
                                             callback=self._symbolsChanged,
                                             direction='horizontal',

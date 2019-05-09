@@ -524,7 +524,7 @@ class PreferencesPopup(CcpnDialog):
         except:
             annType = 0
             self.preferences.general.annotationType = annType
-        self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid'],
+        self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid', 'Minimal'],
                                             selectedInd=annType,
                                             callback=self._setAnnotations,
                                             direction='horizontal',
@@ -534,7 +534,7 @@ class PreferencesPopup(CcpnDialog):
         row += 1
         self.symbolsLabel = Label(parent, text="Symbols", grid=(row, 0))
         symbol = self.preferences.general.symbolType
-        self.symbol = RadioButtons(parent, texts=['Cross', 'lineWidths', 'Filled lineWidths'],
+        self.symbol = RadioButtons(parent, texts=['Cross', 'lineWidths', 'Filled lineWidths', 'Plus'],
                                    selectedInd=symbol,
                                    callback=self._setSymbol,
                                    direction='h',

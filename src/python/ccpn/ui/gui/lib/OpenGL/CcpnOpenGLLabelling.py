@@ -183,9 +183,12 @@ class GLpeakListMethods():
         elif labelType == 1:
             # return the long form
             text = _getScreenPeakAnnotation(obj, useShortCode=False)
-        else:
+        elif labelType == 2:
             # return the original pid
             text = _getPeakAnnotation(obj)
+        else:
+            # return the minimal form
+            text = _getScreenPeakAnnotation(obj, useShortCode=True, useMinimalCode=True)
 
         return text
 
@@ -215,7 +218,7 @@ class GLpeakListMethods():
                 visiblePlaneList = self._GLParent.visiblePlaneList[spectrumView][0]
 
                 vplLen = len(visiblePlaneList)
-                if actualPlane in visiblePlaneList[1:vplLen-1]:
+                if actualPlane in visiblePlaneList[1:vplLen - 1]:
                     return True, False, 0, 1.0
 
                 elif not viewOutOfPlanePeaks:
@@ -224,7 +227,7 @@ class GLpeakListMethods():
                 elif actualPlane == visiblePlaneList[0]:
                     return False, True, 1, GLDefs.OUTOFPLANEFADE
 
-                elif actualPlane == visiblePlaneList[vplLen-1]:
+                elif actualPlane == visiblePlaneList[vplLen - 1]:
                     return False, True, 2, GLDefs.OUTOFPLANEFADE
 
                 return False, False, 0, 1.0
@@ -515,7 +518,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             text = self.getLabelling(obj, self.strip.peakLabelling)
 
             newString = GLString(text=text,
-                                 font=self._GLParent.globalGL.glSmallFont,              # if _isInPlane else self._GLParent.globalGL.glSmallTransparentFont,
+                                 font=self._GLParent.globalGL.glSmallFont,  # if _isInPlane else self._GLParent.globalGL.glSmallTransparentFont,
                                  x=p0[0], y=p0[1],
                                  ox=r * np.sign(self._GLParent.pixelX), oy=w * np.sign(self._GLParent.pixelY),
                                  # ox=r, oy=w,
@@ -588,7 +591,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             text = self.getLabelling(obj, self.strip.peakLabelling)
 
             outString = GLString(text=text,
-                                 font=self._GLParent.globalGL.glSmallFont,              # if _isInPlane else self._GLParent.globalGL.glSmallTransparentFont,
+                                 font=self._GLParent.globalGL.glSmallFont,  # if _isInPlane else self._GLParent.globalGL.glSmallTransparentFont,
                                  x=p0[0], y=p0[1],
                                  ox=r * np.sign(self._GLParent.pixelX), oy=w * np.sign(self._GLParent.pixelY),
                                  color=(*listCol, fade),
@@ -646,7 +649,10 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             pp += GLDefs.LENPID
 
     def _getSquareSymbolCount(self, planeIndex, obj):
-
+        """returns the number of indices required for the symbol based on the planeIndex
+        type of planeIndex - currently 0/1/2 indicating whether normal, infront or behind
+        currently visible planes
+        """
         _selectedCount = [12, 12, 12]
         _unSelectedCount = [4, 6, 6]
 
@@ -739,6 +745,103 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
         return _selected
 
+    def _getPlusSymbolCount(self, planeIndex, obj):
+        """returns the number of indices required for the symbol based on the planeIndex
+        type of planeIndex - currently 0/1/2 indicating whether normal, infront or behind
+        currently visible planes
+        """
+        _selectedCount = [12, 12, 12]
+        _unSelectedCount = [4, 6, 6]
+
+        if self._isSelected(obj):
+            return _selectedCount[planeIndex]
+        else:
+            return _unSelectedCount[planeIndex]
+
+    def _makePlusSymbol(self, drawList, indexPtr, index, planeIndex, obj):
+        """Make a new plus symbol based on the planeIndex type.
+        """
+        _selected = False
+        if planeIndex == 1:
+
+            # arrow indicating in the front flanking plane
+            if self._isSelected(obj):
+                _selected = True
+                drawList.indices[indexPtr:indexPtr + 12] = (index, index + 4, index + 4, index + 3, index + 3, index,
+                                                            index, index + 2, index + 2, index + 1,
+                                                            index + 3, index + 1)
+                iCount = 12
+            else:
+                drawList.indices[indexPtr:indexPtr + 6] = (index, index + 4, index + 4, index + 3, index + 3, index)
+                iCount = 6
+
+        elif planeIndex == 2:
+
+            # arrow indicating in the back flanking plane
+            if self._isSelected(obj):
+                _selected = True
+                drawList.indices[indexPtr:indexPtr + 12] = (index + 2, index + 4, index + 4, index + 1, index + 1, index + 2,
+                                                            index, index + 2,
+                                                            index, index + 3, index + 3, index + 1)
+                iCount = 12
+            else:
+                drawList.indices[indexPtr:indexPtr + 6] = (index + 2, index + 4, index + 4, index + 1, index + 1, index + 2)
+                iCount = 6
+
+        else:
+
+            # normal plus symbol
+            if self._isSelected(obj):
+                _selected = True
+                drawList.indices[indexPtr:indexPtr + 12] = (index + 5, index + 6, index + 7, index + 8,
+                                                            index, index + 2, index + 2, index + 1,
+                                                            index, index + 3, index + 3, index + 1)
+                iCount = 12
+            else:
+                drawList.indices[indexPtr:indexPtr + 4] = (index + 5, index + 6, index + 7, index + 8)
+                iCount = 4
+
+        return iCount, _selected
+
+    def _appendPlusSymbol(self, drawList, indexPtr, index, planeIndex, obj):
+        """Append a new plus symbol based on the planeIndex type.
+        """
+        _selected = False
+        if planeIndex == 1:
+
+            # arrow indicating in the front flanking plane
+            if self._isSelected(obj):
+                _selected = True
+                drawList.indices = np.append(drawList.indices, np.array((index, index + 4, index + 4, index + 3, index + 3, index,
+                                                                         index, index + 2, index + 2, index + 1,
+                                                                         index + 3, index + 1), dtype=np.uint32))
+            else:
+                drawList.indices = np.append(drawList.indices, np.array((index, index + 4, index + 4, index + 3, index + 3, index), dtype=np.uint32))
+
+        elif planeIndex == 2:
+
+            # arrow indicating in the back flanking plane
+            if self._isSelected(obj):
+                _selected = True
+                drawList.indices = np.append(drawList.indices, np.array((index + 2, index + 4, index + 4, index + 1, index + 1, index + 2,
+                                                                         index, index + 2,
+                                                                         index, index + 3, index + 3, index + 1), dtype=np.uint32))
+            else:
+                drawList.indices = np.append(drawList.indices, np.array((index + 2, index + 4, index + 4, index + 1, index + 1, index + 2), dtype=np.uint32))
+
+        else:
+
+            # normal plus symbol
+            if self._isSelected(obj):
+                _selected = True
+                drawList.indices = np.append(drawList.indices, np.array((index + 5, index + 6, index + 7, index + 8,
+                                                                         index, index + 2, index + 2, index + 1,
+                                                                         index, index + 3, index + 3, index + 1), dtype=np.uint32))
+            else:
+                drawList.indices = np.append(drawList.indices, np.array((index + 5, index + 6, index + 7, index + 8), dtype=np.uint32))
+
+        return _selected
+
     def _insertSymbolItem(self, strip, obj, listCol, indexList, r, w,
                           spectrumFrequency, symbolType, drawList, spectrumView,
                           buildIndex):
@@ -785,7 +888,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             # if axisCount != 2:
             getLogger().debug('Bad axisCodes: %s - %s' % (obj.pid, obj.axisCodes))
         else:
-            if symbolType == 0:
+            if symbolType == 0 or symbolType == 3:
 
                 # draw a cross
                 # keep the cross square at 0.1ppm
@@ -800,15 +903,15 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 extraIndices, extraIndexCount = self.insertExtraIndices(drawList, indexPtr + iCount, index + GLDefs.LENSQ, obj)
 
                 drawList.vertices[vertexPtr:vertexPtr + GLDefs.LENSQ2] = (p0[0] - r, p0[1] - w,
-                                                               p0[0] + r, p0[1] + w,
-                                                               p0[0] + r, p0[1] - w,
-                                                               p0[0] - r, p0[1] + w,
-                                                               p0[0], p0[1],
-                                                               p0[0], p0[1] - w,
-                                                               p0[0], p0[1] + w,
-                                                               p0[0] + r, p0[1],
-                                                               p0[0] - r, p0[1]
-                                                               )
+                                                                          p0[0] + r, p0[1] + w,
+                                                                          p0[0] + r, p0[1] - w,
+                                                                          p0[0] - r, p0[1] + w,
+                                                                          p0[0], p0[1],
+                                                                          p0[0], p0[1] - w,
+                                                                          p0[0], p0[1] + w,
+                                                                          p0[0] + r, p0[1],
+                                                                          p0[0] - r, p0[1]
+                                                                          )
                 drawList.colors[2 * vertexPtr:2 * vertexPtr + GLDefs.LENSQ4] = (*cols, fade) * GLDefs.LENSQ
                 drawList.attribs[vertexPtr:vertexPtr + GLDefs.LENSQ2] = (p0[0], p0[1]) * GLDefs.LENSQ
                 # drawList.offsets[vertexPtr:vertexPtr + GLDefs.LENSQ2] = (p0[0]+r, p0[1]+w) * GLDefs.LENSQ
@@ -963,6 +1066,9 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 buildIndex[0] += GLDefs.LENPID
                 buildIndex[1] += (2 * ((np2 + 5) + extraVertices))
 
+            else:
+                raise ValueError('GL Error: bad symbol type')
+
         # times.append(('_sym:', time.time()))
         # print(', '.join([str(t[0] + str(t[1] - tk)) for t in times]))
 
@@ -1003,7 +1109,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             # if axisCount != 2:
             getLogger().debug('Bad axisCodes: %s - %s' % (obj.pid, obj.axisCodes))
         else:
-            if symbolType == 0:
+            if symbolType == 0 or symbolType == 3:
 
                 # draw a cross
                 # keep the cross square at 0.1ppm
@@ -1169,6 +1275,9 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 indexList[1] = len(drawList.indices)
                 drawList.numVertices += ((np2 + 5) + extraVertices)
 
+            else:
+                raise ValueError('GL Error: bad symbol type')
+
     def _appendSymbol(self, spectrumView, objListView, obj):
         """Append a new symbol to the end of the list
         """
@@ -1180,7 +1289,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
         r, w, symbolType, symbolWidth = self._getSymbolWidths()
 
-        if symbolType == 0:  # a cross
+        if symbolType == 0 or symbolType == 3:  # a cross/plus
 
             # change the ratio on resize
             drawList.refreshMode = GLREFRESHMODE_REBUILD
@@ -1200,6 +1309,9 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             drawList.refreshMode = GLREFRESHMODE_NEVER
             drawList.drawMode = GL.GL_TRIANGLES
             drawList.fillMode = GL.GL_FILL
+
+        else:
+            raise ValueError('GL Error: bad symbol type')
 
         # build the peaks VBO
         # index = 0
@@ -1302,7 +1414,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         listCol = getAutoColourRgbRatio(pls.symbolColour, pls.spectrum, self.autoColour,
                                         getColours()[CCPNGLWIDGET_FOREGROUND])
 
-        if symbolType == 0:
+        if symbolType == 0 or symbolType == 3:
+
             for pp in range(0, len(drawList.pids), GLDefs.LENPID):
 
                 # check whether the peaks still exists
@@ -1409,6 +1522,9 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
                 index += np2 + 5
 
+        else:
+            raise ValueError('GL Error: bad symbol type')
+
         drawList.updateTextArrayVBOColour(enableVBO=True)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1427,7 +1543,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
         r, w, symbolType, symbolWidth = self._getSymbolWidths()
 
-        if symbolType == 0:  # a cross
+        if symbolType == 0 or symbolType == 3:  # a cross/plus
+
             # drawList.clearVertices()
             # drawList.vertices.copy(drawList.attribs)
             offsets = np.array([-r, -w, +r, +w, +r, -w, -r, +w, 0, 0, 0, -w, 0, +w, +r, 0, -r, 0], np.float32)
@@ -1484,17 +1601,22 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                     index = 2 * drawList.pids[pp + 1]
                     drawList.vertices[index:index + 48] = drawList.attribs[index:index + 48] + offsets
 
+        else:
+            raise ValueError('GL Error: bad symbol type')
+
     def _rescaleLabels(self, spectrumView=None, objListView=None, drawList=None):
         """Rescale all labels to the new dimensions of the screen
         """
         r, w, symbolType, symbolWidth = self._getSymbolWidths()
 
-        if symbolType == 0:  # a cross
+        if symbolType == 0 or symbolType == 3:  # a cross/plus
+
             for drawStr in drawList.stringList:
                 drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
                 drawStr.updateTextArrayVBOAttribs(enableVBO=True)
 
         elif symbolType == 1:
+
             for drawStr in drawList.stringList:
                 if drawStr.stringOffset:
                     lr, lw = drawStr.stringOffset
@@ -1504,22 +1626,9 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                     drawStr.setStringOffset((GLDefs.STRINGSCALE * r * np.sign(self._GLParent.pixelX),
                                              GLDefs.STRINGSCALE * w * np.sign(self._GLParent.pixelY)))
                 drawStr.updateTextArrayVBOAttribs(enableVBO=True)
-
-            # pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
-            # spectrumFrequency = spectrumView.spectrum.spectrometerFrequencies
-            # frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
-            #
-            # for drawStr in drawList.stringList:
-            #     lineWidths = (drawStr.object.lineWidths[pIndex[0]], drawStr.object.lineWidths[pIndex[1]])
-            #
-            #     if lineWidths[0] and lineWidths[1]:
-            #         r = 0.8 * (0.5 * lineWidths[0] / frequency[0])
-            #         w = 0.8 * (0.5 * lineWidths[1] / frequency[1])
-            #         drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
-            #     else:
-            #         drawStr.setStringOffset((0.8 * r * np.sign(self._GLParent.pixelX), 0.8 * w * np.sign(self._GLParent.pixelY)))
 
         elif symbolType == 2:
+
             for drawStr in drawList.stringList:
                 if drawStr.stringOffset:
                     lr, lw = drawStr.stringOffset
@@ -1530,23 +1639,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                                              GLDefs.STRINGSCALE * w * np.sign(self._GLParent.pixelY)))
                 drawStr.updateTextArrayVBOAttribs(enableVBO=True)
 
-            # pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
-            # spectrumFrequency = spectrumView.spectrum.spectrometerFrequencies
-            # frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
-            #
-            # for drawStr in drawList.stringList:
-            #     lineWidths = (drawStr.object.lineWidths[pIndex[0]], drawStr.object.lineWidths[pIndex[1]])
-            #
-            #     if lineWidths[0] and lineWidths[1]:
-            #         r = 0.8 * (0.5 * lineWidths[0] / frequency[0])
-            #         w = 0.8 * (0.5 * lineWidths[1] / frequency[1])
-            #         drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
-            #     else:
-            #         drawStr.setStringOffset((0.8 * r * np.sign(self._GLParent.pixelX), 0.8 * w * np.sign(self._GLParent.pixelY)))
-
-            # r, w = drawStr.stringOffset[0], drawStr.stringOffset[1]
-            # drawStr.setStringOffset((r, w))
-            # drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
+        else:
+            raise ValueError('GL Error: bad symbol type')
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Building
@@ -1562,7 +1656,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         if not _isInPlane and not _isInFlankingPlane:
             return 0, 0
 
-        if symbolType == 0:  # draw a square symbol
+        if symbolType == 0 or symbolType == 3:  # draw a cross/plus symbol
 
             ind = self._getSquareSymbolCount(planeIndex, obj)
             ind += self.extraIndicesCount(obj)
@@ -1595,6 +1689,9 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             ind = 3 * numPoints
             vert = ((2 * numPoints) + 5)
             return ind, vert
+
+        else:
+            raise ValueError('GL Error: bad symbol type')
 
     def _buildSymbolsCount(self, spectrumView, objListView, drawList):
         """count the number of indices and vertices for the label list
@@ -1658,7 +1755,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
             r, w, symbolType, symbolWidth = self._getSymbolWidths()
 
-            if symbolType == 0:  # a cross
+            if symbolType == 0 or symbolType == 3:  # a cross/plus
 
                 # change the ratio on resize
                 drawList.refreshMode = GLREFRESHMODE_REBUILD
@@ -1678,6 +1775,9 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 drawList.refreshMode = GLREFRESHMODE_NEVER
                 drawList.drawMode = GL.GL_TRIANGLES
                 drawList.fillMode = GL.GL_FILL
+
+            else:
+                raise ValueError('GL Error: bad symbol type')
 
             # build the peaks VBO
             # index = 0
@@ -1993,15 +2093,15 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
         extraIndices, extraIndexCount = self.insertExtraIndices(drawList, indexPtr + iCount, index + GLDefs.LENSQ, obj)
 
         drawList.vertices[vertexPtr:vertexPtr + GLDefs.LENSQ2] = (p0[0] - r, p0[1] - w,
-                                                       p0[0] + r, p0[1] + w,
-                                                       p0[0] + r, p0[1] - w,
-                                                       p0[0] - r, p0[1] + w,
-                                                       p0[0], p0[1],
-                                                       p0[0], p0[1] - w,
-                                                       p0[0], p0[1] + w,
-                                                       p0[0] + r, p0[1],
-                                                       p0[0] - r, p0[1]
-                                                       )
+                                                                  p0[0] + r, p0[1] + w,
+                                                                  p0[0] + r, p0[1] - w,
+                                                                  p0[0] - r, p0[1] + w,
+                                                                  p0[0], p0[1],
+                                                                  p0[0], p0[1] - w,
+                                                                  p0[0], p0[1] + w,
+                                                                  p0[0] + r, p0[1],
+                                                                  p0[0] - r, p0[1]
+                                                                  )
         drawList.colors[2 * vertexPtr:2 * vertexPtr + GLDefs.LENSQ4] = (*cols, 1.0) * GLDefs.LENSQ
         drawList.attribs[vertexPtr:vertexPtr + GLDefs.LENSQ2] = (p0[0], p0[1]) * GLDefs.LENSQ
         # drawList.offsets[vertexPtr:vertexPtr + GLDefs.LENSQ2] = (p0[0]+r, p0[1]+w) * GLDefs.LENSQ
@@ -2855,15 +2955,15 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
         textY = self._GLParent.axisT - (36.0 * self._GLParent.pixelY)
 
         newString = GLString(text=text,
-                                   font=self._GLParent.globalGL.glSmallFont,
-                                   # x=p0[0], y=p0[1],
-                                   x=textX,
-                                   y=textY,
-                                   # ox=symbolWidth, oy=symbolWidth,
-                                   # x=self._screenZero[0], y=self._screenZero[1]
-                                   color=(*listCol, 1.0),
-                                   GLContext=self._GLParent,
-                                   obj=obj)
+                             font=self._GLParent.globalGL.glSmallFont,
+                             # x=p0[0], y=p0[1],
+                             x=textX,
+                             y=textY,
+                             # ox=symbolWidth, oy=symbolWidth,
+                             # x=self._screenZero[0], y=self._screenZero[1]
+                             color=(*listCol, 1.0),
+                             GLContext=self._GLParent,
+                             obj=obj)
         # this is in the attribs
         newString.axisIndex = 0
         newString.axisPosition = pos or 0.0
@@ -2873,6 +2973,7 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
         # # this is in the attribs
         # stringList[-1].axisIndex = 0
         # stringList[-1].axisPosition = pos or 0.0
+
 
 class GLintegral1dLabelling(GLintegralNdLabelling):
     """Class to handle symbol and symbol labelling for 1d displays

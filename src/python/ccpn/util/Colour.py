@@ -268,110 +268,110 @@ shortSpectrumColours = OrderedDict([('#cb1400', 'red'),
 
 # set of colours that have higher saturation
 brightColours = OrderedDict([('#000000', 'black'),
-                             ('#696969', 'dim gray'),
-                             ('#696969', 'dim grey'),
+                             ('#696969', 'dimgray'),
+                             ('#696969', 'dimgrey'),
                              ('#808080', 'gray'),
                              ('#808080', 'grey'),
-                             ('#A9A9A9', 'dark gray'),
-                             ('#A9A9A9', 'dark grey'),
+                             ('#A9A9A9', 'darkgray'),
+                             ('#A9A9A9', 'darkgrey'),
                              ('#C0C0C0', 'silver'),
-                             ('#D3D3D3', 'light gray'),
-                             ('#D3D3D3', 'light grey'),
+                             ('#D3D3D3', 'lightgray'),
+                             ('#D3D3D3', 'lightgrey'),
                              ('#DCDCDC', 'gainsboro'),
-                             ('#F5F5F5', 'white smoke'),
+                             ('#F5F5F5', 'whitesmoke'),
                              ('#FFFFFF', 'white'),
-                             ('#F08080', 'light coral'),
-                             ('#CD5C5C', 'indian red'),
+                             ('#F08080', 'lightcoral'),
+                             ('#CD5C5C', 'indianred'),
                              ('#A52A2A', 'brown'),
                              ('#B22222', 'firebrick'),
                              ('#800000', 'maroon'),
-                             ('#8B0000', 'dark red'),
+                             ('#8B0000', 'darkred'),
                              ('#FF0000', 'red'),
                              ('#FA8072', 'salmon'),
                              ('#FF6347', 'tomato'),
-                             ('#E9967A', 'dark salmon'),
+                             ('#E9967A', 'darksalmon'),
                              ('#FF7F50', 'coral'),
-                             ('#FF4500', 'orange red'),
-                             ('#FFA07A', 'light salmon'),
+                             ('#FF4500', 'orangered'),
+                             ('#FFA07A', 'lightsalmon'),
                              ('#A0522D', 'sienna'),
                              ('#D2691E', 'chocolate'),
-                             ('#8B4513', 'saddle brown'),
-                             ('#F4A460', 'sandy brown'),
+                             ('#8B4513', 'saddlebrown'),
+                             ('#F4A460', 'sandybrown'),
                              ('#CD853F', 'peru'),
-                             ('#FF8C00', 'dark orange'),
-                             ('#DEB887', 'burly wood'),
+                             ('#FF8C00', 'darkorange'),
+                             ('#DEB887', 'burlywood'),
                              ('#D2B48C', 'tan'),
-                             ('#FFDEAD', 'navajo white'),
+                             ('#FFDEAD', 'navajowhite'),
                              ('#FFA500', 'orange'),
-                             ('#B8860B', 'dark goldenrod'),
+                             ('#B8860B', 'darkgoldenrod'),
                              ('#DAA520', 'goldenrod'),
                              ('#FFD700', 'gold'),
                              ('#F0E68C', 'khaki'),
-                             ('#BDB76B', 'dark khaki'),
+                             ('#BDB76B', 'darkkhaki'),
                              ('#808000', 'olive'),
                              ('#FFFF00', 'yellow'),
-                             ('#6B8E23', 'olive drab'),
-                             ('#9ACD32', 'yellow green'),
-                             ('#556B2F', 'dark olive green'),
-                             ('#ADFF2F', 'green yellow'),
+                             ('#6B8E23', 'olivedrab'),
+                             ('#9ACD32', 'yellowgreen'),
+                             ('#556B2F', 'darkolivegreen'),
+                             ('#ADFF2F', 'greenyellow'),
                              ('#7FFF00', 'chartreuse'),
-                             ('#7CFC00', 'lawn green'),
-                             ('#98FB98', 'pale green'),
-                             ('#90EE90', 'light green'),
-                             ('#228B22', 'forest green'),
-                             ('#32CD32', 'lime green'),
-                             ('#006400', 'dark green'),
+                             ('#7CFC00', 'lawngreen'),
+                             ('#98FB98', 'palegreen'),
+                             ('#90EE90', 'lightgreen'),
+                             ('#228B22', 'forestgreen'),
+                             ('#32CD32', 'limegreen'),
+                             ('#006400', 'darkgreen'),
                              ('#008000', 'green'),
                              ('#00FF00', 'lime'),
-                             ('#2E8B57', 'sea green'),
-                             ('#3CB371', 'medium sea green'),
-                             ('#00FF7F', 'spring green'),
-                             ('#00FA9A', 'medium spring green'),
-                             ('#66CDAA', 'medium aquamarine'),
+                             ('#2E8B57', 'seagreen'),
+                             ('#3CB371', 'mediumseagreen'),
+                             ('#00FF7F', 'springgreen'),
+                             ('#00FA9A', 'mediumspringgreen'),
+                             ('#66CDAA', 'mediumaquamarine'),
                              ('#7FFFD4', 'aquamarine'),
                              ('#40E0D0', 'turquoise'),
-                             ('#20B2AA', 'light sea green'),
-                             ('#48D1CC', 'medium turquoise'),
-                             ('#2F4F4F', 'dark slate gray'),
-                             ('#2F4F4F', 'dark slate grey'),
+                             ('#20B2AA', 'lightseagreen'),
+                             ('#48D1CC', 'mediumturquoise'),
+                             ('#2F4F4F', 'darkslategray'),
+                             ('#2F4F4F', 'darkslategrey'),
                              ('#008080', 'teal'),
-                             ('#008B8B', 'dark cyan'),
+                             ('#008B8B', 'darkcyan'),
                              ('#00FFFF', 'aqua'),
                              ('#00FFFF', 'cyan'),
-                             ('#00CED1', 'dark turquoise'),
-                             ('#5F9EA0', 'cadet blue'),
-                             ('#00BFFF', 'deep sky blue'),
-                             ('#87CEEB', 'sky blue'),
-                             ('#87CEFA', 'light sky blue'),
-                             ('#4682B4', 'steel blue'),
-                             ('#1E90FF', 'dodger blue'),
-                             ('#6495ED', 'cornflower blue'),
-                             ('#4169E1', 'royal blue'),
-                             ('#191970', 'midnight blue'),
+                             ('#00CED1', 'darkturquoise'),
+                             ('#5F9EA0', 'cadetblue'),
+                             ('#00BFFF', 'deepskyblue'),
+                             ('#87CEEB', 'skyblue'),
+                             ('#87CEFA', 'lightskyblue'),
+                             ('#4682B4', 'steelblue'),
+                             ('#1E90FF', 'dodgerblue'),
+                             ('#6495ED', 'cornflowerblue'),
+                             ('#4169E1', 'royalblue'),
+                             ('#191970', 'midnightblue'),
                              ('#000080', 'navy'),
-                             ('#00008B', 'dark blue'),
-                             ('#0000CD', 'medium blue'),
+                             ('#00008B', 'darkblue'),
+                             ('#0000CD', 'mediumblue'),
                              ('#0000FF', 'blue'),
-                             ('#6A5ACD', 'slate blue'),
-                             ('#483D8B', 'dark slate blue'),
-                             ('#7B68EE', 'medium slate blue'),
-                             ('#9370DB', 'medium purple'),
-                             ('#663399', 'rebecca purple'),
-                             ('#8A2BE2', 'blue violet'),
+                             ('#6A5ACD', 'slateblue'),
+                             ('#483D8B', 'darkslateblue'),
+                             ('#7B68EE', 'mediumslateblue'),
+                             ('#9370DB', 'mediumpurple'),
+                             ('#663399', 'rebeccapurple'),
+                             ('#8A2BE2', 'blueviolet'),
                              ('#4B0082', 'indigo'),
-                             ('#9932CC', 'dark orchid'),
-                             ('#9400D3', 'dark violet'),
-                             ('#BA55D3', 'medium orchid'),
+                             ('#9932CC', 'darkorchid'),
+                             ('#9400D3', 'darkviolet'),
+                             ('#BA55D3', 'mediumorchid'),
                              ('#EE82EE', 'violet'),
                              ('#800080', 'purple'),
-                             ('#8B008B', 'dark magenta'),
+                             ('#8B008B', 'darkmagenta'),
                              ('#FF00FF', 'fuchsia'),
                              ('#FF00FF', 'magenta'),
                              ('#DA70D6', 'orchid'),
-                             ('#C71585', 'medium violet red'),
-                             ('#FF1493', 'deep pink'),
-                             ('#FF69B4', 'hot pink'),
-                             ('#DB7093', 'pale violet red'),
+                             ('#C71585', 'mediumvioletred'),
+                             ('#FF1493', 'deeppink'),
+                             ('#FF69B4', 'hotpink'),
+                             ('#DB7093', 'palevioletred'),
                              ('#DC143C', 'crimson'),
                              ])
 
@@ -788,68 +788,61 @@ if __name__ == '__main__':
 
     colors = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)
 
+
+    def colourPlot(names):
+        """make a colour plot of the names
+        """
+        n = len(names)
+        ncols = 4
+        nrows = n // ncols + 1
+
+        fig, ax = plt.subplots(figsize=(16, 9))
+
+        # Get height and width
+        X, Y = fig.get_dpi() * fig.get_size_inches()
+        h = Y / (nrows + 1)
+        w = X / ncols
+
+        for i, name in enumerate(names):
+            row = i % nrows
+            col = i // nrows
+
+            y = Y - (row * h) - h
+
+            xi_line = w * (col + 0.05)
+            xf_line = w * (col + 0.25)
+            xi_text = w * (col + 0.3)
+
+            ax.text(xi_text, y, name, fontsize=(h * 0.5),
+                    horizontalalignment='left',
+                    verticalalignment='center')
+
+            ax.hlines(y + h * 0.1, xi_line, xf_line,
+                      color=colors[name], linewidth=(h * 0.6))
+
+        ax.set_xlim(0, X)
+        ax.set_ylim(0, Y)
+        ax.set_axis_off()
+
+        fig.subplots_adjust(left=0, right=1,
+                            top=1, bottom=0,
+                            hspace=0, wspace=0)
+        plt.show()
+
+
     # Sort colors by hue, saturation, value and name.
     by_hsv = sorted((tuple(mcolors.rgb_to_hsv(mcolors.to_rgba(color)[:3])), name)
                     for name, color in colors.items())
     sorted_names = [name for hsv, name in by_hsv
                     if (hsv[0] == 0.0 and hsv[1] == 0.0) or hsv[1] > 0.3]
 
-    n = len(sorted_names)
-    ncols = 4
-    nrows = n // ncols + 1
-
     # print the colors to generate full colorList
     for col in sorted_names:
         if isinstance(colors[col], str):
-            readableCol = colourNameWithSpace(col)
+            # col = colourNameWithSpace(col)
 
-            print('(' + repr(colors[col]) + ', ' + repr(readableCol) + '),')
+            print('(' + repr(colors[col]) + ', ' + repr(col) + '),')
 
-    fig, ax = plt.subplots(figsize=(16, 9))
-
-    # Get height and width
-    X, Y = fig.get_dpi() * fig.get_size_inches()
-    h = Y / (nrows + 1)
-    w = X / ncols
-
-    for i, name in enumerate(sorted_names):
-        row = i % nrows
-        col = i // nrows
-
-        y = Y - (row * h) - h
-
-        xi_line = w * (col + 0.05)
-        xf_line = w * (col + 0.25)
-        xi_text = w * (col + 0.3)
-
-        ax.text(xi_text, y, name, fontsize=(h * 0.5),
-                horizontalalignment='left',
-                verticalalignment='center')
-
-        ax.hlines(y + h * 0.1, xi_line, xf_line,
-                  color=colors[name], linewidth=(h * 0.6))
-
-    ax.set_xlim(0, X)
-    ax.set_ylim(0, Y)
-    ax.set_axis_off()
-
-    fig.subplots_adjust(left=0, right=1,
-                        top=1, bottom=0,
-                        hspace=0, wspace=0)
-    plt.show()
-
-    print('>>>>>>>>>>>>>>>>>>>>>>>>>>>')
-
-    # find nearest colours to hex
-    for k, v in spectrumColours.items():
-        nearestCol = findNearestHex(k)
-        print('>>>nearest', k, v, nearestCol)
-
-    print('>>>>>>>>>>>>>>>>>>>>>>>>>>>')
-
-    # find nearest opposite intensity colours to hex
-    for k, v in allColours.items():
-        col = autoCorrectHexColour(k, referenceHexColour=k, addNewColour=False)
-        nearestCol = findNearestHex(col)
-
-        print('>>>opposite', k, v, nearestCol)
+    colourPlot(spectrumDarkColours.values())
+    colourPlot(spectrumMediumColours.values())
+    colourPlot(spectrumLightColours.values())

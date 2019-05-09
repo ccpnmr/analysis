@@ -555,22 +555,9 @@ def getDefaultSpectrumColours(self: 'Spectrum') -> Tuple[str, str]:
     kk = colorCount // 7
     index = self.experiment.serial - 1 + step * (self._serial - 1)
     posCol = spectrumHexColours[(kk * index) % colorCount]
-
-    colorCount = len(spectrumHexMediumColours)
-    step = ((colorCount // 2 - 1) // 2)
-    kk = colorCount // 5
-    index = self.experiment.serial - 1 + step * (self._serial - 1)
-    negCol = spectrumHexMediumColours[(kk * index) % colorCount]
+    negCol = spectrumHexColours[((kk + 1) * index) % colorCount]
 
     return (posCol, negCol)
-
-    # # larger jump between colours - may not match though
-    # if self._numDim == 1:
-    #     ii = (kk * index)            # % colorCount
-    # else:
-    #     ii = (kk * index)            # % colorCount
-    # #
-    # return (spectrumHexColours[ii % colorCount], spectrumHexColours[(ii + (kk // 2)) % colorCount])
 
 
 def get1DdataInRange(x, y, xRange):

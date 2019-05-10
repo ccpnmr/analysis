@@ -527,18 +527,27 @@ class Strip(AbstractWrapperObject):
                         # sortedSelectedRegion =[list(sorted(x)) for x in selectedRegion]
                         spectrumAxisCodes = spectrumView.spectrum.axisCodes
                         stripAxisCodes = self.axisCodes
-                        position = [0] * spectrumView.spectrum.dimensionCount
 
-                        remapIndices = commonUtil._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
-                        if remapIndices:
-                            for n, axisCode in enumerate(spectrumAxisCodes):
-                                # idx = stripAxisCodes.index(axisCode)
+                        # position = [0] * spectrumView.spectrum.dimensionCount
+                        # remapIndices = commonUtil._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
+                        # if remapIndices:
+                        #     for n, axisCode in enumerate(spectrumAxisCodes):
+                        #         # idx = stripAxisCodes.index(axisCode)
+                        #
+                        #         idx = remapIndices[n]
+                        #         # sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
+                        #         position[n] = inPosition[idx]
+                        # else:
+                        #     position = inPosition
 
-                                idx = remapIndices[n]
-                                # sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
-                                position[n] = inPosition[idx]
-                        else:
-                            position = inPosition
+                        indices = commonUtil.getAxisCodeMatchIndices(spectrumAxisCodes, stripAxisCodes)
+
+                        # skip if no valid mapping
+                        if None in indices:
+                            continue
+
+                        # map position to the spectrum
+                        position = [inPosition[ind] for ii, ind in enumerate(indices)]
 
                         peak = peakList.newPeak(ppmPositions=position, height=height)
                         peak.height = spectrumView.spectrum.getHeight(ppmPositions=position)

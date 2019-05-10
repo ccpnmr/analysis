@@ -133,7 +133,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLLabelling import GLpeakNdLabelling, GLpeak
     GLmultiplet1dLabelling, GLmultipletNdLabelling
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import GLExporter
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
-# from ccpn.util.Common import makeIterableList
+from ccpn.util.Common import getAxisCodeMatch, getAxisCodeMatchIndices
 from typing import Tuple
 from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE, AXIS_ACTIVEAXES, \
     DOUBLEAXIS_ACTIVEAXES, DOUBLEAXIS_FULLATOMNAME, DOUBLEAXIS_MATCHATOMTYPE
@@ -759,18 +759,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_XSCALE] = xScale
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YSCALE] = yScale
 
-        if spectrumView.spectrum.dimensionCount > 1:
-            # get the ordering of the strip axisCodes in the spectrum
-            try:
-                indices = spectrumView.spectrum.getByAxisCodes('indices', self.strip.axisCodes,
-                                                               exactMatch=(self._preferences.matchAxisCode == 1))
-            except Exception as es:
-
-                # spectrum possibly no compatible here, may be 2d overlaid onto Nd
-                indices = spectrumView.spectrum.getByAxisCodes('indices', self.strip.axisCodes[0:2],
-                                                               exactMatch=(self._preferences.matchAxisCode == 1))
-        else:
-            indices = (0,)  # spectrumView.spectrum.getByAxisCodes('indices', self.strip.axisCodes)
+        indices = getAxisCodeMatchIndices(spectrumView.spectrum.axisCodes, self.strip.axisCodes)
 
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX] = indices
 
@@ -2204,20 +2193,20 @@ class CcpnGLWidget(QOpenGLWidget):
         for n, axisCode in enumerate(self._axisCodes):
             if n == 0:
                 xPos = pos = self.cursorCoordinate[0]
-                activeX = axisCode[0]
+                activeX = axisCode      #[0]
 
                 # double cursor
                 dxPos = dPos = self.cursorCoordinate[1]
             elif n == 1:
                 yPos = pos = self.cursorCoordinate[1]
-                activeY = axisCode[0]
+                activeY = axisCode      #[0]
 
                 # double cursor
                 dyPos = dPos = self.cursorCoordinate[0]
 
             else:
                 dPos = pos = self._orderedAxes[n].position  # if n in self._orderedAxes else 0
-                activeOther.append(axisCode[0])
+                activeOther.append(axisCode)        #[0])
 
             # populate the mouse moved dict
             mouseMovedDict[AXIS_MATCHATOMTYPE][axisCode[0]] = pos
@@ -2225,7 +2214,7 @@ class CcpnGLWidget(QOpenGLWidget):
             mouseMovedDict[DOUBLEAXIS_MATCHATOMTYPE][axisCode[0]] = dPos
             mouseMovedDict[DOUBLEAXIS_FULLATOMNAME][axisCode] = dPos
 
-        mouseMovedDict[AXIS_ACTIVEAXES] = (activeX, activeY) + tuple(activeOther)
+        mouseMovedDict[AXIS_ACTIVEAXES] = (activeX, activeY) + tuple(activeOther)               # changed to full axisCodes
         mouseMovedDict[DOUBLEAXIS_ACTIVEAXES] = (activeY, activeX) + tuple(activeOther)
 
         self.current.cursorPosition = (xPos, yPos)
@@ -3707,11 +3696,12 @@ class CcpnGLWidget(QOpenGLWidget):
             if not self._drawDeltaOffset:
                 self._startCoordinate = self.cursorCoordinate
 
-            # get the list of visible spectra, or the first in the list
-            visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
-            thisSpec = visibleSpectra[0] if visibleSpectra else self._ordering[0].spectrum if self._ordering and not self._ordering[0].isDeleted else None
+            # get the list of visible spectrumViews, or the first in the list
+            visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+            thisSpecView = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[0].isDeleted else None
 
-            if thisSpec:
+            if thisSpecView:
+                thisSpec = thisSpecView.spectrum
 
                 # generate different axes depending on units - X Axis
                 if self.XAXES[self._xUnits] == GLDefs.AXISUNITSPPM:
@@ -3722,20 +3712,13 @@ class CcpnGLWidget(QOpenGLWidget):
                 elif self.XAXES[self._xUnits] == GLDefs.AXISUNITSHZ:
                     if self._ordering:
 
-                        # thisSpec = self._ordering[0].spectrum
-
                         if self.is1D:
                             cursorX = self.cursorCoordinate[0] * thisSpec.spectrometerFrequencies[0]
                             startX = self._startCoordinate[0] * thisSpec.spectrometerFrequencies[0]
 
                         else:
                             # get the axis ordering from the spectrumDisplay and map to the strip
-                            stripAxisCodes = self.strip.axisCodes
-                            try:
-                                indices = thisSpec.getByAxisCodes('indices', stripAxisCodes)
-                            except Exception as es:
-                                indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
-
+                            indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
                             cursorX = self.cursorCoordinate[0] * thisSpec.spectrometerFrequencies[indices[0]]
                             startX = self._startCoordinate[0] * thisSpec.spectrometerFrequencies[indices[0]]
 
@@ -3748,20 +3731,13 @@ class CcpnGLWidget(QOpenGLWidget):
                 else:
                     if self._ordering:
 
-                        # visibleSpectra = [specView.spectrum for specView in self._ordering if specView.isVisible()]
-                        # thisSpec = visibleSpectra[0] if visibleSpectra else self._ordering[0].spectrum
-
                         if self.is1D:
                             cursorX = thisSpec.mainSpectrumReferences[0].valueToPoint(self.cursorCoordinate[0])
                             startX = thisSpec.mainSpectrumReferences[0].valueToPoint(self._startCoordinate[0])
 
                         else:
                             # get the axis ordering from the spectrumDisplay and map to the strip
-                            stripAxisCodes = self.strip.axisCodes
-                            try:
-                                indices = thisSpec.getByAxisCodes('indices', stripAxisCodes)
-                            except Exception as es:
-                                indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
+                            indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
 
                             # map to a point
                             cursorX = thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self.cursorCoordinate[0])
@@ -3791,15 +3767,8 @@ class CcpnGLWidget(QOpenGLWidget):
                 elif self.YAXES[self._yUnits] == GLDefs.AXISUNITSHZ:
                     if self._ordering:
 
-                        # thisSpec = self._ordering[0].spectrum
-
                         # get the axis ordering from the spectrumDisplay and map to the strip
-                        stripAxisCodes = self.strip.axisCodes
-                        try:
-                            indices = thisSpec.getByAxisCodes('indices', stripAxisCodes)
-                        except Exception as es:
-                            indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
-
+                        indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
                         cursorY = self.cursorCoordinate[1] * thisSpec.spectrometerFrequencies[indices[1]]
                         startY = self._startCoordinate[1] * thisSpec.spectrometerFrequencies[indices[1]]
 
@@ -3812,15 +3781,8 @@ class CcpnGLWidget(QOpenGLWidget):
                 else:
                     if self._ordering:
 
-                        # visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
-                        # thisSpec = visibleSpectra[0] if visibleSpectra else self._ordering[0].spectrum if self._ordering and not self._ordering[0].isDeleted
-
                         # get the axis ordering from the spectrumDisplay and map to the strip
-                        stripAxisCodes = self.strip.axisCodes
-                        try:
-                            indices = thisSpec.getByAxisCodes('indices', stripAxisCodes)
-                        except Exception as es:
-                            indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
+                        indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
 
                         # map to a point
                         cursorY = thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self.cursorCoordinate[1])
@@ -4200,8 +4162,7 @@ class CcpnGLWidget(QOpenGLWidget):
         point = [int(p + 0.5) for p in point]
 
         # get the correct ordering for horizontal/vertical
-        axisCodes = [a.code for a in spectrumView.strip.axes]  # [0:2]
-        planeDims = spectrumView.spectrum.getByAxisCodes('indices', axisCodes)
+        planeDims = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
 
         if point[planeDims[0]] >= xNumPoints or point[planeDims[1]] >= yNumPoints:
             # Extra check whether the new point is out of range if numLimits
@@ -4261,8 +4222,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 ref = spectrumView.spectrum.mainSpectrumReferences
 
                 # get the correct axis ordering for the refDims
-                axisCodes = [a.code for a in spectrumView.strip.axes]  # [0:2]
-                planeDims = spectrumView.spectrum.getByAxisCodes('indices', axisCodes)
+                planeDims = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
 
                 # rounds the wrong way when point values are adjusted from negative
                 intPositionPixel = [ref[planeDims[ax]].pointToValue(int(ref[planeDims[ax]].valueToPoint(pp) + 0.5)) for ax, pp in enumerate(positionPixel)]
@@ -4324,8 +4284,7 @@ class CcpnGLWidget(QOpenGLWidget):
                         = spectrumView._getTraceParams(position)
 
                     # get the correct axis ordering for the refDims
-                    axisCodes = [a.code for a in spectrumView.strip.axes]  # [0:2]
-                    planeDims = spectrumView.spectrum.getByAxisCodes('indices', axisCodes)
+                    planeDims = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
 
                     # rounds the wrong way when point values are adjusted from negative
                     intPositionPixel = [ref[planeDims[ax]].pointToValue(int(ref[planeDims[ax]].valueToPoint(pp) + 0.5)) for ax, pp in enumerate(positionPixel)]
@@ -4692,11 +4651,13 @@ class CcpnGLWidget(QOpenGLWidget):
 
         if gridGLList.renderMode == GLRENDERMODE_REBUILD:
 
-            # get the list of visible spectra, or the first in the list
-            visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
-            thisSpec = visibleSpectra[0] if visibleSpectra else self._ordering[0].spectrum if self._ordering and not self._ordering[0].isDeleted else None
+            # get the list of visible spectrumViews, or the first in the list
+            visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+            thisSpecView = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[0].isDeleted else None
 
-            if thisSpec:
+            if thisSpecView:
+                thisSpec = thisSpecView.spectrum
+
                 # generate different axes depending on units - X Axis
                 if self.XAXES[self._xUnits] == GLDefs.AXISUNITSPPM:
                     axisLimitL = self.axisL
@@ -4706,20 +4667,13 @@ class CcpnGLWidget(QOpenGLWidget):
                 elif self.XAXES[self._xUnits] == GLDefs.AXISUNITSHZ:
                     if self._ordering:
 
-                        # thisSpec = self._ordering[0].spectrum
-
                         if self.is1D:
                             axisLimitL = self.axisL * thisSpec.spectrometerFrequencies[0]
                             axisLimitR = self.axisR * thisSpec.spectrometerFrequencies[0]
 
                         else:
                             # get the axis ordering from the spectrumDisplay and map to the strip
-                            stripAxisCodes = self.strip.axisCodes
-                            try:
-                                indices = thisSpec.getByAxisCodes('indices', stripAxisCodes)
-                            except Exception as es:
-                                indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
-
+                            indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
                             axisLimitL = self.axisL * thisSpec.spectrometerFrequencies[indices[0]]
                             axisLimitR = self.axisR * thisSpec.spectrometerFrequencies[indices[0]]
 
@@ -4732,20 +4686,13 @@ class CcpnGLWidget(QOpenGLWidget):
                 else:
                     if self._ordering:
 
-                        # visibleSpectra = [specView.spectrum for specView in self._ordering if specView.isVisible()]
-                        # thisSpec = visibleSpectra[0] if visibleSpectra else self._ordering[0].spectrum
-
                         if self.is1D:
                             axisLimitL = thisSpec.mainSpectrumReferences[0].valueToPoint(self.axisL)
                             axisLimitR = thisSpec.mainSpectrumReferences[0].valueToPoint(self.axisR)
 
                         else:
                             # get the axis ordering from the spectrumDisplay and map to the strip
-                            stripAxisCodes = self.strip.axisCodes
-                            try:
-                                indices = thisSpec.getByAxisCodes('indices', stripAxisCodes)
-                            except Exception as es:
-                                indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
+                            indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
 
                             # map to a point
                             axisLimitL = thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self.axisL)
@@ -4771,15 +4718,8 @@ class CcpnGLWidget(QOpenGLWidget):
                 elif self.YAXES[self._yUnits] == GLDefs.AXISUNITSHZ:
                     if self._ordering:
 
-                        # thisSpec = self._ordering[0].spectrum
-
                         # get the axis ordering from the spectrumDisplay and map to the strip
-                        stripAxisCodes = self.strip.axisCodes
-                        try:
-                            indices = thisSpec.getByAxisCodes('indices', stripAxisCodes)
-                        except Exception as es:
-                            indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
-
+                        indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
                         axisLimitT = self.axisT * thisSpec.spectrometerFrequencies[indices[1]]
                         axisLimitB = self.axisB * thisSpec.spectrometerFrequencies[indices[1]]
 
@@ -4792,15 +4732,8 @@ class CcpnGLWidget(QOpenGLWidget):
                 else:
                     if self._ordering:
 
-                        # visibleSpectra = [specView.spectrum for specView in self._ordering if specView.isVisible()]
-                        # thisSpec = visibleSpectra[0] if visibleSpectra else self._ordering[0].spectrum
-
                         # get the axis ordering from the spectrumDisplay and map to the strip
-                        stripAxisCodes = self.strip.axisCodes
-                        try:
-                            indices = thisSpec.getByAxisCodes('indices', stripAxisCodes)
-                        except Exception as es:
-                            indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
+                        indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
 
                         # map to a point
                         axisLimitT = thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self.axisT)
@@ -5167,31 +5100,75 @@ class CcpnGLWidget(QOpenGLWidget):
 
             if self._crosshairVisible:  # or self._updateVTrace or self._updateHTrace:
 
-                if self._preferences.matchAxisCode == AXIS_MATCHATOMTYPE:
-                    for n, axis in enumerate(self._axisOrder[:2]):
-                        for ax in mouseMovedDict[AXIS_MATCHATOMTYPE].keys():
-                            if ax and axis and ax[0] == axis[0] and axis[0] in mouseMovedDict[AXIS_ACTIVEAXES]:
-                                self.cursorCoordinate[n] = mouseMovedDict[AXIS_MATCHATOMTYPE][ax]
+                # if self._preferences.matchAxisCode == AXIS_MATCHATOMTYPE:
+                #     for n, axis in enumerate(self._axisOrder[:2]):
+                #         for ax in mouseMovedDict[AXIS_MATCHATOMTYPE].keys():
+                #             if ax and axis and ax[0] == axis[0] and axis[0] in mouseMovedDict[AXIS_ACTIVEAXES]:
+                #                 self.cursorCoordinate[n] = mouseMovedDict[AXIS_MATCHATOMTYPE][ax]
+                #
+                #                 # double cursor
+                #                 self.doubleCursorCoordinate[n] = mouseMovedDict[DOUBLEAXIS_MATCHATOMTYPE][ax]
+                #                 break
+                #         else:
+                #             self.cursorCoordinate[n] = None
+                #             self.doubleCursorCoordinate[n] = None
+                #
+                # elif self._preferences.matchAxisCode == AXIS_FULLATOMNAME:
+                #     for n, axis in enumerate(self._axisOrder[:2]):
+                #         for ax in mouseMovedDict[AXIS_FULLATOMNAME].keys():
+                #             if axis in mouseMovedDict[AXIS_FULLATOMNAME].keys():
+                #                 self.cursorCoordinate[n] = mouseMovedDict[AXIS_FULLATOMNAME][axis]
+                #
+                #                 # double cursor
+                #                 self.doubleCursorCoordinate[n] = mouseMovedDict[DOUBLEAXIS_FULLATOMNAME][axis]
+                #                 break
+                #         else:
+                #             self.cursorCoordinate[n] = None
+                #             self.doubleCursorCoordinate[n] = None
 
-                                # double cursor
-                                self.doubleCursorCoordinate[n] = mouseMovedDict[DOUBLEAXIS_MATCHATOMTYPE][ax]
-                                break
-                        else:
-                            self.cursorCoordinate[n] = None
-                            self.doubleCursorCoordinate[n] = None
+                exactMatch = (self._preferences.matchAxisCode == AXIS_FULLATOMNAME)
+                indices = getAxisCodeMatchIndices(self._axisCodes[:2], mouseMovedDict[AXIS_ACTIVEAXES], exactMatch=exactMatch)
 
-                elif self._preferences.matchAxisCode == AXIS_FULLATOMNAME:
-                    for n, axis in enumerate(self._axisOrder[:2]):
-                        for ax in mouseMovedDict[AXIS_FULLATOMNAME].keys():
-                            if axis in mouseMovedDict[AXIS_FULLATOMNAME].keys():
-                                self.cursorCoordinate[n] = mouseMovedDict[AXIS_FULLATOMNAME][axis]
+                for n in range(2):
+                    if indices[n] is not None:
 
-                                # double cursor
-                                self.doubleCursorCoordinate[n] = mouseMovedDict[DOUBLEAXIS_FULLATOMNAME][axis]
-                                break
-                        else:
-                            self.cursorCoordinate[n] = None
-                            self.doubleCursorCoordinate[n] = None
+                        axis = mouseMovedDict[AXIS_ACTIVEAXES][indices[n]]
+                        self.cursorCoordinate[n] = mouseMovedDict[AXIS_FULLATOMNAME][axis]
+
+                        axis = mouseMovedDict[DOUBLEAXIS_ACTIVEAXES][indices[n]]
+                        self.doubleCursorCoordinate[n] = mouseMovedDict[DOUBLEAXIS_FULLATOMNAME][axis]
+
+                    else:
+                        self.cursorCoordinate[n] = None
+                        self.doubleCursorCoordinate[n] = None
+
+                # if self._preferences.matchAxisCode == AXIS_MATCHATOMTYPE:
+                #
+                #
+                #     for n, axis in enumerate(self._axisOrder[:2]):
+                #         for ax in mouseMovedDict[AXIS_MATCHATOMTYPE].keys():
+                #             if ax and axis and ax[0] == axis[0] and axis[0] in mouseMovedDict[AXIS_ACTIVEAXES]:
+                #                 self.cursorCoordinate[n] = mouseMovedDict[AXIS_MATCHATOMTYPE][ax]
+                #
+                #                 # double cursor
+                #                 self.doubleCursorCoordinate[n] = mouseMovedDict[DOUBLEAXIS_MATCHATOMTYPE][ax]
+                #                 break
+                #         else:
+                #             self.cursorCoordinate[n] = None
+                #             self.doubleCursorCoordinate[n] = None
+                #
+                # elif self._preferences.matchAxisCode == AXIS_FULLATOMNAME:
+                #     for n, axis in enumerate(self._axisOrder[:2]):
+                #         for ax in mouseMovedDict[AXIS_FULLATOMNAME].keys():
+                #             if axis in mouseMovedDict[AXIS_FULLATOMNAME].keys():
+                #                 self.cursorCoordinate[n] = mouseMovedDict[AXIS_FULLATOMNAME][axis]
+                #
+                #                 # double cursor
+                #                 self.doubleCursorCoordinate[n] = mouseMovedDict[DOUBLEAXIS_FULLATOMNAME][axis]
+                #                 break
+                #         else:
+                #             self.cursorCoordinate[n] = None
+                #             self.doubleCursorCoordinate[n] = None
 
                 self.current.cursorPosition = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 

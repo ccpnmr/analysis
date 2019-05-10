@@ -715,7 +715,7 @@ stdLocalFormatter = LocalFormatter()
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 20190507:ED new routines to match axis codes and return dict or indices
 
-def _matchSingleAxisCode(code1: str = None, code2: str = None) -> int:
+def _matchSingleAxisCode(code1: str = None, code2: str = None, exactMatch: bool = False) -> int:
     """number of matching characters
     code1, code2 = strings
     e.g. 'Hn1', 'H1'
@@ -735,11 +735,16 @@ def _matchSingleAxisCode(code1: str = None, code2: str = None) -> int:
 
     :param code1: first axis code to compare
     :param code2: second axis code to compare
+    :param exactMatch: only allow exact matches, True/False
     :return: score based on the match
     """
     # undefined codes
     if not code1 or not code2 or code1[0].islower() or code2[0].islower():
         return 0
+
+    # if exactMatch is True then only test for exact match
+    if exactMatch:
+        return code1 == code2
 
     ms = [a for a in zip(code1, code2)]  # zips to the shortest string
     ss = 0
@@ -784,7 +789,7 @@ def _SortByMatch(item):
     return -item[2]  # sort from high to low
 
 
-def getAxisCodeMatch(axisCodes, refAxisCodes, allMatches=False) -> OrderedDict:
+def getAxisCodeMatch(axisCodes, refAxisCodes, allMatches=False, exactMatch=False) -> OrderedDict:
     """Return an OrderedDict containing the mapping from the refAxisCodes to axisCodes
 
     There may be multiple matches, or None for each axis code.
@@ -827,7 +832,7 @@ def getAxisCodeMatch(axisCodes, refAxisCodes, allMatches=False) -> OrderedDict:
         foundCodes = []
         for jj, code2 in enumerate(refAxisCodes):
 
-            match = _matchSingleAxisCode(code1, code2)
+            match = _matchSingleAxisCode(code1, code2, exactMatch=exactMatch)
             if match:
                 foundCodes.append((code2, jj, match))
 
@@ -839,7 +844,7 @@ def getAxisCodeMatch(axisCodes, refAxisCodes, allMatches=False) -> OrderedDict:
     return found
 
 
-def getAxisCodeMatchIndices(axisCodes, refAxisCodes):
+def getAxisCodeMatchIndices(axisCodes, refAxisCodes, exactMatch=False):
     """Return a tuple containing the indices for mapping axisCodes into refAxisCodes
 
     Only the best match is returned for each code
@@ -863,7 +868,7 @@ def getAxisCodeMatchIndices(axisCodes, refAxisCodes):
         foundCodes = []
         for jj, code2 in enumerate(refAxisCodes):
 
-            match = _matchSingleAxisCode(code1, code2)
+            match = _matchSingleAxisCode(code1, code2, exactMatch=exactMatch)
             if match:
                 foundCodes.append((code2, jj, match))
 

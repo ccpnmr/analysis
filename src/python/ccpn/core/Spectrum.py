@@ -79,7 +79,11 @@ from ccpn.core.lib.Cache import cached
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, \
     undoStackBlocking, renameObject, undoBlock
-from ccpn.util.Common import axisCodeMapping
+
+# 2019010:ED test new matching
+# from ccpn.util.Common import axisCodeMapping
+from ccpn.util.Common import getAxisCodeMatch as axisCodeMapping
+
 from ccpn.util.Logging import getLogger
 
 from ccpnmodel.ccpncore.lib.Io import Formats
@@ -1653,15 +1657,23 @@ class Spectrum(AbstractWrapperObject):
         # fill with the spectrum limits first
         regionToPick = list(self.spectrumLimits)
 
-        # insert axis regions into the limits list based on axisCode
-        for axis, region in axisDict.items():
-            for specAxis in self.axisCodes:
-                mapAxis = axisCodeMapping([axis], [specAxis])
-                if mapAxis:
-                    regionToPick[self.axisCodes.index(mapAxis[axis])] = region
-                    break
-            else:
-                raise ValueError('Invalid axis: %s' % axis)
+        # # insert axis regions into the limits list based on axisCode
+        # for axis, region in axisDict.items():
+        #     for specAxis in self.axisCodes:
+        #         mapAxis = axisCodeMapping([axis], [specAxis])
+        #         if mapAxis:
+        #             regionToPick[self.axisCodes.index(mapAxis[axis])] = region
+        #             break
+        #     else:
+        #         raise ValueError('Invalid axis: %s' % axis)
+
+        codes = axisDict.keys()
+        limits = tuple(axisDict.values())
+
+        indices = self.getByAxisCodes('indices', codes)
+        for n, ind in enumerate(indices):
+            if ind is not None:
+                regionToPick[n] = limits[ind]
 
         # convert the region limits to point coordinates with the dataSource
         dataDims = self._apiDataSource.sortedDataDims()
@@ -1813,31 +1825,31 @@ class Spectrum(AbstractWrapperObject):
         # for loop fails so return empty arrays in the first element
         return None
 
-    def _getByValidAxisCodes(self, attributeName: str, axisCodes: Sequence[str] = None, exactMatch: bool = False):
-        """Return values defined by attributeName in order defined by axisCodes :
-           (default order if None)
-            perform a mapping if exactMatch=False (eg. 'H' to 'Hn')
-           NB: Use getByDimensions for dimensions (1..dimensionCount) based access
-        """
-        if not hasattr(self, attributeName):
-            raise AttributeError('Spectrum object does not have attribute "%s"' % attributeName)
-
-        mappings = []
-        for ind, axis in enumerate(axisCodes):
-            for specAxis in self.axisCodes:
-                mapAxis = axisCodeMapping([axis], [specAxis])
-                if mapAxis:
-                    mappings.append(mapAxis[axis])  #[self.axisCodes.index(mapAxis[axis])] = ind
-                    break
-            else:
-                # raise ValueError('Invalid axis: %s' % axis)
-                pass
-
-        values = getattr(self, attributeName)
-        if mappings is not None:
-            # change to order defined by axisCodes
-            values = self._reorderValues(values, mappings)
-        return values
+    # def _getByValidAxisCodes(self, attributeName: str, axisCodes: Sequence[str] = None, exactMatch: bool = False):
+    #     """Return values defined by attributeName in order defined by axisCodes :
+    #        (default order if None)
+    #         perform a mapping if exactMatch=False (eg. 'H' to 'Hn')
+    #        NB: Use getByDimensions for dimensions (1..dimensionCount) based access
+    #     """
+    #     if not hasattr(self, attributeName):
+    #         raise AttributeError('Spectrum object does not have attribute "%s"' % attributeName)
+    #
+    #     mappings = []
+    #     for ind, axis in enumerate(axisCodes):
+    #         for specAxis in self.axisCodes:
+    #             mapAxis = axisCodeMapping([axis], [specAxis])
+    #             if mapAxis:
+    #                 mappings.append(mapAxis[axis])  #[self.axisCodes.index(mapAxis[axis])] = ind
+    #                 break
+    #         else:
+    #             # raise ValueError('Invalid axis: %s' % axis)
+    #             pass
+    #
+    #     values = getattr(self, attributeName)
+    #     if mappings is not None:
+    #         # change to order defined by axisCodes
+    #         values = self._reorderValues(values, mappings)
+    #     return values
 
     def getByAxisCodes(self, attributeName: str, axisCodes: Sequence[str] = None, exactMatch: bool = False):
         """Return values defined by attributeName in order defined by axisCodes:

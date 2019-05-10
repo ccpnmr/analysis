@@ -767,12 +767,12 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             # arrow indicating in the front flanking plane - pointing to the left
             if self._isSelected(obj):
                 _selected = True
-                drawList.indices[indexPtr:indexPtr + 14] = (index + 6, index + 4, index + 4, index + 5, index + 4, index + 7,
+                drawList.indices[indexPtr:indexPtr + 14] = (index + 6, index + 4, index + 4, index + 5, index + 4, index + 8,
                                                             index, index + 2, index + 2, index + 1,
                                                             index + 3, index + 1, index, index + 3)
                 iCount = 14
             else:
-                drawList.indices[indexPtr:indexPtr + 6] = (index + 6, index + 4, index + 4, index + 5, index + 4, index + 7)
+                drawList.indices[indexPtr:indexPtr + 6] = (index + 6, index + 4, index + 4, index + 5, index + 4, index + 8)
                 iCount = 6
 
         elif planeIndex == 2:
@@ -780,12 +780,12 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             # arrow indicating in the back flanking plane - pointing to the right
             if self._isSelected(obj):
                 _selected = True
-                drawList.indices[indexPtr:indexPtr + 14] = (index + 6, index + 4, index + 4, index + 5, index + 4, index + 8,
+                drawList.indices[indexPtr:indexPtr + 14] = (index + 6, index + 4, index + 4, index + 5, index + 4, index + 7,
                                                             index, index + 2, index + 2, index + 1,
                                                             index + 3, index + 1, index, index + 3)
                 iCount = 14
             else:
-                drawList.indices[indexPtr:indexPtr + 6] = (index + 6, index + 4, index + 4, index + 5, index + 4, index + 8)
+                drawList.indices[indexPtr:indexPtr + 6] = (index + 6, index + 4, index + 4, index + 5, index + 4, index + 7)
                 iCount = 6
 
         else:
@@ -812,22 +812,22 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             # arrow indicating in the front flanking plane - pointing to the left
             if self._isSelected(obj):
                 _selected = True
-                drawList.indices = np.append(drawList.indices, np.array((index + 6, index + 4, index + 4, index + 5, index + 4, index + 7,
+                drawList.indices = np.append(drawList.indices, np.array((index + 6, index + 4, index + 4, index + 5, index + 4, index + 8,
                                                                          index, index + 2, index + 2, index + 1,
                                                                          index + 3, index + 1, index, index + 3), dtype=np.uint32))
             else:
-                drawList.indices = np.append(drawList.indices, np.array((index + 6, index + 4, index + 4, index + 5, index + 4, index + 7), dtype=np.uint32))
+                drawList.indices = np.append(drawList.indices, np.array((index + 6, index + 4, index + 4, index + 5, index + 4, index + 8), dtype=np.uint32))
 
         elif planeIndex == 2:
 
             # arrow indicating in the back flanking plane - pointing to the right
             if self._isSelected(obj):
                 _selected = True
-                drawList.indices = np.append(drawList.indices, np.array((index + 6, index + 4, index + 4, index + 5, index + 4, index + 8,
+                drawList.indices = np.append(drawList.indices, np.array((index + 6, index + 4, index + 4, index + 5, index + 4, index + 7,
                                                                          index, index + 2, index + 2, index + 1,
                                                                          index + 3, index + 1, index, index + 3), dtype=np.uint32))
             else:
-                drawList.indices = np.append(drawList.indices, np.array((index + 6, index + 4, index + 4, index + 5, index + 4, index + 8), dtype=np.uint32))
+                drawList.indices = np.append(drawList.indices, np.array((index + 6, index + 4, index + 4, index + 5, index + 4, index + 7), dtype=np.uint32))
 
         else:
 

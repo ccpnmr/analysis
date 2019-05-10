@@ -594,7 +594,7 @@ def resetSerial(apiObject, newSerial):
 def makeIterableList(inList=None):
     """
     Take a list of lists and concatenate into a single list.
-    Remove any None's from the list
+    Remove any Nones from the list
     :param inList:
     :return single list:
     """

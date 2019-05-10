@@ -607,31 +607,10 @@ class GuiSpectrumDisplay(CcpnModule):
     def _handlePeak(self, peak, strip, widths=None):
         """Navigate to the peak position in the strip
         """
-        from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
-        # strip = self.strips[ii]
+        from ccpn.ui.gui.lib.SpectrumDisplay import navigateToPeakInStrip
 
-        newWidths = [0.2] * len(self.axisCodes)
-        pos = [None] * len(self.axisCodes)
-        mappedNewWidths = ['full'] * len(self.axisCodes)
-        newWidths = ['full'] * len(self.axisCodes)
-
-        if widths == None:
-            # set the width in case of nD (n>2)
-            _widths = {'H': 0.3, 'C': 1.0, 'N': 1.0}
-            _ac = strip.axisCodes[0]
-            _w = _widths.setdefault(_ac[0], 1.0)
-            newWidths[0] = _w
-
-        indices = strip._getAxisCodeIndices(peak.peakList.spectrum)
-        for ind, ii in enumerate(indices):
-            if ii < len(pos):
-                pos[ii] = peak.position[ind]
-                mappedNewWidths[ii] = newWidths[ind]
-
-        navigateToPositionInStrip(strip, pos, self.axisCodes, widths=mappedNewWidths)
-        strip.header.reset()
-        strip.header.setLabelText(position='c', text=peak.pid)
-        strip.header.headerVisible = True
+        # use the library method
+        navigateToPeakInStrip(self, strip, peak, widths=None)
 
     def _handleStrip(self, moveStrip, dropStrip):
         """Move a strip within a spectrumDisplay by dragging the strip label to another strip

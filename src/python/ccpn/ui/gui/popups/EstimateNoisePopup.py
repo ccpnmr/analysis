@@ -26,8 +26,6 @@ __date__ = "$Date: 2017-07-04 09:28:16 +0000 (Tue, July 04, 2017) $"
 #=========================================================================================
 
 import numpy as np
-from PyQt5 import QtWidgets
-from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
@@ -36,7 +34,7 @@ from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.util.OrderedSet import OrderedSet
-from ccpn.util import Common as commonUtil
+from ccpn.util.Common import getAxisCodeMatchIndices
 
 
 class EstimateNoisePopup(CcpnDialog):
@@ -144,14 +142,22 @@ class NoiseTab(Widget):
             selectedRegion.append((n.region[0], n.region[1]))
         sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]
 
-        # generate axisCodes dict
-        axisCodeDict = self.strip._getAxisCodeDict(self.spectrum, selectedRegion)
-        indices = self.strip._getAxisCodeIndices(self.spectrum)
+        from collections import OrderedDict
+
+        # get indexing for spectrum onto strip.axisCodes
+        indices = getAxisCodeMatchIndices(self.spectrum.axisCodes, self.strip.axisCodes)
+
+        if None in indices:
+            return
+
+        # map the spectrum selectedRegions to the strip
+        axisCodeDict = OrderedDict((code, sortedSelectedRegion[indices[ii]])
+                                   for ii, code in enumerate(self.spectrum.axisCodes) if indices[ii] is not None)
 
         # add an exclusion buffer to ensure that getRegionData always returns a region,
         # otherwise region may be 1 plain thick which will contradict error trapping for peak fitting
         # (which requires at least 3 points in each dimension)
-        exclusionBuffer = [1] * len(axisCodeDict)
+        exclusionBuffer = [1] * self.spectrum.dimensionCount
 
         foundRegions = self.spectrum.getRegionData(exclusionBuffer=exclusionBuffer, **axisCodeDict)
         if not foundRegions:

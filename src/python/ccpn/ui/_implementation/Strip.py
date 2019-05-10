@@ -564,139 +564,147 @@ class Strip(AbstractWrapperObject):
 
         return tuple(result), tuple(peakLists)
 
-    def _getAxisCodeDict(self, spectrum, selectedRegion):
-        """Generate axisCode dict from the given selectedRegion ordered by strip axes, matched to spectrum.
-        """
-        sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]
+    # 20190510: ED removd these routines as there are far too many different ways to map axis codes
+    # def _getAxisCodeDict(self, spectrum, selectedRegion):
+    #     """Generate axisCode dict from the given selectedRegion ordered by strip axes, matched to spectrum.
+    #     """
+    #     sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]
+    #
+    #     # map the limits to the correct axisCodes
+    #     axisCodeDict = {}
+    #     if spectrum.dimensionCount > 1:
+    #         spectrumAxisCodes = spectrum.axisCodes
+    #         stripAxisCodes = self.axisCodes
+    #
+    #         # get the ordering of the strip axisCodes in the spectrum
+    #         try:
+    #             indices = spectrum.getByAxisCodes('indices', stripAxisCodes)
+    #         except Exception as es:
+    #
+    #             # spectrum possibly not compatible here, may be 2d overlaid onto Nd
+    #             indices = spectrum.getByAxisCodes('indices', stripAxisCodes[0:2])
+    #
+    #         # sort the axis limits by spectrum axis order
+    #         for ii, ind in enumerate(indices):
+    #             axisCodeDict[spectrumAxisCodes[ind]] = sortedSelectedRegion[ii]
+    #
+    #     else:
+    #         spectrumAxisCodes = spectrum.axisCodes
+    #         stripAxisCodes = self.axisCodes
+    #
+    #         # get the ordering of the strip axisCodes in the spectrum
+    #         indices = (0, 1)  #spectrum.getByAxisCodes('indices', stripAxisCodes)
+    #
+    #         # sort the axis limits by spectrum axis order
+    #         for n, axisCode in enumerate(spectrumAxisCodes):
+    #             axisCodeDict[axisCode] = sortedSelectedRegion[indices[n]]
+    #
+    #     return axisCodeDict
 
-        # map the limits to the correct axisCodes
-        axisCodeDict = {}
-        if spectrum.dimensionCount > 1:
-            spectrumAxisCodes = spectrum.axisCodes
-            stripAxisCodes = self.axisCodes
+    # def _getAxisCodeIndices(self, spectrum):
+    #     """Return axisCode indices matched to spectrum.
+    #     """
+    #     stripAxisCodes = self.axisCodes
+    #     if spectrum.dimensionCount > 1:
+    #         # get the ordering of the strip axisCodes in the spectrum
+    #         try:
+    #             indices = spectrum.getByAxisCodes('indices', stripAxisCodes)
+    #         except Exception as es:
+    #             # spectrum possibly not compatible here, may be 2d overlaid onto Nd
+    #             # use another nested check and then use the code from settingsWidget
+    #             try:
+    #                 indices = spectrum.getByAxisCodes('indices', stripAxisCodes[0:2])
+    #
+    #             except Exception as es:
+    #
+    #                 # final try with the complicated method
+    #                 indices = self._getSpectrumAxisCodeIndexing(spectrum)
+    #
+    #
+    #     else:
+    #         # get the ordering of the strip axisCodes in the spectrum
+    #         indices = spectrum.getByAxisCodes('indices', stripAxisCodes)
+    #
+    #     return indices
 
-            # get the ordering of the strip axisCodes in the spectrum
-            try:
-                indices = spectrum.getByAxisCodes('indices', stripAxisCodes)
-            except Exception as es:
-
-                # spectrum possibly not compatible here, may be 2d overlaid onto Nd
-                indices = spectrum.getByAxisCodes('indices', stripAxisCodes[0:2])
-
-            # sort the axis limits by spectrum axis order
-            for ii, ind in enumerate(indices):
-                axisCodeDict[spectrumAxisCodes[ind]] = sortedSelectedRegion[ii]
-
-        else:
-            spectrumAxisCodes = spectrum.axisCodes
-            stripAxisCodes = self.axisCodes
-
-            # get the ordering of the strip axisCodes in the spectrum
-            indices = (0, 1)  #spectrum.getByAxisCodes('indices', stripAxisCodes)
-
-            # sort the axis limits by spectrum axis order
-            for n, axisCode in enumerate(spectrumAxisCodes):
-                axisCodeDict[axisCode] = sortedSelectedRegion[indices[n]]
-
-        return axisCodeDict
-
-    def _getAxisCodeIndices(self, spectrum):
-        """Return axisCode indices matched to spectrum.
-        """
-        stripAxisCodes = self.axisCodes
-        if spectrum.dimensionCount > 1:
-            # get the ordering of the strip axisCodes in the spectrum
-            try:
-                indices = spectrum.getByAxisCodes('indices', stripAxisCodes)
-            except Exception as es:
-                # spectrum possibly not compatible here, may be 2d overlaid onto Nd
-                # use another nested check and then use the code from settingsWidget
-                try:
-                    indices = spectrum.getByAxisCodes('indices', stripAxisCodes[0:2])
-
-                except Exception as es:
-
-                    # final try with the complicated method
-                    indices = self._getSpectrumAxisCodeIndexing(spectrum)
-
-
-        else:
-            # get the ordering of the strip axisCodes in the spectrum
-            indices = spectrum.getByAxisCodes('indices', stripAxisCodes)
-
-        return indices
-
-    def _getSpectrumAxisCodeIndexing(self, spectrum):
-
-        from ccpn.util.Common import _axisCodeMapIndices, axisCodeMapping
-
-        maxLen = 0
-        refAxisCodes = None
-
-        if len(self.axisCodes) > maxLen:
-            maxLen = len(self.axisCodes)
-            refAxisCodes = list(self.axisCodes)
-
-        if not maxLen:
-            return
-
-        axisLabels = [set() for ii in range(maxLen)]
-
-        mappings = {}
-        matchAxisCodes = spectrum.axisCodes
-
-        mapping = axisCodeMapping(refAxisCodes, matchAxisCodes)
-        for k, v in mapping.items():
-            if v not in mappings:
-                mappings[v] = set([k])
-            else:
-                mappings[v].add(k)
-
-        mapping = axisCodeMapping(matchAxisCodes, refAxisCodes)
-        for k, v in mapping.items():
-            if v not in mappings:
-                mappings[v] = set([k])
-            else:
-                mappings[v].add(k)
-
-        # example of mappings dict
-        # ('Hn', 'C', 'Nh')
-        # {'Hn': {'Hn'}, 'Nh': {'Nh'}, 'C': {'C'}}
-        # {'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'C'}}
-        # {'CA': {'C'}, 'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'CA', 'C'}}
-        # {'CA': {'C'}, 'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'CA', 'C'}}
-
-        axisIndexing = {}
-
-        axisIndexing[spectrum] = [0 for ii in range(len(spectrum.axisCodes))]
-
-        # get the spectrum dimension axisCode, and see if is already there
-        for specDim, specAxis in enumerate(spectrum.axisCodes):
-
-            if specAxis in refAxisCodes:
-                axisIndexing[spectrum][specDim] = refAxisCodes.index(specAxis)
-                axisLabels[axisIndexing[spectrum][specDim]].add(specAxis)
-
-            else:
-                # if the axisCode is not in the reference list then find the mapping from the dict
-                for k, v in mappings.items():
-                    if specAxis in v:
-                        # refAxisCodes[dim] = k
-                        axisIndexing[spectrum][specDim] = refAxisCodes.index(k)
-                        axisLabels[refAxisCodes.index(k)].add(specAxis)
-
-        axisLabels = [', '.join(ax) for ax in axisLabels]
-        return list(axisIndexing.values())[0] if axisIndexing else None
+    # def _getSpectrumAxisCodeIndexing(self, spectrum):
+    #
+    #     from ccpn.util.Common import _axisCodeMapIndices, axisCodeMapping
+    #
+    #     maxLen = 0
+    #     refAxisCodes = None
+    #
+    #     if len(self.axisCodes) > maxLen:
+    #         maxLen = len(self.axisCodes)
+    #         refAxisCodes = list(self.axisCodes)
+    #
+    #     if not maxLen:
+    #         return
+    #
+    #     axisLabels = [set() for ii in range(maxLen)]
+    #
+    #     mappings = {}
+    #     matchAxisCodes = spectrum.axisCodes
+    #
+    #     mapping = axisCodeMapping(refAxisCodes, matchAxisCodes)
+    #     for k, v in mapping.items():
+    #         if v not in mappings:
+    #             mappings[v] = set([k])
+    #         else:
+    #             mappings[v].add(k)
+    #
+    #     mapping = axisCodeMapping(matchAxisCodes, refAxisCodes)
+    #     for k, v in mapping.items():
+    #         if v not in mappings:
+    #             mappings[v] = set([k])
+    #         else:
+    #             mappings[v].add(k)
+    #
+    #     # example of mappings dict
+    #     # ('Hn', 'C', 'Nh')
+    #     # {'Hn': {'Hn'}, 'Nh': {'Nh'}, 'C': {'C'}}
+    #     # {'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'C'}}
+    #     # {'CA': {'C'}, 'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'CA', 'C'}}
+    #     # {'CA': {'C'}, 'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'CA', 'C'}}
+    #
+    #     axisIndexing = {}
+    #
+    #     axisIndexing[spectrum] = [0 for ii in range(len(spectrum.axisCodes))]
+    #
+    #     # get the spectrum dimension axisCode, and see if is already there
+    #     for specDim, specAxis in enumerate(spectrum.axisCodes):
+    #
+    #         if specAxis in refAxisCodes:
+    #             axisIndexing[spectrum][specDim] = refAxisCodes.index(specAxis)
+    #             axisLabels[axisIndexing[spectrum][specDim]].add(specAxis)
+    #
+    #         else:
+    #             # if the axisCode is not in the reference list then find the mapping from the dict
+    #             for k, v in mappings.items():
+    #                 if specAxis in v:
+    #                     # refAxisCodes[dim] = k
+    #                     axisIndexing[spectrum][specDim] = refAxisCodes.index(k)
+    #                     axisLabels[refAxisCodes.index(k)].add(specAxis)
+    #
+    #     axisLabels = [', '.join(ax) for ax in axisLabels]
+    #     return list(axisIndexing.values())[0] if axisIndexing else None
 
     @logCommand(get='self')
     def peakPickRegion(self, selectedRegion: List[List[float]]) -> Tuple[Peak]:
         """Peak pick all spectra currently displayed in strip in selectedRegion.
         """
+
+        from collections import OrderedDict
+        from ccpn.util.Common import getAxisCodeMatchIndices
+
         result = []
 
         project = self.project
         minDropFactor = self.application.preferences.general.peakDropFactor
         fitMethod = self.application.preferences.general.peakFittingMethod
+
+        # sort each of the regions
+        sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]
 
         with undoBlock():
             for spectrumView in (v for v in self.spectrumViews if v.isVisible()):
@@ -706,13 +714,19 @@ class Strip(AbstractWrapperObject):
                     spectrumView.spectrum.newPeakList()
 
                 validPeakListViews = (pp for pp in spectrumView.peakListViews if pp.isVisible())
+                indices = getAxisCodeMatchIndices(spectrumView.spectrum.axisCodes, self.axisCodes)
+
+                # map the spectrum selectedRegions to the strip
+                axisCodeDict = OrderedDict((code, sortedSelectedRegion[indices[ii]])
+                                           for ii, code in enumerate(spectrumView.spectrum.axisCodes) if indices[ii] is not None)
 
                 for thisPeakListView in validPeakListViews:
 
                     peakList = thisPeakListView.peakList
 
                     if spectrumView.spectrum.dimensionCount > 1:
-                        axisCodeDict = self._getAxisCodeDict(spectrumView.spectrum, selectedRegion)
+                        # axisCodeDict = self._getAxisCodeDict(spectrumView.spectrum, selectedRegion)
+
                         newPeaks = peakList.pickPeaksRegion(axisCodeDict,
                                                             doPos=spectrumView.displayPositiveContours,
                                                             doNeg=spectrumView.displayNegativeContours,

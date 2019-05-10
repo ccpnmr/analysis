@@ -264,6 +264,10 @@ class SpectrumDisplaySettings(Widget):
         pass
 
 
+class _commonSettings():
+    pass
+
+
 class StripPlot(Widget):
 
     def __init__(self, parent=None,
@@ -492,7 +496,8 @@ class StripPlot(Widget):
         if not self.application:
             return 0, None, None, None
 
-        from ccpn.util.Common import _axisCodeMapIndices, axisCodeMapping
+        # from ccpn.util.Common import axisCodeMapping
+        from ccpn.util.Common import getAxisCodeMatch as axisCodeMapping
 
         # get the valid displays
         displays = self.displaysWidget._getDisplays()

@@ -117,6 +117,8 @@ def makeStripPlotFromSingles(spectrumDisplay: GuiSpectrumDisplay, nmrAtoms: List
 
 def navigateToPeakInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, peak, widths=None):
 
+    from ccpn.util.Common import getAxisCodeMatchIndices
+
     newWidths = [0.2] * len(spectrumDisplay.axisCodes)
     pos = [None] * len(spectrumDisplay.axisCodes)
     mappedNewWidths = ['full'] * len(spectrumDisplay.axisCodes)
@@ -129,9 +131,10 @@ def navigateToPeakInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, peak, widt
         _w = _widths.setdefault(_ac[0], 1.0)
         newWidths[0] = _w
 
-    indices = strip._getAxisCodeIndices(peak.peakList.spectrum)
+    indices = getAxisCodeMatchIndices(peak.peakList.spectrum.axisCodes, strip.axisCodes)
+
     for ind, ii in enumerate(indices):
-        if ii < len(pos):
+        if ii and ii < len(pos):
             pos[ii] = peak.position[ind]
             mappedNewWidths[ii] = newWidths[ind]
 

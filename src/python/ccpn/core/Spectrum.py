@@ -79,6 +79,7 @@ from ccpn.core.lib.Cache import cached
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, \
     undoStackBlocking, renameObject, undoBlock
+from ccpn.util.Common import getAxisCodeMatchIndices
 
 # 2019010:ED test new matching
 # from ccpn.util.Common import axisCodeMapping
@@ -1652,28 +1653,18 @@ class Spectrum(AbstractWrapperObject):
 
         startPoint = []
         endPoint = []
-        # spectrum = self.spectrum
 
         # fill with the spectrum limits first
         regionToPick = list(self.spectrumLimits)
 
-        # # insert axis regions into the limits list based on axisCode
-        # for axis, region in axisDict.items():
-        #     for specAxis in self.axisCodes:
-        #         mapAxis = axisCodeMapping([axis], [specAxis])
-        #         if mapAxis:
-        #             regionToPick[self.axisCodes.index(mapAxis[axis])] = region
-        #             break
-        #     else:
-        #         raise ValueError('Invalid axis: %s' % axis)
-
         codes = axisDict.keys()
         limits = tuple(axisDict.values())
 
-        indices = self.getByAxisCodes('indices', codes)
+        # map from input codes to self, done this way as MAY (but shouldn't) contain any Nones
+        indices = getAxisCodeMatchIndices(codes, self.axisCodes)
         for n, ind in enumerate(indices):
             if ind is not None:
-                regionToPick[n] = limits[ind]
+                regionToPick[ind] = limits[n]
 
         # convert the region limits to point coordinates with the dataSource
         dataDims = self._apiDataSource.sortedDataDims()

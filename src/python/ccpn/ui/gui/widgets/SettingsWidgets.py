@@ -265,10 +265,188 @@ class SpectrumDisplaySettings(Widget):
 
 
 class _commonSettings():
-    pass
+    """
+    Not to be used as a stand-alone class
+    """
+    # separated from settings widgets below, but only one seems to use it now
+
+    def _getSpectraFromDisplays(self, displays):
+        """Get the list of active spectra from the spectrumDisplays
+        """
+        if not self.application:
+            return 0, None, None, None
+
+        from ccpn.util.Common import getAxisCodeMatch, getAxisCodeMatchIndices
+
+        validSpectrumViews = {}
+
+        # loop through all the selected displays/spectrumViews that are visible
+        for dp in displays:
+            if dp.strips:
+                for sv in dp.strips[0].spectrumViews:
+
+                    if sv.spectrum not in validSpectrumViews:
+                        validSpectrumViews[sv.spectrum] = sv.isVisible()
+                    else:
+                        validSpectrumViews[sv.spectrum] = validSpectrumViews[sv.spectrum] or sv.isVisible()
+
+        if validSpectrumViews:
+            maxLen = 0
+            refAxisCodes = None
+
+            # need a list of all unique axisCodes in the spectra in the selected spectrumDisplays
+
+            from ccpn.util.OrderedSet import OrderedSet
+
+            # get list of unique axisCodes
+            visibleAxisCodes = OrderedSet()
+            for spectrum, visible in validSpectrumViews.items():
+                for axis in spectrum.axisCodes:
+                    visibleAxisCodes.add(axis)
+
+            # get mapping of each spectrum onto this list
+            spectrumIndices = {}
+            for spectrum, visible in validSpectrumViews.items():
+
+                indices = getAxisCodeMatchIndices(spectrum.axisCodes, visibleAxisCodes, exactMatch=True)
+                spectrumIndices[spectrum] = indices
+                maxLen = max(spectrum.dimensionCount, maxLen)
+
+            # return if nothing to process
+            if not maxLen:
+                return 0, None, None, None
+
+            axisLabels = [', '.join(ax) for ax in visibleAxisCodes]
+
+            return maxLen, tuple(visibleAxisCodes), spectrumIndices, validSpectrumViews
+
+            # for spectrum, visible in validSpectrumViews.items():
+            #
+            #     # get the max length of the axisCodes for the displayed spectra
+            #     if len(spectrum.axisCodes) > maxLen:
+            #         maxLen = len(spectrum.axisCodes)
+            #         refAxisCodes = list(spectrum.axisCodes)
+            #
+            # mappings = {}
+            # for spectrum, visible in validSpectrumViews.items():
+            #
+            #     matchAxisCodes = spectrum.axisCodes
+            #
+            #     foundMap = getAxisCodeMatch(matchAxisCodes, refAxisCodes, allMatches=True)
+            #     mappings.update(foundMap)
+            #
+            #     # for refAxisCode in refAxisCodes:
+            #     #     for matchAxisCode in matchAxisCodes:
+            #     #         mapping = getAxisCodeMatch([matchAxisCode], [refAxisCode])
+            #     #         for k, v in mapping.items():
+            #     #             if v not in mappings:
+            #     #                 mappings[v] = set([k])
+            #     #             else:
+            #     #                 mappings[v].add(k)
+            #
+            # # example of mappings dict
+            # # ('Hn', 'C', 'Nh')
+            # # {'Hn': {'Hn'}, 'Nh': {'Nh'}, 'C': {'C'}}
+            # # {'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'C'}}
+            # # {'CA': {'C'}, 'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'CA', 'C'}}
+            # # {'CA': {'C'}, 'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'CA', 'C'}}
+            #
+            # # far too complicated!
+            # axisLabels = [set() for ii in range(len(mappings))]
+            #
+            # spectrumIndex = {}
+            # # go through the spectra again
+            # for spectrum, visible in validSpectrumViews.items():
+            #
+            #     spectrumIndex[spectrum] = [0 for ii in range(len(spectrum.axisCodes))]
+            #
+            #     # get the spectrum dimension axisCode, and see if is already there
+            #     for spectrumDim, spectrumAxis in enumerate(spectrum.axisCodes):
+            #
+            #         axisTestCodes = tuple(mappings.keys())
+            #         if spectrumAxis in axisTestCodes:
+            #             spectrumIndex[spectrum][spectrumDim] = axisTestCodes.index(spectrumAxis)
+            #             axisLabels[spectrumIndex[spectrum][spectrumDim]].add(spectrumAxis)
+            #
+            #         else:
+            #             # if the axisCode is not in the reference list then find the mapping from the dict
+            #             for k, v in mappings.items():
+            #                 if spectrumAxis in v:
+            #                     # refAxisCodes[dim] = k
+            #                     spectrumIndex[spectrum][spectrumDim] = axisTestCodes.index(k)
+            #                     axisLabels[axisTestCodes.index(k)].add(spectrumAxis)
+            #
+            # axisLabels = [', '.join(ax) for ax in axisLabels]
+            #
+            # return maxLen, axisLabels, spectrumIndex, validSpectrumViews
+            # # self.axisCodeOptions.setCheckBoxes(texts=axisLabels, tipTexts=axisLabels)
+
+        else:
+            return 0, None, None, None
+
+    def _fillSpectrumFrame(self, displays):
+        """Populate then spectrumFrame with the selectable spectra
+        """
+        if self._spectraWidget:
+            self._spectraWidget.hide()
+            self._spectraWidget.deleteLater()
+
+        self._spectraWidget = Widget(parent=self, setLayout=True, hPolicy='minimal',
+                                     grid=(0, 1), gridSpan=(self._spectraRows, 1), vAlign='top', hAlign='left')
+
+        # calculate the maximum number of axes
+        self.maxLen, self.axisLabels, self.spectrumIndex, self.validSpectrumViews = self._getSpectraFromDisplays(displays)
+
+        # modifier for atomCode
+        spectraRow = 0
+        self.atomCodeFrame = Frame(self._spectraWidget, setLayout=True, showBorder=False, fShape='noFrame',
+                                   grid=(spectraRow, 0), gridSpan=(1, self.maxLen + 1),
+                                   vAlign='top', hAlign='left')
+        self.axisCodeLabel = Label(self.atomCodeFrame, 'Restricted Axes:', grid=(0, 0))
+
+        # remember current selection so can be set after redefining checkboxes
+        currentSelection = None
+        if self.axisCodeOptions:
+            currentSelection = self.axisCodeOptions.getSelectedText()
+
+        self.axisCodeOptions = CheckBoxes(self.atomCodeFrame, selectedInd=None, texts=[],
+                                          callback=self._changeAxisCode, grid=(0, 1))
+        self.axisCodeOptions.setCheckBoxes(texts=self.axisLabels, tipTexts=self.axisLabels)
+
+        # set current selection back to the checkboxes
+        if currentSelection:
+            self.axisCodeOptions.setSelectedByText(currentSelection, True, presetAll=True)
+
+        if not self.maxLen:
+            return
+
+        # put in a divider
+        spectraRow += 1
+        HLine(self._spectraWidget, grid=(spectraRow, 0), gridSpan=(1, 4),
+              colour=getColours()[DIVIDER], height=15)
+
+        # add labels for the columns
+        spectraRow += 1
+        Label(self._spectraWidget, 'Spectrum', grid=(spectraRow, 0))
+        for ii in range(self.maxLen):
+            Label(self._spectraWidget, 'Tolerance', grid=(spectraRow, ii + 1))
+        self.spectraStartRow = spectraRow + 1
+
+        if self.application:
+            spectraWidgets = {}  # spectrum.pid, frame dict to show/hide
+            for row, spectrum in enumerate(self.validSpectrumViews.keys()):
+                spectraRow += 1
+                f = _SpectrumRow(parent=self._spectraWidget,
+                                 application=self.application,
+                                 spectrum=spectrum,
+                                 row=spectraRow, col=0,
+                                 setLayout=True,
+                                 visible=self.validSpectrumViews[spectrum])
+
+                spectraWidgets[spectrum.pid] = f
 
 
-class StripPlot(Widget):
+class StripPlot(Widget, _commonSettings):
 
     def __init__(self, parent=None,
                  mainWindow=None,
@@ -311,41 +489,9 @@ class StripPlot(Widget):
 
         texts = [defaultSpectrum.pid] if (defaultSpectrum and defaultSpectrum is not NO_STRIP) else ([ALL] + displayText)
 
-        # self.displaysWidget = ListCompoundWidget(self,
-        #                                          grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-        #                                          vPolicy='minimal',
-        #                                          #minimumWidths=(colwidth, 0, 0),
-        #                                          fixedWidths=(colwidth, colwidth, colwidth),
-        #                                          orientation='left',
-        #                                          labelText='Display(s):',
-        #                                          tipText='SpectrumDisplay modules to respond to double-click',
-        #                                          texts=texts,
-        #                                          callback=self._selectDisplayInList)
-        # self.displaysWidget.setFixedHeights((None, None, 40))
-        #
-        # if defaultSpectrum is not NO_STRIP:
-        #     if defaultSpectrum:
-        #         self.displaysWidget.pulldownList.set(defaultSpectrum.pid)
-        #     else:
-        #         self.displaysWidget.pulldownList.set(ALL)
-        #
-        # # function to make sure that the pullDown is always populated properly just before opening
-        # self.displaysWidget.setPreSelect(self._fillDisplayWidget)
-        #
-        # # handle signals when the items in the displaysWidget have changed
-        # model = self.displaysWidget.listWidget.model()
-        # model.rowsInserted.connect(self._displayWidgetChanged)
-        # model.rowsRemoved.connect(self._displayWidgetChanged)
-        # self.displaysWidget.listWidget.cleared.connect(self._displayWidgetChanged)
-
         row += 1
         self.displaysWidget = SpectrumDisplaySelectionWidget(self, mainWindow=self.mainWindow, grid=(row, 0), gridSpan=(1, 1), texts=texts, displayText=[],
                                                              displayWidgetChangedCallback=self._displayWidgetChanged)
-        # if defaultSpectrum is not NO_STRIP:
-        #     if defaultSpectrum:
-        #         self._tempDisplay.pulldownList.set(defaultSpectrum.pid)
-        #     else:
-        #         self._tempDisplay.pulldownList.set(ALL)
 
         row += 1
         self.sequentialStripsWidget = CheckBoxCompoundWidget(
@@ -433,7 +579,7 @@ class StripPlot(Widget):
         if includeSpectrumTable:
             # create row's of spectrum information
             self._spectraRows = row + len(texts)
-            self._fillSpectrumFrame()
+            self._fillSpectrumFrame(self.displaysWidget._getDisplays())
 
         # add a spacer in the bottom-right corner to stop everything moving
         rows = self.getLayout().rowCount()
@@ -444,16 +590,11 @@ class StripPlot(Widget):
 
         self._registerNotifiers()
 
-    # def _selectDisplayInList(self):
-    #     """Handle clicking items in display selection
-    #     """
-    #     pass
-
     def _displayWidgetChanged(self):
         """Handle adding/removing items from display selection
         """
         if self.includeSpectrumTable:
-            self._fillSpectrumFrame()
+            self._fillSpectrumFrame(self.displaysWidget._getDisplays())
 
     def _changeAxisCode(self):
         """Handle clicking the axis code buttons
@@ -465,212 +606,6 @@ class StripPlot(Widget):
         """
         if self.includeNmrChainPullSelection:
             self.ncWidget.setIndex(0, blockSignals=True)
-
-    # def _fillDisplayWidget(self):
-    #     """Fill the display box with the currently available spectrumDisplays
-    #     """
-    #     ll = ['> select-to-add <'] + [ALL]
-    #     if self.mainWindow:
-    #         ll += [display.pid for display in self.mainWindow.spectrumDisplays]
-    #     self.displaysWidget.pulldownList.setData(texts=ll)
-
-    # def _getDisplays(self):
-    #     """Return list of displays to navigate - if needed
-    #     """
-    #     if not self.application:
-    #         return []
-    #
-    #     displays = []
-    #     # check for valid displays
-    #     gids = self.displaysWidget.getTexts()
-    #     if len(gids) == 0: return displays
-    #     if ALL in gids:
-    #         displays = self.application.ui.mainWindow.spectrumDisplays
-    #     else:
-    #         displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
-    #     return displays
-
-    def _getSpectraFromDisplays(self):
-        """Get the list of active spectra from the spectrumDisplays
-        """
-        if not self.application:
-            return 0, None, None, None
-
-        # from ccpn.util.Common import axisCodeMapping
-        from ccpn.util.Common import getAxisCodeMatch as axisCodeMapping
-
-        # get the valid displays
-        displays = self.displaysWidget._getDisplays()
-        validSpectrumViews = {}
-
-        # loop through all the selected displays/spectrumViews that are visible
-        for dp in displays:
-            if dp.strips:
-                for sv in dp.strips[0].spectrumViews:
-
-                    if sv.spectrum not in validSpectrumViews:
-                        validSpectrumViews[sv.spectrum] = sv.isVisible()
-                    else:
-                        validSpectrumViews[sv.spectrum] = validSpectrumViews[sv.spectrum] or sv.isVisible()
-
-                    # for plv in sv.peakListViews:
-                    #     if plv.isVisible() and sv.isVisible():
-                    #         if plv.peakList not in validSpectrumViews:
-                    #             validSpectrumViews[plv.peakList] = (sv.spectrum, plv)
-                    #         else:
-                    #
-                    #             # skip for now, only one valid peakListView needed per peakList
-                    #             # validSpectrumViews[plv.peakList] += (plv,)
-                    #             pass
-
-        if validSpectrumViews:
-            maxLen = 0
-            refAxisCodes = None
-
-            for spectrum, visible in validSpectrumViews.items():
-
-                if len(spectrum.axisCodes) > maxLen:
-                    maxLen = len(spectrum.axisCodes)
-                    refAxisCodes = list(spectrum.axisCodes)
-
-            if not maxLen:
-                return 0, None, None, None
-
-            mappings = {}
-            for spectrum, visible in validSpectrumViews.items():
-
-                matchAxisCodes = spectrum.axisCodes
-
-                for refAxisCode in refAxisCodes:
-                    for matchAxisCode in matchAxisCodes:
-                        mapping = axisCodeMapping([matchAxisCode], [refAxisCode])
-                        for k, v in mapping.items():
-                            if v not in mappings:
-                                mappings[v] = set([k])
-                            else:
-                                mappings[v].add(k)
-
-                # for matchAxisCode in matchAxisCodes:
-                #     mapping = axisCodeMapping(matchAxisCode, refAxisCodes)
-                #     if len(mapping.keys()) > 0:
-                #         for k, v in mapping.items():
-                #             if v not in mappings:
-                #                 mappings[v] = set([k])
-                #             else:
-                #                 mappings[v].add(k)
-                #     else:
-                #         if matchAxisCode not in mappings.keys():
-                #             mappings[matchAxisCode] = set([matchAxisCode])
-
-                # mapping = axisCodeMapping(matchAxisCodes, refAxisCodes)
-                # for k, v in mapping.items():
-                #     if v not in mappings:
-                #         mappings[v] = set([k])
-                #     else:
-                #         mappings[v].add(k)
-
-            # example of mappings dict
-            # ('Hn', 'C', 'Nh')
-            # {'Hn': {'Hn'}, 'Nh': {'Nh'}, 'C': {'C'}}
-            # {'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'C'}}
-            # {'CA': {'C'}, 'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'CA', 'C'}}
-            # {'CA': {'C'}, 'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'CA', 'C'}}
-
-            axisLabels = [set() for ii in range(len(mappings))]
-
-            spectrumIndex = {}
-            # go through the spectra again
-            for spectrum, visible in validSpectrumViews.items():
-
-                spectrumIndex[spectrum] = [0 for ii in range(len(spectrum.axisCodes))]
-
-                # get the spectrum dimension axisCode, nd see if is already there
-                for spectrumDim, spectrumAxis in enumerate(spectrum.axisCodes):
-
-                    axisTestCodes = tuple(mappings.keys())
-                    if spectrumAxis in axisTestCodes:
-                        spectrumIndex[spectrum][spectrumDim] = axisTestCodes.index(spectrumAxis)
-                        axisLabels[spectrumIndex[spectrum][spectrumDim]].add(spectrumAxis)
-
-                    else:
-                        # if the axisCode is not in the reference list then find the mapping from the dict
-                        for k, v in mappings.items():
-                            if spectrumAxis in v:
-                                # refAxisCodes[dim] = k
-                                spectrumIndex[spectrum][spectrumDim] = axisTestCodes.index(k)
-                                axisLabels[axisTestCodes.index(k)].add(spectrumAxis)
-
-            axisLabels = [', '.join(ax) for ax in axisLabels]
-
-            return maxLen, axisLabels, spectrumIndex, validSpectrumViews
-            # self.axisCodeOptions.setCheckBoxes(texts=axisLabels, tipTexts=axisLabels)
-
-        else:
-            return 0, None, None, None
-
-    def _fillSpectrumFrame(self):
-        """Populate then spectrumFrame with the selectable spectra
-        """
-        if self._spectraWidget:
-            self._spectraWidget.hide()
-            self._spectraWidget.deleteLater()
-
-        self._spectraWidget = Widget(parent=self, setLayout=True, hPolicy='minimal',
-                                     grid=(0, 1), gridSpan=(self._spectraRows, 1), vAlign='top', hAlign='left')
-
-        # calculate the maximum number of axes
-        self.maxLen, self.axisLabels, self.spectrumIndex, self.validSpectrumViews = self._getSpectraFromDisplays()
-
-        # if not self.maxLen:
-        #     return
-
-        # modifier for atomCode
-        spectraRow = 0
-        self.atomCodeFrame = Frame(self._spectraWidget, setLayout=True, showBorder=False, fShape='noFrame',
-                                   grid=(spectraRow, 0), gridSpan=(1, self.maxLen + 1),
-                                   vAlign='top', hAlign='left')
-        self.axisCodeLabel = Label(self.atomCodeFrame, 'Restricted Axes:', grid=(0, 0))
-
-        # remember current selection so can be set after redefining checkboxes
-        currentSelection = None
-        if self.axisCodeOptions:
-            currentSelection = self.axisCodeOptions.getSelectedText()
-
-        self.axisCodeOptions = CheckBoxes(self.atomCodeFrame, selectedInd=None, texts=[],
-                                          callback=self._changeAxisCode, grid=(0, 1))
-        self.axisCodeOptions.setCheckBoxes(texts=self.axisLabels, tipTexts=self.axisLabels)
-
-        # set current selection back to the checkboxes
-        if currentSelection:
-            self.axisCodeOptions.setSelectedByText(currentSelection, True, presetAll=True)
-
-        if not self.maxLen:
-            return
-
-        # put in a divider
-        spectraRow += 1
-        HLine(self._spectraWidget, grid=(spectraRow, 0), gridSpan=(1, 4),
-              colour=getColours()[DIVIDER], height=15)
-
-        # add labels for the columns
-        spectraRow += 1
-        Label(self._spectraWidget, 'Spectrum', grid=(spectraRow, 0))
-        for ii in range(self.maxLen):
-            Label(self._spectraWidget, 'Tolerance', grid=(spectraRow, ii + 1))
-        self.spectraStartRow = spectraRow + 1
-
-        if self.application:
-            spectraWidgets = {}  # spectrum.pid, frame dict to show/hide
-            for row, spectrum in enumerate(self.validSpectrumViews.keys()):
-                spectraRow += 1
-                f = _SpectrumRow(parent=self._spectraWidget,
-                                 application=self.application,
-                                 spectrum=spectrum,
-                                 row=spectraRow, col=0,
-                                 setLayout=True,
-                                 visible=self.validSpectrumViews[spectrum])
-
-                spectraWidgets[spectrum.pid] = f
 
     def _registerNotifiers(self):
         """Notifiers for responding to spectrumViews
@@ -691,13 +626,13 @@ class StripPlot(Widget):
         """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame
         """
         if self.includeSpectrumTable:
-            self._fillSpectrumFrame()
+            self._fillSpectrumFrame(self.displaysWidget._getDisplays())
 
     def _spectrumViewVisibleChanged(self):
         """Respond to a visibleChanged in one of the spectrumViews
         """
         if self.includeSpectrumTable:
-            self._fillSpectrumFrame()
+            self._fillSpectrumFrame(self.displaysWidget._getDisplays())
 
     def doCallback(self):
         """Handle the user callback
@@ -763,7 +698,7 @@ class _SpectrumRow(Frame):
         #                                          grid=(row, col))
 
 
-class SequenceGraphSettings(Widget):
+class SequenceGraphSettings(Widget):  #, _commonSettings):
 
     def __init__(self, parent=None,
                  mainWindow=None,
@@ -798,25 +733,6 @@ class SequenceGraphSettings(Widget):
         colwidth = 140
 
         texts = [ALL] + defaultListItem.pid if defaultListItem else ([ALL] + displayText)
-
-        # self.displaysWidget = ListCompoundWidget(self,
-        #                                          grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-        #                                          vPolicy='minimal',
-        #                                          #minimumWidths=(colwidth, 0, 0),
-        #                                          fixedWidths=(colwidth, colwidth, colwidth),
-        #                                          orientation='left',
-        #                                          labelText='Display(s):',
-        #                                          tipText='SpectrumDisplay modules to respond to double-click',
-        #                                          texts=texts,
-        #                                          callback=self._selectDisplayInList)
-        # self.displaysWidget.setFixedHeights((None, None, 40))
-        # self.displaysWidget.setPreSelect(self._fillDisplayWidget)
-        #
-        # # handle signals when the items in the displaysWidget have changed
-        # model = self.displaysWidget.listWidget.model()
-        # model.rowsInserted.connect(self._displayWidgetChanged)
-        # model.rowsRemoved.connect(self._displayWidgetChanged)
-        # self.displaysWidget.listWidget.cleared.connect(self._displayWidgetChanged)
 
         self.displaysWidget = SpectrumDisplaySelectionWidget(self, mainWindow=self.mainWindow, grid=(row, 0), gridSpan=(1, 1), texts=[ALL], displayText=[])
 
@@ -862,44 +778,10 @@ class SequenceGraphSettings(Widget):
         self.setMinimumWidth(self.sizeHint().width())
         self._registerNotifiers()
 
-    # def _selectDisplayInList(self):
-    #     """Handle clicking items in display selection
-    #     """
-    #     pass
-    #
-    # def _displayWidgetChanged(self):
-    #     """Handle adding/removing items from display selection
-    #     """
-    #     pass
-
     def _changeAxisCode(self):
         """Handle clicking the axis code buttons
         """
         pass
-
-    # def _fillDisplayWidget(self):
-    #     """Fill the display box with the currently available spectrumDisplays
-    #     """
-    #     ll = ['> select-to-add <'] + [ALL]
-    #     if self.mainWindow:
-    #         ll += [display.pid for display in self.mainWindow.spectrumDisplays]
-    #     self.displaysWidget.pulldownList.setData(texts=ll)
-    #
-    # def _getDisplays(self):
-    #     """Return list of displays to navigate - if needed
-    #     """
-    #     if not self.application:
-    #         return []
-    #
-    #     displays = []
-    #     # check for valid displays
-    #     gids = self.displaysWidget.getTexts()
-    #     if len(gids) == 0: return displays
-    #     if ALL in gids:
-    #         displays = self.application.ui.mainWindow.spectrumDisplays
-    #     else:
-    #         displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
-    #     return displays
 
     def _checkInit(self, checkBoxItem, item, data):
         """This is a hack so that the state changes when the layout loads
@@ -914,187 +796,6 @@ class SequenceGraphSettings(Widget):
         # call the initialise function
         initFunc = data['_init']
         initFunc()
-
-    def _getSpectraFromDisplays(self):
-        """Get the list of active spectra from the spectrumDisplays
-        """
-        if not self.application:
-            return 0, None, None, None
-
-        from ccpn.util.Common import _axisCodeMapIndices, axisCodeMapping
-
-        # get the valid displays
-        displays = self._getDisplays()
-        validSpectrumViews = {}
-
-        # loop through all the selected displays/spectrumViews that are visible
-        for dp in displays:
-            if dp.strips:
-                for sv in dp.strips[0].spectrumViews:
-
-                    if sv.spectrum not in validSpectrumViews:
-                        validSpectrumViews[sv.spectrum] = sv.isVisible()
-                    else:
-                        validSpectrumViews[sv.spectrum] = validSpectrumViews[sv.spectrum] or sv.isVisible()
-
-                    # for plv in sv.peakListViews:
-                    #     if plv.isVisible() and sv.isVisible():
-                    #         if plv.peakList not in validSpectrumViews:
-                    #             validSpectrumViews[plv.peakList] = (sv.spectrum, plv)
-                    #         else:
-                    #
-                    #             # skip for now, only one valid peakListView needed per peakList
-                    #             # validSpectrumViews[plv.peakList] += (plv,)
-                    #             pass
-
-        if validSpectrumViews:
-            maxLen = 0
-            refAxisCodes = None
-
-            for spectrum, visible in validSpectrumViews.items():
-
-                if len(spectrum.axisCodes) > maxLen:
-                    maxLen = len(spectrum.axisCodes)
-                    refAxisCodes = list(spectrum.axisCodes)
-
-            if not maxLen:
-                return 0, None, None, None
-
-            mappings = {}
-            for spectrum, visible in validSpectrumViews.items():
-
-                matchAxisCodes = spectrum.axisCodes
-
-                for refAxisCode in refAxisCodes:
-                    for matchAxisCode in matchAxisCodes:
-                        mapping = axisCodeMapping([matchAxisCode], [refAxisCode])
-                        for k, v in mapping.items():
-                            if v not in mappings:
-                                mappings[v] = set([k])
-                            else:
-                                mappings[v].add(k)
-
-                # for matchAxisCode in matchAxisCodes:
-                #     mapping = axisCodeMapping(matchAxisCode, refAxisCodes)
-                #     if len(mapping.keys()) > 0:
-                #         for k, v in mapping.items():
-                #             if v not in mappings:
-                #                 mappings[v] = set([k])
-                #             else:
-                #                 mappings[v].add(k)
-                #     else:
-                #         if matchAxisCode not in mappings.keys():
-                #             mappings[matchAxisCode] = set([matchAxisCode])
-
-                # mapping = axisCodeMapping(matchAxisCodes, refAxisCodes)
-                # for k, v in mapping.items():
-                #     if v not in mappings:
-                #         mappings[v] = set([k])
-                #     else:
-                #         mappings[v].add(k)
-
-            # example of mappings dict
-            # ('Hn', 'C', 'Nh')
-            # {'Hn': {'Hn'}, 'Nh': {'Nh'}, 'C': {'C'}}
-            # {'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'C'}}
-            # {'CA': {'C'}, 'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'CA', 'C'}}
-            # {'CA': {'C'}, 'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'CA', 'C'}}
-
-            axisLabels = [set() for ii in range(len(mappings))]
-
-            spectrumIndex = {}
-            # go through the spectra again
-            for spectrum, visible in validSpectrumViews.items():
-
-                spectrumIndex[spectrum] = [0 for ii in range(len(spectrum.axisCodes))]
-
-                # get the spectrum dimension axisCode, nd see if is already there
-                for spectrumDim, spectrumAxis in enumerate(spectrum.axisCodes):
-
-                    axisTestCodes = tuple(mappings.keys())
-                    if spectrumAxis in axisTestCodes:
-                        spectrumIndex[spectrum][spectrumDim] = axisTestCodes.index(spectrumAxis)
-                        axisLabels[spectrumIndex[spectrum][spectrumDim]].add(spectrumAxis)
-
-                    else:
-                        # if the axisCode is not in the reference list then find the mapping from the dict
-                        for k, v in mappings.items():
-                            if spectrumAxis in v:
-                                # refAxisCodes[dim] = k
-                                spectrumIndex[spectrum][spectrumDim] = axisTestCodes.index(k)
-                                axisLabels[axisTestCodes.index(k)].add(spectrumAxis)
-
-            axisLabels = [', '.join(ax) for ax in axisLabels]
-
-            return maxLen, axisLabels, spectrumIndex, validSpectrumViews
-            # self.axisCodeOptions.setCheckBoxes(texts=axisLabels, tipTexts=axisLabels)
-
-        else:
-            return 0, None, None, None
-
-    def _fillSpectrumFrame(self):
-        """Populate then spectrumFrame with the selectable spectra
-        """
-        if self._spectraWidget:
-            self._spectraWidget.hide()
-            self._spectraWidget.deleteLater()
-
-        self._spectraWidget = Widget(parent=self, setLayout=True, hPolicy='minimal',
-                                     grid=(0, 1), gridSpan=(self._spectraRows, 1), vAlign='top', hAlign='left')
-
-        # calculate the maximum number of axes
-        self.maxLen, self.axisLabels, self.spectrumIndex, self.validSpectrumViews = self._getSpectraFromDisplays()
-
-        # if not self.maxLen:
-        #     return
-
-        # modifier for atomCode
-        spectraRow = 0
-        self.atomCodeFrame = Frame(self._spectraWidget, setLayout=True, showBorder=False, fShape='noFrame',
-                                   grid=(spectraRow, 0), gridSpan=(1, self.maxLen + 1),
-                                   vAlign='top', hAlign='left')
-        self.axisCodeLabel = Label(self.atomCodeFrame, 'Restricted Axes:', grid=(0, 0))
-
-        # remember current selection so can be set after redefining checkboxes
-        currentSelection = None
-        if self.axisCodeOptions:
-            currentSelection = self.axisCodeOptions.getSelectedText()
-
-        self.axisCodeOptions = CheckBoxes(self.atomCodeFrame, selectedInd=None, texts=[],
-                                          callback=self._changeAxisCode, grid=(0, 1))
-        self.axisCodeOptions.setCheckBoxes(texts=self.axisLabels, tipTexts=self.axisLabels)
-
-        # set current selection back to the checkboxes
-        if currentSelection:
-            self.axisCodeOptions.setSelectedByText(currentSelection, True, presetAll=True)
-
-        if not self.maxLen:
-            return
-
-        # put in a divider
-        spectraRow += 1
-        HLine(self._spectraWidget, grid=(spectraRow, 0), gridSpan=(1, 4),
-              colour=getColours()[DIVIDER], height=15)
-
-        # add labels for the columns
-        spectraRow += 1
-        Label(self._spectraWidget, 'Spectrum', grid=(spectraRow, 0))
-        for ii in range(self.maxLen):
-            Label(self._spectraWidget, 'Tolerance', grid=(spectraRow, ii + 1))
-        self.spectraStartRow = spectraRow + 1
-
-        if self.application:
-            spectraWidgets = {}  # spectrum.pid, frame dict to show/hide
-            for row, spectrum in enumerate(self.validSpectrumViews.keys()):
-                spectraRow += 1
-                f = _SpectrumRow(parent=self._spectraWidget,
-                                 application=self.application,
-                                 spectrum=spectrum,
-                                 row=spectraRow, col=0,
-                                 setLayout=True,
-                                 visible=self.validSpectrumViews[spectrum])
-
-                spectraWidgets[spectrum.pid] = f
 
     def _registerNotifiers(self):
         """Notifiers for responding to spectrumViews

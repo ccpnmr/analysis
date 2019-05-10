@@ -797,7 +797,9 @@ class PeakList(AbstractWrapperObject):
 
         codes = list(positionCodeDict.keys())
         positions = [positionCodeDict[code] for code in codes]
-        axisCodeMapping = commonUtil._axisCodeMapIndices(codes, self.spectrum.axisCodes)
+
+        # match the spectrum to the restricted codes, these are the only ones to update
+        indices = commonUtil.getAxisCodeMatchIndices(self.spectrum.axisCodes, codes)
 
         # divide by 2 to get the double-width tolerance, i.e. the width of the region - CHECK WITH GEERTEN
         tolerances = tuple(tol / 2 for tol in self.spectrum.assignmentTolerances)
@@ -807,9 +809,9 @@ class PeakList(AbstractWrapperObject):
         minDropFactor = self.project._appBase.preferences.general.peakDropFactor
 
         with undoBlock():
-            for ii, mapping in enumerate(axisCodeMapping):
-                if mapping is not None:
-                    selectedRegion.insert(ii, [positions[mapping] - tolerances[ii], positions[mapping] + tolerances[ii]])
+            for ii, ind in enumerate(indices):
+                if ind is not None:
+                    selectedRegion.insert(ii, [positions[ind] - tolerances[ii], positions[ind] + tolerances[ii]])
                 else:
                     selectedRegion.insert(ii, [limits[ii][0], limits[ii][1]])
 

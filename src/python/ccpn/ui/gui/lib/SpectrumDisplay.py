@@ -158,3 +158,4 @@ def navigateToNmrResidueInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, nmrR
     strip.header.setLabelText(position='c', text=nmrResidue.pid)
     strip.header.headerVisible = True
 
+

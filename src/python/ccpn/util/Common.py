@@ -42,6 +42,7 @@ import string
 import itertools
 from collections import Iterable
 from . import Constants
+from collections import OrderedDict
 
 
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
@@ -645,28 +646,30 @@ def _getChildren(obj, path=None):
 
 
 def percentage(percent, whole):
-  return (percent * whole) / 100.0
+    return (percent * whole) / 100.0
+
 
 def splitDataFrameWithinRange(dataframe, column1, column2, minX, maxX, minY, maxY):
-  """
-  :param dataframe: dataframe with index a pid type, columns str, values floats or ints  
-  :param column1: label1 , eg PC1
-  :param column2: label1 , eg PC2
-  :param minX:  min value for Y
-  :param maxX:  Max value for X
-  :param minY: min value for Y
-  :param maxY: max value for Y
-  :return:  inners  a dataframe like the unput  but containing only the values within the ranges  and
-            outers (rest) not included in inners
-  """
+    """
+    :param dataframe: dataframe with index a pid type, columns str, values floats or ints
+    :param column1: label1 , eg PC1
+    :param column2: label1 , eg PC2
+    :param minX:  min value for Y
+    :param maxX:  Max value for X
+    :param minY: min value for Y
+    :param maxY: max value for Y
+    :return:  inners  a dataframe like the unput  but containing only the values within the ranges  and
+              outers (rest) not included in inners
+    """
 
-  bools = dataframe[column1].between(minX, maxX, inclusive=True) & dataframe[column2].between(minY, maxY, inclusive=True)
-  inners = dataframe[bools]
-  outers = dataframe[-bools]
-  filteredInners = inners.filter(items=[column1, column2])
-  filteredOuters = outers.filter(items=[column1, column2])
+    bools = dataframe[column1].between(minX, maxX, inclusive=True) & dataframe[column2].between(minY, maxY, inclusive=True)
+    inners = dataframe[bools]
+    outers = dataframe[-bools]
+    filteredInners = inners.filter(items=[column1, column2])
+    filteredOuters = outers.filter(items=[column1, column2])
 
-  return  filteredInners, filteredOuters
+    return filteredInners, filteredOuters
+
 
 class LocalFormatter(string.Formatter):
     """Overrides the string formatter to change the float formatting"""
@@ -708,3 +711,162 @@ class LocalFormatter(string.Formatter):
 
 stdLocalFormatter = LocalFormatter()
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 20190507:ED new routines to match axis codes and return dict or indices
+
+def _matchSingleAxisCode(code1: str = None, code2: str = None) -> int:
+    """number of matching characters
+    code1, code2 = strings
+    e.g. 'Hn1', 'H1'
+
+    Compare single axis codes
+
+    Must always be upper case first letter
+
+    more matching letters = higher code
+    difference in length reduces match
+
+    'Jab' matches 'J' or 'Jab...', but NOT 'Ja...'      ie, 1 or 3 or more letter match
+
+    MQ gets no match
+
+    Hn* always matches Hcn*
+
+    :param code1: first axis code to compare
+    :param code2: second axis code to compare
+    :return: score based on the match
+    """
+    # undefined codes
+    if not code1 or not code2 or code1[0].islower() or code2[0].islower():
+        return 0
+
+    ms = [a for a in zip(code1, code2)]  # zips to the shortest string
+    ss = 0
+
+    # add extra tests from v2.4
+    if code1.startswith('MQ') or code2.startswith('MQ'):
+        return 0
+    # char followed by digit already accounted for
+
+    # get count of matching characters - more characters -> higher score
+    for a, b in ms:
+        if a != b:
+            break
+        ss += 1
+
+    # another v2.4 test
+    if ss:
+        if ((code1.startswith('Hn') and code2.startswith('Hcn')) or
+                (code1.startswith('Hcn') and code2.startswith('Hn'))):
+            # Hn must always match Hcn, give it a high score
+            ss += 500
+
+        if code1.startswith('J'):
+            if ss == 2:  # must be a 1, or (3 or more) letter match
+                return 0
+
+        ss += _matchSingleAxisCodeLength(code1, code2)
+    return (1000 + ss) if ss else 0
+
+
+def _matchSingleAxisCodeLength(code1, code2):
+    """return a score based on the mismatch in length
+    """
+    lenDiff = abs(len(code1) - len(code2))
+
+    return (100 + 800 // (lenDiff + 1))
+
+
+def _SortByMatch(item):
+    """quick sorting key for axisCode match tuples
+    """
+    return -item[2]  # sort from high to low
+
+
+def getAxisCodeMatch(axisCodes, refAxisCodes, allMatches=False) -> OrderedDict:
+    """Return an OrderedDict containing the mapping from the refAxisCodes to axisCodes
+
+    There may be multiple matches, or None for each axis code.
+
+    Set allMatches to True to return all, or False for only the best match in each case
+
+    e.g. for unique axis codes:
+
+        getAxisCodeMatch(('Hn', 'Nh', 'C'), ('Nh', 'Hn'), allMatches=False)
+
+        ->  { 'Hn':   'Hn'
+              'Nh':   'Nh'
+              'C' :   None
+            }
+
+        getAxisCodeMatch(('Hn', 'Nh', 'C'), ('Nh', 'Hn'), allMatches=True)
+
+        ->  { 'Hn':   ('Hn',)
+              'Nh':   ('Nh',)
+              'C' :   ()
+            }
+
+    for similar repeated axis codes, possibly from matching isotopeCodes:
+
+        getAxisCodeMatch(('Nh', 'H'), ('H', 'H1', 'N'), allMatches=True)
+
+        ->  { 'Nh':   'N'
+              'H' :   'H'
+            }
+
+        getAxisCodeMatch(('Nh', 'H'), ('H', 'H1', 'N'), allMatches=True)
+
+        ->  { 'Nh':   ('N',)
+              'H' :   ('H', 'H1')       <- in this case the first match is always the highest
+            }
+    """
+
+    found = OrderedDict()
+    for ii, code1 in enumerate(axisCodes):
+        foundCodes = []
+        for jj, code2 in enumerate(refAxisCodes):
+
+            match = _matchSingleAxisCode(code1, code2)
+            if match:
+                foundCodes.append((code2, jj, match))
+
+        if allMatches:
+            found[code1] = tuple(mm[0] for mm in sorted(foundCodes, key=_SortByMatch))
+        else:
+            found[code1] = sorted(foundCodes, key=_SortByMatch)[0][0] if foundCodes else None
+
+    return found
+
+
+def getAxisCodeMatchIndices(axisCodes, refAxisCodes):
+    """Return a tuple containing the indices for mapping axisCodes into refAxisCodes
+
+    Only the best match is returned for each code
+
+    e.g. for unique axis codes:
+
+        getAxisCodeMatchIndices(('Hn', 'Nh', 'C'), ('Nh', 'Hn'))
+
+        ->  (1, 0, None)
+
+    for similar repeated axis codes, possibly from matching isotopeCodes:
+
+        getAxisCodeMatchIndices(('Nh', 'H'), ('H', 'H1', 'N'))
+
+        ->  (2, 0)
+
+    """
+
+    found = []
+    for ii, code1 in enumerate(axisCodes):
+        foundCodes = []
+        for jj, code2 in enumerate(refAxisCodes):
+
+            match = _matchSingleAxisCode(code1, code2)
+            if match:
+                foundCodes.append((code2, jj, match))
+
+        found.append(sorted(foundCodes, key=_SortByMatch)[0][1] if foundCodes else None)
+
+    return tuple(found)

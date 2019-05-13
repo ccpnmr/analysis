@@ -45,7 +45,7 @@ def test_color_create_unknown_name():
 
 
 def test_color_create_hex():
-    c = Colour('#ff00ff')
+    c = Colour('#FF00FF')
     print(c.name)
     c = Colour('#FF00FFFF')
     print(c.name)

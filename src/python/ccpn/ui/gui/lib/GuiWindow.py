@@ -74,19 +74,23 @@ class GuiWindow():
         addShortCut("f, p", self, partial(navigateToCurrentPeakPosition, self.application), context=context)
         addShortCut("c, a", self, partial(AssignmentLib.propagateAssignments, current=self.application.current), context=context)
         addShortCut("c, z", self, self._clearCurrentPeaks, context=context)
+
         addShortCut("t, u", self, partial(self.traceScaleUp, self), context=context)
         addShortCut("t, d", self, partial(self.traceScaleDown, self), context=context)
         addShortCut("t, h", self, partial(self.toggleHTrace, self), context=context)
         addShortCut("t, v", self, partial(self.toggleVTrace, self), context=context)
-        addShortCut("l, a", self, partial(self.toggleLastAxisOnly, self), context=context)
-        addShortCut("p, v", self, self.setPhasingPivot, context=context)
-        addShortCut("t, r", self, self.removePhasingTraces, context=context)
-        addShortCut("a, m", self, self.addMultiplet, context=context)
         addShortCut("t, a", self, self.newPhasingTrace, context=context)
+        addShortCut("t, r", self, self.removePhasingTraces, context=context)
+        addShortCut("p, v", self, self.setPhasingPivot, context=context)
+
+        addShortCut("l, a", self, partial(self.toggleLastAxisOnly, self), context=context)
+
+        addShortCut("a, m", self, self.addMultiplet, context=context)
         addShortCut("i, 1", self, self.add1DIntegral, context=context)
         addShortCut("w, 1", self, self.getCurrentPositionAndStrip, context=context)
         addShortCut("r, p", self, partial(self.refitCurrentPeaks, singularMode=True), context=context)
         addShortCut("r, g", self, partial(self.refitCurrentPeaks, singularMode=False), context=context)
+
         addShortCut("Tab,Tab", self, self.moveToNextSpectrum, context=context)
         addShortCut("Tab, q", self, self.moveToPreviousSpectrum, context=context)
         addShortCut("Tab, a", self, self.showAllSpectra, context=context)
@@ -94,13 +98,29 @@ class GuiWindow():
         addShortCut("Tab, x", self, self.invertSelectedSpectra, context=context)
         addShortCut("m, m", self, self.switchMouseMode, context=context)
         addShortCut("s, e", self, self.snapCurrentPeaksToExtremum, context=context)
+
         addShortCut("z, s", self, self.storeZoom, context=context)
         addShortCut("z, r", self, self.restoreZoom, context=context)
         addShortCut("z, p", self, self.previousZoom, context=context)
         addShortCut("z, n", self, self.nextZoom, context=context)
         addShortCut("z, i", self, self.zoomIn, context=context)
         addShortCut("z, o", self, self.zoomOut, context=context)
+        addShortCut("=", self, self.zoomIn, context=context)                # overrides openGL _panSpectrum
+        addShortCut("+", self, self.zoomIn, context=context)
+        addShortCut("-", self, self.zoomOut, context=context)
+
+        addShortCut("Up", self, partial(self.panSpectrum, 'up'), context=context)
+        addShortCut("Down", self, partial(self.panSpectrum, 'down'), context=context)
+        addShortCut("Left", self, partial(self.panSpectrum, 'left'), context=context)
+        addShortCut("Right", self, partial(self.panSpectrum, 'right'), context=context)
+
+        addShortCut("Shift+Up", self, partial(self.movePeaks, 'up'), context=context)
+        addShortCut("Shift+Down", self, partial(self.movePeaks, 'down'), context=context)
+        addShortCut("Shift+Left", self, partial(self.movePeaks, 'left'), context=context)
+        addShortCut("Shift+Right", self, partial(self.movePeaks, 'right'), context=context)
+
         addShortCut("z, a", self, self.resetAllZoom, context=context)
+
         addShortCut("p, l", self, self.cyclePeakLabelling, context=context)
         addShortCut("p, s", self, self.cyclePeakSymbols, context=context)
         # addShortCut("Space, Space", self, self.toggleConsole, context=context) # this is not needed here, already set on Menus!!
@@ -651,6 +671,24 @@ class GuiWindow():
         """
         if self.current.strip:
             self.current.strip.spectrumDisplay._zoomOut()
+        else:
+            getLogger().warning('No current strip. Select a strip first.')
+
+    def panSpectrum(self, direction: str='up'):
+        """
+        Pan/Zoom the current strip with the cursor keys
+        """
+        if self.current.strip:
+            self.current.strip._panSpectrum(direction)
+        else:
+            getLogger().warning('No current strip. Select a strip first.')
+
+    def movePeaks(self, direction: str='up'):
+        """
+        Move the peaks in the current strip with the cursors
+        """
+        if self.current.strip:
+            self.current.strip._movePeaks(direction)
         else:
             getLogger().warning('No current strip. Select a strip first.')
 

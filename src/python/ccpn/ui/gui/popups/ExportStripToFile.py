@@ -225,7 +225,7 @@ class ExportStripToFilePopup(ExportDialog):
         fillColourPulldown(self.backgroundColourBox, allowAuto=False)
 
         # set background to white
-        self.backgroundColourBox.setCurrentText(spectrumColours['#ffffff'])
+        self.backgroundColourBox.setCurrentText(spectrumColours['#FFFFFF'])
         self._changeBackgroundPulldown(0)
 
         if self.backgroundColour in spectrumColourKeys:

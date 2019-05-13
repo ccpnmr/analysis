@@ -578,7 +578,7 @@ class Colour(str):
         Assumes that r, g, b values are 8-bit so between 0 and 255 and have optional a.
 
     >>> c = Colour('magenta')
-    >>> c = Colour('#ff00ff')
+    >>> c = Colour('#FF00FF')
     >>> c = Colour((255, 0, 255))
     """
 

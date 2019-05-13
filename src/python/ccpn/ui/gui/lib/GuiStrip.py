@@ -1150,6 +1150,22 @@ class GuiStrip(Frame):
         except Exception as es:
             getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
 
+    def _panSpectrum(self, direction: str = 'up'):
+        """Pan the spectrum with the cursor keys
+        """
+        try:
+            self._CcpnGLWidget._panSpectrum(direction)
+        except Exception as es:
+            getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
+
+    def _movePeaks(self, direction: str = 'up'):
+        """Move the peaks with the cursors
+        """
+        try:
+            self._CcpnGLWidget._movePeaks(direction)
+        except Exception as es:
+            getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
+
     def _resetRemoveStripAction(self):
         """Update interface when a strip is created or deleted.
 

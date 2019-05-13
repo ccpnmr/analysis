@@ -70,14 +70,14 @@ def storeShortcut(keys=None, obj=None, func=None, context=None, shortcut=None):
     if isinstance(keys, str):
         keys = QtGui.QKeySequence(keys)
 
-    keyString = keys.toString()
-    shortcutItem = {SHORTCUT_KEYS     : keys,
-                    SHORTCUT_KEYSTRING: keyString,
-                    SHORTCUT_OBJECT   : obj,
-                    SHORTCUT_FUNC     : func,
-                    SHORTCUT_CONTEXT  : context,
-                    SHORTCUT_SHORTCUT : shortcut}
-    _shortcutList[obj][keyString] = shortcutItem
+        keyString = keys.toString()
+        shortcutItem = {SHORTCUT_KEYS     : keys,
+                        SHORTCUT_KEYSTRING: keyString,
+                        SHORTCUT_OBJECT   : obj,
+                        SHORTCUT_FUNC     : func,
+                        SHORTCUT_CONTEXT  : context,
+                        SHORTCUT_SHORTCUT : shortcut}
+        _shortcutList[obj][keyString] = shortcutItem
 
 
 def clearShortcuts(widget=None):

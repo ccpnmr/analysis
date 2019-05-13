@@ -351,7 +351,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         # else:
         #     phaseTraces = self.vPhaseTraces
         # for trace, line in phaseTraces:
-        #     line.setPen({'color': self._getColour('sliceColour', '#aaaaaa')})
+        #     line.setPen({'color': self._getColour('sliceColour', '#AAAAAA')})
         #     if direction == 0:
         #         position[1] = line.getYPos()
         #     else:
@@ -437,7 +437,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     #     v = positionPixel[1] - self._traceScale * (pixelViewBox1 - pixelViewBox0) * numpy.array(
     #             [data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
     #
-    #     hTrace.setPen({'color': self._getColour('sliceColour', '#aaaaaa')})
+    #     hTrace.setPen({'color': self._getColour('sliceColour', '#AAAAAA')})
     #     hTrace.setData(x, v)
 
     # def _updateVTraceData(self, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel, vTrace, ph0=None, ph1=None, pivot=None):
@@ -469,7 +469,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     #     v = positionPixel[0] + self._traceScale * (pixelViewBox1 - pixelViewBox0) * numpy.array(
     #             [data[p % yNumPoints] for p in range(yMinFrequency, yMaxFrequency + 1)])
     #
-    #     vTrace.setPen({'color': self._getColour('sliceColour', '#aaaaaa')})
+    #     vTrace.setPen({'color': self._getColour('sliceColour', '#AAAAAA')})
     #     vTrace.setData(v, y)
 
     def _updateTrace(self, position, positionPixel, updateHTrace=True, updateVTrace=True):

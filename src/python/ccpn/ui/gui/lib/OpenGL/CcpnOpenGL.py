@@ -1194,58 +1194,130 @@ class CcpnGLWidget(QOpenGLWidget):
             return True
         return super().eventFilter(obj, event)
 
-    def _panSpectrum(self, event, movePercent=20):
+    def _movePeaks(self, direction: str = 'up'):
+        """Move the peaks with the cursor keys
+        """
+        # this is a bit convoluted
+        if len(self.current.peaks) < 1:
+            return
+
+        moveFactor = 5
+        moveDict = {
+            'left' : (-self.pixelX * moveFactor, 0),
+            'right': (self.pixelX * moveFactor, 0),
+            'up'   : (0, self.pixelX * moveFactor),
+            'down' : (0, -self.pixelX * moveFactor)
+            }
+
+        if direction in moveDict:
+            with undoBlock():
+                for peak in self.current.peaks:
+                    self._movePeak(peak, moveDict.get(direction))
+
+
+    def _panSpectrum(self, direction, movePercent=20):
         """Implements Arrows up,down, left, right to pan the spectrum """
         # percentage of the view to set as single step
 
-        if type(event) == QtGui.QKeyEvent:
-            moveFactor = movePercent / 100.0
-            dx = (self.axisR - self.axisL) / 2.0
-            dy = (self.axisT - self.axisB) / 2.0
+        moveFactor = movePercent / 100.0
+        dx = (self.axisR - self.axisL) / 2.0
+        dy = (self.axisT - self.axisB) / 2.0
 
-            key = event.key()
+        if direction == 'left':
+            self.axisL -= moveFactor * dx
+            self.axisR -= moveFactor * dx
 
-            if key == QtCore.Qt.Key_Left:
-                self.axisL -= moveFactor * dx
-                self.axisR -= moveFactor * dx
+        elif direction == 'up':
+            self.axisT += moveFactor * dy
+            self.axisB += moveFactor * dy
 
-            elif key == QtCore.Qt.Key_Up:
-                self.axisT += moveFactor * dy
-                self.axisB += moveFactor * dy
+        elif direction == 'right':
+            self.axisL += moveFactor * dx
+            self.axisR += moveFactor * dx
 
-            elif key == QtCore.Qt.Key_Right:
-                self.axisL += moveFactor * dx
-                self.axisR += moveFactor * dx
+        elif direction == 'down':
+            self.axisT -= moveFactor * dy
+            self.axisB -= moveFactor * dy
 
-            elif key == QtCore.Qt.Key_Down:
-                self.axisT -= moveFactor * dy
-                self.axisB -= moveFactor * dy
-
-            elif key == QtCore.Qt.Key_Plus or key == QtCore.Qt.Key_Equal:  # Plus:
-                self._testAxisLimits()
-                if self._minReached:
-                    return
-
-                self.zoomIn()
-
-            elif key == QtCore.Qt.Key_Minus:
-                self._testAxisLimits()
-                if self._maxReached:
-                    return
-
-                self.zoomOut()
-
-            else:
-                # not a movement key
+        elif direction == 'plus':
+            self._testAxisLimits()
+            if self._minReached:
                 return
 
-            self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
-                                               axisB=self.axisB, axisT=self.axisT,
-                                               axisL=self.axisL, axisR=self.axisR)
+            self.zoomIn()
 
-            # self._testAxisLimits(setLimits=True)
-            self._rescaleAllAxes()
-            self._storeZoomHistory()
+        elif direction == 'minus':
+            self._testAxisLimits()
+            if self._maxReached:
+                return
+
+            self.zoomOut()
+
+        else:
+            # not a movement key
+            return
+
+        self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
+                                           axisB=self.axisB, axisT=self.axisT,
+                                           axisL=self.axisL, axisR=self.axisR)
+
+        # self._testAxisLimits(setLimits=True)
+        self._rescaleAllAxes()
+        self._storeZoomHistory()
+
+    # def _panSpectrum(self, event, movePercent=20):
+    #     """Implements Arrows up,down, left, right to pan the spectrum """
+    #     # percentage of the view to set as single step
+    #
+    #     if type(event) == QtGui.QKeyEvent:
+    #         moveFactor = movePercent / 100.0
+    #         dx = (self.axisR - self.axisL) / 2.0
+    #         dy = (self.axisT - self.axisB) / 2.0
+    #
+    #         key = event.key()
+    #
+    #         if key == QtCore.Qt.Key_Left:
+    #             self.axisL -= moveFactor * dx
+    #             self.axisR -= moveFactor * dx
+    #
+    #         elif key == QtCore.Qt.Key_Up:
+    #             self.axisT += moveFactor * dy
+    #             self.axisB += moveFactor * dy
+    #
+    #         elif key == QtCore.Qt.Key_Right:
+    #             self.axisL += moveFactor * dx
+    #             self.axisR += moveFactor * dx
+    #
+    #         elif key == QtCore.Qt.Key_Down:
+    #             self.axisT -= moveFactor * dy
+    #             self.axisB -= moveFactor * dy
+    #
+    #         elif key == QtCore.Qt.Key_Plus or key == QtCore.Qt.Key_Equal:  # Plus:
+    #             self._testAxisLimits()
+    #             if self._minReached:
+    #                 return
+    #
+    #             print('>>>zoomIn')
+    #             self.zoomIn()
+    #
+    #         elif key == QtCore.Qt.Key_Minus:
+    #             self._testAxisLimits()
+    #             if self._maxReached:
+    #                 return
+    #
+    #             self.zoomOut()
+    #
+    #         else:
+    #             # not a movement key
+    #             return
+    #
+    #         self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
+    #                                            axisB=self.axisB, axisT=self.axisT,
+    #                                            axisL=self.axisL, axisR=self.axisR)
+    #
+    #         # self._testAxisLimits(setLimits=True)
+    #         self._rescaleAllAxes()
+    #         self._storeZoomHistory()
 
     def _moveAxes(self, delta=(0.0, 0.0)):
         """Implements Arrows up,down, left, right to pan the spectrum """
@@ -1261,37 +1333,37 @@ class CcpnGLWidget(QOpenGLWidget):
                                            axisL=self.axisL, axisR=self.axisR)
         self._rescaleAllAxes()
 
-    def _movePeakFromKeys(self, event):
+    # def _movePeakFromKeys(self, event):
+    #
+    #     if len(self.current.peaks) < 1:
+    #         return
+    #
+    #     moveFactor = 5
+    #     moveDict = {
+    #         QtCore.Qt.Key_Left : (-self.pixelX * moveFactor, 0),
+    #         QtCore.Qt.Key_Right: (self.pixelX * moveFactor, 0),
+    #         QtCore.Qt.Key_Up   : (0, self.pixelX * moveFactor),
+    #         QtCore.Qt.Key_Down : (0, -self.pixelX * moveFactor)
+    #         }
+    #
+    #     if type(event) == QtGui.QKeyEvent:
+    #         if event.key() in moveDict:
+    #
+    #             with undoBlock():
+    #                 for peak in self.current.peaks:
+    #                     self._movePeak(peak, moveDict.get(event.key()))
 
-        if len(self.current.peaks) < 1:
-            return
-
-        moveFactor = 5
-        moveDict = {
-            QtCore.Qt.Key_Left : (-self.pixelX * moveFactor, 0),
-            QtCore.Qt.Key_Right: (self.pixelX * moveFactor, 0),
-            QtCore.Qt.Key_Up   : (0, self.pixelX * moveFactor),
-            QtCore.Qt.Key_Down : (0, -self.pixelX * moveFactor)
-            }
-
-        if type(event) == QtGui.QKeyEvent:
-            if event.key() in moveDict:
-
-                with undoBlock():
-                    for peak in self.current.peaks:
-                        self._movePeak(peak, moveDict.get(event.key()))
-
-    def _singleKeyAction(self, event):
-        """
-        :return: Actions for single key press. If current peaks, moves the peaks when using
-        directional arrow otherwise pans the spectrum.
-        """
-        # if not self.current.peak:
-        if not self._isSHIFT:
-            self._panSpectrum(event)
-
-        if self._isSHIFT:
-            self._movePeakFromKeys(event)
+    # def _singleKeyAction(self, event):
+    #     """
+    #     :return: Actions for single key press. If current peaks, moves the peaks when using
+    #     directional arrow otherwise pans the spectrum.
+    #     """
+    #     # if not self.current.peak:
+    #     if not self._isSHIFT:
+    #         self._panSpectrum(event)
+    #
+    #     if self._isSHIFT:
+    #         self._movePeakFromKeys(event)
 
     def initialiseAxes(self, strip=None):
         """
@@ -2095,7 +2167,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def keyPressEvent(self, event: QtGui.QKeyEvent):
         self._key = event.key()
         self._checkKeys(event)
-        self._singleKeyAction(event)
+        # self._singleKeyAction(event)
 
     def _clearAfterRelease(self, ev):
         key = ev.key()
@@ -4043,12 +4115,12 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # print('>>>', positionPixel)
             col1 = getattr(spectrumView.spectrum,
-                           self.SPECTRUMPOSCOLOUR)  #spectrumView._getColour('sliceColour', '#aaaaaa')
+                           self.SPECTRUMPOSCOLOUR)  #spectrumView._getColour('sliceColour', '#AAAAAA')
             if self.is1D:
                 col2 = col1
             else:
                 col2 = getattr(spectrumView.spectrum,
-                               self.SPECTRUMNEGCOLOUR)  #spectrumView._getColour('sliceColour', '#aaaaaa')
+                               self.SPECTRUMNEGCOLOUR)  #spectrumView._getColour('sliceColour', '#AAAAAA')
             colR = int(col1.strip('# ')[0:2], 16) / 255.0
             colG = int(col1.strip('# ')[2:4], 16) / 255.0
             colB = int(col1.strip('# ')[4:6], 16) / 255.0
@@ -4103,12 +4175,12 @@ class CcpnGLWidget(QOpenGLWidget):
             x = positionPixel[0] + spectrumView._traceScale * (self.axisL - self.axisR) * dataX
 
             col1 = getattr(spectrumView.spectrum,
-                           self.SPECTRUMPOSCOLOUR)  #spectrumView._getColour('sliceColour', '#aaaaaa')
+                           self.SPECTRUMPOSCOLOUR)  #spectrumView._getColour('sliceColour', '#AAAAAA')
             if self.is1D:
                 col2 = col1
             else:
                 col2 = getattr(spectrumView.spectrum,
-                               self.SPECTRUMNEGCOLOUR)  #spectrumView._getColour('sliceColour', '#aaaaaa')
+                               self.SPECTRUMNEGCOLOUR)  #spectrumView._getColour('sliceColour', '#AAAAAA')
             colR = int(col1.strip('# ')[0:2], 16) / 255.0
             colG = int(col1.strip('# ')[2:4], 16) / 255.0
             colB = int(col1.strip('# ')[4:6], 16) / 255.0
@@ -4309,6 +4381,13 @@ class CcpnGLWidget(QOpenGLWidget):
         for vTrace in self._staticVTraces:
             vTrace.renderMode = GLRENDERMODE_RESCALE
 
+        # need to update the current active trace - force reset of lastVisible trace
+        for spectrumView in self._ordering:
+            numDim = len(spectrumView.strip.axes)
+            self._lastTracePoint[spectrumView] = [-1] * numDim
+
+        # rebuild traces
+        self.updateTraces()
         self.update()
 
     def rescaleStaticHTraces(self):
@@ -5100,32 +5179,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
             if self._crosshairVisible:  # or self._updateVTrace or self._updateHTrace:
 
-                # if self._preferences.matchAxisCode == AXIS_MATCHATOMTYPE:
-                #     for n, axis in enumerate(self._axisOrder[:2]):
-                #         for ax in mouseMovedDict[AXIS_MATCHATOMTYPE].keys():
-                #             if ax and axis and ax[0] == axis[0] and axis[0] in mouseMovedDict[AXIS_ACTIVEAXES]:
-                #                 self.cursorCoordinate[n] = mouseMovedDict[AXIS_MATCHATOMTYPE][ax]
-                #
-                #                 # double cursor
-                #                 self.doubleCursorCoordinate[n] = mouseMovedDict[DOUBLEAXIS_MATCHATOMTYPE][ax]
-                #                 break
-                #         else:
-                #             self.cursorCoordinate[n] = None
-                #             self.doubleCursorCoordinate[n] = None
-                #
-                # elif self._preferences.matchAxisCode == AXIS_FULLATOMNAME:
-                #     for n, axis in enumerate(self._axisOrder[:2]):
-                #         for ax in mouseMovedDict[AXIS_FULLATOMNAME].keys():
-                #             if axis in mouseMovedDict[AXIS_FULLATOMNAME].keys():
-                #                 self.cursorCoordinate[n] = mouseMovedDict[AXIS_FULLATOMNAME][axis]
-                #
-                #                 # double cursor
-                #                 self.doubleCursorCoordinate[n] = mouseMovedDict[DOUBLEAXIS_FULLATOMNAME][axis]
-                #                 break
-                #         else:
-                #             self.cursorCoordinate[n] = None
-                #             self.doubleCursorCoordinate[n] = None
-
                 exactMatch = (self._preferences.matchAxisCode == AXIS_FULLATOMNAME)
                 indices = getAxisCodeMatchIndices(self._axisCodes[:2], mouseMovedDict[AXIS_ACTIVEAXES], exactMatch=exactMatch)
 
@@ -5135,40 +5188,12 @@ class CcpnGLWidget(QOpenGLWidget):
                         axis = mouseMovedDict[AXIS_ACTIVEAXES][indices[n]]
                         self.cursorCoordinate[n] = mouseMovedDict[AXIS_FULLATOMNAME][axis]
 
-                        axis = mouseMovedDict[DOUBLEAXIS_ACTIVEAXES][indices[n]]
+                        # coordinates have already been flipped
                         self.doubleCursorCoordinate[n] = mouseMovedDict[DOUBLEAXIS_FULLATOMNAME][axis]
 
                     else:
                         self.cursorCoordinate[n] = None
                         self.doubleCursorCoordinate[n] = None
-
-                # if self._preferences.matchAxisCode == AXIS_MATCHATOMTYPE:
-                #
-                #
-                #     for n, axis in enumerate(self._axisOrder[:2]):
-                #         for ax in mouseMovedDict[AXIS_MATCHATOMTYPE].keys():
-                #             if ax and axis and ax[0] == axis[0] and axis[0] in mouseMovedDict[AXIS_ACTIVEAXES]:
-                #                 self.cursorCoordinate[n] = mouseMovedDict[AXIS_MATCHATOMTYPE][ax]
-                #
-                #                 # double cursor
-                #                 self.doubleCursorCoordinate[n] = mouseMovedDict[DOUBLEAXIS_MATCHATOMTYPE][ax]
-                #                 break
-                #         else:
-                #             self.cursorCoordinate[n] = None
-                #             self.doubleCursorCoordinate[n] = None
-                #
-                # elif self._preferences.matchAxisCode == AXIS_FULLATOMNAME:
-                #     for n, axis in enumerate(self._axisOrder[:2]):
-                #         for ax in mouseMovedDict[AXIS_FULLATOMNAME].keys():
-                #             if axis in mouseMovedDict[AXIS_FULLATOMNAME].keys():
-                #                 self.cursorCoordinate[n] = mouseMovedDict[AXIS_FULLATOMNAME][axis]
-                #
-                #                 # double cursor
-                #                 self.doubleCursorCoordinate[n] = mouseMovedDict[DOUBLEAXIS_FULLATOMNAME][axis]
-                #                 break
-                #         else:
-                #             self.cursorCoordinate[n] = None
-                #             self.doubleCursorCoordinate[n] = None
 
                 self.current.cursorPosition = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 

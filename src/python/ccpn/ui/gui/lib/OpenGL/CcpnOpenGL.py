@@ -2877,6 +2877,11 @@ class CcpnGLWidget(QOpenGLWidget):
 
         if not self.spectrumDisplay.is1D:
             for specView in self._ordering:
+
+                # check whether the spectrumView is still active
+                if specView.isDeleted or specView._flaggedForDelete:
+                    continue
+
                 spec = specView.spectrum
 
                 # inside the paint event, so sometimes specView may not exist

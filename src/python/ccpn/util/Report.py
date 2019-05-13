@@ -42,6 +42,8 @@ from reportlab.graphics import renderSVG, renderPS
 from reportlab.graphics.shapes import Drawing, Rect, String, PolyLine, Line, Group, Path
 from reportlab.lib.units import mm
 
+DEFAULTMARGIN = 2.0 * cm
+
 
 class Report():
     """
@@ -49,7 +51,7 @@ class Report():
     """
 
     def __init__(self, parent, project, filename, pagesize=A4,
-                 leftMargin=(2 * cm), rightMargin=(2 * cm), topMargin=(2 * cm), bottomMargin=(2 * cm)):
+                 leftMargin=DEFAULTMARGIN, rightMargin=DEFAULTMARGIN, topMargin=DEFAULTMARGIN, bottomMargin=DEFAULTMARGIN):
         """
         Initialise a new pdf report
 
@@ -68,7 +70,7 @@ class Report():
         self.project = project
         self.filename = filename
         self.canv = None
-        self.defaultMargin = 2.0 * cm
+        self.defaultMargin = DEFAULTMARGIN
 
         # buffer for exporting
         self.buf = io.BytesIO()

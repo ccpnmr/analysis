@@ -113,8 +113,7 @@ class GLExporter():
             pageType = portrait
         else:
             pageType = landscape
-        self._report = Report(self, self.project, filename, pagesize=pageType(A4),
-                              leftMargin=(1 * cm), rightMargin=(1 * cm), topMargin=(1 * cm), bottomMargin=(1 * cm))
+        self._report = Report(self, self.project, filename, pagesize=pageType(A4))
 
         self._ordering = []
         self._importFonts()

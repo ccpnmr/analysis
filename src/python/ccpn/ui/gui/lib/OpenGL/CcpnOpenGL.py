@@ -759,7 +759,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_XSCALE] = xScale
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YSCALE] = yScale
 
-        indices = getAxisCodeMatchIndices(spectrumView.spectrum.axisCodes, self.strip.axisCodes)
+        # indices = getAxisCodeMatchIndices(spectrumView.spectrum.axisCodes, self.strip.axisCodes)
+        indices = getAxisCodeMatchIndices(self.strip.axisCodes, spectrumView.spectrum.axisCodes)
 
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX] = indices
 

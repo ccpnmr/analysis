@@ -1226,7 +1226,7 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
     def _blockSideBarEvents(self):
         """Block all updates/signals/notifiers on the sidebar
         """
-        self.setUpdatesEnabled(False)
+        # self.setUpdatesEnabled(False)
         self.blockSignals(True)
         # self.setBlankingAllNotifiers(True)
 
@@ -1235,7 +1235,7 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         """
         # self.setBlankingAllNotifiers(False)
         self.blockSignals(False)
-        self.setUpdatesEnabled(True)
+        # self.setUpdatesEnabled(True)
 
     def selectPid(self, pid):
         """Select the item in the sideBar with the given pid.

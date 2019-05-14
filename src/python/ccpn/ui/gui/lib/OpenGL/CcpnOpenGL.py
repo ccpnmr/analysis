@@ -309,6 +309,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._gridVisible = self._preferences.showGrid
         self._crosshairVisible = self._preferences.showCrosshair
         # self._doubleCrosshairVisible = self._preferences.showDoubleCrosshair
+        self.diagonalGLList = None
 
         self._axesVisible = True
         self._axisLocked = False
@@ -1648,6 +1649,13 @@ class CcpnGLWidget(QOpenGLWidget):
                                                dimension=2,
                                                GLContext=self))
 
+        self.diagonalGLList = GLVertexArray(numLists=1,
+                                           renderMode=GLRENDERMODE_REBUILD,
+                                           blendMode=False,
+                                           drawMode=GL.GL_LINES,
+                                           dimension=2,
+                                           GLContext=self)
+
         self._cursorList = GLVertexArray(numLists=1,
                                          renderMode=GLRENDERMODE_REBUILD,
                                          blendMode=False,
@@ -2900,7 +2908,8 @@ class CcpnGLWidget(QOpenGLWidget):
                                                                  g=self.foreground[1],
                                                                  b=self.foreground[2],
                                                                  transparency=300.0,
-                                                                 _includeDiagonal=self._matchingIsotopeCodes)
+                                                                 _includeDiagonal=self._matchingIsotopeCodes,
+                                                                 _diagonalList=self.diagonalGLList)
 
         if self.highlighted:
             self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1, 0], r=self.highlightColour[0],
@@ -2921,16 +2930,28 @@ class CcpnGLWidget(QOpenGLWidget):
         for gr in self.gridList:
             gr.defineIndexVBO(enableVBO=True)
 
+        # buffer the diagonal GL line
+        self.diagonalGLList.defineIndexVBO(enableVBO=True)
+
     def drawGrid(self):
         # set to the mainView and draw the grid
         self.buildGrid()
 
         GL.glEnable(GL.GL_BLEND)
 
+        # draw the main grid
         if self._gridVisible:
             self.viewports.setViewport(self._currentView)
             self.gridList[0].drawIndexVBO(enableVBO=True)
 
+        # draw the diagonal line - independent of viewing the grid
+        if self._matchingIsotopeCodes and self.diagonalGLList:
+            # viewport above may not be set
+            if not self._gridVisible:
+                self.viewports.setViewport(self._currentView)
+            self.diagonalGLList.drawIndexVBO(enableVBO=True)
+
+        # draw the axes tick marks (effectively the same grid in smaller viewport)
         if self._axesVisible:
             if self._drawRightAxis:
                 # draw the grid marks for the right axis
@@ -4712,7 +4733,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.update()
 
-    def _buildAxes(self, gridGLList, axisList=None, scaleGrid=None, r=0.0, g=0.0, b=0.0, transparency=256.0, _includeDiagonal=False):
+    def _buildAxes(self, gridGLList, axisList=None, scaleGrid=None, r=0.0, g=0.0, b=0.0, transparency=256.0,
+                   _includeDiagonal=False, _diagonalList=None):
         """Build the grid
         """
 
@@ -4916,35 +4938,47 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 # draw the diagonal x=y if required - need to determine the origin
                 # OR draw on the spectrum bounding box
-                if _includeDiagonal:
+                if _includeDiagonal and _diagonalList:
 
-                    diag = ()
+                    _diagVertexList = ()
 
                     if self.between(axisLimitB, axisLimitL, axisLimitR):
-                        diag += (valueToRatio(axisLimitB, axisLimitL, axisLimitR),
+                        _diagVertexList += (valueToRatio(axisLimitB, axisLimitL, axisLimitR),
                                  0.0)
 
                     if self.between(axisLimitL, axisLimitB, axisLimitT):
-                        diag += (0.0,
+                        _diagVertexList += (0.0,
                                  valueToRatio(axisLimitL, axisLimitB, axisLimitT))
 
                     if self.between(axisLimitT, axisLimitL, axisLimitR):
-                        diag += (valueToRatio(axisLimitT, axisLimitL, axisLimitR),
+                        _diagVertexList += (valueToRatio(axisLimitT, axisLimitL, axisLimitR),
                                  1.0)
 
                     if self.between(axisLimitR, axisLimitB, axisLimitT):
-                        diag += (1.0,
+                        _diagVertexList += (1.0,
                                  valueToRatio(axisLimitR, axisLimitB, axisLimitT))
 
-                    if len(diag) == 4:
-                        indexList += (index, index + 1)
-                        vertexList += diag
+                    if len(_diagVertexList) == 4:
+                        # indexList += (index, index + 1)
+                        # vertexList += diag
+                        #
+                        # alpha = min([1.0, (30.0 + (len(scaleGrid) * 20)) / transparency])
+                        # colorList += (r, g, b, alpha, r, g, b, alpha)
+                        #
+                        # gridGLList.numVertices += 2
+                        # index += 2
 
                         alpha = min([1.0, (30.0 + (len(scaleGrid) * 20)) / transparency])
-                        colorList += (r, g, b, alpha, r, g, b, alpha)
 
-                        gridGLList.numVertices += 2
-                        index += 2
+                        _diagIndexList = (0, 1)
+                        _diagonalList.numVertices = 2
+                        _diagonalList.vertices = np.array(_diagVertexList, dtype=np.float32)
+                        _diagonalList.indices = np.array((0, 1), dtype=np.uint32)
+                        _diagonalList.colors = np.array((r, g, b, alpha, r, g, b, alpha), dtype=np.float32)
+
+                    else:
+                        _diagonalList.numVertices = 0
+                        _diagonalList.indices = np.array((), dtype=np.uint32)
 
                 # copy the arrays the the GLstore
                 gridGLList.vertices = np.array(vertexList, dtype=np.float32)

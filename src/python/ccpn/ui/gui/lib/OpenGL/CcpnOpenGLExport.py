@@ -63,7 +63,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXI
     GLPAGETYPE, GLSPECTRUMDISPLAY, GLAXISLINES, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS, \
     GLCONTOURTHICKNESS, GLFOREGROUND, GLSHOWSPECTRAONPHASE, \
     GLAXISTITLES, GLAXISUNITS, GLAXISMARKSINSIDE, GLSTRIPDIRECTION, GLSTRIPPADDING, \
-    GLFULLLIST, GLEXTENDEDLIST, GLCURSORS
+    GLFULLLIST, GLEXTENDEDLIST, GLCURSORS, GLDIAGONALLINE
 from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPDF, EXPORTSVG, EXPORTTYPES, \
     PAGEPORTRAIT, PAGELANDSCAPE, PAGETYPES
 from ccpn.util.Logging import getLogger
@@ -377,6 +377,7 @@ class GLExporter():
 
         # print the objects
         if self.params[GLGRIDLINES]: self._addGridLines()
+        if self.params[GLDIAGONALLINE]: self._addDiagonalLine()
 
         # check parameters to decide what to print
 
@@ -415,7 +416,7 @@ class GLExporter():
         """
         Add grid lines to the main drawing area.
         """
-        if self.strip.gridVisible:
+        if self.strip.gridVisible and self._parent.gridList[0]:
             colourGroups = OrderedDict()
             self._appendIndexLineGroup(indArray=self._parent.gridList[0],
                                        colourGroups=colourGroups,
@@ -427,11 +428,27 @@ class GLExporter():
                                        ratioLine=True)
             self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='grid')
 
+    def _addDiagonalLine(self):
+        """
+        Add the diagonal line to the main drawing area.
+        """
+        if self._parent.diagonalGLList:
+            colourGroups = OrderedDict()
+            self._appendIndexLineGroup(indArray=self._parent.diagonalGLList,
+                                       colourGroups=colourGroups,
+                                       plotDim={PLOTLEFT  : self.displayScale * self.mainL,
+                                                PLOTBOTTOM: self.displayScale * self.mainB,
+                                                PLOTWIDTH : self.displayScale * self.mainW,
+                                                PLOTHEIGHT: self.displayScale * self.mainH},
+                                       name='diagonal',
+                                       ratioLine=True)
+            self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='diagonal')
+
     def _addCursors(self):
         """
         Add cursors/double cursor to the main drawing area.
         """
-        if self.strip.gridVisible:
+        if self._parent._cursorList:
             colourGroups = OrderedDict()
             self._appendIndexLineGroup(indArray=self._parent._cursorList,
                                        colourGroups=colourGroups,

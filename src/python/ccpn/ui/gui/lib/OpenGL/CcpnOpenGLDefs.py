@@ -105,6 +105,7 @@ GLINTEGRALLABELS = 'Integral Labels'
 GLMULTIPLETSYMBOLS = 'Multiplet Symbols'
 GLMULTIPLETLABELS = 'Multiplet Labels'
 GLGRIDLINES = 'Grid Lines'
+GLDIAGONALLINE = 'Diagonal'
 GLAXISTITLES = 'Axis Titles'
 GLAXISLINES = 'Axis Lines'
 GLAXISMARKS = 'Axis Marks'
@@ -139,6 +140,7 @@ GLFULLLIST = (GLPEAKSYMBOLS,
               GLMULTIPLETSYMBOLS,
               GLMULTIPLETLABELS,
               GLGRIDLINES,
+              GLDIAGONALLINE,
               GLAXISTITLES,
               GLAXISLINES,
               GLAXISMARKS,
@@ -158,6 +160,7 @@ GLFULLLIST = (GLPEAKSYMBOLS,
               GLPLOTBORDER)
 
 GLEXTENDEDLIST = (GLGRIDLINES,
+                  GLDIAGONALLINE,
                   GLAXISTITLES,
                   GLAXISLINES,
                   GLAXISMARKS,

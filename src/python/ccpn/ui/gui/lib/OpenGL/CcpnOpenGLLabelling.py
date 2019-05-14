@@ -1972,7 +1972,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         self.buildSymbols()
 
         lineThickness = self.strip.symbolThickness
-        GL.glLineWidth(lineThickness)
+        GL.glLineWidth(lineThickness * self._GLParent.viewports._devicePixelRatio)
 
         # # loop through the attached objListViews to the strip
         # for spectrumView in self._GLParent._ordering:  #self._parent.spectrumViews:
@@ -1987,7 +1987,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 # self._GLSymbols[objListView].drawIndexArray()
                 self._GLSymbols[objListView].drawIndexVBO(enableVBO=False)
 
-        GL.glLineWidth(1.0)
+        GL.glLineWidth(1.0 * self._GLParent.viewports._devicePixelRatio)
 
     def drawLabels(self, spectrumSettings):
         """Draw the labelling to the screen

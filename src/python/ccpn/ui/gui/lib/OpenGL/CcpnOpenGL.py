@@ -2875,7 +2875,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     GL.glEnd()
 
         # reset lineWidth
-        GL.glLineWidth(1.0)
+        GL.glLineWidth(1.0 * self.viewports._devicePixelRatio)
 
     def buildGrid(self):
         """Build the grids for the mainGrid and the bottom/right axes
@@ -2938,6 +2938,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.buildGrid()
 
         GL.glEnable(GL.GL_BLEND)
+        GL.glLineWidth(1.0 * self.viewports._devicePixelRatio)
 
         # draw the main grid
         if self._gridVisible:
@@ -3499,7 +3500,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 #     GL.glVertex2d(infLine.values[0], self.axisT)
                 #     GL.glVertex2d(infLine.values[0], self.axisB)
 
-                GL.glLineWidth(infLine.lineWidth)
+                GL.glLineWidth(infLine.lineWidth * self.viewports._devicePixelRatio)
                 GL.glBegin(GL.GL_LINES)
                 if infLine.orientation == 'h':
                     GL.glVertex2d(self.axisL, infLine.values)
@@ -3511,7 +3512,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 GL.glEnd()
 
         GL.glDisable(GL.GL_LINE_STIPPLE)
-        GL.glLineWidth(1.0)
+        GL.glLineWidth(1.0 * self.viewports._devicePixelRatio)
 
     def setStripID(self, name):
         self.stripIDLabel = name

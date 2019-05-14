@@ -126,6 +126,11 @@ class GuiWindow():
         # addShortCut("Space, Space", self, self.toggleConsole, context=context) # this is not needed here, already set on Menus!!
         addShortCut("CTRL+a", self, self.selectAllPeaks, context=context)
 
+    #     addShortCut("q, w, p, l", self, self.testLongShortcut, context=context)
+    #
+    # def testLongShortcut(self):
+    #     print('>>>long')
+
     def _setUserShortcuts(self, preferences=None, mainWindow=None):
 
         # TODO:ED fix this circular link

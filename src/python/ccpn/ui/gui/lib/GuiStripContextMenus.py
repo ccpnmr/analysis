@@ -89,35 +89,35 @@ def _createMenu(strip, items):
 
 def _toolBarItem(strip):
     return _SCMitem(name='ToolBar',
-                    typeItem=ItemTypes.get(ITEM), toolTip='toolbarAction',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Toggle Toolbar On/Off',
                     callback=strip.spectrumDisplay.toggleToolbar,
                     checkable=True, checked=True, shortcut='TB', stripMethodName='toolbarAction')
 
 
 def _spectrumToolBarItem(strip):
     return _SCMitem(name='SpectrumToolBar',
-                    typeItem=ItemTypes.get(ITEM), toolTip='spectrumtoolbarAction',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Toggle Spectrum Toolbar On/Off',
                     callback=strip.spectrumDisplay.toggleSpectrumToolbar,
                     checkable=True, checked=True, shortcut='SB', stripMethodName='spectrumToolbarAction')
 
 
 def _crosshairItem(strip):
     return _SCMitem(name='Crosshair',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Crosshair Action',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Toggle Crosshair Mouse On/Off',
                     checkable=True, checked=True, shortcut='CH',
                     callback=strip.spectrumDisplay.toggleCrosshair, stripMethodName='crosshairAction')
 
 
 def _doubleCrosshairItem(strip):
     return _SCMitem(name='DoubleCrosshair',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Double Crosshair Action',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Toggle Double/Single Crosshair Mouse',
                     checkable=True, checked=True, shortcut='CD',
                     callback=strip.spectrumDisplay.mainWindow.toggleDoubleCrosshairAll, stripMethodName='doubleCrosshairAction')
 
 
 def _gridItem(strip):
     return _SCMitem(name='Grid',
-                    typeItem=ItemTypes.get(ITEM), toolTip='gridAction', callback=strip.spectrumDisplay.toggleGrid,
+                    typeItem=ItemTypes.get(ITEM), toolTip='Toggle Grid On/Off', callback=strip.spectrumDisplay.toggleGrid,
                     checkable=True, checked=True, shortcut='GS', stripMethodName='gridAction')
 
 
@@ -131,7 +131,7 @@ def _cyclePeakLabelsItem(strip):
 def _cyclePeakSymbolsItem(strip):
     return _SCMitem(name='Cycle Peak Symbols',
                     typeItem=ItemTypes.get(ITEM), icon='icons/peak-symbols',
-                    toolTip='Cycle Peak Labelling Types',
+                    toolTip='Cycle Peak Symbol Types',
                     callback=strip.cyclePeakSymbols, shortcut='PS', stripMethodName='')
 
 
@@ -167,33 +167,33 @@ def _resetZoom(strip):
 
 def _calibrateX(strip):
     return _SCMitem(name='Calibrate X',
-                    typeItem=ItemTypes.get(ITEM), toolTip='calibrate X axis', checkable=True, checked=False,
+                    typeItem=ItemTypes.get(ITEM), toolTip='Calibrate X Axis', checkable=True, checked=False,
                     callback=strip.toggleCalibrateX, stripMethodName='calibrateXAction')
 
 
 def _calibrateY(strip):
     return _SCMitem(name='Calibrate Y',
-                    typeItem=ItemTypes.get(ITEM), toolTip='calibrate Y axis',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Calibrate Y Axis',
                     checkable=True, checked=False,
                     callback=strip.toggleCalibrateY, stripMethodName='calibrateYAction')
 
 
 def _calibrateXY(strip):
     return _SCMitem(name='Calibrate Spectra',
-                    typeItem=ItemTypes.get(ITEM), toolTip='calibrate spectrum axes', checkable=True, checked=False,
+                    typeItem=ItemTypes.get(ITEM), toolTip='Calibrate Spectrum Axes', checkable=True, checked=False,
                     callback=strip.toggleCalibrateXY, stripMethodName='calibrateXYAction')
 
 
 def _toggleHorizontalTraceItem(strip):
     return _SCMitem(name='Horizontal Trace',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Toggle horizontal trace on/off',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Toggle Horizontal Trace On/off',
                     checkable=True, checked=False, shortcut='TH', stripMethodName='hTraceAction',
                     callback=strip.toggleHorizontalTrace)
 
 
 def _toggleVerticalTraceItem(strip):
     return _SCMitem(name='Vertical Trace',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Toggle vertical trace on/off',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Toggle Vertical Trace On/Off',
                     checkable=True, checked=False, shortcut='TV', stripMethodName='vTraceAction',
                     callback=strip.toggleVerticalTrace)
 
@@ -206,13 +206,13 @@ def _phasingConsoleItem(strip):
 
 def _marksItem(strip):
     return _SCMitem(name='Mark Positions',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Mark positions of all axes', shortcut='MK',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Mark positions of all Axes', shortcut='MK',
                     callback=strip.createMark)
 
 
 def _clearMarksItem(strip):
     return _SCMitem(name='Clear Marks',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Clear all Marks from', shortcut='MC',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Clear all Marks', shortcut='MC',
                     callback=strip.clearMarks)
 
 

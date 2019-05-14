@@ -947,6 +947,9 @@ class CcpnModuleLabel(DockLabel):
 
         self.updateStyle()
 
+        # flag to disable dragMoveEvent during a doubleClick
+        self._inDoubleClick = False
+
     def _createContextMenu(self):
 
         contextMenu = Menu('', self, isFloatWidget=True)
@@ -1077,14 +1080,31 @@ class CcpnModuleLabel(DockLabel):
         #     self.setMinimumWidth(minSize)
 
     def mouseMoveEvent(self, ev):
-        if hasattr(self, 'pressPos'):
+        """Handle the mouse move event to spawn a drag event
+        """
+        if hasattr(self, 'pressPos') and not self._inDoubleClick:
             if not self.startedDrag and (ev.pos() - self.pressPos).manhattanLength() > QtWidgets.QApplication.startDragDistance():
                 # emit a drag started event
                 self.sigDragEntered.emit(self.parent(), ev)
-
                 self.dock.startDrag()
 
             ev.accept()
+
+    def mouseDoubleClickEvent(self, ev):
+        """Handle the double click event
+        """
+        # start a small timer when doubleClicked
+        # disables the dragMoveEvent whilst in a doubleClick
+        self._inDoubleClick = True
+        QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval(),
+                                 self._resetDoubleClick)
+
+        super(CcpnModuleLabel, self).mouseDoubleClickEvent(ev)
+
+    def _resetDoubleClick(self):
+        """reset the double click flag
+        """
+        self._inDoubleClick = False
 
     # def startDrag(self):
     #   print('>>>startDrag')

@@ -23,6 +23,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtGui, QtCore
+from PyQt5.QtCore import pyqtSlot
 from ccpn.core.Spectrum import Spectrum
 from pyqtgraph.dockarea.Dock import Dock
 from pyqtgraph.dockarea.DockArea import DockArea, DockDrop
@@ -69,6 +70,21 @@ class TempAreaWindow(GuiWindow, MainWindow):
 
         self._setShortcuts()
         self.setMouseMode(SELECT)
+
+        # install handler to resize when moving between displays
+        self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
+
+    @pyqtSlot()
+    def _screenChangedEvent(self, *args):
+        self._screenChanged(*args)
+        self.update()
+
+    def _screenChanged(self, *args):
+        getLogger().debug2('tempAreaWindow screenchanged')
+        project = self.application.project
+        for spectrumDisplay in project.spectrumDisplays:
+            for strip in spectrumDisplay.strips:
+                strip.refreshDevicePixelRatio()
 
     def closeEvent(self, *args, **kwargs):
         for module in self.tempModuleArea.ccpnModules:

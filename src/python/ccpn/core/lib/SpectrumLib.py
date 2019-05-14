@@ -659,27 +659,37 @@ def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
                 _recurseData(0, dataList, startCondition, endCondition)
 
                 levels = 10
-                base = abs(endCondition[5]) + 3.0 * endCondition[6]     # abs(mean) + (3 * noiseLevel)
+                base = abs(endCondition[5] + 3.0 * endCondition[6])     # abs(mean) + (3 * noiseLevel)
                 mx = startCondition[3]                                  # global array max
                 mn = startCondition[4]                                  # global array min
 
-                # calculate multiplier to give contours across range of spectrum
-                posMult = pow(abs(mx / base), 1 / levels)
+                # calculate multiplier to give contours across range of spectrum; trap base = 0
+                posMult = pow(abs(mx / base), 1 / levels) if base else 0.0
                 if useSameMultiplier:
                     negMult = posMult
                 else:
-                    negMult = pow(abs(mn / base), 1 / levels)
+                    negMult = pow(abs(mn / base), 1 / levels) if base else 0.0
 
                 # put the new values into the spectrum
                 if setNoiseLevel:
                     spectrum.noiseLevel = base
 
                 if setPositiveContours:
-                    spectrum.positiveContourBase = base
-                    spectrum.positiveContourFactor = posMult
+                    try:
+                        spectrum.positiveContourBase = base
+                        spectrum.positiveContourFactor = posMult
+                    except Exception as es:
+                        spectrum.positiveContourBase = 10000            # default values
+                        spectrum.positiveContourFactor = 1.41
+
                     spectrum.positiveContourCount = levels
 
                 if setNegativeContours:
-                    spectrum.negativeContourBase = -base
-                    spectrum.negativeContourFactor = negMult
+                    try:
+                        spectrum.negativeContourBase = -base
+                        spectrum.negativeContourFactor = negMult
+                    except Exception as es:
+                        spectrum.negativeContourBase = -10000           # default values
+                        spectrum.negativeContourFactor = 1.41
+
                     spectrum.negativeContourCount = levels

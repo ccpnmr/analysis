@@ -157,9 +157,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     #
     #   return False
 
-        # install handler to resize when moving between displays
-        self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
-
     #     self.installEventFilter(self)
     #
     # def eventFilter(self, obj, event):
@@ -177,6 +174,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     #
     #     return False
 
+        # install handler to resize when moving between displays
+        self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
 
     @pyqtSlot()
     def _screenChangedEvent(self, *args):

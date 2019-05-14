@@ -39,6 +39,10 @@ from ccpn.util import Phasing
 
 class GuiSpectrumView1d(GuiSpectrumView):
 
+    hPhaseTrace = None
+    buildContours = True  # trigger the first build
+    buildContoursOnly = False
+
     #def __init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping=None):
     def __init__(self):
         """ spectrumPane is the parent
@@ -76,7 +80,6 @@ class GuiSpectrumView1d(GuiSpectrumView):
         #  self.strip.showPeaks(peakList)
 
         self.hPhaseTrace = None
-
         self.buildContours = True  # trigger the first build
         self.buildContoursOnly = False
         # self.buildSymbols = True

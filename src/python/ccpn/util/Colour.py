@@ -266,6 +266,44 @@ shortSpectrumColours = OrderedDict([('#cb1400', 'red'),
                                     ('#ffffff', 'white'),
                                     ('#000000', 'black')])
 
+# set of colours for spectra on light background
+lightBckgrndSpecColours = OrderedDict([('#008080', 'teal'),
+                            ('#DA70D6', 'orchid'),
+                            ('#800080', 'purple'),
+                            ('#808000', 'olive'),
+                            ('#1E90FF', 'dodgerblue'),
+                            ('#FFA500', 'orange'),
+                            ('#FF0000', 'red'),
+                            ('#4682B4', 'steelblue'),
+                            ('#008000', 'green'),
+                            ('#8A2BE2', 'blueviolet'),
+                            ('#800000', 'maroon'),
+                            ('#00CED1', 'darkturquoise'),
+                            ('#000080', 'navy'),
+                            ('#FF4500', 'orangered'),
+                            ('#FF1493', 'deeppink'),
+                            ('#32CD32', 'limegreen'),
+                            ])
+
+# set of colours for spectra on dark background
+darkBckgrndSpecColours = OrderedDict([('#6B8E23', 'olivedrab'),
+                            ('#DA70D6', 'orchid'),
+                            ('#8A2BE2', 'blueviolet'),
+                            ('#808000', 'olive'),
+                            ('#1E90FF', 'dodgerblue'),
+                            ('#FFA500', 'orange'),
+                            ('#FF0000', 'red'),
+                            ('#4682B4', 'steelblue'),
+                            ('#7FFF00', 'chartreuse'),
+                            ('#8A2BE2', 'blueviolet'),
+                            ('#A0522D', 'sienna'),
+                            ('#00CED1', 'darkturquoise'),
+                            ('#00FFFF', 'cyan'),
+                            ('#FFFF00', 'yellow'),
+                            ('#FF1493', 'deeppink'),
+                            ('#32CD32', 'limegreen'),
+                            ])
+
 # set of colours that have higher saturation
 brightColours = OrderedDict([('#000000', 'black'),
                              ('#696969', 'dimgray'),

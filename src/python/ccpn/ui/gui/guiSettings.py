@@ -31,7 +31,8 @@ from ccpn.ui.gui.widgets.Font import Font
 from ccpn.util.decorators import singleton
 from ccpn.util.Logging import getLogger
 from ccpn.util.Colour import allColours, hexToRgbRatio, autoCorrectHexColour, \
-    spectrumHexDarkColours, spectrumHexLightColours, spectrumHexMediumColours
+    spectrumHexDarkColours, spectrumHexLightColours, spectrumHexMediumColours, \
+    spectrumHexDefaultLightColours, spectrumHexDefaultDarkColours
 
 
 # fonts
@@ -97,6 +98,7 @@ MARKS_COLOURS = 'marksColours'
 COLOUR_SCHEMES = (LIGHT, DARK, DEFAULT)
 
 SPECTRUM_HEXCOLOURS = 'spectrumHexColours'
+SPECTRUM_HEXDEFAULTCOLOURS = 'spectrumHexDefaultColours'
 SPECTRUM_HEXMEDIUMCOLOURS = 'spectrumHexMediumColours'
 SPECTRUMCOLOURS = 'spectrumColours'
 
@@ -206,49 +208,49 @@ colourSchemes = {
     # all colours defined here
     DEFAULT: {
 
-        CCPNGLWIDGET_HEXBACKGROUND    : '#FFFFFF',
-        CCPNGLWIDGET_BACKGROUND       : (0.99, 0.99, 0.99, 1.0),
-        CCPNGLWIDGET_FOREGROUND       : (0.05, 0.05, 0.05, 1.0),  #'#080000'
-        CCPNGLWIDGET_PICKCOLOUR       : (0.2, 0.5, 0.9, 1.0),
-        CCPNGLWIDGET_GRID             : (0.5, 0.0, 0.0, 1.0),  #'#080000'
-        CCPNGLWIDGET_HIGHLIGHT        : (0.23, 0.23, 1.0, 1.0),  #'#3333ff'
-        CCPNGLWIDGET_LABELLING        : (0.05, 0.05, 0.05, 1.0),
-        CCPNGLWIDGET_PHASETRACE       : (0.2, 0.2, 0.2, 1.0),
-        CCPNGLWIDGET_ZOOMAREA         : (0.8, 0.9, 0.2, 0.3),
-        CCPNGLWIDGET_PICKAREA         : (0.2, 0.5, 0.9, 0.3),
-        CCPNGLWIDGET_SELECTAREA       : (0.8, 0.2, 0.9, 0.3),
-        CCPNGLWIDGET_ZOOMLINE         : (0.6, 0.7, 0.2, 1.0),
-        CCPNGLWIDGET_MOUSEMOVELINE    : (0.8, 0.2, 0.9, 1.0),
+        CCPNGLWIDGET_HEXBACKGROUND  : '#FFFFFF',
+        CCPNGLWIDGET_BACKGROUND     : (0.99, 0.99, 0.99, 1.0),
+        CCPNGLWIDGET_FOREGROUND     : (0.05, 0.05, 0.05, 1.0),  #'#080000'
+        CCPNGLWIDGET_PICKCOLOUR     : (0.2, 0.5, 0.9, 1.0),
+        CCPNGLWIDGET_GRID           : (0.5, 0.0, 0.0, 1.0),  #'#080000'
+        CCPNGLWIDGET_HIGHLIGHT      : (0.23, 0.23, 1.0, 1.0),  #'#3333ff'
+        CCPNGLWIDGET_LABELLING      : (0.05, 0.05, 0.05, 1.0),
+        CCPNGLWIDGET_PHASETRACE     : (0.2, 0.2, 0.2, 1.0),
+        CCPNGLWIDGET_ZOOMAREA       : (0.8, 0.9, 0.2, 0.3),
+        CCPNGLWIDGET_PICKAREA       : (0.2, 0.5, 0.9, 0.3),
+        CCPNGLWIDGET_SELECTAREA     : (0.8, 0.2, 0.9, 0.3),
+        CCPNGLWIDGET_ZOOMLINE       : (0.6, 0.7, 0.2, 1.0),
+        CCPNGLWIDGET_MOUSEMOVELINE  : (0.8, 0.2, 0.9, 1.0),
 
-        CCPNGLWIDGET_MULTIPLETLINK    : FIREBRICK,
+        CCPNGLWIDGET_MULTIPLETLINK  : FIREBRICK,
 
-        CCPNMODULELABEL_BACKGROUND    : '#FFFFFF',
-        CCPNMODULELABEL_FOREGROUND    : TEXT_COLOUR,
+        CCPNMODULELABEL_BACKGROUND  : '#FFFFFF',
+        CCPNMODULELABEL_FOREGROUND  : TEXT_COLOUR,
 
-        GUICHAINLABEL_TEXT            : TEXT_COLOUR,
+        GUICHAINLABEL_TEXT          : TEXT_COLOUR,
 
-        GUICHAINRESIDUE_UNASSIGNED    : 'black',
-        GUICHAINRESIDUE_ASSIGNED      : GREEN1,
-        GUICHAINRESIDUE_POSSIBLE      : 'orange',
-        GUICHAINRESIDUE_WARNING       : WARNING_RED,
-        GUICHAINRESIDUE_DRAGENTER     : MARISHINO,
-        GUICHAINRESIDUE_DRAGLEAVE     : 'black',  # '#666e98',
+        GUICHAINRESIDUE_UNASSIGNED  : 'black',
+        GUICHAINRESIDUE_ASSIGNED    : GREEN1,
+        GUICHAINRESIDUE_POSSIBLE    : 'orange',
+        GUICHAINRESIDUE_WARNING     : WARNING_RED,
+        GUICHAINRESIDUE_DRAGENTER   : MARISHINO,
+        GUICHAINRESIDUE_DRAGLEAVE   : 'black',  # '#666e98',
 
-        GUINMRATOM_SELECTED           : TEXT_COLOUR,
-        GUINMRATOM_NOTSELECTED        : '#FDFDFC',
+        GUINMRATOM_SELECTED         : TEXT_COLOUR,
+        GUINMRATOM_NOTSELECTED      : '#FDFDFC',
 
-        GUINMRRESIDUE                 : TEXT_COLOUR,
+        GUINMRRESIDUE               : TEXT_COLOUR,
 
-        GUISTRIP_PIVOT                : MARISHINO,
+        GUISTRIP_PIVOT              : MARISHINO,
 
-        LABEL_FOREGROUND              : TEXT_COLOUR,
-        DIVIDER                       : TEXT_COLOUR,
+        LABEL_FOREGROUND            : TEXT_COLOUR,
+        DIVIDER                     : TEXT_COLOUR,
 
-        SEQUENCEGRAPHMODULE_LINE      : 'black',
-        SEQUENCEGRAPHMODULE_TEXT      : TEXT_COLOUR,
+        SEQUENCEGRAPHMODULE_LINE    : 'black',
+        SEQUENCEGRAPHMODULE_TEXT    : TEXT_COLOUR,
 
-        SEQUENCEMODULE_DRAGMOVE       : MEDIUM_BLUE,
-        SEQUENCEMODULE_TEXT           : TEXT_COLOUR,
+        SEQUENCEMODULE_DRAGMOVE     : MEDIUM_BLUE,
+        SEQUENCEMODULE_TEXT         : TEXT_COLOUR,
 
         GUITABLE_BACKGROUND         : 'white',
         GUITABLE_ALT_BACKGROUND     : LIGHT_GREY,
@@ -256,12 +258,13 @@ colourSchemes = {
         GUITABLE_SELECTED_FOREGROUND: 'black',
         GUITABLE_SELECTED_BACKGROUND: '#FFFCBA',
 
-        STRIPHEADER_FOREGROUND        : TEXT_COLOUR,
-        STRIPHEADER_BACKGROUND        : '#ebebeb',
+        STRIPHEADER_FOREGROUND      : TEXT_COLOUR,
+        STRIPHEADER_BACKGROUND      : '#ebebeb',
 
-        MARKS_COLOURS                 : MARK_LINE_COLOUR_DICT,
-        SPECTRUM_HEXCOLOURS           : spectrumHexDarkColours,
-        SPECTRUM_HEXMEDIUMCOLOURS     : spectrumHexMediumColours
+        MARKS_COLOURS               : MARK_LINE_COLOUR_DICT,
+        SPECTRUM_HEXCOLOURS         : spectrumHexDarkColours,
+        SPECTRUM_HEXMEDIUMCOLOURS   : spectrumHexMediumColours,
+        SPECTRUM_HEXDEFAULTCOLOURS  : spectrumHexDefaultDarkColours,
         },
 
     # Overridden for dark colour scheme
@@ -279,7 +282,8 @@ colourSchemes = {
         CCPNGLWIDGET_MULTIPLETLINK: LIGHTCORAL,
 
         SPECTRUM_HEXCOLOURS       : spectrumHexLightColours,
-        SPECTRUM_HEXMEDIUMCOLOURS : spectrumHexMediumColours
+        SPECTRUM_HEXMEDIUMCOLOURS : spectrumHexMediumColours,
+        SPECTRUM_HEXDEFAULTCOLOURS: spectrumHexDefaultLightColours,
         },
 
     # Overridden for light colour scheme

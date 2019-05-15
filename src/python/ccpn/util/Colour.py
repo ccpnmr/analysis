@@ -267,42 +267,42 @@ shortSpectrumColours = OrderedDict([('#cb1400', 'red'),
                                     ('#000000', 'black')])
 
 # set of colours for spectra on light background
-lightBckgrndSpecColours = OrderedDict([('#008080', 'teal'),
-                            ('#DA70D6', 'orchid'),
-                            ('#800080', 'purple'),
-                            ('#808000', 'olive'),
-                            ('#1E90FF', 'dodgerblue'),
-                            ('#FFA500', 'orange'),
-                            ('#FF0000', 'red'),
-                            ('#4682B4', 'steelblue'),
-                            ('#008000', 'green'),
-                            ('#8A2BE2', 'blueviolet'),
-                            ('#800000', 'maroon'),
-                            ('#00CED1', 'darkturquoise'),
-                            ('#000080', 'navy'),
-                            ('#FF4500', 'orangered'),
-                            ('#FF1493', 'deeppink'),
-                            ('#32CD32', 'limegreen'),
-                            ])
+darkDefaultSpectrumColours = OrderedDict([('#008080', 'teal'),
+                                          ('#DA70D6', 'orchid'),
+                                          ('#800080', 'purple'),
+                                          ('#808000', 'olive'),
+                                          ('#1E90FF', 'dodgerblue'),
+                                          ('#FFA500', 'orange'),
+                                          ('#FF0000', 'red'),
+                                          ('#4682B4', 'steelblue'),
+                                          ('#008000', 'green'),
+                                          ('#8A2BE2', 'blueviolet'),
+                                          ('#800000', 'maroon'),
+                                          ('#00CED1', 'darkturquoise'),
+                                          ('#000080', 'navy'),
+                                          ('#FF4500', 'orangered'),
+                                          ('#FF1493', 'deeppink'),
+                                          ('#32CD32', 'limegreen'),
+                                          ])
 
 # set of colours for spectra on dark background
-darkBckgrndSpecColours = OrderedDict([('#6B8E23', 'olivedrab'),
-                            ('#DA70D6', 'orchid'),
-                            ('#8A2BE2', 'blueviolet'),
-                            ('#808000', 'olive'),
-                            ('#1E90FF', 'dodgerblue'),
-                            ('#FFA500', 'orange'),
-                            ('#FF0000', 'red'),
-                            ('#4682B4', 'steelblue'),
-                            ('#7FFF00', 'chartreuse'),
-                            ('#8A2BE2', 'blueviolet'),
-                            ('#A0522D', 'sienna'),
-                            ('#00CED1', 'darkturquoise'),
-                            ('#00FFFF', 'cyan'),
-                            ('#FFFF00', 'yellow'),
-                            ('#FF1493', 'deeppink'),
-                            ('#32CD32', 'limegreen'),
-                            ])
+lightDefaultSpectrumColours = OrderedDict([('#6B8E23', 'olivedrab'),
+                                           ('#DA70D6', 'orchid'),
+                                           ('#8A2BE2', 'blueviolet'),
+                                           ('#808000', 'olive'),
+                                           ('#1E90FF', 'dodgerblue'),
+                                           ('#FFA500', 'orange'),
+                                           ('#FF0000', 'red'),
+                                           ('#4682B4', 'steelblue'),
+                                           ('#7FFF00', 'chartreuse'),
+                                           ('#9932CC', 'darkorchid'),
+                                           ('#A0522D', 'sienna'),
+                                           ('#00CED1', 'darkturquoise'),
+                                           ('#00FFFF', 'cyan'),
+                                           ('#FFFF00', 'yellow'),
+                                           ('#FF1493', 'deeppink'),
+                                           ('#32CD32', 'limegreen'),
+                                           ])
 
 # set of colours that have higher saturation
 brightColours = OrderedDict([('#000000', 'black'),
@@ -604,6 +604,9 @@ spectrumHexLightColours = tuple(ky for ky in spectrumLightColours.keys() if ky !
 spectrumHexDarkColours = tuple(ky for ky in spectrumDarkColours.keys() if ky != '#')
 spectrumHexMediumColours = tuple(ky for ky in spectrumMediumColours.keys() if ky != '#')
 
+spectrumHexDefaultLightColours = tuple(ky for ky in lightDefaultSpectrumColours.keys() if ky != '#')
+spectrumHexDefaultDarkColours = tuple(ky for ky in darkDefaultSpectrumColours.keys() if ky != '#')
+
 # override this with spectrumLight/DarkColours when colourScheme is changed
 spectrumHexColours = tuple(ky for ky in spectrumColours.keys() if ky != '#')
 
@@ -892,5 +895,5 @@ if __name__ == '__main__':
     colourPlot(spectrumMediumColours.values(), title='Medium Spectrum Colours')
     colourPlot(spectrumLightColours.values(), title='Light Spectrum Colours')
 
-    colourPlot(lightBckgrndSpecColours.values(), title='Light Background Fixed Spectrum Colours')
-    colourPlot(darkBckgrndSpecColours.values(), title='Dark Background Fixed Spectrum Colours')
+    colourPlot(lightDefaultSpectrumColours.values(), title='Dark Default Spectrum Colours')
+    colourPlot(darkDefaultSpectrumColours.values(), title='Light Default Spectrum Colours')

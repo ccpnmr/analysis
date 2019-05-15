@@ -91,53 +91,36 @@ class SpectrumDisplay1d(GuiSpectrumDisplay):
         """
         Adds specific icons for 1d spectra to the spectrum utility toolbar.
         """
-        spectrumUtilToolBar = self.spectrumUtilToolBar
-        #spectrumUtilToolBar.setIconSize(QtCore.QSize(64, 64)) # set in constructor
+        tb = self.spectrumUtilToolBar
+        self._spectrumUtilActions = {}
 
-        # GWV: removed: GuiSpectrumDisplay._fillToolBar(self)
-        #TODO: See Nd case on how to do this better
+        toolBarItemsForBoth = [
+            #  action name,        icon,                 tooltip,                                   active, callback
 
-        # Disable add and remove strips, as they're broken
-        ###spectrumUtilToolBar.removeAction(spectrumUtilToolBar.actions()[0])
-        ###spectrumUtilToolBar.removeAction(spectrumUtilToolBar.actions()[0])
-        # spectrumUtilToolBar.actions()[0].setDisabled(True)
+            ('increaseStripWidth', 'icons/range-expand', 'Increase the width of strips in display', True, self.increaseStripSize),
+            ('decreaseStripWidth', 'icons/range-contract', 'Decrease the width of strips in display', True, self.decreaseStripSize),
+            # ('addStrip', 'icons/plus', 'Duplicate the rightmost strip', True, self.addStrip),
+            # ('removeStrip', 'icons/minus', 'Remove the current strip', True, self.removeCurrentStrip),
+            ]
+        toolBarItemsForNd = [
+            ('maximiseZoom', 'icons/zoom-full', 'Maximise Zoom', True, self._resetAllZooms),
 
-        # Why does asking for the icon size fix it?  I don't know, but it does!
+            ('maximiseHeight', 'icons/zoom-best-fit-1d', 'Maximise Height', True, self._resetYZooms),
+            ('maximiseWidth', 'icons/zoom-full-1d', 'Maximise Width', True, self._resetXZooms),
 
-        # ('Increase Strip Width', 'icons/range-expand', 'Increase the width of strips in display', True, self.increaseStripWidth),
-        # ('Decrease Strip Width', 'icons/range-contract', 'Decrease the width of strips in display', True, self.decreaseStripWidth),
-        increaseStripWidthAction = spectrumUtilToolBar.addAction("Increase Strip Width", self.increaseStripSize)
-        increaseStripWidthIcon = Icon('icons/range-expand')
-        increaseStripWidthAction.setIcon(increaseStripWidthIcon)
-        decreaseStripWidthAction = spectrumUtilToolBar.addAction("Decrease Strip Width", self.decreaseStripSize)
-        decreaseStripWidthIcon = Icon('icons/range-contract')
-        decreaseStripWidthAction.setIcon(decreaseStripWidthIcon)
+            ('storeZoom', 'icons/zoom-store', 'Store Zoom', True, self._storeZoom),
+            ('restoreZoom', 'icons/zoom-restore', 'Restore Zoom', True, self._restoreZoom),
+            ('undoZoom', 'icons/zoom-undo', 'Undo Zoom', True, self._previousZoom),
+            ('redoZoom', 'icons/zoom-redo', 'Redo Zoom', True, self._nextZoom),
+            ]
 
-        autoScaleAction = spectrumUtilToolBar.addAction("AutoScale", self._resetYZooms)
-        autoScaleActionIcon = Icon('icons/zoom-best-fit-1d')
-        # autoScaleActionIcon.actualSize(QtCore.QSize(10, 10))
-        autoScaleAction.setIcon(autoScaleActionIcon)
-        # autoScaleAction.setText("AutoScale")
-        fullZoomAction = spectrumUtilToolBar.addAction("Maximise Width", self._resetXZooms)
-        fullZoomIcon = Icon('icons/zoom-full-1d')
-        fullZoomAction.setIcon(fullZoomIcon)
-        storeZoomAction = spectrumUtilToolBar.addAction("Store Zoom", self._storeZoom)
-        storeZoomIcon = Icon('icons/zoom-store')
-        storeZoomAction.setIcon(storeZoomIcon)
-        storeZoomAction.setToolTip('Store Zoom')
-        restoreZoomAction = spectrumUtilToolBar.addAction("Restore Zoom", self._restoreZoom)
-        restoreZoomIcon = Icon('icons/zoom-restore')
-        restoreZoomAction.setIcon(restoreZoomIcon)
-        restoreZoomAction.setToolTip('Restore Zoom')
-        
-        undoZoomAction = spectrumUtilToolBar.addAction("Undo Zoom", self._previousZoom)
-        undoZoomIcon = Icon('icons/zoom-undo')
-        undoZoomAction.setIcon(undoZoomIcon)
-        undoZoomAction.setToolTip('Undo Zoom')
-        redoZoomAction = spectrumUtilToolBar.addAction("Redo Zoom", self._nextZoom)
-        redoZoomIcon = Icon('icons/zoom-redo')
-        redoZoomAction.setIcon(redoZoomIcon)
-        redoZoomAction.setToolTip('Redo Zoom')
+        # create the actions from the lists
+        for aName, icon, tooltip, active, callback in toolBarItemsForBoth + toolBarItemsForNd:
+            action = tb.addAction(tooltip, callback)
+            if icon is not None:
+                ic = Icon(icon)
+                action.setIcon(ic)
+            self._spectrumUtilActions[aName] = action
 
     def processSpectra(self, pids: Sequence[str], event):
         """Display spectra defined by list of Pid strings"""

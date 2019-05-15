@@ -545,17 +545,26 @@ def getDefaultSpectrumColours(self: 'Spectrum') -> Tuple[str, str]:
     """
 
     # from ccpn.util.Colour import spectrumHexColours
-    from ccpn.ui.gui.guiSettings import getColours, getColourScheme, SPECTRUM_HEXCOLOURS, SPECTRUM_HEXMEDIUMCOLOURS
+    from ccpn.ui.gui.guiSettings import getColours, SPECTRUM_HEXCOLOURS, SPECTRUM_HEXDEFAULTCOLOURS
 
     spectrumHexColours = getColours().get(SPECTRUM_HEXCOLOURS)
-    spectrumHexMediumColours = getColours().get(SPECTRUM_HEXMEDIUMCOLOURS)
+    spectrumHexDefaultColours = getColours().get(SPECTRUM_HEXDEFAULTCOLOURS)
 
-    colorCount = len(spectrumHexColours)
-    step = ((colorCount // 2 - 1) // 2)
-    kk = colorCount // 7
-    index = self.experiment.serial - 1 + step * (self._serial - 1)
-    posCol = spectrumHexColours[(kk * index) % colorCount]
-    negCol = spectrumHexColours[((kk + 1) * index) % colorCount]
+    # use different colour lists for 1d and Nd
+    if self.dimensionCount < 2:
+        colorCount = len(spectrumHexColours)
+        step = ((colorCount // 2 - 1) // 2)
+        kk = colorCount // 7
+        index = self.experiment.serial - 1 + step * (self._serial - 1)
+        posCol = spectrumHexColours[(kk * index) % colorCount]
+        negCol = spectrumHexColours[((kk + 1) * index) % colorCount]
+
+    else:
+        colorCount = len(spectrumHexDefaultColours)
+        step = ((colorCount // 2 - 1) // 2)
+        index = self.experiment.serial - 1 + step * (self._serial - 1)
+        posCol = spectrumHexDefaultColours[(2 * index) % colorCount]
+        negCol = spectrumHexDefaultColours[(2 * index + 1) % colorCount]
 
     return (posCol, negCol)
 

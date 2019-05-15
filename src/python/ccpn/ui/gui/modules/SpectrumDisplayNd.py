@@ -77,33 +77,31 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
         Adds specific icons for Nd spectra to the spectrum utility toolbar.
         """
         tb = self.spectrumUtilToolBar
-        # bit of a hack: save all the action in a dict to ba able to access later
         self._spectrumUtilActions = {}
 
         toolBarItemsForBoth = [
-            #  action name     icon                    tooltip                     active     callback
-            ('Increase Trace Scale', 'icons/tracescale-up', 'Increase trace scale of strips in display', True, self.increaseTraceScale),
-            ('Decrease Trace Scale', 'icons/tracescale-down', 'Decrease trace scale of strips in display', True, self.decreaseTraceScale),
-            ('Increase Strip Width', 'icons/range-expand', 'Increase the width of strips in display', True, self.increaseStripSize),
-            ('Decrease Strip Width', 'icons/range-contract', 'Decrease the width of strips in display', True, self.decreaseStripSize),
-            ('Add Strip', 'icons/plus', 'Duplicate the rightmost strip', True, self.addStrip),
-            ('Remove Strip', 'icons/minus', 'Remove the current strip', True, self.removeCurrentStrip),
+            #  action name,        icon,                  tooltip,                                     active, callback
+
+            ('increaseTraceScale', 'icons/tracescale-up', 'Increase trace scale of strips in display', True, self.increaseTraceScale),
+            ('decreaseTraceScale', 'icons/tracescale-down', 'Decrease trace scale of strips in display', True, self.decreaseTraceScale),
+            ('increaseStripWidth', 'icons/range-expand', 'Increase the width of strips in display', True, self.increaseStripSize),
+            ('decreaseStripWidth', 'icons/range-contract', 'Decrease the width of strips in display', True, self.decreaseStripSize),
+            ('addStrip', 'icons/plus', 'Duplicate the rightmost strip', True, self.addStrip),
+            ('removeStrip', 'icons/minus', 'Remove the current strip', True, self.removeCurrentStrip),
             ]
         toolBarItemsForNd = [
-            #  action name     icon                    tooltip                     active     callback
-            #  ('+1',           'icons/contour-add',    'Add one contour level',     True,     self.addContourLevel),
-            #  ('-1',           'icons/contour-remove', 'Remove one contour level',  True,     self.removeContourLevel),
-            ('*1.4', 'icons/contour-base-up', 'Raise Contour Base Level', True, self.raiseContourBase),
-            ('/1.4', 'icons/contour-base-down', 'Lower Contour Base Level', True, self.lowerContourBase),
-            ('Maximise Zoom', 'icons/zoom-full', 'Maximum Zoom', True, self._resetAllZooms),
-            ('Store Zoom', 'icons/zoom-store', 'Store Zoom', True, self._storeZoom),
-            ('Restore Zoom', 'icons/zoom-restore', 'Restore Zoom', True, self._restoreZoom),
-            ('Undo Zoom', 'icons/zoom-undo', 'Undo Zoom', True, self._previousZoom),
-            ('Redo Zoom', 'icons/zoom-redo', 'Redo Zoom', True, self._nextZoom),
+            ('raiseBase', 'icons/contour-base-up', 'Raise Contour Base Level', True, self.raiseContourBase),
+            ('lowerBase', 'icons/contour-base-down', 'Lower Contour Base Level', True, self.lowerContourBase),
+            ('maximiseZoom', 'icons/zoom-full', 'Maximise Zoom', True, self._resetAllZooms),
+            ('storeZoom', 'icons/zoom-store', 'Store Zoom', True, self._storeZoom),
+            ('restoreZoom', 'icons/zoom-restore', 'Restore Zoom', True, self._restoreZoom),
+            ('undoZoom', 'icons/zoom-undo', 'Undo Zoom', True, self._previousZoom),
+            ('redoZoom', 'icons/zoom-redo', 'Redo Zoom', True, self._nextZoom),
             ]
 
+        # create the actions from the lists
         for aName, icon, tooltip, active, callback in toolBarItemsForBoth + toolBarItemsForNd:
-            action = tb.addAction(aName, callback)
+            action = tb.addAction(tooltip, callback)
             if icon is not None:
                 ic = Icon(icon)
                 action.setIcon(ic)

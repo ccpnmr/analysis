@@ -65,7 +65,7 @@ from ccpn.ui.gui.widgets.ToolButton import ToolButton
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import moduleLabelFont
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.SideBar import SideBar      #,SideBar
+from ccpn.ui.gui.widgets.SideBar import SideBar  #,SideBar
 from ccpn.ui.gui.widgets.PythonEditor import QCodeEditor
 
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame, Frame
@@ -211,9 +211,6 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         CcpnModule.moduleName = name
 
         self.widgetArea.setContentsMargins(0, 0, 0, 0)
-        # hide original dock label and generate a new CCPN one
-        # self._originalLabel = self.label
-        # self._originalLabel.hide()
 
         # remove old label, so it can be redefined
         self.topLayout.removeWidget(self.label)
@@ -227,51 +224,19 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self.topLayout.addWidget(self.label, 0, 1)  # ejb - swap out the old widget, keeps hierarchy
         # except it doesn't work properly
         self.setOrientation(o='horizontal')
-        # self.widgetArea = LayoutWidget()    # ejb - transparent, make normal drops better
         self.setAutoFillBackground(True)
 
-        # ejb - below, True allows normal drops from outside and spectra, False for DockArea drops
-        # self.widgetArea.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
-
-        # ejb - add eventFilter for toggling WA_TransparentForMouseEvents
-
         # main widget area
-        #self.mainWidget = Frame(parent=self, fShape='styledPanel', fShadow='plain')
-        self.mainWidget = Frame(parent=None, setLayout=True, acceptDrops=True)  #QtWidgets.QWidget(self)
-
-        # print('>>>mainWidget ')
-        #self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.mainWidget = Frame(parent=None, setLayout=True, acceptDrops=True)
 
         # optional settings widget area
         self.settingsWidget = None
         if self.includeSettingsWidget:
-            # self.settingsWidget = ScrollableWidget(parent=self.widgetArea, setLayout=True,
-            #                                       scrollBarPolicies=('always','asNeeded'),
-            #                                       minimumSizes=self.settingsMinimumSizes
-            #                                      )
             self._settingsScrollArea = ScrollArea(parent=self.widgetArea)
-
-            # self.settingsWidget = Frame(parent=None, showBorder=False)
             self.settingsWidget = Widget(parent=None, acceptDrops=True)
-
-            # self.settingsWidget.setMinimumWidth(self.settingsMinimumSizes[0])
-            # self.settingsWidget.setMinimumHeight(self.settingsMinimumSizes[1])
             self._settingsScrollArea.setWidget(self.settingsWidget)
-            #self.settingsWidget.setLayout(QtWidgets.QGridLayout())
             self.settingsWidget.setGridLayout()
             self._settingsScrollArea.setWidgetResizable(True)
-            #self._settingsScrollArea.getLayout().addWidget(self.settingsWidget)
-            #self.settingsWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-
-            # if self.settingsOnTop:
-            #   # self.addWidget(self.settingsWidget.getScrollArea(), 0, 0)
-            #   self.addWidget(self._settingsScrollArea, 0, 0)
-            #   self.addWidget(self.mainWidget, 1, 0)
-            # else:
-            #   # self.addWidget(self.settingsWidget.getScrollArea(), 1, 0)
-            #   self.addWidget(self._settingsScrollArea, 1, 0)
-            #   self.addWidget(self.mainWidget, 1, 1)
-            # # self.settingsWidget._sequenceGraphScrollArea.hide()
 
             if self.settingsPosition in settingsWidgetPositions:
                 hSettings, vSettings = settingsWidgetPositions[self.settingsPosition]['settings']
@@ -284,8 +249,6 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
             self._settingsScrollArea.hide()
 
-            # testing a splitter to improve settings
-            # self._splitter.setChildrenCollapsible(False)
             self.layout.removeWidget(self._settingsScrollArea)
             self.layout.removeWidget(self.mainWidget)
 
@@ -309,56 +272,15 @@ class CcpnModule(Dock, DropBase, NotifierBase):
             self.addWidget(self._splitter)
             self._splitter.setStretchFactor(1, 5)
 
-            # #another fix for the stylesheet
-            # if hasattr(mainWindow, 'application') and mainWindow.application:
-            #   # check that application has been attached - may not be the case for some test modules
-            #   self.colourScheme = mainWindow.application.colourScheme
-            #   if self.colourScheme == 'dark':
-            #     self.setStyleSheet("""QSplitter{
-            #                                 background-color: #2a3358;
-            #                           }
-            #                           QSplitter::handle:horizontal {
-            #                                 width: 3px;
-            #                           }
-            #                           QSplitter::handle:vertical {
-            #                                 height: 3px;
-            #                           }
-            #                           QSplitter::handle { background-color: LightGray }
-            #                           """)
-            #   elif self.colourScheme == 'light':
-            #     self.setStyleSheet("""QSplitter{
-            #                                 background-color: #FBF4CC;
-            #                           }
-            #                           QSplitter::handle:horizontal {
-            #                                 width: 3px;
-            #                           }
-            #                           QSplitter::handle:vertical {
-            #                                 height: 3px;
-            #                           }
-            #                           QSplitter::handle { background-color: DarkGray }
-            #                           """)
-
         else:
             self.settingsWidget = None
             self.addWidget(self.mainWidget, 0, 0)
 
-        # self.setWidgetTransparency(False)
-
-        # add an event filter to handle transparency
-        # and to check when the dock has been floated - it needs to have a callback
+        # add an event filter to check when the dock has been floated - it needs to have a callback
         # that fires when the window has been maximised
         self._maximiseFunc = None
         self._closeFunc = None
-        self.eventFilter = self._eventFilter
-        self.installEventFilter(self)
         CcpnModule._lastActionWasDrop = False
-
-        # attach the mouse events to the widget
-        # self.mainWidget.dragMoveEvent = self.dragMoveEvent
-        # self.mainWidget.mouseMoveEvent = self.mouseMoveEvent
-        # self.mainWidget.dragEnterEvent = self.dragEnterEvent
-        # self.mainWidget.dragLeaveEvent = self.dragLeaveEvent
-        # self.mainWidget.dropEvent = self.dropEvent
 
         # always explicitly show the mainWidget and/or settings widget
         # default state (increased by one by settingsCallback)
@@ -371,47 +293,18 @@ class CcpnModule(Dock, DropBase, NotifierBase):
             self.setParent(self.mainWindow.moduleArea)  # ejb
         self.widgetArea.setParent(self)
 
-        # # Not needed after all - SpectrumDisplay 'name' is renamed to 'title'
-        # def getName(self):
-        #   "Return name of self; done to allow for override in GuiSpectrumDisplay as that is a wrapper object as well"
-        #   return self.name()
-
-        # stop the blue overlay popping up when dragging over a spectrum
+        # stop the blue overlay popping up when dragging over a spectrum (no central region)
         self.allowedAreas = ['top', 'left', 'right', 'bottom']
 
         self._updateStyle()
-        self.update()  # ejb - make sure that the widgetArea starts the correct size
+        self.update()  # make sure that the widgetArea starts the correct size
 
-        # self._instances.add(ref(self))
         self._allChildren = set()
-
-    # def setWidgetTransparency(self, transparent):
-    #     """Set the transparency of the mainWidgets, currently required because
-    #     dragMovevent is not propagated through all the widgets
-    #     """
-    #     return
-    #
-    #     self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, transparent)
-    #     if self.settingsWidget:
-    #         self.settingsWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, transparent)
 
     def _findChildren(self, widget):
         for i in widget.children():
             self._allChildren.update({i})
             self._findChildren(i)
-
-    # @classmethod
-    # def getInstances(cls):
-    #   dead = set()
-    #   for ref in cls._instances:
-    #     obj = ref()
-    #     if obj is not None:
-    #       # if isinstance(obj, cls):
-    #       if obj.className == cls.className:
-    #         yield obj
-    #     else:
-    #       dead.add(ref)
-    #   cls._instances -= dead
 
     @property
     def titleName(self):
@@ -525,50 +418,18 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self.label.setText(newName)
         self._name = newName
 
-    def _eventFilter(self, source, event):
+    def event(self, event):
         """
         CCPNInternal
         Handle events for switching transparency of modules
         Modules become transparent when dragging to another module.
         Ensure that the dropAreas become active
         """
-
-        # if isinstance(source, CcpnModule) or isinstance(source, SideBar):
-        #     if event.type() == QtCore.QEvent.DragEnter:
-        #         data = self.parseEvent(event)
-        #         if DropBase.PIDS in data and not isinstance(data['event'].source(), (SideBar, SideBar)):
-        #             self.setWidgetTransparency(False)
-        #         else:
-        #
-        #             # make transparent to enable module dragging
-        #             self.setWidgetTransparency(True)
-        #
-        #     elif event.type() == QtCore.QEvent.Leave:
-        #         self.setWidgetTransparency(False)
-        #
-        #     elif event.type() == QtCore.QEvent.Drop:
-        #         self.setWidgetTransparency(False)
-        #
-        #     elif event.type() == QtCore.QEvent.MouseButtonRelease:
-        #         self.setWidgetTransparency(False)
-        #
-        # else:
-        #     if event.type() == QtCore.QEvent.DragLeave:
-        #         self.setWidgetTransparency(False)
-        #
-        #     if event.type() == QtCore.QEvent.Enter:
-        #         self.setWidgetTransparency(False)
-        #
-        #     if event.type() == QtCore.QEvent.Leave:
-        #         self.setWidgetTransparency(False)
-        #
-        #     elif event.type() == QtCore.QEvent.MouseButtonRelease:
-        #         self.setWidgetTransparency(False)
-
         if event.type() == QtCore.QEvent.ParentChange and self._maximiseFunc:
             try:
                 found = False
                 searchWidget = self.parent()
+
                 # while searchWidget is not None and not found:
                 #   # print (searchWidget)
                 #   if isinstance(searchWidget, TempAreaWindow):
@@ -581,29 +442,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
             except Exception as es:
                 getLogger().warning('Error setting maximiseFunc', str(es))
 
-        return False
-
-    # def _transparentAllModules(self, transparency:bool=True):
-    #   if self.area:
-    #     areaList = self.area.findAll()
-    #     for modInArea in areaList:
-    #       modInArea.widgetArea.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, transparency)
-
-    # def resizeEvent(self, event):
-    #   # self.setOrientation(self.labelOrientation, force=True)
-    #   newSize = self.size()
-    #   self.resizeOverlay(newSize)
-    #   self.widgetArea.resize(newSize)   # ejb - to make the DropArea work properly
-    #   self.mainWidget.resize(newSize)   # ejb - to make the DropArea work properly
-
-    # override the default dock settings
-    # self.widgetArea.setStyleSheet("""
-    # Dock > QWidget {
-    #   padding: 0;
-    #   margin: 0px 0px 0px 0px;
-    #   border: 0px;
-    # }
-    # """)
+        return super(CcpnModule, self).event(event)
 
     def installMaximiseEventHandler(self, maximiseFunc, closeFunc):
         """
@@ -614,8 +453,8 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         """
         return
 
-        self._maximiseFunc = maximiseFunc
-        self._closeFunc = closeFunc
+        # self._maximiseFunc = maximiseFunc
+        # self._closeFunc = closeFunc
 
     def removeMaximiseEventHandler(self):
         """
@@ -700,9 +539,6 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         # except:
         #     pass
 
-        # if ref(self) in self._instances:
-        #   self._instances.remove(ref(self))
-
         getLogger().debug('Closing %s' % str(self.container()))
         if not self._container:
             area = self.mainWindow.moduleArea
@@ -711,15 +547,8 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                     for i in area.children():
                         if isinstance(i, Container):
                             self._container = i
-        # try:
-        super().close()
-        # self.deleteLater()   # ejb - remove recursion when closing table from commandline
-        # except Exception as es:
-        #   getLogger().debug('>>>delete CcpnModule Error %s' %es)
 
-    # def setAcceptDrops(self, value):
-    #     """Method to pass drops"""
-    #     self.mainWidget.setAcceptDrops(value)
+        super().close()
 
     def dragMoveEvent(self, *args):
         DockDrop.dragMoveEvent(self, *args)
@@ -732,7 +561,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
             ev = args[0]
             # print ('>>>', ev.source())
             data = self.parseEvent(ev)
-            if DropBase.PIDS in data and isinstance(data['event'].source(), SideBar):      #(SideBar, SideBar)):
+            if DropBase.PIDS in data and isinstance(data['event'].source(), SideBar):  #(SideBar, SideBar)):
                 if self.widgetArea:
 
                     ld = ev.pos().x()
@@ -794,7 +623,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                 DockDrop.dragEnterEvent(self, *args)
 
     def dropEvent(self, event):
-        # self.setWidgetTransparency(False)
+
         if event:
             source = event.source()
             data = self.parseEvent(event)
@@ -804,13 +633,13 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
                 # check whether a new spectrumDisplay is needed, and check axisOrdering
                 from ccpn.ui.gui.popups.AxisOrderingPopup import checkSpectraToOpen
+
                 checkSpectraToOpen(self.mainWindow, objs)
 
                 with undoBlock():
                     _openItemObject(self.mainWindow, objs, position=self.dropArea, relativeTo=self)
 
                 event.accept()
-                # print('DONE')
 
                 # reset the dock area
                 self.dropArea = None
@@ -860,10 +689,8 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self.setStyleSheet(tempStyle)
 
     def startDrag(self):
-        # print('>>>startDrag')
         self.drag = QtGui.QDrag(self)
         mime = QtCore.QMimeData()
-        #mime.setPlainText("asd")
         self.drag.setMimeData(mime)
         self.widgetArea.setStyleSheet(self.dragStyle)
         self.update()
@@ -904,19 +731,12 @@ class CcpnModuleLabel(DockLabel):
         self.module = module
         self.fixedWidth = True
         self.setFont(moduleLabelFont)
-        #print('>>', name, self.module.application.colourScheme)
-
         self.setAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignHCenter)
 
         if showCloseButton:
             # button is already there because of the DockLabel init
             self.closeButton.setIconSize(QtCore.QSize(self.labelSize, self.labelSize))
-            # hardcoded because stylesheet appears not to work
-            # self.closeButton.setStyleSheet("""
-            #   QToolButton
-            #     border-width: 0px;
-            #     padding: 0px;
-            #   }""")
+
             if closeCallback is None:
                 raise RuntimeError('Requested closeButton without callback')
             else:
@@ -924,22 +744,10 @@ class CcpnModuleLabel(DockLabel):
 
         # Settings
         if showSettingsButton:
-            # self.settingsButton = QtWidgets.QToolButton(self)
-
             self.settingsButton = ToolButton(self)
             self.settingsButton.setIcon(Icon('icons/settings'))
             self.settingsButton.setIconSize(QtCore.QSize(self.labelSize - 5, self.labelSize - 5))  # GWV hack to make it work
-            # hardcoded because stylesheet appears not to work
-            # colours = getColours()
-            # styleSheet = """
-            #   QComboBox {
-            #     border-width: 0px;
-            #     padding: 0px;
-            #     background-color : %s;
-            #     color : %s;
-            #   }""" % (colours[CCPNMODULELABEL_BACKGROUND], colours[CCPNMODULELABEL_FOREGROUND])
-            # print(">>>", styleSheet)
-            # self.settingsButton.setStyleSheet(styleSheet)
+
             if settingsCallback is None:
                 raise RuntimeError('Requested settingsButton without callback')
             else:
@@ -957,16 +765,6 @@ class CcpnModuleLabel(DockLabel):
         if len(self.module.mainWindow.moduleArea.ccpnModules) > 1:
             closeOthers = contextMenu.addAction('Close Others', partial(self.module.mainWindow.moduleArea._closeOthers, self.module))
             closeAllModules = contextMenu.addAction('Close All', self.module.mainWindow.moduleArea._closeAll)
-            # contextMenu.addSeparator()
-            # moveMenu = Menu('Move', self, isFloatWidget=True)
-            # popout = moveMenu.addAction('Out', self.module.float)
-            # # position has to be one of str  'bottom', 'top', 'left', 'right', 'above' as pyqtgraph wants!
-            # positions = ['top','bottom', 'left', 'right']
-            # for position in positions:
-            #   mm = self._modulesMenu(position, self.module)
-            #   moveMenu._addQMenu(mm)
-            #
-            # contextMenu._addQMenu(moveMenu)
 
         return contextMenu
 
@@ -993,42 +791,6 @@ class CcpnModuleLabel(DockLabel):
         else:
             super(CcpnModuleLabel, self).mousePressEvent(event)
 
-    # GWV: not sure why this was copied as it is identical to the routine in the parent class
-    # def mousePressEvent(self, ev):
-    #   if ev.button() == QtCore.Qt.LeftButton:
-    #     self.pressPos = ev.pos()
-    #     self.startedDrag = False
-    #     ev.accept()
-
-    # def updateStyle(self):
-    #   """
-    #   Copied from the parent class to allow for modification in StyleSheet
-    #   However, that appears not to work (fully);
-    #
-    #   GWV: many calls to the updateStyle are triggered during initialization
-    #        probably from paint event
-    #   """
-    #
-    #   # Padding apears not to work; overriden somewhere else?
-    #   colours = getColours()
-    #   print('>>>', colours)
-    #   # retain 'horizontal' and 'vertical' as the underlying PyQtGraph has it
-    #   if self.orientation == 'vertical':
-    #     self.vStyle = """CcpnModuleLabel {
-    #             background-color : %s;
-    #             color : %s;
-    #             border-width: 0px;
-    #         }""" % (colours[CCPNMODULELABEL_BACKGROUND], colours[CCPNMODULELABEL_FOREGROUND])
-    #     self.setStyleSheet(self.vStyle)
-    #   else:
-    #     self.hStyle = """CcpnModuleLabel {
-    #             background-color %s;
-    #             color : %s;
-    #             border-width: 0px;
-    #         }""" % (colours[CCPNMODULELABEL_BACKGROUND], colours[CCPNMODULELABEL_FOREGROUND])
-    #     print('>>>', self.hStyle)
-    #     self.setStyleSheet(self.hStyle)
-
     def paintEvent(self, ev):
         """
         Copied from the parent VerticalLabel class to allow for modification in StyleSheet
@@ -1043,8 +805,6 @@ class CcpnModuleLabel(DockLabel):
             rgn = QtCore.QRect(-self.height(), 0, self.height(), self.width() + added)
         else:
             rgn = self.contentsRect()
-            #print('>>', self.width(), self.height())
-            #print(rgn, rgn.left(), rgn.top())
             added = 4
             rgn = QtCore.QRect(rgn.left(), rgn.top(), rgn.width(), rgn.height() + added)
 
@@ -1061,23 +821,6 @@ class CcpnModuleLabel(DockLabel):
         else:
             self.setMinimumHeight(self.labelSize)
             self.setMaximumHeight(self.labelSize)
-
-        # if self.orientation == 'vertical':
-        #   self.setMaximumWidth(self.hint.height())
-        #   self.setMinimumWidth(0)
-        #   self.setMaximumHeight(16777215)
-        #   if self.forceWidth:
-        #     self.setMinimumHeight(self.hint.width())
-        #   else:
-        #     self.setMinimumHeight(minSize)
-        # else:
-        #   self.setMaximumHeight(self.hint.height())
-        #   self.setMinimumHeight(0)
-        #   self.setMaximumWidth(16777215)
-        #   if self.forceWidth:
-        #     self.setMinimumWidth(self.hint.width())
-        #   else:
-        #     self.setMinimumWidth(minSize)
 
     def mouseMoveEvent(self, ev):
         """Handle the mouse move event to spawn a drag event
@@ -1096,7 +839,7 @@ class CcpnModuleLabel(DockLabel):
         # start a small timer when doubleClicked
         # disables the dragMoveEvent whilst in a doubleClick
         self._inDoubleClick = True
-        QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval(),
+        QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval() * 2,
                                  self._resetDoubleClick)
 
         super(CcpnModuleLabel, self).mouseDoubleClickEvent(ev)
@@ -1105,23 +848,6 @@ class CcpnModuleLabel(DockLabel):
         """reset the double click flag
         """
         self._inDoubleClick = False
-
-    # def startDrag(self):
-    #   print('>>>startDrag')
-    #   self.drag = QtGui.QDrag(self)
-    #   mime = QtCore.QMimeData()
-    #   #mime.setPlainText("asd")
-    #   self.drag.setMimeData(mime)
-    #   self.parent().widgetArea.setStyleSheet(self.parent().dragStyle)
-    #   self.parent().update()
-    #
-    #   self.drag.destroyed.connect(self.parent()._destroyed)
-    #   action = self.drag.exec_()
-    #   self.parent().updateStyle()
-    #
-    # def _destroyed(self, ev):
-    #   print('>>>_destroyed')
-    #   self.parent()._dragFinished(ev)
 
 
 class DropAreaSelectedOverlay(QtWidgets.QWidget):
@@ -1154,6 +880,7 @@ class DropAreaSelectedOverlay(QtWidgets.QWidget):
     def _resize(self):
         """Resize the overlay, sometimes the overlay is temporarily visible while the module is moving
         """
+        # called from ccpnModule during resize to update rect()
         self.setDropArea(self.dropArea)
 
     def paintEvent(self, ev):
@@ -1161,6 +888,8 @@ class DropAreaSelectedOverlay(QtWidgets.QWidget):
         """
         if self.dropArea is None:
             return
+
+        # create a transparent rectangle and painter over the widget
         p = QtGui.QPainter(self)
         rgn = self.rect()
 

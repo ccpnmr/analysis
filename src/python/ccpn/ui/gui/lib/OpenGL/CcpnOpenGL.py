@@ -1192,9 +1192,11 @@ class CcpnGLWidget(QOpenGLWidget):
         self._key = '_'
         if type(event) == QtGui.QKeyEvent and event.key() == Qt.Key_A:
             self._key = 'A'
-            event.accept()
+            # event.accept()
             return True
-        return super().eventFilter(obj, event)
+
+        return False
+        # return super().eventFilter(obj, event)
 
     def _movePeaks(self, direction: str = 'up'):
         """Move the peaks with the cursor keys

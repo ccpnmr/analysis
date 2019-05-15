@@ -58,6 +58,9 @@ class _StripLabel(Label):
     """
     Specific Label to be used in Strip displays
     """
+
+    # ED: This class contains the best current method for handling single and double click events
+    # without any clashes between events, and creating a dragged item
     DOUBLECLICKENABLED = False
 
     def __init__(self, parent, mainWindow, strip, text, dragKey=DropBase.PIDS, **kwds):
@@ -75,10 +78,6 @@ class _StripLabel(Label):
         self._dragKey = dragKey
         self.setAcceptDrops(True)
         # self.setDragEnabled(True)           # not possible for Label
-
-        self._source = None
-        self.eventFilter = self._eventFilter
-        self.installEventFilter(self)
 
         self._lastClick = None
         self._mousePressed = False
@@ -142,11 +141,11 @@ class _StripLabel(Label):
         # drag.targetChanged.connect(self._targetChanged)
         drag.exec_(QtCore.Qt.CopyAction)
 
-    def _eventFilter(self, obj, event):
+    def event(self, event):
         """
-        Replace all the events with a single filter process
+        Process all events in the event handler
         Not sure if this is the best solution, but doesn't interfere with _processDroppedItems
-        and allows changing of the cursor (cursor not changing properly in pyqt5) - ejb
+        and allows changing of the cursor (cursor not always changing properly in pyqt5) - ejb
         """
         if event.type() == QtCore.QEvent.MouseButtonPress:
             # process the single click event
@@ -163,7 +162,7 @@ class _StripLabel(Label):
             self._mouseReleaseEvent(event)
             return True
 
-        return super(_StripLabel, self).eventFilter(obj, event)  # do the rest
+        return super().event(event)
 
     def _mousePressEvent(self, event):
         """Handle mouse press event for single click and beginning of mouse drag event

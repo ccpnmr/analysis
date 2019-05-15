@@ -54,8 +54,7 @@ class SpectrumToolBar(ToolBar):
         self.widget = widget
         self._parent = parent
         self.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
-        self.eventFilter = self._eventFilter
-        self.installEventFilter(self)
+
         self.setMouseTracking(True)
         self._spectrumToolBarBlockingLevel = 0
 
@@ -330,12 +329,10 @@ class SpectrumToolBar(ToolBar):
             else:
                 event.ignore()
 
-    def _eventFilter(self, obj, event):
+    def event(self, event: QtCore.QEvent) -> bool:
         """
-        Replace all the events with a single filter process
-
+        Use the event handler to process events
         """
-
         if event.type() == QtCore.QEvent.MouseButtonPress:
             # if event.button() == QtCore.Qt.LeftButton: Can't make it working!!!
 
@@ -352,7 +349,7 @@ class SpectrumToolBar(ToolBar):
         elif event.type() == QtCore.QEvent.Resize:
             self._processToolBarExtension()
 
-        return super(SpectrumToolBar, self).eventFilter(obj, event)  # do the rest
+        return super(SpectrumToolBar, self).event(event)
 
     def _toolbarAddSpectrum(self, data):
         """Respond to a new spectrum being added to the spectrumDisplay; add new toolbar Icon

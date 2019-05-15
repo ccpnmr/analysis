@@ -88,14 +88,14 @@ def _createMenu(strip, items):
 
 
 def _toolBarItem(strip):
-    return _SCMitem(name='ToolBar',
+    return _SCMitem(name='Toolbar',
                     typeItem=ItemTypes.get(ITEM), toolTip='Toggle Toolbar On/Off',
                     callback=strip.spectrumDisplay.toggleToolbar,
                     checkable=True, checked=True, shortcut='TB', stripMethodName='toolbarAction')
 
 
 def _spectrumToolBarItem(strip):
-    return _SCMitem(name='SpectrumToolBar',
+    return _SCMitem(name='Spectrum Toolbar',
                     typeItem=ItemTypes.get(ITEM), toolTip='Toggle Spectrum Toolbar On/Off',
                     callback=strip.spectrumDisplay.toggleSpectrumToolbar,
                     checkable=True, checked=True, shortcut='SB', stripMethodName='spectrumToolbarAction')
@@ -109,7 +109,7 @@ def _crosshairItem(strip):
 
 
 def _doubleCrosshairItem(strip):
-    return _SCMitem(name='DoubleCrosshair',
+    return _SCMitem(name='Double Crosshair',
                     typeItem=ItemTypes.get(ITEM), toolTip='Toggle Double/Single Crosshair Mouse',
                     checkable=True, checked=True, shortcut='CD',
                     callback=strip.spectrumDisplay.mainWindow.toggleDoubleCrosshairAll, stripMethodName='doubleCrosshairAction')

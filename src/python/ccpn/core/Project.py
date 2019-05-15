@@ -1207,6 +1207,8 @@ class Project(AbstractWrapperObject):
             (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
             spectrum.sliceColour = spectrum.positiveContourColour
 
+            print('>>>Setting spectrum colour', spectrum.positiveContourColour)
+
             # if there are no peakLists then create a new one - taken from Spectrum _spectrumMakeFirstPeakList notifier
             if not spectrum.peakLists:
                 spectrum.newPeakList()

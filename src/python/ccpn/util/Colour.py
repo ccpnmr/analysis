@@ -827,7 +827,7 @@ if __name__ == '__main__':
     colors = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)
 
 
-    def colourPlot(names):
+    def colourPlot(names, title = 'ColourPlot'):
         """make a colour plot of the names
         """
         n = len(names)
@@ -838,14 +838,16 @@ if __name__ == '__main__':
 
         # Get height and width
         X, Y = fig.get_dpi() * fig.get_size_inches()
-        h = Y / (nrows + 1)
-        w = X / ncols
+
+        Y0 = Y - fig.get_dpi() * 1.0                # remove an inch from the size
+        h = Y0 // max((nrows + 1), 15)
+        w = X // ncols
 
         for i, name in enumerate(names):
             row = i % nrows
             col = i // nrows
 
-            y = Y - (row * h) - h
+            y = Y0 - (row * h) - h
 
             xi_line = w * (col + 0.05)
             xf_line = w * (col + 0.25)
@@ -861,6 +863,11 @@ if __name__ == '__main__':
         ax.set_xlim(0, X)
         ax.set_ylim(0, Y)
         ax.set_axis_off()
+
+        ax.text(fig.get_dpi() * 0.25, Y - fig.get_dpi() * 0.5,
+                title, fontsize=fig.get_dpi() * 0.25,
+                horizontalalignment='left',
+                verticalalignment='center')
 
         fig.subplots_adjust(left=0, right=1,
                             top=1, bottom=0,
@@ -881,6 +888,9 @@ if __name__ == '__main__':
 
             print('(' + repr(colors[col]) + ', ' + repr(col) + '),')
 
-    colourPlot(spectrumDarkColours.values())
-    colourPlot(spectrumMediumColours.values())
-    colourPlot(spectrumLightColours.values())
+    colourPlot(spectrumDarkColours.values(), title='Dark Spectrum Colours')
+    colourPlot(spectrumMediumColours.values(), title='Medium Spectrum Colours')
+    colourPlot(spectrumLightColours.values(), title='Light Spectrum Colours')
+
+    colourPlot(lightBckgrndSpecColours.values(), title='Light Background Fixed Spectrum Colours')
+    colourPlot(darkBckgrndSpecColours.values(), title='Dark Background Fixed Spectrum Colours')

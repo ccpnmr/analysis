@@ -35,7 +35,8 @@ import numpy as np
 def _ccpnHex(val):
     """Generate hex value with padded leading zeroes
     """
-    return "{0:#0{1}x}".format(int(val), 4)
+    val = '{0:#0{1}x}'.format(int(val), 4)
+    return '0x' + val[2:].upper()
 
 
 def rgbaToHex(r, g, b, a=255):
@@ -106,7 +107,7 @@ def gam_sRGB(v):
 
 
 # GRAY VALUE ("brightness")
-def gray(r, g, b):
+def gray(r, g, b, a=1.0):
     return gam_sRGB(
             rY * inv_gam_sRGB(r) +
             gY * inv_gam_sRGB(g) +
@@ -182,7 +183,7 @@ def colourNameWithSpace(name):
     return " ".join(colName.split())
 
 
-def invertRGB(r, g, b):
+def invertRGBLuma(r, g, b):
     """Invert the rgb colour using the ycbcr method by inverting the luma
     rgb input r, g, b in range 0-255
     """
@@ -194,8 +195,35 @@ def invertRGB(r, g, b):
     ycbcr = np.add(cie, COLORMATRIXJPEGCONST)
     ycbcr = np.clip(ycbcr, [0, 0, 0], [255, 255, 255])
 
-    # invert the luma
-    ycbcr[0] = 256 - ycbcr[0]
+    # invert the luma - reverse y
+    ycbcr[0] = 255 - ycbcr[0]
+    ycbcr = np.add(ycbcr, COLORMATRIXJPEGINVOFFSET)
+
+    rgbprimeOut = np.dot(COLORMATRIXJPEGINV, ycbcr)
+    # rgbprimeOut = np.add(rgbprimeOut, COLORMATRIXJPEGINVCONST) / 256
+
+    # return tuple([255*inv_gam_sRGB(col) for col in rgbprimeOut])
+
+    # clip the colours
+    rgbprimeOut = np.clip(rgbprimeOut, [0, 0, 0], [255, 255, 255])
+    return tuple([float(col) for col in rgbprimeOut])
+
+
+def invertRGBHue(r, g, b):
+    """Invert the rgb colour using the ycbcr method by finding the opposite hue
+    rgb input r, g, b in range 0-255
+    """
+    # rgbprimeIn = [gam_sRGB(r/255.0),gam_sRGB(g/255.0),gam_sRGB(b/255.0)]
+    rgbprimeIn = [r, g, b]
+
+    # rgbprimeIn r, g, b in range 0-255
+    cie = np.dot(COLORMATRIXJPEG, rgbprimeIn)
+    ycbcr = np.add(cie, COLORMATRIXJPEGCONST)
+    ycbcr = np.clip(ycbcr, [0, 0, 0], [255, 255, 255])
+
+    # get opposite hue - reverse cb and cr
+    ycbcr[1] = 255 - ycbcr[1]
+    ycbcr[2] = 255 - ycbcr[2]
     ycbcr = np.add(ycbcr, COLORMATRIXJPEGINVOFFSET)
 
     rgbprimeOut = np.dot(COLORMATRIXJPEGINV, ycbcr)
@@ -720,7 +748,7 @@ def autoCorrectHexColour(colour, referenceHexColour='#ffffff', addNewColour=True
     gRef = gray(*rgb)
 
     if abs(g - gRef) < COLOUR_THRESHOLD:
-        newCol = invertRGB(*hexToRgb(colour))
+        newCol = invertRGBLuma(*hexToRgb(colour))
         hx = rgbToHex(*newCol)
 
         if addNewColour:
@@ -799,25 +827,25 @@ def getAutoColourRgbRatio(inColour=None, sourceObject=None, colourAttribute=None
     return hexToRgbRatio(listColour)
 
 
-def findNearestHex(hexCol):
+def findNearestHex(hexCol, colourHexList):
     weights = (0.3, 0.59, 0.11)  # assuming rgb
     rgbIn = hexToRgb(hexCol)
 
     lastCol = None
-    for k, v in allColours.items():
+    for col in colourHexList:
 
-        rgbTest = hexToRgb(k)
+        rgbTest = hexToRgb(col)
 
         # use euclidean to find closest colour
         num = 0.0
         for a, b, w in zip(rgbIn, rgbTest, weights):
-            num += pow((a - b) * w, 2)
+            num += pow((a - b) * w, 4)
 
         if lastCol is None or num < lastDiff:
             lastDiff = num
-            lastCol = (k, v, num)
+            lastCol = (col, num)
 
-    return lastCol
+    return lastCol[0]
 
 
 if __name__ == '__main__':
@@ -830,7 +858,7 @@ if __name__ == '__main__':
     colors = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)
 
 
-    def colourPlot(names, title = 'ColourPlot'):
+    def colourPlot(names, title='ColourPlot'):
         """make a colour plot of the names
         """
         n = len(names)
@@ -842,7 +870,7 @@ if __name__ == '__main__':
         # Get height and width
         X, Y = fig.get_dpi() * fig.get_size_inches()
 
-        Y0 = Y - fig.get_dpi() * 1.0                # remove an inch from the size
+        Y0 = Y - fig.get_dpi() * 1.0  # remove an inch from the size
         h = Y0 // max((nrows + 1), 15)
         w = X // ncols
 
@@ -861,7 +889,8 @@ if __name__ == '__main__':
                     verticalalignment='center')
 
             ax.hlines(y + h * 0.1, xi_line, xf_line,
-                      color=colors[name], linewidth=(h * 0.6))
+                      color=colors[name] if name in colors else name,
+                      linewidth=(h * 0.6))
 
         ax.set_xlim(0, X)
         ax.set_ylim(0, Y)
@@ -895,5 +924,28 @@ if __name__ == '__main__':
     colourPlot(spectrumMediumColours.values(), title='Medium Spectrum Colours')
     colourPlot(spectrumLightColours.values(), title='Light Spectrum Colours')
 
-    colourPlot(lightDefaultSpectrumColours.values(), title='Dark Default Spectrum Colours')
-    colourPlot(darkDefaultSpectrumColours.values(), title='Light Default Spectrum Colours')
+    thisPalette = spectrumLightColours
+    colourPlot(thisPalette.values(), title='Light Default Spectrum Colours')
+    opposites = []
+    for col in thisPalette.keys():
+        rgbIn = hexToRgb(col)
+        negRGB = invertRGBHue(*rgbIn)
+        oppCol = rgbToHex(*negRGB)
+
+        oppCol = findNearestHex(oppCol, thisPalette.keys())
+        opposites.append(thisPalette[oppCol])
+
+    colourPlot(opposites, title='Light Inverted Colours')
+
+    thisPalette = spectrumDarkColours
+    colourPlot(thisPalette.values(), title='Dark Default Spectrum Colours')
+    opposites = []
+    for col in thisPalette.keys():
+        rgbIn = hexToRgb(col)
+        negRGB = invertRGBHue(*rgbIn)
+        oppCol = rgbToHex(*negRGB)
+
+        oppCol = findNearestHex(oppCol, thisPalette.keys())
+        opposites.append(thisPalette[oppCol])
+
+    colourPlot(opposites, title='Dark Inverted Colours')

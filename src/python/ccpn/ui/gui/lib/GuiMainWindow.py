@@ -61,6 +61,7 @@ from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.util.Common import uniquify
 from ccpn.util import Logging
+from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
 
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 from ccpn.core.Peak import Peak
@@ -69,6 +70,9 @@ from PyQt5.QtWidgets import QApplication
 
 #from ccpn.util.Logging import getLogger
 #from collections import OrderedDict
+
+from ccpn.ui.gui.widgets.DropBase import DropBase
+from ccpn.ui.gui.lib.MenuActions import _openItemObject
 
 
 # For readability there should be a class:
@@ -79,6 +83,8 @@ from PyQt5.QtWidgets import QApplication
 # The latter should all be private methods!
 #
 # The docstring of GuiMainWindow should detail how this setup is
+
+MAXITEMLOGGING = 4
 
 
 class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
@@ -938,40 +944,53 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         """
         assert 0 == 1
 
-        # axisCodes = strip.axisCodes
-        # orderedAxes = strip.orderedAxes
-        #
-        # # positionDict
-        # #   strip --> strip
-        # #   axisCode --> position (for each axisCode in strip)
-        # # for the first two axes the position is provided by the cursor
-        # # for the z axes the position is provided as the center of the axis region (i.e. the position)
-        #
-        # mouseMovedDict = dict(strip=strip)
-        # try:
-        #   for n, axisCode in enumerate(axisCodes):
-        #     if n == 0:
-        #       xPos = pos = position.x()
-        #     elif n == 1:
-        #       yPos = pos = position.y()
-        #     else:
-        #       pos = orderedAxes[n].position
-        #     mouseMovedDict[axisCode] = pos
-        #
-        #   self.application.current.cursorPosition = (xPos, yPos) # TODO: is there a better place for this to be set?
-        #
-        #   self._mouseMovedSignal.emit(mouseMovedDict)
-        # except Exception as es:
-        #   Logging.warning(str(es))
-
-    # def _processDroppedItems(self, application, project, data):
     def _processDroppedItems(self, data):
+        """Handle the dropped urls
+        """
+        # CCPN INTERNAL. Called also from module area and GuiStrip. They should have same behaviour
+        # use an undoBlock, and ignore logging if 5 or more items
+        # to stop overloading of the log
+
+        urls = data.get('urls', [])
+        if urls and len(urls) > 0:
+            with undoBlock():
+                getLogger().info('Handling urls...')
+                if len(urls) > MAXITEMLOGGING:
+                    with notificationEchoBlocking():
+                        objs = self._processUrls(urls)
+                else:
+                    objs = self._processUrls(urls)
+
+        return objs
+
+    def _processPids(self, data, position=None, relativeTo=None):
+        """Handle the urls passed to the drop event
+        """
+        # CCPN INTERNAL. Called also from CcpnModule and CcpnModuleArea. They should have same behaviour
+
+        pids = data[DropBase.PIDS]
+        if pids and len(pids) > 0:
+            getLogger().debug('>>> dropped pids...')
+
+            objs = [self.project.getByPid(pid) for pid in pids]
+
+            # check whether a new spectrumDisplay is needed, check axisOrdering
+            # add show popup for ordering if required
+            from ccpn.ui.gui.popups.AxisOrderingPopup import checkSpectraToOpen
+            checkSpectraToOpen(self, objs)
+
+            _openItemObject(self, objs, position=position, relativeTo=relativeTo)
+
+
+    def _processUrls(self, urls):
         """Handle the dropped urls
         """
         # CCPN INTERNAL. Called also from module area and GuiStrip. They should have same behaviour
 
         objs = []
-        for url in data.get('urls', []):
+        # for url in data.get('urls', []):
+
+        for url in urls:
             getLogger().debug('>>> dropped: ' + str(url))
 
             dataType, subType, usePath = ioFormats.analyseUrl(url)
@@ -987,34 +1006,13 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                         obj = None
                         obj = self._loadProjectLastValid(url)
 
-                        # with catchExceptions():
-                        #     obj = self.application.loadProject(url)
-                        #
-                        # try:
-                        #     if isinstance(obj, Project):
-                        #         # obj._mainWindow.sideBar.fillSideBar(obj)
-                        #
-                        #         # set the sidebar and open the new object's mainWindow
-                        #         obj._mainWindow.sideBar.buildTree(obj)
-                        #         obj._mainWindow.show()
-                        #
-                        #         # if the new project contains invalid spectra then open the popup to see them
-                        #         badSpectra = [spectrum for spectrum in obj.spectra if not spectrum.isValidPath]
-                        #         if badSpectra:
-                        #             obj._mainWindow.application.showValidateSpectraPopup(defaultSelected='invalid')
-                        #             obj.save(createFallback=False, overwriteExisting=True)
-                        #
-                        #         QtWidgets.QApplication.setActiveWindow(self)
-                        #
-                        # except Exception as es:
-                        #     getLogger().warning('Error: %s' % str(es))
-
             else:
                 # with progressManager(self.mainWindow, 'Loading data... ' + url):
                 try:  #  Why do we need this try?
                     data = self.project.loadData(url)
                     if data:
                         objs.extend(data)
+
                 except Exception as es:
                     MessageDialog.showError('Load Data', 'loadData Error: %s' % str(es))
                     getLogger().warning('loadData Error: %s' % str(es))

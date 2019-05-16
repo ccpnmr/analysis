@@ -63,6 +63,9 @@ from ccpn.ui.gui.popups.StructureEnsemblePopup import StructureEnsemblePopup
 from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
 from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
 
+MAXITEMLOGGING = 4
+
+
 class CreateNewObjectABC():
     """
     An ABC to implement an abstract callback function to create new object
@@ -673,7 +676,9 @@ OpenObjAction = {
 def _openItemObject(mainWindow, objs, **kwds):
     if len(objs) > 0:
         with undoBlock():
-            if len(objs) > 5:
+
+            # if 5 or more then don't log, otherwise log may be overloaded
+            if len(objs) > MAXITEMLOGGING:
                 getLogger().info('Opening items...')
                 with notificationEchoBlocking():
                     _openItemObjects(mainWindow, objs, **kwds)

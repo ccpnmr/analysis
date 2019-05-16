@@ -545,7 +545,9 @@ def getDefaultSpectrumColours(self: 'Spectrum') -> Tuple[str, str]:
     """
 
     # from ccpn.util.Colour import spectrumHexColours
-    from ccpn.ui.gui.guiSettings import getColours, SPECTRUM_HEXCOLOURS, SPECTRUM_HEXDEFAULTCOLOURS
+    from ccpn.ui.gui.guiSettings import getColours, SPECTRUM_HEXCOLOURS, \
+        SPECTRUM_HEXDEFAULTCOLOURS, CCPNGLWIDGET_BACKGROUND
+    from ccpn.util.Colour import gray, hexToRgb, findNearestHex, invertRGBHue, rgbToHex
 
     spectrumHexColours = getColours().get(SPECTRUM_HEXCOLOURS)
     spectrumHexDefaultColours = getColours().get(SPECTRUM_HEXDEFAULTCOLOURS)
@@ -556,15 +558,30 @@ def getDefaultSpectrumColours(self: 'Spectrum') -> Tuple[str, str]:
         step = ((colorCount // 2 - 1) // 2)
         kk = colorCount // 7
         index = self.experiment.serial - 1 + step * (self._serial - 1)
-        posCol = spectrumHexColours[(kk * index) % colorCount]
-        negCol = spectrumHexColours[((kk + 1) * index) % colorCount]
+        posCol = spectrumHexColours[(kk * index + 10) % colorCount]
+        negCol = spectrumHexColours[((kk + 1) * index + 10) % colorCount]
 
     else:
-        colorCount = len(spectrumHexDefaultColours)
+        # automatic colours
+        colorCount = len(spectrumHexColours)
         step = ((colorCount // 2 - 1) // 2)
+        kk = colorCount // 5
         index = self.experiment.serial - 1 + step * (self._serial - 1)
-        posCol = spectrumHexDefaultColours[(2 * index) % colorCount]
-        negCol = spectrumHexDefaultColours[(2 * index + 1) % colorCount]
+        posCol = spectrumHexColours[(kk * index + 10) % colorCount]
+
+        # invert the colour by reversing the ycbcr palette
+        rgbIn = hexToRgb(posCol)
+        negRGB = invertRGBHue(*rgbIn)
+        oppCol = rgbToHex(*negRGB)
+        # get the nearest one in the current colour list, so colourName exists
+        negCol = findNearestHex(oppCol, spectrumHexColours)
+
+        # # colours for Vicky :)
+        # colorCount = len(spectrumHexDefaultColours)
+        # step = ((colorCount // 2 - 1) // 2)
+        # index = self.experiment.serial - 1 + step * (self._serial - 1)
+        # posCol = spectrumHexDefaultColours[(2 * index) % colorCount]
+        # negCol = spectrumHexDefaultColours[(2 * index + 1) % colorCount]
 
     return (posCol, negCol)
 

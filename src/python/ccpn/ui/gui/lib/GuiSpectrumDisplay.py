@@ -84,6 +84,8 @@ SPECTRUMISGROUPED = 'spectrumIsGrouped'
 SPECTRUMGROUPLIST = 'spectrumGroupList'
 STRIPDIRECTIONS = ['Y', 'X']
 
+MAXITEMLOGGING = 4
+
 
 class GuiSpectrumDisplay(CcpnModule):
     """
@@ -515,18 +517,20 @@ class GuiSpectrumDisplay(CcpnModule):
         theObject = data.get('theObject')
 
         if DropBase.URLS in data:
+
+            # process dropped items but don't open any spectra
             self.mainWindow._processDroppedItems(data)
 
+        # handle Pids, many more items than mainWindow._processPids
         pids = data.get(DropBase.PIDS, [])
-        if pids:
-            if len(pids) > 0:
-                with undoBlock():
-                    getLogger().info('Handling pids')
-                    if len(pids) > 5:
-                        with notificationEchoBlocking():
-                            self._handlePids(pids, theObject)
-                    else:
+        if pids and len(pids) > 0:
+            with undoBlock():
+                getLogger().info('Handling pids...')
+                if len(pids) > MAXITEMLOGGING:
+                    with notificationEchoBlocking():
                         self._handlePids(pids, theObject)
+                else:
+                    self._handlePids(pids, theObject)
 
     def _handlePids(self, pids, strip=None):
         "handle a; return True in case it is a Spectrum or a SpectrumGroup"

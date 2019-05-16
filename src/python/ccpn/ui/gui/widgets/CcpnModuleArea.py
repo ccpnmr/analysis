@@ -146,27 +146,27 @@ class CcpnModuleArea(ModuleArea, DropBase):  #, DropBase):
 
         # drop an item from the sidebar onto the drop area
         if DropBase.PIDS in data and isinstance(data['event'].source(), SideBar):      #(SideBar, SideBar)):
-            pids = data[DropBase.PIDS]
-            objs = [self.mainWindow.project.getByPid(pid) for pid in pids]
 
-            # check whether a new spectrumDisplay is needed, and check axisOrdering
-            from ccpn.ui.gui.popups.AxisOrderingPopup import checkSpectraToOpen
-            checkSpectraToOpen(self.mainWindow, objs)
+            # similar to CcpnModule dropEvent
 
-            _openItemObject(self.mainWindow, objs, position=self.dropArea)
+            # pids = data[DropBase.PIDS]
+            # objs = [self.mainWindow.project.getByPid(pid) for pid in pids]
+            #
+            # # check whether a new spectrumDisplay is needed, check axisOrdering
+            # # add show popup for ordering if required
+            # from ccpn.ui.gui.popups.AxisOrderingPopup import checkSpectraToOpen
+            # checkSpectraToOpen(self.mainWindow, objs)
+            #
+            # _openItemObject(self.mainWindow, objs, position=self.dropArea)
 
-            # # reset the dock area
-            # self.dropArea = None
-            # self.overlay.setDropArea(self.dropArea)
+            self.mainWindow._processPids(data, position=self.dropArea)
 
         elif DropBase.URLS in data:
             objs = self.mainWindow._processDroppedItems(data)
+
+            # dropped spectra will automatically open from here
             spectra = [obj for obj in objs if isinstance(obj, Spectrum)]
             _openItemObject(self.mainWindow, spectra, position=self.dropArea)
-
-            # # reset the dock area
-            # self.dropArea = None
-            # self.overlay.setDropArea(self.dropArea)
 
         if hasattr(source, 'implements') and source.implements('dock'):
             DockArea.dropEvent(self, event, *args)

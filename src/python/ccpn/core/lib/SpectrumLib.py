@@ -562,26 +562,35 @@ def getDefaultSpectrumColours(self: 'Spectrum') -> Tuple[str, str]:
         negCol = spectrumHexColours[((kk + 1) * index + 10) % colorCount]
 
     else:
-        # automatic colours
-        colorCount = len(spectrumHexColours)
-        step = ((colorCount // 2 - 1) // 2)
-        kk = colorCount // 5
-        index = self.experiment.serial - 1 + step * (self._serial - 1)
-        posCol = spectrumHexColours[(kk * index + 10) % colorCount]
+        try:
+            # try and get the colourPalette number from the preferences, otherwise use 0
+            from ccpn.framework.Application import getApplication
+            colourPalette = getApplication().preferences.general.colourPalette
+        except:
+            colourPalette = 0
 
-        # invert the colour by reversing the ycbcr palette
-        rgbIn = hexToRgb(posCol)
-        negRGB = invertRGBHue(*rgbIn)
-        oppCol = rgbToHex(*negRGB)
-        # get the nearest one in the current colour list, so colourName exists
-        negCol = findNearestHex(oppCol, spectrumHexColours)
+        if colourPalette == 0:
+            # colours for Vicky :)
+            colorCount = len(spectrumHexDefaultColours)
+            step = ((colorCount // 2 - 1) // 2)
+            index = self.experiment.serial - 1 + step * (self._serial - 1)
+            posCol = spectrumHexDefaultColours[(2 * index) % colorCount]
+            negCol = spectrumHexDefaultColours[(2 * index + 1) % colorCount]
 
-        # # colours for Vicky :)
-        # colorCount = len(spectrumHexDefaultColours)
-        # step = ((colorCount // 2 - 1) // 2)
-        # index = self.experiment.serial - 1 + step * (self._serial - 1)
-        # posCol = spectrumHexDefaultColours[(2 * index) % colorCount]
-        # negCol = spectrumHexDefaultColours[(2 * index + 1) % colorCount]
+        else:
+            # automatic colours
+            colorCount = len(spectrumHexColours)
+            step = ((colorCount // 2 - 1) // 2)
+            kk = 11         #colorCount // 11
+            index = self.experiment.serial - 1 + step * (self._serial - 1)
+            posCol = spectrumHexColours[(kk * index + 10) % colorCount]
+
+            # invert the colour by reversing the ycbcr palette
+            rgbIn = hexToRgb(posCol)
+            negRGB = invertRGBHue(*rgbIn)
+            oppCol = rgbToHex(*negRGB)
+            # get the nearest one in the current colour list, so colourName exists
+            negCol = findNearestHex(oppCol, spectrumHexColours)
 
     return (posCol, negCol)
 

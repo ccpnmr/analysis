@@ -147,18 +147,7 @@ class CcpnModuleArea(ModuleArea, DropBase):  #, DropBase):
         # drop an item from the sidebar onto the drop area
         if DropBase.PIDS in data and isinstance(data['event'].source(), SideBar):      #(SideBar, SideBar)):
 
-            # similar to CcpnModule dropEvent
-
-            # pids = data[DropBase.PIDS]
-            # objs = [self.mainWindow.project.getByPid(pid) for pid in pids]
-            #
-            # # check whether a new spectrumDisplay is needed, check axisOrdering
-            # # add show popup for ordering if required
-            # from ccpn.ui.gui.popups.AxisOrderingPopup import checkSpectraToOpen
-            # checkSpectraToOpen(self.mainWindow, objs)
-            #
-            # _openItemObject(self.mainWindow, objs, position=self.dropArea)
-
+            # process Pids
             self.mainWindow._processPids(data, position=self.dropArea)
 
         elif DropBase.URLS in data:

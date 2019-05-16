@@ -629,18 +629,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
             data = self.parseEvent(event)
             if DropBase.PIDS in data:
 
-                # similar to CcpnModuleArea dropEvent
-
-                # pids = data[DropBase.PIDS]
-                # objs = [self.mainWindow.project.getByPid(pid) for pid in pids]
-                #
-                # # check whether a new spectrumDisplay is needed, check axisOrdering
-                # # add show popup for ordering if required
-                # from ccpn.ui.gui.popups.AxisOrderingPopup import checkSpectraToOpen
-                # checkSpectraToOpen(self.mainWindow, objs)
-                #
-                # _openItemObject(self.mainWindow, objs, position=self.dropArea, relativeTo=self)
-
+                # process Pids
                 self.mainWindow._processPids(data, position=self.dropArea, relativeTo=self)
                 event.accept()
 

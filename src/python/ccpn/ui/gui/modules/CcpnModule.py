@@ -301,6 +301,13 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
         self._allChildren = set()
 
+    def event(self, event):
+        if event.type() == QtCore.QEvent.ShortcutOverride:
+            event.accept()
+            print('>>>Override')
+        else:
+            super(CcpnModule, self).event(event)
+            
     def _findChildren(self, widget):
         for i in widget.children():
             self._allChildren.update({i})

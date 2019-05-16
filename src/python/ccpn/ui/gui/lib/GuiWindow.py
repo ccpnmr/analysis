@@ -109,15 +109,17 @@ class GuiWindow():
         addShortCut("+", self, self.zoomIn, context=context)
         addShortCut("-", self, self.zoomOut, context=context)
 
-        addShortCut("Up", self, partial(self.panSpectrum, 'up'), context=context)
-        addShortCut("Down", self, partial(self.panSpectrum, 'down'), context=context)
-        addShortCut("Left", self, partial(self.panSpectrum, 'left'), context=context)
-        addShortCut("Right", self, partial(self.panSpectrum, 'right'), context=context)
+        # THESE REMOVE CONTROL FROM TABLES
 
-        addShortCut("Shift+Up", self, partial(self.movePeaks, 'up'), context=context)
-        addShortCut("Shift+Down", self, partial(self.movePeaks, 'down'), context=context)
-        addShortCut("Shift+Left", self, partial(self.movePeaks, 'left'), context=context)
-        addShortCut("Shift+Right", self, partial(self.movePeaks, 'right'), context=context)
+        # addShortCut("Up", self, partial(self.panSpectrum, 'up'), context=context)
+        # addShortCut("Down", self, partial(self.panSpectrum, 'down'), context=context)
+        # addShortCut("Left", self, partial(self.panSpectrum, 'left'), context=context)
+        # addShortCut("Right", self, partial(self.panSpectrum, 'right'), context=context)
+
+        # addShortCut("Shift+Up", self, partial(self.movePeaks, 'up'), context=context)
+        # addShortCut("Shift+Down", self, partial(self.movePeaks, 'down'), context=context)
+        # addShortCut("Shift+Left", self, partial(self.movePeaks, 'left'), context=context)
+        # addShortCut("Shift+Right", self, partial(self.movePeaks, 'right'), context=context)
 
         addShortCut("z, a", self, self.resetAllZoom, context=context)
 

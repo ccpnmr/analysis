@@ -1269,59 +1269,59 @@ class CcpnGLWidget(QOpenGLWidget):
         self._rescaleAllAxes()
         self._storeZoomHistory()
 
-    # def _panSpectrum(self, event, movePercent=20):
-    #     """Implements Arrows up,down, left, right to pan the spectrum """
-    #     # percentage of the view to set as single step
-    #
-    #     if type(event) == QtGui.QKeyEvent:
-    #         moveFactor = movePercent / 100.0
-    #         dx = (self.axisR - self.axisL) / 2.0
-    #         dy = (self.axisT - self.axisB) / 2.0
-    #
-    #         key = event.key()
-    #
-    #         if key == QtCore.Qt.Key_Left:
-    #             self.axisL -= moveFactor * dx
-    #             self.axisR -= moveFactor * dx
-    #
-    #         elif key == QtCore.Qt.Key_Up:
-    #             self.axisT += moveFactor * dy
-    #             self.axisB += moveFactor * dy
-    #
-    #         elif key == QtCore.Qt.Key_Right:
-    #             self.axisL += moveFactor * dx
-    #             self.axisR += moveFactor * dx
-    #
-    #         elif key == QtCore.Qt.Key_Down:
-    #             self.axisT -= moveFactor * dy
-    #             self.axisB -= moveFactor * dy
-    #
-    #         elif key == QtCore.Qt.Key_Plus or key == QtCore.Qt.Key_Equal:  # Plus:
-    #             self._testAxisLimits()
-    #             if self._minReached:
-    #                 return
-    #
-    #             print('>>>zoomIn')
-    #             self.zoomIn()
-    #
-    #         elif key == QtCore.Qt.Key_Minus:
-    #             self._testAxisLimits()
-    #             if self._maxReached:
-    #                 return
-    #
-    #             self.zoomOut()
-    #
-    #         else:
-    #             # not a movement key
-    #             return
-    #
-    #         self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
-    #                                            axisB=self.axisB, axisT=self.axisT,
-    #                                            axisL=self.axisL, axisR=self.axisR)
-    #
-    #         # self._testAxisLimits(setLimits=True)
-    #         self._rescaleAllAxes()
-    #         self._storeZoomHistory()
+    def _panGLSpectrum(self, event, movePercent=20):
+        """Implements Arrows up,down, left, right to pan the spectrum """
+        # percentage of the view to set as single step
+
+        if type(event) == QtGui.QKeyEvent:
+            moveFactor = movePercent / 100.0
+            dx = (self.axisR - self.axisL) / 2.0
+            dy = (self.axisT - self.axisB) / 2.0
+
+            key = event.key()
+
+            if key == QtCore.Qt.Key_Left:
+                self.axisL -= moveFactor * dx
+                self.axisR -= moveFactor * dx
+
+            elif key == QtCore.Qt.Key_Up:
+                self.axisT += moveFactor * dy
+                self.axisB += moveFactor * dy
+
+            elif key == QtCore.Qt.Key_Right:
+                self.axisL += moveFactor * dx
+                self.axisR += moveFactor * dx
+
+            elif key == QtCore.Qt.Key_Down:
+                self.axisT -= moveFactor * dy
+                self.axisB -= moveFactor * dy
+
+            elif key == QtCore.Qt.Key_Plus or key == QtCore.Qt.Key_Equal:  # Plus:
+                self._testAxisLimits()
+                if self._minReached:
+                    return
+
+                print('>>>zoomIn')
+                self.zoomIn()
+
+            elif key == QtCore.Qt.Key_Minus:
+                self._testAxisLimits()
+                if self._maxReached:
+                    return
+
+                self.zoomOut()
+
+            else:
+                # not a movement key
+                return
+
+            self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
+                                               axisB=self.axisB, axisT=self.axisT,
+                                               axisL=self.axisL, axisR=self.axisR)
+
+            # self._testAxisLimits(setLimits=True)
+            self._rescaleAllAxes()
+            self._storeZoomHistory()
 
     def _moveAxes(self, delta=(0.0, 0.0)):
         """Implements Arrows up,down, left, right to pan the spectrum """
@@ -1337,37 +1337,37 @@ class CcpnGLWidget(QOpenGLWidget):
                                            axisL=self.axisL, axisR=self.axisR)
         self._rescaleAllAxes()
 
-    # def _movePeakFromKeys(self, event):
-    #
-    #     if len(self.current.peaks) < 1:
-    #         return
-    #
-    #     moveFactor = 5
-    #     moveDict = {
-    #         QtCore.Qt.Key_Left : (-self.pixelX * moveFactor, 0),
-    #         QtCore.Qt.Key_Right: (self.pixelX * moveFactor, 0),
-    #         QtCore.Qt.Key_Up   : (0, self.pixelX * moveFactor),
-    #         QtCore.Qt.Key_Down : (0, -self.pixelX * moveFactor)
-    #         }
-    #
-    #     if type(event) == QtGui.QKeyEvent:
-    #         if event.key() in moveDict:
-    #
-    #             with undoBlock():
-    #                 for peak in self.current.peaks:
-    #                     self._movePeak(peak, moveDict.get(event.key()))
+    def _movePeakFromGLKeys(self, event):
 
-    # def _singleKeyAction(self, event):
-    #     """
-    #     :return: Actions for single key press. If current peaks, moves the peaks when using
-    #     directional arrow otherwise pans the spectrum.
-    #     """
-    #     # if not self.current.peak:
-    #     if not self._isSHIFT:
-    #         self._panSpectrum(event)
-    #
-    #     if self._isSHIFT:
-    #         self._movePeakFromKeys(event)
+        if len(self.current.peaks) < 1:
+            return
+
+        moveFactor = 5
+        moveDict = {
+            QtCore.Qt.Key_Left : (-self.pixelX * moveFactor, 0),
+            QtCore.Qt.Key_Right: (self.pixelX * moveFactor, 0),
+            QtCore.Qt.Key_Up   : (0, self.pixelX * moveFactor),
+            QtCore.Qt.Key_Down : (0, -self.pixelX * moveFactor)
+            }
+
+        if type(event) == QtGui.QKeyEvent:
+            if event.key() in moveDict:
+
+                with undoBlock():
+                    for peak in self.current.peaks:
+                        self._movePeak(peak, moveDict.get(event.key()))
+
+    def _singleKeyAction(self, event):
+        """
+        :return: Actions for single key press. If current peaks, moves the peaks when using
+        directional arrow otherwise pans the spectrum.
+        """
+        # if not self.current.peak:
+        if not self._isSHIFT:
+            self._panGLSpectrum(event)
+
+        if self._isSHIFT:
+            self._movePeakFromGLKeys(event)
 
     def initialiseAxes(self, strip=None):
         """
@@ -2178,7 +2178,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def keyPressEvent(self, event: QtGui.QKeyEvent):
         self._key = event.key()
         self._checkKeys(event)
-        # self._singleKeyAction(event)
+        self._singleKeyAction(event)
 
     def _clearAfterRelease(self, ev):
         key = ev.key()

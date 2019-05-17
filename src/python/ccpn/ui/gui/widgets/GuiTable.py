@@ -798,7 +798,7 @@ GuiTable::item::selected {
 
         # print('>>>mouseReleaseEvent', self._lastClick)
         if self._lastClick == "click":
-            QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval() // 2,
+            QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval(),
                                      partial(self._handleCellClicked, event))
 
         super(GuiTable, self).mouseReleaseEvent(event)

@@ -1607,7 +1607,7 @@ class Spectrum(AbstractWrapperObject):
                                  (axisCode, newAxisCodeOrder, self.axisCodes))
         return newValues
 
-    def getRegionData(self, exclusionBuffer:Optional[Sequence], minimumDimensionSize: int = 3, **axisDict):
+    def getRegionData(self, exclusionBuffer: Optional[Sequence] = None, minimumDimensionSize: int = 3, **axisDict):
         """Return the region of the spectrum data defined by the axis limits.
 
         Axis limits are passed in as a dict containing the axis codes and the required limits.
@@ -1633,20 +1633,38 @@ class Spectrum(AbstractWrapperObject):
             regionData = spectrum.getRegionData(**limitsDict)
             regionData = spectrum.getRegionData(Hn=(7.0, 9.0), Nh=(110, 130))
 
-        exclusionBuffer: defines the size to extend the region by in index units, e.g. [1, 1, 1]
+            and
+
+            regionData = spectrum.getRegionData()           to get all the data, this may be very large!
+
+        exclusionBuffer: defines the size to extend the region by in index units, e.g. [1, 1, 1] for a 3d array,
                             extends the region by 1 index point in all axes.
                             Default is 1 in all axis directions.
+                            Must be the correct length for the number of dimensions
 
-        minimumDimensionSize:   defines the minimum number if elements in each dimension that are needed
+        minimumDimensionSize:   defines the minimum number of elements in each dimension that are needed
                                 for the region to be valid.
 
                                 default is 3, as mostly used for parabolic curve fitting which
                                 requires 3 points in any given dimension
 
+        The returned regionData is a tuple of regions, each of the form:
+
+                single region = (dataArray,                 numpy array containing the data
+                                intRegion,
+                                startPoints,
+                                endPoints,
+                                startPointBufferActual,
+                                endPointBufferActual,
+                                startPointIntActual,
+                                numPointInt,
+                                startPointBuffer,
+                                endPointBuffer)
+
         :param exclusionBuffer: array of int
         :param minimumDimensionSize: int
         :param axisDict: dict of axis limits
-        :return: numpy data array
+        :return: tuple of regions
         """
         if not self.isValidPath:
             return

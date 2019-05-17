@@ -288,7 +288,7 @@ class ChemicalShiftTableWithAssignment(CcpnModule):
             logger.error('No valid item selected')
 
 
-    class emptyObject():
+    class _emptyObject():
         def __init__(self):
             pass
 
@@ -304,7 +304,7 @@ class ChemicalShiftTableWithAssignment(CcpnModule):
             return
 
         if id == ALL:
-            self.assignedPeaksTable._peakList = self.emptyObject()
+            self.assignedPeaksTable._peakList = self._emptyObject()
 
             self.assignedPeaksTable._peakList.peaks = list(
                     set([pk for nmrAtom in self.application.current.nmrResidue.nmrAtoms for pk in nmrAtom.assignedPeaks]))

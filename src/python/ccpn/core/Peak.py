@@ -39,6 +39,7 @@ from ccpn.core.NmrAtom import NmrAtom
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 #from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr import Peak as LibPeak
+from ccpn.core.lib.peakUtils import snapToExtremum as peakUtilsSnapToExtremum
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, undoBlock
 from ccpn.util.Logging import getLogger
@@ -566,13 +567,13 @@ class Peak(AbstractWrapperObject):
             values = self.reorderValues(values, axisCodes)
         setattr(self, attributeName, values)
 
-    def snapToExtremum(self, halfBoxSearchWidth: int = 4, halfBoxFitWidth: int = 2):
+    def snapToExtremum(self, halfBoxSearchWidth: int = 4, halfBoxFitWidth: int = 4):
         """Snap the Peak to the closest local extrema, if within range."""
-        LibPeak.snapToExtremum(self._apiPeak, halfBoxSearchWidth=halfBoxSearchWidth, halfBoxFitWidth=halfBoxFitWidth)
+        peakUtilsSnapToExtremum(self, halfBoxSearchWidth=halfBoxSearchWidth, halfBoxFitWidth=halfBoxFitWidth)
 
-    def fitPositionHeightLineWidths(self):
-        """Set the position, height and lineWidth of the Peak."""
-        LibPeak.fitPositionHeightLineWidths(self._apiPeak)
+    # def fitPositionHeightLineWidths(self):
+    #     """Set the position, height and lineWidth of the Peak."""
+    #     LibPeak.fitPositionHeightLineWidths(self._apiPeak)
 
     @property
     def integral(self):

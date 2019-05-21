@@ -27,6 +27,8 @@ from ccpn.util.Logging import getLogger
 from collections import OrderedDict
 from scipy.optimize import curve_fit
 from collections import OrderedDict
+from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD
+
 
 POSITIONS = 'positions'
 HEIGHT = 'height'
@@ -171,7 +173,7 @@ def peakdet(y, x, delta, negative=False):
             mn = this
             mnpos = x[i]
         if lookformax:
-            if not negative: # just positives
+            if not negative:  # just positives
                 this = abs(this)
             if this < mx - delta:
                 maxtab.append((float(mxpos), float(mx)))
@@ -334,7 +336,6 @@ def getNmrResiduePeakHeight(nmrResidue, nmrAtomsNames, spectra):
     return heights
 
 
-
 def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atomWeights=None):
     '''
 
@@ -400,26 +401,29 @@ def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atom
         return round(float(np.mean(deltas)), 3)
     return
 
+
 def _getKd(func, x, y):
-    if len(x)<=1:
+    if len(x) <= 1:
         return
     param = curve_fit(func, x, y)
     bindingUnscaled, bmax = param[0]
     yScaled = y / bmax
     try:
         paramScaled = curve_fit(func, x, yScaled)
-        kd, bmax =  paramScaled[0]
+        kd, bmax = paramScaled[0]
     except Exception as err:
-        getLogger().warning('Impossible to estimate Kd values. %s' %err)
+        getLogger().warning('Impossible to estimate Kd values. %s' % err)
         kd, bmax = [None, None]
     return kd
 
 
 def oneSiteBindingCurve(x, kd, bmax):
-    return (bmax*x)/(x+kd)
+    return (bmax * x) / (x + kd)
+
 
 def exponenial_func(x, a, b):
-    return a*np.exp(-b*x)
+    return a * np.exp(-b * x)
+
 
 def _fit1SiteBindCurve(bindingCurves, aFunc=oneSiteBindingCurve, xfStep=0.01, xfPercent=30):
     """
@@ -449,7 +453,8 @@ def _fit1SiteBindCurve(bindingCurves, aFunc=oneSiteBindingCurve, xfStep=0.01, xf
     """
     from scipy.optimize import curve_fit
     from ccpn.util.Common import percentage
-    errorValue = (None,)*6
+
+    errorValue = (None,) * 6
     if aFunc is None or not callable(aFunc):
         getLogger().warning("Error. Fitting curve %s is not callable" % aFunc)
         return errorValue
@@ -461,8 +466,8 @@ def _fit1SiteBindCurve(bindingCurves, aFunc=oneSiteBindingCurve, xfStep=0.01, xf
     ys = data.values.flatten(order='F')  #puts all y values in a single 1d array.
     xss = np.array([data.columns] * data.shape[0])
     xs = xss.flatten(order='F')  # #puts all x values in a 1d array preserving the original y positions (order='F').
-    if len(xs)<=1:
-        return errorValue #not enough datapoints
+    if len(xs) <= 1:
+        return errorValue  #not enough datapoints
     try:
         param = curve_fit(aFunc, xs, ys)
         xhalfUnscaled, bMaxUnscaled = param[0]
@@ -477,21 +482,18 @@ def _fit1SiteBindCurve(bindingCurves, aFunc=oneSiteBindingCurve, xfStep=0.01, xf
         x_atHalf_Y, bmax = paramScaled[0]
         return (x_atHalf_Y, bmax, xs, yScaled, xf, yf)
     except Exception as err:
-        getLogger().warning('Impossible to estimate Kd value %s' %(err))
+        getLogger().warning('Impossible to estimate Kd value %s' % (err))
     return errorValue
 
 
-
-
-
-
-def _fitExpDecayCurve(bindingCurves, aFunc=exponenial_func, xfStep=0.01, xfPercent=30, p0 = (1, 0.1)):
+def _fitExpDecayCurve(bindingCurves, aFunc=exponenial_func, xfStep=0.01, xfPercent=30, p0=(1, 0.1)):
     """
     :param TODO
     """
 
     from ccpn.util.Common import percentage
-    errorValue = (None,)*6
+
+    errorValue = (None,) * 6
     if aFunc is None or not callable(aFunc):
         getLogger().warning("Error. Fitting curve %s is not callable" % aFunc)
         return errorValue
@@ -503,8 +505,8 @@ def _fitExpDecayCurve(bindingCurves, aFunc=exponenial_func, xfStep=0.01, xfPerce
     ys = data.values.flatten(order='F')  #puts all y values in a single 1d array.
     xss = np.array([data.columns] * data.shape[0])
     xs = xss.flatten(order='F')  # #puts all x values in a 1d array preserving the original y positions (order='F').
-    if len(xs)<=1:
-        return errorValue #not enough datapoints
+    if len(xs) <= 1:
+        return errorValue  #not enough datapoints
     try:
 
         popt, pcov = curve_fit(aFunc, xs, ys, p0=p0)
@@ -515,31 +517,140 @@ def _fitExpDecayCurve(bindingCurves, aFunc=exponenial_func, xfStep=0.01, xfPerce
         yf = aFunc(xf, *popt)
         return (xs, ys, xf, yf, *popt)
     except Exception as err:
-        getLogger().warning('Impossible to estimate Kd value %s' %(err))
+        getLogger().warning('Impossible to estimate Kd value %s' % (err))
     return errorValue
 
 
+def snapToExtremum(fitPeak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: int = 3,
+                   fitMethod: str = GAUSSIANMETHOD):
+    """Snap the position of the peak the nearest extremum.
+    Assumes called with an existing peak, will fit within a box ±halfBoxSearchWidth about the current peak position.
+    """
 
+    from ccpn.core.Peak import Peak
+    from ccpnc.peak import Peak as CPeak
+    from ccpn.framework.Application import getApplication
 
+    # error checking - that the peak is a valid peak
+    fitPeak = getApplication().project.getByPid(fitPeak) if isinstance(fitPeak, str) else fitPeak
+    if not isinstance(fitPeak, Peak):
+        raise TypeError('%s is not of type Peak' % fitPeak)
 
+    apiPeak = fitPeak._wrappedData
 
+    dataSource = apiPeak.peakList.dataSource
+    numDim = dataSource.numDim
+    peakDims = apiPeak.sortedPeakDims()
 
+    # get the height - remember not to use (position-1) because function does that
+    height = dataSource.getPositionValue([peakDim.position for peakDim in peakDims])
 
+    # generate a np array with the position of the peak in points rounded to integers
+    position = [peakDim.position - 1 for peakDim in peakDims]  # API position starts at 1
 
+    # round up/down the position
+    pLower = np.floor(position).astype(np.int32)
+    pUpper = np.ceil(position).astype(np.int32)
+    position = np.round(np.array(position))
 
+    # generate a np array with the number of points per dimension
+    # numPoints = [peakDim.dataDim.numPoints for peakDim in peakDims]
+    numPoints = np.array([peakDim.dataDim.numPoints for peakDim in peakDims], dtype=np.int32)
 
+    # extra plane in each direction increases accuracy of group fitting
+    startPoint = np.maximum(pLower - halfBoxSearchWidth, 0)
+    endPoint = np.minimum(pUpper + halfBoxSearchWidth, numPoints)
 
+    # map to co-ordinates to a (0,0) cornered box
+    regionArray = np.array((startPoint - startPoint, endPoint - startPoint), dtype=np.int32)
 
+    # Get the data; note that arguments has to be cast to ints for the C routines
+    dataArray, intRegion = dataSource.getRegionData(startPoint, endPoint)
 
+    if not (dataArray is not None and dataArray.size != 0):
+        getLogger().warning('no region found')
+        return
 
+    scaledHeight = 0.5 * height  # this is so that have sensible pos/negLevel
+    if height > 0:
+        doPos = True
+        doNeg = False
+        posLevel = scaledHeight
+        negLevel = 0                # arbitrary - not necessary
+    else:
+        doPos = False
+        doNeg = True
+        posLevel = 0                # arbitrary - not necessary
+        negLevel = scaledHeight
 
+    exclusionBuffer = [1] * numDim
 
+    nonAdj = 0
+    minDropfactor = 0.1
+    minLinewidth = [0.0] * numDim
 
+    excludedRegionsList = []
+    excludedDiagonalDimsList = []
+    excludedDiagonalTransformList = []
 
+    peakPoints = CPeak.findPeaks(dataArray, doNeg, doPos,
+                                 negLevel, posLevel, exclusionBuffer,
+                                 nonAdj, minDropfactor, minLinewidth,
+                                 excludedRegionsList, excludedDiagonalDimsList, excludedDiagonalTransformList)
 
+    if not peakPoints:
+        getLogger().warning('no points found')
+        return
 
+    # catch any C errors
+    try:
 
+        # find the closest peak in the found list
+        peakPoint, height = peakPoints[0]
+        dist = None
+        for findNextPeak in peakPoints:
+            peakDist = np.linalg.norm(np.array(findNextPeak[0]) - np.array(position) - startPoint)
+            if dist == None or peakDist < dist:
+                dist = peakDist
+                peakPoint = findNextPeak[0]
 
+        # use this as the centre for the peak fitting
+        peakPoint = np.array(peakPoint)
+        peakArray = peakPoint.reshape((1, numDim))
+        peakArray = peakArray.astype(np.float32)
 
+        if fitMethod == PARABOLICMETHOD:
+            # parabolic - generate all peaks in one operation
+            result = CPeak.fitParabolicPeaks(dataArray, regionArray, peakArray)
 
+        else:
+            method = 0 if fitMethod == GAUSSIANMETHOD else 1
 
+            # fit all peaks in one operation
+            result = CPeak.fitPeaks(dataArray, regionArray, peakArray, method)
+
+    except CPeak.error as e:
+        # there could be some fitting error
+        getLogger().warning("Aborting peak fit, Error for peak: %s:\n\n%s " % (fitPeak, e))
+        return
+
+    # if any results are found then set the new peak position/height
+    if result:
+        height, center, linewidth = result[0]
+
+        # work on the _wrappedData
+        apiPeak = fitPeak._wrappedData
+        peakDims = apiPeak.sortedPeakDims()
+
+        dataSource = apiPeak.peakList.dataSource
+        dataDims = dataSource.sortedDataDims()
+
+        for i, peakDim in enumerate(peakDims):
+            newPos = min(max(center[i], 0.5), dataArray.shape[i] - 1.5)
+
+            # ignore if out of range
+            if abs(newPos - center[i]) < 1e-9:
+                peakDim.position = center[i] + startPoint[i] + 1.0  # API position starts at 1
+            peakDim.lineWidth = dataDims[i].valuePerPoint * linewidth[i]
+
+        apiPeak.height = dataSource.scale * height

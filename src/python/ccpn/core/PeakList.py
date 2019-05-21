@@ -46,9 +46,12 @@ LORENTZIANMETHOD = 'lorentzian'
 PARABOLICMETHOD = 'parabolic'
 PICKINGMETHODS = (GAUSSIANMETHOD, LORENTZIANMETHOD, PARABOLICMETHOD)
 
+
 def _signalToNoiseFunc(noise, signal):
     snr = math.log10(abs(np.mean(signal) ** 2 / np.mean(noise) ** 2))
     return snr
+
+
 # def _signalToNoiseFunc(noise, signal):
 #     snr = math.log10(abs(np.mean(signal) ** 2 / np.mean(noise) ** 2))
 #     return snr
@@ -91,7 +94,7 @@ def _signalToNoiseFunc(noise, signal):
 #         else:
 #             return 1
 
-def estimateSignalRegion(y,  nlMax=None, nlMin=None):
+def estimateSignalRegion(y, nlMax=None, nlMin=None):
     if y is None: return 0
     if nlMax is None or nlMin is None:
         nlMax, nlMin = estimateNoiseLevel1D(y)
@@ -142,9 +145,10 @@ def estimateSNR_1D(noiseLevels, signalPoints, ratio=2.5):
     if dd != 0 and dd is not None:
         snRatios = (ratio * pp) / dd
         return snRatios
-    return [None]*len(signalPoints)
+    return [None] * len(signalPoints)
 
-def estimateNoiseLevel1D(y, f=10, stdFactor = 0.5):
+
+def estimateNoiseLevel1D(y, f=10, stdFactor=0.5):
     """
 
     :param y: the y region of the spectrum.
@@ -154,16 +158,16 @@ def estimateNoiseLevel1D(y, f=10, stdFactor = 0.5):
     :return:   (float, float) of estimated noise threshold  as max and min
     """
 
-    eMax, eMin = 0,0
+    eMax, eMin = 0, 0
     if stdFactor == 0:
         stdFactor = 0.01
         getLogger().warning('stdFactor of value zero is not allowed.')
     if y is None:
         return eMax, eMin
-    percent = percentage(f,int(len(y)))
+    percent = percentage(f, int(len(y)))
     fy = y[:int(percent)]
 
-    stdValue = np.std(fy)*stdFactor
+    stdValue = np.std(fy) * stdFactor
 
     eMax = np.max(fy) + stdValue
     eMin = np.min(fy) - stdValue
@@ -193,10 +197,11 @@ def estimateNoiseLevel1D(y, f=10, stdFactor = 0.5):
 #         nl = np.min(nls)
 #     return nl
 
-def _filterROI1Darray(x,y, roi):
+def _filterROI1Darray(x, y, roi):
     """ Return region included in the ROI ppm position"""
     mask = (x > max(roi)) | (x > min(roi))
     return x[mask], y[mask]
+
 
 def _filtered1DArray(data, ignoredRegions):
     # returns an array without ignoredRegions. Used for automatic 1d peak picking
@@ -661,10 +666,11 @@ class PeakList(AbstractWrapperObject):
     #
     #   return peaks
 
-    def peakFinder1D(self, maxNoiseLevel = None,minNoiseLevel=None, ignoredRegions=[[20, 19]], negativePeaks=True):
+    def peakFinder1D(self, maxNoiseLevel=None, minNoiseLevel=None, ignoredRegions=[[20, 19]], negativePeaks=True):
         from ccpn.core.lib.peakUtils import peakdet, _getIntersectionPoints, _pairIntersectionPoints
         from scipy import signal
         from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar
+
         with undoBlockWithoutSideBar():
             spectrum = self.spectrum
             # integralList = self.spectrum.newIntegralList()
@@ -674,7 +680,6 @@ class PeakList(AbstractWrapperObject):
             filteredX, filteredY = masked[0], masked[1]
             if maxNoiseLevel is None or minNoiseLevel is None:
                 maxNoiseLevel, minNoiseLevel = estimateNoiseLevel1D(filteredY)
-
 
             maxValues, minValues = peakdet(y=filteredY, x=filteredX, delta=maxNoiseLevel)
             for position, height in maxValues:
@@ -865,11 +870,11 @@ class PeakList(AbstractWrapperObject):
 
         with undoBlock():
             peaks = self._pickPeaksRegion(regionToPick=regionToPick,
-                                         doPos=doPos, doNeg=doNeg,
-                                         minLinewidth=minLinewidth, exclusionBuffer=exclusionBuffer,
-                                         minDropFactor=minDropFactor, checkAllAdjacent=checkAllAdjacent,
-                                         fitMethod=fitMethod, excludedRegions=excludedRegions,
-                                         excludedDiagonalDims=excludedDiagonalDims, excludedDiagonalTransform=excludedDiagonalTransform)
+                                          doPos=doPos, doNeg=doNeg,
+                                          minLinewidth=minLinewidth, exclusionBuffer=exclusionBuffer,
+                                          minDropFactor=minDropFactor, checkAllAdjacent=checkAllAdjacent,
+                                          fitMethod=fitMethod, excludedRegions=excludedRegions,
+                                          excludedDiagonalDims=excludedDiagonalDims, excludedDiagonalTransform=excludedDiagonalTransform)
         return peaks
 
     def _pickPeaksRegion(self, regionToPick: dict = {},
@@ -1018,15 +1023,15 @@ class PeakList(AbstractWrapperObject):
                 # find new peaks
 
                 # exclusion code copied from Nmr/PeakList.py
-                excludedRegionsList = [np.array(excludedRegion, dtype='float32') - startPointBuffer for excludedRegion in excludedRegions]
+                excludedRegionsList = [np.array(excludedRegion, dtype=np.float32) - startPointBuffer for excludedRegion in excludedRegions]
                 excludedDiagonalDimsList = []
                 excludedDiagonalTransformList = []
                 for n in range(len(excludedDiagonalDims)):
                     dim1, dim2 = excludedDiagonalDims[n]
                     a1, a2, b12, d = excludedDiagonalTransform[n]
                     b12 += a1 * startPointBuffer[dim1] - a2 * startPointBuffer[dim2]
-                    excludedDiagonalDimsList.append(np.array((dim1, dim2), dtype='int32'))
-                    excludedDiagonalTransformList.append(np.array((a1, a2, b12, d), dtype='float32'))
+                    excludedDiagonalDimsList.append(np.array((dim1, dim2), dtype=np.int32))
+                    excludedDiagonalTransformList.append(np.array((a1, a2, b12, d), dtype=np.float32))
 
                 doPos = posLevel is not None
                 doNeg = negLevel is not None
@@ -1087,7 +1092,7 @@ class PeakList(AbstractWrapperObject):
                     firstArray = np.maximum(position - 2, 0)
                     lastArray = np.minimum(position + 3, numPointInt)
                     localRegionArray = np.array((firstArray, lastArray))
-                    localRegionArray = localRegionArray.astype('int32')
+                    localRegionArray = localRegionArray.astype(np.int32)
 
                     # get the larger regionArray size containing all points so far
                     firstArray = np.maximum(position - 3, 0)
@@ -1097,9 +1102,9 @@ class PeakList(AbstractWrapperObject):
                         lastArray = np.maximum(lastArray, regionArray[1])
 
                     peakArray = position.reshape((1, numDim))
-                    peakArray = peakArray.astype('float32')
-                    firstArray = firstArray.astype('int32')
-                    lastArray = lastArray.astype('int32')
+                    peakArray = peakArray.astype(np.float32)
+                    firstArray = firstArray.astype(np.int32)
+                    lastArray = lastArray.astype(np.int32)
                     regionArray = np.array((firstArray, lastArray))
 
                     if allPeaksArray is None:
@@ -1173,9 +1178,10 @@ class PeakList(AbstractWrapperObject):
 
         return peaks
 
-    def fitExistingPeaks(self, peaks: Sequence['Peak'], fitMethod: str = GAUSSIANMETHOD, singularMode=True):
+    def fitExistingPeaks(self, peaks: Sequence['Peak'], fitMethod: str = GAUSSIANMETHOD, singularMode: bool = True,
+                         halfBoxSearchWidth: int = 2, halfBoxFitWidth: int = 2):
         """Refit the current selected peaks.
-        Must be called with opeaks that belong to this peakList
+        Must be called with peaks that belong to this peakList
         """
 
         from ccpnc.peak import Peak as CPeak
@@ -1203,6 +1209,10 @@ class PeakList(AbstractWrapperObject):
 
             # generate a np array with the position of the peak in points rounded to integers
             position = [peakDim.position - 1 for peakDim in peakDims]  # API position starts at 1
+
+            # round up/down the position
+            pLower = np.floor(position).astype(np.int32)
+            pUpper = np.ceil(position).astype(np.int32)
             position = np.round(np.array(position))
 
             # generate a np array with the number of points per dimension
@@ -1212,25 +1222,25 @@ class PeakList(AbstractWrapperObject):
             # consider for each dimension on the interval [point-3,point+4>, account for min and max
             # of each dimension
             if fitMethod == PARABOLICMETHOD or singularMode is True:
-                firstArray = np.maximum(position - 2, 0)
-                lastArray = np.minimum(position + 3, numPoints)
+                firstArray = np.maximum(pLower - halfBoxSearchWidth, 0)
+                lastArray = np.minimum(pUpper + halfBoxSearchWidth, numPoints)
             else:
                 # extra plane in each direction increases accuracy of group fitting
-                firstArray = np.maximum(position - 3, 0)
-                lastArray = np.minimum(position + 4, numPoints)
+                firstArray = np.maximum(pLower - halfBoxSearchWidth - 1, 0)
+                lastArray = np.minimum(pUpper + halfBoxSearchWidth + 1, numPoints)
 
             # Cast to int for subsequent call
-            firstArray = firstArray.astype('int32')
-            lastArray = lastArray.astype('int32')
+            firstArray = firstArray.astype(np.int32)
+            lastArray = lastArray.astype(np.int32)
             localRegionArray = np.array((firstArray, lastArray), dtype=np.int32)
 
             if regionArray is not None:
                 firstArray = np.minimum(firstArray, regionArray[0])
                 lastArray = np.maximum(lastArray, regionArray[1])
 
-            # peakArray = (position - firstArray).reshape((1, numDim))
+            # requires reshaping of the array for use with CPeak.fitParabolicPeaks
             peakArray = position.reshape((1, numDim))
-            peakArray = peakArray.astype('float32')
+            peakArray = peakArray.astype(np.float32)
             regionArray = np.array((firstArray, lastArray), dtype=np.int32)
 
             if allPeaksArray is None:
@@ -1248,17 +1258,17 @@ class PeakList(AbstractWrapperObject):
             dataArray, intRegion = dataSource.getRegionData(firstArray, lastArray)
 
             # update positions relative to the corner of the data array
-            firstArray = firstArray.astype('float32')
+            firstArray = firstArray.astype(np.float32)
             updatePeaksArray = None
             for pk in allPeaksArray:
                 if updatePeaksArray is None:
                     updatePeaksArray = pk - firstArray
                     updatePeaksArray = updatePeaksArray.reshape((1, numDim))
-                    updatePeaksArray = updatePeaksArray.astype('float32')
+                    updatePeaksArray = updatePeaksArray.astype(np.float32)
                 else:
                     pk = pk - firstArray
                     pk = pk.reshape((1, numDim))
-                    pk = pk.astype('float32')
+                    pk = pk.astype(np.float32)
                     updatePeaksArray = np.append(updatePeaksArray, pk, axis=0)
 
             try:
@@ -1276,7 +1286,7 @@ class PeakList(AbstractWrapperObject):
                         for peakArray, localRegionArray in zip(allPeaksArray, allRegionArrays):
                             peakArray = peakArray - firstArray
                             peakArray = peakArray.reshape((1, numDim))
-                            peakArray = peakArray.astype('float32')
+                            peakArray = peakArray.astype(np.float32)
                             localRegionArray = np.array((localRegionArray[0] - firstArray, localRegionArray[1] - firstArray), dtype=np.int32)
 
                             localResult = CPeak.fitPeaks(dataArray, localRegionArray, peakArray, method)
@@ -1314,34 +1324,6 @@ class PeakList(AbstractWrapperObject):
                     peakDim.lineWidth = dataDims[i].valuePerPoint * linewidth[i]
 
                 peak.height = dataSource.scale * height
-
-    # if allPeaksArray is not None:
-    #
-    #     result = []
-    #     if method == PICKINGMETHODS[2]:
-    #
-    #         # parabolic - generate all peaks in one operation
-    #         result = CPeak.fitParabolicPeaks(dataArray, regionArray, allPeaksArray)
-    #
-    #     else:
-    #
-    #         # currently gaussian or lorentzian
-    #         if peakFittingMethod == SINGULAR_FIT:
-    #
-    #         # fit peaks individually
-    #
-    #         else:
-    #
-    #             # fit all peaks in one operation
-    #             result = CPeak.fitPeaks(dataArray, regionArray, allPeaksArray, method)
-    #
-    #     for height, centerGuess, linewidth in result:
-    #         center = np.array(centerGuess)
-    #
-    #         position = center + startPointBufferActual
-    #         peak = self._newPickedPeak(pointPositions=position, height=height,
-    #                                    lineWidths=linewidth, fitMethod=fitMethod)
-    #         peaks.append(peak)
 
     #===========================================================================================
     # new'Object' and other methods

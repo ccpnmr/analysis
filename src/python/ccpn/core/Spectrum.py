@@ -1706,6 +1706,9 @@ class Spectrum(AbstractWrapperObject):
                 # completely outside limits
                 break
 
+                # OR find aliasing offsets and change values to inside aliasing limits
+
+
             value0 = max(value0, aliasingLimit0)
             value1 = min(value1, aliasingLimit1)
 

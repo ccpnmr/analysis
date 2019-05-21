@@ -95,8 +95,8 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
             ('maximiseZoom', 'icons/zoom-full', 'Maximise Zoom', True, self._resetAllZooms),
             ('storeZoom', 'icons/zoom-store', 'Store Zoom', True, self._storeZoom),
             ('restoreZoom', 'icons/zoom-restore', 'Restore Zoom', True, self._restoreZoom),
-            ('undoZoom', 'icons/zoom-undo', 'Undo Zoom', True, self._previousZoom),
-            ('redoZoom', 'icons/zoom-redo', 'Redo Zoom', True, self._nextZoom),
+            ('undoZoom', 'icons/zoom-undo', 'Previous Zoom', True, self._previousZoom),
+            ('redoZoom', 'icons/zoom-redo', 'Next Zoom', True, self._nextZoom),
             ]
 
         # create the actions from the lists

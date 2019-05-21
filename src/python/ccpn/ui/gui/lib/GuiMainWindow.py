@@ -953,13 +953,20 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         urls = data.get('urls', [])
         if urls and len(urls) > 0:
-            with undoBlock():
-                getLogger().info('Handling urls...')
-                if len(urls) > MAXITEMLOGGING:
-                    with notificationEchoBlocking():
+
+            project = self._checkUrlsForProject(urls)
+
+            if project:
+                objs = self._processUrls(urls)
+
+            else:
+                with undoBlock():
+                    getLogger().info('Handling urls...')
+                    if len(urls) > MAXITEMLOGGING:
+                        with notificationEchoBlocking():
+                            objs = self._processUrls(urls)
+                    else:
                         objs = self._processUrls(urls)
-                else:
-                    objs = self._processUrls(urls)
 
         return objs
 
@@ -981,6 +988,21 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
             _openItemObject(self, objs, position=position, relativeTo=relativeTo)
 
+
+    def _checkUrlsForProject(self, urls):
+        """Check whether there is a project in the dropped url list,
+        and return the first project
+        """
+        for url in urls:
+            getLogger().debug('>>> dropped: ' + str(url))
+
+            dataType, subType, usePath = ioFormats.analyseUrl(url)
+            if dataType == 'Project' and subType in (ioFormats.CCPN,
+                                                     ioFormats.NEF,
+                                                     ioFormats.NMRSTAR,
+                                                     ioFormats.SPARKY):
+
+                return url
 
     def _processUrls(self, urls):
         """Handle the dropped urls

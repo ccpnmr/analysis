@@ -61,18 +61,27 @@ def rgbRatioToHex(r, g, b):
 
 
 def hexToRgb(hx):
+    if not hx:
+        pass
+
     hx = hx.lstrip('#')
     lv = len(hx)
     return tuple(int(hx[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
 
 
 def hexToRgbRatio(hx):
+    if not hx:
+        pass
+
     hx = hx.lstrip('#')
     lv = len(hx)
     return tuple(float(int(hx[i:i + lv // 3], 16)) / 255 for i in range(0, lv, lv // 3))
 
 
 def hexToRgba(hx):
+    if not hx:
+        pass
+
     hx = hx.lstrip('#')
     lv = len(hx)
     cols = [int(hx[i:i + lv // 3], 16) for i in range(0, lv, lv // 3)]

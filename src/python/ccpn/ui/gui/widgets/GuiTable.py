@@ -181,6 +181,9 @@ def exportTableDialog(dataFrame, columns=None, path='~/table.xlsx'):
 
 
 class GuiTable(TableWidget, Base):
+
+    # selectionUserChanged = QtCore.pyqtSignal(QtCore.QItemSelection)
+
     ICON_FILE = os.path.join(os.path.dirname(__file__), 'icons', 'editable.png')
 
     styleSheet = """
@@ -316,9 +319,28 @@ GuiTable::item::selected {
         self.setItemDelegate(delegate)
 
         # set the callback for changing selection on table
-        model = self.selectionModel()
+        # model = self.selectionModel()
+
+        # try:
+        #     self._superFunc = None
+        #
+        #     def _selectionModelSelect(*args, **kwds):
+        #         print ('>>>>>>>>>', id(self), self._selectOverride, self._mousePressed,
+        #                self._lastClick, self.isEnabled())
+        #         if self._superFunc:
+        #             self._superFunc(*args, **kwds)
+        #
+        #     self._superFunc = self.selectionModel().select
+        #     self.selectionModel().select = _selectionModelSelect
+        # except Exception as es:
+        #     print(str(es))
+        #
+        # self.setEnabled(False)
         # need manual selection changed
-        model.selectionChanged.connect(self._selectionTableCallback)
+        # model.selectionChanged.connect(self._selectionTableCallback)
+
+        # model.selectionChanged.connect(self._selectionChangedCallback)
+        # self.selectionUserChanged.connect(self._selectionTableCallback)
 
         # testing other methods - just need to disable selection callbacks during double click period
         # model.currentChanged.connect(self._selectionTableCallback)
@@ -332,6 +354,7 @@ GuiTable::item::selected {
         self._mousePressed = False
         self._userKeyPressed = False
         self._selectOverride = False
+        self._lastClick = None
         self._tableData = {}
         self._rawData = None  # this is set when called setData()
         self._tableNotifier = None
@@ -357,11 +380,49 @@ GuiTable::item::selected {
 
         # TableWidget.sortByColumn = __sortByColumn__   #MethodType(__sortByColumn__, TableWidget)
 
+        # self.installEventFilter(self)
+        # self.setEnabled(True)
+
+    # def eventFilter(self, obj, event):
+    #
+    #     eType = event.Type()
+    #     if eType == QtCore.QEvent.MouseButtonPress or eType == QtCore.QEvent.MouseButtonRelease:
+    #         print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~mouse')
+    #         if event.button() == QtCore.Qt.LeftButton:
+    #             print('>>>leftFilter')
+    #             self.setEnabled(False)
+    #             return True
+    #
+    #     return False
+
+    # def event(self, event: QtCore.QEvent) -> bool:
+    #     """
+    #     Use the event handler to process events
+    #     """
+    #     if event.type() == QtCore.QEvent.MouseButtonPress:
+    #
+    #         if event.button() == QtCore.Qt.RightButton:
+    #             print('>>>right')
+    #
+    #         elif event.button() == QtCore.Qt.MiddleButton:
+    #             print('>>>middle')
+    #
+    #         elif event.button() == QtCore.Qt.LeftButton:
+    #             print('>>>left')
+    #             return True
+    #
+    #     elif event.type() == QtCore.QEvent.Resize:
+    #         print('>>>resize')
+    #
+    #     return super().event(event)
+
+
     def _blockTableEvents(self, blanking=True):
         """Block all updates/signals/notifiers in the table.
         """
         # block on first entry
         if self._tableBlockingLevel == 0:
+            # self.setEnabled(False)
             self.blockSignals(True)
             self.selectionModel().blockSignals(True)
             self.setUpdatesEnabled(False)
@@ -383,6 +444,7 @@ GuiTable::item::selected {
                 self.setUpdatesEnabled(True)
                 self.selectionModel().blockSignals(False)
                 self.blockSignals(False)
+                # self.setEnabled(True)
         else:
             raise RuntimeError('Error: tableBlockingLevel already at 0')
 
@@ -478,8 +540,8 @@ GuiTable::item::selected {
     def setSelectionCallback(self, selectionCallback):
         # enable callbacks
         self._selectionCallback = selectionCallback
-        if self._selectionCallback:
-            self.itemClicked.connect(self._cellClicked)
+        # if self._selectionCallback:
+        #     self.itemClicked.connect(self._cellClicked)
 
     def _handleDroppedItems(self, pids, objType, pulldown):
         """
@@ -512,24 +574,24 @@ GuiTable::item::selected {
                 if openNew:
                     _openItemObject(self.mainWindow, others)
 
-    def _cellClicked(self, item):
-        # print('>>> %s _cellClicked' % _moduleId(self.moduleParent))
-
-        if item:
-            if isinstance(item.value, bool):
-                self._checkBoxTableCallback(item)
-            try:
-                if self._selectionCallback:
-                    self._currentRow = item.row()
-                    self._currentCol = item.column()
-            except:
-                # Fixme
-                # item has been deleted error
-                pass
-        #
+    # def _cellClicked(self, item):
+    #     print('>>> %s _cellClicked' % _moduleId(self.moduleParent))
+    #
+    #     if item:
+    #         if isinstance(item.value, bool):
+    #             self._checkBoxTableCallback(item)
+    #         try:
+    #             if self._selectionCallback:
+    #                 self._currentRow = item.row()
+    #                 self._currentCol = item.column()
+    #         except:
+    #             # Fixme
+    #             # item has been deleted error
+    #             pass
+    #     #
 
     def _checkBoxCallback(self, data):
-        # print('>>> %s _checkBoxCallback' % _moduleId(self.moduleParent))
+        print('>>> %s _checkBoxCallback' % _moduleId(self.moduleParent))
 
         pass
 
@@ -648,23 +710,29 @@ GuiTable::item::selected {
     #     # self._dataFrameObject.columnDefinitions.setEditValues[col](obj, text)
     #     pass
 
+    # def _selectionChangedCallback(self, itemSelection):
+    #
+    #     if not self._selectOverride:
+    #         print('>>>SPAWN USER SELECT')
+    #
+    #         # need to emit selected item, just to be sure
+    #         self.selectionUserChanged.emit(itemSelection)
+    #     else:
+    #         print('>>>NO USER SELECT')
+    #         print('>>>caller', id(self), self._mousePressed, self._lastClick, self._tableBlockingLevel)
+
     def _selectionTableCallback(self, itemSelection):
         """Handler when selection has changed on the table
         This can be either user or code changed
         """
-        getLogger().debug('>>> %s _selectionTableCallback' % _moduleId(self.moduleParent), self._tableBlockingLevel)
-
-        print('>>>caller', self._mousePressed, self._lastClick, self._userKeyPressed)
-
-        if self._selectOverride:
-            print('>>>NO SELECT')       # this is the correct place, but item is still stacked
-            return
+        # getLogger().debug('>>> %s _selectionTableCallback' % _moduleId(self.moduleParent), self._tableBlockingLevel)
 
         with self._tableBlockSignals('_selectionTableCallback', blanking=False):
 
+            # get selected objects on the table
             objList = self.getSelectedObjects()
 
-            if objList:
+            if objList and self._selectionCallback:
                 data = CallBack(theObject=self._dataFrameObject,
                                 object=objList,
                                 index=0,
@@ -674,9 +742,7 @@ GuiTable::item::selected {
                                 col=0,
                                 rowItem=None)
 
-                # fire selection callback if defined
-                if self._selectionCallback:
-                    self._selectionCallback(data)
+                self._selectionCallback(data)
 
             else:
                 self.clearSelection()
@@ -775,64 +841,79 @@ GuiTable::item::selected {
         # verticalHeader->setSectionResizeMode(QHeaderView::Fixed);
         # verticalHeader->setDefaultSectionSize(24);
 
-    def keyPressEvent(self, ev):
-        self._userKeyPressed = True
-        super(GuiTable, self).keyPressEvent(ev)
+    def keyPressEvent(self, event):
+        super(GuiTable, self).keyPressEvent(event)
 
-    def keyReleaseEvent(self, ev):
-        self._userKeyPressed = True
-        # self._selectionTableCallback(None)
-        super(GuiTable, self).keyReleaseEvent(ev)
+        cursors = [QtCore.Qt.Key_Up, QtCore.Qt.Key_Down, QtCore.Qt.Key_Left, QtCore.Qt.Key_Right]
+        enter = [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return]
+
+        key = event.key()
+        if key in cursors:
+            self._selectionTableCallback(None)
+
+        elif key in enter:
+            if self._actionCallback:
+                self._doubleClickCallback(self.currentItem())
+            else:
+                self._defaultDoubleClick(self.currentItem())
+
+    def mouseMoveEvent(self, event):
+        event.ignore()
+        super(GuiTable, self).mouseMoveEvent(event)
+
+        self._selectionTableCallback(None)
 
     def mousePressEvent(self, event):
         """handle mouse press events
         Clicking is handled on the mouse release
         """
         self._lastClick = 'click'
-        self._selectOverride = True
+        self._selectOverride = False
+
+        self._buttonPressed = event.button()
 
         if event.button() == QtCore.Qt.RightButton:
             # stops the selection from the table when the right button is clicked
             event.accept()
+
         elif event.button() == QtCore.Qt.LeftButton:
             # self.clearSelection()
+            # selectionModel = self.selectionModel()
+            # selectionModel.clearSelection()
+
             # we are selecting from the table
             self._mousePressed = True
-            event.ignore()
+
+            # # timer to re-enable
+            # QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval() * 5,
+            #                          partial(self._handleCellClicked, event))
+            # super(GuiTable, self).mousePressEvent(event)
+            event.accept()
             super(GuiTable, self).mousePressEvent(event)
+
+            self._selectionTableCallback(None)
+
         else:
             event.ignore()
             super(GuiTable, self).mousePressEvent(event)
 
     def mouseReleaseEvent(self, event):
         self._mousePressed = False
-
-        if self._lastClick == "click":
-            QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval(),
-                                     partial(self._handleCellClicked, event))
-
         super(GuiTable, self).mouseReleaseEvent(event)
 
-    def _handleCellClicked(self, event):
-        """handle a single click event, but ignore double click events
-        """
-        self._selectOverride = False
+    #     print('>>>mouseRelease', self._tableBlockingLevel, self.signalsBlocked(), self.selectionModel().signalsBlocked(), '\n\n')
+    #
+    #     if self._lastClick == "click":
+    #         QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval(),
+    #                                  partial(self._handleCellClicked, event))
+    #
+    #     super(GuiTable, self).mouseReleaseEvent(event)
 
-        # if self._lastClick == "click":
-        #     pos = QtCore.QPoint(event.pos())
-        #     item = self.itemAt(pos)
-        #
-        #     self._cellClicked(item)
-        #     # self._selectionTableCallback(item)
-        # else:
-        #     print('>>processdouble')
-
-    def mouseDoubleClickEvent(self, event):
-        """set the doubleClick flag
-        """
-        self._lastClick = 'doubleClick'
-        self._selectOverride = True
-        super(GuiTable, self).mouseDoubleClickEvent(event)
+    # def _handleCellClicked(self, event):
+    #     """handle a single click event, but ignore double click events
+    #     """
+    #     self._lastClick = None
+    #     self._mousePressed = False
 
     def _setHeaderContextMenu(self):
         """Set up the context menu for the table header
@@ -1344,8 +1425,8 @@ GuiTable::item::selected {
             selectionModel = self.selectionModel()
             if objList:
 
-                if not self._mousePressed:
-                    selectionModel.clearSelection()  # causes a clear problem here
+                # if not self._mousePressed:
+                selectionModel.clearSelection()  # causes a clear problem here
                     # strange tablewidget cmd/selection problem
 
                 for obj in objList:
@@ -1372,18 +1453,14 @@ GuiTable::item::selected {
                     if obj in self._dataFrameObject.objects:
                         rowObjs.append(obj)
 
-                print('>>>select', self._tableBlockingLevel, [str(obj.pid) for obj in rowObjs])
-                print('>>>', self.signalsBlocked(), selectionModel.signalsBlocked())
-                if not self._mousePressed:
-                    selectionModel.clearSelection()  # causes a clear problem here
+                # if not self._mousePressed:
+                selectionModel.clearSelection()  # causes a clear problem here
 
                 for obj in rowObjs:
                     row = self._dataFrameObject.find(self, str(obj.pid))
                     if row is not None:
                         selectionModel.select(self.model().index(row, 0),
                                               selectionModel.Select | selectionModel.Rows)
-
-        pass
 
     def clearTable(self):
         "remove all objects from the table"

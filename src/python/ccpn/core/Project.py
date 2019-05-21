@@ -201,6 +201,10 @@ class Project(AbstractWrapperObject):
         # initialise, creating the wrapped objects
         self._initializeAll()
 
+        # 20190520:ED routines that use core objects, not sure whether the correct place
+        self._setContourColours()
+        self._setNoiseLevels()
+
     def _close(self):
         self.close()
 
@@ -432,14 +436,13 @@ class Project(AbstractWrapperObject):
         #
         return result
 
-
-  #===========================================================================================
+    #===========================================================================================
     #  Notifiers system
     #
 
     # Old, API-level functions:
-  #
-  #===========================================================================================
+    #
+    #===========================================================================================
 
     @classmethod
     def _setupApiNotifier(cls, func, apiClassOrName, apiFuncName, parameterDict=None):
@@ -518,12 +521,12 @@ class Project(AbstractWrapperObject):
             tt = self._activeNotifiers.pop()
             Notifiers.unregisterNotify(*tt)
 
-  #===========================================================================================
-  #  Notifiers system
-  #
+    #===========================================================================================
+    #  Notifiers system
+    #
     # New notifier system (Free for use in application code):
-  #
-  #===========================================================================================
+    #
+    #===========================================================================================
 
     def registerNotifier(self, className: str, target: str, func: typing.Callable[..., None],
                          parameterDict: dict = {}, onceOnly: bool = False) -> typing.Callable[..., None]:
@@ -721,7 +724,6 @@ class Project(AbstractWrapperObject):
         """
         undo = self._undo
         if undo is not None:
-
             # self.resumeNotification()
             undo.decreaseWaypointBlocking()
 
@@ -1188,7 +1190,6 @@ class Project(AbstractWrapperObject):
             getLogger().warning('ERROR here')
             raise es
 
-
         if apiDataSource is None:
             return []
         else:
@@ -1197,8 +1198,8 @@ class Project(AbstractWrapperObject):
 
             # estimate new base contour levels
             setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
-                              setPositiveContours=True, setNegativeContours=True,
-                              useSameMultiplier=False)
+                                      setPositiveContours=True, setNegativeContours=True,
+                                      useSameMultiplier=False)
 
             # set the positive/negative/slice colours
 
@@ -1284,6 +1285,32 @@ class Project(AbstractWrapperObject):
             result = None
         #
         return result
+
+    def _setContourColours(self):
+        """Set new contour colours for spectra that have not been defined
+        """
+        # 20190520:ED new code to set colours and update contour levels
+        from ccpn.core.lib.SpectrumLib import getDefaultSpectrumColours
+
+        for spectrum in self.spectra:
+            if not spectrum.positiveContourColour or not spectrum.negativeContourColour:
+                # set contour colours for every spectrum
+                (spectrum.positiveContourColour,
+                 spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
+            if not spectrum.sliceColour:
+                spectrum.sliceColour = spectrum.positiveContourColour
+
+    def _setNoiseLevels(self):
+        """Set noise levels for spectra that have not been defined
+        """
+        # 20190520:ED new code to set colours and update contour levels
+        from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
+
+        for spectrum in self.spectra:
+            if not spectrum.noiseLevel:
+                setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
+                                          setPositiveContours=True, setNegativeContours=True,
+                                          useSameMultiplier=False)
 
     #===========================================================================================
     # new'Object' and other methods

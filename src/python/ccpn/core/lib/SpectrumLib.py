@@ -531,33 +531,27 @@ def nmrGlueBaselineCorrector(data, wd=20):
 from typing import Tuple
 
 
-def _getDefaultApiSpectrumColours(self: 'DataSource') -> Tuple[str, str]:
+def _getDefaultApiSpectrumColours(apiSpectrum: 'DataSource') -> Tuple[str, str]:
     """Get the default colours from the core spectrum class
     """
-    # this shouldn't need to be called now, but if it is, it will return (red, red)
-    return ('#FF0000', '#FF0000')
-
-
-def getDefaultSpectrumColours(self: 'Spectrum') -> Tuple[str, str]:
-    """Get default positivecontourcolour, negativecontourcolour for Spectrum
-    (calculated by hashing spectrum properties to avoid always getting the same colours
-    Currently matches getDefaultColours in dataSource that is set through the api
-    """
-
     # from ccpn.util.Colour import spectrumHexColours
     from ccpn.ui.gui.guiSettings import getColours, SPECTRUM_HEXCOLOURS, \
         SPECTRUM_HEXDEFAULTCOLOURS, CCPNGLWIDGET_BACKGROUND
     from ccpn.util.Colour import gray, hexToRgb, findNearestHex, invertRGBHue, rgbToHex
 
+    dimensionCount = apiSpectrum.numDim
+    serial = apiSpectrum.serial
+    expSerial = apiSpectrum.experiment.serial
+
     spectrumHexColours = getColours().get(SPECTRUM_HEXCOLOURS)
     spectrumHexDefaultColours = getColours().get(SPECTRUM_HEXDEFAULTCOLOURS)
 
     # use different colour lists for 1d and Nd
-    if self.dimensionCount < 2:
+    if dimensionCount < 2:
         colorCount = len(spectrumHexColours)
         step = ((colorCount // 2 - 1) // 2)
         kk = colorCount // 7
-        index = self.experiment.serial - 1 + step * (self._serial - 1)
+        index = expSerial - 1 + step * (serial - 1)
         posCol = spectrumHexColours[(kk * index + 10) % colorCount]
         negCol = spectrumHexColours[((kk + 1) * index + 10) % colorCount]
 
@@ -573,7 +567,7 @@ def getDefaultSpectrumColours(self: 'Spectrum') -> Tuple[str, str]:
             # colours for Vicky :)
             colorCount = len(spectrumHexDefaultColours)
             step = ((colorCount // 2 - 1) // 2)
-            index = self.experiment.serial - 1 + step * (self._serial - 1)
+            index = expSerial - 1 + step * (serial - 1)
             posCol = spectrumHexDefaultColours[(2 * index) % colorCount]
             negCol = spectrumHexDefaultColours[(2 * index + 1) % colorCount]
 
@@ -582,7 +576,7 @@ def getDefaultSpectrumColours(self: 'Spectrum') -> Tuple[str, str]:
             colorCount = len(spectrumHexColours)
             step = ((colorCount // 2 - 1) // 2)
             kk = 11         #colorCount // 11
-            index = self.experiment.serial - 1 + step * (self._serial - 1)
+            index = expSerial - 1 + step * (serial - 1)
             posCol = spectrumHexColours[(kk * index + 10) % colorCount]
 
             # invert the colour by reversing the ycbcr palette
@@ -593,6 +587,16 @@ def getDefaultSpectrumColours(self: 'Spectrum') -> Tuple[str, str]:
             negCol = findNearestHex(oppCol, spectrumHexColours)
 
     return (posCol, negCol)
+
+
+def getDefaultSpectrumColours(self: 'Spectrum') -> Tuple[str, str]:
+    """Get default positivecontourcolour, negativecontourcolour for Spectrum
+    (calculated by hashing spectrum properties to avoid always getting the same colours
+    Currently matches getDefaultColours in dataSource that is set through the api
+    """
+
+    apiSpectrum = self._wrappedData
+    return _getDefaultApiSpectrumColours(apiSpectrum)
 
 
 def get1DdataInRange(x, y, xRange):
@@ -648,6 +652,21 @@ def _recurseData(ii, dataList, startCondition, endCondition):
 
             _recurseData(ii + 1, newData, startCondition, endCondition)
 
+
+def _setApiContourLevelsFromNoise(apiSpectrum, setNoiseLevel=True,
+                              setPositiveContours=True, setNegativeContours=True,
+                              useSameMultiplier=False):
+    """Calculate the noise level, base contour level and positive/negative multipliers for the given apiSpectrum
+    """
+
+    project = apiSpectrum.topObject
+
+    # the core objects should have been initialised at this point
+    if project and apiSpectrum in project._data2Obj:
+        spectrum = project._data2Obj[apiSpectrum]
+        setContourLevelsFromNoise(spectrum, setNoiseLevel=setNoiseLevel,
+                                  setPositiveContours=setPositiveContours, setNegativeContours=setNegativeContours,
+                                  useSameMultiplier=useSameMultiplier)
 
 def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
                               setPositiveContours=True, setNegativeContours=True,

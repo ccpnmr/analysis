@@ -138,6 +138,8 @@ class GuiStrip(Frame):
         self.navigateToCursorMenu = None  #set from context menu and in CcpnOpenGL rightClick
         self._isPhasingOn = False
 
+        self._preferences = self.application.preferences.general
+
         # set peakLabelling to the default from preferences or strip to the left
         settings = spectrumDisplay.getSettings()
         if len(spectrumDisplay.strips) > 1:
@@ -157,15 +159,15 @@ class GuiStrip(Frame):
         else:
 
             # get the values from the preferences
-            self.peakLabelling = self.application.preferences.general.annotationType
-            self.symbolType = self.application.preferences.general.symbolType
-            self._symbolSize = self.application.preferences.general.symbolSizePixel
+            self.peakLabelling = self._preferences.annotationType
+            self.symbolType = self._preferences.symbolType
+            self._symbolSize = self._preferences.symbolSizePixel
 
-            self._symbolThickness = self.application.preferences.general.symbolThickness
-            self.gridVisible = self.application.preferences.general.showGrid
-            self.crosshairVisible = self.application.preferences.general.showCrosshair
-            self.showSpectraOnPhasing = self.application.preferences.general.showSpectraOnPhasing
-            self._contourThickness = self.application.preferences.general.contourThickness
+            self._symbolThickness = self._preferences.symbolThickness
+            self.gridVisible = self._preferences.showGrid
+            self.crosshairVisible = self._preferences.showCrosshair
+            self.showSpectraOnPhasing = self._preferences.showSpectraOnPhasing
+            self._contourThickness = self._preferences.contourThickness
 
         self._storedPhasingData = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
         self.showActivePhaseTrace = True
@@ -175,7 +177,7 @@ class GuiStrip(Frame):
         self._CcpnGLWidget.xUnits = settings[AXISXUNITS]
         self._CcpnGLWidget.yUnits = settings[AXISYUNITS]
         self._CcpnGLWidget.axisLocked = settings[AXISLOCKASPECTRATIO]
-        self._CcpnGLWidget._doubleCrosshairVisible = self.application.preferences.general.showDoubleCrosshair
+        self._CcpnGLWidget._doubleCrosshairVisible = self._preferences.showDoubleCrosshair
 
 
         # initialise the notifiers
@@ -917,7 +919,7 @@ class GuiStrip(Frame):
 
     def _createMarkAtPosition(self, positions, axisCodes):
         try:
-            defaultColour = self.application.preferences.general.defaultMarksColour
+            defaultColour = self._preferences.defaultMarksColour
             self._project.newMark(defaultColour, positions, axisCodes)
 
         except Exception as es:
@@ -929,7 +931,7 @@ class GuiStrip(Frame):
             # colourDict = guiSettings.MARK_LINE_COLOUR_DICT  # maps atomName --> colour
 
             positions = [self.current.mouseMovedDict[AXIS_FULLATOMNAME][ax] for ax in self.axisCodes]
-            defaultColour = self.application.preferences.general.defaultMarksColour
+            defaultColour = self._preferences.defaultMarksColour
             self._project.newMark(defaultColour, positions, self.axisCodes)
 
         except Exception as es:
@@ -978,13 +980,13 @@ class GuiStrip(Frame):
         """
         Zooms x axis of strip to the specified region
         """
-        padding = self.application.preferences.general.stripRegionPadding
+        padding = self._preferences.stripRegionPadding
         self.viewBox.setXRange(x1, x2, padding=padding)
 
     def zoomY(self, y1: float, y2: float):
         """Zooms y axis of strip to the specified region
         """
-        padding = self.application.preferences.general.stripRegionPadding
+        padding = self._preferences.stripRegionPadding
         self.viewBox.setYRange(y1, y2, padding=padding)
 
     # def showZoomPopup(self):

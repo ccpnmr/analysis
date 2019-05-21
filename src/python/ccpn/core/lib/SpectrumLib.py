@@ -559,6 +559,7 @@ def _getDefaultApiSpectrumColours(apiSpectrum: 'DataSource') -> Tuple[str, str]:
         try:
             # try and get the colourPalette number from the preferences, otherwise use 0
             from ccpn.framework.Application import getApplication
+
             colourPalette = getApplication().preferences.general.colourPalette
         except:
             colourPalette = 0
@@ -575,7 +576,7 @@ def _getDefaultApiSpectrumColours(apiSpectrum: 'DataSource') -> Tuple[str, str]:
             # automatic colours
             colorCount = len(spectrumHexColours)
             step = ((colorCount // 2 - 1) // 2)
-            kk = 11         #colorCount // 11
+            kk = 11  #colorCount // 11
             index = expSerial - 1 + step * (serial - 1)
             posCol = spectrumHexColours[(kk * index + 10) % colorCount]
 
@@ -654,8 +655,8 @@ def _recurseData(ii, dataList, startCondition, endCondition):
 
 
 def _setApiContourLevelsFromNoise(apiSpectrum, setNoiseLevel=True,
-                              setPositiveContours=True, setNegativeContours=True,
-                              useSameMultiplier=False):
+                                  setPositiveContours=True, setNegativeContours=True,
+                                  useSameMultiplier=False):
     """Calculate the noise level, base contour level and positive/negative multipliers for the given apiSpectrum
     """
 
@@ -668,10 +669,10 @@ def _setApiContourLevelsFromNoise(apiSpectrum, setNoiseLevel=True,
                                   setPositiveContours=setPositiveContours, setNegativeContours=setNegativeContours,
                                   useSameMultiplier=useSameMultiplier)
 
+
 def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
                               setPositiveContours=True, setNegativeContours=True,
                               useSameMultiplier=False):
-
     """Calculate the noise level, base contour level and positive/negative multipliers for the given spectrum
     """
 
@@ -688,16 +689,18 @@ def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
     # get specLimits for all dimensions
     specLimits = list(spectrum.spectrumLimits)
     dims = spectrum.dimensionCount
+    valsPerPoint = spectrum.valuesPerPoint
 
-    # set dimensions above 1 to just the centre of the spectrum
+    # set dimensions above 1 to just the centre of the spectrum +- 1/2 the values per point
+    # the ensures that at least 1 point is returned in each dimension
     for ii in range(2, dims):
         k = np.mean(specLimits[ii])
-        specLimits[ii] = (k, k)
+        specLimits[ii] = (k - (valsPerPoint[ii] / 2), k + (valsPerPoint[ii] / 2))
 
     axisCodeDict = dict((k, v) for k, v in zip(spectrum.axisCodes, specLimits))
-    exclusionBuffer = [1] * len(axisCodeDict)
+    # exclusionBuffer = [1] * len(axisCodeDict)
 
-    foundRegions = spectrum.getRegionData(exclusionBuffer=exclusionBuffer, minimumDimensionSize=1, **axisCodeDict)
+    foundRegions = spectrum.getRegionData(minimumDimensionSize=1, **axisCodeDict)
     if foundRegions:
 
         # just use the first region
@@ -713,9 +716,9 @@ def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
                 _recurseData(0, dataList, startCondition, endCondition)
 
                 levels = 10
-                base = abs(endCondition[5] + 3.0 * endCondition[6])     # abs(mean) + (3 * noiseLevel)
-                mx = startCondition[3]                                  # global array max
-                mn = startCondition[4]                                  # global array min
+                base = abs(endCondition[5] + 3.0 * endCondition[6])  # abs(mean) + (3 * noiseLevel)
+                mx = startCondition[3]  # global array max
+                mn = startCondition[4]  # global array min
 
                 # calculate multiplier to give contours across range of spectrum; trap base = 0
                 posMult = pow(abs(mx / base), 1 / levels) if base else 0.0
@@ -733,7 +736,7 @@ def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
                         spectrum.positiveContourBase = base
                         spectrum.positiveContourFactor = posMult
                     except Exception as es:
-                        spectrum.positiveContourBase = 10000            # default values
+                        spectrum.positiveContourBase = 10000  # default values
                         spectrum.positiveContourFactor = 1.41
 
                     spectrum.positiveContourCount = levels
@@ -743,7 +746,7 @@ def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
                         spectrum.negativeContourBase = -base
                         spectrum.negativeContourFactor = negMult
                     except Exception as es:
-                        spectrum.negativeContourBase = -10000           # default values
+                        spectrum.negativeContourBase = -10000  # default values
                         spectrum.negativeContourFactor = 1.41
 
                     spectrum.negativeContourCount = levels

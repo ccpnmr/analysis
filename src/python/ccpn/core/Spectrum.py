@@ -690,34 +690,34 @@ class Spectrum(AbstractWrapperObject):
             raise ValueError("SpectralWidth value must have length %s, was %s" %
                              (apiDataSource.numDim, value))
 
-        @property
-        def valuesPerPoint(self) -> Tuple[Optional[float], ...]:
-            """valuePerPoint for each dimension
+    @property
+    def valuesPerPoint(self) -> Tuple[Optional[float], ...]:
+        """valuePerPoint for each dimension
 
-            in ppm for Frequency dimensions with a single, well-defined reference
+        in ppm for Frequency dimensions with a single, well-defined reference
 
-            None for Frequency dimensions without a single, well-defined reference
+        None for Frequency dimensions without a single, well-defined reference
 
-            in time units (seconds) for FId dimensions
+        in time units (seconds) for FId dimensions
 
-            None for sampled dimensions"""
+        None for sampled dimensions"""
 
-            result = []
-            for dataDim in self._wrappedData.sortedDataDims():
-                if hasattr(dataDim, 'primaryDataDimRef'):
-                    # FreqDataDim - get ppm valuePerPoint
-                    ddr = dataDim.primaryDataDimRef
-                    valuePerPoint = ddr and ddr.valuePerPoint
-                elif hasattr(dataDim, 'valuePerPoint'):
-                    # FidDataDim - get time valuePerPoint
-                    valuePerPoint = dataDim.valuePerPoint
-                else:
-                    # Sampled DataDim - return None
-                    valuePerPoint = None
-                #
-                result.append(valuePerPoint)
+        result = []
+        for dataDim in self._wrappedData.sortedDataDims():
+            if hasattr(dataDim, 'primaryDataDimRef'):
+                # FreqDataDim - get ppm valuePerPoint
+                ddr = dataDim.primaryDataDimRef
+                valuePerPoint = ddr and ddr.valuePerPoint
+            elif hasattr(dataDim, 'valuePerPoint'):
+                # FidDataDim - get time valuePerPoint
+                valuePerPoint = dataDim.valuePerPoint
+            else:
+                # Sampled DataDim - return None
+                valuePerPoint = None
             #
-            return tuple(result)
+            result.append(valuePerPoint)
+        #
+        return tuple(result)
 
     @property
     def phases0(self) -> tuple:

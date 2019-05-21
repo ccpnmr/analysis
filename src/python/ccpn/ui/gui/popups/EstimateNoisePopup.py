@@ -157,9 +157,10 @@ class NoiseTab(Widget):
         # add an exclusion buffer to ensure that getRegionData always returns a region,
         # otherwise region may be 1 plain thick which will contradict error trapping for peak fitting
         # (which requires at least 3 points in each dimension)
-        exclusionBuffer = [1] * self.spectrum.dimensionCount
+        # exclusionBuffer = [1] * self.spectrum.dimensionCount
+        # however, this shouldn't be needed of the range is > valuePrePoint in each dimension
 
-        foundRegions = self.spectrum.getRegionData(exclusionBuffer=exclusionBuffer, **axisCodeDict)
+        foundRegions = self.spectrum.getRegionData(minimumDimensionSize=1, **axisCodeDict)
         if not foundRegions:
             return
 

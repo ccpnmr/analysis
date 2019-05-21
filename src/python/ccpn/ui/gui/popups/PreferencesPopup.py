@@ -378,7 +378,7 @@ class PreferencesPopup(CcpnDialog):
         self.showCrosshairBox.toggled.connect(partial(self._toggleGeneralOptions, 'showCrosshair'))
 
         row += 1
-        self.showDoubleCrosshairLabel = Label(parent, text="Show Double Crosshairs: ", grid=(row, 0))
+        self.showDoubleCrosshairLabel = Label(parent, text="    - and Double Crosshairs: ", grid=(row, 0))
         self.showDoubleCrosshairBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.showDoubleCrosshair)
         self.showDoubleCrosshairBox.toggled.connect(partial(self._toggleGeneralOptions, 'showDoubleCrosshair'))
 

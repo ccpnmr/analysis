@@ -108,10 +108,10 @@ def _getShiftForSpectra(referenceSpectrum, spectra, referenceRegion=(3, 2), engi
     else:
         return [0] * len(spectra) if engine == IndividualMode else 0  # cannot align without a reference intensity signal
 
-        #  find the shift for each spectrum for the selected region
-        for sp in spectra:
-            xTarg, yTarg = sp.positions, sp.intensities
-            x_TargetFilter = np.where((xTarg <= point1) & (xTarg >= point2))  # filter only the region of interest for the target spectrum
+    #  find the shift for each spectrum for the selected region
+    for sp in spectra:
+        xTarg, yTarg = sp.positions, sp.intensities
+        x_TargetFilter = np.where((xTarg <= point1) & (xTarg >= point2))  # filter only the region of interest for the target spectrum
 
         y_TargetValues = yTarg[x_TargetFilter]
         maxYTarget = np.max(y_TargetValues)
@@ -122,16 +122,16 @@ def _getShiftForSpectra(referenceSpectrum, spectra, referenceRegion=(3, 2), engi
             shift = tarPos - refPos
             shifts.append(shift)
 
-        if len(shifts) == len(spectra):
-            if engine == IndividualMode:
-                return shifts
+    if len(shifts) == len(spectra):
+        if engine == IndividualMode:
+            return shifts
 
-        # get a common shift from all the shifts found
-        if engine in EnginesCallables.keys():
-            shift = EnginesCallables[engine](shifts)
-            if isinstance(shift, stats.stats.ModeResult):
-                shift = shift.mode[0]
-                return float(shift)
+    # get a common shift from all the shifts found
+    if engine in EnginesCallables.keys():
+        shift = EnginesCallables[engine](shifts)
+        if isinstance(shift, stats.stats.ModeResult):
+            shift = shift.mode[0]
+            return float(shift)
 
 
 def addIndividualShiftToSpectra(spectra, shifts):

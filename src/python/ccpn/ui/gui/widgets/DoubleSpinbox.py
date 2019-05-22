@@ -117,6 +117,7 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
 
     def focusInEvent(self, QFocusEvent):
         self.setSelected()
+        super(DoubleSpinbox, self).focusInEvent(QFocusEvent)
 
     def setCallback(self, callback):
         "Sets callback; disconnects if callback=None"

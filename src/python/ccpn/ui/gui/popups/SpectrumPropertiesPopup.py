@@ -120,11 +120,15 @@ class SpectrumPropertiesPopup(CcpnDialog):
                                        callbacks=[self.reject, self._applyChanges, self._okButton],
                                        tipTexts=['', '', '', None], direction='h',
                                        hAlign='r', grid=(4, 1), gridSpan=(1, 4))
+        self.applyButtons.getButton('Ok').setFocus()
 
         self._fillPullDowns()
 
         # self.setFixedWidth(self.sizeHint().width())
         self.setFixedSize(self.sizeHint())
+
+        # as this is a dialog, need to set one of the buttons as the default button when other widgets have focus
+        self.setDefaultButton(self.applyButtons.getButton('Ok'))
 
     def _fillPullDowns(self):
         if self.spectrum.dimensionCount == 1:
@@ -277,7 +281,7 @@ class GeneralTab(Widget):
         Label(self, text="Path", vAlign='t', hAlign='l', grid=(row, 0))
         self.pathData = LineEdit(self, textAlignment='left', vAlign='t', grid=(row, 1))
         self.pathData.setValidator(SpectrumValidator(parent=self.pathData, spectrum=self.spectrum))
-        self.pathButton = Button(self, grid=(row, 2), callback=partial(self._getSpectrumFile, self.spectrum), icon='icons/applications-system')
+        self.pathButton = Button(self, grid=(row, 2), callback=partial(self._getSpectrumFile, self.spectrum), icon='icons/directory')
         row += 1
 
         self.pythonConsole = mainWindow.pythonConsole
@@ -340,11 +344,13 @@ class GeneralTab(Widget):
             self.colourBox.currentIndexChanged.connect(partial(self._queueChangeSliceComboIndex, spectrum))
             colourButton = Button(self, vAlign='t', hAlign='l', grid=(7, 2), hPolicy='fixed',
                                   callback=partial(self._queueSetSpectrumColour, spectrum), icon='icons/colours')
+
             Label(self, text="Experiment Type ", vAlign='t', hAlign='l', grid=(8, 0))
             self.spectrumType = FilteringPulldownList(self, vAlign='t', grid=(8, 1))
             spButton = Button(self, grid=(8, 2),
                               callback=partial(self._raiseExperimentFilterPopup, spectrum),
                               hPolicy='fixed', icon='icons/applications-system')
+
             experimentTypes = _getExperimentTypes(spectrum.project, spectrum)
             self.spectrumType.setData(texts=list(experimentTypes.keys()), objects=list(experimentTypes.values()))
 
@@ -1423,6 +1429,7 @@ class SpectrumDisplayPropertiesPopupNd(CcpnDialog):
                                        callbacks=[self.reject, self._applyChanges, self._okButton],
                                        tipTexts=['', '', '', None], direction='h',
                                        hAlign='r', grid=(2, 1), gridSpan=(1, 4))
+        self.applyButtons.getButton('Ok').setFocus()
 
         self._fillPullDowns()
 
@@ -1432,6 +1439,9 @@ class SpectrumDisplayPropertiesPopupNd(CcpnDialog):
             t._changes = dict()
 
         self.setFixedSize(self.sizeHint())
+
+        # as this is a dialog, need to set one of the buttons as the default button when other widgets have focus
+        self.setDefaultButton(self.applyButtons.getButton('Ok'))
 
     def _fillPullDowns(self):
         for aTab in self._contoursTab:
@@ -1534,6 +1544,7 @@ class SpectrumDisplayPropertiesPopup1d(CcpnDialog):
                                        callbacks=[self.reject, self._applyChanges, self._okButton],
                                        tipTexts=['', '', '', None], direction='h',
                                        hAlign='r', grid=(2, 1), gridSpan=(1, 4))
+        self.applyButtons.getButton('Ok').setFocus()
 
         self._fillPullDowns()
 
@@ -1543,6 +1554,9 @@ class SpectrumDisplayPropertiesPopup1d(CcpnDialog):
             t._changes = dict()
 
         self.setFixedSize(self.sizeHint())
+
+        # as this is a dialog, need to set one of the buttons as the default button when other widgets have focus
+        self.setDefaultButton(self.applyButtons.getButton('Ok'))
 
     def _fillPullDowns(self):
         for aTab in self._generalTab:

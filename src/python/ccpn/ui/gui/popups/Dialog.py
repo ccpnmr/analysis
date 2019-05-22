@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-07-04 15:21:16 +0000 (Tue, July 04, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtWidgets
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.util.Logging import getLogger
 from contextlib import contextmanager
@@ -60,6 +60,14 @@ class CcpnDialog(QtWidgets.QDialog, Base):
         self.setSizePolicy(self.sizePolicy)
         self.setFixedSize(self.maximumWidth(), self.maximumHeight())
         self.setSizeGripEnabled(False)
+
+    def setDefaultButton(self, button):
+        if isinstance(button, QtWidgets.QPushButton):
+            button.setDefault(True)
+            button.setAutoDefault(True)
+        else:
+            raise TypeError('%s is not a button' % str(button))
+
 
 def dialogErrorReport(self, undo, es):
     """Show warning popup and check the undo stack for items that need to be culled

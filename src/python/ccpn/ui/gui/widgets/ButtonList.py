@@ -118,6 +118,17 @@ class ButtonList(Widget):
             self.buttons.append(button)
             self.buttonNames[text] = i + j
 
+    def getButton(self, buttonName: str):
+        """
+        Return the button with the given name or return None
+        :param buttonName(str) - name of the button:
+        """
+        if buttonName in self.buttonNames.keys():
+            return self.buttons[self.buttonNames[buttonName]]
+
+        else:
+            getLogger().warning('Button %s not found in the list' % buttonName)
+
     def setButtonEnabled(self, buttonName: str, enable: bool = True):
         """
         Enable/Disable a button by name

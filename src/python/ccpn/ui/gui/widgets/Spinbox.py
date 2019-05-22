@@ -31,7 +31,7 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Label import Label
 
 
-class Spinbox(QtGui.QSpinBox, Base):
+class Spinbox(QtWidgets.QSpinBox, Base):
 
     def __init__(self, parent, prefix=None, value=None, step=None, min=None, max=None, showButtons=True, **kwds):
 

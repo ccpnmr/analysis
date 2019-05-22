@@ -64,6 +64,9 @@ class PulldownList(QtWidgets.QComboBox, Base):
         super().__init__(parent)
         Base._init(self, **kwds)
 
+        # focus can be set with the tab keys and mouse
+        self.setFocusPolicy(QtCore.Qt.StrongFocus)
+
         self.text = None
         self.object = None
         self.texts = []

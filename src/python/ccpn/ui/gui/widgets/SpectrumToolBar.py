@@ -188,7 +188,6 @@ class SpectrumToolBar(ToolBar):
         Creates a context menu containing a command to delete the spectrum from the display and its
         button from the toolbar.
         """
-        from collections import OrderedDict
 
         if not button:
             return None
@@ -261,6 +260,7 @@ class SpectrumToolBar(ToolBar):
             validActions = [action for action in self.actions() if action.text() == oldId]
             for action in validActions:
                 action.setText(spectrum.id)
+                action.setObjectName(spectrum.pid)
 
     def _removeSpectrum(self, button: QtWidgets.QToolButton):
         """

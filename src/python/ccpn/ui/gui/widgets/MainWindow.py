@@ -58,7 +58,7 @@ class MainWindow(QtWidgets.QMainWindow, Base):
         self.setGeometry(self.x(), self.y(), width, height)
 
 
-class DockWidget(QtGui.QDockWidget):
+class DockWidget(QtWidgets.QDockWidget, Base):
     AREA_DICT = dict(
             left=QtCore.Qt.LeftDockWidgetArea,
             top=QtCore.Qt.TopDockWidgetArea,

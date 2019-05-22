@@ -260,3 +260,4 @@ class Base(DropBase):
         """
         from ccpn.ui.gui.widgets.Spacer import Spacer
         return Spacer(self, width=width, height=height, grid=grid, gridSpan=gridSpan)
+

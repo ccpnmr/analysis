@@ -28,51 +28,21 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 
 import sys
 import math
-import time
-from threading import Thread
-import multiprocessing as mp
-# from queue import Queue
-from PyQt5 import QtCore, QtGui, QtWidgets
-# from PyQt5.QtCore import QPoint, QSize, Qt, pyqtSlot
-# from PyQt5.QtWidgets import QApplication, QOpenGLWidget
+from PyQt5 import QtWidgets
 from ccpn.util.Logging import getLogger
 import numpy as np
-# from pyqtgraph import functions as fn
-# from ccpn.core.PeakList import PeakList
-# from ccpn.core.IntegralList import IntegralList
-# from ccpn.ui.gui.lib.mouseEvents import getCurrentMouseMode
-# from ccpn.ui.gui.lib.GuiStrip import DefaultMenu, PeakMenu, MultipletMenu, PhasingMenu
-
+from ccpn.core.Peak import Peak
+from ccpn.core.NmrAtom import NmrAtom
 from ccpn.util.Colour import getAutoColourRgbRatio
-from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, \
-    CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_INTEGRALSHADE, \
-    CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE, CCPNGLWIDGET_MULTIPLETLINK, getColours
+from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_INTEGRALSHADE, \
+    CCPNGLWIDGET_MULTIPLETLINK, getColours
 from ccpn.ui.gui.lib.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation
-# import ccpn.util.Phasing as Phasing
-# from ccpn.ui.gui.lib.mouseEvents import \
-#     leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, \
-#     middleMouse, shiftMiddleMouse, rightMouse, shiftRightMouse, controlRightMouse, PICK
 from ccpn.core.lib.Notifiers import Notifier
-# from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
-# from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLGlobalData
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_IGNORE, GLRENDERMODE_DRAW, \
-    GLRENDERMODE_RESCALE, GLRENDERMODE_REBUILD, \
-    GLREFRESHMODE_NEVER, GLREFRESHMODE_ALWAYS, \
-    GLREFRESHMODE_REBUILD, GLVertexArray, \
-    GLSymbolArray, GLLabelArray
-# from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import GLViewports
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLIntegralRegion, GLExternalRegion, \
-    GLRegion, REGION_COLOURS
-# from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import GLExporter
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_DRAW,  GLRENDERMODE_RESCALE, GLRENDERMODE_REBUILD, \
+    GLREFRESHMODE_NEVER, GLREFRESHMODE_REBUILD, GLSymbolArray, GLLabelArray
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLIntegralRegion
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
-
-from ccpn.util.Common import makeIterableList
-from ccpn.core.lib.Cache import cached
-
-
-# from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE
-
 
 try:
     from OpenGL import GL, GLU, GLUT
@@ -185,7 +155,8 @@ class GLpeakListMethods():
             text = _getScreenPeakAnnotation(obj, useShortCode=False)
         elif labelType == 2:
             # return the original pid
-            text = _getPeakAnnotation(obj)
+            # text = _getPeakAnnotation(obj)
+            text = _getScreenPeakAnnotation(obj, useShortCode=False, usePid=True)
         else:
             # return the minimal form
             text = _getScreenPeakAnnotation(obj, useShortCode=True, useMinimalCode=True)
@@ -406,12 +377,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                             self._appendLabel(spectrumView, objListView, drawList.stringList, obj)
                             self._rescaleLabels(spectrumView, objListView, drawList)
 
-    def _processNotifier(self, data):
-        """Process notifiers
-        """
-        triggers = data[Notifier.TRIGGER]
-        obj = data[Notifier.OBJECT]
-
+    def _handleNotifier(self, triggers, obj):
         if Notifier.DELETE in triggers:
             self._deleteSymbol(obj)
             self._deleteLabel(obj)
@@ -423,6 +389,34 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         if Notifier.CHANGE in triggers:
             self._changeSymbol(obj)
             self._changeLabel(obj)
+
+    def _processNotifier(self, data):
+        """Process notifiers
+        """
+        triggers = data[Notifier.TRIGGER]
+        obj = data[Notifier.OBJECT]
+
+        if isinstance(obj, Peak):
+
+            # update the peak labelling
+            if Notifier.DELETE in triggers:
+                self._deleteSymbol(obj)
+                self._deleteLabel(obj)
+
+            if Notifier.CREATE in triggers:
+                self._createSymbol(obj)
+                self._createLabel(obj)
+
+            if Notifier.CHANGE in triggers:
+                self._changeSymbol(obj)
+                self._changeLabel(obj)
+
+        elif isinstance(obj, NmrAtom):
+
+            # update the labels on the peaks
+            for peak in obj.assignedPeaks:
+                self._changeSymbol(peak)
+                self._changeLabel(peak)
 
     def _getSymbolWidths(self):
         """return the required r, w, symbolWidth for the current screen scaling.

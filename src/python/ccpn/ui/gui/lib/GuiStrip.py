@@ -197,6 +197,9 @@ class GuiStrip(Frame):
         self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
                          'Peak', self._updateDisplayedPeaks, onceOnly=True)
 
+        self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
+                         'NmrAtom', self._updateDisplayedNmrAtoms, onceOnly=True)
+
         # Notifier for updating the integrals
         self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
                          'Integral', self._updateDisplayedIntegrals, onceOnly=True)
@@ -342,6 +345,11 @@ class GuiStrip(Frame):
         """Callback when peaks have changed
         """
         self._CcpnGLWidget._processPeakNotifier(data)
+
+    def _updateDisplayedNmrAtoms(self, data):
+        """Callback when nmrAtoms have changed
+        """
+        self._CcpnGLWidget._processNmrAtomNotifier(data)
 
     def _updateDisplayedMultiplets(self, data):
         """Callback when multiplets have changed

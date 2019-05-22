@@ -2429,6 +2429,13 @@ class CcpnGLWidget(QOpenGLWidget):
         self._clearKeys()
         self.update()
 
+    def _processNmrAtomNotifier(self, data):
+        self._updateVisibleSpectrumViews()
+        self._GLPeaks._processNotifier(data)
+
+        self._clearKeys()
+        self.update()
+
     def _processIntegralNotifier(self, data):
         self._updateVisibleSpectrumViews()
         self._GLIntegrals._processNotifier(data)

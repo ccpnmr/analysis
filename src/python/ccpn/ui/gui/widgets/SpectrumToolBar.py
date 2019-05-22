@@ -42,6 +42,8 @@ from ccpn.core.IntegralList import IntegralList
 from ccpn.core.MultipletList import MultipletList
 from ccpn.ui.gui.lib.GuiSpectrumView import _spectrumViewHasChanged
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
+from ccpn.core.lib import Pid
+
 
 TOOLBAR_EXTENSIONNAME = 'qt_toolbar_ext_button'
 
@@ -81,7 +83,7 @@ class SpectrumToolBar(ToolBar):
         """
         self.blockSignals(False)
         self.setUpdatesEnabled(True)
-        
+
     @contextmanager
     def spectrumToolBarBlocking(self, node=None):
         """Context manager to handle blocking of the spectrumToolBar events.
@@ -141,7 +143,7 @@ class SpectrumToolBar(ToolBar):
         GLSignals._emitAxisUnitsChanged(source=None, strip=self.widget.strips[0], dataDict={})
 
     def _addSubMenusToContext(self, contextMenu, button):
-        
+
         with self.spectrumToolBarBlocking():
             dd = OrderedDict([(PeakList, PeakListView), (IntegralList, IntegralListView), (MultipletList, MultipletListView)])
             spectrum = self.widget.project.getByPid(button.actions()[0].objectName())
@@ -174,7 +176,7 @@ class SpectrumToolBar(ToolBar):
                                 action = smenu.addItem('{0} ({1}{2})'.format(ccpnObj.id, strip.id, currentTxt), toolTip=toolTip)
                             else:
                                 action = smenu.addItem(ccpnObj.id, toolTip=toolTip)
-    
+
                             action.setCheckable(True)
                             if view.isVisible():
                                 action.setChecked(True)
@@ -245,6 +247,20 @@ class SpectrumToolBar(ToolBar):
                 for action in menu.actions():
                     if action.text() == view.pid:
                         action.setChecked(abool)
+
+    def _spectrumRename(self, data):
+        """Rename the spectrum name in the toolbar from a notifier callback
+        """
+        spectrum = data[Notifier.OBJECT]
+        trigger = data[Notifier.TRIGGER]
+
+        if spectrum and trigger in [Notifier.RENAME]:
+            oldPid = Pid.Pid(data[Notifier.OLDPID])
+            oldId = oldPid.id
+
+            validActions = [action for action in self.actions() if action.text() == oldId]
+            for action in validActions:
+                action.setText(spectrum.id)
 
     def _removeSpectrum(self, button: QtWidgets.QToolButton):
         """

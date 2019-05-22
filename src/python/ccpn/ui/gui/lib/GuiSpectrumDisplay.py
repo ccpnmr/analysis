@@ -306,10 +306,10 @@ class GuiSpectrumDisplay(CcpnModule):
         self._phasingTraceScale = 1.0e-7
         self.stripScaleFactor = 1.0
 
-        # self._spectrumNotifier = self.setNotifier(self.project,
-        #                                        [Notifier.CREATE],
-        #                                        'Spectrum',
-        #                                        self._spectrumViewChanged)
+        self._spectrumRenameNotifier = self.setNotifier(self.project,
+                                               [Notifier.RENAME],
+                                               'Spectrum',
+                                               self._spectrumRenameChanged)
 
         self._toolbarNotifier = self.setNotifier(self.project,
                                                  [Notifier.CHANGE],
@@ -364,6 +364,11 @@ class GuiSpectrumDisplay(CcpnModule):
                 strip.header.headerVisible = False
             elif strip.header.handle == handle:
                 strip.header.headerVisible = False
+
+    def _spectrumRenameChanged(self, data):
+        """Respond to a change on the name of a spectrum
+        """
+        self.spectrumToolBar._spectrumRename(data)
 
     def _spectrumViewChanged(self, data):
         """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame

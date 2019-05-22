@@ -90,10 +90,8 @@ class SpectrumPropertiesPopup(CcpnDialog):
         self.current = mainWindow.application.current
         self.spectrum = spectrum
 
-        # layout = QtWidgets.QGridLayout()
-        # self.setLayout(layout)
         self.tabWidget = QtWidgets.QTabWidget()
-        # tabWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+
         if spectrum.dimensionCount == 1:
             self._generalTab = GeneralTab(parent=self, mainWindow=self.mainWindow, spectrum=spectrum)
             self._dimensionsTab = DimensionsTab(parent=self, mainWindow=self.mainWindow,
@@ -123,8 +121,6 @@ class SpectrumPropertiesPopup(CcpnDialog):
         self.applyButtons.getButton('Ok').setFocus()
 
         self._fillPullDowns()
-
-        # self.setFixedWidth(self.sizeHint().width())
         self.setFixedSize(self.sizeHint())
 
         # as this is a dialog, need to set one of the buttons as the default button when other widgets have focus
@@ -1412,18 +1408,13 @@ class SpectrumDisplayPropertiesPopupNd(CcpnDialog):
         self.orderedSpectrumViews = orderedSpectrumViews
         self.orderedSpectra = OrderedSet([spec.spectrum for spec in self.orderedSpectrumViews])
 
-        # self.tabWidget = QtWidgets.QTabWidget()
-        # self.tabWidget.setMinimumWidth(
-        #         max(self.MINIMUM_WIDTH, self.MINIMUM_WIDTH_PER_TAB * len(self.orderedSpectra)))
-
         self.tabWidget = Tabs(self, setLayout=True, grid=(0, 0), gridSpan=(2, 4))
+        self.tabWidget.setFixedWidth(self.MINIMUM_WIDTH)
 
         self._contoursTab = []
         for specNum, thisSpec in enumerate(self.orderedSpectra):
             self._contoursTab.append(ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec))
             self.tabWidget.addTab(self._contoursTab[specNum], thisSpec.name)
-
-        # self.layout().addWidget(self.tabWidget, 0, 0, 2, 4)
 
         self.applyButtons = ButtonList(self, texts=['Cancel', 'Apply', 'Ok'],
                                        callbacks=[self.reject, self._applyChanges, self._okButton],
@@ -1529,8 +1520,7 @@ class SpectrumDisplayPropertiesPopup1d(CcpnDialog):
         self.orderedSpectra = [spec.spectrum for spec in self.orderedSpectrumViews]
 
         self.tabWidget = QtWidgets.QTabWidget()
-        self.tabWidget.setMinimumWidth(
-                max(self.MINIMUM_WIDTH, self.MINIMUM_WIDTH_PER_TAB * len(self.orderedSpectra)))
+        self.tabWidget.setFixedWidth(self.MINIMUM_WIDTH)
 
         self._generalTab = []
         # for specNum, thisSpec in enumerate(self.orderedSpectra):

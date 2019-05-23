@@ -1216,7 +1216,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         orderedAxes = self._apiStripSpectrumView.strip.orderedAxes
 
         if dimensionCount == 2:
-            return [], 0, 0
+            return
 
         elif dimensionCount == 3:
 
@@ -1247,9 +1247,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             zPointFloat0 = valueToPoint(zRegionValue[0]) - 1
             zPointFloat1 = valueToPoint(zRegionValue[1]) - 1
 
-            zPoint0, zPoint1 = (int(zPointFloat0 + 1), int(zPointFloat1 + 1))  # this gives first and 1+last integer in range
+            zPoint0, zPoint1 = (int(zPointFloat0 + 1), int(zPointFloat1 + 1))   # this gives first and 1+last integer in range
             if zPoint0 == zPoint1:
-                if zPointFloat0 - (zPoint0 - 1) < zPoint1 - zPointFloat1:  # which is closest to an integer
+                if zPointFloat0 - (zPoint0 - 1) < zPoint1 - zPointFloat1:       # which is closest to an integer
                     zPoint0 -= 1
                 else:
                     zPoint1 += 1
@@ -1269,7 +1269,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             return (tuple(zz for zz in range(zPoint0, zPoint1)), zPointOffset, zPointCount)
 
         else:
-            return [], 0, 0
+            return
 
     def _addContoursToDisplayList(self, displayList, contourData, level):
         """ contourData is list of [NumPy array with ndim = 1 and size = twice number of points] """

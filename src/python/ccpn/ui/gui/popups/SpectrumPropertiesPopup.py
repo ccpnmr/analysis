@@ -124,7 +124,7 @@ class SpectrumPropertiesPopup(CcpnDialog):
         self.setFixedSize(self.sizeHint())
 
         # as this is a dialog, need to set one of the buttons as the default button when other widgets have focus
-        self.setDefaultButton(self.applyButtons.getButton('Ok'))
+        self.setDefaultButton(self.applyButtons.getButton('Apply'))
 
     def _fillPullDowns(self):
         if self.spectrum.dimensionCount == 1:
@@ -1432,7 +1432,7 @@ class SpectrumDisplayPropertiesPopupNd(CcpnDialog):
         self.setFixedSize(self.sizeHint())
 
         # as this is a dialog, need to set one of the buttons as the default button when other widgets have focus
-        self.setDefaultButton(self.applyButtons.getButton('Ok'))
+        self.setDefaultButton(self.applyButtons.getButton('Apply'))
 
     def _fillPullDowns(self):
         for aTab in self._contoursTab:
@@ -1521,6 +1521,7 @@ class SpectrumDisplayPropertiesPopup1d(CcpnDialog):
 
         self.tabWidget = QtWidgets.QTabWidget()
         self.tabWidget.setFixedWidth(self.MINIMUM_WIDTH)
+        self.tabWidget.setFocusPolicy(QtCore.Qt.StrongFocus)
 
         self._generalTab = []
         # for specNum, thisSpec in enumerate(self.orderedSpectra):
@@ -1546,7 +1547,7 @@ class SpectrumDisplayPropertiesPopup1d(CcpnDialog):
         self.setFixedSize(self.sizeHint())
 
         # as this is a dialog, need to set one of the buttons as the default button when other widgets have focus
-        self.setDefaultButton(self.applyButtons.getButton('Ok'))
+        self.setDefaultButton(self.applyButtons.getButton('Apply'))
 
     def _fillPullDowns(self):
         for aTab in self._generalTab:

@@ -68,6 +68,13 @@ POLICY_DICT = {
     'ignored'         : QtWidgets.QSizePolicy.Ignored,
     }
 
+FOCUS_DICT = {
+    'no'    : QtCore.Qt.NoFocus,
+    'tab'   : QtCore.Qt.TabFocus,
+    'click' : QtCore.Qt.ClickFocus,
+    'string': QtCore.Qt.StrongFocus
+    }
+
 
 class Base(DropBase):
 
@@ -86,11 +93,13 @@ class Base(DropBase):
               # keywords for adding to parent
               grid=(None, None), gridSpan=(1, 1), stretch=(0, 0),
               hAlign=None, vAlign=None,
-              hidden= False,
+              hidden=False,
 
               # keywords related to dropable properties
               acceptDrops=False,
 
+              # other keywords
+              focusPolicy=None,
               objectName=None
               ):
         """
@@ -153,6 +162,10 @@ class Base(DropBase):
         if not isFloatWidget and (grid[0] is not None or grid[1] is not None):
             self._addToParent(grid=grid, gridSpan=gridSpan, stretch=stretch,
                               hAlign=hAlign, vAlign=vAlign)
+
+        # set the focus policy for the widget, if not valid, will default to strongFocus
+        if focusPolicy:
+            self.setFocusPolicy(FOCUS_DICT.get(focusPolicy, QtCore.Qt.StrongFocus))
 
         # set the object name of the widget to give unique name for restoring widgets
         if objectName:
@@ -250,7 +263,7 @@ class Base(DropBase):
         """
         return self.parent()
 
-    def addSpacer(self, width, height, grid, gridSpan=(1,1)):
+    def addSpacer(self, width, height, grid, gridSpan=(1, 1)):
         """Convience to insert spacer
         width, height: in pixels
         grid=(row,col): tuple or list defining row, column
@@ -259,5 +272,5 @@ class Base(DropBase):
         :returns: Spacer widget
         """
         from ccpn.ui.gui.widgets.Spacer import Spacer
-        return Spacer(self, width=width, height=height, grid=grid, gridSpan=gridSpan)
 
+        return Spacer(self, width=width, height=height, grid=grid, gridSpan=gridSpan)

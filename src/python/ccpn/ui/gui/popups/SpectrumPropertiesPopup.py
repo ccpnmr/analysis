@@ -90,7 +90,7 @@ class SpectrumPropertiesPopup(CcpnDialog):
         self.current = mainWindow.application.current
         self.spectrum = spectrum
 
-        self.tabWidget = QtWidgets.QTabWidget()
+        self.tabWidget = Tabs(self, setLayout=True, grid=(0, 0), gridSpan=(2, 4), focusPolicy='strong')
 
         if spectrum.dimensionCount == 1:
             self._generalTab = GeneralTab(parent=self, mainWindow=self.mainWindow, spectrum=spectrum)
@@ -109,7 +109,6 @@ class SpectrumPropertiesPopup(CcpnDialog):
             self.tabWidget.addTab(self._generalTab, "General")
             self.tabWidget.addTab(self._dimensionsTab, "Dimensions")
             self.tabWidget.addTab(self._contoursTab, "Contours")
-        self.layout().addWidget(self.tabWidget, 0, 0, 2, 4)
 
         Spacer(self, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(3, 1), gridSpan=(1, 1))
@@ -118,7 +117,7 @@ class SpectrumPropertiesPopup(CcpnDialog):
                                        callbacks=[self.reject, self._applyChanges, self._okButton],
                                        tipTexts=['', '', '', None], direction='h',
                                        hAlign='r', grid=(4, 1), gridSpan=(1, 4))
-        self.applyButtons.getButton('Ok').setFocus()
+        self.applyButtons.getButton('Apply').setFocus()
 
         self._fillPullDowns()
         self.setFixedSize(self.sizeHint())
@@ -1408,7 +1407,7 @@ class SpectrumDisplayPropertiesPopupNd(CcpnDialog):
         self.orderedSpectrumViews = orderedSpectrumViews
         self.orderedSpectra = OrderedSet([spec.spectrum for spec in self.orderedSpectrumViews])
 
-        self.tabWidget = Tabs(self, setLayout=True, grid=(0, 0), gridSpan=(2, 4))
+        self.tabWidget = Tabs(self, setLayout=True, grid=(0, 0), gridSpan=(2, 4), focusPolicy='strong')
         self.tabWidget.setFixedWidth(self.MINIMUM_WIDTH)
 
         self._contoursTab = []
@@ -1420,7 +1419,7 @@ class SpectrumDisplayPropertiesPopupNd(CcpnDialog):
                                        callbacks=[self.reject, self._applyChanges, self._okButton],
                                        tipTexts=['', '', '', None], direction='h',
                                        hAlign='r', grid=(2, 1), gridSpan=(1, 4))
-        self.applyButtons.getButton('Ok').setFocus()
+        self.applyButtons.getButton('Apply').setFocus()
 
         self._fillPullDowns()
 
@@ -1519,9 +1518,8 @@ class SpectrumDisplayPropertiesPopup1d(CcpnDialog):
         self.orderedSpectrumViews = orderedSpectrumViews
         self.orderedSpectra = [spec.spectrum for spec in self.orderedSpectrumViews]
 
-        self.tabWidget = QtWidgets.QTabWidget()
+        self.tabWidget = Tabs(self, setLayout=True, grid=(0, 0), gridSpan=(2, 4), focusPolicy='strong')
         self.tabWidget.setFixedWidth(self.MINIMUM_WIDTH)
-        self.tabWidget.setFocusPolicy(QtCore.Qt.StrongFocus)
 
         self._generalTab = []
         # for specNum, thisSpec in enumerate(self.orderedSpectra):
@@ -1529,13 +1527,11 @@ class SpectrumDisplayPropertiesPopup1d(CcpnDialog):
             self._generalTab.append(ColourTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec))
             self.tabWidget.addTab(self._generalTab[specNum], thisSpec.name)
 
-        self.layout().addWidget(self.tabWidget, 0, 0, 2, 4)
-
         self.applyButtons = ButtonList(self, texts=['Cancel', 'Apply', 'Ok'],
                                        callbacks=[self.reject, self._applyChanges, self._okButton],
                                        tipTexts=['', '', '', None], direction='h',
                                        hAlign='r', grid=(2, 1), gridSpan=(1, 4))
-        self.applyButtons.getButton('Ok').setFocus()
+        self.applyButtons.getButton('Apply').setFocus()
 
         self._fillPullDowns()
 

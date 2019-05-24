@@ -822,7 +822,7 @@ class GuiStripNd(GuiStrip):
                 self._addCalibrateXNDSpectrumWidget()
             self.calibrateXNDWidgets.setVisible(True)
             self.calibrateXNDWidgets._toggleLines()
-            self.calibrateXNDWidgets.resetUndos()
+            # self.calibrateXNDWidgets.resetUndos()
 
         else:
             self.calibrateXNDWidgets.setVisible(False)
@@ -844,7 +844,7 @@ class GuiStripNd(GuiStrip):
                 self._addCalibrateYNDSpectrumWidget()
             self.calibrateYNDWidgets.setVisible(True)
             self.calibrateYNDWidgets._toggleLines()
-            self.calibrateYNDWidgets.resetUndos()
+            # self.calibrateYNDWidgets.resetUndos()
 
         else:
             self.calibrateYNDWidgets.setVisible(False)
@@ -858,13 +858,13 @@ class GuiStripNd(GuiStrip):
                 self._addCalibrateXNDSpectrumWidget()
             self.calibrateXNDWidgets.setVisible(True)
             self.calibrateXNDWidgets._toggleLines()
-            self.calibrateXNDWidgets.resetUndos()
+            # self.calibrateXNDWidgets.resetUndos()
 
             if self.calibrateYNDWidgets is None:
                 self._addCalibrateYNDSpectrumWidget()
             self.calibrateYNDWidgets.setVisible(True)
             self.calibrateYNDWidgets._toggleLines()
-            self.calibrateYNDWidgets.resetUndos()
+            # self.calibrateYNDWidgets.resetUndos()
 
         else:
             self.calibrateXNDWidgets.setVisible(False)

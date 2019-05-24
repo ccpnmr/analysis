@@ -1208,6 +1208,9 @@ class Project(AbstractWrapperObject):
             (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
             spectrum.sliceColour = spectrum.positiveContourColour
 
+            # set the initial axis ordering
+            spectrum.getDefaultOrdering(None)
+
             # if there are no peakLists then create a new one - taken from Spectrum _spectrumMakeFirstPeakList notifier
             if not spectrum.peakLists:
                 spectrum.newPeakList()

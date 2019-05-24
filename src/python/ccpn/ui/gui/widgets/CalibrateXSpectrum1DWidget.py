@@ -38,6 +38,9 @@ from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.core.lib.ContextManagers import undoBlock
+from ccpn.ui.gui.popups.Dialog import handleDialogApply
+from ccpn.core.lib.ContextManagers import undoStackBlocking
+from functools import partial
 
 
 OP = 'Calibrate X - Original Position: '
@@ -63,7 +66,7 @@ class CalibrateX1DWidgets(Frame):
         self.originalPosition = None
         self.newPosition = None
         self.strip = strip
-        self.targetLineVisible = False
+        self.targetLineVisible = True
 
         try:
             self.GLWidget = self.current.strip._CcpnGLWidget
@@ -171,11 +174,6 @@ class CalibrateX1DWidgets(Frame):
                 self.infiniteLine.visible = False
                 self.originalPosInfiniteLine.visible = False
 
-    def resetUndos(self):
-        """Set the number of undos to enable cancelling
-        """
-        self.numUndos = self.project._undo.numItems()
-
     def _toggleLines(self):
         if self.isVisible():
             self._initLines()
@@ -183,40 +181,23 @@ class CalibrateX1DWidgets(Frame):
             self._removeLines()
 
     def _apply(self):
-        applyAccept = False
 
-        with undoBlock():
-            _undo = self.project._undo
-            oldUndo = _undo.numItems()
+        with handleDialogApply(self) as error:
             fromPos = self.originalPosition
             toPos = self.newPosition
-            try:
+
+            # add an undo item to the stack
+            with undoStackBlocking() as addUndoItem:
                 self._calibrateSpectra(fromPos, toPos)
 
-                # add an undo item to the stack
-                if _undo is not None:
-                    _undo.newItem(self._calibrateSpectra, self._calibrateSpectra,
-                                  undoArgs=(toPos, fromPos),
-                                  redoArgs=(fromPos, toPos))
-
-                applyAccept = True
-            except Exception as es:
-                showWarning(str(self.windowTitle()), str(es))
-
-        if applyAccept is False:
-            # should only undo if something new has been added to the undo deque
-            # may cause a problem as some things may be set with the same values
-            # and still be added to the change list, so only undo if length has changed
-            errorName = str(self.__class__.__name__)
-            while oldUndo < self.project._undo.numItems():
-                self.project._undo.undo()
-            getLogger().debug('>>>Undo.%s._applychanges' % errorName)
+                addUndoItem(undo=partial(self._calibrateSpectra, toPos, fromPos),
+                            redo=partial(self._calibrateSpectra, fromPos, toPos))
 
     def _calibrateSpectra(self, fromPos, toPos):
         if self.mainWindow is not None:
             if self.strip is not None:
                 for spectrumView in self.strip.spectrumViews:
-                    if spectrumView.plot.isVisible():
+                    if spectrumView.isVisible():
                         spectrum = spectrumView.spectrum
                         _calibrateX1D(spectrum, fromPos, toPos)
                         self.setOriginalPos(toPos)

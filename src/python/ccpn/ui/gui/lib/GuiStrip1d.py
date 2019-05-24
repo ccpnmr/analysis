@@ -297,7 +297,7 @@ class GuiStrip1d(GuiStrip):
                 self._addCalibrate1DXSpectrumWidget()
             self.calibrateX1DWidgets.setVisible(True)
             self.calibrateX1DWidgets._toggleLines()
-            self.calibrateX1DWidgets.resetUndos()
+            # self.calibrateX1DWidgets.resetUndos()
 
         else:
             self.calibrateX1DWidgets.setVisible(False)
@@ -328,7 +328,7 @@ class GuiStrip1d(GuiStrip):
                 self._addCalibrate1DYSpectrumWidget()
             self.calibrateY1DWidgets.setVisible(True)
             self.calibrateY1DWidgets._toggleLines()
-            self.calibrateY1DWidgets.resetUndos()
+            # self.calibrateY1DWidgets.resetUndos()
 
         else:
             self.calibrateY1DWidgets.setVisible(False)

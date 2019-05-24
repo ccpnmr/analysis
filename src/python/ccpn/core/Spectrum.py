@@ -1351,6 +1351,44 @@ class Spectrum(AbstractWrapperObject):
     # Library functions
     #=========================================================================================
 
+    def getDefaultOrdering(self, axisOrder):
+        if not axisOrder:
+            axisOption = self.project.application.preferences.general.axisOrderingOptions
+
+            preferredAxisOrder = self.preferredAxisOrdering
+            if preferredAxisOrder is not None:
+
+                specAxisOrder = self.axisCodes
+                axisOrder = [specAxisOrder[ii] for ii in preferredAxisOrder]
+
+            else:
+
+                # sets an Nd default to HCN (or possibly 2d to HC)
+                specAxisOrder = self.axisCodes
+                pOrder = self.searchAxisCodePermutations(('H', 'C', 'N'))
+                if pOrder:
+                    self.preferredAxisOrdering = pOrder
+                    axisOrder = [specAxisOrder[ii] for ii in pOrder]
+                    getLogger().debug('setting default axisOrdering: ', str(axisOrder))
+
+                else:
+
+                    # just set to the normal ordering
+                    self.preferredAxisOrdering = tuple(ii for ii in range(self.dimensionCount))
+                    axisOrder = specAxisOrder
+
+                    # # try permutations of repeated codes
+                    # duplicates = [('H', 'H'), ('C', 'C'), ('N', 'N')]
+                    # for dCode in duplicates:
+                    #     pOrder = spectrum.searchAxisCodePermutations(dCode)
+                    #     if pOrder:
+                    #         spectrum.preferredAxisOrdering = pOrder
+                    #         axisOrder = [specAxisOrder[ii] for ii in pOrder]
+                    #         getLogger().debug('setting duplicate axisOrdering: ', str(axisOrder))
+                    #         break
+
+        return axisOrder
+
     def getHeight(self, ppmPositions):
         """Returns the interpolated height at the ppm position
         """

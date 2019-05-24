@@ -129,39 +129,46 @@ class Window(AbstractWrapperObject):
         """
         from ccpn.ui._implementation.SpectrumDisplay import _createSpectrumDisplay
 
-        if not axisOrder:
-            axisOption = self.application.preferences.general.axisOrderingOptions
+        axisOrder = spectrum.getDefaultOrdering(axisOrder)
 
-            preferredAxisOrder = spectrum.preferredAxisOrdering
-            if preferredAxisOrder is not None:
-
-                specAxisOrder = spectrum.axisCodes
-                axisOrder = [specAxisOrder[ii] for ii in preferredAxisOrder]
-
-            else:
-
-                # sets an Nd default to HCN (or possibly 2d to HC)
-                specAxisOrder = spectrum.axisCodes
-                pOrder = spectrum.searchAxisCodePermutations(('H', 'C', 'N'))
-                if pOrder:
-                    spectrum.preferredAxisOrdering = pOrder
-                    axisOrder = [specAxisOrder[ii] for ii in pOrder]
-                    getLogger().debug('setting default axisOrdering: ', str(axisOrder))
-
-                else:
-                    # try permutations of repeated codes
-                    duplicates = [('H','H'), ('C','C'), ('N','N')]
-                    for dCode in duplicates:
-                        pOrder = spectrum.searchAxisCodePermutations(dCode)
-                        if pOrder:
-                            spectrum.preferredAxisOrdering = pOrder
-                            axisOrder = [specAxisOrder[ii] for ii in pOrder]
-                            getLogger().debug('setting duplicate axisOrdering: ', str(axisOrder))
-                            break
+        # if not axisOrder:
+        #     axisOption = self.application.preferences.general.axisOrderingOptions
+        #
+        #     preferredAxisOrder = spectrum.preferredAxisOrdering
+        #     if preferredAxisOrder is not None:
+        #
+        #         specAxisOrder = spectrum.axisCodes
+        #         axisOrder = [specAxisOrder[ii] for ii in preferredAxisOrder]
+        #
+        #     else:
+        #
+        #         # sets an Nd default to HCN (or possibly 2d to HC)
+        #         specAxisOrder = spectrum.axisCodes
+        #         pOrder = spectrum.searchAxisCodePermutations(('H', 'C', 'N'))
+        #         if pOrder:
+        #             spectrum.preferredAxisOrdering = pOrder
+        #             axisOrder = [specAxisOrder[ii] for ii in pOrder]
+        #             getLogger().debug('setting default axisOrdering: ', str(axisOrder))
+        #
+        #         else:
+        #
+        #             # just set to the normal ordering
+        #             spectrum.preferredAxisOrdering = tuple(ii for ii in range(spectrum.dimensionCount))
+        #             axisOrder = None
+        #
+        #             # # try permutations of repeated codes
+        #             # duplicates = [('H', 'H'), ('C', 'C'), ('N', 'N')]
+        #             # for dCode in duplicates:
+        #             #     pOrder = spectrum.searchAxisCodePermutations(dCode)
+        #             #     if pOrder:
+        #             #         spectrum.preferredAxisOrdering = pOrder
+        #             #         axisOrder = [specAxisOrder[ii] for ii in pOrder]
+        #             #         getLogger().debug('setting duplicate axisOrdering: ', str(axisOrder))
+        #             #         break
 
         display = _createSpectrumDisplay(self, spectrum, displayAxisCodes=displayAxisCodes, axisOrder=axisOrder,
-                                      title=title, positions=positions, widths=widths, units=units,
-                                      stripDirection=stripDirection, is1D=is1D, **kwds)
+                                         title=title, positions=positions, widths=widths, units=units,
+                                         stripDirection=stripDirection, is1D=is1D, **kwds)
         if not positions and not widths:
             display.autoRange()
         return display

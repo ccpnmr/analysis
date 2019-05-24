@@ -3312,12 +3312,11 @@ class CcpnGLWidget(QOpenGLWidget):
                 if mark.text == oldId:
                     mark.text = nmrAtom.id
 
-                    print('>>>rebuild', nmrAtom, mark)
                     # rebuild string
                     mark.buildString()
                     self._rescaleMarksAxisCode(mark)
 
-            self._update()
+            self.update()
 
     def buildMarksRulers(self):
         drawList = self._marksList

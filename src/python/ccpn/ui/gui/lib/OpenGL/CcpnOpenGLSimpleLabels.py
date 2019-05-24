@@ -205,6 +205,16 @@ class GLSimpleStrings():
         # return the new created GLstring
         return newLabel
 
+    def renameString(self, obj):
+        """Rename a string in the list, if it exists
+        """
+        strings = [(specView, string) for specView, string in self.strings.items() if string.object is obj]
+
+        for specView, string in strings:
+            string.text = self.objectText(specView)
+            string.buildString()
+            self._rescaleString(string)
+
     def removeString(self, obj):
         """Remove a string from the list, if it exists
         """

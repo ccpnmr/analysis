@@ -2426,6 +2426,13 @@ class CcpnGLWidget(QOpenGLWidget):
         drawList = self._GLIntegralLists[integralListView]
         drawList._rebuild()
 
+    def _processSpectrumNotifier(self, data):
+        trigger = data[Notifier.TRIGGER]
+
+        if trigger in [Notifier.RENAME]:
+            obj = data[Notifier.OBJECT]
+            self._spectrumLabelling.renameString(obj)
+
     def _processPeakNotifier(self, data):
         self._updateVisibleSpectrumViews()
         self._GLPeaks._processNotifier(data)

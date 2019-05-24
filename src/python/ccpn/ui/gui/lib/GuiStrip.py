@@ -209,6 +209,9 @@ class GuiStrip(Frame):
                          'Multiplet', self._updateDisplayedMultiplets, onceOnly=True)
 
         # Notifier for change of stripLabel
+        self.setNotifier(self.project, [Notifier.RENAME], 'Spectrum', self._updateSpectrumLabels)
+
+        # Notifier for change of stripLabel
         self.setNotifier(self.project, [Notifier.RENAME], 'NmrResidue', self._updateStripLabel)
 
         # For now, all dropEvents are not strip specific, use spectrumDisplay's handling
@@ -340,6 +343,11 @@ class GuiStrip(Frame):
     #     self._stripLabelNotifier.unRegister()
     #     self._droppedNotifier.unRegister()
     #     self._moveEventNotifier.unRegister()
+
+    def _updateSpectrumLabels(self, data):
+        """Callback when spectra have changed
+        """
+        self._CcpnGLWidget._processSpectrumNotifier(data)
 
     def _updateDisplayedPeaks(self, data):
         """Callback when peaks have changed

@@ -1234,7 +1234,8 @@ class Framework(NotifierBase):
                          ("New SpectrumDisplay with strip", self.copyStrip, []),
                          ("Copy with X-Y Axes flipped", self.flipXYAxis, [('shortcut', 'xy')]),
                          ("Copy with X-Z Axes flipped", self.flipXZAxis, [('shortcut', 'xz')]),
-                         ("Copy with Y-Z Axes flipped", self.flipYZAxis, [('shortcut', 'yz')])
+                         ("Copy with Y-Z Axes flipped", self.flipYZAxis, [('shortcut', 'yz')]),
+                         ("Copy with Arbitrary Axes Flipped", self.flipArbitraryAxis, [('shortcut', 'fa')]),
                          )),
             (),
             ("Show/hide Modules", ([
@@ -2540,6 +2541,22 @@ class Framework(NotifierBase):
     def copyStrip(self):
         if self.current.strip is not None:
             self.current.strip.copyStrip()
+        else:
+            getLogger().warning('No strip selected')
+
+    def flipArbitraryAxis(self):
+        if self.current.strip is not None:
+
+            if self.current.strip.spectrumDisplay.is1D:
+                getLogger().warning('Function not permitted on 1D spectra')
+            else:
+
+                from ccpn.ui.gui.popups.CopyStripFlippedAxesPopup import CopyStripFlippedSpectraPopup
+
+                popup = CopyStripFlippedSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
+                                                     strip=self.current.strip, label=self.current.strip.id)
+                popup.exec_()
+
         else:
             getLogger().warning('No strip selected')
 

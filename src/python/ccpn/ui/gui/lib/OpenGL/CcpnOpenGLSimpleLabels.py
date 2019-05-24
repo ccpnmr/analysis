@@ -147,13 +147,21 @@ class GLSimpleStrings():
 
     def objectText(self, obj):
         """return the string to be used for the label
+        To be subclassed as required
         """
         return str(obj.spectrum.id)
 
     def objectInstance(self, obj):
-        """return the object instance
+        """return the object instance to insert into the string
+        To be subclassed as required
         """
         return obj.spectrum
+
+    def objectSettings(self, string, obj):
+        """Set up class specific settings for the new string
+        To be subclassed as required
+        """
+        string.spectrumView = obj
 
     def addString(self, obj, position=(0, 0), axisCodes=None, colour="#FF0000", alpha=1.0,
                   lock=GLDefs.LOCKNONE, serial=0):
@@ -183,7 +191,8 @@ class GLSimpleStrings():
         newLabel.axisCodes = axisCodes
         newLabel.lock = lock
 
-        newLabel.spectrumView = obj
+        # set up class specific settings, to be subclassed as required
+        self.objectSettings(newLabel, obj)
 
         # shouldn't be necessary but here for completeness
         self._rescaleString(newLabel)

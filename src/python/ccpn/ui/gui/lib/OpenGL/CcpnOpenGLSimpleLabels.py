@@ -230,7 +230,7 @@ class GLSimpleStrings():
 
             if lock == GLDefs.LOCKNONE:
 
-                # lock to the correct axisCodes if exist
+                # lock to the correct axisCodes if exist - not tested yet
                 if obj.axisIndices[0] and obj.axisIndices[1]:
                     offsets = [position[obj.axisIndices[0]], position[obj.axisIndices[1]]]
 

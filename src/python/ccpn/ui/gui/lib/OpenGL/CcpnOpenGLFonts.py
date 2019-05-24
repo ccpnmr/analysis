@@ -237,9 +237,24 @@ class GLString(GLVertexArray):
         self.font = font
         self.object = obj
         self.pid = obj.pid if hasattr(obj, 'pid') else None
+        self.serial = serial
+        self.colour = colour
+        self._position = (x, y)
+        self._offset = (ox, oy)
+
+        self.buildString()
+
+    def buildString(self):
+        """Build the string
+        """
+        text = self.text
+        font = self.font
+        colour = self.colour
+        x, y = self._position
+        ox, oy = self._offset
+        self.pid = self.object.pid if hasattr(self.object, 'pid') else None
 
         # each object can have a unique serial number if required
-        self.serial = serial
         self.height = font.height
         self.width = 0
 

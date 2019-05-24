@@ -145,7 +145,8 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
 from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.util.decorators import profile
-
+from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.lib import Pid
 
 UNITS_PPM = 'ppm'
 UNITS_HZ = 'Hz'
@@ -2435,6 +2436,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def _processNmrAtomNotifier(self, data):
         self._updateVisibleSpectrumViews()
         self._GLPeaks._processNotifier(data)
+        self._nmrAtomsNotifier(data)
 
         self._clearKeys()
         self.update()
@@ -3288,6 +3290,28 @@ class CcpnGLWidget(QOpenGLWidget):
 
             drawList.defineIndexVBO(enableVBO=True)
 
+    def _nmrAtomsNotifier(self, data):
+        """respond to a rename notifier on an nmrAtom, and update marks
+        """
+        trigger = data[Notifier.TRIGGER]
+
+        if trigger in [Notifier.RENAME]:
+            nmrAtom = data[Notifier.OBJECT]
+            oldPid = Pid.Pid(data[Notifier.OLDPID])
+            oldId = oldPid.id
+
+            # search for the old name in the strings and remake
+            for mark in self._marksAxisCodes:
+                if mark.text == oldId:
+                    mark.text = nmrAtom.id
+
+                    print('>>>rebuild', nmrAtom, mark)
+                    # rebuild string
+                    mark.buildString()
+                    self._rescaleMarksAxisCode(mark)
+
+            self._update()
+
     def buildMarksRulers(self):
         drawList = self._marksList
 
@@ -3303,18 +3327,15 @@ class CcpnGLWidget(QOpenGLWidget):
             index = 0
             for mark in self.project.marks:
 
-                for rr in mark.rulerData:
+                # find the matching axisCodes to the display
+                exactMatch = (self._preferences.matchAxisCode == AXIS_FULLATOMNAME)
+                indices = getAxisCodeMatchIndices(mark.axisCodes, self._axisCodes[:2], exactMatch=exactMatch)
 
-                    axisIndex = 2
-                    for ps, psCode in enumerate(self.axisOrder[0:2]):
-                        if self._preferences.matchAxisCode == 0:  # default - match atom type
-                            if rr.axisCode[0] == psCode[0]:
-                                axisIndex = ps
-                        elif self._preferences.matchAxisCode == 1:  # match full code
-                            if rr.axisCode == psCode:
-                                axisIndex = ps
+                for ii, rr in enumerate(mark.rulerData):
 
-                    if axisIndex < 2:
+                    axisIndex = indices[ii]
+
+                    if axisIndex is not None and axisIndex < 2:
 
                         # NOTE:ED check axis units - assume 'ppm' for the minute
                         if axisIndex == 0:

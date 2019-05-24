@@ -1701,7 +1701,7 @@ class CcpnGLWidget(QOpenGLWidget):
         #     # add some test strings
         #     self._spectrumLabelling.addString(spectrum, (ii*15,ii*15),
         #                                       colour="#FE64C6", alpha=0.75,
-        #                                       lock=GLDefs.LOCKSCREEN)
+        #                                       lock=GLDefs.LOCKNONE)
 
         self.viewports = GLViewports()
 

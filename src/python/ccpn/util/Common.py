@@ -715,7 +715,7 @@ stdLocalFormatter = LocalFormatter()
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 20190507:ED new routines to match axis codes and return dict or indices
 
-def _matchSingleAxisCode(code1: str = None, code2: str = None, exactMatch: bool = False) -> int:
+def _matchSingleAxisCode(code1: str = None, code2: str = None, exactMatch: bool = False, allowLowercase=True) -> int:
     """number of matching characters
     code1, code2 = strings
     e.g. 'Hn1', 'H1'
@@ -739,7 +739,7 @@ def _matchSingleAxisCode(code1: str = None, code2: str = None, exactMatch: bool 
     :return: score based on the match
     """
     # undefined codes
-    if not code1 or not code2 or code1[0].islower() or code2[0].islower():
+    if not code1 or not code2 or (code1[0].islower() and code2[0].islower() and not allowLowercase):
         return 0
 
     # if exactMatch is True then only test for exact match

@@ -118,7 +118,7 @@ class GLSimpleStrings():
         self.strip = strip
         self.name = name
         self.resizeGL = resizeGL
-
+        self.axisCodes = self.strip.axisCodes
         self.current = self.strip.current if self.strip else None
 
         self.strings = {}
@@ -132,7 +132,7 @@ class GLSimpleStrings():
             if spectrumView not in self.strings:
                 self.addString(spectrumView, (0, 0),
                                colour=spectrumView.spectrum.positiveContourColour, alpha=1.0,
-                               lock=GLDefs.LOCKLEFT)
+                               lock=GLDefs.LOCKAXIS | GLDefs.LOCKLEFT | GLDefs.LOCKBOTTOM, axisCodes=('intensity',))
 
     def drawStrings(self):
         if self.strip.isDeleted:
@@ -162,6 +162,8 @@ class GLSimpleStrings():
         To be subclassed as required
         """
         string.spectrumView = obj
+        if string.axisCodes:
+            string.axisIndices = getAxisCodeMatchIndices(string.axisCodes, self.axisCodes)
 
     def addString(self, obj, position=(0, 0), axisCodes=None, colour="#FF0000", alpha=1.0,
                   lock=GLDefs.LOCKNONE, serial=0):
@@ -226,12 +228,22 @@ class GLSimpleStrings():
 
                 position[1] = GLp._spectrumSettings[obj.spectrumView][GLDefs.SPECTRUM_STACKEDMATRIXOFFSET]
 
-            if lock == GLDefs.LOCKSCREEN:
+            if lock == GLDefs.LOCKNONE:
+
+                # lock to the correct axisCodes if exist
+                if obj.axisIndices[0] and obj.axisIndices[1]:
+                    offsets = [position[obj.axisIndices[0]], position[obj.axisIndices[1]]]
+
+                else:
+                    offsets = position
+
+            elif lock == GLDefs.LOCKSCREEN:
 
                 # fixed screen co-ordinates
                 offsets = [GLp.axisL + position[0] * GLp.pixelX,
                            GLp.axisB + position[1] * GLp.pixelY]
 
+            # not locking to an axisCode
             elif lock == GLDefs.LOCKLEFT:
 
                 # lock to the left margin
@@ -255,6 +267,44 @@ class GLSimpleStrings():
                 # lock to the top margin - updated in resize
                 offsets = [position[0],
                            GLp.axisT - (3.0 + obj.height) * GLp.pixelY]
+
+            elif lock & GLDefs.LOCKAXIS:
+
+                # locking to a named axisCodes
+                if len(obj.axisIndices) == 1:
+
+                    # match to a single axisCode
+                    if obj.axisIndices[0] == 1:
+
+                        if lock & GLDefs.LOCKRIGHT:
+
+                            # lock to the right margin
+                            offsets = [GLp.axisR - (3.0 + obj.width) * GLp.pixelX,
+                                       position[1]]
+
+                        else:
+
+                            # lock to the left margin
+                            offsets = [GLp.axisL + 3.0 * GLp.pixelX,
+                                       position[1]]
+
+                    elif obj.axisIndices[0] == 0:
+
+                        if lock & GLDefs.LOCKTOP:
+
+                            # lock to the top margin - updated in resize
+                            offsets = [position[0],
+                                       GLp.axisT - (3.0 + obj.height) * GLp.pixelY]
+
+                        else:
+
+                            # lock to the bottom margin - updated in resize
+                            offsets = [position[0],
+                                       GLp.axisB + 3.0 * GLp.pixelY]
+
+                else:
+                    # can't match more than 1
+                    return
 
             else:
                 return

@@ -34,18 +34,16 @@ class CalibrateYNDWidgets(CalibrateY1DWidgets):
     def __init__(self, parent=None, mainWindow=None, strip=None, **kwds):
         super().__init__(parent=parent, mainWindow=mainWindow, strip=strip, **kwds)
 
-    def _calibrateSpectra(self, fromPos, toPos):
-        if self.mainWindow is not None:
-            if self.strip is not None:
-                for spectrumView in self.strip.spectrumViews:
-                    if spectrumView.isVisible():
-                        spectrum = spectrumView.spectrum
-                        _calibrateYND(spectrum, fromPos, toPos)
-                        self.setOriginalPos(toPos)
+    def _calibrateSpectra(self, spectra, fromPos, toPos):
 
-                        spectrumView.buildContours = True
+        for specView, spectrum in spectra:
+            _calibrateYND(spectrum, fromPos, toPos)
 
-        if self.GLWidget:
+            if specView and not specView.isDeleted:
+                specView.buildContours = True
+
+        self.setOriginalPos(toPos)
+        if self.mainWindow and self.strip and self.GLWidget:
             # spawn a redraw of the GL windows
-            self.GLWidget._moveAxes((0.0, toPos-fromPos))
+            self.GLWidget._moveAxes((0.0, toPos - fromPos))
             self.GLSignals.emitPaintEvent()

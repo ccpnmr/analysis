@@ -2101,7 +2101,7 @@ class Spectrum(AbstractWrapperObject):
 
         self.setParameter(SPECTRUMAXES, SPECTRUMPREFERREDAXISORDERING, order)
 
-    def searchAxisCodePermutations(self, checkCodes: Tuple[str]) -> Optional[Tuple[int]]:
+    def searchAxisCodePermutations(self, checkCodes: Tuple[str, ...]) -> Optional[Tuple[int]]:
         """Generate the permutations of the current axisCodes
         """
         if not checkCodes:

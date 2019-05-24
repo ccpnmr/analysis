@@ -181,30 +181,30 @@ class CalibrateX1DWidgets(Frame):
             self._removeLines()
 
     def _apply(self):
-
         with handleDialogApply(self) as error:
             fromPos = self.originalPosition
             toPos = self.newPosition
 
             # add an undo item to the stack
             with undoStackBlocking() as addUndoItem:
-                self._calibrateSpectra(fromPos, toPos)
 
-                addUndoItem(undo=partial(self._calibrateSpectra, toPos, fromPos),
-                            redo=partial(self._calibrateSpectra, fromPos, toPos))
+                # get the list of visible spectra in this strip
+                spectra = [(specView, specView.spectrum) for specView in self.strip.spectrumViews if specView.isVisible()]
+                self._calibrateSpectra(spectra, fromPos, toPos)
 
-    def _calibrateSpectra(self, fromPos, toPos):
-        if self.mainWindow is not None:
-            if self.strip is not None:
-                for spectrumView in self.strip.spectrumViews:
-                    if spectrumView.isVisible():
-                        spectrum = spectrumView.spectrum
-                        _calibrateX1D(spectrum, fromPos, toPos)
-                        self.setOriginalPos(toPos)
+                addUndoItem(undo=partial(self._calibrateSpectra, spectra, toPos, fromPos),
+                            redo=partial(self._calibrateSpectra, spectra, fromPos, toPos))
 
-                        spectrumView.buildContours = True
+    def _calibrateSpectra(self, spectra, fromPos, toPos):
 
-        if self.GLWidget:
+        for specView, spectrum in spectra:
+            _calibrateX1D(spectrum, fromPos, toPos)
+
+            if specView and not specView.isDeleted:
+                specView.buildContours = True
+
+        self.setOriginalPos(toPos)
+        if self.mainWindow and self.strip and self.GLWidget:
             # spawn a redraw of the GL windows
             self.GLWidget._moveAxes((toPos - fromPos, 0.0))
             self.GLSignals.emitPaintEvent()

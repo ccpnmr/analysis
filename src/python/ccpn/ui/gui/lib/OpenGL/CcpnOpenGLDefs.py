@@ -26,6 +26,7 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 #=========================================================================================
 
 SPECTRUM_STACKEDMATRIX = 'stackedMatrix'
+SPECTRUM_STACKEDMATRIXOFFSET = 'stackedMatrixOffset'
 SPECTRUM_MATRIX = 'spectrumMatrix'
 SPECTRUM_MAXXALIAS = 'maxXAlias'
 SPECTRUM_MINXALIAS = 'minXAlias'
@@ -217,3 +218,13 @@ PEAKSYMBOL_CROSS = 'peakSymbolCross'
 PEAKSYMBOL_LINEWIDTH = 'peakSymbolLineWidth'
 PEAKSYMBOL_FILLEDLINEWIDTH = 'peakSymbolFilledLineWidth'
 PEAKSYMBOL_PLUS = 'peakSymbolPlus'
+
+LOCKNONE = 0
+LOCKSCREEN = 1
+LOCKX = 2
+LOCKY = 4
+LOCKLEFT = 8
+LOCKRIGHT = 16
+LOCKTOP = 32
+LOCKBOTTOM = 64
+LOCKAXIS = 128

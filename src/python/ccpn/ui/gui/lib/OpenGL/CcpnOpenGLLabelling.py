@@ -84,6 +84,7 @@ class GLLabelling():
         self._GLSymbols = {}
         self._GLLabels = {}
         self._ordering = ()
+        self._visibleOrdering = ()
 
         self.autoColour = self._GLParent.SPECTRUMPOSCOLOUR
 
@@ -521,7 +522,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                                  ox=r * np.sign(self._GLParent.pixelX), oy=w * np.sign(self._GLParent.pixelY),
                                  # ox=r, oy=w,
                                  # x=self._screenZero[0], y=self._screenZero[1]
-                                 color=(*listCol, fade),
+                                 colour=(*listCol, fade),
                                  GLContext=self._GLParent,
                                  obj=obj, clearArrays=False)
             newString.stringOffset = stringOffset
@@ -592,7 +593,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                                  font=self._GLParent.globalGL.glSmallFont,  # if _isInPlane else self._GLParent.globalGL.glSmallTransparentFont,
                                  x=p0[0], y=p0[1],
                                  ox=r * np.sign(self._GLParent.pixelX), oy=w * np.sign(self._GLParent.pixelY),
-                                 color=(*listCol, fade),
+                                 colour=(*listCol, fade),
                                  GLContext=self._GLParent,
                                  obj=obj, clearArrays=False)
             outString.stringOffset = stringOffset
@@ -2392,7 +2393,7 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
                              ox=r * np.sign(self._GLParent.pixelX), oy=w * np.sign(self._GLParent.pixelY),
                              # ox=symbolWidth, oy=symbolWidth,
                              # x=self._screenZero[0], y=self._screenZero[1]
-                             color=(*listCol, 1.0),
+                             colour=(*listCol, 1.0),
                              GLContext=self._GLParent,
                              obj=obj)
         newString.stringOffset = None
@@ -2977,7 +2978,7 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
                              y=textY,
                              # ox=symbolWidth, oy=symbolWidth,
                              # x=self._screenZero[0], y=self._screenZero[1]
-                             color=(*listCol, 1.0),
+                             colour=(*listCol, 1.0),
                              GLContext=self._GLParent,
                              obj=obj)
         # this is in the attribs

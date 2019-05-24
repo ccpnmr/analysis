@@ -327,6 +327,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         self.resetRangeLimits()
 
         self._ordering = []
+        self._visibleOrdering = []
         self.glReady = True
 
     def refreshDevicePixelRatio(self):

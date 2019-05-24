@@ -656,15 +656,16 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
         apiPeak.height = dataSource.scale * height
 
 
-def _getSpectrumData(peak: 'Peak', halfBoxWidth: int = 3):
+def getSpectrumData(peak: 'Peak', halfBoxWidth: int = 3):
     """Get a region of the spectrum data centred on the peak.
     Will return the smallest region containing the peak ±halfBoxWidth about the current peak position.
 
-    returns a tuple of the form (dataArray, region, position)
+    returns a tuple of the form (dataArray, region, position, planePosition)
 
         dataArray is the numpy array surrounding the peak, ordered by spectrum axisCodes
         region is a tuple (bottomLeft, topRight)
-        position is the relative position of the peak in dataArray
+        position is the float32 relative position of the peak in dataArray
+        planePosition is the int32 position of the nearest planes to the peak
 
     where bottomLeft is the co-ordinates of the bottom-left corner of the region
             topRight is the co-ordinates of the top-right corner of the region
@@ -673,7 +674,7 @@ def _getSpectrumData(peak: 'Peak', halfBoxWidth: int = 3):
 
             Note: screen point co-ordinates are indexed from (1, 1)
 
-    The region will be cropped to the ounds of the spectrum, in which case position will not correspond to the centre
+    The region will be cropped to the bounds of the spectrum, in which case position will not correspond to the centre
     if no region is found, returns None
     """
 
@@ -713,4 +714,4 @@ def _getSpectrumData(peak: 'Peak', halfBoxWidth: int = 3):
         getLogger().warning('no region found')
         return
 
-    return (dataArray, intRegion, list(position - startPoint))
+    return (dataArray, intRegion, list(position - startPoint), list(np.round(position).astype(np.int32)))

@@ -177,9 +177,14 @@ class GuiNdWidget(CcpnGLWidget):
             if specView not in self._ordering:
                 del self._spectrumSettings[specView]
 
+                # delete the 1d string relating to the spectrumView
+                self._spectrumLabelling.removeString(specView)
+
         # make a list of the visible and not-deleted spectrumViews
         visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
         visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+
+        self._visibleOrdering = visibleSpectrumViews
 
         # set the first visible, or the first in the ordered list
         self._firstVisible = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[
@@ -460,9 +465,14 @@ class Gui1dWidget(CcpnGLWidget):
                 # print('>>>', [id(spec) for spec in self._ordering])
                 del self._spectrumSettings[specView]
 
+                # delete the 1d string relating to the spectrumView
+                self._spectrumLabelling.removeString(specView)
+
         # make a list of the visible and not-deleted spectrumViews
         visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
         visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+
+        self._visibleOrdering = visibleSpectrumViews
 
         # set the first visible, or the first in the ordered list
         self._firstVisible = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[

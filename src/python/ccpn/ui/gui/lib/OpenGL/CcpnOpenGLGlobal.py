@@ -174,7 +174,9 @@ class GLGlobalData(QtWidgets.QWidget):
               filter = texture2D(texture, varyingTexCoord);
               // colour for blending enabled
               if (blendEnabled != 0)
-                gl_FragColor = vec4(FC.xyz, filter.w);
+                // multiply the character fade by the color fade to give the actual transparency
+                gl_FragColor = vec4(FC.xyz, FC.w * filter.w);
+                
               else   
                 // gives a background box around the character, giving a simple border
                 gl_FragColor = vec4((FC.xyz * filter.w) + (1-filter.w)*background.xyz, 1.0);

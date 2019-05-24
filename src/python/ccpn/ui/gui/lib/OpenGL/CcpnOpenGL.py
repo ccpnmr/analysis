@@ -120,6 +120,7 @@ except ImportError:
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLGlobalData
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLSimpleLabels import GLSimpleStrings
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_IGNORE, GLRENDERMODE_DRAW, \
     GLRENDERMODE_RESCALE, GLRENDERMODE_REBUILD, \
     GLREFRESHMODE_NEVER, GLREFRESHMODE_ALWAYS, \
@@ -348,6 +349,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._GLIntegralLabels = {}
 
         self._marksAxisCodes = []
+
         self._regions = []
         self._infiniteLines = []
         self._buildTextFlag = True
@@ -419,6 +421,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.resetRangeLimits()
 
         self._ordering = []
+        self._visibleOrdering = []
         self._firstVisible = None
         self.visiblePlaneList = {}
         self._visibleSpectrumViewsChange = False
@@ -442,7 +445,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def rescale(self, rescaleOverlayText=True, rescaleMarksRulers=True,
                 rescaleIntegralLists=True, rescaleRegions=True,
                 rescaleSpectra=True, rescaleStaticHTraces=True,
-                rescaleStaticVTraces=True):
+                rescaleStaticVTraces=True, rescaleSpectrumLabels=True):
         """Change to axes of the view, axis visibility, scale and rebuild matrices when necessary
         to improve display speed
         """
@@ -561,6 +564,9 @@ class CcpnGLWidget(QOpenGLWidget):
         if rescaleSpectra:
             self.rescaleSpectra()
 
+        if rescaleSpectrumLabels:
+            self._spectrumLabelling.rescale()
+
         if rescaleStaticHTraces:
             self.rescaleStaticHTraces()
 
@@ -573,6 +579,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def setStackingMode(self, value):
         self._stackingMode = value
         self.rescaleSpectra()
+        self._spectrumLabelling.rescale()
         self.update()
 
     def resetRangeLimits(self, allLimits=True):
@@ -734,6 +741,8 @@ class CcpnGLWidget(QOpenGLWidget):
                                                                                              0.0, 1.0, 0.0, 0.0,
                                                                                              0.0, 0.0, 1.0, 0.0,
                                                                                              0.0, st, 0.0, 1.0]
+                self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIXOFFSET] = st
+
                 # else:
                 #     self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX][0:16] = [1.0, 0.0, 0.0, 0.0,
                 #                                                                                  0.0, 1.0, 0.0, 0.0,
@@ -1107,19 +1116,6 @@ class CcpnGLWidget(QOpenGLWidget):
             getLogger().debug('error setting viewing window Y-range')
         # finally:
         #     self.project._endCommandEchoBlock()
-
-    def _rebuildMarks(self, update=True):
-        self.rescale(rescaleStaticHTraces=False, rescaleStaticVTraces=False)
-
-        # spawn rebuild event for the grid
-        for li in self.gridList:
-            li.renderMode = GLRENDERMODE_REBUILD
-        self._marksList.renderMode = GLRENDERMODE_REBUILD
-
-        self._rescaleOverlayText()
-
-        if update:
-            self.update()
 
     def _testAxisLimits(self, setLimits=False):
         xRange = abs(self.axisL - self.axisR) / 3.0
@@ -1700,6 +1696,13 @@ class CcpnGLWidget(QOpenGLWidget):
                                            dimension=4,
                                            GLContext=self)
 
+        self._spectrumLabelling = GLSimpleStrings(parent=self, strip=self.strip, name='spectrumLabelling')
+        # for ii, spectrum in enumerate(self.project.spectra):
+        #     # add some test strings
+        #     self._spectrumLabelling.addString(spectrum, (ii*15,ii*15),
+        #                                       colour="#FE64C6", alpha=0.75,
+        #                                       lock=GLDefs.LOCKSCREEN)
+
         self.viewports = GLViewports()
 
         # define the main viewports
@@ -1749,9 +1752,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # set strings for the overlay text
         self._lockStringFalse = GLString(text='Lock', font=self.globalGL.glSmallFont, x=0, y=0,
-                                         color=(0.5, 0.5, 0.5, 1.0), GLContext=self)
+                                         colour=(0.5, 0.5, 0.5, 1.0), GLContext=self)
         self._lockStringTrue = GLString(text='Lock', font=self.globalGL.glSmallFont, x=0, y=0,
-                                        color=self.highlightColour, GLContext=self)
+                                        colour=self.highlightColour, GLContext=self)
 
         self.stripIDString = GLString(text='', font=self.globalGL.glSmallFont, x=0, y=0, GLContext=self, obj=None)
 
@@ -1799,7 +1802,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # change the colour of the selected 'Lock' string
         self._lockStringTrue = GLString(text='Lock', font=self.globalGL.glSmallFont, x=0, y=0,
-                                        color=self.highlightColour, GLContext=self)
+                                        colour=self.highlightColour, GLContext=self)
 
         # set the new limits
         self._applyXLimit = self._preferences.zoomXLimitApply
@@ -2556,17 +2559,20 @@ class CcpnGLWidget(QOpenGLWidget):
         self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
         currentShader.setGLUniform4fv('axisScale', 1, self._axisScale)
 
+        # draw the text to the screen
         self.enableTexture()
-
+        self.enableTextClientState()
         if not self._stackingMode:
-            self.enableTextClientState()
 
             self._GLPeaks.drawLabels(self._spectrumSettings)
             self._GLMultiplets.drawLabels(self._spectrumSettings)
             self._GLIntegrals.drawLabels(self._spectrumSettings)
             self.drawMarksAxisCodes()
 
-            self.disableTextClientState()
+        else:
+            self._spectrumLabelling.drawStrings()
+
+        self.disableTextClientState()
 
         currentShader = self.globalGL._shaderProgram1.makeCurrent()
 
@@ -3032,7 +3038,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                                  axisXText)),
                                                          y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height,
 
-                                                         color=labelColour, GLContext=self,
+                                                         colour=labelColour, GLContext=self,
                                                          obj=None))
 
                 # append the axisCode
@@ -3040,7 +3046,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                      font=self.globalGL.glSmallFont,
                                                      x=GLDefs.AXISTEXTXOFFSET * self.deltaX,
                                                      y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height,
-                                                     color=labelColour, GLContext=self,
+                                                     colour=labelColour, GLContext=self,
                                                      obj=None))
                 # and the axis dimensions
                 xUnitsLabels = self.XAXES[self._xUnits]
@@ -3048,7 +3054,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                      font=self.globalGL.glSmallFont,
                                                      x=1.0 - (self.deltaX * len(xUnitsLabels) * self.globalGL.glSmallFont.width),
                                                      y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height,
-                                                     color=labelColour, GLContext=self,
+                                                     colour=labelColour, GLContext=self,
                                                      obj=None))
 
             self._axisYLabelling = []
@@ -3070,7 +3076,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                          x=self.AXIS_OFFSET,
                                                          # y=axisY - (GLDefs.AXISTEXTYOFFSET * self.pixelY),
                                                          y=axisY - (GLDefs.AXISTEXTYOFFSET * self.deltaY),
-                                                         color=labelColour, GLContext=self,
+                                                         colour=labelColour, GLContext=self,
                                                          obj=None))
 
                 # append the axisCode
@@ -3079,7 +3085,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                      x=self.AXIS_OFFSET,
                                                      # y=self.axisT - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.pixelY),
                                                      y=1.0 - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.deltaY),
-                                                     color=labelColour, GLContext=self,
+                                                     colour=labelColour, GLContext=self,
                                                      obj=None))
                 # and the axis dimensions
                 yUnitsLabels = self.YAXES[self._yUnits]
@@ -3087,7 +3093,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                      font=self.globalGL.glSmallFont,
                                                      x=self.AXIS_OFFSET,
                                                      y=1.0 * self.deltaY,
-                                                     color=labelColour, GLContext=self,
+                                                     colour=labelColour, GLContext=self,
                                                      obj=None))
 
     def drawAxisLabels(self):
@@ -3343,7 +3349,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                  font=self.globalGL.glSmallFont,
                                                  x=textX,
                                                  y=textY,
-                                                 color=(colR, colG, colB, 1.0),
+                                                 colour=(colR, colG, colB, 1.0),
                                                  GLContext=self,
                                                  obj=None)
                         # this is in the attribs
@@ -3546,7 +3552,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                           # y=self.axisT - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.pixelY),
                                           x=GLDefs.TITLEXOFFSET * self.globalGL.glSmallFont.width * self.deltaX,
                                           y=1.0 - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.deltaY),
-                                          color=colour, GLContext=self,
+                                          colour=colour, GLContext=self,
                                           obj=None, blendMode=False)
 
             self._oldStripIDLabel = self.stripIDLabel
@@ -3921,7 +3927,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                         font=self.globalGL.glSmallFont,
                                         x=valueToRatio(self.cursorCoordinate[0], self.axisL, self.axisR),
                                         y=valueToRatio(self.cursorCoordinate[1], self.axisB, self.axisT),
-                                        color=self.foreground, GLContext=self,
+                                        colour=self.foreground, GLContext=self,
                                         obj=None)
             self._mouseCoords = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
@@ -3936,7 +3942,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                 x=valueToRatio(self.cursorCoordinate[0], self.axisL, self.axisR),
                                                 y=valueToRatio(self.cursorCoordinate[1], self.axisB, self.axisT) - (
                                                         self.globalGL.glSmallFont.height * 2.0 * self.deltaY),
-                                                color=self.foreground, GLContext=self,
+                                                colour=self.foreground, GLContext=self,
                                                 obj=None)
 
     def drawMouseCoords(self):

@@ -222,11 +222,11 @@ class CcpnGLFont():
 
 
 class GLString(GLVertexArray):
-    def __init__(self, text=None, font=None, obj=None, color=(1.0, 1.0, 1.0, 1.0),
+    def __init__(self, text=None, font=None, obj=None, colour=(1.0, 1.0, 1.0, 1.0),
                  x=0.0, y=0.0,
                  ox=0.0, oy=0.0,
                  angle=0.0, width=None, height=None, GLContext=None, blendMode=True,
-                 clearArrays=False):
+                 clearArrays=False, serial=None):
         super().__init__(renderMode=GLRENDERMODE_DRAW, blendMode=blendMode,
                          GLContext=GLContext, drawMode=GL.GL_TRIANGLES,
                          dimension=2, clearArrays=clearArrays)
@@ -237,6 +237,12 @@ class GLString(GLVertexArray):
         self.font = font
         self.object = obj
         self.pid = obj.pid if hasattr(obj, 'pid') else None
+
+        # each object can have a unique serial number if required
+        self.serial = serial
+        self.height = font.height
+        self.width = 0
+
         lenText = len(text)
 
         # allocate space for all the letters
@@ -297,15 +303,17 @@ class GLString(GLVertexArray):
                 self.vertices[i8:i8 + 8] = (x0, y0, x0, y1, x1, y1, x1, y0)
                 self.indices[i6:i6 + 6] = (i4, i4 + 1, i4 + 2, i4, i4 + 2, i4 + 3)
                 self.texcoords[i8:i8 + 8] = (u0, v0, u0, v1, u1, v1, u1, v0)
-                self.colors[i16:i16 + 16] = color * 4
+                self.colors[i16:i16 + 16] = colour * 4
 
                 # self.attribs[i * 4:i * 4 + 4] = attribs
                 # self.offsets[i * 4:i * 4 + 4] = offsets
 
                 penX = penX + glyph[GlyphOrigW] + kerning
+                self.width = max(self.width, penX)
 
             if (c == 32):  # space
                 penX += font.spaceWidth
+                self.width = max(self.width, penX)
 
             elif (c == 10):  # newline
                 penX = 0
@@ -316,9 +324,11 @@ class GLString(GLVertexArray):
                 # occasional strange - RuntimeWarning: invalid value encountered in add
                 # self.vertices[:, 1] += font.height
                 self.vertices[1::2] += font.height
+                self.height += font.height
 
             elif (c == 9):  # tab
                 penX = penX + 4 * font.width
+                self.width = max(self.width, penX)
 
             # penY = penY + glyph[GlyphHeight]
             prev = charCode

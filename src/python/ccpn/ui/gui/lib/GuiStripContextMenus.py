@@ -178,6 +178,12 @@ def _calibrateY(strip):
                     callback=strip.toggleCalibrateY, stripMethodName='calibrateYAction')
 
 
+def _calibrateFromPeaks(strip):
+    return _SCMitem(name='Calibrate Spectra from Peaks...',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Calibrate Spectra from Selected Peaks',
+                    callback=strip.calibrateFromPeaks)
+
+
 def _calibrateXY(strip):
     return _SCMitem(name='Calibrate Spectra',
                     typeItem=ItemTypes.get(ITEM), toolTip='Calibrate Spectrum Axes', checkable=True, checked=False,
@@ -470,6 +476,7 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
                  checkable=True, checked=False,
                  callback=guiStrip1d.toggleCalibrateY, stripMethodName='calibrateYAction'),
 
+        _calibrateFromPeaks(guiStrip1d),
         _stackSpectraDefaultItem(guiStrip1d),
         _separator(),
         _phasingConsoleItem(guiStrip1d),
@@ -516,6 +523,7 @@ def _get1dPeakMenu(guiStrip1d) -> Menu:
         _copyPeakItem(guiStrip1d),
         _editPeakAssignmentItem(guiStrip1d),
         _setPeakAliasingItem(guiStrip1d),
+        _calibrateFromPeaks(guiStrip1d),
         _separator(),
         _newMultipletItem(guiStrip1d),
         _integrate1DItem(guiStrip1d),
@@ -591,6 +599,7 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
         # _calibrateX(guiStripNd),
         # _calibrateY(guiStripNd),
         _calibrateXY(guiStripNd),
+        _calibrateFromPeaks(guiStripNd),
 
         _separator(),
         _toggleHorizontalTraceItem(guiStripNd),
@@ -647,6 +656,7 @@ def _getNdPeakMenu(guiStripNd) -> Menu:
         _refitPeakGroupItem(guiStripNd),
         _snapToExtremaItem(guiStripNd),
         _makeStripPlotItem(guiStripNd),
+        _calibrateFromPeaks(guiStripNd),
         _separator(),
         _newMultipletItem(guiStripNd),
         _separator(),

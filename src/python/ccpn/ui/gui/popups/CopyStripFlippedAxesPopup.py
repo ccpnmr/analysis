@@ -45,7 +45,7 @@ class CopyStripFlippedSpectraPopup(AxisOrderingPopup):
     Set the axis ordering for the new spectrumDisplay from a popup
     """
 
-    def __init__(self, parent=None, mainWindow=None, strip=None, title='Copy Strip with Flipped Axes', label='', **kwds):
+    def __init__(self, parent=None, mainWindow=None, strip=None, title='Copy Strip with Axes Flipped', label='', **kwds):
         CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
         # make sure there's a strip
@@ -65,7 +65,7 @@ class CopyStripFlippedSpectraPopup(AxisOrderingPopup):
             Label(self, text=title + ': ' + label + ' - ' + str(self._axisOrdering), bold=True, grid=(row, 0), gridSpan=(1, 3))
 
             row += 1
-            self.preferredAxisOrderPulldown = PulldownListCompoundWidget(self, labelText="Axis Ordering",
+            self.preferredAxisOrderPulldown = PulldownListCompoundWidget(self, labelText="Select Axis Ordering:",
                                                                          grid=(row, 0), gridSpan=(1, 3), vAlign='t',
                                                                          callback=self._setAxisCodeOrdering)
             self.preferredAxisOrderPulldown.setPreSelect(self._fillPreferredWidget)
@@ -96,7 +96,7 @@ class CopyStripFlippedSpectraPopup(AxisOrderingPopup):
             # add permutations for the axes
             axisPerms = permutations([axisCode for axisCode in self.axisCodes])
             axisOrder = tuple(permutations(list(range(len(self.axisCodes)))))
-            ll += ["".join(ax for ax in perm) for perm in axisPerms]
+            ll += [" ".join(ax for ax in perm) for perm in axisPerms]
 
         self.preferredAxisOrderPulldown.pulldownList.setData(ll)
 

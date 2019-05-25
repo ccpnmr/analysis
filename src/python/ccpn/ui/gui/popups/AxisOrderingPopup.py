@@ -57,10 +57,10 @@ class AxisOrderingPopup(CcpnDialog):
         if self.spectrum:
 
             row = 0
-            Label(self, text=title+label+' - '+str(spectrum.pid), bold=True, grid=(row, 0), gridSpan=(1,3))
+            Label(self, text=title + ': ' + label+' - '+str(spectrum.pid), bold=True, grid=(row, 0), gridSpan=(1,3))
 
             row += 1
-            self.preferredAxisOrderPulldown = PulldownListCompoundWidget(self, labelText="Axis Ordering",
+            self.preferredAxisOrderPulldown = PulldownListCompoundWidget(self, labelText="Select Axis Ordering",
                                                                          grid=(row, 0), gridSpan=(1, 3), vAlign='t',
                                                                          callback=self._setSpectrumOrdering)
             self.preferredAxisOrderPulldown.setPreSelect(self._fillPreferredWidget)
@@ -90,7 +90,7 @@ class AxisOrderingPopup(CcpnDialog):
             # add permutations for the axes
             axisPerms = permutations([axisCode for axisCode in self.spectrum.axisCodes])
             axisOrder = tuple(permutations(list(range(len(self.spectrum.axisCodes)))))
-            ll += ["".join(ax for ax in perm) for perm in axisPerms]
+            ll += [" ".join(ax for ax in perm) for perm in axisPerms]
 
         self.preferredAxisOrderPulldown.pulldownList.setData(ll)
 

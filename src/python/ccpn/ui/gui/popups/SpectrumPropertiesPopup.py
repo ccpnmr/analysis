@@ -728,7 +728,7 @@ class DimensionsTab(Widget):
         for i in range(dimensions):
             dimLabel = Label(self, text='%s' % str(i + 1), grid=(1, i + 1), vAlign='t', hAlign='l')
 
-        self.axisCodes = [i for i in range(dimensions)]
+        self.axisCodeEdits = [i for i in range(dimensions)]
         self.isotopeCodePullDowns = [i for i in range(dimensions)]
         self.spectralReferencingData = [i for i in range(dimensions)]
         self.spectralReferencingDataPoints = [i for i in range(dimensions)]
@@ -790,11 +790,11 @@ class DimensionsTab(Widget):
             # Label(self, text=str(spectrum.axisCodes[i]), grid=(row, i+1),  hAlign='l', vAlign='t',)
 
             value = spectrum.axisCodes[i]
-            self.axisCodes[i] = LineEdit(self,
+            self.axisCodeEdits[i] = LineEdit(self,
                                          text='<None>' if value is None else str(value),
                                          grid=(row, i + 1), vAlign='t', hAlign='l')
-            self.axisCodes[i].textChanged.connect(partial(self._queueSetAxisCodes,
-                                                          self.axisCodes[i].text, i))
+            self.axisCodeEdits[i].textChanged.connect(partial(self._queueSetAxisCodes,
+                                                          self.axisCodeEdits[i].text, i))
 
             row += 1
             # Label(self, text=str(spectrum.isotopeCodes[i]), grid=(row, i + 1), hAlign='l', vAlign='t', )
@@ -935,7 +935,7 @@ class DimensionsTab(Widget):
             # add permutations for the axes
             axisPerms = permutations([axisCode for axisCode in self.spectrum.axisCodes])
             axisOrder = tuple(permutations(list(range(len(self.spectrum.axisCodes)))))
-            ll += ["".join(ax for ax in perm) for perm in axisPerms]
+            ll += [" ".join(ax for ax in perm) for perm in axisPerms]
 
         self.preferredAxisOrderPulldown.pulldownList.setData(ll)
 
@@ -948,7 +948,7 @@ class DimensionsTab(Widget):
         """
         specOrder = tuple(self.spectrum.preferredAxisOrdering) if self.spectrum.preferredAxisOrdering is not None else None
 
-        axisCodeTexts = tuple([ss.text() for ss in self.axisCodes])
+        axisCodeTexts = tuple([ss.text() for ss in self.axisCodeEdits])
         ll = ['<None>']
         axisPerms = []
         axisOrder = []
@@ -956,7 +956,7 @@ class DimensionsTab(Widget):
             # add permutations for the axes
             axisPerms = permutations([axisCode for axisCode in axisCodeTexts])
             axisOrder = tuple(permutations(list(range(len(axisCodeTexts)))))
-            ll += ["".join(ax for ax in perm) for perm in axisPerms]
+            ll += [" ".join(ax for ax in perm) for perm in axisPerms]
 
         self.preferredAxisOrderPulldown.pulldownList.setData(ll)
 

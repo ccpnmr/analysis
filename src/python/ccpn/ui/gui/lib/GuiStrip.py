@@ -328,6 +328,34 @@ class GuiStrip(Frame):
         popup.exec_()
         popup._cleanupWidget()
 
+    def calibrateFromPeaks(self):
+        if self.current.peaks and len(self.current.peaks) > 1:
+
+            # make sure that selected peaks are unique in each spectrum
+            spectrumCount = {}
+            for peak in self.current.peaks:
+                if peak.peakList.spectrum in spectrumCount:
+                    MessageDialog.showMessage('Too Many Peaks', 'Only select one peak in each spectrum')
+                    break
+                else:
+                    spectrumCount[peak.peakList.spectrum] = peak
+
+            else:
+                # popup to calibrate from selected peaks in this display
+                from ccpn.ui.gui.popups.CalibrateSpectraFromPeaksPopup import CalibrateSpectraFromPeaksPopupNd, CalibrateSpectraFromPeaksPopup1d
+
+                if self.spectrumDisplay.is1D:
+                    popup = CalibrateSpectraFromPeaksPopup1d(parent=self.mainWindow, mainWindow=self.mainWindow,
+                                                             strip=self, spectrumCount=spectrumCount)
+                else:
+                    popup = CalibrateSpectraFromPeaksPopupNd(parent=self.mainWindow, mainWindow=self.mainWindow,
+                                                             strip=self, spectrumCount=spectrumCount)
+
+                popup.exec_()
+
+        else:
+            MessageDialog.showMessage('Not Enough Peaks', 'Select more than one peak, only one per spectrum')
+
     def close(self):
         self.deleteAllNotifiers()
         super().close()

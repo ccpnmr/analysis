@@ -1235,7 +1235,7 @@ class Framework(NotifierBase):
                          ("Copy with X-Y Axes flipped", self.flipXYAxis, [('shortcut', 'xy')]),
                          ("Copy with X-Z Axes flipped", self.flipXZAxis, [('shortcut', 'xz')]),
                          ("Copy with Y-Z Axes flipped", self.flipYZAxis, [('shortcut', 'yz')]),
-                         ("Copy with Arbitrary Axes Flipped", self.flipArbitraryAxis, [('shortcut', 'fa')]),
+                         ("Copy with Axes Flipped...", self.flipArbitraryAxis, [('shortcut', 'fa')]),
                          )),
             (),
             ("Show/hide Modules", ([

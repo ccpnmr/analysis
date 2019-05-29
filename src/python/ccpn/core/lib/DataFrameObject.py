@@ -126,7 +126,7 @@ class DataFrameObject(object):
     def table(self, table=None):
         self._table = table
 
-    def find(self, table, text, column='Pid'):
+    def find(self, table, text, column=DATAFRAME_PID):
         model = table.model()
 
         # change column to correct index
@@ -178,7 +178,7 @@ class DataFrameObject(object):
 
     def removeObject(self, obj):
         # remove an object from the class
-        row = self.find(self._table, str(obj.pid), column='Pid')
+        row = self.find(self._table, str(obj.pid), column=DATAFRAME_PID)
         if row is not None:
             self._table.silenceCallBack = True
 
@@ -190,7 +190,7 @@ class DataFrameObject(object):
                 self._dataFrame = self._dataFrame.ix[self._dataFrame[DATAFRAME_OBJECT] != obj]
 
                 # remove from table by pid
-                row = self.find(self._table, str(obj.pid), column='Pid')
+                row = self.find(self._table, str(obj.pid), column=DATAFRAME_PID)
                 if row is not None:
                     with self._table._guiTableUpdate(self):
                         self._table.removeRow(row)
@@ -201,7 +201,7 @@ class DataFrameObject(object):
                 self._table.silenceCallBack = False
 
     def appendObject(self, obj, multipleAttr=None):
-        row = self.find(self._table, str(obj.pid), column='Pid')
+        row = self.find(self._table, str(obj.pid), column=DATAFRAME_PID)
 
         # check that the object doesn't already exists in the table
         if row is None:
@@ -228,10 +228,10 @@ class DataFrameObject(object):
                     # append a new line to the end
 
                     # set Index to next available - will change later
-                    if not self._dataFrame.empty and 'Index' in self._dataFrame:
-                        newIndex = self._dataFrame['Index'].max() + 1
-                        if 'Index' in listDict.keys():
-                            listDict['Index'] = newIndex
+                    if not self._dataFrame.empty and DATAFRAME_INDEX in self._dataFrame:
+                        newIndex = self._dataFrame[DATAFRAME_INDEX].max() + 1
+                        if DATAFRAME_INDEX in listDict.keys():
+                            listDict[DATAFRAME_INDEX] = newIndex
 
                     # update internal list
                     self._objects.append(obj)
@@ -271,7 +271,7 @@ class DataFrameObject(object):
                 return True
 
     def renameObject(self, obj, oldPid):
-        row = self.find(self._table, str(oldPid), column='Pid')
+        row = self.find(self._table, str(oldPid), column=DATAFRAME_PID)
         # row = self.find(self._table, obj, column='_object')
         if row is not None:
             self._table.silenceCallBack = True
@@ -286,17 +286,17 @@ class DataFrameObject(object):
                 self._dataFrame = self._dataFrame.ix[self._dataFrame[DATAFRAME_OBJECT] != obj]
 
                 # keep the Index if it exists
-                if not self._dataFrame_foundPid.empty and 'Index' in self._dataFrame_foundPid:
-                    newIndex = self._dataFrame_foundPid['Index'].iloc[0]
-                    if 'Index' in listDict.keys():
-                        listDict['Index'] = newIndex
+                if not self._dataFrame_foundPid.empty and DATAFRAME_INDEX in self._dataFrame_foundPid:
+                    newIndex = self._dataFrame_foundPid[DATAFRAME_INDEX].iloc[0]
+                    if DATAFRAME_INDEX in listDict.keys():
+                        listDict[DATAFRAME_INDEX] = newIndex
 
                 # store to the table
                 self._table.setRow(row, list(listDict.values()))
 
                 # store the actual object in the dataFrame
-                # if 'Pid' in listDict.keys():
-                #   listDict['Pid'] = obj
+                # if DATAFRAME_PID in listDict.keys():
+                #   listDict[DATAFRAME_PID] = obj
                 appendDataFrame = pd.DataFrame([listDict], columns=self.headings)
                 self._dataFrame = self._dataFrame.append(appendDataFrame)
 
@@ -317,7 +317,7 @@ class DataFrameObject(object):
                 header.setEditValue(obj, value)
 
     def changeObject(self, obj):
-        # row = self.find(self._table, str(obj.pid), column='Pid')
+        # row = self.find(self._table, str(obj.pid), column=DATAFRAME_PID)
         row = self.findObject(self._table, obj, column='_object')
         _update = False
         if row is not None:
@@ -334,18 +334,18 @@ class DataFrameObject(object):
             self._dataFrame = self._dataFrame.ix[self._dataFrame[DATAFRAME_OBJECT] != obj]
 
             # keep the Index if it exists
-            if not self._dataFrame_foundPid.empty and 'Index' in self._dataFrame_foundPid:
-                newIndex = self._dataFrame_foundPid['Index'].iloc[0]
-                if 'Index' in listDict.keys():
-                    listDict['Index'] = newIndex
+            if not self._dataFrame_foundPid.empty and DATAFRAME_INDEX in self._dataFrame_foundPid:
+                newIndex = self._dataFrame_foundPid[DATAFRAME_INDEX].iloc[0]
+                if DATAFRAME_INDEX in listDict.keys():
+                    listDict[DATAFRAME_INDEX] = newIndex
 
             # store to the table
             with self._table._guiTableUpdate(self):
                 self._table.setRow(row, list(listDict.values()))
 
             # store the actual object in the dataFrame
-            # if 'Pid' in listDict.keys():
-            #   listDict['Pid'] = obj
+            # if DATAFRAME_PID in listDict.keys():
+            #   listDict[DATAFRAME_PID] = obj
             appendDataFrame = pd.DataFrame([listDict], columns=self.headings)
             self._dataFrame = self._dataFrame.append(appendDataFrame)
 
@@ -356,7 +356,7 @@ class DataFrameObject(object):
             return True
 
     def objectExists(self, obj):
-        return self.find(self._table, str(obj.pid), column='Pid') is not None
+        return self.find(self._table, str(obj.pid), column=DATAFRAME_PID) is not None
 
     def emptyRow(self):
         """

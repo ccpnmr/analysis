@@ -209,7 +209,17 @@ class NmrResidueTable(GuiTable):
         CCPN-INTERNAL: Insert an index into ObjectTable
         """
         try:
-            return nmrRes.nmrChain.nmrResidues.index(nmrRes)
+            return nmrRes.nmrChain.nmrResidues.index(nmrRes)                # ED: THIS IS VERY SLOW
+        except:
+            return None
+
+    @staticmethod
+    def _nmrLamInt(row, name):
+        """
+        CCPN-INTERNAL: Insert an int into ObjectTable
+        """
+        try:
+            return int(getattr(row, name))
         except:
             return None
 
@@ -248,6 +258,8 @@ class NmrResidueTable(GuiTable):
         self.NMRcolumns = ColumnClass([
             ('#', lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None),
             ('Index', lambda nmrResidue: NmrResidueTable._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
+            # ('Index', lambda nmrResidue: NmrResidueTable._nmrLamInt(nmrResidue, 'Index'), 'Index of NmrResidue in the NmrChain', None),
+
             # ('Index',      lambda nmrResidue: nmrResidue.nmrChain.nmrResidues.index(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
             # ('NmrChain',   lambda nmrResidue: nmrResidue.nmrChain.id, 'NmrChain id', None),
             ('Pid', lambda nmrResidue: nmrResidue.pid, 'Pid of NmrResidue', None),

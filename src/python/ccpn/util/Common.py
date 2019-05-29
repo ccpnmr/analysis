@@ -851,9 +851,11 @@ def getAxisCodeMatchIndices(axisCodes, refAxisCodes, exactMatch=False):
 
     e.g. for unique axis codes:
 
-        getAxisCodeMatchIndices(('Hn', 'Nh', 'C'), ('Nh', 'Hn'))
+        indices = getAxisCodeMatchIndices(('Hn', 'Nh', 'C'), ('Nh', 'Hn'))
 
         ->  (1, 0, None)
+
+                i.e axisCodes[0] = 'Hn' which maps to refAxisCodes[indices[0]] = 'Hn'
 
     for similar repeated axis codes, possibly from matching isotopeCodes:
 

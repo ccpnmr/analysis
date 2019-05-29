@@ -1337,7 +1337,7 @@ GuiTable::item::selected {
             if not h.isSectionHidden(i) and h.sectionViewportPosition(i) >= 0:
                 if self.getSelectedRows():
                     self.scrollTo(self.model().index(self.getSelectedRows()[0], i),
-                                  self.PositionAtCenter)
+                                  self.EnsureVisible)           #PositionAtCenter)
                     break
 
     def getSelectedRows(self):
@@ -1458,9 +1458,12 @@ GuiTable::item::selected {
 
                 for obj in rowObjs:
                     row = self._dataFrameObject.find(self, str(obj.pid))
+
                     if row is not None:
                         selectionModel.select(self.model().index(row, 0),
                                               selectionModel.Select | selectionModel.Rows)
+
+                self.scrollToSelectedIndex()
 
     def clearTable(self):
         "remove all objects from the table"
@@ -1512,6 +1515,7 @@ GuiTable::item::selected {
                 if multipleAttr:
                     # newIndex = [multipleAttr.index(rr) for rr in self._objects]
 
+                    # find the columns containing the objects and the indexing
                     objCol = indCol = None
                     for cc in range(self.columnCount()):
                         colName = self.horizontalHeaderItem(cc).text()

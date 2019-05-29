@@ -153,8 +153,8 @@ class CalibrateSpectraFromPeaksPopupNd(CcpnDialog):
             else:
                 toPos, fromPos = fromPeakPos, toPeakPos
 
-            _calibrateXND(spectrum, fromPos[0], toPos[0])
-            _calibrateYND(spectrum, fromPos[1], toPos[1])
+            _calibrateXND(spectrum, strip, fromPos[0], toPos[0])
+            _calibrateYND(spectrum, strip, fromPos[1], toPos[1])
 
             if specView and not specView.isDeleted:
                 specView.buildContours = True

@@ -38,7 +38,7 @@ class CalibrateYNDWidgets(CalibrateY1DWidgets):
     def _calibrateSpectra(self, spectra, fromPos, toPos):
 
         for specView, spectrum in spectra:
-            _calibrateYND(spectrum, fromPos, toPos)
+            _calibrateYND(spectrum, self.strip, fromPos, toPos)
 
             if specView and not specView.isDeleted:
                 specView.buildContours = True

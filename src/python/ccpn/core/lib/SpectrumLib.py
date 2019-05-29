@@ -84,15 +84,27 @@ def _calibrateY1D(spectrum, currentPosition, newPosition):
     spectrum.intensities = spectrum.intensities + shift
 
 
-def _calibrateXND(spectrum, currentPosition, newPosition):
+def _calibrateXND(spectrum, strip, currentPosition, newPosition):
+    from ccpn.util.Common import getAxisCodeMatchIndices
+
+    # map the X change to the correct spectrum axis
     spectrumReferencing = list(spectrum.referenceValues)
-    spectrumReferencing[0] = float(spectrumReferencing[0] + (newPosition - currentPosition))
+    indices = getAxisCodeMatchIndices(strip.axisCodes, spectrum.axisCodes)
+
+    # as modifying the spectrum, spectrum needs to be the second argument of getAxisCodeMatchIndices
+    spectrumReferencing[indices[0]] = float(spectrumReferencing[indices[0]] + (newPosition - currentPosition))
     spectrum.referenceValues = spectrumReferencing
 
 
-def _calibrateYND(spectrum, currentPosition, newPosition):
+def _calibrateYND(spectrum, strip, currentPosition, newPosition):
+    from ccpn.util.Common import getAxisCodeMatchIndices
+
+    # map the Y change to the correct spectrum axis
     spectrumReferencing = list(spectrum.referenceValues)
-    spectrumReferencing[1] = float(spectrumReferencing[1] + (newPosition - currentPosition))
+    indices = getAxisCodeMatchIndices(strip.axisCodes, spectrum.axisCodes)
+
+    # as modifying the spectrum, spectrum needs to be the second argument of getAxisCodeMatchIndices
+    spectrumReferencing[indices[1]] = float(spectrumReferencing[indices[1]] + (newPosition - currentPosition))
     spectrum.referenceValues = spectrumReferencing
 
 

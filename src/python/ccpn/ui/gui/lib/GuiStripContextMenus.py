@@ -476,7 +476,7 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
                  checkable=True, checked=False,
                  callback=guiStrip1d.toggleCalibrateY, stripMethodName='calibrateYAction'),
 
-        _calibrateFromPeaks(guiStrip1d),
+        # _calibrateFromPeaks(guiStrip1d),
         _stackSpectraDefaultItem(guiStrip1d),
         _separator(),
         _phasingConsoleItem(guiStrip1d),
@@ -599,7 +599,7 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
         # _calibrateX(guiStripNd),
         # _calibrateY(guiStripNd),
         _calibrateXY(guiStripNd),
-        _calibrateFromPeaks(guiStripNd),
+        # _calibrateFromPeaks(guiStripNd),
 
         _separator(),
         _toggleHorizontalTraceItem(guiStripNd),

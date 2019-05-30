@@ -1461,6 +1461,8 @@ GuiTable::item::selected {
         """
         with self._tableBlockSignals('clearSelection'):
 
+            print('>>>clearSelection')
+
             objList = self.getSelectedObjects()
             selectionModel = self.selectionModel()
             selectionModel.clearSelection()
@@ -1536,6 +1538,8 @@ GuiTable::item::selected {
         #self._silenceCallback = True
 
         with self._tableBlockSignals('clearTable'):
+            print('>>>clearTable')
+
             self.clearTableContents()
 
         # self.show()
@@ -1552,6 +1556,9 @@ GuiTable::item::selected {
         self._dataFrameObject = dataFrameObject if dataFrameObject else None
 
         if self._dataFrameObject:
+            print('>>>clearTableContents')
+
+
             # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.ResizeToContents)
 
             # there must be something in the table to set the headers against

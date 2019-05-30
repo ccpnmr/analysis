@@ -358,19 +358,23 @@ class ChemicalShiftTable(GuiTable):
         """
         Update the table
         """
-        if not self._updateSilence:
-            self.project.blankNotification()
-            objs = self.getSelectedObjects()
+        self.populateTable(rowObjects=chemicalShiftList.chemicalShifts,
+                           columnDefs=self.CScolumns
+                           )
 
-            self._dataFrameObject = self.getDataFrameFromList(table=self,
-                                                              buildList=chemicalShiftList.chemicalShifts,
-                                                              colDefs=self.CScolumns,
-                                                              hiddenColumns=self._hiddenColumns)
-
-            # populate from the Pandas dataFrame inside the dataFrameObject
-            self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
-            self._highLightObjs(objs)
-            self.project.unblankNotification()
+        # if not self._updateSilence:
+        #     self.project.blankNotification()
+        #     objs = self.getSelectedObjects()
+        #
+        #     self._dataFrameObject = self.getDataFrameFromList(table=self,
+        #                                                       buildList=chemicalShiftList.chemicalShifts,
+        #                                                       colDefs=self.CScolumns,
+        #                                                       hiddenColumns=self._hiddenColumns)
+        #
+        #     # populate from the Pandas dataFrame inside the dataFrameObject
+        #     self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
+        #     self._highLightObjs(objs)
+        #     self.project.unblankNotification()
 
     def setUpdateSilence(self, silence):
         """

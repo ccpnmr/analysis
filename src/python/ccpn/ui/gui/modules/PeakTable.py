@@ -302,31 +302,42 @@ class PeakListTableWidget(GuiTable):
         if useSelectedPeakList:
             if self._selectedPeakList:
 
-                self.project.blankNotification()
-                self._dataFrameObject = self.getDataFrameFromList(table=self,
-                                                                  buildList=self._selectedPeakList.peaks,
-                                                                  colDefs=self._getTableColumns(self._selectedPeakList),
-                                                                  hiddenColumns=self._hiddenColumns)
+                self.populateTable(rowObjects=self._selectedPeakList.peaks,
+                                   columnDefs=self._getTableColumns(self._selectedPeakList),
+                                   selectedObjects=self.current.peaks)
 
-                # populate from the Pandas dataFrame inside the dataFrameObject
-                self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
-                self._highLightObjs(self.current.peaks)
-                self.project.unblankNotification()
+                # self.project.blankNotification()
+                # self._dataFrameObject = self.getDataFrameFromList(table=self,
+                #                                                   buildList=self._selectedPeakList.peaks,
+                #                                                   colDefs=self._getTableColumns(self._selectedPeakList),
+                #                                                   hiddenColumns=self._hiddenColumns)
+                #
+                # # populate from the Pandas dataFrame inside the dataFrameObject
+                # self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
+                # self._highLightObjs(self.current.peaks)
+                # self.project.unblankNotification()
+
             else:
                 self.clear()
         else:
             if peaks:
                 if peakList:
-                    self.project.blankNotification()
-                    self._dataFrameObject = self.getDataFrameFromList(table=self,
-                                                                      buildList=peaks,
-                                                                      colDefs=self._getTableColumns(peakList),
-                                                                      hiddenColumns=self._hiddenColumns)
 
-                    # populate from the Pandas dataFrame inside the dataFrameObject
-                    self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
-                    self._highLightObjs(self.current.peaks)
-                    self.project.unblankNotification()
+                    self.populateTable(rowObjects=peaks,
+                                       columnDefs=self._getTableColumns(peakList),
+                                       selectedObjects=self.current.peaks)
+
+                    # self.project.blankNotification()
+                    # self._dataFrameObject = self.getDataFrameFromList(table=self,
+                    #                                                   buildList=peaks,
+                    #                                                   colDefs=self._getTableColumns(peakList),
+                    #                                                   hiddenColumns=self._hiddenColumns)
+                    #
+                    # # populate from the Pandas dataFrame inside the dataFrameObject
+                    # self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
+                    # self._highLightObjs(self.current.peaks)
+                    # self.project.unblankNotification()
+
             else:
                 self.clear()
 
@@ -481,10 +492,11 @@ class PeakListTableWidget(GuiTable):
         """
         # print('>>>PeakTable _selectOnTableCurrentPeaks', repr(self))
 
-        if len(currentPeaks) > 0:
-            self._highLightObjs(currentPeaks)
-        else:
-            self.clearSelection()
+        self.highlightObjects(currentPeaks)
+        # if len(currentPeaks) > 0:
+        #     self._highLightObjs(currentPeaks)
+        # else:
+        #     self.clearSelection()
 
     # @staticmethod
     # def _getCommentText(peak):

@@ -204,13 +204,13 @@ class MultipletListTableWidget(GuiTable):
         actionCallback = self._actionCallback if actionCallback is None else actionCallback
 
         super().__init__(parent=parent,
-                            mainWindow=self.mainWindow,
-                            dataFrameObject=None,
-                            setLayout=True,
-                            autoResize=True, multiSelect=True,
-                            actionCallback=actionCallback,
-                            selectionCallback=selectionCallback,
-                            grid=(3, 0), gridSpan=(1, 6))
+                         mainWindow=self.mainWindow,
+                         dataFrameObject=None,
+                         setLayout=True,
+                         autoResize=True, multiSelect=True,
+                         actionCallback=actionCallback,
+                         selectionCallback=selectionCallback,
+                         grid=(3, 0), gridSpan=(1, 6))
         self.moduleParent = moduleParent
 
         # self.tableMenu.addAction('Copy Multiplets...', self._copyMultiplets)
@@ -323,19 +323,26 @@ class MultipletListTableWidget(GuiTable):
 
         if self._selectedMultipletList:
 
-            self.project.blankNotification()
-            self._dataFrameObject = self.getDataFrameFromList(table=self,
-                                                              buildList=self._selectedMultipletList.multiplets,
-                                                              colDefs=self._getTableColumns(self._selectedMultipletList),
-                                                              hiddenColumns=self._hiddenColumns)
-
-            # populate from the Pandas dataFrame inside the dataFrameObject
-            self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
-            self._highLightObjs(self.current.multiplets)
-            multiplet = self.current.multiplet
-            #
+            self.populateTable(rowObjects=self._selectedMultipletList.multiplets,
+                               columnDefs=self._getTableColumns(self._selectedMultipletList),
+                               selectedObjects=self.current.multiplets
+                               )
             self._updateMultipletPeaksOnTable()
-            self.project.unblankNotification()
+
+            # self.project.blankNotification()
+            # self._dataFrameObject = self.getDataFrameFromList(table=self,
+            #                                                   buildList=self._selectedMultipletList.multiplets,
+            #                                                   colDefs=self._getTableColumns(self._selectedMultipletList),
+            #                                                   hiddenColumns=self._hiddenColumns)
+            #
+            # # populate from the Pandas dataFrame inside the dataFrameObject
+            # self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
+            # self._highLightObjs(self.current.multiplets)
+            # multiplet = self.current.multiplet
+            # #
+            # self._updateMultipletPeaksOnTable()
+            # self.project.unblankNotification()
+
         else:
             self.clear()
             self.peakListTable.clear()
@@ -367,12 +374,12 @@ class MultipletListTableWidget(GuiTable):
         self.mLwidget.select(value)
         self._updateTable()
 
-    def displayTableForMultipletList(self, multipletList):
-        """
-        Display the table for all NmrResidue's of nmrChain
-        """
-        self.mLwidget.select(multipletList.pid)
-        self._updateTable(multiplets=multipletList.multiplets)
+    # def displayTableForMultipletList(self, multipletList):
+    #     """
+    #     Display the table for all NmrResidue's of nmrChain
+    #     """
+    #     self.mLwidget.select(multipletList.pid)
+    #     self._updateTable(multiplets=multipletList.multiplets)
 
     def _actionCallback(self, data, *args):
         ''' If current strip contains the double clicked multiplet will navigateToPositionInStrip '''
@@ -427,15 +434,24 @@ class MultipletListTableWidget(GuiTable):
         multiplet = self.current.multiplet
         if multiplet:
             if len(multiplet.peaks) > 0:
-                self.peakListTable._dataFrameObject = self.getDataFrameFromList(table=self,
-                                                                                buildList=multiplet.peaks,
 
-                                                                                colDefs=self.peakListTable._getTableColumns(
-                                                                                        multiplet.peaks[-1].peakList),
+                self.peakListTable.populateTable(rowObjects=multiplet.peaks,
+                                                 columnDefs=self.peakListTable._getTableColumns(
+                                                         multiplet.peaks[-1].peakList)
+                                                 )
 
-                                                                                hiddenColumns=self.peakListTable._hiddenColumns)
-                # populate from the Pandas dataFrame inside the dataFrameObject
-                self.peakListTable.setTableFromDataFrameObject(dataFrameObject=self.peakListTable._dataFrameObject)
+                # self.peakListTable._dataFrameObject = self.getDataFrameFromList(table=self,
+                #                                                                 buildList=multiplet.peaks,
+                #
+                #                                                                 colDefs=self.peakListTable._getTableColumns(
+                #                                                                         multiplet.peaks[-1].peakList),
+                #
+                #                                                                 hiddenColumns=self.peakListTable._hiddenColumns)
+                # # populate from the Pandas dataFrame inside the dataFrameObject
+                # self.peakListTable.setTableFromDataFrameObject(dataFrameObject=self.peakListTable._dataFrameObject)
+
+            else:
+                self.peakListTable.clear()
 
     def _pulldownUnitsCallback(self, unit):
         # update the table with new units
@@ -477,11 +493,13 @@ class MultipletListTableWidget(GuiTable):
         Highlight the list of multiplets on the table
         :param currentMultiplets:
         """
+        self.highlightObjects(currentMultiplets)
+
         if len(currentMultiplets) > 0:
-            self._highLightObjs(currentMultiplets)
+            # self._highLightObjs(currentMultiplets)
             self._populateMultipletPeaksOnTable()
         else:
-            self.clearSelection()
+            # self.clearSelection()
             self.peakListTable.clear()
 
     def _setPositionUnit(self, value):
@@ -491,4 +509,3 @@ class MultipletListTableWidget(GuiTable):
     # def destroy(self):
     #     "Cleanup of self"
     #     self.clearTableNotifiers()
-

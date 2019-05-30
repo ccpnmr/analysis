@@ -166,9 +166,10 @@ def exportTableDialog(dataFrame, columns=None, path='~/table.xlsx'):
         return
 
     from ccpn.util.Path import aPath
+
     path = aPath(path)
 
-    saveDialog = FileDialog(directory=str(path.parent),  selectFile=str(path), # default saving name
+    saveDialog = FileDialog(directory=str(path.parent), selectFile=str(path),  # default saving name
                             fileMode=FileDialog.AnyFile,
                             filter=".xlsx;; .csv;; .tsv;; .json ",
                             text='Save as ',
@@ -181,7 +182,6 @@ def exportTableDialog(dataFrame, columns=None, path='~/table.xlsx'):
 
 
 class GuiTable(TableWidget, Base):
-
     # selectionUserChanged = QtCore.pyqtSignal(QtCore.QItemSelection)
 
     ICON_FILE = os.path.join(os.path.dirname(__file__), 'icons', 'editable.png')
@@ -354,6 +354,8 @@ GuiTable::item::selected {
         self._mousePressed = False
         self._userKeyPressed = False
         self._selectOverride = False
+        self._scrollOverride = False
+
         self._lastClick = None
         self._tableData = {}
         self._rawData = None  # this is set when called setData()
@@ -416,12 +418,13 @@ GuiTable::item::selected {
     #
     #     return super().event(event)
 
-
-    def _blockTableEvents(self, blanking=True):
+    def _blockTableEvents(self, blanking=True, _disableScroll=False):
         """Block all updates/signals/notifiers in the table.
         """
         # block on first entry
         if self._tableBlockingLevel == 0:
+            if _disableScroll:
+                self._scrollOverride = True
             # self.setEnabled(False)
             self.blockSignals(True)
             self.selectionModel().blockSignals(True)
@@ -431,7 +434,7 @@ GuiTable::item::selected {
 
         self._tableBlockingLevel += 1
 
-    def _unblockTableEvents(self, blanking=True):
+    def _unblockTableEvents(self, blanking=True, _disableScroll=False):
         """Unblock all updates/signals/notifiers in the table.
         """
         if self._tableBlockingLevel > 0:
@@ -445,21 +448,24 @@ GuiTable::item::selected {
                 self.selectionModel().blockSignals(False)
                 self.blockSignals(False)
                 # self.setEnabled(True)
+
+                if _disableScroll:
+                    self._scrollOverride = False
         else:
             raise RuntimeError('Error: tableBlockingLevel already at 0')
 
     @contextmanager
-    def _tableBlockSignals(self, callerId='', blanking=True):
+    def _tableBlockSignals(self, callerId='', blanking=True, _disableScroll=False):
         """Block all signals from the table
         """
-        self._blockTableEvents(blanking)
+        self._blockTableEvents(blanking, _disableScroll=_disableScroll)
         try:
             yield  # yield control to the calling process
 
         except Exception as es:
             raise es
         finally:
-            self._unblockTableEvents(blanking)
+            self._unblockTableEvents(blanking, _disableScroll=_disableScroll)
 
     def _preSort(self, *args):
         """
@@ -575,20 +581,12 @@ GuiTable::item::selected {
                     _openItemObject(self.mainWindow, others)
 
     # def _cellClicked(self, item):
-    #     print('>>> %s _cellClicked' % _moduleId(self.moduleParent))
-    #
     #     if item:
-    #         if isinstance(item.value, bool):
-    #             self._checkBoxTableCallback(item)
-    #         try:
-    #             if self._selectionCallback:
-    #                 self._currentRow = item.row()
-    #                 self._currentCol = item.column()
-    #         except:
-    #             # Fixme
-    #             # item has been deleted error
-    #             pass
-    #     #
+    #         self._currentRow = item.row()
+    #         self._currentCol = item.column()
+    #     else:
+    #         self._currentRow = None
+    #         self._currentCol = None
 
     def _checkBoxCallback(self, data):
         print('>>> %s _checkBoxCallback' % _moduleId(self.moduleParent))
@@ -618,7 +616,7 @@ GuiTable::item::selected {
 
     def _doubleClickCallback(self, itemSelection):
 
-        with self._tableBlockSignals('_doubleClickCallback', blanking=False):
+        with self._tableBlockSignals('_doubleClickCallback', blanking=False, _disableScroll=True):
 
             model = self.selectionModel()
 
@@ -723,29 +721,35 @@ GuiTable::item::selected {
 
     def _selectionTableCallback(self, itemSelection):
         """Handler when selection has changed on the table
-        This can be either user or code changed
+        This user changed only
         """
         # getLogger().debug('>>> %s _selectionTableCallback' % _moduleId(self.moduleParent), self._tableBlockingLevel)
 
-        with self._tableBlockSignals('_selectionTableCallback', blanking=False):
+        with self._tableBlockSignals('_selectionTableCallback', blanking=False, _disableScroll=True):
 
-            # get selected objects on the table
-            objList = self.getSelectedObjects()
-
-            if objList and self._selectionCallback:
-                data = CallBack(theObject=self._dataFrameObject,
-                                object=objList,
-                                index=0,
-                                targetName=objList[0].className,
-                                trigger=CallBack.DOUBLECLICK,
-                                row=0,
-                                col=0,
-                                rowItem=None)
-
-                self._selectionCallback(data)
+            # get whether current row is defined
+            if not (self._currentRow is not None and self._currentCol is not None):
+                self._selectionCallback({Notifier.OBJECT: None})
 
             else:
-                self.clearSelection()
+
+                # get selected objects on the table
+                objList = self.getSelectedObjects()
+
+                if objList and self._selectionCallback:
+                    data = CallBack(theObject=self._dataFrameObject,
+                                    object=objList,
+                                    index=0,
+                                    targetName=objList[0].className,
+                                    trigger=CallBack.DOUBLECLICK,
+                                    row=0,
+                                    col=0,
+                                    rowItem=None)
+
+                    self._selectionCallback(data)
+
+                else:
+                    self.clearSelection()
 
     def _checkBoxTableCallback(self, itemSelection):
         # print('>>> %s _checkBoxTableCallback' % _moduleId(self.moduleParent))
@@ -880,6 +884,14 @@ GuiTable::item::selected {
             # self.clearSelection()
             # selectionModel = self.selectionModel()
             # selectionModel.clearSelection()
+
+            item = self.itemAt(event.pos())
+            if item:
+                self._currentRow = item.row()
+                self._currentCol = item.column()
+            else:
+                self._currentRow = None
+                self._currentCol = None
 
             # we are selecting from the table
             self._mousePressed = True
@@ -1107,8 +1119,60 @@ GuiTable::item::selected {
 
             # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
 
+    def highlightObjects(self, objectList, scrollToSelection=True):
+        """Highlight a list of objects in the table
+        """
+        objs = []
+
+        # get the list of objects, exclude deleted and flagged for delete
+        for obj in objectList:
+            if isinstance(obj, str):
+                objFromPid = self.project.getByPid(obj)
+
+                if objFromPid and not objFromPid.isDeleted and not objFromPid._flaggedForDelete:
+                    objs.append(objFromPid)
+
+            else:
+                objs.append(obj)
+
+        if objs:
+            self._highLightObjs(objs, scrollToSelection=scrollToSelection)
+        else:
+            self.clearSelection()
+
+    def populateTable(self, rowObjects=None, columnDefs=None,
+                      selectedObjects=None):
+        """Populate the table with a set of objects to highlight, or keep current selection highlighted
+        with the first item visible.
+
+        Use selectedObjects = [] to clear the selected items
+
+        :param rowObjects: list of objects to set each row
+        """
+        self.project.blankNotification()
+
+        # if nothing passed in then keep the current highlighted objects
+        objs = selectedObjects if selectedObjects is not None else self.getSelectedObjects()
+
+        try:
+            _dataFrameObject = self.getDataFrameFromList(table=self,
+                                                         buildList=rowObjects,
+                                                         colDefs=columnDefs,
+                                                         hiddenColumns=self._hiddenColumns)
+
+            # populate from the Pandas dataFrame inside the dataFrameObject
+            self.setTableFromDataFrameObject(dataFrameObject=_dataFrameObject)
+
+        except Exception as es:
+            getLogger().warning('Error populating table', str(es))
+
+        finally:
+            self._highLightObjs(objs)
+            self.project.unblankNotification()
+
     def setTableFromDataFrameObject(self, dataFrameObject):
-        # populate the table from the the Pandas dataFrame
+        """Populate the table from a Pandas dataFrame
+        """
 
         with self._tableBlockSignals('setTableFromDataFrameObject'):
 
@@ -1337,7 +1401,7 @@ GuiTable::item::selected {
             if not h.isSectionHidden(i) and h.sectionViewportPosition(i) >= 0:
                 if self.getSelectedRows():
                     self.scrollTo(self.model().index(self.getSelectedRows()[0], i),
-                                  self.EnsureVisible)           #PositionAtCenter)
+                                  self.EnsureVisible)  #PositionAtCenter)
                     break
 
     def getSelectedRows(self):
@@ -1427,7 +1491,7 @@ GuiTable::item::selected {
 
                 # if not self._mousePressed:
                 selectionModel.clearSelection()  # causes a clear problem here
-                    # strange tablewidget cmd/selection problem
+                # strange tablewidget cmd/selection problem
 
                 for obj in objList:
                     row = self._dataFrameObject.find(self, str(obj.pid))
@@ -1435,7 +1499,7 @@ GuiTable::item::selected {
                         selectionModel.select(self.model().index(row, 0),
                                               selectionModel.Select | selectionModel.Rows)
 
-    def _highLightObjs(self, selection):
+    def _highLightObjs(self, selection, scrollToSelection=True):
 
         # skip if the table is empty
         if not self._dataFrameObject:
@@ -1463,7 +1527,8 @@ GuiTable::item::selected {
                         selectionModel.select(self.model().index(row, 0),
                                               selectionModel.Select | selectionModel.Rows)
 
-                self.scrollToSelectedIndex()
+                if scrollToSelection and not self._scrollOverride:
+                    self.scrollToSelectedIndex()
 
     def clearTable(self):
         "remove all objects from the table"
@@ -2061,9 +2126,9 @@ class GuiTableDelegate(QtWidgets.QStyledItemDelegate):
 class GuiTableFrame(Frame):
     def __init__(self, *args, **kwargs):
         super(GuiTableFrame, self).__init__(parent=self.mainWidget, setLayout=True, spacing=(0, 0),
-                                              showBorder=False, fShape='noFrame',
-                                              grid=(1, 0),
-                                              hPolicy='expanding', vPolicy='expanding')
+                                            showBorder=False, fShape='noFrame',
+                                            grid=(1, 0),
+                                            hPolicy='expanding', vPolicy='expanding')
 
         self.guiTable = GuiTable(self, *args, **kwargs)
         self.searchWidget = None

@@ -309,17 +309,21 @@ class ChemicalShiftTableWithAssignment(CcpnModule):
             self.assignedPeaksTable._peakList.peaks = list(
                     set([pk for nmrAtom in self.application.current.nmrResidue.nmrAtoms for pk in nmrAtom.assignedPeaks]))
 
-            self.project.blankNotification()
-            objs = self.assignedPeaksTable.getSelectedObjects()
-            self._dataFrameObject = self.assignedPeaksTable.getDataFrameFromList(table=self.assignedPeaksTable,
-                                                                                 buildList=self.assignedPeaksTable._peakList.peaks,
-                                                                                 colDefs=self.getColumns(),
-                                                                                 hiddenColumns=self._hiddenColumns)
+            self.assignedPeaksTable.populateTable(rowObjects=self.assignedPeaksTable._peakList.peaks,
+                                                  columnDefs=self.getColumns()
+                                                  )
 
-            # populate from the Pandas dataFrame inside the dataFrameObject
-            self.assignedPeaksTable.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
-            self.assignedPeaksTable._highLightObjs(objs)
-            self.project.unblankNotification()
+            # self.project.blankNotification()
+            # objs = self.assignedPeaksTable.getSelectedObjects()
+            # self._dataFrameObject = self.assignedPeaksTable.getDataFrameFromList(table=self.assignedPeaksTable,
+            #                                                                      buildList=self.assignedPeaksTable._peakList.peaks,
+            #                                                                      colDefs=self.getColumns(),
+            #                                                                      hiddenColumns=self._hiddenColumns)
+            #
+            # # populate from the Pandas dataFrame inside the dataFrameObject
+            # self.assignedPeaksTable.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
+            # self.assignedPeaksTable._highLightObjs(objs)
+            # self.project.unblankNotification()
 
             # self.assignedPeaksTable.setObjects(peaks)
             # highlight current.nmrAtom in the list widget
@@ -330,17 +334,22 @@ class ChemicalShiftTableWithAssignment(CcpnModule):
             nmrAtom = self.application.project.getByPid(pid)
             #print('>>', pid, nmrAtom)
             if nmrAtom is not None:
-                self.project.blankNotification()
-                objs = self.assignedPeaksTable.getSelectedObjects()
-                self._dataFrameObject = self.assignedPeaksTable.getDataFrameFromList(table=self.assignedPeaksTable,
-                                                                                     buildList=nmrAtom.assignedPeaks,
-                                                                                     colDefs=self.getColumns(),
-                                                                                     hiddenColumns=self._hiddenColumns)
 
-                # populate from the Pandas dataFrame inside the dataFrameObject
-                self.assignedPeaksTable.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
-                self.assignedPeaksTable._highLightObjs(objs)
-                self.project.unblankNotification()
+                self.assignedPeaksTable.populateTable(rowObjects=nmrAtom.assignedPeaks,
+                                                      columnDefs=self.getColumns()
+                                                      )
+
+                # self.project.blankNotification()
+                # objs = self.assignedPeaksTable.getSelectedObjects()
+                # self._dataFrameObject = self.assignedPeaksTable.getDataFrameFromList(table=self.assignedPeaksTable,
+                #                                                                      buildList=nmrAtom.assignedPeaks,
+                #                                                                      colDefs=self.getColumns(),
+                #                                                                      hiddenColumns=self._hiddenColumns)
+                #
+                # # populate from the Pandas dataFrame inside the dataFrameObject
+                # self.assignedPeaksTable.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
+                # self.assignedPeaksTable._highLightObjs(objs)
+                # self.project.unblankNotification()
 
                 # self.assignedPeaksTable.setObjects(nmrAtom.assignedPeaks)
                 # highlight current.nmrAtom in the list widget

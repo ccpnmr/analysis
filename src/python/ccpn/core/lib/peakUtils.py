@@ -55,6 +55,10 @@ class Dictlist(dict):
 
 def getMultipletPosition(multiplet, dim, unit='ppm'):
     try:
+        # skip if the position is None, otherwise check for dimensions
+        if multiplet.position is None:
+            return
+
         if multiplet.position[dim] is None:
             value = None  #"*NOT SET*"
 

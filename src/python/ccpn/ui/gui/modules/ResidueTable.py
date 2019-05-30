@@ -318,18 +318,22 @@ class ResidueTable(GuiTable):
         """
         Update the table
         """
-        self.project.blankNotification()
-        objs = self.getSelectedObjects()
+        self.populateTable(rowObjects=chain.residues,
+                           columnDefs=self.NMRcolumns
+                           )
 
-        self._dataFrameObject = self.getDataFrameFromList(table=self,
-                                                          buildList=chain.residues,
-                                                          colDefs=self.NMRcolumns,
-                                                          hiddenColumns=self._hiddenColumns)
-
-        # populate from the Pandas dataFrame inside the dataFrameObject
-        self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
-        self._highLightObjs(objs)
-        self.project.unblankNotification()
+        # self.project.blankNotification()
+        # objs = self.getSelectedObjects()
+        #
+        # self._dataFrameObject = self.getDataFrameFromList(table=self,
+        #                                                   buildList=chain.residues,
+        #                                                   colDefs=self.NMRcolumns,
+        #                                                   hiddenColumns=self._hiddenColumns)
+        #
+        # # populate from the Pandas dataFrame inside the dataFrameObject
+        # self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
+        # self._highLightObjs(objs)
+        # self.project.unblankNotification()
 
 
     def _selectionCallback(self, data):
@@ -372,11 +376,11 @@ class ResidueTable(GuiTable):
         """
         highlight  current Residues on the opened table
         """
-        if len(currentResidues) > 0:
-            self._highLightObjs(currentResidues)
-        else:
-            self.clearSelection()
-
+        self.highlightObjects(currentResidues)
+        # if len(currentResidues) > 0:
+        #     self._highLightObjs(currentResidues)
+        # else:
+        #     self.clearSelection()
 
     @staticmethod
     def _getAtomNames(residue):

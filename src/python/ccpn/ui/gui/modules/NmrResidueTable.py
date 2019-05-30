@@ -507,18 +507,22 @@ class NmrResidueTable(GuiTable):
         # self._selectOnTableCurrentNmrResidues(self.current.nmrResidues)
         # # self.show()
 
-        self.project.blankNotification()
-        objs = self.getSelectedObjects()
+        self.populateTable(rowObjects=nmrChain.nmrResidues,
+                           columnDefs=self.NMRcolumns
+                           )
 
-        self._dataFrameObject = self.getDataFrameFromList(table=self,
-                                                          buildList=nmrChain.nmrResidues,
-                                                          colDefs=self.NMRcolumns,
-                                                          hiddenColumns=self._hiddenColumns)
-
-        # populate from the Pandas dataFrame inside the dataFrameObject
-        self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
-        self._highLightObjs(objs)
-        self.project.unblankNotification()
+        # self.project.blankNotification()
+        # objs = self.getSelectedObjects()
+        #
+        # self._dataFrameObject = self.getDataFrameFromList(table=self,
+        #                                                   buildList=nmrChain.nmrResidues,
+        #                                                   colDefs=self.NMRcolumns,
+        #                                                   hiddenColumns=self._hiddenColumns)
+        #
+        # # populate from the Pandas dataFrame inside the dataFrameObject
+        # self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
+        # self._highLightObjs(objs)
+        # self.project.unblankNotification()
 
     def setUpdateSilence(self, silence):
         """
@@ -566,10 +570,11 @@ class NmrResidueTable(GuiTable):
         """
         highlight  current NmrResidues on the opened table
         """
-        if len(currentNmrResidues) > 0:
-            self._highLightObjs(currentNmrResidues)
-        else:
-            self.clearSelection()
+        self.highlightObjects(currentNmrResidues)
+        # if len(currentNmrResidues) > 0:
+        #     self._highLightObjs(currentNmrResidues)
+        # else:
+        #     self.clearSelection()
 
     # @staticmethod
     # def _getCommentText(nmrResidue):

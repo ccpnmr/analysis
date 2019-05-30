@@ -275,18 +275,22 @@ class IntegralTable(GuiTable):
         """
         Update the table
         """
-        self.project.blankNotification()
-        objs = self.getSelectedObjects()
+        self.populateTable(rowObjects=integralList.integrals,
+                           columnDefs=self.ITcolumns
+                           )
 
-        self._dataFrameObject = self.getDataFrameFromList(table=self,
-                                                          buildList=integralList.integrals,
-                                                          colDefs=self.ITcolumns,
-                                                          hiddenColumns=self._hiddenColumns)
-
-        # populate from the Pandas dataFrame inside the dataFrameObject
-        self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
-        self._highLightObjs(objs)
-        self.project.unblankNotification()
+        # self.project.blankNotification()
+        # objs = self.getSelectedObjects()
+        #
+        # self._dataFrameObject = self.getDataFrameFromList(table=self,
+        #                                                   buildList=integralList.integrals,
+        #                                                   colDefs=self.ITcolumns,
+        #                                                   hiddenColumns=self._hiddenColumns)
+        #
+        # # populate from the Pandas dataFrame inside the dataFrameObject
+        # self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
+        # self._highLightObjs(objs)
+        # self.project.unblankNotification()
 
     def setUpdateSilence(self, silence):
         """
@@ -347,10 +351,12 @@ class IntegralTable(GuiTable):
         """ highlight current integrals on the opened integral table """
 
         # print(currentIntegrals)
-        if len(currentIntegrals) > 0:
-            self._highLightObjs(currentIntegrals)
-        else:
-            self.clearSelection()
+
+        self.highlightObjects(currentIntegrals)
+        # if len(currentIntegrals) > 0:
+        #     self._highLightObjs(currentIntegrals)
+        # else:
+        #     self.clearSelection()
 
     ##### Action callback: Lines on plot
 

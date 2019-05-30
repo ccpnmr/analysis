@@ -2449,6 +2449,56 @@ class GLmultipletListMethods():
     # List specific routines
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    def objIsInVisiblePlanes(self, spectrumView, multiplet, viewOutOfPlanePeaks=True):
+        """Return whether in plane or flanking plane
+
+        :param spectrumView: current spectrumView containing peaks
+        :param multiplet: multiplet to test
+        :param viewOutOfPlanePeaks: whether to show outofplane peaks, defaults to true
+        :return: inPlane - true/false
+                inFlankingPlane - true/false
+                type of outofplane - currently 0/1/2 indicating whether normal, infront or behind
+                fade for colouring
+        """
+        displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
+
+        for ii, displayIndex in enumerate(displayIndices[2:]):
+            if displayIndex is not None:
+                # If no axis matches the index may be None
+
+                if not multiplet.position:
+                    return False, False, 0, 1.0
+
+                zPosition = multiplet.position[displayIndex]
+                if not zPosition:
+                    return False, False, 0, 1.0
+
+                settings = self._spectrumSettings[spectrumView]
+
+                actualPlane = int(settings[GLDefs.SPECTRUM_VALUETOPOINT](zPosition) + 0.5) - 1
+                planes = self._GLParent.visiblePlaneList[spectrumView]
+
+                if not (planes and planes[0]):
+                    return False, False, 0, 1.0
+
+                visiblePlaneList = planes[0]
+                vplLen = len(visiblePlaneList)
+                if actualPlane in visiblePlaneList[1:vplLen - 1]:
+                    return True, False, 0, 1.0
+
+                elif not viewOutOfPlanePeaks:
+                    return False, False, 0, 1.0
+
+                elif actualPlane == visiblePlaneList[0]:
+                    return False, True, 1, GLDefs.OUTOFPLANEFADE
+
+                elif actualPlane == visiblePlaneList[vplLen - 1]:
+                    return False, True, 2, GLDefs.OUTOFPLANEFADE
+
+                return False, False, 0, 1.0
+
+        return True, False, 0, 1.0
+
     # def objIsInPlane(self, strip, multiplet) -> bool:
     #     """is multiplet in currently displayed planes for strip?
     #     Use the first peak to determine the spectrumView and the actual multiplet position
@@ -2622,6 +2672,25 @@ class GLmultipletNdLabelling(GLmultipletListMethods, GLpeakNdLabelling):
         # drawList.offsets[vertexPTR:vertexPTR + 2 * numVertices] = p0 * numVertices
 
         return numVertices
+
+    def _processNotifier(self, data):
+        """Process notifiers
+        """
+        triggers = data[Notifier.TRIGGER]
+        obj = data[Notifier.OBJECT]
+
+        # update the multiplet labelling
+        if Notifier.DELETE in triggers:
+            self._deleteSymbol(obj)
+            self._deleteLabel(obj)
+
+        if Notifier.CREATE in triggers:
+            self._createSymbol(obj)
+            self._createLabel(obj)
+
+        if Notifier.CHANGE in triggers:
+            self._changeSymbol(obj)
+            self._changeLabel(obj)
 
 
 class GLmultiplet1dLabelling(GLmultipletListMethods, GLpeak1dLabelling):

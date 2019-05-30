@@ -394,21 +394,21 @@ class ChemicalShiftTable(GuiTable):
         """
         Notifier Callback for selecting a row in the table
         """
-        obj = data[CallBack.OBJECT]
-
-        getLogger().debug('ChemicalShiftTable>>> selection', obj)
-        return
+        # obj = data[CallBack.OBJECT]
+        #
+        # getLogger().debug('ChemicalShiftTable>>> selection', obj)
+        # return
 
         selected = data[CallBack.OBJECT]
 
+        obj = None
         if selected:
-            if self.multiSelect:  #In this case selected is a List!!
-                if isinstance(selected, list):
-                    obj = selected
-            else:
-                obj = selected[0]
-        else:
-            obj = None
+            # if self.multiSelect:  #In this case selected is a List!!
+            #     if isinstance(selected, list):
+            #         obj = selected
+            # else:
+
+            obj = selected[0]
 
         self.current.chemicalShift = obj
         ChemicalShiftTableModule.currentCallback = {'object': self.chemicalShiftList, 'table': self}

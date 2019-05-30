@@ -5573,7 +5573,8 @@ class CcpnGLWidget(QOpenGLWidget):
             strip._checkMenuItems()
 
             # set the correct rightMouseMenu for the clicked object (must be selected)
-            if self._mouseInPeak(xPosition, yPosition, firstOnly=True):
+            pks = self._mouseInPeak(xPosition, yPosition, firstOnly=True)
+            if pks:
                 strip.contextMenuMode = PeakMenu
                 menu = strip._contextMenus.get(strip.contextMenuMode)
 

@@ -512,28 +512,28 @@ GuiTable::item::selected {
         # this is also called when the table is populated from the pulldown :)
         return
 
-        # print('>>>tableSorting', col, sortOrder)
-        # print('>>>currentIndex', self.currentIndex())
-
-        rows = list(range(self.rowCount()))
-        columns = list(range(self.columnCount()))
-        headings = []
-        for c in columns:
-            hi = self.horizontalHeaderItem(c)
-            if hi:
-                headings.append(self.horizontalHeaderItem(c).text())
-            else:
-                headings.append('*')
-
-        # print(headings)
-        if DATAFRAME_PID in headings:
-            pidCol = headings.index(DATAFRAME_PID)
-            pids = []
-            for r in rows:
-                pids.append(self.item(r, pidCol).value)
-            # print(pids)
-
-        self._newSorted = True
+        # # print('>>>tableSorting', col, sortOrder)
+        # # print('>>>currentIndex', self.currentIndex())
+        #
+        # rows = list(range(self.rowCount()))
+        # columns = list(range(self.columnCount()))
+        # headings = []
+        # for c in columns:
+        #     hi = self.horizontalHeaderItem(c)
+        #     if hi:
+        #         headings.append(self.horizontalHeaderItem(c).text())
+        #     else:
+        #         headings.append('*')
+        #
+        # # print(headings)
+        # if DATAFRAME_PID in headings:
+        #     pidCol = headings.index(DATAFRAME_PID)
+        #     pids = []
+        #     for r in rows:
+        #         pids.append(self.item(r, pidCol).value)
+        #     # print(pids)
+        #
+        # self._newSorted = True
 
     def setActionCallback(self, actionCallback):
         # enable callbacks
@@ -589,7 +589,7 @@ GuiTable::item::selected {
     #         self._currentCol = None
 
     def _checkBoxCallback(self, data):
-        print('>>> %s _checkBoxCallback' % _moduleId(self.moduleParent))
+        getLogger().info('>>> %s _checkBoxCallback' % _moduleId(self.moduleParent))
 
         pass
 
@@ -1461,8 +1461,6 @@ GuiTable::item::selected {
         """
         with self._tableBlockSignals('clearSelection'):
 
-            print('>>>clearSelection')
-
             objList = self.getSelectedObjects()
             selectionModel = self.selectionModel()
             selectionModel.clearSelection()
@@ -1538,8 +1536,6 @@ GuiTable::item::selected {
         #self._silenceCallback = True
 
         with self._tableBlockSignals('clearTable'):
-            print('>>>clearTable')
-
             self.clearTableContents()
 
         # self.show()
@@ -1556,8 +1552,6 @@ GuiTable::item::selected {
         self._dataFrameObject = dataFrameObject if dataFrameObject else None
 
         if self._dataFrameObject:
-            print('>>>clearTableContents')
-
 
             # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.ResizeToContents)
 

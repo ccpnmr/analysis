@@ -411,6 +411,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._background = np.zeros((4,), dtype=np.float32)
         self._parameterList = np.zeros((4,), dtype=np.int32)
         self._view = np.zeros((4,), dtype=np.float32)
+        self._updateBackgroundColour = True
 
         # get information from the parent class (strip)
         self.orderedAxes = self.strip.orderedAxes
@@ -1761,7 +1762,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # This is the correct blend function to ignore stray surface blending functions
         GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
-        self.setBackgroundColour(self.background)
+        self.setBackgroundColour(self.background, silent=True)
         self.globalGL._shaderProgramTex.setBlendEnabled(0)
 
         if self.strip:
@@ -1810,14 +1811,14 @@ class CcpnGLWidget(QOpenGLWidget):
         self._applyYLimit = self._preferences.zoomYLimitApply
         self._intensityLimit = self._preferences.intensityLimit
 
-        self.setBackgroundColour(self.background)
+        # set the flag to update the background in the paint event
+        self._updateBackgroundColour = True
 
     def setBackgroundColour(self, col, silent=False):
         """
         set all background colours in the shaders
         :param col - vec4, 4 element list e.g.: [0.05, 0.05, 0.05, 1.0], very dark gray
         """
-        self.makeCurrent()
         GL.glClearColor(*col)
         self.background = np.array(col, dtype=np.float32)
 
@@ -1827,10 +1828,6 @@ class CcpnGLWidget(QOpenGLWidget):
         self.globalGL._shaderProgramTex.setBackground(self.background)
         if not silent:
             self.update()
-        self.doneCurrent()
-
-        # self.doneCurrent()
-        # self.update()
 
     def mapMouseToAxis(self, pnt):
         if isinstance(pnt, QPoint):
@@ -2508,6 +2505,11 @@ class CcpnGLWidget(QOpenGLWidget):
     def paintGL(self):
         w = self.w
         h = self.h
+
+        if self._updateBackgroundColour:
+            self._updateBackgroundColour = False
+            self.setBackgroundColour(self.background, silent=True)
+
         GL.glClear(GL.GL_COLOR_BUFFER_BIT)
         currentShader = self.globalGL._shaderProgram1.makeCurrent()
 

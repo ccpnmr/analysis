@@ -61,6 +61,7 @@ def safeOpen(path, mode):
         safeFileName is the new safe filename.
 
     :param path: filepath and filename.
+    :param mode: open flags
     :return: Open file handle and new fileName
     """
     flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
@@ -85,3 +86,29 @@ def safeOpen(path, mode):
 
             # ...and exit
             return
+
+def getSafeFilename(path, mode='w'):
+    """Get the first safe filename from the given path
+
+    :param path: filepath and filename.
+    :param mode: open flags
+    :return: Open file handle and new fileName
+    """
+    flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
+
+    if 'b' in mode and sys.platform.system() == 'Windows' and hasattr(os, 'O_BINARY'):
+        flags |= os.O_BINARY
+
+    # repeat over filenames with iterating number
+    for filename in _iter_incrementing_file_names(path):
+        try:
+            file_handle = os.open(filename, flags)
+        except OSError as e:
+            if e.errno == errno.EEXIST:
+                # force repeat of the loop if file exists (file not opened)
+                pass
+            else:
+                raise
+        else:
+            # return the new filename
+            return filename

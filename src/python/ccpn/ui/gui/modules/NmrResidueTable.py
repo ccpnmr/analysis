@@ -50,10 +50,11 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot
-
+from ccpnc.clibrary import Clibrary
 
 logger = getLogger()
 ALL = '<all>'
+_getNmrIndex = Clibrary.getNmrResidueIndex
 
 
 class NmrResidueTableModule(CcpnModule):
@@ -209,8 +210,10 @@ class NmrResidueTable(GuiTable):
         CCPN-INTERNAL: Insert an index into ObjectTable
         """
         try:
-            return nmrRes.nmrChain.nmrResidues.index(nmrRes)                # ED: THIS IS VERY SLOW
-        except:
+            val = _getNmrIndex(nmrRes)
+            return val
+            # return nmrRes.nmrChain.nmrResidues.index(nmrRes)                # ED: THIS IS VERY SLOW
+        except Exception as es:
             return None
 
     @staticmethod

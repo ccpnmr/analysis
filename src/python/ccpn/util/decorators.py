@@ -38,6 +38,7 @@ import cProfile
 import decorator
 import inspect
 from functools import partial
+from ccpn.util.SafeFilename import getSafeFilename
 # from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.util.Logging import getLogger
 
@@ -108,6 +109,7 @@ def profile(func):
             return ret
         finally:
             filename = os.path.expanduser(os.path.join('~', func.__name__ + '.pstat'))
+            filename = getSafeFilename(filename, 'w')
             profiler.dump_stats(filename)
 
     return profileWrapper

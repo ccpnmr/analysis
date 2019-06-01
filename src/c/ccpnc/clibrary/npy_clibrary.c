@@ -86,21 +86,21 @@ static appendFloatLong(PyObject *list, value)
     }
 }
 
-#define cat(z, a)          *((uint8_t *)memcpy(&(z), &(a), sizeof(a)) + sizeof(a))
-
 struct Node
 {
+    // Struct to contain nmrResidue information
+
     // data
-    PyObject *mainResonance;
+    PyObject *object;
     double  relativeOffset;
-    double  index;
+    long    index;
 
     // pointers
     struct  Node *prev;
     struct  Node *next;
 };
 
-struct Node *newNode(PyObject *item)
+struct Node *newNode(PyObject *nmrResidue)
 {
     // create a new element
     struct Node *temp = (struct Node*) malloc(sizeof(struct Node));
@@ -108,7 +108,7 @@ struct Node *newNode(PyObject *item)
     // set up the data
     temp->relativeOffset = -0.1;
     temp->index = -1;
-    temp->mainResonance = item;
+    temp->object = nmrResidue;
 
     // initialise the pointers
     temp->prev = NULL;
@@ -116,66 +116,67 @@ struct Node *newNode(PyObject *item)
     return temp;
 }
 
-static appendNode(struct Node** headRef, PyObject *item, index)
+static CcpnBool compareRes(struct Node* leftNode, struct Node* rightNode)
 {
-    struct Node *temp = newNode(item);
-    struct Node *ptr = (*headRef);
+    // compare whether 2 residues in connected stretch are similar
+    if (leftNode->index == rightNode->index)
+        if (leftNode->relativeOffset < rightNode->relativeOffset)
+            return CCPN_TRUE;
+        else
+            return CCPN_FALSE;
 
-    if (!ptr)
-        // set the head to the only element
-        (*headRef) = temp;
-    else
-    {
-        // find the end of the list
-        while (ptr->next)
-            ptr = ptr->next;
+    if (leftNode->index < rightNode->index)
+        return CCPN_TRUE;
 
-        // add the new item
-        ptr->next = temp;
-        temp->prev = ptr;
-    }
-    temp->index = (double) index;
+    return CCPN_FALSE;
 }
 
-void insertNode(struct Node **headRef, PyObject *mainResonance, PyObject *offsetItem, index)
+struct Node* insert(struct Node* node, struct Node* item)
+{
+    // If the tree is empty, return previously defined new node
+    if (!node)
+        return item;
+
+    // Otherwise, recurse down the tree
+    if (compareRes(item, node) == CCPN_TRUE)
+        node->prev = insert(node->prev, item);
+    else
+        node->next = insert(node->next, item);
+
+    return node;
+}
+
+static CcpnBool insertNode(struct Node **headRef, PyObject *offsetItem, long index)
 {
     struct Node *temp = newNode(offsetItem);
     struct Node *ptr = (*headRef);
     double relOffset;
+    PyObject *test;
 
-    // test whether the relativeOffsets are lower...
-    // this is assumed to be offset
-
-    if (!ptr)
-        // just making sure - the list MAY be empty
-        (*headRef) = temp;
-    else
+    // test for None - means a main residue
+    test = PyObject_GetAttrString(offsetItem, "relativeOffset");
+    if (test != Py_None)
     {
         relOffset = PyFloat_AsDouble(PyObject_GetAttrString(offsetItem, "relativeOffset"));
-        while (ptr)
-        {
-            if ((ptr->mainResonance == mainResonance) && (relOffset < ptr->relativeOffset))
-            {
-                if (!ptr->prev)
-                {
-                    // put at the head
-                    temp->next = ptr;
-                    ptr->prev = temp;
-                    (*headRef) = temp;
-                    return;
-                }
-                else
-                {
-                    // insert before
-                    temp->next = ptr;
-                    temp->prev = ptr->prev;
-                    ptr->prev->next = temp;
-                    ptr->prev = temp;
-                    return;
-                }
-            }
-            ptr = ptr->next;
-        }
+        temp->relativeOffset = relOffset;
+    }
+    temp->index = index;
+
+    (*headRef) = insert(ptr, temp);
+
+    return CCPN_TRUE;
+}
+
+static void getIndexInList(struct Node *node, PyObject *item, long *index, long *found)
+{
+    if (node)
+    {
+        getIndexInList(node->prev, item, index, found);
+        (*index)++;
+        if (node->object == item)
+            *found = *index;
+
+        getIndexInList(node->next, item, index, found);
     }
 }
 
@@ -188,7 +189,7 @@ long getIndex(struct Node *nodeList, PyObject *item)
     while (ptr)
     {
         index++;
-        if (ptr->mainResonance == item)
+        if (ptr->object == item)
         {
             returnValue = index;
             break;
@@ -203,25 +204,23 @@ long getIndex(struct Node *nodeList, PyObject *item)
 static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args)
 {
     PyObject *nmrChain;
-//    PyListObject *nmrResidues;
     PyTupleObject *nmrResidues;
     PyObject *nmrResidue;
     PyObject *returnValue;
     char error_msg[1000];
-    long index, numRes = 0, numOffsets = 0;
+    long index = -1, numRes = 0, numOffsets = 0, found = -1;
     PyObject *listRes;
     PyObject *apiNmrResidue;
     PyListObject *offsetList;
     PyObject *offsetRes;
+    PyListObject *foundResonanceGroups;
+    PyListObject *resonanceGroups;
+    PyObject *project;
 
 //    long    *ptrs = NULL;
 //    MALLOC(ptrs, long, 10);     // remember to dealloc
 //    REALLOC(ptrs, long, 12);
 //    FREE(ptrs, long);
-
-//    PyObject *returnObject;
-//    returnObject = newList();
-
 
     if (!PyArg_ParseTuple(args, "O", &nmrResidue))
         RETURN_OBJ_ERROR("need arguments: nmrResidue");
@@ -232,6 +231,10 @@ static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args)
     nmrChain = (PyObject *) PyObject_GetAttrString(apiNmrResidue, "nmrChain");
     nmrResidues = (PyListObject *) PyObject_GetAttrString(nmrChain, "mainResonanceGroups");
 
+    foundResonanceGroups = newList();
+    project = (PyObject *) PyObject_GetAttrString(apiNmrResidue, "nmrProject");
+
+
     // iterate through the mainresonanceGroups
     // add tolinked list
 
@@ -240,76 +243,26 @@ static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args)
 
     struct Node *resonanceList = NULL;
 
+
     numRes = PyTuple_GET_SIZE(nmrResidues);
     for (long ii = 0; ii < numRes; ii++)
     {
         listRes = (PyObject *) PyTuple_GET_ITEM(nmrResidues, ii);
 
-        appendNode(&resonanceList, listRes, ii);
+        insertNode(&resonanceList, listRes, ii);
 
         offsetList = (PyListObject *) PyObject_GetAttrString(listRes, "offsetResonanceGroups");
         numOffsets = PyList_GET_SIZE(offsetList);
         for (long jj=0; jj < numOffsets; jj++)
         {
-            printf("~");
             offsetRes = (PyObject *) PyList_GET_ITEM(offsetList, jj);
-            insertNode(&resonanceList, listRes, offsetRes, ii);
+            insertNode(&resonanceList, offsetRes, ii);
         }
     }
 
-    index = getIndex(resonanceList, apiNmrResidue);
-    printf("\nstrange %d\n\n", index);
-    returnValue = PyLong_FromLong(index);
+    getIndexInList(resonanceList, apiNmrResidue, &index, &found);
+    returnValue = PyLong_FromLong(found);
     return returnValue;
-
-
-
-/*
-//    appendFloatLong(returnObject, nmrResidue);
-//    appendFloatLong(returnObject, apiNmrResidue);
-
-
-//    numRes = PyTuple_GET_SIZE(nmrResidues);
-    for (long ii = 0; ii < numRes; ii++)
-    {
-        listRes = (PyObject *) PyTuple_GET_ITEM(nmrResidues, ii);
-
-//        appendFloatLong(returnObject, listRes);
-
-        if (listRes == apiNmrResidue)
-            return PyLong_FromLong(ii);
-    }
-
-    returnValue = PyLong_FromLong(index);
-    return returnValue;
-
-/*
-    nmrChain = (PyObject *) PyObject_GetAttrString(nmrResidue, "nmrChain");
-    if (!nmrChain)
-        RETURN_OBJ_ERROR("nmrChain is not defined");
-
-    nmrResidues = (PyListObject *) PyObject_GetAttrString(nmrChain, "nmrResidues");
-    if (!nmrResidues)
-        RETURN_OBJ_ERROR("nmrChain.nmrResidues is not defined");
-
-    numRes = PyList_GET_SIZE(nmrResidues);
-    if (!numRes)
-        RETURN_OBJ_ERROR("nmrResidues is empty");
-
-    for (int ii = 0; ii < numRes; ii++)
-    {
-        listRes = (PyObject *) PyList_GET_ITEM(nmrResidues, ii);
-        if (listRes == nmrResidue)
-        {
-            index = ii;
-            break;
-        }
-    }
-
-    returnValue = PyLong_FromLong(index);
-    return returnValue;
-
-*/
 }
 
 static PyObject *getObjectIndex(PyObject *self, PyObject *args)
@@ -345,23 +298,6 @@ static PyObject *getObjectIndex(PyObject *self, PyObject *args)
     }
 
     returnValue = PyLong_FromLong(index);
-
-    /*    if (PyList_Append(returnObject, PyFloat_FromDouble((double) 126.45)) != 0)
-        {
-            Py_DECREF(returnObject);
-            RETURN_OBJ_ERROR("appending item to returnObject");
-        }
-        if (PyList_Append(returnObject, PyFloat_FromDouble((double) 15.67)) != 0)
-        {
-            Py_DECREF(returnObject);
-            RETURN_OBJ_ERROR("appending item to returnObject");
-        }
-        if (PyList_Append(returnObject, PyFloat_FromDouble((double) -1.12)) != 0)
-        {
-            Py_DECREF(returnObject);
-            RETURN_OBJ_ERROR("appending item to returnObject");
-        }
-    */
     return returnValue;
 }
 
@@ -372,37 +308,12 @@ static PyObject *testReturnList(PyObject *self, PyObject *args)
 
     // create a new list
     returnObject = newList();
-    /*    if (!returnObject)
-        {
-        	RETURN_OBJ_ERROR("allocating returnObject memory");
-        }
-    */
+
     // append an item to the list
     appendFloatList(returnObject, 126.45);
     appendFloatList(returnObject, 54.27);
     appendFloatList(returnObject, -2.6);
 
-    // Needs the array to be defined first
-//    appendFloatList(colours, -2.6);
-//    appendFloatList(colours, 52.6);
-
-
-    /*    if (PyList_Append(returnObject, PyFloat_FromDouble((double) 126.45)) != 0)
-        {
-            Py_DECREF(returnObject);
-            RETURN_OBJ_ERROR("appending item to returnObject");
-        }
-        if (PyList_Append(returnObject, PyFloat_FromDouble((double) 15.67)) != 0)
-        {
-            Py_DECREF(returnObject);
-            RETURN_OBJ_ERROR("appending item to returnObject");
-        }
-        if (PyList_Append(returnObject, PyFloat_FromDouble((double) -1.12)) != 0)
-        {
-            Py_DECREF(returnObject);
-            RETURN_OBJ_ERROR("appending item to returnObject");
-        }
-    */
     return returnObject;
 }
 

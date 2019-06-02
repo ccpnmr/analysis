@@ -209,12 +209,14 @@ static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args)
     PyObject *returnValue;
     char error_msg[1000];
     long index = -1, numRes = 0, numOffsets = 0, found = -1, rg;
+    long ii, jj;
     PyObject *listRes;
     PyObject *apiNmrResidue;
     PyListObject *offsetList;
     PyObject *offsetRes;
 //    PyListObject *foundResonanceGroups;
     PyListObject *resonanceGroups;
+    PyDictObject *nmrProjectDict;
     PyDictObject *resonanceGroupDict;
     PyObject *project, *mainRes;
 
@@ -237,40 +239,42 @@ static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args)
 
 //    foundResonanceGroups = newList();
     project = (PyObject *) PyObject_GetAttrString(apiNmrResidue, "nmrProject");
-    resonanceGroupDict = (PyDictObject *) PyObject_GetAttrString(project, "__dict__");
-    resonanceGroups = (PyListObject *) PyDict_GetItemString(resonanceGroupDict, "resonanceGroups");
+    nmrProjectDict = (PyDictObject *) PyObject_GetAttrString(project, "__dict__");
+    resonanceGroupDict = (PyDictObject *) PyDict_GetItemString(nmrProjectDict, "resonanceGroups");
+    resonanceGroups = (PyListObject *) PyDict_Values(resonanceGroupDict);
 
     // put the main residues into a list
     numRes = PyTuple_GET_SIZE(nmrResidues);
     PyObject *mainResGroups[numRes];
-    for (long ii = 0; ii < numRes; ii++)
+    for (ii = 0; ii < numRes; ii++)
     {
         mainResGroups[ii] = (PyObject *) PyTuple_GET_ITEM(nmrResidues, ii);
     }
 
     // search all residues into the list
     rg = PyList_GET_SIZE(resonanceGroups);
-    PyObject *foundResonanceGroups[rg];
+    PyObject *offsetResonanceGroups[rg];            //  just make it full size, but only need some of it
+    PyObject *offSetMainResonances[rg];
 
-    printf("%li \n", rg);
-    int count = 0, jj;
-    for (long ii = 0; ii < rg; ii++)
+//    printf("%li \n", rg);
+    for (ii = 0; ii < rg; ii++)
     {
         listRes = (PyObject *) PyList_GET_ITEM(resonanceGroups, ii);
+        mainRes = (PyObject *) PyObject_GetAttrString(listRes, "mainResonanceGroup");     //  not pointing to the right place?
 
-//        mainRes = (PyObject *) PyObject_GetAttrString(listRes, "serial");     //  not pointing to the right place
-//
         for (jj = 0; jj < numRes; jj++)
-            if (listRes == mainResGroups[jj])
+            if ((mainRes == mainResGroups[jj]) && (mainRes != listRes))
             {
-                foundResonanceGroups[count] = listRes;
-                count++;
+                // simple way of keeping res and mainRes together;
+                offsetResonanceGroups[numOffsets] = listRes;
+                offSetMainResonances[numOffsets] = mainRes;
+                numOffsets++;
             }
     }
-    printf("%i \n", count);
+//    printf("%li \n", numOffsets);         //  should be all the offsetResonanceGroups
 
     // iterate through the mainresonanceGroups
-    // add tolinked list
+    // add to linked list
 
     // iterate through offsetResonanceGroups
     // insert by relativeoffset if samemainResonanceGroup
@@ -279,21 +283,27 @@ static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args)
 
     struct Node *resonanceList = NULL;
 
-    numRes = PyTuple_GET_SIZE(nmrResidues);
-    for (long ii = 0; ii < numRes; ii++)
+    for (ii = 0; ii < numRes; ii++)
     {
-        listRes = (PyObject *) PyTuple_GET_ITEM(nmrResidues, ii);
-//        listRes = foundResonanceGroups[ii];       // nice, but order lost
+        mainRes = (PyObject *) PyTuple_GET_ITEM(nmrResidues, ii);
+        insertNode(&resonanceList, mainRes, ii);
 
-        insertNode(&resonanceList, listRes, ii);
+        for (jj=0; jj < numOffsets; jj++)
+            if (offSetMainResonances[jj] == mainRes)
+                insertNode(&resonanceList, offsetResonanceGroups[jj], ii);
 
-        offsetList = (PyListObject *) PyObject_GetAttrString(listRes, "offsetResonanceGroups");
-        numOffsets = PyList_GET_SIZE(offsetList);
-        for (long jj=0; jj < numOffsets; jj++)
-        {
-            offsetRes = (PyObject *) PyList_GET_ITEM(offsetList, jj);
-            insertNode(&resonanceList, offsetRes, ii);
-        }
+//        // this is the slow line
+//        offsetList = (PyListObject *) PyObject_GetAttrString(listRes, "offsetResonanceGroups");
+//
+//        numOffsets = PyList_GET_SIZE(offsetList);
+//        for (long jj=0; jj < numOffsets; jj++)
+//        {
+//            offsetRes = (PyObject *) PyList_GET_ITEM(offsetList, jj);
+//            insertNode(&resonanceList, offsetRes, ii);
+//        }
+
+
+
     }
 
     getIndexInList(resonanceList, apiNmrResidue, &index, &found);

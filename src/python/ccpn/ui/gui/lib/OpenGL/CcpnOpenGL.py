@@ -148,6 +148,7 @@ from ccpn.util.decorators import profile
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib import Pid
 
+
 UNITS_PPM = 'ppm'
 UNITS_HZ = 'Hz'
 UNITS_POINT = 'point'
@@ -901,9 +902,25 @@ class CcpnGLWidget(QOpenGLWidget):
         w = self.w
 
         # find the correct viewport
-        mw = [0, self.AXIS_MARGINBOTTOM, w - self.AXIS_MARGINRIGHT, h - 1]
-        ba = [0, 0, w - self.AXIS_MARGINRIGHT, self.AXIS_MARGINBOTTOM - 1]
-        ra = [w - self.AXIS_MARGINRIGHT, self.AXIS_MARGINBOTTOM, w, h]
+        if (self._drawRightAxis and self._drawBottomAxis):
+            mw = [0, self.AXIS_MARGINBOTTOM, w - self.AXIS_MARGINRIGHT, h - 1]
+            ba = [0, 0, w - self.AXIS_MARGINRIGHT, self.AXIS_MARGINBOTTOM - 1]
+            ra = [w - self.AXIS_MARGINRIGHT, self.AXIS_MARGINBOTTOM, w, h]
+
+        elif (self._drawBottomAxis):
+            mw = [0, self.AXIS_MARGINBOTTOM, w, h - 1]
+            ba = [0, 0, w, self.AXIS_MARGINBOTTOM - 1]
+            ra = [w, self.AXIS_MARGINBOTTOM, w, h]
+
+        elif (self._drawRightAxis):
+            mw = [0, 0, w - self.AXIS_MARGINRIGHT, h - 1]
+            ba = [0, 0, w - self.AXIS_MARGINRIGHT, 0]
+            ra = [w - self.AXIS_MARGINRIGHT, 0, w, h]
+
+        else:  # no axes visible
+            mw = [0, 0, w, h]
+            ba = [0, 0, w, 0]
+            ra = [w, 0, w, h]
 
         mx = event.pos().x()
         my = self.height() - event.pos().y()
@@ -1216,7 +1233,6 @@ class CcpnGLWidget(QOpenGLWidget):
                 for peak in self.current.peaks:
                     self._movePeak(peak, moveDict.get(direction))
 
-
     def _panSpectrum(self, direction, movePercent=20):
         """Implements Arrows up,down, left, right to pan the spectrum """
         # percentage of the view to set as single step
@@ -1299,7 +1315,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 if self._minReached:
                     return
 
-                print('>>>zoomIn')
+                # print('>>>zoomIn')
                 self.zoomIn()
 
             elif key == QtCore.Qt.Key_Minus:
@@ -1650,11 +1666,11 @@ class CcpnGLWidget(QOpenGLWidget):
                                                GLContext=self))
 
         self.diagonalGLList = GLVertexArray(numLists=1,
-                                           renderMode=GLRENDERMODE_REBUILD,
-                                           blendMode=False,
-                                           drawMode=GL.GL_LINES,
-                                           dimension=2,
-                                           GLContext=self)
+                                            renderMode=GLRENDERMODE_REBUILD,
+                                            blendMode=False,
+                                            drawMode=GL.GL_LINES,
+                                            dimension=2,
+                                            GLContext=self)
 
         self._cursorList = GLVertexArray(numLists=1,
                                          renderMode=GLRENDERMODE_REBUILD,
@@ -2280,20 +2296,20 @@ class CcpnGLWidget(QOpenGLWidget):
         for n, axisCode in enumerate(self._axisCodes):
             if n == 0:
                 xPos = pos = self.cursorCoordinate[0]
-                activeX = axisCode      #[0]
+                activeX = axisCode  #[0]
 
                 # double cursor
                 dxPos = dPos = self.cursorCoordinate[1]
             elif n == 1:
                 yPos = pos = self.cursorCoordinate[1]
-                activeY = axisCode      #[0]
+                activeY = axisCode  #[0]
 
                 # double cursor
                 dyPos = dPos = self.cursorCoordinate[0]
 
             else:
                 dPos = pos = self._orderedAxes[n].position  # if n in self._orderedAxes else 0
-                activeOther.append(axisCode)        #[0])
+                activeOther.append(axisCode)  #[0])
 
             # populate the mouse moved dict
             mouseMovedDict[AXIS_MATCHATOMTYPE][axisCode[0]] = pos
@@ -2301,7 +2317,7 @@ class CcpnGLWidget(QOpenGLWidget):
             mouseMovedDict[DOUBLEAXIS_MATCHATOMTYPE][axisCode[0]] = dPos
             mouseMovedDict[DOUBLEAXIS_FULLATOMNAME][axisCode] = dPos
 
-        mouseMovedDict[AXIS_ACTIVEAXES] = (activeX, activeY) + tuple(activeOther)               # changed to full axisCodes
+        mouseMovedDict[AXIS_ACTIVEAXES] = (activeX, activeY) + tuple(activeOther)  # changed to full axisCodes
         mouseMovedDict[DOUBLEAXIS_ACTIVEAXES] = (activeY, activeX) + tuple(activeOther)
 
         self.current.cursorPosition = (xPos, yPos)
@@ -2783,23 +2799,23 @@ class CcpnGLWidget(QOpenGLWidget):
                             folding = spectrumView.spectrum.foldingModes
                             pIndex = specSettings[GLDefs.SPECTRUM_POINTINDEX]
 
-                            for ii in range(alias[pIndex[0]][0], alias[pIndex[0]][1]+1, 1):
-                                for jj in range(alias[pIndex[1]][0], alias[pIndex[1]][1]+1, 1):
+                            for ii in range(alias[pIndex[0]][0], alias[pIndex[0]][1] + 1, 1):
+                                for jj in range(alias[pIndex[1]][0], alias[pIndex[1]][1] + 1, 1):
 
                                     foldX = foldY = 1.0
                                     foldXOffset = foldYOffset = 0
                                     if folding[pIndex[0]] == 'mirror':
-                                        foldX = pow(-1,ii)
+                                        foldX = pow(-1, ii)
                                         foldXOffset = -dxAF if foldX < 0 else 0
 
                                     if folding[pIndex[1]] == 'mirror':
-                                        foldY = pow(-1,jj)
+                                        foldY = pow(-1, jj)
                                         foldYOffset = -dyAF if foldY < 0 else 0
 
-                                    specMatrix[0:16] = [xScale*foldX, 0.0, 0.0, 0.0,
-                                                        0.0, yScale*foldY, 0.0, 0.0,
+                                    specMatrix[0:16] = [xScale * foldX, 0.0, 0.0, 0.0,
+                                                        0.0, yScale * foldY, 0.0, 0.0,
                                                         0.0, 0.0, 1.0, 0.0,
-                                                        fx0+(ii*dxAF)+foldXOffset, fy0+(jj*dyAF)+foldYOffset, 0.0, 1.0]
+                                                        fx0 + (ii * dxAF) + foldXOffset, fy0 + (jj * dyAF) + foldYOffset, 0.0, 1.0]
 
                                     # flipping in the same GL region -  xScale = -xScale
                                     #                                   offset = fx0-dxAF
@@ -3845,7 +3861,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # get the list of visible spectrumViews, or the first in the list
             visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
-            thisSpecView = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[0].isDeleted else None
+            thisSpecView = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[
+                0].isDeleted else None
 
             if thisSpecView:
                 thisSpec = thisSpecView.spectrum
@@ -4808,7 +4825,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # get the list of visible spectrumViews, or the first in the list
             visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
-            thisSpecView = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[0].isDeleted else None
+            thisSpecView = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[
+                0].isDeleted else None
 
             if thisSpecView:
                 thisSpec = thisSpecView.spectrum
@@ -4992,19 +5010,19 @@ class CcpnGLWidget(QOpenGLWidget):
 
                     if self.between(axisLimitB, axisLimitL, axisLimitR):
                         _diagVertexList += (valueToRatio(axisLimitB, axisLimitL, axisLimitR),
-                                 0.0)
+                                            0.0)
 
                     if self.between(axisLimitL, axisLimitB, axisLimitT):
                         _diagVertexList += (0.0,
-                                 valueToRatio(axisLimitL, axisLimitB, axisLimitT))
+                                            valueToRatio(axisLimitL, axisLimitB, axisLimitT))
 
                     if self.between(axisLimitT, axisLimitL, axisLimitR):
                         _diagVertexList += (valueToRatio(axisLimitT, axisLimitL, axisLimitR),
-                                 1.0)
+                                            1.0)
 
                     if self.between(axisLimitR, axisLimitB, axisLimitT):
                         _diagVertexList += (1.0,
-                                 valueToRatio(axisLimitR, axisLimitB, axisLimitT))
+                                            valueToRatio(axisLimitR, axisLimitB, axisLimitT))
 
                     if len(_diagVertexList) == 4:
                         # indexList += (index, index + 1)

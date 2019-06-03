@@ -2213,6 +2213,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def focusInEvent(self, ev: QtGui.QFocusEvent):
         super().focusInEvent(ev)
+        if (self.strip and not self.strip.isDeleted and self._preferences.focusFollowsMouse):
+            self.current.strip = self.strip
+
         self._clearAndUpdate()
 
     def focusOutEvent(self, ev: QtGui.QFocusEvent):
@@ -5575,25 +5578,39 @@ class CcpnGLWidget(QOpenGLWidget):
             strip._checkMenuItems()
 
             # set the correct rightMouseMenu for the clicked object (must be selected)
-            pks = self._mouseInPeak(xPosition, yPosition, firstOnly=True)
-            if pks:
+            objs = self._mouseInPeak(xPosition, yPosition, firstOnly=False)
+            if objs:
                 strip.contextMenuMode = PeakMenu
                 menu = strip._contextMenus.get(strip.contextMenuMode)
+                strip._lastSelectedObjects = objs
 
-            elif self._mouseInIntegral(xPosition, yPosition, firstOnly=True):
-                strip.contextMenuMode = IntegralMenu
-                menu = strip._contextMenus.get(strip.contextMenuMode)
+            else:
+                objs = self._mouseInIntegral(xPosition, yPosition, firstOnly=False)
+                if objs:
+                    strip.contextMenuMode = IntegralMenu
+                    menu = strip._contextMenus.get(strip.contextMenuMode)
+                    strip._lastSelectedObjects = objs
 
-            elif self._mouseInMultiplet(xPosition, yPosition, firstOnly=True):
-                strip.contextMenuMode = MultipletMenu
-                menu = strip._contextMenus.get(strip.contextMenuMode)
+                else:
+                    objs = self._mouseInMultiplet(xPosition, yPosition, firstOnly=False)
+                    if objs:
+                        strip.contextMenuMode = MultipletMenu
+                        menu = strip._contextMenus.get(strip.contextMenuMode)
+                        strip._lastSelectedObjects = objs
+
+            # elif self._mouseInIntegral(xPosition, yPosition, firstOnly=True):
+            #     strip.contextMenuMode = IntegralMenu
+            #     menu = strip._contextMenus.get(strip.contextMenuMode)
+            #
+            # elif self._mouseInMultiplet(xPosition, yPosition, firstOnly=True):
+            #     strip.contextMenuMode = MultipletMenu
+            #     menu = strip._contextMenus.get(strip.contextMenuMode)
 
             if menu is not None:
                 strip.viewStripMenu = menu
             else:
                 strip.viewStripMenu = self._getCanvasContextMenu()
             strip._raiseContextMenu(event)
-
 
         elif controlRightMouse(event) and axis is None:
             # control-right-mouse click: reset the zoom

@@ -35,9 +35,10 @@ IDENTITY = QtGui.QTransform()
 IDENTITY.reset()
 
 
-def _getPeakAnnotationMinimal(peak):
-    text = 'TEMP'
-    return text
+def _getPeakId(peak):
+    """Get the current id for the peak
+    """
+    return peak.id
 
 
 def _getPeakAnnotation(peak):
@@ -133,87 +134,87 @@ def _getScreenPeakAnnotation(peak, useShortCode=False, useMinimalCode=False, use
     text = '; '.join(', '.join(atoms) for atoms in ids.values())
     return text if text else ','.join(['_'] * numDims)
 
-    for dimension in range(peak.peakList.spectrum.dimensionCount):
-
-        pdNADim = [atom for atom in pdNA[dimension] if not (atom.isDeleted or atom._flaggedForDelete)]
-        pdNAids = OrderedDict((atom.nmrResidue.id, []) for atom in pdNADim)
-
-        if pdNADim:                # pdNA[dimension]:
-
-            # remove the last item if not defined
-            if peakLabel and peakLabel[-1] == '_':
-                peakLabel.pop()
-
-            try:
-                peakNmrResidues = [atom[0].nmrResidue.id for atom in pdNA if len(atom) != 0 and not (atom[0].isDeleted or atom[0]._flaggedForDelete)]
-
-                if all(x == peakNmrResidues[0] for x in peakNmrResidues):
-                    for item in pdNADim:                # pdNA[dimension]:
-                        if len(peakLabel) > 0 and useShortCode:
-
-                            if useMinimalCode:
-                                continue
-
-                            label = item.name
-                        else:
-                            if useMinimalCode:
-                                label = shortCode(item) + item.nmrResidue.sequenceCode
-                            else:
-                                label = chainLabel(item) + shortCode(item) + item.nmrResidue.sequenceCode + item.name
-
-                        peakLabel.append(label)
-
-                else:
-
-                    peakNmrDict = {}
-                    for atom in pdNADim:                # pdNA[dimension]:
-                        thisID = atom.nmrResidue.id
-                        if thisID not in peakNmrDict.keys():
-                            peakNmrDict[thisID] = [atom]
-                        else:
-                            peakNmrDict[thisID].append(atom)
-
-                    resLabels = []
-                    for thispdNA in peakNmrDict.values():
-                        resLabel = []
-                        try:
-                            for item in thispdNA:
-                                if len(resLabel) > 0 and useShortCode:
-
-                                    if useMinimalCode:
-                                        continue
-
-                                    label = item.name
-                                else:
-                                    if useMinimalCode:
-                                        label = shortCode(item) + item.nmrResidue.sequenceCode
-                                    else:
-                                        label = chainLabel(item) + shortCode(item) + item.nmrResidue.sequenceCode + item.name
-                                resLabel.append(label)
-
-                            if useMinimalCode:
-                                resLabel = list(OrderedSet(resLabel))
-
-                        except:
-                            resLabel.append('-')
-
-                        resLabels.append(', '.join(resLabel))
-
-                    peakLabel.append('; '.join(resLabels))
-
-            except Exception as es:
-                peakLabel.append('-')
-        else:
-            if len(pdNA) == 1:
-                peakLabel.append(peak.id)
-            else:
-                peakLabel.append('_')
-
-    if useMinimalCode:
-        peakLabel = list(OrderedSet(peakLabel))
-
-    text = ', '.join(peakLabel)
-    return text
+    # for dimension in range(peak.peakList.spectrum.dimensionCount):
+    #
+    #     pdNADim = [atom for atom in pdNA[dimension] if not (atom.isDeleted or atom._flaggedForDelete)]
+    #     pdNAids = OrderedDict((atom.nmrResidue.id, []) for atom in pdNADim)
+    #
+    #     if pdNADim:                # pdNA[dimension]:
+    #
+    #         # remove the last item if not defined
+    #         if peakLabel and peakLabel[-1] == '_':
+    #             peakLabel.pop()
+    #
+    #         try:
+    #             peakNmrResidues = [atom[0].nmrResidue.id for atom in pdNA if len(atom) != 0 and not (atom[0].isDeleted or atom[0]._flaggedForDelete)]
+    #
+    #             if all(x == peakNmrResidues[0] for x in peakNmrResidues):
+    #                 for item in pdNADim:                # pdNA[dimension]:
+    #                     if len(peakLabel) > 0 and useShortCode:
+    #
+    #                         if useMinimalCode:
+    #                             continue
+    #
+    #                         label = item.name
+    #                     else:
+    #                         if useMinimalCode:
+    #                             label = shortCode(item) + item.nmrResidue.sequenceCode
+    #                         else:
+    #                             label = chainLabel(item) + shortCode(item) + item.nmrResidue.sequenceCode + item.name
+    #
+    #                     peakLabel.append(label)
+    #
+    #             else:
+    #
+    #                 peakNmrDict = {}
+    #                 for atom in pdNADim:                # pdNA[dimension]:
+    #                     thisID = atom.nmrResidue.id
+    #                     if thisID not in peakNmrDict.keys():
+    #                         peakNmrDict[thisID] = [atom]
+    #                     else:
+    #                         peakNmrDict[thisID].append(atom)
+    #
+    #                 resLabels = []
+    #                 for thispdNA in peakNmrDict.values():
+    #                     resLabel = []
+    #                     try:
+    #                         for item in thispdNA:
+    #                             if len(resLabel) > 0 and useShortCode:
+    #
+    #                                 if useMinimalCode:
+    #                                     continue
+    #
+    #                                 label = item.name
+    #                             else:
+    #                                 if useMinimalCode:
+    #                                     label = shortCode(item) + item.nmrResidue.sequenceCode
+    #                                 else:
+    #                                     label = chainLabel(item) + shortCode(item) + item.nmrResidue.sequenceCode + item.name
+    #                             resLabel.append(label)
+    #
+    #                         if useMinimalCode:
+    #                             resLabel = list(OrderedSet(resLabel))
+    #
+    #                     except:
+    #                         resLabel.append('-')
+    #
+    #                     resLabels.append(', '.join(resLabel))
+    #
+    #                 peakLabel.append('; '.join(resLabels))
+    #
+    #         except Exception as es:
+    #             peakLabel.append('-')
+    #     else:
+    #         if len(pdNA) == 1:
+    #             peakLabel.append(peak.id)
+    #         else:
+    #             peakLabel.append('_')
+    #
+    # if useMinimalCode:
+    #     peakLabel = list(OrderedSet(peakLabel))
+    #
+    # text = ', '.join(peakLabel)
+    # return text
 
 
 class GuiPeakListView(GuiListViewABC):

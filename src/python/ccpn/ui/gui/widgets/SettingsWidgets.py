@@ -148,8 +148,8 @@ class SpectrumDisplaySettings(Widget):
 
             row += 1
             self.annotationsLabel = Label(parent, text="Symbol Annotation", grid=(row, 0))
-            self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid', 'Minimal'],
-                                                objectNames=['annSDS_Short', 'annSDS_Full', 'annSDS_Pid', 'annSDS_Minimal'],
+            self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid', 'Minimal', 'Peak Id'],
+                                                objectNames=['annSDS_Short', 'annSDS_Full', 'annSDS_Pid', 'annSDS_Minimal', 'annSDS_Id'],
                                                 selectedInd=annotationType,
                                                 callback=self._symbolsChanged,
                                                 direction='horizontal',

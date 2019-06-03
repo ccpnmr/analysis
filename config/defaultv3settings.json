@@ -47,7 +47,8 @@
         "xAxisUnits": 0,
         "yAxisUnits": 0,
         "axisOrderingOptions": 0,
-        "colourPalette" : 0
+        "colourPalette" : 0,
+        "focusFollowsMouse" : false
     },
 
     "externalPrograms": {

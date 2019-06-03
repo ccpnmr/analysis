@@ -98,6 +98,7 @@ struct Node
     long   seqCode;
     char   *seqInsertCode;
     CcpnBool    isConnected;
+    CcpnBool    seqIsReference;
 
     // pointers
     struct  Node *prev;
@@ -113,9 +114,10 @@ struct Node *newNode(PyObject *nmrResidue)
     temp->relativeOffset = -0.1;
     temp->index = -1;
     temp->object = nmrResidue;
+    temp->seqIsReference = CCPN_FALSE;
 
 //    strcpy(&(temp->seqInsertCode), "");
-    STRING_MALLOC_NEW(temp->seqInsertCode, "");
+//    STRING_MALLOC_NEW(temp->seqInsertCode, "");
 
     // initialise the pointers
     temp->prev = NULL;
@@ -191,6 +193,7 @@ struct Node *insertConnectedNode(struct Node **headRef,
     if (isConnected == CCPN_TRUE)
     {
         temp->index = index;
+        STRING_MALLOC_NEW(temp->seqInsertCode, "");
     }
     else
     {
@@ -208,18 +211,17 @@ struct Node *insertConnectedNode(struct Node **headRef,
         seqInsertCode = PyDict_GetItemString(apiDict, "seqInsertCode");
 
         if (seqInsertCode == Py_None)
-//            strcpy(&(temp->seqInsertCode), "");
         {
             STRING_MALLOC_NEW(temp->seqInsertCode, "");
         }
         else
         {
-            // read the string from the PyObject, ands put into seqInsertCode
+            // read the string from the PyObject, and put into seqInsertCode
             seqString = PyUnicode_AsASCIIString(seqInsertCode);
             if (seqString)
             {
                 temp->seqInsertCode = PyBytes_AS_STRING(seqString);
-//                printf(">>%s<<", temp->seqInsertCode);
+                temp->seqIsReference = CCPN_TRUE;
             }
         }
     }
@@ -230,6 +232,11 @@ struct Node *insertConnectedNode(struct Node **headRef,
         relOffset = PyFloat_AsDouble(PyObject_GetAttrString(offsetItem, "relativeOffset"));
         temp->relativeOffset = relOffset;
     }
+
+    (*headRef) = insertConnected(ptr, temp);
+
+    // cleanup reference counts
+    return temp;            // CCPN_TRUE;
 
 //    seqInsertCode = PyObject_GetAttrString(offsetItem, "seqInsertCode");
 //    seqInsertCode = PyDict_GetItemString(apiDict, "seqCode");
@@ -269,9 +276,9 @@ struct Node *insertConnectedNode(struct Node **headRef,
 //    temp->seqInsertCode = PyBytes_AsString(seqInsertCode);
 //    printf(temp->seqInsertCode);
 
-    (*headRef) = insertConnected(ptr, temp);
-
-    return temp;            // CCPN_TRUE;
+//    (*headRef) = insertConnected(ptr, temp);
+//
+//    return temp;            // CCPN_TRUE;
 }
 
 static void getIndexInList(struct Node *node, PyObject *item, long *index, long *found)
@@ -287,25 +294,21 @@ static void getIndexInList(struct Node *node, PyObject *item, long *index, long 
     }
 }
 
-long getIndex(struct Node *nodeList, PyObject *item)
+static void deallocateNodeList(struct Node *node)
 {
-    struct Node *ptr = nodeList;
-    long index = -1, returnValue = -1;
-
-    //start from the beginning
-    while (ptr)
+    if (node)
     {
-        index++;
-        if (ptr->object == item)
-        {
-            returnValue = index;
-            break;
-        }
+        deallocateNodeList(node->prev);
+        deallocateNodeList(node->next);
 
-        ptr = ptr->next;
+        // deallocate node contents and children
+        if ((node->seqIsReference == CCPN_FALSE) && (node->seqInsertCode))
+            free(node->seqInsertCode);
+        if (node->prev)
+            free(node->prev);
+        if (node->next)
+            free(node->next);
     }
-
-    return returnValue;
 }
 
 static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args)
@@ -321,17 +324,11 @@ static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args)
     PyObject *apiNmrResidue;
     PyListObject *offsetList;
     PyObject *offsetRes;
-//    PyListObject *foundResonanceGroups;
     PyListObject *resonanceGroups;
     PyDictObject *nmrProjectDict;
     PyDictObject *resonanceGroupDict;
     PyObject *project, *mainRes;
     CcpnBool isConnected;
-
-//    long    *ptrs = NULL;
-//    MALLOC(ptrs, long, 10);     // remember to dealloc
-//    REALLOC(ptrs, long, 12);
-//    FREE(ptrs, long);
 
     // check thart the argument is an nmrResidue
     if (!PyArg_ParseTuple(args, "O", &nmrResidue))
@@ -418,31 +415,46 @@ static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args)
             if (offSetMainResonances[jj] == mainRes)
                 offsetNode = insertConnectedNode(&resonanceList, offsetResonanceGroups[jj], thisNode->index, isConnected, CCPN_FALSE);
 
-//        // this is the slow line
-//        offsetList = (PyListObject *) PyObject_GetAttrString(listRes, "offsetResonanceGroups");
-//
-//        numOffsets = PyList_GET_SIZE(offsetList);
-//        for (long jj=0; jj < numOffsets; jj++)
-//        {
-//            offsetRes = (PyObject *) PyList_GET_ITEM(offsetList, jj);
-//            insertConnectedNode(&resonanceList, offsetRes, ii);
-//        }
+            //        // this is the slow line
+            //        offsetList = (PyListObject *) PyObject_GetAttrString(listRes, "offsetResonanceGroups");
+            //
+            //        numOffsets = PyList_GET_SIZE(offsetList);
+            //        for (long jj=0; jj < numOffsets; jj++)
+            //        {
+            //            offsetRes = (PyObject *) PyList_GET_ITEM(offsetList, jj);
+            //            insertConnectedNode(&resonanceList, offsetRes, ii);
+            //        }
 
     }
 
+    // get the index of the current nmrResidue in the list
     getIndexInList(resonanceList, apiNmrResidue, &index, &found);
+
+    // clean up allocated memory
+    deallocateNodeList(resonanceList);
+    if (resonanceList)
+        free(resonanceList);
+
+    // return index
     returnValue = PyLong_FromLong(found);
     return returnValue;
 }
 
 static PyObject *getObjectIndex(PyObject *self, PyObject *args)
 {
+    // First attempt routine to get the index of an nmrResidue in an nmrChain
+
     PyListObject *nmrChain;
     PyObject *nmrResidue;
     PyObject *returnValue;
     char error_msg[1000];
     long index = -1, numRes = 0;
     PyObject *listRes;
+
+//    long    *ptrs = NULL;
+//    MALLOC(ptrs, long, 10);     // remember to dealloc
+//    REALLOC(ptrs, long, 12);
+//    FREE(ptrs, long);
 
     if (!PyArg_ParseTuple(args, "O!O",
                           &PyList_Type, &nmrChain,
@@ -452,10 +464,7 @@ static PyObject *getObjectIndex(PyObject *self, PyObject *args)
 
     numRes = PyList_GET_SIZE(nmrChain);
     if (numRes == 0)
-    {
-        sprintf(error_msg, "nmrChain is empty");
-        RETURN_OBJ_ERROR(error_msg);
-    }
+        RETURN_OBJ_ERROR("nmrChain is empty");
 
     for (int ii = 0; ii < numRes; ii++)
     {

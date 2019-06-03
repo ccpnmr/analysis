@@ -94,6 +94,10 @@ struct Node
     PyObject *object;
     double  relativeOffset;
     long    index;
+    CcpnBool    seqCodeCompare;
+    long   seqCode;
+    char   seqInsertCode[128];
+    CcpnBool    isConnected;
 
     // pointers
     struct  Node *prev;
@@ -109,6 +113,8 @@ struct Node *newNode(PyObject *nmrResidue)
     temp->relativeOffset = -0.1;
     temp->index = -1;
     temp->object = nmrResidue;
+    strcpy(&(temp->seqInsertCode), "");
+    strcpy(&(temp->seqCode), "");
 
     // initialise the pointers
     temp->prev = NULL;
@@ -131,7 +137,7 @@ static CcpnBool compareRes(struct Node* leftNode, struct Node* rightNode)
     return CCPN_FALSE;
 }
 
-struct Node* insert(struct Node* node, struct Node* item)
+struct Node* insertConnected(struct Node* node, struct Node* item)
 {
     // If the tree is empty, return previously defined new node
     if (!node)
@@ -139,32 +145,101 @@ struct Node* insert(struct Node* node, struct Node* item)
 
     // Otherwise, recurse down the tree
     if (compareRes(item, node) == CCPN_TRUE)
-        node->prev = insert(node->prev, item);
+        node->prev = insertConnected(node->prev, item);
     else
-        node->next = insert(node->next, item);
+        node->next = insertConnected(node->next, item);
 
     return node;
 }
 
-static CcpnBool insertNode(struct Node **headRef, PyObject *offsetItem, long index)
+struct Node *insertConnectedNode(struct Node **headRef,
+                    PyObject *offsetItem,
+                    long index,
+                    CcpnBool isConnected,
+                    CcpnBool isMainResonance)
 {
     struct Node *temp = newNode(offsetItem);
     struct Node *ptr = (*headRef);
     double relOffset;
-    PyObject *test;
+    PyObject *offsetTest;
+    PyObject *seqInsertCode;
+    PyObject *seqCode;
+    PyObject *serial;
+    PyObject *seqString;
+    PyDictObject *apiDict = PyObject_GetAttrString(offsetItem, "__dict__");
 
-    // test for None - means a main residue
-    test = PyObject_GetAttrString(offsetItem, "relativeOffset");
-    if (test != Py_None)
+    temp->isConnected = isConnected;
+    if (isConnected == CCPN_TRUE)
+    {
+        temp->index = index;
+    }
+    else
+    {
+        seqCode = PyDict_GetItemString(apiDict, "seqCode");
+        serial = PyDict_GetItemString(apiDict, "serial");
+
+        if (isMainResonance)
+            if (seqCode == Py_None)
+                temp->index = PyLong_AsLong(serial) + 1000000000;
+            else
+                temp->index = PyLong_AsLong(seqCode);
+        else
+            temp->index = index;
+
+        seqInsertCode = PyDict_GetItemString(apiDict, "seqInsertCode");
+
+        if (seqInsertCode == Py_None)
+            strcpy(&(temp->seqInsertCode), "");
+    }
+
+    offsetTest = PyDict_GetItemString(apiDict, "relativeOffset");
+    if (offsetTest != Py_None)
     {
         relOffset = PyFloat_AsDouble(PyObject_GetAttrString(offsetItem, "relativeOffset"));
         temp->relativeOffset = relOffset;
     }
-    temp->index = index;
 
-    (*headRef) = insert(ptr, temp);
+//    seqInsertCode = PyObject_GetAttrString(offsetItem, "seqInsertCode");
+//    seqInsertCode = PyDict_GetItemString(apiDict, "seqCode");
 
-    return CCPN_TRUE;
+
+//    if (PyObject_RichCompareBool(seqInsertCode, Py_None, Py_NE) == 1)
+//    {
+//        continue;
+//        ss = PyBytes_Size(seqInsertCode);
+
+//        seqString = PyObject_Bytes(seqInsertCode);
+//        if (seqString)
+//        if (PyObject_IsInstance(seqInsertCode, &PyObject_Type))
+//            printf("    array\n");
+
+//    seqString = PyObject_Str(seqInsertCode);
+//    int seqLen = PyObject_Size(seqString);
+//
+//    int ss = PyLong_AsLong(seqInsertCode);
+//
+//    printf("size %i\n", ss);
+
+//        PyByteArrayObject *strNone = PyByteArray_FromObject(seqInsertCode);
+//        if (!strNone)
+//            RETURN_OBJ_ERROR("error defining string");
+
+//        seqLen = PyObject_Size(strNone);
+
+//        char thisString[seqLen];
+
+//        const char *thisString2 = PyByteArray_AsString(seqString);
+//        strncpy(thisString, *thisString2, seqLen);
+
+//        printf("%i \n", PyBytes_Size(strNone));
+//    }
+
+//    temp->seqInsertCode = PyBytes_AsString(seqInsertCode);
+//    printf(temp->seqInsertCode);
+
+    (*headRef) = insertConnected(ptr, temp);
+
+    return temp;            // CCPN_TRUE;
 }
 
 static void getIndexInList(struct Node *node, PyObject *item, long *index, long *found)
@@ -219,6 +294,7 @@ static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args)
     PyDictObject *nmrProjectDict;
     PyDictObject *resonanceGroupDict;
     PyObject *project, *mainRes;
+    CcpnBool isConnected;
 
 //    long    *ptrs = NULL;
 //    MALLOC(ptrs, long, 10);     // remember to dealloc
@@ -231,13 +307,34 @@ static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args)
     // testing through api
 
     apiNmrResidue = (PyObject *) PyObject_GetAttrString(nmrResidue, "_wrappedData");
+    if (!apiNmrResidue)
+        RETURN_OBJ_ERROR("error getting _wrappedData");
+
     nmrChain = (PyObject *) PyObject_GetAttrString(apiNmrResidue, "nmrChain");
+    if (!nmrChain)
+        RETURN_OBJ_ERROR("error getting nmrChain");
+
+    PyDictObject *nmrChainDict = PyObject_GetAttrString(nmrChain, "__dict__");
+    PyObject *isConnectedObj = PyDict_GetItemString(nmrChainDict, "isConnected");
+    PyObject *nmrChainSerialObj = PyDict_GetItemString(nmrChainDict, "serial");
+
     nmrResidues = (PyListObject *) PyObject_GetAttrString(nmrChain, "mainResonanceGroups");
+    if (!nmrResidues)
+        RETURN_OBJ_ERROR("error getting nmrResidues");
+
+    if (!isConnectedObj)
+        RETURN_OBJ_ERROR("error getting isConnected");
+
+    if (!nmrChainSerialObj)
+        RETURN_OBJ_ERROR("error getting serial");
+
+    if (isConnectedObj == Py_True)         // this works
+        isConnected = CCPN_TRUE;
+    else
+        isConnected = CCPN_FALSE;
 
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
-//    foundResonanceGroups = newList();
     project = (PyObject *) PyObject_GetAttrString(apiNmrResidue, "nmrProject");
     nmrProjectDict = (PyDictObject *) PyObject_GetAttrString(project, "__dict__");
     resonanceGroupDict = (PyDictObject *) PyDict_GetItemString(nmrProjectDict, "resonanceGroups");
@@ -251,7 +348,7 @@ static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args)
         mainResGroups[ii] = (PyObject *) PyTuple_GET_ITEM(nmrResidues, ii);
     }
 
-    // search all residues into the list
+    // search all residues in the project into the list
     rg = PyList_GET_SIZE(resonanceGroups);
     PyObject *offsetResonanceGroups[rg];            //  just make it full size, but only need some of it
     PyObject *offSetMainResonances[rg];
@@ -282,15 +379,18 @@ static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args)
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     struct Node *resonanceList = NULL;
+    struct Node *thisNode = NULL;
+    struct Node *offsetNode = NULL;
 
     for (ii = 0; ii < numRes; ii++)
     {
         mainRes = (PyObject *) PyTuple_GET_ITEM(nmrResidues, ii);
-        insertNode(&resonanceList, mainRes, ii);
+        thisNode = insertConnectedNode(&resonanceList, mainRes, ii, isConnected, CCPN_TRUE);
 
+        // if an offsetResonance, then uses the index of the mainResonance
         for (jj=0; jj < numOffsets; jj++)
             if (offSetMainResonances[jj] == mainRes)
-                insertNode(&resonanceList, offsetResonanceGroups[jj], ii);
+                offsetNode = insertConnectedNode(&resonanceList, offsetResonanceGroups[jj], thisNode->index, isConnected, CCPN_FALSE);
 
 //        // this is the slow line
 //        offsetList = (PyListObject *) PyObject_GetAttrString(listRes, "offsetResonanceGroups");
@@ -299,10 +399,8 @@ static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args)
 //        for (long jj=0; jj < numOffsets; jj++)
 //        {
 //            offsetRes = (PyObject *) PyList_GET_ITEM(offsetList, jj);
-//            insertNode(&resonanceList, offsetRes, ii);
+//            insertConnectedNode(&resonanceList, offsetRes, ii);
 //        }
-
-
 
     }
 

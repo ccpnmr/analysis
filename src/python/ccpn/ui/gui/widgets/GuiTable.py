@@ -656,7 +656,8 @@ GuiTable::item::selected {
 
                     elif self._dataFrameObject and self._dataFrameObject.columnDefinitions.setEditValues[col]:  # ejb - editable fields don't actionCallback:
                         item = self.item(row, col)
-                        item.setEditable(True)
+                        # item.setEditable(True)
+                        item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
                         # self.itemDelegate().closeEditor.connect(partial(self._changeMe, row, col))
                         # item.textChanged.connect(partial(self._changeMe, item))
                         self.editItem(item)  # enter the editing mode
@@ -2087,6 +2088,19 @@ class GuiTableDelegate(QtWidgets.QStyledItemDelegate):
         self.customWidget = False
         self._parent = parent
 
+    # def createEditor(self, parentWidget, itemStyle, index):
+    #     pass
+    #     col = index.column()
+    #     objCol = self._parent.columns[col]
+    #
+    #     returnValue = super(GuiTableDelegate, self).createEditor(parentWidget, itemStyle, index)
+    #     return returnValue
+    #
+    # def setEditorData(self, editor, index) -> None:
+    #     pass
+    #     returnValue = super(GuiTableDelegate, self).setEditorData(editor, index)
+    #     return returnValue
+
     def setModelData(self, widget, mode, index):
         """
         Set the object to the new value
@@ -2117,6 +2131,7 @@ class GuiTableDelegate(QtWidgets.QStyledItemDelegate):
                     func(obj, text)
             else:
                 getLogger().debug('table %s does not contain a Pid' % self)
+                # return super(GuiTableDelegate, self).setModelData(widget, mode, index)
 
         except Exception as es:
             getLogger().warning('Error handling cell editing: %i %i %s' % (row, col, str(es)))

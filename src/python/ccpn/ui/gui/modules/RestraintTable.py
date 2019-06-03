@@ -34,7 +34,7 @@ from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.ui.gui.widgets.GuiTable import GuiTable
 from ccpn.ui.gui.widgets.Column import Column, ColumnClass
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.widgets.PulldownListsForObjects import RestraintPulldown
+from ccpn.ui.gui.widgets.PulldownListsForObjects import RestraintListPulldown
 from ccpn.core.RestraintList import RestraintList
 from ccpn.core.Restraint import Restraint
 from ccpn.ui.gui.widgets.DropBase import DropBase
@@ -205,12 +205,12 @@ class RestraintTable(GuiTable):
 
         row += 1
         gridHPos = 0
-        self.rtWidget = RestraintPulldown(parent=self._widget,
-                                          project=self.project, default=None,
-                                          grid=(row, gridHPos), gridSpan=(1, 1), minimumWidths=(0, 100),
-                                          showSelectName=True,
-                                          sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
-                                          callback=self._selectionPulldownCallback)
+        self.rtWidget = RestraintListPulldown(parent=self._widget,
+                                              project=self.project, default=None,
+                                              grid=(row, gridHPos), gridSpan=(1, 1), minimumWidths=(0, 100),
+                                              showSelectName=True,
+                                              sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
+                                              callback=self._selectionPulldownCallback)
         row += 1
         self.spacer = Spacer(self._widget, 5, 5,
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
@@ -223,13 +223,13 @@ class RestraintTable(GuiTable):
 
         # initialise the table
         super().__init__(parent=parent,
-                            mainWindow=self.mainWindow,
-                            dataFrameObject=None,
-                            setLayout=True,
-                            autoResize=True,
-                            selectionCallback=self._selectionCallback,
-                            actionCallback=self._actionCallback,
-                            grid=(3, 0), gridSpan=(1, 6))
+                         mainWindow=self.mainWindow,
+                         dataFrameObject=None,
+                         setLayout=True,
+                         autoResize=True,
+                         selectionCallback=self._selectionCallback,
+                         actionCallback=self._actionCallback,
+                         grid=(3, 0), gridSpan=(1, 6))
         self.moduleParent = moduleParent
 
         ## populate the table if there are restraintLists in the project

@@ -301,46 +301,42 @@ static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args)
 //    REALLOC(ptrs, long, 12);
 //    FREE(ptrs, long);
 
+    // check thart the argument is an nmrResidue
     if (!PyArg_ParseTuple(args, "O", &nmrResidue))
         RETURN_OBJ_ERROR("need arguments: nmrResidue");
 
-    // testing through api
-
+    // get the apiResonanceGroup
     apiNmrResidue = (PyObject *) PyObject_GetAttrString(nmrResidue, "_wrappedData");
     if (!apiNmrResidue)
         RETURN_OBJ_ERROR("error getting _wrappedData");
 
+    // get the nmrChain containing the resonanceGroup
     nmrChain = (PyObject *) PyObject_GetAttrString(apiNmrResidue, "nmrChain");
     if (!nmrChain)
         RETURN_OBJ_ERROR("error getting nmrChain");
 
+    // get isConnected and serial for the nmrChain
     PyDictObject *nmrChainDict = PyObject_GetAttrString(nmrChain, "__dict__");
     PyObject *isConnectedObj = PyDict_GetItemString(nmrChainDict, "isConnected");
     PyObject *nmrChainSerialObj = PyDict_GetItemString(nmrChainDict, "serial");
 
+    // get all the resonanceGroups in the local nmrChain
     nmrResidues = (PyListObject *) PyObject_GetAttrString(nmrChain, "mainResonanceGroups");
+
+    // error checking
     if (!nmrResidues)
         RETURN_OBJ_ERROR("error getting nmrResidues");
-
     if (!isConnectedObj)
         RETURN_OBJ_ERROR("error getting isConnected");
-
     if (!nmrChainSerialObj)
         RETURN_OBJ_ERROR("error getting serial");
 
-    if (isConnectedObj == Py_True)         // this works
+    if (isConnectedObj == Py_True)
         isConnected = CCPN_TRUE;
     else
         isConnected = CCPN_FALSE;
 
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    project = (PyObject *) PyObject_GetAttrString(apiNmrResidue, "nmrProject");
-    nmrProjectDict = (PyDictObject *) PyObject_GetAttrString(project, "__dict__");
-    resonanceGroupDict = (PyDictObject *) PyDict_GetItemString(nmrProjectDict, "resonanceGroups");
-    resonanceGroups = (PyListObject *) PyDict_Values(resonanceGroupDict);
-
-    // put the main residues into a list
+    // put the resonanceGroups into a list
     numRes = PyTuple_GET_SIZE(nmrResidues);
     PyObject *mainResGroups[numRes];
     for (ii = 0; ii < numRes; ii++)
@@ -348,7 +344,13 @@ static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args)
         mainResGroups[ii] = (PyObject *) PyTuple_GET_ITEM(nmrResidues, ii);
     }
 
-    // search all residues in the project into the list
+    // get the list of all resonanceGroups in the project
+    project = (PyObject *) PyObject_GetAttrString(apiNmrResidue, "nmrProject");
+    nmrProjectDict = (PyDictObject *) PyObject_GetAttrString(project, "__dict__");
+    resonanceGroupDict = (PyDictObject *) PyDict_GetItemString(nmrProjectDict, "resonanceGroups");
+    resonanceGroups = (PyListObject *) PyDict_Values(resonanceGroupDict);
+
+    // search all resonanceGroups in the project,
     rg = PyList_GET_SIZE(resonanceGroups);
     PyObject *offsetResonanceGroups[rg];            //  just make it full size, but only need some of it
     PyObject *offSetMainResonances[rg];

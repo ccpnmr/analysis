@@ -96,7 +96,7 @@ struct Node
     long    index;
     CcpnBool    seqCodeCompare;
     long   seqCode;
-    char   seqInsertCode[128];
+    char   *seqInsertCode;
     CcpnBool    isConnected;
 
     // pointers
@@ -113,8 +113,9 @@ struct Node *newNode(PyObject *nmrResidue)
     temp->relativeOffset = -0.1;
     temp->index = -1;
     temp->object = nmrResidue;
-    strcpy(&(temp->seqInsertCode), "");
-    strcpy(&(temp->seqCode), "");
+
+//    strcpy(&(temp->seqInsertCode), "");
+    STRING_MALLOC_NEW(temp->seqInsertCode, "");
 
     // initialise the pointers
     temp->prev = NULL;
@@ -124,17 +125,35 @@ struct Node *newNode(PyObject *nmrResidue)
 
 static CcpnBool compareRes(struct Node* leftNode, struct Node* rightNode)
 {
+    int strCompare;
+
     // compare whether 2 residues in connected stretch are similar
+    // need to clean this up
+
+    // compare index
     if (leftNode->index == rightNode->index)
-        if (leftNode->relativeOffset < rightNode->relativeOffset)
+    {
+        // compare seqInsertCode
+        strCompare = strcmp(leftNode->seqInsertCode, rightNode->seqInsertCode);
+
+        if (strCompare == 0)
+
+            // compare relativeOffset
+            if (leftNode->relativeOffset < rightNode->relativeOffset)
+                return CCPN_TRUE;
+            else
+                return CCPN_FALSE;
+
+        else if (strCompare < 0)
             return CCPN_TRUE;
         else
             return CCPN_FALSE;
+    }
 
-    if (leftNode->index < rightNode->index)
+    else if (leftNode->index < rightNode->index)
         return CCPN_TRUE;
-
-    return CCPN_FALSE;
+    else
+        return CCPN_FALSE;
 }
 
 struct Node* insertConnected(struct Node* node, struct Node* item)
@@ -189,7 +208,20 @@ struct Node *insertConnectedNode(struct Node **headRef,
         seqInsertCode = PyDict_GetItemString(apiDict, "seqInsertCode");
 
         if (seqInsertCode == Py_None)
-            strcpy(&(temp->seqInsertCode), "");
+//            strcpy(&(temp->seqInsertCode), "");
+        {
+            STRING_MALLOC_NEW(temp->seqInsertCode, "");
+        }
+        else
+        {
+            // read the string from the PyObject, ands put into seqInsertCode
+            seqString = PyUnicode_AsASCIIString(seqInsertCode);
+            if (seqString)
+            {
+                temp->seqInsertCode = PyBytes_AS_STRING(seqString);
+//                printf(">>%s<<", temp->seqInsertCode);
+            }
+        }
     }
 
     offsetTest = PyDict_GetItemString(apiDict, "relativeOffset");
@@ -351,11 +383,11 @@ static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args)
     resonanceGroups = (PyListObject *) PyDict_Values(resonanceGroupDict);
 
     // search all resonanceGroups in the project,
+    // to find all attached offsetResonanceGroups
     rg = PyList_GET_SIZE(resonanceGroups);
     PyObject *offsetResonanceGroups[rg];            //  just make it full size, but only need some of it
     PyObject *offSetMainResonances[rg];
 
-//    printf("%li \n", rg);
     for (ii = 0; ii < rg; ii++)
     {
         listRes = (PyObject *) PyList_GET_ITEM(resonanceGroups, ii);
@@ -370,20 +402,12 @@ static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args)
                 numOffsets++;
             }
     }
-//    printf("%li \n", numOffsets);         //  should be all the offsetResonanceGroups
-
-    // iterate through the mainresonanceGroups
-    // add to linked list
-
-    // iterate through offsetResonanceGroups
-    // insert by relativeoffset if samemainResonanceGroup
-
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     struct Node *resonanceList = NULL;
     struct Node *thisNode = NULL;
     struct Node *offsetNode = NULL;
 
+    // insert all resonanceGroups into a linked list for ordering
     for (ii = 0; ii < numRes; ii++)
     {
         mainRes = (PyObject *) PyTuple_GET_ITEM(nmrResidues, ii);

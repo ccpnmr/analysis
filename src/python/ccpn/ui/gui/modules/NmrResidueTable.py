@@ -210,11 +210,7 @@ class NmrResidueTable(GuiTable):
         CCPN-INTERNAL: Insert an index into ObjectTable
         """
         try:
-            if (nmrRes._wrappedData.seqCode or nmrRes._wrappedData.seqInsertCode):
-                print('>>>', nmrRes, nmrRes._wrappedData.seqCode,
-                      nmrRes._wrappedData.seqInsertCode)
-            val = _getNmrIndex(nmrRes)
-            return val
+            return _getNmrIndex(nmrRes)
             # return nmrRes.nmrChain.nmrResidues.index(nmrRes)                # ED: THIS IS VERY SLOW
         except Exception as es:
             return None

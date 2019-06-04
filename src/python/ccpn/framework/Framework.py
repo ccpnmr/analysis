@@ -1544,10 +1544,11 @@ class Framework(NotifierBase):
         :param askBeforeOpen_lenght: how many spectra can open without asking first
 
         """
-
-        if self.preferences.general.useNative:
-            getLogger().info('Native dialog not available on multiple selections. Use load data instead')
         if paths is None:
+            if self.preferences.general.useNative:
+                m = 'Native dialog not available on multiple selections. ' \
+                    'For loading a single file (not Dir) through a native dialog please use: Project > Load Data...'
+                getLogger().info(m)
             dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.ExistingFiles, text='Load Spectra',
                                 acceptMode=FileDialog.AcceptOpen, multiSelection=True,
                                 filter=filter, useNative=False)

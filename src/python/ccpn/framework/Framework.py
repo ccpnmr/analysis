@@ -1565,15 +1565,15 @@ class Framework(NotifierBase):
             notRecognised = [i for i in paths if i not in spectraPaths if not os.path.isdir(i)]
             getLogger().warning('Not valid spectrum Path(s): ' + str(notRecognised))
 
-        if len(spectraPaths) > askBeforeOpen_lenght:
-            okToOpenAll = MessageDialog.showYesNo('Load data', 'The directory contains multiple items (~%s).'
-                                                               ' Do you want to open all?' % str(len(spectraPaths)))
-            if not okToOpenAll:
-                return
+            if len(spectraPaths) > askBeforeOpen_lenght:
+                okToOpenAll = MessageDialog.showYesNo('Load data', 'The directory contains multiple items (~%s).'
+                                                                   ' Do you want to open all?' % str(len(spectraPaths)))
+                if not okToOpenAll:
+                    return
 
-        with notificationEchoBlocking():
-            for spectrumPath in tqdm(spectraPaths):
-                self.project.loadData(str(spectrumPath))
+            with notificationEchoBlocking():
+                for spectrumPath in tqdm(spectraPaths):
+                    self.project.loadData(str(spectrumPath))
 
     def loadData(self, paths=None, text=None, filter=None):
         """

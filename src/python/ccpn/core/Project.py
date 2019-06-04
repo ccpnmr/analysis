@@ -29,6 +29,7 @@ import os
 import typing
 import operator
 import numpy as np
+from tqdm import tqdm
 from typing import Sequence, Tuple, Union, Optional
 from collections import OrderedDict
 from time import time
@@ -1031,12 +1032,10 @@ class Project(AbstractWrapperObject):
             return None
 
         elif dataType == 'Dirs':
-            from tqdm import tqdm
             # special case - usePath is a list of paths from a top dir with enumerate subDirs and paths.
             paths = usePath
             #TODO:RASMUS: Undefined return type
-
-            for path in tqdm(paths):
+            for path in paths:
                 self.loadData(path)
 
         elif not os.path.exists(usePath):
@@ -1199,19 +1198,20 @@ class Project(AbstractWrapperObject):
             spectrum.assignmentTolerances = spectrum.defaultAssignmentTolerances
 
             # estimate new base contour levels
-            setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
-                                      setPositiveContours=True, setNegativeContours=True,
-                                      useSameMultiplier=False)
+            if spectrum.dimensionCount >1:
+                setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
+                                          setPositiveContours=True, setNegativeContours=True,
+                                          useSameMultiplier=False)
 
-            # set the positive/negative/slice colours
+                # set the positive/negative/slice colours
 
-            from ccpn.core.lib.SpectrumLib import getDefaultSpectrumColours
+                from ccpn.core.lib.SpectrumLib import getDefaultSpectrumColours
 
-            (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
-            spectrum.sliceColour = spectrum.positiveContourColour
+                (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
+                spectrum.sliceColour = spectrum.positiveContourColour
 
-            # set the initial axis ordering
-            spectrum.getDefaultOrdering(None)
+                # set the initial axis ordering
+                spectrum.getDefaultOrdering(None)
 
             # if there are no peakLists then create a new one - taken from Spectrum _spectrumMakeFirstPeakList notifier
             if not spectrum.peakLists:

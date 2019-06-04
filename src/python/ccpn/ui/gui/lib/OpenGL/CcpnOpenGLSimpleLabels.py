@@ -35,6 +35,8 @@ from functools import partial
 # from threading import Thread
 # from queue import Queue
 from PyQt5 import QtCore, QtGui, QtWidgets
+from ccpn.util.Colour import hexToRgbRatio
+
 from PyQt5.QtCore import QPoint, QSize, Qt, pyqtSlot
 from PyQt5.QtWidgets import QApplication, QOpenGLWidget
 from ccpn.util.Logging import getLogger
@@ -131,7 +133,7 @@ class GLSimpleStrings():
 
             if spectrumView not in self.strings:
                 self.addString(spectrumView, (0, 0),
-                               colour=spectrumView.spectrum.positiveContourColour, alpha=1.0,
+                               colour=spectrumView.spectrum.sliceColour, alpha=1.0,
                                lock=GLDefs.LOCKAXIS | GLDefs.LOCKLEFT | GLDefs.LOCKBOTTOM, axisCodes=('intensity',))
 
     def drawStrings(self):
@@ -170,9 +172,7 @@ class GLSimpleStrings():
         """Add a new string to the list
         """
         GLp = self._GLParent
-        colR = int(colour.strip('# ')[0:2], 16) / 255.0
-        colG = int(colour.strip('# ')[2:4], 16) / 255.0
-        colB = int(colour.strip('# ')[4:6], 16) / 255.0
+        col = hexToRgbRatio(colour)
 
         # NOTE:ED check axis units - assume 'ppm' for the minute
 
@@ -185,7 +185,7 @@ class GLSimpleStrings():
                             font=GLp.globalGL.glSmallFont,
                             x=textX,
                             y=textY,
-                            colour=(colR, colG, colB, alpha),
+                            colour=(*col, alpha),
                             GLContext=GLp,
                             obj=self.objectInstance(obj),
                             serial=serial)
@@ -322,8 +322,14 @@ class GLSimpleStrings():
             for pp in range(0, 2 * vertices, 2):
                 obj.attribs[pp:pp + 2] = offsets
 
-            # redefine the mark's VBOs
+            # redefine the string's position VBOs
             obj.updateTextArrayVBOAttribs(enableVBO=True)
+
+            # reset the colour, may have changed due to spectrum colour change, but not caught anywhere else yet
+            obj.setStringHexColour(obj.spectrumView.spectrum.sliceColour, alpha=1.0)
+
+            # redefine the string's colour VBOs
+            obj.updateTextArrayVBOColour(enableVBO=True)
 
     def rescale(self):
         """rescale the objects

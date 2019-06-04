@@ -612,7 +612,7 @@ GuiTable::item::selected {
                     item.setEditable(True)
                     # self.itemDelegate().closeEditor.connect(partial(self._changeMe, row, col))
                     # item.textChanged.connect(partial(self._changeMe, item))
-                    self.editItem(item)
+                    # self.editItem(item)
 
     def _doubleClickCallback(self, itemSelection):
 
@@ -660,7 +660,7 @@ GuiTable::item::selected {
                         item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
                         # self.itemDelegate().closeEditor.connect(partial(self._changeMe, row, col))
                         # item.textChanged.connect(partial(self._changeMe, item))
-                        self.editItem(item)  # enter the editing mode
+                        # self.editItem(item)  # enter the editing mode
                     else:
                         if self._actionCallback:
                             self._actionCallback(data)
@@ -2088,18 +2088,45 @@ class GuiTableDelegate(QtWidgets.QStyledItemDelegate):
         self.customWidget = False
         self._parent = parent
 
-    # def createEditor(self, parentWidget, itemStyle, index):
-    #     pass
-    #     col = index.column()
-    #     objCol = self._parent.columns[col]
-    #
-    #     returnValue = super(GuiTableDelegate, self).createEditor(parentWidget, itemStyle, index)
-    #     return returnValue
-    #
-    # def setEditorData(self, editor, index) -> None:
-    #     pass
-    #     returnValue = super(GuiTableDelegate, self).setEditorData(editor, index)
-    #     return returnValue
+    def setEditorData(self, widget, index) -> None:
+        """populate the editor widget when the cell is edited
+        """
+        model = index.model()
+        value = model.data(index, EDIT_ROLE)
+
+        if not isinstance(value, (list, tuple)):
+            value = (value,)
+
+        if hasattr(widget, 'setColor'):
+            widget.setColor(*value)
+
+        elif hasattr(widget, 'setData'):
+            widget.setData(*value)
+
+        elif hasattr(widget, 'set'):
+            widget.set(*value)
+
+        elif hasattr(widget, 'setValue'):
+            widget.setValue(*value)
+
+        elif hasattr(widget, 'setText'):
+            widget.setText(*value)
+
+        elif hasattr(widget, 'setFile'):
+            widget.setFile(*value)
+
+        else:
+            msg = 'Widget %s does not expose "setData", "set" or "setValue" method; ' % widget
+            msg += 'required for table proxy editing'
+            raise Exception(msg)
+
+    def destroyEditor(self, editor:  QtWidgets.QWidget, index: QtCore.QModelIndex) -> None:
+        print('>>>DESTROY')
+        return super(GuiTableDelegate, self).destroyEditor(editor, index)
+
+    def editorEvent(self, event: QtCore.QEvent, model: QtCore.QAbstractItemModel, option: 'QStyleOptionViewItem', index: QtCore.QModelIndex) -> bool:
+        pass
+        return super(GuiTableDelegate, self).editorEvent(event, model, option, index)
 
     def setModelData(self, widget, mode, index):
         """

@@ -31,7 +31,7 @@ from PyQt5 import QtWidgets
 import numpy as np
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray, GLRENDERMODE_DRAW
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import LEFTBORDER, RIGHTBORDER, TOPBORDER, BOTTOMBORDER
-
+from ccpn.util.Colour import hexToRgbRatio
 
 try:
     from OpenGL import GL, GLU, GLUT
@@ -369,7 +369,13 @@ class GLString(GLVertexArray):
         super().drawTextArrayVBO(enableVBO=enableVBO)
 
     def setStringColour(self, col):
+        self.colour = col
         self.colors = np.array(col * self.numVertices, dtype=np.float32)
+
+    def setStringHexColour(self, hexColour, alpha=1.0):
+        col = hexToRgbRatio(hexColour)
+        self.colour = (*col, alpha)
+        self.colors = np.array((*col, alpha) * self.numVertices, dtype=np.float32)
 
     def setStringOffset(self, attrib):
         self.attribs = self.offsets + np.array(attrib * self.numVertices, dtype=np.float32)

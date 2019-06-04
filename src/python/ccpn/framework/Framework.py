@@ -1557,9 +1557,9 @@ class Framework(NotifierBase):
         spectraPaths = []
         for path in paths:
             path = str(path)
-            spectrumPath = ioFormats._searchSpectraPathsInSubDir(path) # Filter only spectra files
-            if len(spectrumPath)>0:
-                spectraPaths+=spectrumPath
+            subPaths = ioFormats._searchSpectraPathsInSubDir(path) # Filter only spectra files
+            if len(subPaths)>0:
+                spectraPaths+=subPaths
 
 
         if len(spectraPaths) > askBeforeOpen_lenght:

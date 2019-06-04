@@ -1580,6 +1580,8 @@ GuiTable::item::selected {
 
                             thisObj = self.item(rr, objCol).value
                             if thisObj in multipleAttr:
+
+                                # this could be slow in some cases - nmrChain.index(nmrResidue)?
                                 self.item(rr, indCol).setValue(multipleAttr.index(thisObj))
 
     def _updateTableCallback(self, data):

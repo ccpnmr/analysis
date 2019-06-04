@@ -1167,7 +1167,7 @@ class Framework(NotifierBase):
                    ))
 
         ms.append(('Spectrum', [
-            ("Load Spectrum...", lambda: self._loadDataFromMenu(text='Load Spectrum'), [('shortcut', 'ls')]),
+            ("Load Spectra...", self.loadSpectra, [('shortcut', 'ls')]),
             (),
             ("Spectrum Groups...", self.showSpectrumGroupsPopup, [('shortcut', 'ss')]),
             ("Set Experiment Types...", self.showExperimentTypePopup, [('shortcut', 'et')]),
@@ -1536,6 +1536,39 @@ class Framework(NotifierBase):
     def clearRecentMacros(self):
         self.preferences.recentMacros = []
         self.ui.mainWindow._fillRecentMacrosMenu()
+
+    def loadSpectra(self, paths=None, filter=None, askBeforeOpen_lenght=20):
+        """
+        :param paths: list of str of paths
+        :param filter:
+        :param askBeforeOpen_lenght: how many spectra can open without asking first
+
+        """
+
+        if self.preferences.general.useNative:
+            getLogger().info('Native dialog not available on multiple selections. Use load data instead')
+        if paths is None:
+            dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.ExistingFiles, text='Load Spectra',
+                                acceptMode=FileDialog.AcceptOpen, multiSelection=True,
+                                filter=filter, useNative=False)
+            paths = dialog._customMultiSelectedFiles
+
+        spectraPaths = []
+        for path in paths:
+            path = str(path)
+            spectrumPath = ioFormats._searchSpectraPathsInSubDir(path) # Filter only spectra files
+            if len(spectrumPath)>0:
+                spectraPaths+=spectrumPath
+
+
+        if len(spectraPaths) > askBeforeOpen_lenght:
+            okToOpenAll = MessageDialog.showYesNo('Load data', 'The directory contains multiple items (~%s).'
+                                                               ' Do you want to open all?' % str(len(spectraPaths)))
+            if not okToOpenAll:
+                return
+
+        for spectrumPath in spectraPaths:
+            self.project.loadData(str(spectrumPath))
 
     def loadData(self, paths=None, text=None, filter=None):
         """

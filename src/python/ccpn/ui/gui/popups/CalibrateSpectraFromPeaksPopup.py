@@ -336,8 +336,8 @@ class CalibrateSpectraFromPeaksPopup1d(CalibrateSpectraFromPeaksPopupNd):
         layout = spectrumFrame.getLayout()
         while layout.count():
             wid = layout.takeAt(0).widget()
-            wid.setParent(None)
             wid.setVisible(False)
+            wid.setParent(None)
 
         fromPos = self.primaryPeak.position + (self.primaryPeak.height,)
 

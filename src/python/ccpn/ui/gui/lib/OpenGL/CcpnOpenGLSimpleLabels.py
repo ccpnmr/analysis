@@ -325,11 +325,15 @@ class GLSimpleStrings():
             # redefine the string's position VBOs
             obj.updateTextArrayVBOAttribs(enableVBO=True)
 
-            # reset the colour, may have changed due to spectrum colour change, but not caught anywhere else yet
-            obj.setStringHexColour(obj.spectrumView.spectrum.sliceColour, alpha=1.0)
+            try:
+                # reset the colour, may have changed due to spectrum colour change, but not caught anywhere else yet
+                obj.setStringHexColour(obj.spectrumView.spectrum.sliceColour, alpha=1.0)
 
-            # redefine the string's colour VBOs
-            obj.updateTextArrayVBOColour(enableVBO=True)
+                # redefine the string's colour VBOs
+                obj.updateTextArrayVBOColour(enableVBO=True)
+
+            except Exception as es:
+                getLogger().warning('error setting string colour')
 
     def rescale(self):
         """rescale the objects

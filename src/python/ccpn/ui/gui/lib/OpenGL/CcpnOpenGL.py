@@ -2600,7 +2600,10 @@ class CcpnGLWidget(QOpenGLWidget):
             self.drawMarksAxisCodes()
 
         else:
+            # make the overlay/axis solid
+            currentShader.setBlendEnabled(0)
             self._spectrumLabelling.drawStrings()
+            currentShader.setBlendEnabled(1)
 
         self.disableTextClientState()
 

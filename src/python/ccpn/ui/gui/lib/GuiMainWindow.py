@@ -1038,9 +1038,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                                                                            ' Do you want to open all?' %str(spectraPathsCount))
                         if not okToOpenAll:
                             continue
-                    data = self.project.loadData(url)
-                    if data:
-                        objs.extend(data)
+                    with notificationEchoBlocking():
+                        data = self.project.loadData(url)
+                        if data:
+                            objs.extend(data)
 
                 except Exception as es:
                     MessageDialog.showError('Load Data', 'loadData Error: %s' % str(es))

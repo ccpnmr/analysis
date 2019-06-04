@@ -1571,8 +1571,9 @@ class Framework(NotifierBase):
             if not okToOpenAll:
                 return
 
-        for spectrumPath in spectraPaths:
-            self.project.loadData(str(spectrumPath))
+        with notificationEchoBlocking():
+            for spectrumPath in tqdm(spectraPaths):
+                self.project.loadData(str(spectrumPath))
 
     def loadData(self, paths=None, text=None, filter=None):
         """

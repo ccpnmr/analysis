@@ -1031,11 +1031,12 @@ class Project(AbstractWrapperObject):
             return None
 
         elif dataType == 'Dirs':
+            from tqdm import tqdm
             # special case - usePath is a list of paths from a top dir with enumerate subDirs and paths.
             paths = usePath
             #TODO:RASMUS: Undefined return type
 
-            for path in paths:
+            for path in tqdm(paths):
                 self.loadData(path)
 
         elif not os.path.exists(usePath):

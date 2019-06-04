@@ -2091,6 +2091,8 @@ class GuiTableDelegate(QtWidgets.QStyledItemDelegate):
     def setEditorData(self, widget, index) -> None:
         """populate the editor widget when the cell is edited
         """
+        # edits occur without actually calling editItem()
+
         model = index.model()
         value = model.data(index, EDIT_ROLE)
 
@@ -2121,11 +2123,9 @@ class GuiTableDelegate(QtWidgets.QStyledItemDelegate):
             raise Exception(msg)
 
     def destroyEditor(self, editor:  QtWidgets.QWidget, index: QtCore.QModelIndex) -> None:
-        print('>>>DESTROY')
         return super(GuiTableDelegate, self).destroyEditor(editor, index)
 
-    def editorEvent(self, event: QtCore.QEvent, model: QtCore.QAbstractItemModel, option: 'QStyleOptionViewItem', index: QtCore.QModelIndex) -> bool:
-        pass
+    def editorEvent(self, event: QtCore.QEvent, model: QtCore.QAbstractItemModel, option: 'QtWidgets.QStyleOptionViewItem', index: QtCore.QModelIndex) -> bool:
         return super(GuiTableDelegate, self).editorEvent(event, model, option, index)
 
     def setModelData(self, widget, mode, index):

@@ -1034,6 +1034,7 @@ class Project(AbstractWrapperObject):
             # special case - usePath is a list of paths from a top dir with enumerate subDirs and paths.
             paths = usePath
             #TODO:RASMUS: Undefined return type
+
             for path in paths:
                 self.loadData(path)
 
@@ -1187,7 +1188,7 @@ class Project(AbstractWrapperObject):
         try:
             apiDataSource = self._wrappedData.loadDataSource(path, subType)
         except Exception as es:
-            getLogger().warning('ERROR here')
+            getLogger().warning(es)
             raise es
 
         if apiDataSource is None:

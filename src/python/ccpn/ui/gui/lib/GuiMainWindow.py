@@ -1031,10 +1031,11 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             else:
                 # with progressManager(self.mainWindow, 'Loading data... ' + url):
                 try:  #  Why do we need this try?
+                    spectraPathsCount = len(ioFormats._searchSpectraPathsInSubDir(url))
                     askBeforeOpen_lenght = 20 # Ask user if want to open all (spectra) before start loading the full set.
-                    cpt = sum([len(files) for r, d, files in os.walk(url)])
-                    if cpt > askBeforeOpen_lenght:
-                        okToOpenAll = MessageDialog.showYesNo('Load data', 'The directory contains multiple items. Do you want to open all?')
+                    if spectraPathsCount > askBeforeOpen_lenght:
+                        okToOpenAll = MessageDialog.showYesNo('Load data', 'The directory contains multiple items (~%s).'
+                                                                           ' Do you want to open all?' %str(spectraPathsCount))
                         if not okToOpenAll:
                             continue
                     data = self.project.loadData(url)

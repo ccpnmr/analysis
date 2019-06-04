@@ -1561,6 +1561,9 @@ class Framework(NotifierBase):
             if len(subPaths)>0:
                 spectraPaths+=subPaths
 
+        if len(spectraPaths)<len(paths):
+            notRecognised = [i for i in paths if i not in spectraPaths if not os.path.isdir(i)]
+            getLogger().warning('Not valid spectrum Path(s): ' + str(notRecognised))
 
         if len(spectraPaths) > askBeforeOpen_lenght:
             okToOpenAll = MessageDialog.showYesNo('Load data', 'The directory contains multiple items (~%s).'

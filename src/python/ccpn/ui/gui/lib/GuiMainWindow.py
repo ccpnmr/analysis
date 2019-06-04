@@ -1034,7 +1034,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                     askBeforeOpen_lenght = 20 # Ask user if want to open all (spectra) before start loading the full set.
                     cpt = sum([len(files) for r, d, files in os.walk(url)])
                     if cpt > askBeforeOpen_lenght:
-                        # maxOpen
                         okToOpenAll = MessageDialog.showYesNo('Load data', 'The directory contains multiple items. Do you want to open all?')
                         if not okToOpenAll:
                             continue

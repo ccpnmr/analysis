@@ -458,9 +458,9 @@ GuiTable::item::selected {
         """
         catch the click event on a header
         """
-        # print('>>> %s _postSort' % _moduleId(self.moduleParent))
-
-        self.resizeColumnsToContents()
+        # self.resizeColumnsToContents()
+        with self._guiTableUpdate(self._dataFrameObject):
+            pass
 
     @staticmethod
     def _getCommentText(obj):
@@ -954,7 +954,7 @@ GuiTable::item::selected {
         pos = QtCore.QPoint(pos.x(), pos.y() + 10)  #move the popup a bit down. Otherwise can trigger an event if the pointer is just on top the first item
 
         self.headerContextMenumenu = QtWidgets.QMenu()
-        columnsSettings = self.headerContextMenumenu.addAction("Columns Settings...")
+        columnsSettings = self.headerContextMenumenu.addAction("Column Settings...")
         searchSettings = None
         if self._enableSearch and self.searchWidget is not None:
             searchSettings = self.headerContextMenumenu.addAction("Search")
@@ -1550,6 +1550,8 @@ GuiTable::item::selected {
         self.items = []
 
     def reindexTableObjects(self):
+        """updating to make sure that the index of the item in the table matches the index of the item in the actual list
+        """
         if self._tableData['tableSelection']:
             tSelect = getattr(self, self._tableData['tableSelection'])
             if tSelect:

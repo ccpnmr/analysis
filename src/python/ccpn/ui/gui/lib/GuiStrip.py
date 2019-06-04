@@ -1571,6 +1571,11 @@ class GuiStrip(Frame):
         """
         return self._CcpnGLWidget._firstVisible
 
+    def _toggleStackPhaseFromShortCut(self):
+        """Not implemented, to be overwritten by subclasses
+        """
+        pass
+
 
 # Notifiers:
 def _updateDisplayedMarks(data):

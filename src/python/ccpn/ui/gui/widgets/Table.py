@@ -652,7 +652,7 @@ class ObjectTable(QtWidgets.QTableView, Base):
         pos = QtCore.QPoint(pos.x(), pos.y() + 10)  #move the popup a bit down. Otherwise can trigger an event if the pointer is just on top the first item
 
         self.headerContextMenumenu = QtWidgets.QMenu()
-        columnsSettings = self.headerContextMenumenu.addAction("Columns Settings...")
+        columnsSettings = self.headerContextMenumenu.addAction("Column Settings...")
         searchSettings = None
         if self.searchWidget is not None:
             searchSettings = self.headerContextMenumenu.addAction("Search")

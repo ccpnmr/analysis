@@ -24,47 +24,10 @@ __date__ = "$Date$"
 # Start of code
 #=========================================================================================
 
-import os
 import sys
-import math
-import json
-import re
-import time
-import numpy as np
-from functools import partial
-# from threading import Thread
-# from queue import Queue
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.util.Colour import hexToRgbRatio
-
-from PyQt5.QtCore import QPoint, QSize, Qt, pyqtSlot
-from PyQt5.QtWidgets import QApplication, QOpenGLWidget
 from ccpn.util.Logging import getLogger
-from pyqtgraph import functions as fn
-from ccpn.core.PeakList import PeakList
-from ccpn.core.Integral import Integral
-# from ccpn.core.IntegralList import IntegralList
-from ccpn.ui.gui.lib.mouseEvents import getCurrentMouseMode
-from ccpn.ui.gui.lib.GuiStrip import DefaultMenu, PeakMenu, IntegralMenu, \
-    MultipletMenu, PhasingMenu
-
-from ccpn.core.lib.Cache import cached
-
-# from ccpn.util.Colour import getAutoColourRgbRatio
-from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, \
-    CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_INTEGRALSHADE, \
-    CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE, getColours, \
-    CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_ZOOMAREA, CCPNGLWIDGET_PICKAREA, \
-    CCPNGLWIDGET_SELECTAREA, CCPNGLWIDGET_ZOOMLINE, CCPNGLWIDGET_MOUSEMOVELINE, \
-    CCPNGLWIDGET_HARDSHADE
-# from ccpn.ui.gui.lib.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation  # temp until I rewrite
-import ccpn.util.Phasing as Phasing
-from ccpn.ui.gui.lib.mouseEvents import \
-    leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, controlShiftRightMouse, \
-    middleMouse, shiftMiddleMouse, rightMouse, shiftRightMouse, controlRightMouse, PICK
-
-
-# from ccpn.core.lib.Notifiers import Notifier
 
 try:
     # used to test whether all the arrays are defined correctly
@@ -77,33 +40,9 @@ except ImportError:
                                    "PyOpenGL must be installed to run this example.")
     sys.exit(1)
 
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLGlobalData
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_IGNORE, GLRENDERMODE_DRAW, \
-    GLRENDERMODE_RESCALE, GLRENDERMODE_REBUILD, \
-    GLREFRESHMODE_NEVER, GLREFRESHMODE_ALWAYS, \
-    GLREFRESHMODE_REBUILD, GLVertexArray, \
-    GLSymbolArray, GLLabelArray
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import GLViewports
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLExternalRegion, \
-    GLRegion, REGION_COLOURS, GLInfiniteLine
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLLabelling import GLpeakNdLabelling, GLpeak1dLabelling, \
-    GLintegral1dLabelling, GLintegralNdLabelling, \
-    GLmultiplet1dLabelling, GLmultipletNdLabelling
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import GLExporter
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
 from ccpn.util.Common import getAxisCodeMatch, getAxisCodeMatchIndices
-from typing import Tuple
-from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE, AXIS_ACTIVEAXES, \
-    DOUBLEAXIS_ACTIVEAXES, DOUBLEAXIS_FULLATOMNAME, DOUBLEAXIS_MATCHATOMTYPE
-from ccpn.ui.gui.guiSettings import textFont, getColours, STRIPHEADER_BACKGROUND, \
-    STRIPHEADER_FOREGROUND, GUINMRRESIDUE
-
-from ccpn.ui.gui.widgets.DropBase import DropBase
-from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
-from ccpn.core.lib.ContextManagers import undoBlock
-from ccpn.util.decorators import profile
 
 
 class GLSimpleStrings():

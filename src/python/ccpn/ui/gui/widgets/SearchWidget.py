@@ -43,6 +43,7 @@ from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.TableModel import ObjectTableModel
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
@@ -55,41 +56,81 @@ from ccpn.core.lib.Notifiers import Notifier
 from functools import partial
 from collections import OrderedDict
 from ccpn.util.OrderedSet import OrderedSet
-
+from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.util.Logging import getLogger
 
 
-class GuiTableFilter(Frame):
+class GuiTableFilter(ScrollArea):
     def __init__(self, table, parent=None, **kwds):
-        super().__init__(parent, setLayout=False, **kwds)
+        # super().__init__(parent, setLayout=True, showBorder=False, **kwds)
+        super().__init__(parent, scrollBarPolicies=('never', 'never'), **kwds)
 
         self.table = table
         self._parent = parent
 
-        labelColumn = Label(self,'Search in',)
-        self.columnOptions = PulldownList(self,)
+
+
+        # self._widgetScrollArea = ScrollArea(parent=parent, scrollBarPolicies=('never', 'never'), **kwds)
+        self.setWidgetResizable(True)
+        self._widget = Frame(self, setLayout=True, showBorder=False)
+        self.getLayout().setHorizontalSpacing(0)
+        self.getLayout().setVerticalSpacing(0)
+        self.setWidget(self._widget)
+        self._widget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
+
+
+
+        labelColumn = Label(self._widget,'Search in', grid=(1,0), gridSpan=(1, 2))
+        self.columnOptions = PulldownList(self._widget, grid=(1, 2))
 
         self.columnOptions.setMinimumWidth(40)
-        self.searchLabel = Label(self,'Search for',)
-        self.edit = LineEdit(self,)
 
-        self.searchButtons = ButtonList(self, texts=['Search', 'Reset', 'Close'], tipTexts=['Search', 'Restore Table', 'Close Search'],
-                                        callbacks=[partial(self.findOnTable, self.table),
-                                                   partial(self.restoreTable, self.table),
-                                                   self.hideSearch])
+        # self.searchLabel = Label(self,'Search for')
+        # self.searchLabel.setIcon(Icon('icons/disconnectPrevious'))
+
+        self.edit = LineEdit(self._widget, grid=(0,0), gridSpan=(1,5), backgroundText='Search Item')
+
+        # self.searchLabel = Label(self._widget, grid=(0,0))
+        # thisIcon = Icon('icons/edit-find')
+        # self.searchLabel.setPixmap(thisIcon.pixmap(thisIcon.actualSize(QtCore.QSize(24,24))))
+        self.searchLabel = Button(self._widget, grid=(0, 4), icon=Icon('icons/edit-find'),
+                                  callback=partial(self.findOnTable, self.table))
+        self.searchLabel.setFlat(True)
+
+        self.searchButtons = ButtonList(self._widget, texts=['Reset', 'Close'], tipTexts=['Restore Table', 'Close Search'],
+                                        callbacks=[partial(self.restoreTable, self.table),
+                                                   self.hideSearch],
+                                        grid=(1, 3), gridSpan=(1,2))
+        # self.searchButtons = ButtonList(self._widget, texts=['Search', 'Reset', 'Close'], tipTexts=['Search', 'Restore Table', 'Close Search'],
+        #                                 callbacks=[partial(self.findOnTable, self.table),
+        #                                            partial(self.restoreTable, self.table),
+        #                                            self.hideSearch],
+        #                                 grid=(1, 3), gridSpan=(1,2))
+
+        Spacer(self._widget, 5, 5, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
+               grid=(0, 2), gridSpan=(1, 1))
 
         self.edit.returnPressed.connect(partial(self.findOnTable, self.table))
 
-        self.searchButtons.buttons[1].setEnabled(False)
-        self.searchButtons.setFixedHeight(30)
+        self.searchButtons.getButton('Reset').setEnabled(False)
 
-        self.widgetLayout = QtGui.QHBoxLayout()
-        self.setLayout(self.widgetLayout)
-        ws = [labelColumn, self.columnOptions, self.searchLabel, self.edit, self.searchButtons]
-        for w in ws:
-            self.widgetLayout.addWidget(w)
+        # fix the sizes of the widgets
+        self.setFixedHeight(self.sizeHint().height()+10)
+
+        labelColumn.setFixedWidth(labelColumn.sizeHint().width())
+        self.searchLabel.setFixedWidth(self.searchLabel.sizeHint().width())
+        self.searchButtons.setFixedWidth(self.searchButtons.sizeHint().width())
+
+        # self.widgetLayout = QtGui.QHBoxLayout()
+        # self.setLayout(self.widgetLayout)
+        # ws = [labelColumn, self.columnOptions, self.searchLabel, self.edit, self.searchButtons]
+        # for w in ws:
+        #     self.widgetLayout.addWidget(w)
         self.setColumnOptions()
-        self.widgetLayout.setContentsMargins(0, 0, 0, 0)
+        # self.widgetLayout.setContentsMargins(0, 0, 0, 0)
+
         self.setContentsMargins(0, 0, 0, 0)
 
         self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
@@ -114,7 +155,7 @@ class GuiTableFilter(Frame):
     def updateSearchWidgets(self, table):
         self.table = table
         self.setColumnOptions()
-        self.searchButtons.buttons[1].setEnabled(False)
+        self.searchButtons.getButton('Reset').setEnabled(False)
 
     def hideSearch(self):
         self.restoreTable(self.table)
@@ -124,7 +165,7 @@ class GuiTableFilter(Frame):
     def restoreTable(self, table):
         self.table.refreshTable()
         self.edit.clear()
-        self.searchButtons.buttons[1].setEnabled(False)
+        self.searchButtons.getButton('Reset').setEnabled(False)
         self._lastRows = None
 
     def findOnTable(self, table, matchExactly=False, ignoreNotFound=False):
@@ -209,9 +250,9 @@ class GuiTableFilter(Frame):
                 self.table.setData(self._searchedDataFrame.values)
 
             # self.table.refreshHeaders()
-            self.searchButtons.buttons[1].setEnabled(True)
+            self.searchButtons.getButton('Reset').setEnabled(True)
         else:
-            self.searchButtons.buttons[1].setEnabled(False)
+            self.searchButtons.getButton('Reset').setEnabled(False)
             self.restoreTable(table)
             if not ignoreNotFound:
                 MessageDialog.showWarning('Not found', text)
@@ -250,7 +291,7 @@ def attachSearchWidget(parent, table):
                     row, column, rowSpan, columnSpan = location
                     table.searchWidget = GuiTableFilter(parent=parent, table=table, vAlign='b')
                     parentLayout.addWidget(table.searchWidget, row + 1, column, 1, columnSpan)
-                    table.searchWidget.setFixedHeight(30)
+                    # table.searchWidget.setFixedHeight(30)
                     table.searchWidget.hide()
 
                     # TODO:ED move this to the tables

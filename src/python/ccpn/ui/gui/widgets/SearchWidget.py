@@ -62,6 +62,9 @@ from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.util.Logging import getLogger
 
 
+VISIBLESEARCH = '<Visible Table>'
+
+
 class GuiTableFilter(ScrollArea):
     def __init__(self, table, parent=None, **kwds):
         # super().__init__(parent, setLayout=True, showBorder=False, **kwds)
@@ -136,7 +139,7 @@ class GuiTableFilter(ScrollArea):
         self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
 
         # initialise search list
-        self._lastRows = None
+        self._listRows = None
 
     def setColumnOptions(self):
         # columns = self.table._dataFrameObject.columns
@@ -147,7 +150,7 @@ class GuiTableFilter(ScrollArea):
         objectsRange = range(len(texts))
 
         self.columnOptions.clear()
-        self.columnOptions.addItem('<Whole Table>', object=None)
+        self.columnOptions.addItem(VISIBLESEARCH, object=None)
         for i, text in enumerate(texts):
             self.columnOptions.addItem(text, objectsRange[i])
         self.columnOptions.setIndex(0)
@@ -166,7 +169,7 @@ class GuiTableFilter(ScrollArea):
         self.table.refreshTable()
         self.edit.clear()
         self.searchButtons.getButton('Reset').setEnabled(False)
-        self._lastRows = None
+        self._listRows = None
 
     def findOnTable(self, table, matchExactly=False, ignoreNotFound=False):
         if self.edit.text() == '' or None:
@@ -190,7 +193,7 @@ class GuiTableFilter(ScrollArea):
         # if matchExactly:
         #     func = lambda x: text == str(x)
         # else:
-        #     func = lambda x: _test(text, x)         #text in str(x)
+        #     func = lambda x: text in str(x)
         #
         # columns = self.table._dataFrameObject.headings
 
@@ -226,7 +229,9 @@ class GuiTableFilter(ScrollArea):
         # check using the actual table - not the underlying dataframe
         df = self.table._dataFrameObject.dataFrame
         rows = OrderedSet()
-        visHeadings = self.table._dataFrameObject.visibleColumnHeadings
+
+        searchColumn = self.columnOptions.getText()
+        visHeadings = self.table._dataFrameObject.visibleColumnHeadings if (searchColumn == VISIBLESEARCH) else searchColumn
 
         for row in range(self.table.rowCount()):
 
@@ -234,15 +239,19 @@ class GuiTableFilter(ScrollArea):
                 if self.table.horizontalHeaderItem(column).text() in visHeadings:
                     item = table.item(row, column)
 
-                    if item and text in item.data(QtCore.Qt.DisplayRole):              #item.data(QtCore.Qt.DisplayRole) == "my_search_value":
+                    if matchExactly:
+                        match = item and (text == item.data(QtCore.Qt.DisplayRole))
+                    else:
+                        match = item and (text in item.data(QtCore.Qt.DisplayRole))
 
-                        if self._lastRows is not None:
-                            rows.add(list(self._lastRows)[item.index])
+                    if match:
+                        if self._listRows is not None:
+                            rows.add(list(self._listRows)[item.index])
                         else:
                             rows.add(item.index)
 
         self._searchedDataFrame = df.loc[list(rows)]
-        self._lastRows = rows
+        self._listRows = rows
 
         if not self._searchedDataFrame.empty:
 

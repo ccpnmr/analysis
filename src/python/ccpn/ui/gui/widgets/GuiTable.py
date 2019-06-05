@@ -927,7 +927,9 @@ GuiTable::item::selected {
     def _setContextMenu(self, enableExport=True, enableDelete=True):
         self.tableMenu = QtWidgets.QMenu()
         if enableExport:
-            self.tableMenu.addAction("Export Table", self.exportTableDialog)
+            self.tableMenu.addAction("Export Visible Table", partial(self.exportTableDialog, exportAll=False))
+        if enableExport:
+            self.tableMenu.addAction("Export All", partial(self.exportTableDialog, exportAll=True))
         if enableDelete:
             self.tableMenu.addAction("Delete", self.deleteObjFromTable)
 
@@ -1293,7 +1295,35 @@ GuiTable::item::selected {
                                hiddenColumns=hiddenColumns,
                                table=table)
 
-    def exportTableDialog(self):
+    def exportTableDialog(self, exportAll=True):
+        """export the contents of the table to a file
+        The actual data values are exported, not the visible items which may be rounded due to the table settings
+
+        :param exportAll: True/False - True implies export whole table - but in visible order
+                                    False, export only the visible table
+        """
+        rowList = None
+        if exportAll:
+            colList = self._dataFrameObject.userHeadings
+            if self.rowCount() and self.columnCount():
+                rowList = [self.item(row, 0).index for row in range(self.rowCount())]
+
+        else:
+            colList = self._dataFrameObject.visibleColumnHeadings
+
+            # export contents of dataFrame based on the visible rows and columns
+            if self.searchWidget and self.searchWidget._listRows and self.columnCount():
+
+                # retrieve the correct item, checking that it is in the bounds of the table
+                count = min(len(self.searchWidget._listRows), self.rowCount())
+                rowList = [list(self.searchWidget._listRows)[self.item(row, 0).index] for row in range(count)]
+            else:
+                if self.rowCount() and self.columnCount():
+                    rowList = [self.item(row, 0).index for row in range(self.rowCount())]
+
+        self._exportTableDialog(self._dataFrameObject.dataFrame, rowList=rowList, colList=colList)
+
+    def _exportTableDialog(self, dataFrame, rowList=None, colList=None):
         self.saveDialog = FileDialog(directory='ccpn_Table.xlsx',  #default saving name
                                      fileMode=FileDialog.AnyFile,
                                      filter=".xlsx;; .csv;; .tsv;; .json ",
@@ -1303,12 +1333,16 @@ GuiTable::item::selected {
         path = self.saveDialog.selectedFile()
         sheet_name = 'Table'
         if path:
-            dataFrameObject = self._dataFrameObject
-            if dataFrameObject is not None:
-                dataFrame = dataFrameObject.dataFrame
-                visColumns = dataFrameObject.visibleColumnHeadings
+            if dataFrame is not None:
+
+                if colList:
+                    dataFrame = dataFrame[colList]  # returns a new dataFrame
+                if rowList:
+                    dataFrame = dataFrame[:].iloc[rowList]
+
                 ft = self.saveDialog.selectedNameFilter()
-                findExportFormats(path, dataFrame, sheet_name=sheet_name, filterType=ft, columns=visColumns)
+
+                findExportFormats(path, dataFrame, sheet_name=sheet_name, filterType=ft, columns=colList)
 
             else:
                 if self._rawData is not None:
@@ -1318,62 +1352,6 @@ GuiTable::item::selected {
                         # df.to_excel(path, sheet_name=sheet_name)
                     except Exception as e:
                         getLogger().warning(e)
-
-    # def findExportFormats(self, path, sheet_name='Table'):
-    #     formatTypes = OrderedDict([
-    #         ('.xlsx', self.dataFrameToExcel),
-    #         ('.csv', self.dataFrameToCsv),
-    #         ('.tsv', self.dataFrameToTsv),
-    #         ('.json', self.dataFrameToJson)
-    #         ])
-    #
-    #     extension = os.path.splitext(path)[1]
-    #     if extension in formatTypes.keys():
-    #         formatTypes[extension](self._dataFrameObject, path, sheet_name)
-    #         return
-    #     else:
-    #         try:
-    #             self.findExportFormats(str(path) + self.saveDialog.selectedNameFilter(), sheet_name)
-    #         except:
-    #             getLogger().warning('Format file not supported')
-    #
-    # def dataFrameToExcel(self, dataFrameObject, path, sheet_name='Table'):
-    #     if dataFrameObject is not None:
-    #         visColumns = dataFrameObject.visibleColumnHeadings
-    #         # writer = pd.ExcelWriter(path, engine='xlsxwriter')
-    #         #
-    #         # dataFrameExcel = dataFrameObject.dataFrame.apply(pd.to_numeric, errors='ignore')
-    #         # dataFrameExcel.to_excel(writer, sheet_name=sheet_name, index=False, columns=visColumns)
-    #         dataFrameObject.dataFrame.to_excel(path, sheet_name=sheet_name, index=False, columns=visColumns)
-    #     else:
-    #         if self._rawData is not None:
-    #             try:
-    #                 df = pd.DataFrame(self._rawData).transpose()
-    #                 df.to_excel(path, sheet_name=sheet_name)
-    #             except Exception as e:
-    #                 getLogger().warning(e)
-    #
-    # def dataFrameToCsv(self, dataFrameObject, path):
-    #     dataFrameObject.dataFrame.to_csv(path)
-    #
-    # def dataFrameToTsv(self, dataFrameObject, path):
-    #     dataFrameObject.dataFrame.to_csv(path, sep='\t')
-    #
-    # def dataFrameToJson(self, dataFrameObject, path):
-    #     dataFrameObject.dataFrame.to_json(path, orient='split')
-    #
-    # def tableToDataFrame(self):
-    #     return self._dataFrameObject.dataFrame[self._dataFrameObject.visibleColumnHeadings]
-
-    # def tableToDataFrame(self):
-    #   from pandas import DataFrame
-    #   headers = self._dataFrameObject.visibleColumnHeadings   #[c.heading for c in self.columns]
-    #   rows = []
-    #   for obj in self.objects:
-    #     rows.append([x.getValue(obj) for x in self.columns])
-    #   dataFrame = DataFrame(rows, index=None, columns=headers)
-    #   dataFrame.apply(pd.to_numeric, errors='ignore')
-    #   return dataFrame
 
     def scrollToSelectedIndex(self):
         h = self.horizontalHeader()
@@ -1532,7 +1510,6 @@ GuiTable::item::selected {
         self._dataFrameObject = dataFrameObject if dataFrameObject else None
 
         if self._dataFrameObject:
-
             # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.ResizeToContents)
 
             # there must be something in the table to set the headers against
@@ -1580,7 +1557,6 @@ GuiTable::item::selected {
 
                             thisObj = self.item(rr, objCol).value
                             if thisObj in multipleAttr:
-
                                 # this could be slow in some cases - nmrChain.index(nmrResidue)?
                                 self.item(rr, indCol).setValue(multipleAttr.index(thisObj))
 
@@ -2078,7 +2054,7 @@ class GuiTableDelegate(QtWidgets.QStyledItemDelegate):
         """
         # edits occur without actually calling editItem() - and occurs twice?
 
-        if self._editorCreated == 1:            # only populate on the first event after creation
+        if self._editorCreated == 1:  # only populate on the first event after creation
             self._editorCreated = 2
 
             # if self._editorCreated:
@@ -2123,7 +2099,7 @@ class GuiTableDelegate(QtWidgets.QStyledItemDelegate):
         self._editorValue = None
         self._returnPressed = False
 
-        if isinstance(widget, QtWidgets. QLineEdit):
+        if isinstance(widget, QtWidgets.QLineEdit):
             # add returnPressed capture signal - destroyed on widget destroy
             widget.returnPressed.connect(partial(self._returnPressedCallback, widget))
 

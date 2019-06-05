@@ -153,7 +153,7 @@ class FileDialog(QtWidgets.QFileDialog):
     def selectedFiles(self):
 
         if self.result and not self.useNative:
-            print(self._customMultiSelectedFiles, 'PPP')
+            # print(self._customMultiSelectedFiles, 'PPP')
             return QtWidgets.QFileDialog.selectedFiles(self)
         elif self.result and self.useNative:
             return [self.result]

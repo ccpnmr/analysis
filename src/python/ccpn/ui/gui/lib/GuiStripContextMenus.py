@@ -276,8 +276,8 @@ def _deletePeakItem(strip):
 
 
 def _editPeakAssignmentItem(strip):
-    return _SCMitem(name='Edit Peak',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Edit current peak assignment', callback=strip.application.showPeakAssigner)
+    return _SCMitem(name='Edit Peak Assignments',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Edit current peak assignments', callback=strip.application.showPeakAssigner)
 
 
 def _setPeakAliasingItem(strip):
@@ -429,7 +429,7 @@ def _stackSpectraDefaultItem(strip):
     return _SCMitem(name='Stack Spectra',
                     typeItem=ItemTypes.get(ITEM), toolTip='Stack Spectra',
                     checkable=True, checked=strip._CcpnGLWidget._stackingMode,
-                    callback=strip._toggleStack, shortcut='ST', stripMethodName='stackAction')
+                    callback=strip._toggleStack, shortcut='SK', stripMethodName='stackAction')
 
 
 def _stackSpectraPhaseItem(strip):

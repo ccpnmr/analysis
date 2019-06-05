@@ -91,7 +91,7 @@ class SpectrumView(AbstractWrapperObject):
             index = self._parent.spectrumViews.index(self)
             parent = self._parent
 
-            # self._finaliseAction('delete')
+            self._finaliseAction('delete')
             # with notificationBlanking():
             self._wrappedData.spectrumView.delete()
 

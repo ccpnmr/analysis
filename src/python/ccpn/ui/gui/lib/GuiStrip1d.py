@@ -383,6 +383,10 @@ class GuiStrip1d(GuiStrip):
             except:
                 getLogger().debugGL('OpenGL widget not instantiated')
 
+    def _toggleStackPhaseFromShortCut(self):
+        self.stackActionPhase.setChecked(not self.stackActionPhase.isChecked())
+        self._toggleStackPhase()
+
     def _toggleStackPhase(self):
         """Toggle stacking mode for 1d spectra
         This vertically stacks the spectra for clarity

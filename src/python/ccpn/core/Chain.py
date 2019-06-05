@@ -178,8 +178,14 @@ class Chain(AbstractWrapperObject):
         #     log('clone')
 
         with undoBlock():
-            newApiChain = copySubTree(apiChain, apiMolSystem, maySkipCrosslinks=True,
-                                      topObjectParameters=topObjectParameters)
+            try:
+                newApiChain = copySubTree(apiChain, apiMolSystem, maySkipCrosslinks=True,
+                                         topObjectParameters=topObjectParameters)
+            except Exception as es:
+
+                # put in an error trap but now doesn't seem to re-create the error
+                raise ValueError('Error cloning chain - %s' % str(es))
+
             result = self._project._data2Obj.get(newApiChain)
 
             # Add intra-chain generic bonds
@@ -193,7 +199,7 @@ class Chain(AbstractWrapperObject):
                     newAtoms = list(result.getAtom(x) for x in relativeIds)
                     newAtoms[0].addInterAtomBond(newAtoms[1])
 
-        return result
+            return result
 
     def _lock(self):
         """Finalise chain so that it can no longer be modified, and add missing data."""
@@ -406,7 +412,8 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
         name = compoundName
     else:
         raise ValueError(
-                "Substance '%s' already exists. Try Substance.createChain function instead?"
+                "Substance '%s' already exists. Try choosing a new molecule name.\n"
+                "If you want to create a second identical chain from an existing substance, please clone the chain."
                 % compoundName)
 
     substance = self.createPolymerSubstance(sequence=sequence, name=name,

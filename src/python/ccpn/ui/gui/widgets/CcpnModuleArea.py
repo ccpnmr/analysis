@@ -404,7 +404,12 @@ class CcpnModuleArea(ModuleArea, DropBase):  #, DropBase):
             childs = []
             if obj is not None:
                 for i in range(obj.count()):
-                    childs.append(self.childState(obj.widget(i)))
+                    try:
+                        widg = obj.widget(i)
+                        childs.append(self.childState(obj.widget(i)))
+                    except Exception as es:
+                        getLogger().warning('Error accessing widget: %s' % str(es))
+
                 return (obj.type(), childs, obj.saveState())
 
     def addTempArea(self):

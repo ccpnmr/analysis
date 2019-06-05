@@ -124,6 +124,19 @@ class PeakListTableWidget(GuiTable):
 
     positionsUnit = UNITS[0]  #default
 
+    @staticmethod
+    def _setFigureOfMerit(obj, value):
+        """
+        CCPN-INTERNAL: Set figureOfMerit from table
+        Must be a floatRatio in range [0.0, 1.0]
+        """
+        # ejb - why is it blanking a notification here?
+        # NmrResidueTable._project.blankNotification()
+
+        # clip and set the figure of merit
+        obj.figureOfMerit = min(max(float(value), 0.0), 1.0) if value else None
+        # NmrResidueTable._project.unblankNotification()
+
     def __init__(self, parent=None, mainWindow=None, moduleParent=None, peakList=None, actionCallback=None, selectionCallback=None, **kwds):
         """
         Initialise the table
@@ -268,7 +281,8 @@ class PeakListTableWidget(GuiTable):
 
         # figureOfMerit column
         figureOfMeritTipText = 'Figure of merit'
-        columnDefs.append(('Merit', lambda pk: pk.figureOfMerit, figureOfMeritTipText, None))
+        columnDefs.append(('Merit', lambda pk: pk.figureOfMerit, figureOfMeritTipText,
+                           lambda pk, value: PeakListTableWidget._setFigureOfMerit(pk, value)))
 
         # comment column
         commentsTipText = 'Textual notes about the peak'

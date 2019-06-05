@@ -524,7 +524,7 @@ class PreferencesPopup(CcpnDialog):
         except:
             annType = 0
             self.preferences.general.annotationType = annType
-        self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid', 'Minimal'],
+        self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid', 'Minimal', 'Peak Id'],
                                             selectedInd=annType,
                                             callback=self._setAnnotations,
                                             direction='horizontal',

@@ -83,6 +83,7 @@ class GuiWindow():
         addShortCut("t, r", self, self.removePhasingTraces, context=context)
         addShortCut("p, v", self, self.setPhasingPivot, context=context)
 
+        addShortCut("s, k", self, self.stackSpectra, context=context)
         addShortCut("l, a", self, partial(self.toggleLastAxisOnly, self), context=context)
 
         addShortCut("a, m", self, self.addMultiplet, context=context)
@@ -431,6 +432,11 @@ class GuiWindow():
         strip = self.application.current.strip
         if strip:               # and (strip.spectrumDisplay.window is self):
             strip._newPhasingTrace()
+
+    def stackSpectra(self):
+        strip = self.application.current.strip
+        if strip:               # and (strip.spectrumDisplay.window is self):
+            strip._toggleStackPhaseFromShortCut()
 
     def setPhasingPivot(self):
 

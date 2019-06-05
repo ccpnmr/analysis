@@ -336,6 +336,13 @@ class NmrChain(AbstractWrapperObject):
             addUndoItem(undo=partial(self.rename, oldName),
                         redo=partial(self.rename, value))
 
+    def _finaliseAction(self, action):
+        if action in ['delete']:
+            if self._wrappedData.implCode == '@-' and self._wrappedData.nmrProject:
+                raise TypeError("NmrChain '@-' cannot be deleted")
+
+        super(NmrChain, self)._finaliseAction(action)
+
     #=========================================================================================
     # CCPN functions
     #=========================================================================================

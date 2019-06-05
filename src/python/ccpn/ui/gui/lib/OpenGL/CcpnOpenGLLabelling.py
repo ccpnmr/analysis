@@ -36,7 +36,7 @@ from ccpn.core.NmrAtom import NmrAtom
 from ccpn.util.Colour import getAutoColourRgbRatio
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_INTEGRALSHADE, \
     CCPNGLWIDGET_MULTIPLETLINK, getColours
-from ccpn.ui.gui.lib.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation
+from ccpn.ui.gui.lib.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation, _getPeakId
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_DRAW,  GLRENDERMODE_RESCALE, GLRENDERMODE_REBUILD, \
@@ -158,9 +158,12 @@ class GLpeakListMethods():
             # return the original pid
             # text = _getPeakAnnotation(obj)
             text = _getScreenPeakAnnotation(obj, useShortCode=False, usePid=True)
-        else:
+        elif labelType == 3:
             # return the minimal form
             text = _getScreenPeakAnnotation(obj, useShortCode=True, useMinimalCode=True)
+
+        else:
+            text = _getPeakId(obj)
 
         return text
 

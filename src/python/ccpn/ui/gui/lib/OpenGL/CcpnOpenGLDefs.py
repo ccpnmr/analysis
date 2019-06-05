@@ -213,6 +213,7 @@ PEAKLABEL_MINIMAL = 'peaklabelMinimal'
 PEAKLABEL_SHORT = 'peaklabelShort'
 PEAKLABEL_FULL = 'peaklabelFull'
 PEAKLABEL_PID = 'peaklabelPid'
+PEAKLABEL_ID = 'peaklabelId'
 
 PEAKSYMBOL_CROSS = 'peakSymbolCross'
 PEAKSYMBOL_LINEWIDTH = 'peakSymbolLineWidth'

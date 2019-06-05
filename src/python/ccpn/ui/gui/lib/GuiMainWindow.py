@@ -466,8 +466,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             return project
 
         except Exception as es:
-            MessageDialog.showError('loadProject', 'Fatal error loading project:\n%s\nReloading last saved position.' % str(projectDir))
-            Logging.getLogger().warning('Fatal error loading project: %s - Reloading last saved position.' % str(projectDir))
+            MessageDialog.showError('loadProject', 'Error loading project:\n%s\n\n%s\n\nReloading last saved position.' % (str(projectDir), str(es)))
+            Logging.getLogger().warning('Error loading project: %s - Reloading last saved position.' % str(projectDir))
 
             if not lastProjectisTemporary:
                 # try and load the previous project (only one try)
@@ -476,8 +476,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                     return project
 
                 except Exception as es:
-                    MessageDialog.showError('loadProject', 'Fatal error loading last project:\n%s' % str(lastValidProject))
-                    Logging.getLogger().warning('Fatal error loading last project: %s' % str(lastValidProject))
+                    MessageDialog.showError('loadProject', 'Error loading last project:\n%s\n\n%s' % (str(lastValidProject), str(es)))
+                    Logging.getLogger().warning('Error loading last project: %s' % str(lastValidProject))
             else:
                 # open a new project again
                 project = self.application.newProject()

@@ -148,8 +148,8 @@ class SpectrumDisplaySettings(Widget):
 
             row += 1
             self.annotationsLabel = Label(parent, text="Symbol Annotation", grid=(row, 0))
-            self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid', 'Minimal'],
-                                                objectNames=['annSDS_Short', 'annSDS_Full', 'annSDS_Pid', 'annSDS_Minimal'],
+            self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid', 'Minimal', 'Peak Id'],
+                                                objectNames=['annSDS_Short', 'annSDS_Full', 'annSDS_Pid', 'annSDS_Minimal', 'annSDS_Id'],
                                                 selectedInd=annotationType,
                                                 callback=self._symbolsChanged,
                                                 direction='horizontal',
@@ -285,10 +285,11 @@ class _commonSettings():
             if dp.strips:
                 for sv in dp.strips[0].spectrumViews:
 
-                    if sv.spectrum not in validSpectrumViews:
-                        validSpectrumViews[sv.spectrum] = sv.isVisible()
-                    else:
-                        validSpectrumViews[sv.spectrum] = validSpectrumViews[sv.spectrum] or sv.isVisible()
+                    if not (sv.isDeleted or sv._flaggedForDelete):
+                        if sv.spectrum not in validSpectrumViews:
+                            validSpectrumViews[sv.spectrum] = sv.isVisible()
+                        else:
+                            validSpectrumViews[sv.spectrum] = validSpectrumViews[sv.spectrum] or sv.isVisible()
 
         if validSpectrumViews:
             maxLen = 0
@@ -384,12 +385,33 @@ class _commonSettings():
         else:
             return 0, None, None, None
 
+    def _removeWidget(self, widget):
+        """Destroy a widget and all it's contents
+        """
+        def deleteItems(layout):
+            if layout is not None:
+                while layout.count():
+                    item = layout.takeAt(0)
+                    widget = item.widget()
+                    if widget is not None:
+                        widget.setVisible(False)
+                        widget.setParent(None)
+                        del widget
+                    else:
+                        deleteItems(item.layout())
+
+        deleteItems(widget.getLayout())
+        del widget
+
     def _fillSpectrumFrame(self, displays):
         """Populate then spectrumFrame with the selectable spectra
         """
         if self._spectraWidget:
             self._spectraWidget.hide()
-            self._spectraWidget.deleteLater()
+            self._spectraWidget.setParent(None)
+            # self._spectraWidget.deleteLater()
+
+            self._removeWidget(self._spectraWidget)
 
         self._spectraWidget = Widget(parent=self, setLayout=True, hPolicy='minimal',
                                      grid=(0, 1), gridSpan=(self._spectraRows, 1), vAlign='top', hAlign='left')
@@ -610,8 +632,9 @@ class StripPlot(Widget, _commonSettings):
     def _registerNotifiers(self):
         """Notifiers for responding to spectrumViews
         """
+        # can't use setNotifier as not guaranteed a parent abstractWrapperObject
         self._spectrumViewNotifier = Notifier(self.project,
-                                              [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
+                                              [Notifier.CREATE, Notifier.DELETE],       # DELETE not registering
                                               SpectrumView.className,
                                               self._spectrumViewChanged,
                                               onceOnly=True)

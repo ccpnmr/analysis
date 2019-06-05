@@ -25,16 +25,9 @@ __date__ = "$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $"
 # Start of code
 #=========================================================================================
 
-import json
-import re
-
 from PyQt5 import QtGui, QtCore, QtWidgets
 import pandas as pd
 import os
-from types import MethodType
-from contextlib import contextmanager
-
-from collections import Iterable
 from pyqtgraph import TableWidget
 from pyqtgraph.widgets.TableWidget import _defersort, TableWidgetItem
 from ccpn.core.lib.CcpnSorting import universalSortKey
@@ -43,31 +36,17 @@ from ccpn.core.lib.DataFrameObject import DataFrameObject, DATAFRAME_OBJECT, \
     DATAFRAME_INDEX, DATAFRAME_HASH, DATAFRAME_PID
 
 from ccpn.ui.gui.guiSettings import getColours
-
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.Splitter import Splitter
-from ccpn.ui.gui.widgets.TableModel import ObjectTableModel
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.popups.Dialog import CcpnDialog
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.TableFilter import ObjectTableFilter
 from ccpn.ui.gui.widgets.ColumnViewSettings import ColumnViewSettingsPopup
-from ccpn.ui.gui.widgets.TableModel import ObjectTableModel
 from ccpn.ui.gui.widgets.SearchWidget import attachSearchWidget
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.widgets.DropBase import DropBase
-from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.util.Common import makeIterableList
 from functools import partial
 from ccpn.util.OrderedSet import OrderedSet
-
 from collections import OrderedDict
 from ccpn.util.Logging import getLogger
 from types import SimpleNamespace
@@ -126,16 +105,16 @@ def dataFrameToExcel(dataFrame, path, sheet_name='Table', columns=None):
             dataFrame.to_excel(path, sheet_name=sheet_name)
 
 
-def dataFrameToCsv(dataFrameObject, path, *args):
-    dataFrameObject.dataFrame.to_csv(path)
+def dataFrameToCsv(dataFrame, path, *args):
+    dataFrame.to_csv(path)
 
 
-def dataFrameToTsv(dataFrameObject, path, *args):
-    dataFrameObject.dataFrame.to_csv(path, sep='\t')
+def dataFrameToTsv(dataFrame, path, *args):
+    dataFrame.to_csv(path, sep='\t')
 
 
-def dataFrameToJson(self, dataFrameObject, path, *args):
-    dataFrameObject.dataFrame.to_json(path, orient='split')
+def dataFrameToJson(dataFrame, path, *args):
+    dataFrame.to_json(path, orient='split', default_handler=str)
 
 
 # def tableToDataFrame(self):
@@ -479,9 +458,9 @@ GuiTable::item::selected {
         """
         catch the click event on a header
         """
-        # print('>>> %s _postSort' % _moduleId(self.moduleParent))
-
-        self.resizeColumnsToContents()
+        # self.resizeColumnsToContents()
+        with self._guiTableUpdate(self._dataFrameObject):
+            pass
 
     @staticmethod
     def _getCommentText(obj):
@@ -612,7 +591,7 @@ GuiTable::item::selected {
                     item.setEditable(True)
                     # self.itemDelegate().closeEditor.connect(partial(self._changeMe, row, col))
                     # item.textChanged.connect(partial(self._changeMe, item))
-                    self.editItem(item)
+                    # self.editItem(item)
 
     def _doubleClickCallback(self, itemSelection):
 
@@ -656,10 +635,11 @@ GuiTable::item::selected {
 
                     elif self._dataFrameObject and self._dataFrameObject.columnDefinitions.setEditValues[col]:  # ejb - editable fields don't actionCallback:
                         item = self.item(row, col)
-                        item.setEditable(True)
+                        # item.setEditable(True)
+                        item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
                         # self.itemDelegate().closeEditor.connect(partial(self._changeMe, row, col))
                         # item.textChanged.connect(partial(self._changeMe, item))
-                        self.editItem(item)  # enter the editing mode
+                        # self.editItem(item)  # enter the editing mode
                     else:
                         if self._actionCallback:
                             self._actionCallback(data)
@@ -974,7 +954,7 @@ GuiTable::item::selected {
         pos = QtCore.QPoint(pos.x(), pos.y() + 10)  #move the popup a bit down. Otherwise can trigger an event if the pointer is just on top the first item
 
         self.headerContextMenumenu = QtWidgets.QMenu()
-        columnsSettings = self.headerContextMenumenu.addAction("Columns Settings...")
+        columnsSettings = self.headerContextMenumenu.addAction("Column Settings...")
         searchSettings = None
         if self._enableSearch and self.searchWidget is not None:
             searchSettings = self.headerContextMenumenu.addAction("Search")
@@ -1570,6 +1550,8 @@ GuiTable::item::selected {
         self.items = []
 
     def reindexTableObjects(self):
+        """updating to make sure that the index of the item in the table matches the index of the item in the actual list
+        """
         if self._tableData['tableSelection']:
             tSelect = getattr(self, self._tableData['tableSelection'])
             if tSelect:
@@ -1598,6 +1580,8 @@ GuiTable::item::selected {
 
                             thisObj = self.item(rr, objCol).value
                             if thisObj in multipleAttr:
+
+                                # this could be slow in some cases - nmrChain.index(nmrResidue)?
                                 self.item(rr, indCol).setValue(multipleAttr.index(thisObj))
 
     def _updateTableCallback(self, data):
@@ -2086,6 +2070,74 @@ class GuiTableDelegate(QtWidgets.QStyledItemDelegate):
         QtWidgets.QStyledItemDelegate.__init__(self, parent)
         self.customWidget = False
         self._parent = parent
+        self._editorCreated = 0
+        self._returnPressed = False
+
+    def setEditorData(self, widget, index) -> None:
+        """populate the editor widget when the cell is edited
+        """
+        # edits occur without actually calling editItem() - and occurs twice?
+
+        if self._editorCreated == 1:            # only populate on the first event after creation
+            self._editorCreated = 2
+
+            # if self._editorCreated:
+            model = index.model()
+            value = model.data(index, EDIT_ROLE)
+
+            if not isinstance(value, (list, tuple)):
+                value = (value,)
+
+            if hasattr(widget, 'setColor'):
+                widget.setColor(*value)
+
+            elif hasattr(widget, 'setData'):
+                widget.setData(*value)
+
+            elif hasattr(widget, 'set'):
+                widget.set(*value)
+
+            elif hasattr(widget, 'setValue'):
+                widget.setValue(*value)
+
+            elif hasattr(widget, 'setText'):
+                widget.setText(*value)
+
+            elif hasattr(widget, 'setFile'):
+                widget.setFile(*value)
+
+            else:
+                msg = 'Widget %s does not expose "setData", "set" or "setValue" method; ' % widget
+                msg += 'required for table proxy editing'
+                raise Exception(msg)
+
+        else:
+            super(GuiTableDelegate, self).setEditorData(widget, index)
+
+    def createEditor(self, parent: QtWidgets.QWidget, option: 'QtWidgets.QStyleOptionViewItem', index: QtCore.QModelIndex) -> QtWidgets.QWidget:
+
+        # create the widget from the superClass
+        widget = super(GuiTableDelegate, self).createEditor(parent, option, index)
+
+        self._editorCreated = 1
+        self._editorValue = None
+        self._returnPressed = False
+
+        if isinstance(widget, QtWidgets. QLineEdit):
+            # add returnPressed capture signal - destroyed on widget destroy
+            widget.returnPressed.connect(partial(self._returnPressedCallback, widget))
+
+        return widget
+
+    def _returnPressedCallback(self, widget):
+        """Capture the returnPressed event from the widget, because the setModeData event seems to be a frame behind the widget
+        when getting the text()
+        """
+
+        # check that it is a QLineEdit - check for other types later (see old table class)
+        if isinstance(widget, QtWidgets.QLineEdit):
+            self._editorValue = widget.text()
+            self._returnPressed = True
 
     def setModelData(self, widget, mode, index):
         """
@@ -2094,7 +2146,15 @@ class GuiTableDelegate(QtWidgets.QStyledItemDelegate):
         :param mode - editing mode:
         :param index - QModelIndex of the cell:
         """
-        text = widget.text()
+
+        # check the widget type
+        if isinstance(widget, QtWidgets.QLineEdit):
+            if self._returnPressed:
+                # grab from the stored value - other value seems to be a frame behind the QLineEdit update
+                text = self._editorValue
+            else:
+                text = widget.text()
+
         row = index.row()
         col = index.column()
 
@@ -2117,11 +2177,10 @@ class GuiTableDelegate(QtWidgets.QStyledItemDelegate):
                     func(obj, text)
             else:
                 getLogger().debug('table %s does not contain a Pid' % self)
+                # return super(GuiTableDelegate, self).setModelData(widget, mode, index)
 
         except Exception as es:
             getLogger().warning('Error handling cell editing: %i %i %s' % (row, col, str(es)))
-
-        # return QtWidgets.QStyledItemDelegate.setModelData(self, widget, mode, index)
 
 
 class GuiTableFrame(Frame):

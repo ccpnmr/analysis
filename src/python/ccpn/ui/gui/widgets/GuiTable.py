@@ -53,6 +53,7 @@ from types import SimpleNamespace
 from contextlib import contextmanager
 from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.core.lib.Util import getParentObjectFromPid
+from ccpn.core.lib.ContextManagers import catchExceptions
 
 
 # BG_COLOR = QtGui.QColor('#E0E0E0')
@@ -994,21 +995,22 @@ GuiTable::item::selected {
                 msg = 'Delete %sselected item%s from the project?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
             if MessageDialog.showYesNo(title, msg):
 
-                if hasattr(selected[0], 'project'):
-                    thisProject = selected[0].project
+                with catchExceptions(application=self.application, errorStringTemplate='Error deleting objects from table; "%s"'):
+                    if hasattr(selected[0], 'project'):
+                        thisProject = selected[0].project
 
-                    with undoBlock():
-                        # echo [sI.pid for sI in selected])
+                        with undoBlock():
+                            # echo [sI.pid for sI in selected])
+                            for obj in selected:
+                                if hasattr(obj, 'pid'):
+                                    obj.delete()
+
+                    else:
+
+                        # TODO:ED this is deleting from PandasTable, check for another way to get project
                         for obj in selected:
                             if hasattr(obj, 'pid'):
                                 obj.delete()
-
-                else:
-
-                    # TODO:ED this is deleting from PandasTable, check for another way to get project
-                    for obj in selected:
-                        if hasattr(obj, 'pid'):
-                            obj.delete()
 
                 self.clearSelection()
                 return True
@@ -1529,6 +1531,9 @@ GuiTable::item::selected {
     def reindexTableObjects(self):
         """updating to make sure that the index of the item in the table matches the index of the item in the actual list
         """
+        # this is for those objects that undo returns back to the table
+        # because items are just given the next available 'Index' when re-inserted
+        # so need to be corrected - should be done in each rename, change routine
         if self._tableData['tableSelection']:
             tSelect = getattr(self, self._tableData['tableSelection'])
             if tSelect:

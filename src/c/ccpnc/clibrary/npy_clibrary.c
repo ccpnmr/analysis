@@ -319,6 +319,35 @@ static void deallocateNodeList(struct Node *node)
     }
 }
 
+static CcpnBool _flaggedForDelete(PyObject *projectDict, PyObject *apiRes)
+{
+    PyObject *isDeleted;
+    PyObject *_flagged;
+    PyObject *res = PyDict_GetItem(projectDict, apiRes);
+
+    // if -1 residue before selection and 0 residue after selection then works okay
+
+    if (res)
+    {
+        isDeleted = (PyObject *) PyObject_GetAttrString(apiRes, "isDeleted");
+        if (PyObject_HasAttrString(res, "_flaggedForDelete"))
+        {
+            _flagged = (PyObject *) PyObject_GetAttrString(res, "_flaggedForDelete");
+            if (isDeleted != Py_False)
+                printf("_flaggedForDelete\n");
+        }
+        else
+            printf("no flag\n");
+
+//        if (!isDeleted)
+//            RETURN_OBJ_ERROR("error getting isDeleted");
+//        if (!_flagged)
+//            RETURN_OBJ_ERROR("error getting _flaggedForDelete");
+    }
+
+    return CCPN_FALSE;
+}
+
 static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args)
 {
     PyObject *apiNmrChain;
@@ -333,10 +362,15 @@ static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args)
     PyListObject *offsetList;
     PyObject *offsetRes;
     PyListObject *resonanceGroups;
-    PyDictObject *nmrProjectDict;
+    PyDictObject *apiNmrProjectDict;
     PyDictObject *resonanceGroupDict;
-    PyObject *project, *mainRes;
+    PyObject *apiNmrProject, *mainRes;
     CcpnBool isConnected;
+    PyObject *project, *projectDict;
+
+//    data2Obj = project._data2Obj
+//    data2Obj[wrappedData] = self
+//    self._flaggedForDelete
 
     // check thart the argument is an nmrResidue
     if (!PyArg_ParseTuple(args, "O", &nmrResidue))
@@ -381,11 +415,31 @@ static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args)
         mainResGroups[ii] = (PyObject *) PyTuple_GET_ITEM(apiNmrResidues, ii);
     }
 
-    // get the list of all resonanceGroups in the project
-    project = (PyObject *) PyObject_GetAttrString(apiNmrResidue, "nmrProject");
-    nmrProjectDict = (PyDictObject *) PyObject_GetAttrString(project, "__dict__");
-    resonanceGroupDict = (PyDictObject *) PyDict_GetItemString(nmrProjectDict, "resonanceGroups");
+    // get the list of all resonanceGroups in the apiNmrProject
+    apiNmrProject = (PyObject *) PyObject_GetAttrString(apiNmrResidue, "nmrProject");
+    apiNmrProjectDict = (PyDictObject *) PyObject_GetAttrString(apiNmrProject, "__dict__");
+    resonanceGroupDict = (PyDictObject *) PyDict_GetItemString(apiNmrProjectDict, "resonanceGroups");
     resonanceGroups = (PyListObject *) PyDict_Values(resonanceGroupDict);
+
+    // error checking
+    if (!apiNmrProject)
+        RETURN_OBJ_ERROR("error getting apiNmrProject");
+    if (!apiNmrProjectDict)
+        RETURN_OBJ_ERROR("error getting apiNmrProjectDict");
+    if (!resonanceGroupDict)
+        RETURN_OBJ_ERROR("error getting resonanceGroupDict");
+    if (!resonanceGroups)
+        RETURN_OBJ_ERROR("error getting resonanceGroups");
+
+    // get the V3project
+    project = (PyObject *) PyObject_GetAttrString(nmrResidue, "project");
+    projectDict = (PyDictObject *) PyObject_GetAttrString(project, "_data2Obj");
+
+    // error checking
+    if (!project)
+        RETURN_OBJ_ERROR("error getting project");
+    if (!projectDict)
+        RETURN_OBJ_ERROR("error getting projectDict");
 
     // search all resonanceGroups in the project,
     // to find all attached offsetResonanceGroups

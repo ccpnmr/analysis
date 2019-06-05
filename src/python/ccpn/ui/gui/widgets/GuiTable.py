@@ -105,16 +105,16 @@ def dataFrameToExcel(dataFrame, path, sheet_name='Table', columns=None):
             dataFrame.to_excel(path, sheet_name=sheet_name)
 
 
-def dataFrameToCsv(dataFrameObject, path, *args):
-    dataFrameObject.dataFrame.to_csv(path)
+def dataFrameToCsv(dataFrame, path, *args):
+    dataFrame.to_csv(path)
 
 
-def dataFrameToTsv(dataFrameObject, path, *args):
-    dataFrameObject.dataFrame.to_csv(path, sep='\t')
+def dataFrameToTsv(dataFrame, path, *args):
+    dataFrame.to_csv(path, sep='\t')
 
 
-def dataFrameToJson(self, dataFrameObject, path, *args):
-    dataFrameObject.dataFrame.to_json(path, orient='split')
+def dataFrameToJson(dataFrame, path, *args):
+    dataFrame.to_json(path, orient='split', default_handler=str)
 
 
 # def tableToDataFrame(self):

@@ -78,9 +78,9 @@ static appendFloatList(PyObject *list, double value)
     }
 }
 
-static appendFloatLong(PyObject *list, value)
+static appendFloatLong(PyObject *list, long value)
 {
-    if (PyList_Append(list, PyLong_FromVoidPtr(value)) != 0)
+    if (PyList_Append(list, PyLong_FromLong(value)) != 0)
     {
         RETURN_OBJ_ERROR("appending item to list");
     }

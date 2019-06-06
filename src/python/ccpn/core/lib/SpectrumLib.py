@@ -698,6 +698,10 @@ def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
     if not isinstance(useSameMultiplier, bool):
         raise TypeError('useSameMultiplier is not boolean.')
 
+    # exit if nothing set
+    if not (setNoiseLevel or setPositiveContours or setNegativeContours):
+        return
+
     # get specLimits for all dimensions
     specLimits = list(spectrum.spectrumLimits)
     dims = spectrum.dimensionCount

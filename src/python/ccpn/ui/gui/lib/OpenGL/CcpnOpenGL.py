@@ -2734,7 +2734,8 @@ class CcpnGLWidget(QOpenGLWidget):
                                                                     drawMode=GL.GL_LINES,
                                                                     dimension=2,
                                                                     GLContext=self)
-                spectrumView._buildGLContours(self._contourList[spectrumView])
+                spectrumView._buildGLContours(self._contourList[spectrumView],
+                                              firstShow=self._preferences.automaticNoiseContoursOnFirstShow)
 
                 self._buildSpectrumSetting(spectrumView=spectrumView)
                 rebuildFlag = True

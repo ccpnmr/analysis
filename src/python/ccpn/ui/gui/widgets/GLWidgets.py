@@ -436,7 +436,8 @@ class Gui1dWidget(CcpnGLWidget):
                                                                     drawMode=GL.GL_LINE_STRIP,
                                                                     dimension=2,
                                                                     GLContext=self)
-                spectrumView._buildGLContours(self._contourList[spectrumView])
+                spectrumView._buildGLContours(self._contourList[spectrumView],
+                                              firstShow=self._preferences.automaticNoiseContoursOnFirstShow)
 
                 self._buildSpectrumSetting(spectrumView=spectrumView, stackCount=stackCount)
                 # if self._stackingMode:

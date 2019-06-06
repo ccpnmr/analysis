@@ -1198,7 +1198,8 @@ class Project(AbstractWrapperObject):
             spectrum.assignmentTolerances = spectrum.defaultAssignmentTolerances
 
             # estimate new base contour levels
-            if spectrum.dimensionCount >1:
+            if spectrum.dimensionCount > 1 and self.application.preferences.general.automaticNoiseContoursOnLoadSpectrum:
+                getLogger().info("estimating noise level for spectrum %s" % str(spectrum.pid))
                 setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
                                           setPositiveContours=True, setNegativeContours=True,
                                           useSameMultiplier=False)

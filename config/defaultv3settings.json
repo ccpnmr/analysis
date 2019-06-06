@@ -48,7 +48,9 @@
         "yAxisUnits": 0,
         "axisOrderingOptions": 0,
         "colourPalette" : 0,
-        "focusFollowsMouse" : false
+        "focusFollowsMouse" : false,
+        "automaticNoiseContoursOnLoadSpectrum" : false,
+        "automaticNoiseContoursOnFirstShow" : true
     },
 
     "externalPrograms": {

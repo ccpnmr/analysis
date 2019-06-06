@@ -115,6 +115,7 @@ GLAXISLABELS = 'Axis Labels'
 GLAXISUNITS = 'Axis Units'
 GLSPECTRUMCONTOURS = 'Spectrum Contours'
 GLSPECTRUMBORDERS = 'Spectrum Borders'
+GLSPECTRUMLABELS = 'Spectrum Labels'
 GLMARKLINES = 'Mark Lines'
 GLMARKLABELS = 'Mark Labels'
 GLCURSORS = 'Show Cursors'
@@ -150,6 +151,7 @@ GLFULLLIST = (GLPEAKSYMBOLS,
               GLAXISUNITS,
               GLSPECTRUMCONTOURS,
               GLSPECTRUMBORDERS,
+              GLSPECTRUMLABELS,
               GLMARKLINES,
               GLMARKLABELS,
               GLCURSORS,
@@ -170,6 +172,7 @@ GLEXTENDEDLIST = (GLGRIDLINES,
                   GLAXISUNITS,
                   GLSPECTRUMCONTOURS,
                   GLSPECTRUMBORDERS,
+                  GLSPECTRUMLABELS,
                   GLMARKLINES,
                   GLMARKLABELS,
                   GLCURSORS,

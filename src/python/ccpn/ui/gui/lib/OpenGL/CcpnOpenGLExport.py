@@ -59,7 +59,8 @@ from ccpn.util.Report import Report
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXISLABELS, GLAXISMARKS, \
     GLINTEGRALLABELS, GLINTEGRALSYMBOLS, GLMARKLABELS, GLMARKLINES, GLMULTIPLETLABELS, GLREGIONS, \
     GLMULTIPLETSYMBOLS, GLOTHERLINES, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLSELECTEDPIDS, \
-    GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSTRIP, GLSTRIPLABELLING, GLTRACES, GLWIDGET, GLPLOTBORDER, \
+    GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSPECTRUMLABELS, \
+    GLSTRIP, GLSTRIPLABELLING, GLTRACES, GLWIDGET, GLPLOTBORDER, \
     GLPAGETYPE, GLSPECTRUMDISPLAY, GLAXISLINES, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS, \
     GLCONTOURTHICKNESS, GLFOREGROUND, GLSHOWSPECTRAONPHASE, \
     GLAXISTITLES, GLAXISUNITS, GLAXISMARKSINSIDE, GLSTRIPDIRECTION, GLSTRIPPADDING, \
@@ -399,6 +400,9 @@ class GLExporter():
             if self.params[GLINTEGRALLABELS]: self._addIntegralLabels()
             if self.params[GLMULTIPLETLABELS]: self._addMultipletLabels()
             if self.params[GLMARKLABELS]: self._addMarkLabels()
+        else:
+            # currently only in stacking mode
+            if self.params[GLSPECTRUMLABELS]: self._addSpectrumLabels()
 
         if self.params[GLTRACES]: self._addTraces()
 
@@ -884,6 +888,37 @@ class GLExporter():
                 col = drawString.colors[0:4]
             colour = colors.Color(*col[0:3], alpha=alphaClip(col[3]))
             colourPath = 'projectMarks%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
+
+            newLine = [drawString.attribs[0], drawString.attribs[1]]
+            if self._parent.pointVisible(newLine,
+                                         x=self.displayScale * self.mainL,
+                                         y=self.displayScale * self.mainB,
+                                         width=self.displayScale * self.mainW,
+                                         height=self.displayScale * self.mainH):
+                if colourPath not in colourGroups:
+                    colourGroups[colourPath] = Group()
+                self._addString(colourGroups, colourPath, drawString, newLine, colour, boxed=False)
+
+        for colourGroup in colourGroups.values():
+            self._mainPlot.add(colourGroup)
+
+    def _addSpectrumLabels(self):
+        """
+        Add the (stacked) spectrum labels to the main drawing area.
+        """
+        colourGroups = OrderedDict()
+
+        if not (self._parent._spectrumLabelling and self._parent._spectrumLabelling.strings):
+            return
+
+        for drawString in self._parent._spectrumLabelling.strings.values():
+            # drawString.drawTextArrayVBO(enableVBO=True)
+
+            col = drawString.colors[0]
+            if not isinstance(col, Iterable):
+                col = drawString.colors[0:4]
+            colour = colors.Color(*col[0:3], alpha=alphaClip(col[3]))
+            colourPath = 'projectSpectrumLabels%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
 
             newLine = [drawString.attribs[0], drawString.attribs[1]]
             if self._parent.pointVisible(newLine,

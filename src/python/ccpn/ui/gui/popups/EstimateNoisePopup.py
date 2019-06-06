@@ -35,11 +35,13 @@ from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.Common import getAxisCodeMatchIndices
+from collections import OrderedDict
 
 
 class EstimateNoisePopup(CcpnDialog):
-    MINIMUM_WIDTH_PER_TAB = 120
-    MINIMUM_WIDTH = 400
+    MINIMUM_WIDTH_PER_TAB = 100
+    MINIMUM_WIDTH = 350
+    MAXIMUM_WIDTH = 600
 
     def __init__(self, parent=None, mainWindow=None, title='Estimate Noise',
                  strip=None, orderedSpectrumViews=None, **kwds):
@@ -68,8 +70,6 @@ class EstimateNoisePopup(CcpnDialog):
         self.orderedSpectra = OrderedSet([spec.spectrum for spec in self.orderedSpectrumViews])
 
         self.tabWidget = Tabs(self, setLayout=True, grid=(1, 0), gridSpan=(1, 4))
-        self.tabWidget.setMinimumWidth(
-                max(self.MINIMUM_WIDTH, self.MINIMUM_WIDTH_PER_TAB * len(self.orderedSpectra)))
 
         # add a tab for each spectrum in the spectrumDisplay
         self._noiseTab = []
@@ -79,6 +79,14 @@ class EstimateNoisePopup(CcpnDialog):
 
         ButtonList(self, ['Close'], [self._accept], grid=(2, 3))
 
+        # restrict the width of the tab widget
+        self.tabWidget.adjustSize()
+        self.tabWidget.setFixedHeight(self.tabWidget.sizeHint().height())
+        self.tabWidget.setFixedWidth(min(max(self.MINIMUM_WIDTH, self.MINIMUM_WIDTH_PER_TAB * len(self.orderedSpectra)),
+                                         self.MAXIMUM_WIDTH))
+
+        # restrict popup size
+        self.adjustSize()
         self.setFixedSize(self.sizeHint())
 
     def _accept(self):
@@ -126,14 +134,22 @@ class NoiseTab(Widget):
         Label(self, text='Min', grid=(row, 0), vAlign='t', hAlign='l')
         self.minLabel = Label(self, text='<None>', grid=(row, 1), vAlign='t', hAlign='l')
 
+        # row += 1
+        # HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
+
         row += 1
-        Label(self, text='Noise Level', grid=(row, 0), vAlign='t', hAlign='l')
+        Label(self, text='Current Noise Level', grid=(row, 0), vAlign='t', hAlign='l')
+        self.currentNoiseLabel = Label(self, text='<None>', grid=(row, 1), vAlign='t', hAlign='l')
+        self.currentNoiseLabel.setText(str(self.spectrum.noiseLevel))
+
+        row += 1
+        Label(self, text='Estimated Noise Level', grid=(row, 0), vAlign='t', hAlign='l')
         self.noiseLevelSpinBox = ScientificDoubleSpinBox(self, grid=(row, 1), vAlign='t')
         self.noiseLevelSpinBox.setMaximum(1e12)
         self.noiseLevelSpinBox.setMinimum(0.1)
         self.noiseLevelButton = Button(self, grid=(row, 2), callback=self._setNoiseLevel, text='Apply')
 
-        # This can be moved somewhere more sensible
+        # 20190606:ED This could be moved somewhere more sensible
 
         # calculate the region over which to estimate the noise
         selectedRegion = [[self.strip._CcpnGLWidget.axisL, self.strip._CcpnGLWidget.axisR],
@@ -141,8 +157,6 @@ class NoiseTab(Widget):
         for n in self.strip.orderedAxes[2:]:
             selectedRegion.append((n.region[0], n.region[1]))
         sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]
-
-        from collections import OrderedDict
 
         # get indexing for spectrum onto strip.axisCodes
         indices = getAxisCodeMatchIndices(self.spectrum.axisCodes, self.strip.axisCodes)

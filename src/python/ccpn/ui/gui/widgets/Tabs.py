@@ -45,7 +45,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 
-from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 from ccpn.ui.gui.widgets.Base import Base
 
 
@@ -53,6 +53,8 @@ class Tabs(QtWidgets.QTabWidget, Base):
     def __init__(self, parent, **kwds):
         super().__init__(parent)
         Base._init(self, **kwds)
+
+        self.setFocusPolicy(QtCore.Qt.StrongFocus)
 
 
 if __name__ == '__main__':

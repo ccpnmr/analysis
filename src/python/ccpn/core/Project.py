@@ -1198,21 +1198,21 @@ class Project(AbstractWrapperObject):
             spectrum.assignmentTolerances = spectrum.defaultAssignmentTolerances
 
             # estimate new base contour levels
-            if spectrum.dimensionCount > 1 and self.application.preferences.general.automaticNoiseContoursOnLoadSpectrum:
+            if self.application.preferences.general.automaticNoiseContoursOnLoadSpectrum:
                 getLogger().info("estimating noise level for spectrum %s" % str(spectrum.pid))
+
                 setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
                                           setPositiveContours=True, setNegativeContours=True,
                                           useSameMultiplier=False)
 
-                # set the positive/negative/slice colours
+            # set the positive/negative/slice colours
+            from ccpn.core.lib.SpectrumLib import getDefaultSpectrumColours
 
-                from ccpn.core.lib.SpectrumLib import getDefaultSpectrumColours
+            (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
+            spectrum.sliceColour = spectrum.positiveContourColour
 
-                (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
-                spectrum.sliceColour = spectrum.positiveContourColour
-
-                # set the initial axis ordering
-                spectrum.getDefaultOrdering(None)
+            # set the initial axis ordering
+            spectrum.getDefaultOrdering(None)
 
             # if there are no peakLists then create a new one - taken from Spectrum _spectrumMakeFirstPeakList notifier
             if not spectrum.peakLists:

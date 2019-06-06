@@ -54,6 +54,7 @@ from contextlib import contextmanager
 from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.core.lib.Util import getParentObjectFromPid
 from ccpn.core.lib.ContextManagers import catchExceptions
+from ccpn.ui.gui.widgets.MessageDialog import showWarning, showMessage
 
 
 # BG_COLOR = QtGui.QColor('#E0E0E0')
@@ -1304,11 +1305,14 @@ GuiTable::item::selected {
         :param exportAll: True/False - True implies export whole table - but in visible order
                                     False, export only the visible table
         """
+        if not (self._dataFrameObject and self._dataFrameObject.dataFrame is not None):
+            showWarning('Export Table to File', 'Table does no contain a dataFrame')
+            return
+
         rowList = None
         if exportAll:
             colList = self._dataFrameObject.userHeadings
-            if self.rowCount() and self.columnCount():
-                rowList = [self.item(row, 0).index for row in range(self.rowCount())]
+            rowList = list(self._dataFrameObject.dataFrame.index)
 
         else:
             colList = self._dataFrameObject.visibleColumnHeadings

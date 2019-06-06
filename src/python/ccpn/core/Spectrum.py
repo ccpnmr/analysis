@@ -1377,15 +1377,17 @@ class Spectrum(AbstractWrapperObject):
                     self.preferredAxisOrdering = tuple(ii for ii in range(self.dimensionCount))
                     axisOrder = specAxisOrder
 
-                    # # try permutations of repeated codes
-                    # duplicates = [('H', 'H'), ('C', 'C'), ('N', 'N')]
-                    # for dCode in duplicates:
-                    #     pOrder = spectrum.searchAxisCodePermutations(dCode)
-                    #     if pOrder:
-                    #         spectrum.preferredAxisOrdering = pOrder
-                    #         axisOrder = [specAxisOrder[ii] for ii in pOrder]
-                    #         getLogger().debug('setting duplicate axisOrdering: ', str(axisOrder))
-                    #         break
+                    # try permutations of repeated codes
+                    duplicates = [('H', 'H'), ('C', 'C'), ('N', 'N')]
+                    for dCode in duplicates:
+                        pOrder = self.searchAxisCodePermutations(dCode)
+
+                        # if permutation found and matches first axis
+                        if pOrder and pOrder[0] == 0:
+                            self.preferredAxisOrdering = pOrder
+                            axisOrder = [specAxisOrder[ii] for ii in pOrder]
+                            getLogger().debug('setting duplicate axisOrdering: ', str(axisOrder))
+                            break
 
         return axisOrder
 

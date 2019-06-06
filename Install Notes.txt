@@ -4,7 +4,7 @@ Bitbucket/Git setup
 
     Instructions for installing CCPN as a developer
 
-    The development files are downloaded and installed by downloading and executing an install-script 'installDevelopment'
+    The development files are downloaded and installed by downloading and executing an install-script 'installDevelopment.sh'
     contained in a separate repository on bitbucket.
 
     If you would like to be a developer please email ccpnmr3@gmail.com
@@ -23,7 +23,7 @@ Bitbucket/Git setup
     git config --global user.email "email@address.ac.uk"
 
     Step 3:
-    run ./installDevelopment
+    run ./installDevelopment.sh
 
     Step 4:
     Now add the following to version control in Pycharm>Preferences>Version Control:

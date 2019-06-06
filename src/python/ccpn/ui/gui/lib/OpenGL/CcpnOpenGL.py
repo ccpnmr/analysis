@@ -2449,6 +2449,9 @@ class CcpnGLWidget(QOpenGLWidget):
             obj = data[Notifier.OBJECT]
             self._spectrumLabelling.renameString(obj)
 
+        self._clearKeys()
+        self.update()
+
     def _processPeakNotifier(self, data):
         self._updateVisibleSpectrumViews()
         self._GLPeaks._processNotifier(data)

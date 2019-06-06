@@ -298,7 +298,7 @@ class PeakListTableWidget(GuiTable):
         """
         self._updateTable()
 
-    def _updateAllModule(self):
+    def _updateAllModule(self, data=None):
         """Updates the table and the settings widgets
         """
         self._updateTable()

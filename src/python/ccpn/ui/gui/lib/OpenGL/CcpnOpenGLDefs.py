@@ -89,7 +89,6 @@ LENSQ4 = 4 * LENSQ
 DEFAULTFADE = 0.3
 OUTOFPLANEFADE = 1.0
 INPLANEFADE = 1.0
-DEFAULTFADE = 1.0
 
 # export to file settings
 GLFILENAME = 'filename'

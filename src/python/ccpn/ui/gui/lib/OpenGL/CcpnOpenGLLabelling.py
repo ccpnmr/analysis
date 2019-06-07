@@ -2786,9 +2786,9 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
             if obj and not obj.isDeleted:
 
                 if self._isSelected(obj):
-                    drawStr.setStringColour((*self._GLParent.highlightColour[:3], GLDefs.DEFAULTFADE))
+                    drawStr.setStringColour((*self._GLParent.highlightColour[:3], GLDefs.INPLANEFADE))
                 else:
-                    drawStr.setStringColour((*listCol, GLDefs.DEFAULTFADE))
+                    drawStr.setStringColour((*listCol, GLDefs.INPLANEFADE))
                 drawStr.updateTextArrayVBOColour(enableVBO=True)
 
     def drawSymbols(self, spectrumSettings):

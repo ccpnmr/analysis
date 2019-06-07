@@ -777,6 +777,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YSCALE] = yScale
 
         if len(self._spectrumValues) > 2:
+            # store a list for the extra dimensions
             vPP = ()
             dDim = ()
             vTP = ()
@@ -5879,16 +5880,22 @@ class CcpnGLWidget(QOpenGLWidget):
         # oldPosition = peak.position
         # orderedAxes = peak.orderedAxes
 
+        indices = getAxisCodeMatchIndices(self.axisCodes, peak.axisCodes)
+
         # get the correct coordinates based on the axisCodes
         p0 = list(peak.position)  # [0.0] * 2            #len(self.axisOrder)
-        axisCount = 0
-        for ps, psCode in enumerate(self.axisOrder[:2]):  # display x, y
-            for pp, ppCode in enumerate(peak.axisCodes):
+        for ii in range(0, 2):
+            if indices[ii] is not None:
+                p0[indices[ii]] += deltaPosition[ii]
 
-                # if self._preferences.matchAxisCode == 0:  # default - match atom type, first letter
-                if ppCode[0] == psCode[0]:
-                    p0[pp] += deltaPosition[ps]
-                    axisCount += 1
+        # axisCount = 0
+        # for ps, psCode in enumerate(self.axisOrder[:2]):  # display x, y
+        #     for pp, ppCode in enumerate(peak.axisCodes):
+        #
+        #         # if self._preferences.matchAxisCode == 0:  # default - match atom type, first letter
+        #         if ppCode[0] == psCode[0]:
+        #             p0[pp] += deltaPosition[ps]
+        #             axisCount += 1
 
         if self.is1D:
             peak.height = peak.height + deltaPosition[1]

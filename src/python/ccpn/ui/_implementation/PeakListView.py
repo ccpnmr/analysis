@@ -81,6 +81,11 @@ class PeakListView(AbstractWrapperObject):
         return str(self._wrappedData.peakListView.peakListSerial)
 
     @property
+    def _childClass(self):
+        """Ccpn core obj that PeakListView refers to"""
+        return self.peakList
+
+    @property
     def _localCcpnSortKey(self) -> typing.Tuple:
         """Local sorting key, in context of parent."""
         return (self._wrappedData.peakListView.peakListSerial,)
@@ -165,11 +170,6 @@ class PeakListView(AbstractWrapperObject):
         """PeakList that PeakListView refers to"""
         return self._project._data2Obj.get(self._wrappedData.peakListView.peakList)
 
-    @property
-    def _childClass(self):
-        """Ccpn core obj that PeakListView refers to"""
-        return self.peakList
-
     #=========================================================================================
     # Implementation functions
     #=========================================================================================
@@ -187,41 +187,20 @@ class PeakListView(AbstractWrapperObject):
 # CCPN functions
 #========================================================================================
 
-# newPeakListView functions: None
 
-from ccpn.util.Common import makeIterableList
+# newPeakListView functions: None
 
 # PeakList.peakListViews property
 def getter(peakList: PeakList) -> typing.Tuple[PeakListView, ...]:
     data2ObjDict = peakList._project._data2Obj
-
-    # splvs = [x for x in peakList._wrappedData.sortedPeakListViews()]
-    # ssplvs = [y.sortedStripPeakListViews() for y in splvs if not y.isDeleted]
-    # plvs = tuple(data2ObjDict[y] for y in makeIterableList(ssplvs))
-
     return tuple(data2ObjDict[y]
                  for x in peakList._wrappedData.sortedPeakListViews()
                  for y in x.sortedStripPeakListViews() if not x.isDeleted)
-
-    # could add the test .. and y in data2ObjDict)
-    # but just moves the error somewhere else
 
 
 PeakList.peakListViews = property(getter, None, None,
                                   "PeakListViews showing Spectrum")
 del getter
-
-# # MultipletList.peakListViews property
-# from ccpn.core.MultipletList import MultipletList
-# def getter(multipletList:MultipletList) -> typing.Tuple[PeakListView, ...]:
-#   data2ObjDict = multipletList._project._data2Obj
-#   return tuple(data2ObjDict[y]
-#                for x in multipletList._wrappedData.sortedPeakListViews()
-#                for y in x.sortedStripPeakListViews() if not x.isDeleted)
-# MultipletList.peakListViews = property(getter, None, None,
-#                                   "peakListViews showing Spectrum")
-# del getter
-
 
 # Notifiers:
 # TODO change to calling _setupApiNotifier

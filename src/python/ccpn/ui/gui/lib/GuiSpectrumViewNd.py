@@ -1222,61 +1222,64 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         yDim = dimIndices[1]
         orderedAxes = self._apiStripSpectrumView.strip.orderedAxes
 
-        if dimensionCount == 2:
+        if dimensionCount <= 2:
             return
-
-        elif dimensionCount == 3:
-
-            # make sure there is always a spectrumView to base visibility on
-            # useFirstVisible = firstVisible if firstVisible else self
-            zPosition = orderedAxes[2].position
-
-            # check as there could be more dimensions
-            planeCount = self.strip.planeToolbar.planeCounts[0].value()
-
-            # valuePerPoint, _, _, _, _ = useFirstVisible._getSpectrumViewParams(2)
-            # zRegionValue = (zPosition + 0.5 * (planeCount+2) * valuePerPoint, zPosition - 0.5 * (planeCount+2) * valuePerPoint)  # Note + and - (axis backwards)
-
-            # now get the z bounds for this spectrum
-            valuePerPoint, zTotalPointCount, minAliasedFrequency, maxAliasedFrequency, zDataDim = self._getSpectrumViewParams(2)
-            zRegionValue = (zPosition + 0.5 * (planeCount+2) * valuePerPoint, zPosition - 0.5 * (planeCount+2) * valuePerPoint)  # Note + and - (axis backwards)
-
-            if not (minAliasedFrequency <= zPosition <= maxAliasedFrequency):
-                return
-
-            if hasattr(zDataDim, 'primaryDataDimRef'):
-                ddr = zDataDim.primaryDataDimRef
-                valueToPoint = ddr and ddr.valueToPoint
-            else:
-                valueToPoint = zDataDim.valueToPoint
-
-            # -1 below because points start at 1 in data model
-            zPointFloat0 = valueToPoint(zRegionValue[0]) - 1
-            zPointFloat1 = valueToPoint(zRegionValue[1]) - 1
-
-            zPoint0, zPoint1 = (int(zPointFloat0 + 1), int(zPointFloat1 + 1))   # this gives first and 1+last integer in range
-            if zPoint0 == zPoint1:
-                if zPointFloat0 - (zPoint0 - 1) < zPoint1 - zPointFloat1:       # which is closest to an integer
-                    zPoint0 -= 1
-                else:
-                    zPoint1 += 1
-
-            if (zPoint1 - zPoint0) >= zTotalPointCount:
-                zPoint0 = 0
-                zPoint1 = zTotalPointCount
-            else:
-                zPoint0 %= zTotalPointCount
-                zPoint1 %= zTotalPointCount
-                if zPoint1 < zPoint0:
-                    zPoint1 += zTotalPointCount
-
-            zPointOffset = zDataDim.pointOffset if hasattr(zDataDim, "pointOffset") else 0
-            zPointCount = zDataDim.numPoints
-
-            return (tuple(zz for zz in range(zPoint0, zPoint1)), zPointOffset, zPointCount)
 
         else:
-            return
+
+            planeList = ()
+            for dim in range(2, dimensionCount):
+
+                # make sure there is always a spectrumView to base visibility on
+                # useFirstVisible = firstVisible if firstVisible else self
+                zPosition = orderedAxes[dim].position
+
+                # check as there could be more dimensions
+                planeCount = self.strip.planeToolbar.planeCounts[dim-2].value()
+
+                # valuePerPoint, _, _, _, _ = useFirstVisible._getSpectrumViewParams(2)
+                # zRegionValue = (zPosition + 0.5 * (planeCount+2) * valuePerPoint, zPosition - 0.5 * (planeCount+2) * valuePerPoint)  # Note + and - (axis backwards)
+
+                # now get the z bounds for this spectrum
+                valuePerPoint, zTotalPointCount, minAliasedFrequency, maxAliasedFrequency, zDataDim = self._getSpectrumViewParams(dim)
+                zRegionValue = (zPosition + 0.5 * (planeCount+2) * valuePerPoint, zPosition - 0.5 * (planeCount+2) * valuePerPoint)  # Note + and - (axis backwards)
+
+                if not (minAliasedFrequency <= zPosition <= maxAliasedFrequency):
+                    return
+
+                if hasattr(zDataDim, 'primaryDataDimRef'):
+                    ddr = zDataDim.primaryDataDimRef
+                    valueToPoint = ddr and ddr.valueToPoint
+                else:
+                    valueToPoint = zDataDim.valueToPoint
+
+                # -1 below because points start at 1 in data model
+                zPointFloat0 = valueToPoint(zRegionValue[0]) - 1
+                zPointFloat1 = valueToPoint(zRegionValue[1]) - 1
+
+                zPoint0, zPoint1 = (int(zPointFloat0 + 1), int(zPointFloat1 + 1))   # this gives first and 1+last integer in range
+                if zPoint0 == zPoint1:
+                    if zPointFloat0 - (zPoint0 - 1) < zPoint1 - zPointFloat1:       # which is closest to an integer
+                        zPoint0 -= 1
+                    else:
+                        zPoint1 += 1
+
+                if (zPoint1 - zPoint0) >= zTotalPointCount:
+                    zPoint0 = 0
+                    zPoint1 = zTotalPointCount
+                else:
+                    zPoint0 %= zTotalPointCount
+                    zPoint1 %= zTotalPointCount
+                    if zPoint1 < zPoint0:
+                        zPoint1 += zTotalPointCount
+
+                zPointOffset = zDataDim.pointOffset if hasattr(zDataDim, "pointOffset") else 0
+                zPointCount = zDataDim.numPoints
+
+                planeList = planeList + ((tuple(zz for zz in range(zPoint0, zPoint1)), zPointOffset, zPointCount), )
+
+            # return (tuple(zz for zz in range(zPoint0, zPoint1)), zPointOffset, zPointCount)
+            return planeList
 
     def _addContoursToDisplayList(self, displayList, contourData, level):
         """ contourData is list of [NumPy array with ndim = 1 and size = twice number of points] """

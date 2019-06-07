@@ -1858,44 +1858,55 @@ class GLpeakListMethods():
                 type of outofplane - currently 0/1/2 indicating whether normal, infront or behind
                 fade for colouring
         """
+        if not peak.position:
+            return False, False, 0, 1.0
+
         displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
+        inPlane = True
+        endPlane = 0
 
         for ii, displayIndex in enumerate(displayIndices[2:]):
             if displayIndex is not None:
 
                 # If no axis matches the index may be None
-                if not peak.position:
-                    return False, False, 0, 1.0
-
                 zPosition = peak.position[displayIndex]
                 if not zPosition:
                     return False, False, 0, 1.0
 
                 settings = self._spectrumSettings[spectrumView]
-
-                actualPlane = int(settings[GLDefs.SPECTRUM_VALUETOPOINT](zPosition) + 0.5) - 1
-                planes = self._GLParent.visiblePlaneList[spectrumView]
+                actualPlane = int(settings[GLDefs.SPECTRUM_VALUETOPOINT][ii](zPosition) + 0.5) - 1
+                planes = (self._GLParent.visiblePlaneList[spectrumView])[ii]
 
                 if not (planes and planes[0]):
                     return False, False, 0, 1.0
 
                 visiblePlaneList = planes[0]
                 vplLen = len(visiblePlaneList)
-                if actualPlane in visiblePlaneList[1:vplLen - 1]:
-                    return True, False, 0, 1.0
 
+                if actualPlane in visiblePlaneList[1:vplLen - 1]:
+                    # return True, False, 0, 1.0
+                    pass
+
+                # exit if don't want to view outOfPlane peaks
                 elif not viewOutOfPlanePeaks:
                     return False, False, 0, 1.0
 
                 elif actualPlane == visiblePlaneList[0]:
-                    return False, True, 1, GLDefs.OUTOFPLANEFADE
+                    # return False, True, 1, GLDefs.OUTOFPLANEFADE
+                    inPlane = False
+                    endPlane = 1
 
                 elif actualPlane == visiblePlaneList[vplLen - 1]:
-                    return False, True, 2, GLDefs.OUTOFPLANEFADE
+                    # return False, True, 2, GLDefs.OUTOFPLANEFADE
+                    inPlane = False
+                    endPlane = 2
 
-                return False, False, 0, 1.0
+                else:
+                    # catch any stray conditions
+                    return False, False, 0, 1.0
 
-        return True, False, 0, 1.0
+        # return True, False, 0, 1.0
+        return inPlane, (not inPlane), endPlane, GLDefs.INPLANEFADE if inPlane else GLDefs.OUTOFPLANEFADE
 
     def getLabelling(self, obj, labelType):
         """Get the object label based on the current labelling method
@@ -2436,52 +2447,59 @@ class GLmultipletListMethods():
     def objIsInVisiblePlanes(self, spectrumView, multiplet, viewOutOfPlaneMultiplets=True):
         """Return whether in plane or flanking plane
 
-        :param spectrumView: current spectrumView containing peaks
+        :param spectrumView: current spectrumView containing multiplets
         :param multiplet: multiplet to test
-        :param viewOutOfPlanePeaks: whether to show outofplane peaks, defaults to true
+        :param viewOutOfPlaneMultiplets: whether to show outofplane multiplets, defaults to true
         :return: inPlane - true/false
                 inFlankingPlane - true/false
                 type of outofplane - currently 0/1/2 indicating whether normal, infront or behind
                 fade for colouring
         """
+        if not multiplet.position:
+            return False, False, 0, 1.0
+
         displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
+        inPlane = True
+        endPlane = 0
 
         for ii, displayIndex in enumerate(displayIndices[2:]):
             if displayIndex is not None:
 
                 # If no axis matches the index may be None
-                if not multiplet.position:
-                    return False, False, 0, 1.0
-
                 zPosition = multiplet.position[displayIndex]
                 if not zPosition:
                     return False, False, 0, 1.0
 
                 settings = self._spectrumSettings[spectrumView]
-
-                actualPlane = int(settings[GLDefs.SPECTRUM_VALUETOPOINT](zPosition) + 0.5) - 1
-                planes = self._GLParent.visiblePlaneList[spectrumView]
+                actualPlane = int(settings[GLDefs.SPECTRUM_VALUETOPOINT][ii](zPosition) + 0.5) - 1
+                planes = (self._GLParent.visiblePlaneList[spectrumView])[ii]
 
                 if not (planes and planes[0]):
                     return False, False, 0, 1.0
 
                 visiblePlaneList = planes[0]
                 vplLen = len(visiblePlaneList)
-                if actualPlane in visiblePlaneList[1:vplLen - 1]:
-                    return True, False, 0, 1.0
 
+                if actualPlane in visiblePlaneList[1:vplLen - 1]:
+                    pass
+
+                # exit if don't want to view outOfPlane multiplets
                 elif not viewOutOfPlaneMultiplets:
                     return False, False, 0, 1.0
 
                 elif actualPlane == visiblePlaneList[0]:
-                    return False, True, 1, GLDefs.OUTOFPLANEFADE
+                    inPlane = False
+                    endPlane = 1
 
                 elif actualPlane == visiblePlaneList[vplLen - 1]:
-                    return False, True, 2, GLDefs.OUTOFPLANEFADE
+                    inPlane = False
+                    endPlane = 2
 
-                return False, False, 0, 1.0
+                else:
+                    # catch any stray conditions
+                    return False, False, 0, 1.0
 
-        return True, False, 0, 1.0
+        return inPlane, (not inPlane), endPlane, GLDefs.INPLANEFADE if inPlane else GLDefs.OUTOFPLANEFADE
 
     def getLabelling(self, obj, labelType):
         """get the object label based on the current labelling method

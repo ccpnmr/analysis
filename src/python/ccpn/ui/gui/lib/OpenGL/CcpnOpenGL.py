@@ -777,17 +777,32 @@ class CcpnGLWidget(QOpenGLWidget):
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YSCALE] = yScale
 
         if len(self._spectrumValues) > 2:
-            specVal = self._spectrumValues[2]
-            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUEPERPOINT] = specVal.valuePerPoint
-            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_DATADIM] = specVal.dataDim
+            vPP = ()
+            dDim = ()
+            vTP = ()
+            for dim in range(2, len(self._spectrumValues)):
+                specVal = self._spectrumValues[dim]
+                specDataDim = specVal.dataDim
 
-            if hasattr(specVal.dataDim, 'primaryDataDimRef'):
-                ddr = specVal.dataDim.primaryDataDimRef
-                valueToPoint = ddr and ddr.valueToPoint
-            else:
-                valueToPoint = specVal.dataDim.valueToPoint
+                vPP = vPP + (specVal.valuePerPoint,)
+                dDim = dDim + (specDataDim,)
 
-            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUETOPOINT] = valueToPoint
+                # self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUEPERPOINT] = specVal.valuePerPoint
+                # self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_DATADIM] = specVal.dataDim
+
+                if hasattr(specDataDim, 'primaryDataDimRef'):
+                    ddr = specDataDim.primaryDataDimRef
+                    valueToPoint = ddr and ddr.valueToPoint
+                else:
+                    valueToPoint = specDataDim.valueToPoint
+
+                vTP = vTP + (valueToPoint,)
+                # self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUETOPOINT] = valueToPoint
+
+            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUEPERPOINT] = vPP
+            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_DATADIM] = dDim
+            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUETOPOINT] = vTP
+
         else:
             self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUEPERPOINT] = None
             self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_DATADIM] = None

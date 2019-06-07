@@ -2154,9 +2154,17 @@ class Spectrum(AbstractWrapperObject):
         if action in ['change']:
             for specView in self.spectrumViews:
                 specView._finaliseAction(action=action)
+
+        # notify peak/integral/multiplet list
         if action in ['create', 'delete']:
             for peakList in self.peakLists:
                 peakList._finaliseAction(action=action)
+        if action in ['create', 'delete']:
+            for multipletList in self.multipletLists:
+                multipletList._finaliseAction(action=action)
+        if action in ['create', 'delete']:
+            for integralList in self.integralLists:
+                integralList._finaliseAction(action=action)
 
     #=========================================================================================
     # CCPN functions

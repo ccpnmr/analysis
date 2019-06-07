@@ -103,9 +103,6 @@ from ccpn.ui.gui.lib.mouseEvents import \
     leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, controlShiftRightMouse, \
     middleMouse, shiftMiddleMouse, rightMouse, shiftRightMouse, controlRightMouse, PICK
 
-
-# from ccpn.core.lib.Notifiers import Notifier
-
 try:
     # used to test whether all the arrays are defined correctly
     # os.environ.update({'PYOPENGL_ERROR_ON_COPY': 'true'})
@@ -2481,6 +2478,27 @@ class CcpnGLWidget(QOpenGLWidget):
         self._clearKeys()
         self.update()
 
+    def _nmrAtomsNotifier(self, data):
+        """respond to a rename notifier on an nmrAtom, and update marks
+        """
+        trigger = data[Notifier.TRIGGER]
+
+        if trigger in [Notifier.RENAME]:
+            nmrAtom = data[Notifier.OBJECT]
+            oldPid = Pid.Pid(data[Notifier.OLDPID])
+            oldId = oldPid.id
+
+            # search for the old name in the strings and remake
+            for mark in self._marksAxisCodes:
+                if mark.text == oldId:
+                    mark.text = nmrAtom.id
+
+                    # rebuild string
+                    mark.buildString()
+                    self._rescaleMarksAxisCode(mark)
+
+            self.update()
+
     def _round_sig(self, x, sig=6, small_value=1.0e-9):
         return 0 if x == 0 else round(x, sig - int(math.floor(math.log10(max(abs(x), abs(small_value))))) - 1)
 
@@ -3324,27 +3342,6 @@ class CcpnGLWidget(QOpenGLWidget):
             drawList._resize()
 
             drawList.defineIndexVBO(enableVBO=True)
-
-    def _nmrAtomsNotifier(self, data):
-        """respond to a rename notifier on an nmrAtom, and update marks
-        """
-        trigger = data[Notifier.TRIGGER]
-
-        if trigger in [Notifier.RENAME]:
-            nmrAtom = data[Notifier.OBJECT]
-            oldPid = Pid.Pid(data[Notifier.OLDPID])
-            oldId = oldPid.id
-
-            # search for the old name in the strings and remake
-            for mark in self._marksAxisCodes:
-                if mark.text == oldId:
-                    mark.text = nmrAtom.id
-
-                    # rebuild string
-                    mark.buildString()
-                    self._rescaleMarksAxisCode(mark)
-
-            self.update()
 
     def buildMarksRulers(self):
         drawList = self._marksList

@@ -928,7 +928,7 @@ class GLExporter():
                                          height=self.displayScale * self.mainH):
                 if colourPath not in colourGroups:
                     colourGroups[colourPath] = Group()
-                self._addString(colourGroups, colourPath, drawString, newLine, colour, boxed=False)
+                self._addString(colourGroups, colourPath, drawString, newLine, colour, boxed=True)
 
         for colourGroup in colourGroups.values():
             self._mainPlot.add(colourGroup)

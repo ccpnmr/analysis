@@ -388,8 +388,8 @@ class GuiStripNd(GuiStrip):
             for spectrum in self.spectra:
                 newDisplay.displaySpectrum(spectrum)
 
-            #TODO: also restore zoom, plane etc settings
-            newDisplay.autoRange()
+            # newDisplay.autoRange()
+            copyStripPosition(self, newDisplay.strips[0])
 
     @logCommand(get='self')
     def flipXYAxis(self):
@@ -433,7 +433,9 @@ class GuiStripNd(GuiStrip):
                 newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisOrder=axisOrder)
                 for spectrum in self.spectra:  #[1:]:
                     newDisplay.displaySpectrum(spectrum)
-                newDisplay.autoRange()
+
+                # newDisplay.autoRange()
+                copyStripPosition(self, newDisplay.strips[0])
 
     @logCommand(get='self')
     def flipYZAxis(self):
@@ -455,7 +457,9 @@ class GuiStripNd(GuiStrip):
                 newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisOrder=axisOrder)
                 for spectrum in self.spectra:
                     newDisplay.displaySpectrum(spectrum)
-                newDisplay.autoRange()
+
+                # newDisplay.autoRange()
+                copyStripPosition(self, newDisplay.strips[0])
 
     def reorderSpectra(self):
         pass

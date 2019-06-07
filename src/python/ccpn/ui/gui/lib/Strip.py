@@ -158,9 +158,19 @@ def navigateToPositionInStrip(strip, positions: typing.List[float], axisCodes: t
 def copyStripPosition(self, toStrip):
     """copy the strip axes to the new strip
     """
-    axisCodes = reorder()
     positions = [axis.position for axis in self.orderedAxes]
     widths = [axis.width for axis in self.orderedAxes]
+
+    # remove non-XY widths
+    for ii in range(2, len(widths)):
+        widths[ii] = None
+
+    positions = reorder(positions, self.axisCodes, toStrip.axisCodes)
+    widths = reorder(widths, self.axisCodes, toStrip.axisCodes)
+
+    for ii in range(2, len(widths)):
+        widths[ii] = None
+
     navigateToPositionInStrip(toStrip, positions, toStrip.axisCodes, widths)
 
 

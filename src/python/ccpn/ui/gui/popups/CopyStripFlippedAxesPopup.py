@@ -38,6 +38,7 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.lib.ContextManagers import undoBlock
+from ccpn.ui.gui.lib.Strip import copyStripPosition
 
 
 class CopyStripFlippedSpectraPopup(AxisOrderingPopup):
@@ -126,4 +127,7 @@ class CopyStripFlippedSpectraPopup(AxisOrderingPopup):
                 newDisplay = self.mainWindow.createSpectrumDisplay(spectra[0], axisOrder=tuple(self.axisCodes[ii] for ii in self._axisOrdering))
                 for spectrum in spectra:
                     newDisplay.displaySpectrum(spectrum)
-                newDisplay.autoRange()
+
+                # newDisplay.autoRange()
+                copyStripPosition(self.strip, newDisplay.strips[0])
+

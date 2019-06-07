@@ -44,33 +44,18 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtWidgets, QtCore
-
-# import math
+from PyQt5 import QtWidgets
 import numpy
 from functools import partial
-# import pyqtgraph as pg
-
-# from ccpn.core.Project import Project
 from ccpn.core.PeakList import PeakList
-# from ccpn.core.Peak import Peak
-
-# from ccpn.ui.gui.widgets.Button import Button
-# from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
-from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.PlaneToolbar import PlaneToolbar  #, PlaneSelectorWidget
-# from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import undoBlock
-
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, IntegralMenu, MultipletMenu, PhasingMenu
 from ccpn.ui.gui.lib.GuiStripContextMenus import _getNdPhasingMenu, _getNdDefaultMenu, _getNdPeakMenu, \
     _getNdIntegralMenu, _getNdMultipletMenu
-
-
-# from ccpn.ui.gui.modules.spectrumItems.GuiPeakListView import GuiPeakListView
+from ccpn.ui.gui.lib.Strip import copyStripPosition
 
 
 class GuiStripNd(GuiStrip):
@@ -424,7 +409,9 @@ class GuiStripNd(GuiStrip):
                 newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisOrder=axisOrder)
                 for spectrum in self.spectra:
                     newDisplay.displaySpectrum(spectrum)
-                newDisplay.autoRange()
+
+                # newDisplay.autoRange()
+                copyStripPosition(self, newDisplay.strips[0])
 
     @logCommand(get='self')
     def flipXZAxis(self):

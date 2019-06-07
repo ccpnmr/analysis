@@ -31,7 +31,7 @@ from ccpn.util import Common as commonUtil
 from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip
-
+from ccpn.util.Common import getAxisCodeMatch, reorder
 from ccpn.util.Logging import getLogger
 
 
@@ -153,6 +153,15 @@ def navigateToPositionInStrip(strip, positions: typing.List[float], axisCodes: t
 
     # if _undo is not None:
     #   _undo.decreaseBlocking()
+
+
+def copyStripPosition(self, toStrip):
+    """copy the strip axes to the new strip
+    """
+    axisCodes = reorder()
+    positions = [axis.position for axis in self.orderedAxes]
+    widths = [axis.width for axis in self.orderedAxes]
+    navigateToPositionInStrip(toStrip, positions, toStrip.axisCodes, widths)
 
 
 def matchAxesAndNmrAtoms(strip: GuiStrip, nmrAtoms: typing.List[NmrAtom]):

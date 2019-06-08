@@ -203,8 +203,8 @@ class Project(AbstractWrapperObject):
         self._initializeAll()
 
         # 20190520:ED routines that use core objects, not sure whether the correct place
-        self._setContourColours()
-        self._setNoiseLevels()
+        # self._setContourColours()
+        # self._setNoiseLevels()
 
     def _close(self):
         self.close()
@@ -1179,14 +1179,14 @@ class Project(AbstractWrapperObject):
         else:
             raise ValueError("Project file type %s is not recognised" % subType)
 
-    def loadSpectrum(self, path: str, subType: str) -> list:
+    def loadSpectrum(self, path: str, subType: str, name=None) -> list:
         """Load spectrum from file into application"""
         from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
 
         # #TODO:RASMUS FIXME check for rename
 
         try:
-            apiDataSource = self._wrappedData.loadDataSource(path, subType)
+            apiDataSource = self._wrappedData.loadDataSource(path, subType, name)
         except Exception as es:
             getLogger().warning(es)
             raise es

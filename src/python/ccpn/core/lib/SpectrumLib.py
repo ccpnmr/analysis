@@ -677,9 +677,10 @@ def _setApiContourLevelsFromNoise(apiSpectrum, setNoiseLevel=True,
     # the core objects should have been initialised at this point
     if project and apiSpectrum in project._data2Obj:
         spectrum = project._data2Obj[apiSpectrum]
+        if spectrum.dimensionCount == 1: return
         setContourLevelsFromNoise(spectrum, setNoiseLevel=setNoiseLevel,
-                                  setPositiveContours=setPositiveContours, setNegativeContours=setNegativeContours,
-                                  useSameMultiplier=useSameMultiplier)
+                                      setPositiveContours=setPositiveContours, setNegativeContours=setNegativeContours,
+                                      useSameMultiplier=useSameMultiplier)
 
 
 def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
@@ -697,6 +698,8 @@ def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
         raise TypeError('setNegativeContours is not boolean.')
     if not isinstance(useSameMultiplier, bool):
         raise TypeError('useSameMultiplier is not boolean.')
+    if spectrum.dimensionCount == 1:
+        return
 
     # exit if nothing set
     if not (setNoiseLevel or setPositiveContours or setNegativeContours):

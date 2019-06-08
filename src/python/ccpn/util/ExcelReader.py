@@ -28,7 +28,7 @@ from os.path import isfile, join
 import pathlib
 import pandas as pd
 from ccpn.util.Logging import getLogger, _debug3
-from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
+from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 
 
 ################################       Excel Headers Warning      ######################################################
@@ -86,8 +86,72 @@ SUBSTANCE_PROPERTIES = [comment, smiles, synonyms, molecularMass, empiricalFormu
                         hBondAcceptorCount, hBondDonorCount, bondCount, ringCount, polarSurfaceArea,
                         logPartitionCoefficient, userCode, ]
 
+SUBSTANCES_SHEET_COLUMNS =  [SUBSTANCE_NAME,SPECTRUM_PATH,SPECTRUM_GROUP_NAME,EXP_TYPE]+SUBSTANCE_PROPERTIES
+SAMPLE_SHEET_COLUMNS =  [SAMPLE_NAME,SPECTRUM_GROUP_NAME,SPECTRUM_PATH]+SUBSTANCE_PROPERTIES
+
+
+def makeTemplate(path,fileName='lookupTemplate.xlsx',):
+    """
+    :param path: path where to save the template
+    :param fileName: name of template
+    :return:  the file path where is saved
+    """
+    if path is not None:
+        path = path+ '/' if not path.endswith('/') else path
+    file = path+fileName
+    substanceDf = getDefaultSubstancesDF()
+    sampleDF = getDefaultSampleDF()
+    writer = pd.ExcelWriter(file, engine='xlsxwriter')
+    substanceDf.to_excel(writer, sheet_name=SUBSTANCE)
+    sampleDF.to_excel(writer, sheet_name=SAMPLE)
+    writer.save()
+    return writer
+
+def getDefaultSubstancesDF():
+    return  pd.DataFrame(columns=SUBSTANCES_SHEET_COLUMNS)
+
+def getDefaultSampleDF():
+    return  pd.DataFrame(columns=SAMPLE_SHEET_COLUMNS)
+
+
+def _filterBrukerExperiments(brukerFilePaths, fileType = '1r', multipleExp=False, expDirName='1', procDirName='1'):
+    """
+
+    :param brukerFilePaths:
+    :param fileType:
+    :param multipleExp: whether or not there are subdirectories after the spectrum top dir before the  acqu files and pdata dir (even one).
+                        eg.a)  SpectumDir > pdata > 1 > 1r     ====  multipleExp=False
+                        eg.b)  SpectumDir > 1 > pdata > 1 > 1r ====  multipleExp=True
+
+    :param expDirName: if there are: str of folder name. e.g. '1','2'... '700'
+                        eg)  SpectumDir > |1|   > pdata > 1 > 1r
+                                        > |2|   > pdata > 1 > 1r
+                                        > |700| > pdata > 1 > 1r
+                            Default: 1
+    :param procDirName: dir name straight
+                         eg)  SpectumDir > 1  > pdata > |1| > 1r
+                                                      > |2| > 1r
+                        default: 1
+    :return: list of filtered global path
+    """
+    filteredPaths = []
+    for path in brukerFilePaths:
+        if path.endswith(fileType):
+           d = os.path.dirname(path)  ## directory of  1r file has to be as defaultProcsNumber
+           if d.endswith(procDirName):
+               if multipleExp: # search for other expeiments and take only the one of interest.
+                   pdata = os.path.dirname(d)
+                   expP = os.path.dirname(pdata)
+                   if expP.endswith(expDirName):
+                       filteredPaths.append(path)
+               else:
+                filteredPaths.append(path)
+    return filteredPaths
 
 class ExcelReader(object):
+
+    # from ccpn.util.decorators import profile
+    # @profile
     def __init__(self, project, excelPath):
         """
         :param project: the ccpnmr Project object
@@ -116,7 +180,7 @@ class ExcelReader(object):
 
 
         """
-
+        from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
         self._project = project
         self.excelPath = excelPath
         self.pandasFile = pd.ExcelFile(self.excelPath)
@@ -307,7 +371,10 @@ class ExcelReader(object):
         :param dct:  dict with information for the spectrum. eg EXP type
         :obj: obj to link the spectrum to. E.g. Sample or Substance,
         '''
-        data = self._project.loadData(filePath)
+        if filePath.endswith('1r'): # a try to make a loader faster down the model, skipping the loops
+            data = self._project.loadSpectrum(filePath, 'Bruker', obj.name )
+        else:
+            data = self._project.loadData(filePath)
         if data is not None:
             if len(data) > 0:
                 self._linkSpectrumToObj(obj, data[0], dct)

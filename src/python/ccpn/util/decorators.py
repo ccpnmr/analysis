@@ -114,6 +114,26 @@ def profile(func):
 
     return profileWrapper
 
+def pstatToText(pstatPath, outPath=None):
+    """
+    Converts a profile file of type .pstat into a plain text file.
+    :param pstatPath: path of the pstat file. (The output of the decorator "profile")
+    :param outPath: output pat. Including the file name and extension ".txt".
+                    If None, saves in the same location of pstat with same original name
+    :return: the stats object for the file
+    """
+    import pstats
+    import io
+    s = io.StringIO()
+    ps = pstats.Stats(pstatPath, stream=s).sort_stats('tottime')
+    ps.print_stats()
+    if not outPath:
+        outPath = pstatPath.replace('pstat','txt')
+    with open(outPath, 'w+') as f:
+        f.write(s.getvalue())
+    return ps
+
+
 
 def notify(trigger, preExecution=False):
     """A decorator wrap a method around a notification blanking with explicit notification pre- or post-execution

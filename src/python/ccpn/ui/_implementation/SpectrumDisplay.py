@@ -97,21 +97,23 @@ class SpectrumDisplay(AbstractWrapperObject):
     @property
     def stripDirection(self) -> str:
         """Strip axis direction ('X', 'Y', None) - None only for non-strip plots"""
-        return self._wrappedData.stripDirection
+        raise RuntimeError('deprecated: use stripArrangement')
+
+        # return self._wrappedData.stripDirection
 
     @stripDirection.setter
     def stripDirection(self, value):
         """Set the new strip direction ('X', 'Y', None) - None only for non-strip plots
         """
-        if not isinstance(value, str):
-            raise TypeError('stripDirection must be a string')
-        elif value not in ['X', 'Y']:
-            raise ValueError("stripDirection must be either 'X' or 'Y'")
+        raise RuntimeError('deprecated: use stripArrangement')
 
-        # override 'frozen' set
-        self._wrappedData.__dict__['stripDirection'] = value
-
-        # need to update the display
+        # if not isinstance(value, str):
+        #     raise TypeError('stripDirection must be a string')
+        # elif value not in ['X', 'Y']:
+        #     raise ValueError("stripDirection must be either 'X' or 'Y'")
+        #
+        # # override 'frozen' set
+        # self._wrappedData.__dict__['stripDirection'] = value
 
     @property
     def stripCount(self) -> str:

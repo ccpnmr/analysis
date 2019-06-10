@@ -487,12 +487,12 @@ class Strip1d(coreClass, _GuiStrip1d):
 
         stripIndex = self.spectrumDisplay.orderedStrips.index(self)
 
-        if self.spectrumDisplay.stripDirection == 'Y':
+        if self.spectrumDisplay.stripArrangement == 'Y':
 
             # strips are arranged in a row
             self.spectrumDisplay.stripFrame.layout().addWidget(self, 0, stripIndex)
 
-        elif self.spectrumDisplay.stripDirection == 'X':
+        elif self.spectrumDisplay.stripArrangement == 'X':
 
             # strips are arranged in a column
             self.spectrumDisplay.stripFrame.layout().addWidget(self, stripIndex, 0)
@@ -515,12 +515,12 @@ class StripNd(coreClass, _GuiStripNd):
         # cannot add the Frame until fully done
         stripIndex = self.spectrumDisplay.orderedStrips.index(self)
 
-        if self.spectrumDisplay.stripDirection == 'Y':
+        if self.spectrumDisplay.stripArrangement == 'Y':
 
             # strips are arranged in a row
             self.spectrumDisplay.stripFrame.layout().addWidget(self, 0, stripIndex)
 
-        elif self.spectrumDisplay.stripDirection == 'X':
+        elif self.spectrumDisplay.stripArrangement == 'X':
 
             # strips are arranged in a column
             self.spectrumDisplay.stripFrame.layout().addWidget(self, stripIndex, 0)

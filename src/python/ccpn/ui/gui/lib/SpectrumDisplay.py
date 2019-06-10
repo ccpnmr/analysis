@@ -117,26 +117,33 @@ def makeStripPlotFromSingles(spectrumDisplay: GuiSpectrumDisplay, nmrAtoms: List
 
 def navigateToPeakInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, peak, widths=None):
 
-    from ccpn.util.Common import getAxisCodeMatchIndices
+    from ccpn.util.Common import getAxisCodeMatchIndices, getAxisCodeMatch
 
     newWidths = [0.2] * len(spectrumDisplay.axisCodes)
     pos = [None] * len(spectrumDisplay.axisCodes)
     mappedNewWidths = ['full'] * len(spectrumDisplay.axisCodes)
     newWidths = ['full'] * len(spectrumDisplay.axisCodes)
 
+    newWidths = ['default'] * len(strip.axisCodes)
+
     if widths == None:
         # set the width in case of nD (n>2)
         _widths = {'H': 0.3, 'C': 1.0, 'N': 1.0}
-        _ac = strip.axisCodes[0]
+        # _ac = strip.axisCodes[0]
+        _ac = spectrumDisplay.axisCodes[0]
         _w = _widths.setdefault(_ac[0], 1.0)
-        newWidths[0] = _w
+        newWidths = [_w, 'full']
 
-    indices = getAxisCodeMatchIndices(peak.peakList.spectrum.axisCodes, strip.axisCodes)
+    # indices = getAxisCodeMatchIndices(peak.peakList.spectrum.axisCodes, strip.axisCodes)
 
-    for ind, ii in enumerate(indices):
-        if ii and ii < len(pos):
+    indices = getAxisCodeMatchIndices(strip.axisCodes, peak.peakList.spectrum.axisCodes)
+
+    for ii, ind in enumerate(indices):
+        if ind is not None and ind < len(peak.position):
             pos[ii] = peak.position[ind]
             mappedNewWidths[ii] = newWidths[ind]
+    #
+    # navigateToPositionInStrip(strip, pos, spectrumDisplay.axisCodes, widths=mappedNewWidths)
 
     navigateToPositionInStrip(strip, pos, spectrumDisplay.axisCodes, widths=mappedNewWidths)
     strip.header.reset()
@@ -154,6 +161,9 @@ def navigateToNmrResidueInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, nmrR
         _w = _widths.setdefault(_ac[0], 1.0)
         newWidths = [_w, 'full']
 
+    # ED: change this to match the above, or somehow set the primary axis
+    # i.e. stripArrangement == 'Y', primary = axis[1]
+    #      stripArrangement == 'X', primary = axis[0]
     navigateToNmrAtomsInStrip(strip, nmrResidue.nmrAtoms,
                               widths=newWidths, markPositions=markPositions, setNmrResidueLabel=False)
 

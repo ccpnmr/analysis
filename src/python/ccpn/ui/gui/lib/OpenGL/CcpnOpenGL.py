@@ -5280,7 +5280,7 @@ class CcpnGLWidget(QOpenGLWidget):
             if self._widthsChangedEnough([axisB, self.axisB], [axisT, self.axisT]) and \
                     self._widthsChangedEnough([axisL, self.axisL], [axisR, self.axisR]):
 
-                if self.spectrumDisplay.stripDirection == 'Y':
+                if self.spectrumDisplay.stripArrangement == 'Y':
 
                     # strips are arranged in a row
                     diff = (axisR - axisL) / 2.0
@@ -5290,7 +5290,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     self.axisB = axisB
                     self.axisT = axisT
 
-                elif self.spectrumDisplay.stripDirection == 'X':
+                elif self.spectrumDisplay.stripArrangement == 'X':
 
                     # strips are arranged in a column
                     diff = (axisT - axisB) / 2.0

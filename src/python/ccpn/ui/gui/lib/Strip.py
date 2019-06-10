@@ -71,7 +71,7 @@ def navigateToPositionInStrip(strip, positions: typing.List[float], axisCodes: t
         except ValueError as e:
             continue
         if len(positions) > ii:  # this used to say 1 rather than ii (coupled with the else below)
-            if positions[ii]:       # and strip.orderedAxes[stripAxisIndex]:
+            if positions[ii]:           # and strip.orderedAxes[stripAxisIndex]:
                 strip.orderedAxes[stripAxisIndex].position = positions[ii]
 
         #else: # what in the world is the case this is trying to deal with??

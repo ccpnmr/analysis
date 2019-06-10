@@ -83,6 +83,8 @@ SPECTRUMGROUPS = 'spectrumGroups'
 SPECTRUMISGROUPED = 'spectrumIsGrouped'
 SPECTRUMGROUPLIST = 'spectrumGroupList'
 STRIPDIRECTIONS = ['Y', 'X']
+SPECTRUMDISPLAY = 'spectrumDisplay'
+STRIPARRANGEMENT = 'stripArrangement'
 
 MAXITEMLOGGING = 4
 
@@ -416,7 +418,7 @@ class GuiSpectrumDisplay(CcpnModule):
         newDirection = STRIPDIRECTIONS[value]
 
         # set the new stripDirection, and redraw
-        self.stripDirection = newDirection
+        self.stripArrangement = newDirection
         self._redrawLayout(self)
 
     def _listViewChanged(self, data):
@@ -449,6 +451,35 @@ class GuiSpectrumDisplay(CcpnModule):
         """Set whether the spectrumDisplay contains grouped spectra
         """
         AbstractWrapperObject.setParameter(self, SPECTRUMGROUPS, SPECTRUMISGROUPED, grouped)
+
+    @property
+    def stripArrangement(self):
+        """Strip axis direction ('X', 'Y', None) - None only for non-strip plots
+        """
+        # Using AbstractWrapperObject because there seems to already be a setParameter
+        # belonging to spectrumDisplay
+        arrangement = AbstractWrapperObject.getParameter(self, SPECTRUMDISPLAY, STRIPARRANGEMENT)
+        if arrangement is not None:
+            return arrangement
+
+        # set default values in the ccpnInternal store
+        arrangement = self._wrappedData.stripDirection                       # SHOULD always be 'Y', if it makes a difference
+        AbstractWrapperObject.setParameter(self, SPECTRUMDISPLAY, STRIPARRANGEMENT, arrangement)
+        return arrangement
+
+    @stripArrangement.setter
+    def stripArrangement(self, value):
+        """Set the new strip direction ('X', 'Y', None) - None only for non-strip plots
+        """
+        if not isinstance(value, str):
+            raise TypeError('stripArrangement must be a string')
+        elif value not in ['X', 'Y']:
+            raise ValueError("stripArrangement must be either 'X' or 'Y'")
+
+        AbstractWrapperObject.setParameter(self, SPECTRUMDISPLAY, STRIPARRANGEMENT, value)
+        # leave the _wrappedData as it's initialised value
+
+
 
     def _getSpectrumGroups(self):
         """Return the groups contained in the spectrumDisplay
@@ -1031,13 +1062,13 @@ class GuiSpectrumDisplay(CcpnModule):
             layout.setSpacing(space)
 
             # reinsert strips in new order - reset minimum widths
-            if spectrumDisplay.stripDirection == 'Y':
+            if spectrumDisplay.stripArrangement == 'Y':
 
                 # horizontal strip layout
                 for m, widgStrip in enumerate(_widgets):
                     layout.addWidget(widgStrip, 0, m)
 
-            elif spectrumDisplay.stripDirection == 'X':
+            elif spectrumDisplay.stripArrangement == 'X':
 
                 # vertical strip layout
                 for m, widgStrip in enumerate(_widgets):
@@ -1080,13 +1111,13 @@ class GuiSpectrumDisplay(CcpnModule):
             layout.setSpacing(space)
 
             # reinsert strips in new order - reset minimum widths
-            if spectrumDisplay.stripDirection == 'Y':
+            if spectrumDisplay.stripArrangement == 'Y':
 
                 # horizontal strip layout
                 for m, widgStrip in enumerate(_widgets):
                     layout.addWidget(widgStrip, 0, m)
 
-            elif spectrumDisplay.stripDirection == 'X':
+            elif spectrumDisplay.stripArrangement == 'X':
 
                 # vertical strip layout
                 for m, widgStrip in enumerate(_widgets):
@@ -1125,13 +1156,13 @@ class GuiSpectrumDisplay(CcpnModule):
             layout.setSpacing(space)
 
             # reinsert strips in new order - reset minimum widths
-            if spectrumDisplay.stripDirection == 'Y':
+            if spectrumDisplay.stripArrangement == 'Y':
 
                 # horizontal strip layout
                 for m, widgStrip in enumerate(_widgets):
                     layout.addWidget(widgStrip, 0, m)
 
-            elif spectrumDisplay.stripDirection == 'X':
+            elif spectrumDisplay.stripArrangement == 'X':
 
                 # vertical strip layout
                 for m, widgStrip in enumerate(_widgets):
@@ -1252,7 +1283,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
         if currentStrips:
 
-            if self.stripDirection == 'Y':
+            if self.stripArrangement == 'Y':
 
                 # strips are arranged in a row
                 if self.lastAxisOnly:
@@ -1265,7 +1296,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     for ss in self.strips:
                         ss.setAxesVisible(rightAxisVisible=True, bottomAxisVisible=True)
 
-            elif self.stripDirection == 'X':
+            elif self.stripArrangement == 'X':
 
                 # strips are arranged in a column
                 if self.lastAxisOnly:
@@ -1306,12 +1337,12 @@ class GuiSpectrumDisplay(CcpnModule):
     def increaseStripSize(self):
         """Increase the width/height of the strips depending on the orientation
         """
-        if self.stripDirection == 'Y':
+        if self.stripArrangement == 'Y':
 
             # strips are arranged in a row
             self._increaseStripWidth()
 
-        elif self.stripDirection == 'X':
+        elif self.stripArrangement == 'X':
 
             # strips are arranged in a column
             self._increaseStripHeight()
@@ -1319,12 +1350,12 @@ class GuiSpectrumDisplay(CcpnModule):
     def decreaseStripSize(self):
         """Decrease the width/height of the strips depending on the orientation
         """
-        if self.stripDirection == 'Y':
+        if self.stripArrangement == 'Y':
 
             # strips are arranged in a row
             self._decreaseStripWidth()
 
-        elif self.stripDirection == 'X':
+        elif self.stripArrangement == 'X':
 
             # strips are arranged in a column
             self._decreaseStripHeight()
@@ -1479,12 +1510,12 @@ class GuiSpectrumDisplay(CcpnModule):
         """Set the column widths of the strips so that the last strip accommodates the axis bar
                 if necessary."""
         
-        if self.stripDirection == 'Y':
+        if self.stripArrangement == 'Y':
             
             # strips are arranged in a row
             self._setColumnStretches(stretchValue=stretchValue, scaleFactor=scaleFactor, widths=widths, minimumWidth=minimumWidth)
 
-        elif self.stripDirection == 'X':
+        elif self.stripArrangement == 'X':
 
             # strips are arranged in a column
             self._setRowStretches(stretchValue=stretchValue, scaleFactor=scaleFactor, heights=widths, minimumHeight=minimumWidth)

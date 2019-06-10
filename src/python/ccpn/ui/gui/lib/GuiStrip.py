@@ -1521,14 +1521,14 @@ class GuiStrip(Frame):
         layout.setSpacing(space)
 
         # reinsert strips in new order - reset minimum widths
-        if spectrumDisplay.stripDirection == 'Y':
+        if spectrumDisplay.stripArrangement == 'Y':
 
             # horizontal strip layout
             for m, widgStrip in enumerate(_widgets):
                 layout.addWidget(widgStrip, 0, m)
                 widgStrip.setMinimumWidth(minWidths[m])
 
-        elif spectrumDisplay.stripDirection == 'X':
+        elif spectrumDisplay.stripArrangement == 'X':
 
             # vertical strip layout
             for m, widgStrip in enumerate(_widgets):

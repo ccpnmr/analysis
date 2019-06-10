@@ -521,7 +521,7 @@ class ExportStripToFilePopup(ExportDialog):
         if 'SpectrumDisplay' in selected:
             spectrumDisplay = self.objects[selected][0]
             strip = spectrumDisplay.strips[0]
-            stripDirection = self.spectrumDisplay.stripDirection
+            stripDirection = self.spectrumDisplay.stripArrangement
         else:
             spectrumDisplay = None
             strip = self.objects[selected][0]

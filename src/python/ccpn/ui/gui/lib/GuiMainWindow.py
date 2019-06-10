@@ -895,7 +895,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     #
     #     xCount = yCount = 1
     #     if isinstance(spectrumDisplayOrStrip, GuiSpectrumDisplay):
-    #       if spectrumDisplayOrStrip.stripDirection == 'X':
+    #       if spectrumDisplayOrStrip.stripArrangement == 'X':
     #         yCount = len(strips)
     #       else:
     #         xCount = len(strips)
@@ -911,7 +911,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     #       xNumber = yNumber = 0
     #       if isinstance(spectrumDisplayOrStrip, GuiSpectrumDisplay):
     #         for n, strip in enumerate(strips):
-    #           if spectrumDisplayOrStrip.stripDirection == 'X':
+    #           if spectrumDisplayOrStrip.stripArrangement == 'X':
     #             xOutputRegion = (0, width)
     #             yOutputRegion = (n * height / yCount, (n + 1) * height / yCount)
     #             yNumber = n

@@ -231,6 +231,25 @@ class PeakListTableWidget(GuiTable):
                                            [GuiNotifier.DROPEVENT], [DropBase.PIDS],
                                            self._processDroppedItems)
 
+    def _setUpMultipletSubTable(self, tableSelection):
+        """Set up the peak table as a child of a multiplet table
+        """
+        # This should be put into an ABC
+        self._selectedMultipletPeakList = None
+
+        self.setTableNotifiers(tableClass=None,
+                               rowClass=Peak,
+                               cellClassNames=(NmrAtom, 'assignedPeaks'),
+                               tableName='peakList', rowName='peak',
+                               changeFunc=self._updateAllModule,
+                               className=self.attributeName,
+                               updateFunc=self._updateAllModule,
+                               tableSelection=tableSelection,
+                               pullDownWidget=None,
+                               callBackClass=Peak,
+                               selectCurrentCallBack=self._selectOnTableCurrentPeaksNotifierCallback,
+                               moduleParent=self.moduleParent)
+
     def _processDroppedItems(self, data):
         """CallBack for Drop events
         """

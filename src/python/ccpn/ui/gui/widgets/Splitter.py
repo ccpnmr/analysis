@@ -33,16 +33,17 @@ from ccpn.ui.gui.widgets.Base import Base
 class Splitter(QtWidgets.QSplitter, Base):
     "CcpNmr widgets: Splitter class"
 
-    def __init__(self, parent=None, horizontal=True, **kwds):
+    def __init__(self, parent=None, horizontal=True, collapsible=False, **kwds):
 
         super().__init__(parent)
         Base._init(self, parent, **kwds)
 
         if horizontal:
-            self.setOrientation(QtCore.Qt.Horizontal)  #
+            self.setOrientation(QtCore.Qt.Horizontal)
         else:
-            self.setOrientation(QtCore.Qt.Vertical)  #
+            self.setOrientation(QtCore.Qt.Vertical)
 
+        self.setChildrenCollapsible(collapsible)
         self.doResize = False
 
     def createHandle(self):

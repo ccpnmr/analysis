@@ -73,7 +73,7 @@ class MultipletTableModule(CcpnModule):
         self.application = mainWindow.application
         self.project = mainWindow.project
         self.current = mainWindow.application.current
-        self.splitter = Splitter(QtCore.Qt.Horizontal)
+        self.splitter = Splitter(horizontal=True, collapsible=False)
         # mainWidget
         self.peaksFrame = Frame(self.mainWidget, setLayout=True, grid=(0, 1))
         self.peakListTableLabel = Label(self.peaksFrame, 'Peaks:', grid=(0, 0), )
@@ -84,6 +84,9 @@ class MultipletTableModule(CcpnModule):
                                                  moduleParent=self.peaksFrame,  # just to give a unique id
                                                  setLayout=False,
                                                  grid=(1, 0))
+        # make the tableinto a multiplet sub-table - should be an ABC
+        # self.peakListTable._setUpMultipletSubTable()
+
         self.peakListTable._widgetScrollArea.hide()
 
         self.multipletListTable = MultipletListTableWidget(parent=self.mainWidget, mainWindow=self.mainWindow,

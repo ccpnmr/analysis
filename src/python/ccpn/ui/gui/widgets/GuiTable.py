@@ -1109,16 +1109,17 @@ GuiTable::item::selected {
         """
         objs = []
 
-        # get the list of objects, exclude deleted and flagged for delete
-        for obj in objectList:
-            if isinstance(obj, str):
-                objFromPid = self.project.getByPid(obj)
+        if objectList:
+            # get the list of objects, exclude deleted and flagged for delete
+            for obj in objectList:
+                if isinstance(obj, str):
+                    objFromPid = self.project.getByPid(obj)
 
-                if objFromPid and not objFromPid.isDeleted and not objFromPid._flaggedForDelete:
-                    objs.append(objFromPid)
+                    if objFromPid and not objFromPid.isDeleted and not objFromPid._flaggedForDelete:
+                        objs.append(objFromPid)
 
-            else:
-                objs.append(obj)
+                else:
+                    objs.append(obj)
 
         if objs:
             self._highLightObjs(objs, scrollToSelection=scrollToSelection)
@@ -1682,8 +1683,16 @@ GuiTable::item::selected {
                     if tSelect:
 
                         # check that the object created is in the list viewed in this table
-                        # e.g. row.peakList == tSelect then add
-                        if tSelect == getattr(row, self._tableData['tableName']):
+                        # e.g. row.peakList == tSelect then add - older test
+                        # if tSelect == getattr(row, self._tableData['tableName']):
+
+                        # multiple attribute name, i.e. added 's' - and get tSelect.objs
+                        multiple = self._tableData['classCallBack']
+                        multipleAttr = getattr(tSelect, multiple)
+
+                        # if item is in the list, then create
+                        if row in multipleAttr:
+
                             # add the row to the dataFrame and table
                             self._dataFrameObject.appendObject(row)
                             _update = True
@@ -1721,7 +1730,7 @@ GuiTable::item::selected {
                     #         _update = True
 
 
-                except:
+                except Exception as es:
                     getLogger().debug2('Error updating row in table')
 
             elif trigger == Notifier.RENAME:
@@ -1924,6 +1933,11 @@ GuiTable::item::selected {
                                                    [Notifier.CURRENT],
                                                    callBackClass._pluralLinkName,
                                                    self._selectCurrentCallBack)
+            # else:
+            #     self._selectCurrentNotifier = Notifier(self.current,
+            #                                            [Notifier.CURRENT],
+            #                                            rowName,
+            #                                            self._selectCurrentCallBack)
 
         if searchCallBack:
             self._searchNotifier = Notifier(self.current,

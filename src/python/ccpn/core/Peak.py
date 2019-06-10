@@ -485,9 +485,12 @@ class Peak(AbstractWrapperObject):
         """
         super()._finaliseAction(action=action)
 
+        # if this peak is changed or deleted then it's multiplets/integral need to CHANGE
+        # create required as undo may return peak to a multiplet list
         if action in ['change', 'create', 'delete']:
             for mt in self.multiplets:
-                mt._finaliseAction(action=action)
+                mt._finaliseAction(action='change')
+            # NOTE:ED does integral need to be notified? - and reverse notifiers in multiplet/integral
 
     #=========================================================================================
     # CCPN functions

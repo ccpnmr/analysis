@@ -137,7 +137,8 @@ class PeakListTableWidget(GuiTable):
         obj.figureOfMerit = min(max(float(value), 0.0), 1.0) if value else None
         # NmrResidueTable._project.unblankNotification()
 
-    def __init__(self, parent=None, mainWindow=None, moduleParent=None, peakList=None, actionCallback=None, selectionCallback=None, **kwds):
+    def __init__(self, parent=None, mainWindow=None, moduleParent=None, peakList=None, multiSelect=True,
+                 actionCallback=None, selectionCallback=None, **kwds):
         """
         Initialise the table
         """
@@ -202,7 +203,7 @@ class PeakListTableWidget(GuiTable):
                             mainWindow=self.mainWindow,
                             dataFrameObject=None,
                             setLayout=True,
-                            autoResize=True, multiSelect=True,
+                            autoResize=True, multiSelect=multiSelect,
                             actionCallback=actionCallback,
                             selectionCallback=selectionCallback,
                             grid=(3, 0), gridSpan=(1, 6))
@@ -230,25 +231,6 @@ class PeakListTableWidget(GuiTable):
         self.droppedNotifier = GuiNotifier(self,
                                            [GuiNotifier.DROPEVENT], [DropBase.PIDS],
                                            self._processDroppedItems)
-
-    def _setUpMultipletSubTable(self, tableSelection):
-        """Set up the peak table as a child of a multiplet table
-        """
-        # This should be put into an ABC
-        self._selectedMultipletPeakList = None
-
-        self.setTableNotifiers(tableClass=None,
-                               rowClass=Peak,
-                               cellClassNames=(NmrAtom, 'assignedPeaks'),
-                               tableName='peakList', rowName='peak',
-                               changeFunc=self._updateAllModule,
-                               className=self.attributeName,
-                               updateFunc=self._updateAllModule,
-                               tableSelection=tableSelection,
-                               pullDownWidget=None,
-                               callBackClass=Peak,
-                               selectCurrentCallBack=self._selectOnTableCurrentPeaksNotifierCallback,
-                               moduleParent=self.moduleParent)
 
     def _processDroppedItems(self, data):
         """CallBack for Drop events
@@ -281,7 +263,7 @@ class PeakListTableWidget(GuiTable):
         for i in range(peakList.spectrum.dimensionCount):
             positionTipText = 'Peak position in dimension %s' % str(i + 1)
             columnDefs.append(('Pos F%s' % str(i + 1),
-                               lambda pk, dim=i, unit=PeakListTableWidget.positionsUnit: getPeakPosition(pk, dim, unit),
+                               lambda pk, dim=i, unit=self.positionsUnit: getPeakPosition(pk, dim, unit),
                                positionTipText, None))
 
         # linewidth column TODO remove hardcoded Hz unit
@@ -301,12 +283,12 @@ class PeakListTableWidget(GuiTable):
         # figureOfMerit column
         figureOfMeritTipText = 'Figure of merit'
         columnDefs.append(('Merit', lambda pk: pk.figureOfMerit, figureOfMeritTipText,
-                           lambda pk, value: PeakListTableWidget._setFigureOfMerit(pk, value)))
+                           lambda pk, value: self._setFigureOfMerit(pk, value)))
 
         # comment column
         commentsTipText = 'Textual notes about the peak'
-        columnDefs.append(('Comment', lambda pk: PeakListTableWidget._getCommentText(pk), commentsTipText,
-                           lambda pk, value: PeakListTableWidget._setComment(pk, value)))
+        columnDefs.append(('Comment', lambda pk: self._getCommentText(pk), commentsTipText,
+                           lambda pk, value: self._setComment(pk, value)))
 
         return ColumnClass(columnDefs)
 
@@ -412,17 +394,17 @@ class PeakListTableWidget(GuiTable):
     def _getPullDownSelection(self):
         return self.pLwidget.getText()
 
-    def _selectPullDown(self, value):
-        self.pLwidget.select(value)
-        self._updateTable()
+    # def _selectPullDown(self, value):
+    #     self.pLwidget.select(value)
+    #     self._updateTable()
 
-    def displayTableForPeakList(self, peakList):
-        """Display the table for all NmrResidue's of nmrChain
-        """
-        # print('>>>displayTableForPeakList')
-
-        self.pLwidget.select(peakList.pid)
-        self._updateTable(peaks=peakList.peaks)
+    # def displayTableForPeakList(self, peakList):
+    #     """Display the table for all NmrResidue's of nmrChain
+    #     """
+    #     # print('>>>displayTableForPeakList')
+    #
+    #     self.pLwidget.select(peakList.pid)
+    #     self._updateTable(peaks=peakList.peaks)
 
     def _actionCallback(self, data, *args):
         """If current strip contains the double clicked peak will navigateToPositionInStrip
@@ -546,40 +528,4 @@ class PeakListTableWidget(GuiTable):
 
     def _setPositionUnit(self, value):
         if value in UNITS:
-            PeakListTableWidget.positionsUnit = value
-
-    # def destroy(self):
-    #     "Cleanup of self"
-    #     self.clearTableNotifiers()
-
-    # def _setNotifiers(self):
-    #   """
-    #   Set a Notifier to call when an object is created/deleted/renamed/changed
-    #   rename calls on name
-    #   change calls on any other attribute
-    #   """
-    #   self._selectOnTableCurrentPeaksNotifier = Notifier(self.current,
-    #                                                       [Notifier.CURRENT],
-    #                                                       targetName='peaks',
-    #                                                       callback=self._selectOnTableCurrentPeaksNotifierCallback)
-    #   # TODO set notifier to trigger only for the selected peakList.
-    #
-    #   self._peakListDeleteNotifier = Notifier(self.project,
-    #                                            [Notifier.CREATE, Notifier.DELETE],
-    #                                            'PeakList',
-    #                                            self._peakListNotifierCallback)
-    #   self._peakNotifier =  Notifier(self.project,
-    #                                   [Notifier.DELETE, Notifier.CREATE, Notifier.CHANGE],
-    #                                   'Peak', self._peakNotifierNotifierCallback,
-    #                                   onceOnly=True)
-    #
-    # def _clearNotifiers(self):
-    #   """
-    #   clean up the notifiers
-    #   """
-    #   if self._peakListDeleteNotifier is not None:
-    #     self._peakListDeleteNotifier.unRegister()
-    #   if self._peakNotifier is not None:
-    #     self._peakNotifier.unRegister()
-    #   if self._selectOnTableCurrentPeaksNotifier is not None:
-    #     self._selectOnTableCurrentPeaksNotifier.unRegister()
+            self.positionsUnit = value

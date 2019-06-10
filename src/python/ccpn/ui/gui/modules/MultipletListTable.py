@@ -41,6 +41,7 @@ from ccpn.core.Multiplet import Multiplet
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.modules.PeakTable import PeakListTableWidget
+from ccpn.ui.gui.modules.MultipletPeakTable import MultipletPeakListTableWidget
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
@@ -79,18 +80,17 @@ class MultipletTableModule(CcpnModule):
         self.peakListTableLabel = Label(self.peaksFrame, 'Peaks:', grid=(0, 0), )
         self.peakListTableLabel.setFixedHeight(20)
 
-        self.peakListTable = PeakListTableWidget(parent=self.peaksFrame,
-                                                 mainWindow=self.mainWindow,
-                                                 moduleParent=self.peaksFrame,  # just to give a unique id
-                                                 setLayout=False,
-                                                 grid=(1, 0))
-        # make the tableinto a multiplet sub-table - should be an ABC
-        # self.peakListTable._setUpMultipletSubTable()
+        self.peakListTable = MultipletPeakListTableWidget(parent=self.peaksFrame,
+                                                          mainWindow=self.mainWindow,
+                                                          moduleParent=self.peaksFrame,  # just to give a unique id
+                                                          setLayout=False,
+                                                          multiSelect=True,
+                                                          grid=(1, 0))
 
         self.peakListTable._widgetScrollArea.hide()
 
         self.multipletListTable = MultipletListTableWidget(parent=self.mainWidget, mainWindow=self.mainWindow,
-                                                           moduleParent=self, setLayout=True,
+                                                           moduleParent=self, setLayout=True, multiSelect=False,
                                                            grid=(0, 0))
 
         if multipletList is not None:
@@ -142,7 +142,8 @@ class MultipletListTableWidget(GuiTable):
 
     positionsUnit = MultipletPosUnits[0]  #default
 
-    def __init__(self, parent=None, mainWindow=None, moduleParent=None, multipletList=None, actionCallback=None, selectionCallback=None, **kwds):
+    def __init__(self, parent=None, mainWindow=None, moduleParent=None, multipletList=None, multiSelect=True,
+                 actionCallback=None, selectionCallback=None, **kwds):
         """
         Initialise the widgets for the module. kwds passed to the scrollArea widget
         """
@@ -210,7 +211,7 @@ class MultipletListTableWidget(GuiTable):
                          mainWindow=self.mainWindow,
                          dataFrameObject=None,
                          setLayout=True,
-                         autoResize=True, multiSelect=True,
+                         autoResize=True, multiSelect=False,
                          actionCallback=actionCallback,
                          selectionCallback=selectionCallback,
                          grid=(3, 0), gridSpan=(1, 6))
@@ -349,6 +350,7 @@ class MultipletListTableWidget(GuiTable):
         else:
             self.clear()
             self.peakListTable.clear()
+            self.peakListTable._selectedMultipletPeakList = None
 
     def _selectMultipletList(self, multipletList=None):
         """
@@ -418,6 +420,8 @@ class MultipletListTableWidget(GuiTable):
         if multiplets is None:
             self.current.clearMultiplets()
             self.peakListTable.clear()
+            self.peakListTable._selectedMultipletPeakList = None
+            self.highlightObjects(None)
         else:
             self.current.multiplets = multiplets
             #  show only the current multiplet peaks
@@ -429,6 +433,8 @@ class MultipletListTableWidget(GuiTable):
             peaks = self.current.multiplet.peaks
             if len(peaks) > 0:
                 peakList = peaks[-1].peakList  # needed to create the columns in the peak table
+
+                self.peakListTable._selectedMultipletPeakList = self.current.multiplet
                 self.peakListTable._updateTable(useSelectedPeakList=False, peaks=peaks, peakList=peakList)
 
     def _populateMultipletPeaksOnTable(self):
@@ -455,6 +461,7 @@ class MultipletListTableWidget(GuiTable):
 
             else:
                 self.peakListTable.clear()
+                self.peakListTable._selectedMultipletPeakList = None
 
     def _pulldownUnitsCallback(self, unit):
         # update the table with new units
@@ -504,11 +511,8 @@ class MultipletListTableWidget(GuiTable):
         else:
             # self.clearSelection()
             self.peakListTable.clear()
+            self.peakListTable._selectedMultipletPeakList = None
 
     def _setPositionUnit(self, value):
         if value in MultipletPosUnits:
             MultipletListTableWidget.positionsUnit = value
-
-    # def destroy(self):
-    #     "Cleanup of self"
-    #     self.clearTableNotifiers()

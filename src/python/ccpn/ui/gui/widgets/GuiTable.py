@@ -293,8 +293,6 @@ GuiTable::item::selected {
             self.doubleClicked.connect(self._doubleClickCallback)
         else:
             self.doubleClicked.connect(self._defaultDoubleClick)
-        # if self._selectionCallback:
-        self.itemClicked.connect(self._cellClicked)
 
         # set the delegate for editing
         delegate = GuiTableDelegate(self)
@@ -333,7 +331,7 @@ GuiTable::item::selected {
         self.horizontalHeader().sectionClicked.connect(self._postSort)
 
         # set internal flags
-        self._mousePressed = False
+        self._mousePressedPos = None
         self._userKeyPressed = False
         self._selectOverride = False
         self._scrollOverride = False
@@ -492,8 +490,6 @@ GuiTable::item::selected {
     def setSelectionCallback(self, selectionCallback):
         # enable callbacks
         self._selectionCallback = selectionCallback
-        # if self._selectionCallback:
-        #     self.itemClicked.connect(self._cellClicked)
 
     def _handleDroppedItems(self, pids, objType, pulldown):
         """
@@ -575,8 +571,6 @@ GuiTable::item::selected {
 
                 obj = self.getSelectedObjects(selection)
                 obj = obj[0] if obj else None
-
-                print('>>>_double', objs, ' --- ', objs if self.multiSelect else obj)
 
                 if obj:
                     # store the data for the clicked row
@@ -819,29 +813,19 @@ GuiTable::item::selected {
         event.ignore()
         super(GuiTable, self).mouseMoveEvent(event)
 
-        if self._mousePressed:
+        if self._mousePressedPos is not None:
+            # if the mouse has been pressed, then re-enable selection if started a mouse drag, and override double-click
+            if self._selectOverride and (event.pos() - self._mousePressedPos).manhattanLength() > QtWidgets.QApplication.startDragDistance():
+                # turn off selection blocking
+                self._handleCellClicked(event)
+
             self._selectionTableCallback(None)
-
-    def _cellClicked(self, event):
-        return
-
-        if self._lastClick == 'click':
-            print('\n>>>_cellClicked')
-            self._selectionTableCallback(None)
-
-        elif self._lastClick == 'doubleClick':
-            if self._lastSelection and self._lastSelection['selection']:
-                print('>>>', self._lastSelection['selection'])
-                self.highlightObjects(self._lastSelection['selection'])
-                self._lastClick = None
 
     def mousePressEvent(self, event):
         """handle mouse press events
         Clicking is handled on the mouse release
         """
         self._lastClick = 'click'
-        # self._selectOverride = True
-
         self._buttonPressed = event.button()
 
         if event.button() == QtCore.Qt.RightButton:
@@ -859,12 +843,7 @@ GuiTable::item::selected {
                 self._currentCol = None
 
             # we are selecting from the table
-            self._mousePressed = True
-
-            # # timer to re-enable
-            # QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval() * 5,
-            #                          partial(self._handleCellClicked, event))
-            # super(GuiTable, self).mousePressEvent(event)
+            self._mousePressedPos = event.pos()
 
             event.accept()
             super(GuiTable, self).mousePressEvent(event)
@@ -874,6 +853,7 @@ GuiTable::item::selected {
 
                 # disable selecting as there may be a double click
                 self.setSelectionMode(self.NoSelection)
+
                 self._selectOverride = True
 
                 # timer to re-enable
@@ -885,14 +865,8 @@ GuiTable::item::selected {
             super(GuiTable, self).mousePressEvent(event)
 
     def mouseReleaseEvent(self, event):
-        self._mousePressed = False
+        self._mousePressedPos = None
         super(GuiTable, self).mouseReleaseEvent(event)
-
-    #     if self._lastClick == "click":
-    #         QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval(),
-    #                                  partial(self._handleCellClicked, event))
-    #
-    #     super(GuiTable, self).mouseReleaseEvent(event)
 
     def _handleCellClicked(self, event):
         """handle a single click event, but ignore double click events
@@ -1456,10 +1430,7 @@ GuiTable::item::selected {
             selectionModel = self.selectionModel()
             if objList:
 
-                # if not self._mousePressed:
-                selectionModel.clearSelection()  # causes a clear problem here
-                # strange tablewidget cmd/selection problem
-
+                selectionModel.clearSelection()
                 for obj in objList:
                     row = self._dataFrameObject.find(self, str(obj.pid))
                     if row is not None:
@@ -1484,9 +1455,7 @@ GuiTable::item::selected {
                     if obj in self._dataFrameObject.objects:
                         rowObjs.append(obj)
 
-                # if not self._mousePressed:
-                selectionModel.clearSelection()  # causes a clear problem here
-
+                selectionModel.clearSelection()
                 for obj in rowObjs:
                     row = self._dataFrameObject.find(self, str(obj.pid))
 
@@ -1792,7 +1761,6 @@ GuiTable::item::selected {
             # cells = getattr(cellData, attr)
             cells = makeIterableList(cellData)
 
-            # print('      >>>', cells, data[Notifier.TRIGGER])
             #self._silenceCallback = True
             _update = False
 

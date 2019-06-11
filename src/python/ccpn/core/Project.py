@@ -203,8 +203,8 @@ class Project(AbstractWrapperObject):
         self._initializeAll()
 
         # 20190520:ED routines that use core objects, not sure whether the correct place
-        # self._setContourColours()
-        # self._setNoiseLevels()
+        self._setContourColours()
+        self._setNoiseLevels()
 
     def _close(self):
         self.close()

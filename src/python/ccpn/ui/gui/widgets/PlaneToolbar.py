@@ -329,6 +329,7 @@ class PlaneToolbar(ToolBar):
             self.nextPlaneButton.setFixedHeight(19)
             planeCount = Spinbox(self, showButtons=False, hAlign='c')
             planeCount.setMinimum(1)
+            planeCount.setMaximum(1000)
             planeCount.setValue(1)
             planeCount.oldValue = 1
             planeCount.valueChanged.connect(partial(callbacks[3], i))

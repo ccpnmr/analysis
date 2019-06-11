@@ -809,6 +809,11 @@ GuiTable::item::selected {
                 else:
                     self._defaultDoubleClick(self.currentItem())
 
+    # def enterEvent(self, event):
+    #     print('>>>focus')
+    #     self.setFocus()
+    #     super(GuiTable, self).enterEvent(event)
+
     def mouseMoveEvent(self, event):
         event.ignore()
         super(GuiTable, self).mouseMoveEvent(event)

@@ -128,6 +128,7 @@ from ccpn.util.Constants import concentrationUnits
 from ccpn.util.Common import splitDataFrameWithinRange
 from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRandomColours
 from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.peakUtils import getNmrResidueDeltas,_getKd, oneSiteBindingCurve, _fit1SiteBindCurve, _fitExpDecayCurve,\
                                     MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME, DefaultAtomWeights, H, N, OTHER, C
 from ccpn.core.lib import CcpnSorting
@@ -561,7 +562,13 @@ class ChemicalShiftsMapping(CcpnModule):
   #####################################################
 
   def _customActionCallBack(self, data):
-    nmrResidue = data[Notifier.OBJECT]
+    # nmrResidue = data[Notifier.OBJECT]
+    objs = data[CallBack.OBJECT]
+    if isinstance(objs, (tuple, list)) and objs:
+      nmrResidue = objs[0]
+    else:
+      nmrResidue = objs
+
     if nmrResidue:
       xPos = int(nmrResidue.sequenceCode)
       yPos = nmrResidue._delta

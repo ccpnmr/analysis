@@ -35,10 +35,10 @@ from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import IntegralListPulldown
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.Integral import Integral
-
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+from ccpn.core.lib.CallBack import CallBack
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 
 
@@ -312,7 +312,7 @@ class IntegralTable(GuiTable):
         """
         Set as current the selected integrals on the table
         """
-        integrals = data[Notifier.OBJECT]
+        integrals = data[CallBack.OBJECT]
 
         # self._clearRegions()
         if integrals is None:
@@ -324,7 +324,11 @@ class IntegralTable(GuiTable):
         """
         Notifier DoubleClick action on item in table
         """
-        integral = data[Notifier.OBJECT]
+        objs = data[CallBack.OBJECT]
+        if isinstance(objs, (tuple, list)) and objs:
+            integral = objs[0]
+        else:
+            integral = objs
 
         # self._showRegions()
         self._navigateToPosition()

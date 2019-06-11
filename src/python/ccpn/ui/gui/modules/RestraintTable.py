@@ -39,7 +39,7 @@ from ccpn.core.RestraintList import RestraintList
 from ccpn.core.Restraint import Restraint
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
-
+from ccpn.core.lib.CallBack import CallBack
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot
@@ -349,7 +349,7 @@ class RestraintTable(GuiTable):
         """
         Notifier Callback for selecting a row in the table
         """
-        restraint = data[Notifier.OBJECT]
+        restraint = data[CallBack.OBJECT]
 
         self.current.restraint = restraint
         RestraintTableModule.currentCallback = {'object': self.restraintList, 'table': self}
@@ -358,7 +358,11 @@ class RestraintTable(GuiTable):
         """
         Notifier DoubleClick action on item in table
         """
-        restraint = data[Notifier.OBJECT]
+        objs = data[CallBack.OBJECT]
+        if isinstance(objs, (tuple, list)) and objs:
+            restraint = objs[0]
+        else:
+            restraint = objs
 
         logger.debug(str(NotImplemented))
 

@@ -42,6 +42,7 @@ from PyQt5 import QtWidgets
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+from ccpn.core.lib.CallBack import CallBack
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 
 logger = getLogger()
@@ -291,9 +292,15 @@ class ResidueTable(GuiTable):
                         self._chain = chain
                         self.cWidget.select(self._chain.pid)
 
-    def defaultActionCallback(self, residue, *args):
+    def defaultActionCallback(self, data, *args):
         """
         """
+        objs = data[CallBack.OBJECT]
+        if isinstance(objs, (tuple, list)) and objs:
+            residue = objs[0]
+        else:
+            residue = objs
+
         showNotImplementedMessage()
         return
         # TODO add default Action Callback

@@ -386,7 +386,12 @@ class ChemicalShiftTable(GuiTable):
         """
         Notifier DoubleClick action on item in table
         """
-        obj = data[CallBack.OBJECT]
+        # multiselection table will return a list of objects
+        objs = data[CallBack.OBJECT]
+        if isinstance(objs, (tuple, list)) and objs:
+            obj = objs[0]
+        else:
+            obj = objs
 
         getLogger().debug('ChemicalShiftTable>>> action', obj)
 

@@ -144,7 +144,11 @@ class NmrResidueTableModule(CcpnModule):
         """
         from ccpn.core.lib.CallBack import CallBack
 
-        nmrResidue = data[CallBack.OBJECT]
+        objs = data[CallBack.OBJECT]
+        if isinstance(objs, (tuple, list)) and objs:
+            nmrResidue = objs[0]
+        else:
+            nmrResidue = objs
 
         logger.debug('nmrResidue=%s' % (nmrResidue.id))
 

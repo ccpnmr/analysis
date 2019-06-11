@@ -42,6 +42,7 @@ from ccpn.core.NmrAtom import NmrAtom
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+from ccpn.core.lib.CallBack import CallBack
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Spacer import Spacer
 
@@ -414,12 +415,17 @@ class PeakListTableWidget(GuiTable):
 
         from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, _getCurrentZoomRatio
 
-        peak = data[Notifier.OBJECT]
+        # multiselection table will return a list of objects
+        objs = data[CallBack.OBJECT]
+        if isinstance(objs, (tuple, list)) and objs:
+            peak = objs[0]
+        else:
+            peak = objs
 
         if self.current.strip is not None:
             validPeakListViews = [pp.peakList for pp in self.current.strip.peakListViews if isinstance(pp.peakList, PeakList)]
 
-            if peak.peakList in validPeakListViews:
+            if peak and peak.peakList in validPeakListViews:
                 widths = None
 
                 if peak.peakList.spectrum.dimensionCount <= 2:
@@ -436,7 +442,7 @@ class PeakListTableWidget(GuiTable):
         set as current the selected peaks on the table
         """
         # print('>>>PeakTable _selectionCallback', repr(self))
-        peaks = data[Notifier.OBJECT]
+        peaks = data[CallBack.OBJECT]
         if peaks is None:
             self.current.clearPeaks()
         else:

@@ -117,35 +117,32 @@ def makeStripPlotFromSingles(spectrumDisplay: GuiSpectrumDisplay, nmrAtoms: List
 
 def navigateToPeakInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, peak, widths=None):
 
-    from ccpn.util.Common import getAxisCodeMatchIndices, getAxisCodeMatch
+    from ccpn.util.Common import getAxisCodeMatchIndices
 
-    newWidths = [0.2] * len(spectrumDisplay.axisCodes)
-    pos = [None] * len(spectrumDisplay.axisCodes)
-    mappedNewWidths = ['full'] * len(spectrumDisplay.axisCodes)
-    newWidths = ['full'] * len(spectrumDisplay.axisCodes)
+    spCodes = spectrumDisplay.axisCodes
+    pos = [None] * len(spCodes)
+    newWidths = ['full'] * len(spCodes)
 
-    newWidths = ['default'] * len(strip.axisCodes)
-
+    index = 'YX'.index(spectrumDisplay.stripArrangement)
     if widths == None:
         # set the width in case of nD (n>2)
         _widths = {'H': 0.3, 'C': 1.0, 'N': 1.0}
         # _ac = strip.axisCodes[0]
-        _ac = spectrumDisplay.axisCodes[0]
+        _ac = spCodes[index]                                # primary axisCode based in stripArrangement
         _w = _widths.setdefault(_ac[0], 1.0)
-        newWidths = [_w, 'full']
+        newWidths[index] = _w
+        # newWidths = [_w, 'full']
+    else:
+        newWidths = widths
 
-    # indices = getAxisCodeMatchIndices(peak.peakList.spectrum.axisCodes, strip.axisCodes)
-
-    indices = getAxisCodeMatchIndices(strip.axisCodes, peak.peakList.spectrum.axisCodes)
+    indices = getAxisCodeMatchIndices(spCodes, peak.axisCodes)
 
     for ii, ind in enumerate(indices):
         if ind is not None and ind < len(peak.position):
             pos[ii] = peak.position[ind]
-            mappedNewWidths[ii] = newWidths[ind]
-    #
-    # navigateToPositionInStrip(strip, pos, spectrumDisplay.axisCodes, widths=mappedNewWidths)
+            # mappedNewWidths[ii] = newWidths[ind]
 
-    navigateToPositionInStrip(strip, pos, spectrumDisplay.axisCodes, widths=mappedNewWidths)
+    navigateToPositionInStrip(strip, pos, spCodes, widths=newWidths)
     strip.header.reset()
     strip.header.setLabelText(position='c', text=peak.pid)
     strip.header.headerVisible = True
@@ -153,17 +150,19 @@ def navigateToPeakInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, peak, widt
 
 def navigateToNmrResidueInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, nmrResidue, widths=None, markPositions=False):
 
-    newWidths = ['default'] * len(strip.axisCodes)
+    spCodes = spectrumDisplay.axisCodes
+    newWidths = ['full'] * len(spCodes)
+    index = 'YX'.index(spectrumDisplay.stripArrangement)
     if widths == None:
         # set the width in case of nD (n>2)
         _widths = {'H': 0.3, 'C': 1.0, 'N': 1.0}
-        _ac = strip.axisCodes[0]
+        _ac = spCodes[index]                                # primary axisCode based in stripArrangement
         _w = _widths.setdefault(_ac[0], 1.0)
-        newWidths = [_w, 'full']
+        newWidths[index] = _w
+        # newWidths = [_w, 'full']
+    else:
+        newWidths = widths
 
-    # ED: change this to match the above, or somehow set the primary axis
-    # i.e. stripArrangement == 'Y', primary = axis[1]
-    #      stripArrangement == 'X', primary = axis[0]
     navigateToNmrAtomsInStrip(strip, nmrResidue.nmrAtoms,
                               widths=newWidths, markPositions=markPositions, setNmrResidueLabel=False)
 

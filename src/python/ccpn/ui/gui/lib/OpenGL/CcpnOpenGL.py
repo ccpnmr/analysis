@@ -2134,8 +2134,26 @@ class CcpnGLWidget(QOpenGLWidget):
         # self._startCoordinate = self._aMatrix.reshape((4, 4)).dot(vect)
 
         self._startCoordinate = self.mouseTransform.dot([mx, my, 0.0, 1.0])
+        self._startMiddleDrag = False
 
         self._endCoordinate = self._startCoordinate
+
+        if ev.buttons() & Qt.MiddleButton:
+            if self._isSHIFT == '' and self._isCTRL == '' and self._isALT == '' and self._isMETA == '':
+                # drag a peak
+                xPosition = self.cursorCoordinate[0]  # self.mapSceneToView(event.pos()).x()
+                yPosition = self.cursorCoordinate[1]  #
+                objs = self._mouseInPeak(xPosition, yPosition, firstOnly=True)
+                if objs:
+                    indices = getAxisCodeMatchIndices(self._axisCodes, objs[0].axisCodes)
+                    self._startCoordinate[0] = objs[0].position[indices[0]]
+                    self._startCoordinate[1] = objs[0].position[indices[1]]
+
+                    # set the flags for middle mouse dragging
+                    self._startMiddleDrag = True
+                    self._drawMouseMoveLine = True
+                    self._drawDeltaOffset = True
+
         # self._drawSelectionBox = True
 
         # if not self.mousePressInRegion(self._externalRegions._regions):
@@ -2170,6 +2188,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._mousePressed = False
         self._draggingLabel = False
 
+        # here or at the end of release?
         self._clearAndUpdate()
 
         mx = ev.pos().x()
@@ -2190,6 +2209,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # end of drag event - perform action
             self._mouseDragEvent(ev)
+
+        self._startMiddleDrag = False
 
     def _checkKeys(self, ev):
         keyMod = QApplication.keyboardModifiers()
@@ -2420,7 +2441,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     self._storeZoomHistory()
 
         elif event.buttons() & Qt.MiddleButton:
-            if self._isSHIFT == '' and self._isCTRL == '' and self._isALT == '' and self._isMETA == '':
+            if self._isSHIFT == '' and self._isCTRL == '' and self._isALT == '' and self._isMETA == '' and self._startMiddleDrag:
                 # drag a peak
                 self._endCoordinate = self.cursorCoordinate
                 self._drawMouseMoveLine = True
@@ -5843,23 +5864,24 @@ class CcpnGLWidget(QOpenGLWidget):
             self._selectPeaksInRegion(xPositions, yPositions, zPositions)
 
         elif middleMouse(event):
-            # middle drag: moves a selected peak
+            # middle drag: moves selected peaks
             event.accept()
 
-            peaks = list(self.current.peaks)
-            if not peaks:
-                return
+            if self._startMiddleDrag:
+                peaks = list(self.current.peaks)
+                if not peaks:
+                    return
 
-            deltaPosition = [self.cursorCoordinate[0] - self._startCoordinate[0],
-                             self.cursorCoordinate[1] - self._startCoordinate[1]]
-            for peak in peaks:
-                peak.startPosition = peak.position
-
-            with undoBlock():
+                deltaPosition = [self.cursorCoordinate[0] - self._startCoordinate[0],
+                                 self.cursorCoordinate[1] - self._startCoordinate[1]]
                 for peak in peaks:
-                    self._movePeak(peak, deltaPosition)
+                    peak.startPosition = peak.position
 
-            self.current.peaks = peaks
+                with undoBlock():
+                    for peak in peaks:
+                        self._movePeak(peak, deltaPosition)
+
+                self.current.peaks = peaks
 
         elif shiftLeftMouse(event):
             # zoom into the region - yellow box

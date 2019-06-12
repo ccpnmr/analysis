@@ -33,7 +33,7 @@ import glob
 from ccpn.framework.PathsAndUrls import macroPath as mp
 from ccpn.core.lib.ContextManagers import undoBlock
 
-StarPath = 'nmr-star3.1'
+StarPath = 'nmrStar3_1Examples'
 BmrbPath = os.path.join(mp, StarPath)
 
 

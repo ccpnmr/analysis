@@ -24,7 +24,7 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 
 #### GUI IMPORTS
-from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, commonWidgets
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, commonWidgets, _getWidgetByAtt
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.LinearRegionsPlot import TargetButtonSpinBoxes
@@ -77,9 +77,13 @@ class ExcludeRegionsGuiPipe(GuiPipe):
         self.addRemoveButtons.setMaximumHeight(20)
         self.count = 1
 
-        self.excludeRegion1Label = Label(self.pipeFrame, text=Region + str(self.count), grid=(self.count, 0))
+        # GLSpinboxes start from count = 1 -> 'Region_1'
+        # self.excludeRegion1Label = Label(self.pipeFrame, text=Region + str(self.count), grid=(self.count, 0))
+
+        setattr(self, ExcludeRegions + str(self.count), Label(self.pipeFrame, text=Region + str(self.count), grid=(self.count, 0)))
         setattr(self, Region + str(self.count), GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application,
                                                                         orientation='v', decimals=3, grid=(self.count, 1)))
+
         setattr(self, _STORE, Spinbox(self.pipeFrame, value=self.count, grid=(0, 0), hidden=True)) # used to store how many entries there are
 
     ############       Gui Callbacks      ###########
@@ -87,36 +91,60 @@ class ExcludeRegionsGuiPipe(GuiPipe):
     def _addRegion(self):
         """Also called upon restoring widget state """
         self.count += 1
-        self.excludeRegionLabel = Label(self.pipeFrame, text=Region + str(self.count), grid=(self.count, 0))
+        setattr(self, ExcludeRegions + str(self.count), Label(self.pipeFrame, text=Region + str(self.count), grid=(self.count, 0)))
         setattr(self, Region + str(self.count), GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application,
                                                                         decimals=3, orientation='v', grid=(self.count, 1)))
-        self.count += 1
+        # self.count += 1
         getattr(self, _STORE).set(self.count)
 
     def _deleteRegions(self):
         """ delete the widget from layout. """
-        positions = []
-        for row in range(self.count):
-            positions.append((row, 0))
-            positions.append((row, 1))
-        if (len(positions)) > 1:
-            positions = positions[2:]
-            if len(positions) > 1:
-                positions = positions[-2:]
-                for position in positions:
-                    item = self.pipeFrame.getLayout().itemAtPosition(*position)
-                    if item:
-                        w = item.widget()
-                        if w:
-                            if isinstance(w, GLTargetButtonSpinBoxes):
-                                w._turnOffPositionPicking()
-                            w.deleteLater()
-                self.count -= 1
-        getattr(self, _STORE).set(self.count)
+
+        # remove GLTargetButtonSpinBoxes and labels
+        widgets = [_getWidgetByAtt(self, Region + str(ii+1)) for ii in range(self.count) if _getWidgetByAtt(self, Region + str(ii+1))]
+        if widgets:
+
+            # delete the spinbox
+            widgets[-1]._turnOffPositionPicking()
+            widgets[-1].deleteLater()
+
+            # remove Labels - should correspond to spinboxes above
+            labels = [_getWidgetByAtt(self, ExcludeRegions + str(ii+1)) for ii in range(self.count) if _getWidgetByAtt(self, ExcludeRegions + str(ii+1))]
+            if labels:
+                labels[-1].deleteLater()
+
+            # update the count
+            self.count -= 1
+            getattr(self, _STORE).set(self.count)
+
+        # positions = []
+        # for ii in range(self.count):
+        #     name = Region + str(ii)
+        #     widg = _getWidgetByAtt(self, name)
+        #     print('>>>', name, widg)
+        #
+        # for row in range(self.count):
+        #     positions.append((row, 0))
+        #     positions.append((row, 1))
+        # if (len(positions)) > 1:
+        #     positions = positions[2:]
+        #     if len(positions) > 1:
+        #         positions = positions[-2:]
+        #         for position in positions:
+        #             item = self.pipeFrame.getLayout().itemAtPosition(*position)
+        #             if item:
+        #                 w = item.widget()
+        #                 if w:
+        #                     if isinstance(w, GLTargetButtonSpinBoxes):
+        #                         w._turnOffPositionPicking()
+        #                         print('>>>KillWidget')
+        #                     w.deleteLater()
+        #         self.count -= 1
+        # getattr(self, _STORE).set(self.count)
 
     def _closeBox(self):
         """remove the lines from plotwidget if any"""
-        for row in range(self.count - 1):
+        for row in range(self.count):
             self._deleteRegions()
         self.closeBox()
 

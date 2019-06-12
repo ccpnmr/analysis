@@ -83,7 +83,7 @@ def _getWidgetByAtt(cls, name):
     :param name: widget variable name
     :return: widget obj
     '''
-    w = getattr(cls, name)
+    w = getattr(cls, name, None)
     if w is not None:
         return w
 

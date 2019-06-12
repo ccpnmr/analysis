@@ -44,7 +44,8 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Menu import Menu
 
-from ccpn.ui.gui.guiSettings import getColours, CCPNMODULELABEL_BACKGROUND, CCPNMODULELABEL_FOREGROUND
+from ccpn.ui.gui.guiSettings import getColours, CCPNMODULELABEL_BACKGROUND, CCPNMODULELABEL_FOREGROUND, \
+    CCPNMODULELABEL_BACKGROUND_ACTIVE, CCPNMODULELABEL_FOREGROUND_ACTIVE, CCPNMODULELABEL_BORDER, CCPNMODULELABEL_BORDER_ACTIVE
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Label import Label
@@ -301,13 +302,14 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
         self._allChildren = set()
 
-    def event(self, event):
-        if event.type() == QtCore.QEvent.ShortcutOverride:
-            event.accept()
-            print('>>>Override')
-        else:
-            super(CcpnModule, self).event(event)
-            
+    # Leave this in so I remember ShortcutOverride
+    # def event(self, event):
+    #     if event.type() == QtCore.QEvent.ShortcutOverride:
+    #         event.accept()
+    #         print('>>>Override')
+    #     else:
+    #         super(CcpnModule, self).event(event)
+
     def _findChildren(self, widget):
         for i in widget.children():
             self._allChildren.update({i})
@@ -557,6 +559,17 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
         super().close()
 
+    def enterEvent(self, event):
+        if self.mainWindow.application.preferences.general.focusFollowsMouse:
+            self.setFocus()
+            self.label.setModuleHighlight(True)
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        if self.mainWindow.application.preferences.general.focusFollowsMouse:
+            self.label.setModuleHighlight(False)
+        super().enterEvent(event)
+
     def dragMoveEvent(self, *args):
         DockDrop.dragMoveEvent(self, *args)
 
@@ -635,7 +648,6 @@ class CcpnModule(Dock, DropBase, NotifierBase):
             source = event.source()
             data = self.parseEvent(event)
             if DropBase.PIDS in data:
-
                 # process Pids
                 self.mainWindow._processPids(data, position=self.dropArea, relativeTo=self)
                 event.accept()
@@ -756,6 +768,50 @@ class CcpnModuleLabel(DockLabel):
 
         # flag to disable dragMoveEvent during a doubleClick
         self._inDoubleClick = False
+
+    def setModuleHighlight(self, hightlighted=False):
+        self.setDim(hightlighted)
+
+    def updateStyle(self):
+        r = '3px'
+        # get the colours from the colourScheme
+        if self.dim:
+            fg = getColours()[CCPNMODULELABEL_FOREGROUND_ACTIVE]
+            bg = getColours()[CCPNMODULELABEL_BACKGROUND_ACTIVE]
+            border = getColours()[CCPNMODULELABEL_BORDER_ACTIVE]
+        else:
+            fg = getColours()[CCPNMODULELABEL_FOREGROUND]
+            bg = getColours()[CCPNMODULELABEL_BACKGROUND]
+            border = getColours()[CCPNMODULELABEL_BORDER]
+
+        if self.orientation == 'vertical':
+            self.vStyle = """DockLabel {
+                background-color : %s;
+                color : %s;
+                border-top-right-radius: 0px;
+                border-top-left-radius: %s;
+                border-bottom-right-radius: 0px;
+                border-bottom-left-radius: %s;
+                border-width: 0px;
+                border-right: 2px solid %s;
+                padding-top: 3px;
+                padding-bottom: 3px;
+            }""" % (bg, fg, r, r, border)
+            self.setStyleSheet(self.vStyle)
+        else:
+            self.hStyle = """DockLabel {
+                background-color : %s;
+                color : %s;
+                border-top-right-radius: %s;
+                border-top-left-radius: %s;
+                border-bottom-right-radius: 0px;
+                border-bottom-left-radius: 0px;
+                border-width: 0px;
+                border-bottom: 2px solid %s;
+                padding-left: 3px;
+                padding-right: 3px;
+            }""" % (bg, fg, r, r, border)
+            self.setStyleSheet(self.hStyle)
 
     def _createContextMenu(self):
 

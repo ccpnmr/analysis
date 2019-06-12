@@ -810,7 +810,7 @@ GuiTable::item::selected {
                     self._defaultDoubleClick(self.currentItem())
 
     def enterEvent(self, event):
-        if self.mainWindow.application.preferences.general.tableFollowsMouse:
+        if self.mainWindow.application.preferences.general.focusFollowsMouse:
             self.setFocus()
         super(GuiTable, self).enterEvent(event)
 

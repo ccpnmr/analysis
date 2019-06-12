@@ -44,6 +44,8 @@ class GLNotifier(QtWidgets.QWidget):
     GLMOUSEMOVEDDICT = 'mouseMovedict'
     GLSPECTRUMDISPLAY = 'spectrumDisplay'
     GLSTRIP = 'strip'
+    GLKEY = 'key'
+    GLMODIFIER = 'modifier'
     GLBOTTOMAXISVALUE = 'bottomAxis'
     GLTOPAXISVALUE = 'topAxis'
     GLLEFTAXISVALUE = 'leftAxis'
@@ -91,6 +93,7 @@ class GLNotifier(QtWidgets.QWidget):
     glAxisLockChanged = pyqtSignal(dict)
     glAxisUnitsChanged = pyqtSignal(dict)
     glSymbolsChanged = pyqtSignal(dict)
+    glKeyEvent = pyqtSignal(dict)
 
     def __init__(self, parent=None, strip=None):
         super(GLNotifier, self).__init__()
@@ -191,3 +194,9 @@ class GLNotifier(QtWidgets.QWidget):
                  }
         self.glSymbolsChanged.emit(aDict)
 
+    def _emitKeyEvent(self, strip=None, key=None, modifier=None):
+        aDict = {GLNotifier.GLSTRIP   : strip,
+                 GLNotifier.GLKEY     : key,
+                 GLNotifier.GLMODIFIER: modifier
+                 }
+        self.glKeyEvent.emit(aDict)

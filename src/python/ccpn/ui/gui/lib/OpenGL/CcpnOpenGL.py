@@ -229,6 +229,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.GLSignals.glEvent.connect(self._glEvent)
         self.GLSignals.glAxisLockChanged.connect(self._glAxisLockChanged)
         self.GLSignals.glAxisUnitsChanged.connect(self._glAxisUnitsChanged)
+        self.GLSignals.glKeyEvent.connect(self._glKeyEvent)
 
     def _initialiseAll(self):
         """Initialise all attributes for the display
@@ -438,6 +439,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.GLSignals.glEvent.disconnect()
         self.GLSignals.glAxisLockChanged.disconnect()
         self.GLSignals.glAxisUnitsChanged.disconnect()
+        self.GLSignals.glKeyEvent.disconnect()
 
     def threadUpdate(self):
         self.update()
@@ -1296,59 +1298,56 @@ class CcpnGLWidget(QOpenGLWidget):
         self._rescaleAllAxes()
         self._storeZoomHistory()
 
-    def _panGLSpectrum(self, event, movePercent=20):
+    def _panGLSpectrum(self, key, movePercent=20):
         """Implements Arrows up,down, left, right to pan the spectrum """
         # percentage of the view to set as single step
 
-        if type(event) == QtGui.QKeyEvent:
-            moveFactor = movePercent / 100.0
-            dx = (self.axisR - self.axisL) / 2.0
-            dy = (self.axisT - self.axisB) / 2.0
+        moveFactor = movePercent / 100.0
+        dx = (self.axisR - self.axisL) / 2.0
+        dy = (self.axisT - self.axisB) / 2.0
 
-            key = event.key()
+        if key == QtCore.Qt.Key_Left:
+            self.axisL -= moveFactor * dx
+            self.axisR -= moveFactor * dx
 
-            if key == QtCore.Qt.Key_Left:
-                self.axisL -= moveFactor * dx
-                self.axisR -= moveFactor * dx
+        elif key == QtCore.Qt.Key_Up:
+            self.axisT += moveFactor * dy
+            self.axisB += moveFactor * dy
 
-            elif key == QtCore.Qt.Key_Up:
-                self.axisT += moveFactor * dy
-                self.axisB += moveFactor * dy
+        elif key == QtCore.Qt.Key_Right:
+            self.axisL += moveFactor * dx
+            self.axisR += moveFactor * dx
 
-            elif key == QtCore.Qt.Key_Right:
-                self.axisL += moveFactor * dx
-                self.axisR += moveFactor * dx
+        elif key == QtCore.Qt.Key_Down:
+            self.axisT -= moveFactor * dy
+            self.axisB -= moveFactor * dy
 
-            elif key == QtCore.Qt.Key_Down:
-                self.axisT -= moveFactor * dy
-                self.axisB -= moveFactor * dy
-
-            elif key == QtCore.Qt.Key_Plus or key == QtCore.Qt.Key_Equal:  # Plus:
-                self._testAxisLimits()
-                if self._minReached:
-                    return
-
-                # print('>>>zoomIn')
-                self.zoomIn()
-
-            elif key == QtCore.Qt.Key_Minus:
-                self._testAxisLimits()
-                if self._maxReached:
-                    return
-
-                self.zoomOut()
-
-            else:
-                # not a movement key
+        elif key == QtCore.Qt.Key_Plus or key == QtCore.Qt.Key_Equal:  # Plus:
+            self._testAxisLimits()
+            if self._minReached:
                 return
 
-            self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
-                                               axisB=self.axisB, axisT=self.axisT,
-                                               axisL=self.axisL, axisR=self.axisR)
+            # print('>>>zoomIn')
+            self.zoomIn()
 
-            # self._testAxisLimits(setLimits=True)
-            self._rescaleAllAxes()
-            self._storeZoomHistory()
+        elif key == QtCore.Qt.Key_Minus:
+            self._testAxisLimits()
+            if self._maxReached:
+                return
+
+            self.zoomOut()
+
+        else:
+            # not a movement key
+            return
+
+        self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
+                                           axisB=self.axisB, axisT=self.axisT,
+                                           axisL=self.axisL, axisR=self.axisR)
+
+        # self._testAxisLimits(setLimits=True)
+        self._rescaleAllAxes()
+        self._storeZoomHistory()
 
     def _moveAxes(self, delta=(0.0, 0.0)):
         """Implements Arrows up,down, left, right to pan the spectrum """
@@ -1363,38 +1362,6 @@ class CcpnGLWidget(QOpenGLWidget):
                                            axisB=self.axisB, axisT=self.axisT,
                                            axisL=self.axisL, axisR=self.axisR)
         self._rescaleAllAxes()
-
-    def _movePeakFromGLKeys(self, event):
-
-        if len(self.current.peaks) < 1:
-            return
-
-        moveFactor = 5
-        moveDict = {
-            QtCore.Qt.Key_Left : (-self.pixelX * moveFactor, 0),
-            QtCore.Qt.Key_Right: (self.pixelX * moveFactor, 0),
-            QtCore.Qt.Key_Up   : (0, self.pixelX * moveFactor),
-            QtCore.Qt.Key_Down : (0, -self.pixelX * moveFactor)
-            }
-
-        if type(event) == QtGui.QKeyEvent:
-            if event.key() in moveDict:
-
-                with undoBlock():
-                    for peak in self.current.peaks:
-                        self._movePeak(peak, moveDict.get(event.key()))
-
-    def _singleKeyAction(self, event):
-        """
-        :return: Actions for single key press. If current peaks, moves the peaks when using
-        directional arrow otherwise pans the spectrum.
-        """
-        # if not self.current.peak:
-        if not self._isSHIFT:
-            self._panGLSpectrum(event)
-
-        if self._isSHIFT:
-            self._movePeakFromGLKeys(event)
 
     def initialiseAxes(self, strip=None):
         """
@@ -2212,9 +2179,38 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self._startMiddleDrag = False
 
-    def _checkKeys(self, ev):
+    def _movePeakFromGLKeys(self, key):
+
+        if len(self.current.peaks) < 1:
+            return
+
+        moveFactor = 5
+        moveDict = {
+            QtCore.Qt.Key_Left : (-self.pixelX * moveFactor, 0),
+            QtCore.Qt.Key_Right: (self.pixelX * moveFactor, 0),
+            QtCore.Qt.Key_Up   : (0, self.pixelX * moveFactor),
+            QtCore.Qt.Key_Down : (0, -self.pixelX * moveFactor)
+            }
+
+        if key in moveDict:
+
+            with undoBlock():
+                for peak in self.current.peaks:
+                    self._movePeak(peak, moveDict.get(key))
+
+    def _singleKeyAction(self, key, isShift):
+        """
+        :return: Actions for single key press. If current peaks, moves the peaks when using
+        directional arrow otherwise pans the spectrum.
+        """
+        if not isShift:
+            self._panGLSpectrum(key)
+
+        if isShift:
+            self._movePeakFromGLKeys(key)
+
+    def _checkKeys(self, key):
         keyMod = QApplication.keyboardModifiers()
-        key = ev.key()
 
         if keyMod == Qt.ShiftModifier or key == QtCore.Qt.Key_Shift:
             self._isSHIFT = 'S'
@@ -2226,10 +2222,28 @@ class CcpnGLWidget(QOpenGLWidget):
         if keyMod == Qt.MetaModifier:
             self._isMETA = 'M'
 
+    def glKeyPressEvent(self, aDict):
+        """Process the key events from GLsignals
+        """
+        if (self.strip and not self.strip.isDeleted):
+
+            # this may not be the current strip
+            if self.strip == self.current.strip:
+                self._key = aDict[GLNotifier.GLKEY]
+                self._singleKeyAction(self._key, aDict[GLNotifier.GLMODIFIER])
+                self.update()
+
     def keyPressEvent(self, event: QtGui.QKeyEvent):
-        self._key = event.key()
-        self._checkKeys(event)
-        self._singleKeyAction(event)
+        """Process key events or pass to current strip of required
+        """
+        if (self.strip and not self.strip.isDeleted):
+            self._key = event.key()
+            self._checkKeys(self._key)
+            if self.strip == self.current.strip:
+                self._singleKeyAction(self._key, self._isSHIFT)
+
+            elif not self._preferences.currentStripFollowsMouse:
+                self.GLSignals._emitKeyEvent(strip=self.strip, key=event.key(), modifier=self._isSHIFT)
 
     def _clearAfterRelease(self, ev):
         key = ev.key()
@@ -2258,14 +2272,16 @@ class CcpnGLWidget(QOpenGLWidget):
         self._clearAfterRelease(ev)
 
     def enterEvent(self, ev: QtCore.QEvent):
+        if (self.strip and not self.strip.isDeleted and self._preferences.currentStripFollowsMouse):
+            self.current.strip = self.strip
+            self.setFocus()
+        if self._preferences.focusFollowsMouse:
+            self.setFocus()
         super().enterEvent(ev)
         self._clearAndUpdate()
 
     def focusInEvent(self, ev: QtGui.QFocusEvent):
         super().focusInEvent(ev)
-        if (self.strip and not self.strip.isDeleted and self._preferences.focusFollowsMouse):
-            self.current.strip = self.strip
-
         self._clearAndUpdate()
 
     def focusOutEvent(self, ev: QtGui.QFocusEvent):
@@ -2287,7 +2303,6 @@ class CcpnGLWidget(QOpenGLWidget):
         if abs(self.axisL - self.axisR) < 1.0e-6 or abs(self.axisT - self.axisB) < 1.0e-6:
             return
 
-        self.setFocus()
         dx = event.pos().x() - self.lastPos.x()
         dy = event.pos().y() - self.lastPos.y()
         self.lastPos = event.pos()
@@ -5365,11 +5380,23 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.update()
 
     @pyqtSlot(dict)
-    def _glEvent(self, aDict):
+    def _glKeyEvent(self, aDict):
+        """Process Key events from the application/popups and other strips
+        :param aDict - dictionary containing event flags:
         """
-    process events from the application/popups and other strips
-    :param aDict - dictionary containing event flags:
-    """
+        if self.strip.isDeleted:
+            return
+
+        if not self.globalGL:
+            return
+
+        self.glKeyPressEvent(aDict)
+
+    @pyqtSlot(dict)
+    def _glEvent(self, aDict):
+        """Process events from the application/popups and other strips
+        :param aDict - dictionary containing event flags:
+        """
         if self.strip.isDeleted:
             return
 

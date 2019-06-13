@@ -40,7 +40,7 @@
         "restoreLayoutOnOpening":true,
         "lockAspectRatio": false,
         "aspectRatios": { "H": 1.0, "N": 4.0, "C": 16, "intensity": 10000000 },
-        "defaultMarksColour": "#c0b0b0",
+        "defaultMarksColour": "#EE82EE",
         "autoCorrectColours": true,
         "multipletAveraging": 0,
         "showSpectraOnPhasing": false,

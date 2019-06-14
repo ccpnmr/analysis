@@ -30,6 +30,9 @@ __date__ = "$Date: 2019-06-12 10:28:40 +0000 (Wed, Jun 12, 2019) $"
 import pandas as pd
 import os
 import glob
+import numpy as np
+from collections import OrderedDict as od
+from ccpn.util.Common import getAxisCodeMatchIndices
 from ccpn.framework.PathsAndUrls import macroPath as mp
 from ccpn.core.lib.ContextManagers import undoBlock
 
@@ -74,12 +77,12 @@ def _openBmrb(filePath):
             lines.append(line)
     return lines
 
-def makeDataFrame(bmbrbLines):
+def makeDataFrame(bmrbLines):
     ## create dataframe of interest using the same names as appear in the BMRB.
     # NB Columns are not always the same in number (E.G. fileA=10columns, fileB=12columns).
     table = []
     columns = []
-    for i in [sub.splitlines() for sub in bmbrbLines]:
+    for i in [sub.splitlines() for sub in bmrbLines]:
         vv = [j.strip() for j in i if j]
         columns += [j for j in [i for i in vv if i.startswith('_')]]
         row = [j for i in [i.split(' ') for i in vv if not i.startswith('_')] for j in i if j]
@@ -88,11 +91,15 @@ def makeDataFrame(bmbrbLines):
     shortColumns = [c.replace(_Atom_chem_shift,'') for c in columns]
     return pd.DataFrame(table, columns=shortColumns)
 
-def makeV3Objs(df, newChemicalShiftList=True):
+def makeCSLfromDF(df, chemicalShiftListName=None):
+    """
 
-    chemicalShiftList = None
-    if newChemicalShiftList:
-        chemicalShiftList = project.newChemicalShiftList()
+    :param df: Pandas dataFrame
+    :param chemicalShiftListName: str, default if None
+    :return: Chemical Shift List Object
+    """
+
+    chemicalShiftList = project.newChemicalShiftList(name=chemicalShiftListName)
 
     nmrChain = project.fetchNmrChain()
     for index, row in df.iterrows():
@@ -103,13 +110,101 @@ def makeV3Objs(df, newChemicalShiftList=True):
                 cs = chemicalShiftList.newChemicalShift(value=float(row[Val]), nmrAtom=nmrAtom)
                 if row[Val_err] is not None:
                     cs.valueError = float(row[Val_err])
-    return nmrChain
+    return chemicalShiftList
 
 
+def _peaksFromCSList(csl, targetSpectrum=None, nmrAtomNames:tuple=None, axesCodes=None):
+    """
+    ac = {
+        "H":"H",
+        "N":"N",
+        "Ca":"C"
+        }
+
+
+    :param csl: chemicalShiftList Object
+    :param nmrAtomNames: tuple of str containing Atoms of interest
+    :return:
+    """
+
+
+    if not targetSpectrum:
+        targetSpectrum = project.createDummySpectrum(axisCodes=axesCodes, name=None)#, chemicalShiftList=csl)
+    peakList = targetSpectrum.newPeakList()
+
+    # filter by NmrAtom of interest
+
+    nmrResiduesOD = od()
+    for chemicalShift in csl.chemicalShifts:
+
+        na = chemicalShift.nmrAtom
+        if na.name in nmrAtomNames:
+            try:
+                nmrResiduesOD[na.nmrResidue].append([na, chemicalShift.value])
+            except KeyError:
+                nmrResiduesOD[na.nmrResidue] = [(na, chemicalShift.value)]
+
+    for nmrResidue in nmrResiduesOD:
+        shifts = []
+        atoms = []
+        for v in nmrResiduesOD[nmrResidue]:
+            print('IIII',v)
+            atoms.append(v[0])
+            shifts.append(v[1])
+        # try:
+        axisCodes = [n.name for n in atoms]
+        i = np.array(getAxisCodeMatchIndices(nmrAtomNames,targetSpectrum.axisCodes))
+        print('IND',i)
+        ss = np.array(shifts)
+        ats = np.array(atoms)
+        print(ss, i)
+        peak = peakList.newPeak(list(ss[i]))
+
+        for na in ats[i]:
+            print(na.name[0], [na])
+            peak.assignDimension(na.name[0], [na])
+        # except Exception as e:
+        #     print('Error: ', e)
+
+
+        # shiftList.add(shift[0])
+        # peak = peakList.newPeak(position)
+    #     position = []
+    #     # nmrAtoms = []
+    #     for i in subset:
+    #         nmrAtom, shift = i
+    #         position.append(shift)
+    #         # nmrAtoms.append(nmrAtom)
+    #     # list1, list2 = nmrAtomNames, [n.name for n  in nmrAtoms]
+    #     # sortedNmrAtomNames = sorted(list2, key=lambda x: list1[list2.index(x)])
+    #     try:
+    #         peak = peakList.newPeak(position)
+    #         for nmrAtomName in nmrAtomNames:
+    #             atom = nmrResidue.fetchNmrAtom(name=str(nmrAtomName))
+    #             peak.assignDimension(axisCode=nmrAtomName[0], value=[atom])
+    #
+    #
+    #     except Exception as er:
+    #         print('ER __@@ ', er)
+
+
+
+            # peak = peakList.newPeak([chemicalShift.value])
+            # peak.assignDimension(axisCode=nmrAtom.name[0], value=[nmrAtom])
+
+
+
+
+#
 isFromCcpn = True
-for mybmrb in glob.glob(BmrbPath+'/*'):
-    lines = _openBmrb(mybmrb)
-    df = makeDataFrame(lines)
-    if isFromCcpn:
-        with undoBlock():
-            c = makeV3Objs(df, newChemicalShiftList=True)
+# for mybmrb in glob.glob(BmrbPath+'/*')
+#
+mybmrb = '/Users/luca/AnalysisV3/src/python/ccpn/macros/nmrStar3_1Examples/test2'
+lines = _openBmrb(mybmrb)
+df = makeDataFrame(lines)
+if isFromCcpn:
+    with undoBlock():
+        csl = makeCSLfromDF(df, chemicalShiftListName='')
+        _peaksFromCSList(csl, nmrAtomNames=["H","HA"], axesCodes=['H','H1'])
+
+

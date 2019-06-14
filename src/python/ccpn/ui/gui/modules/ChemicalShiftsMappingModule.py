@@ -572,10 +572,13 @@ class ChemicalShiftsMapping(CcpnModule):
       nmrResidue = objs
 
     if nmrResidue:
-      try:
-        xPos = int(nmrResidue.sequenceCode)
-      except Exception as es:
-        print('>>>bad int')
+
+      # # new CCode to get the index of an nmrResidue in it's parent nmrChain
+      # from ccpnc.clibrary import Clibrary
+      # _getNmrIndex = Clibrary.getNmrResidueIndex
+      # xPos = _getNmrIndex(nmrResidue)     # int(nmrResidue.sequenceCode)
+
+      xPos = int(nmrResidue.sequenceCode)
       yPos = nmrResidue._delta
       if xPos and yPos:
         xr, yr = _getCurrentZoomRatio(self.barGraphWidget.customViewBox.viewRange())

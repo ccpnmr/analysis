@@ -572,7 +572,10 @@ class ChemicalShiftsMapping(CcpnModule):
       nmrResidue = objs
 
     if nmrResidue:
-      xPos = int(nmrResidue.sequenceCode)
+      try:
+        xPos = int(nmrResidue.sequenceCode)
+      except Exception as es:
+        print('>>>bad int')
       yPos = nmrResidue._delta
       if xPos and yPos:
         xr, yr = _getCurrentZoomRatio(self.barGraphWidget.customViewBox.viewRange())

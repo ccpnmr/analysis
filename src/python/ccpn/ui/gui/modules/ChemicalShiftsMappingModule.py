@@ -1467,8 +1467,9 @@ class ChemicalShiftsMapping(CcpnModule):
   #############################################################
   ######   Updating widgets (plots and table) callbacks #######
   #############################################################
-  from ccpn.util.decorators import profile
-  @profile
+
+  # from ccpn.util.decorators import profile
+  # @profile
   def _updateBarGraph(self):
     xs = []
     ys = []

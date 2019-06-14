@@ -73,7 +73,7 @@ class StripPlotPopup(CcpnDialog):
         ButtonList(self, ['Cancel', 'OK'], [self.reject, self._accept], grid=(2, 1), gridSpan=(1, 2))
         self.setFixedSize(self.sizeHint())
 
-    @profile
+    # @profile
     def _accept(self, dummy=None):
         """OK button pressed
         """

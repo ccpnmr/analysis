@@ -133,7 +133,7 @@ class CreateNmrChainPopup(CcpnDialog):
         self.addSpacer(0, 10, grid=(vGrid, 0))
         vGrid += 1
 
-        self.buttonBox = ButtonList(self, texts=[Cancel, Create], callbacks=[self.reject, self._createNmrChain],
+        self.buttonBox = ButtonList(self, texts=[Cancel, Create], callbacks=[self.reject, self._applyChanges],
                                     grid=(vGrid, 0), gridSpan=(1,2), vAlign='bottom')
         vGrid += 1
 
@@ -255,6 +255,20 @@ class CreateNmrChainPopup(CcpnDialog):
     #       if isinstance(substance, Substance):
     #         if not substance.smiles:
     #           self.availableSubstancesPD.pulldownList.model().item(i).setEnabled(False)
+
+    def _applyChanges(self):
+        """
+        The apply button has been clicked
+        If there is an error setting the values then popup an error message
+        repopulate the settings
+        """
+        try:
+            self._createNmrChain()
+
+        except Exception as es:
+            showWarning(str(self.windowTitle()), str(es))
+            if self.mainWindow.application._isInDebugMode:
+                raise es
 
     def _createNmrChain(self):
         name = self.nameLineEdit.get()

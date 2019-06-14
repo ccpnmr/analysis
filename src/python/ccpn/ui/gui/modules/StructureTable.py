@@ -758,7 +758,9 @@ class StructureTable(GuiTableStructure):
         Notifier DoubleClick action on item in table
         """
         objs = data[CallBack.OBJECT]
-        if isinstance(objs, (tuple, list)) and objs:
+        if not objs:
+            return
+        if isinstance(objs, (tuple, list)):
             obj = objs[0]
         else:
             obj = objs

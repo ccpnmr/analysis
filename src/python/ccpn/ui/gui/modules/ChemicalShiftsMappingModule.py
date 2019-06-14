@@ -564,7 +564,9 @@ class ChemicalShiftsMapping(CcpnModule):
   def _customActionCallBack(self, data):
     # nmrResidue = data[Notifier.OBJECT]
     objs = data[CallBack.OBJECT]
-    if isinstance(objs, (tuple, list)) and objs:
+    if not objs:
+      return
+    if isinstance(objs, (tuple, list)):
       nmrResidue = objs[0]
     else:
       nmrResidue = objs

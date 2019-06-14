@@ -25,26 +25,11 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets
-from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown
-# from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ColumnViewSettings,  ObjectTableFilter
-from ccpn.ui.gui.widgets.GuiTable import GuiTable
-from ccpn.ui.gui.widgets.Column import ColumnClass, Column
-from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.core.lib.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth
-from ccpn.core.PeakList import PeakList
 from ccpn.core.Peak import Peak
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.util.Logging import getLogger
-from ccpn.ui.gui.widgets.DropBase import DropBase
-from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
-from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
-from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.modules.PeakTable import PeakListTableWidget
+from ccpn.util.OrderedSet import OrderedSet
 
 
 logger = getLogger()
@@ -53,26 +38,10 @@ UNITS = ['ppm', 'Hz', 'point']
 
 class MultipletPeakListTableWidget(PeakListTableWidget):
     """
-    Class to present a peakList Table linked to a multiplet
+    Class to present a peakList Table linked to a multipletTable
     """
     className = 'MultipletPeakListTable'
     attributeName = 'peakLists'
-
-    # positionsUnit = UNITS[0]  #default
-    #
-    # @staticmethod
-    # def _setFigureOfMerit(obj, value):
-    #     """
-    #     CCPN-INTERNAL: Set figureOfMerit from table
-    #     Must be a floatRatio in range [0.0, 1.0]
-    #     """
-    #     # ejb - why is it blanking a notification here?
-    #     # NmrResidueTable._project.blankNotification()
-    #
-    #     # clip and set the figure of merit
-    #     obj.figureOfMerit = min(max(float(value), 0.0), 1.0) if value else None
-    #     # NmrResidueTable._project.unblankNotification()
-    #
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None, peakList=None, multiSelect=False,
                  actionCallback=None, selectionCallback=None, **kwds):
@@ -106,17 +75,11 @@ class MultipletPeakListTableWidget(PeakListTableWidget):
 
         if self._selectedMultipletPeakList:      # always use selection
 
-            from ccpn.util.OrderedSet import OrderedSet
+            peaks = OrderedSet()
+            [peaks.add(peak) for mt in self._selectedMultipletPeakList for peak in mt.peaks]
+            peaks = tuple(peaks)
 
-            # get the list of unique peaks
-            # peaks = OrderedSet()
-            # for ml in self._selectedMultipletPeakList:
-            #     for pk in ml.peaks:
-            #         peaks.add(pk)
-            peaks = tuple(self._selectedMultipletPeakList.peaks)
-
-            if peaks:
-                peaks = tuple(peaks)
+            if peaks and peaks[0].PeakList:
                 self.populateTable(rowObjects=peaks,
                                    columnDefs=self._getTableColumns(peaks[0].peakList),
                                    selectedObjects=self.current.peaks)
@@ -133,4 +96,18 @@ class MultipletPeakListTableWidget(PeakListTableWidget):
 
     def _getPullDownSelection(self):
         raise RuntimeError('not defined for this table')
+
+    def getIndexList(self, classItems, attribute):
+        """Get the list of objects on which to before the indexing
+        """
+        # classItem is usually a type such as PeakList, MultipletList
+        # with an attribute such as peaks/peaks
+
+        # Actually, the peaks don't have an index at the moment so redundant, but argument still stands
+        if self._selectedMultipletPeakList:
+            peaks = OrderedSet()
+            [peaks.add(peak) for mt in self._selectedMultipletPeakList for peak in mt.peaks]
+            peaks = tuple(peaks)
+
+            return peaks
 

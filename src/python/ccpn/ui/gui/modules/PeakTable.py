@@ -417,7 +417,9 @@ class PeakListTableWidget(GuiTable):
 
         # multiselection table will return a list of objects
         objs = data[CallBack.OBJECT]
-        if isinstance(objs, (tuple, list)) and objs:
+        if not objs:
+            return
+        if isinstance(objs, (tuple, list)):
             peak = objs[0]
         else:
             peak = objs

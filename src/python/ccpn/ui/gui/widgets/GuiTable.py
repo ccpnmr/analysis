@@ -347,6 +347,8 @@ GuiTable::item::selected {
         self._droppedNotifier = None
         self._icons = [self.ICON_FILE]
         self._stretchLastSection = stretchLastSection
+        self._defaultHeadings = []
+        self._defaultHiddenColumns = []
 
         # set the minimum size the table can collapse to
         self.setMinimumSize(30, 30)
@@ -425,7 +427,7 @@ GuiTable::item::selected {
             # keep highlighted objects
             objs = self.getSelectedObjects()
             with self._guiTableUpdate(self._dataFrameObject):
-                # context manager performs the necessary operations to keep headers consistent
+                # context manager performs the necessary operations to keep headers consistent - empty dataFrameObject is handled there
                 pass
 
             self._highLightObjs(objs)
@@ -549,30 +551,36 @@ GuiTable::item::selected {
 
     def _doubleClickCallback(self, itemSelection):
 
+        # if nothing attached don't do anything
+        if not self._dataFrameObject:
+            return
+
         self._lastClick = 'doubleClick'
         with self._tableBlockSignals('_doubleClickCallback', blanking=False, _disableScroll=True):
 
             item = self.currentItem()
 
-            objs = None
+            # get the current selected objects from the table - objects now persistent after single-click
+            objList = []
             if self._lastSelection is not None:
-                objs = self._lastSelection['selection']
+                objList = self._lastSelection['selection']
+            # objList = self.getSelectedObjects()
 
             if item:
                 row = item.row()
                 col = item.column()
 
+                # get the row data corresponding to the row clicked
                 model = self.selectionModel()
                 selection = [iSelect for iSelect in model.selectedIndexes() if iSelect.row() == row]
-
-                if objs:
-                    # return the highlight to the previous selection
-                    self._highLightObjs(objs)
-
                 obj = self.getSelectedObjects(selection)
                 obj = obj[0] if obj else None
 
-                if obj:
+                # if objList:
+                #     # return the highlight to the previous selection
+                #     self._highLightObjs(objList)
+
+                if obj and objList:
                     # store the data for the clicked row
                     data = {}
                     for cc in range(self.columnCount()):
@@ -581,7 +589,7 @@ GuiTable::item::selected {
 
                     objIndex = item.index
                     data = CallBack(theObject=self._dataFrameObject,
-                                    object=objs if self.multiSelect else obj,       # single object or multi-selection
+                                    object=objList if self.multiSelect else obj,       # single object or multi-selection
                                     index=objIndex,
                                     targetName=obj.className,
                                     trigger=CallBack.DOUBLECLICK,
@@ -634,24 +642,31 @@ GuiTable::item::selected {
                 pulldown.setData(*val)
                 self.setCellWidget(row, col, pulldown)
 
-
             else:
                 item.setValue(val)
 
-    def _selectionTableCallback(self, itemSelection):
+    def _selectionTableCallback(self, itemSelection, mouseDrag=True):
         """Handler when selection has changed on the table
         This user changed only
         """
         # getLogger().debug('>>> %s _selectionTableCallback' % _moduleId(self.moduleParent), self._tableBlockingLevel)
 
-        # only call selection if it has changed
-        objs = self.getSelectedObjects()
-        if self._lastSelection is not None and set(objs) == set(self._lastSelection['selection']):
+        # if nothing attached don't do anything
+        if not self._dataFrameObject:
             return
+
+        # skip selection if it already exists and hasn't changed
+        # BUT, annoyingly, need an extra case for a single click on an already selected item
+        objList = self.getSelectedObjects()
+        if objList and self._lastSelection is not None and \
+                self._lastSelection['selection'] is not None and \
+                set(objList) == set(self._lastSelection['selection']):
+            if mouseDrag:
+                return
 
         # update selection
         self._lastSelection = {'clicked'       : self.currentItem(),
-                               'selection'     : self.getSelectedObjects(),
+                               'selection'     : objList,
                                'modelSelection': self.selectionModel().selectedIndexes(),
                                'selected'      : self.currentItem().isSelected() if self.currentItem() else None}
 
@@ -660,15 +675,12 @@ GuiTable::item::selected {
             # get whether current row is defined
             item = self.currentItem()
 
-            # get selected objects on the table
-            objList = self.getSelectedObjects()
-
             if item and objList and self._selectionCallback:
                 data = CallBack(theObject=self._dataFrameObject,
                                 object=objList,
                                 index=0,
                                 targetName=objList[0].className,
-                                trigger=CallBack.DOUBLECLICK,
+                                trigger=CallBack.CLICK,
                                 row=0,
                                 col=0,
                                 rowItem=None)
@@ -717,10 +729,24 @@ GuiTable::item::selected {
                                 checked=state)
             self._checkBoxCallback(data)
 
+    def hideDefaultColumns(self):
+        """If the table is empty then check visible headers against the last header hidden list
+        """
+        h = self.horizontalHeader()
+        for ii in range(h.count()):
+            headerItem = self.horizontalHeaderItem(ii)
+
+            # remember to hide th special column
+            if headerItem.text() in self._defaultHiddenColumns or headerItem.text() == DATAFRAME_OBJECT:
+                self.hideColumn(ii)
+
     def showColumns(self, dataFrameObject):
         # show the columns in the list
         for i, colName in enumerate(dataFrameObject.headings):
             if dataFrameObject.hiddenColumns:
+
+                # store the current hidden columns
+                self._defaultHiddenColumns = dataFrameObject.hiddenColumns
 
                 # always hide the special column DATAFRAME_OBJECT
                 if colName in dataFrameObject.hiddenColumns or colName == DATAFRAME_OBJECT:
@@ -822,8 +848,9 @@ GuiTable::item::selected {
             # if the mouse has been pressed, then re-enable selection if started a mouse drag, and override double-click
             if self._selectOverride and (event.pos() - self._mousePressedPos).manhattanLength() > QtWidgets.QApplication.startDragDistance():
                 # turn off selection blocking
-                self._handleCellClicked(event)
+                self._handleCellClickedExit()
 
+            # this is alter selection in a mouseDrag
             self._selectionTableCallback(None)
 
     def mousePressEvent(self, event):
@@ -854,15 +881,16 @@ GuiTable::item::selected {
             super(GuiTable, self).mousePressEvent(event)
 
             if self._selectOverride == False:
-                self._selectionTableCallback(None)
+                # False required as may be clicking on an already selected item to deselect everything else
+                self._selectionTableCallback(None, mouseDrag=False)
 
                 # disable selecting as there may be a double click
                 self.setSelectionMode(self.NoSelection)
 
                 self._selectOverride = True
 
-                # timer to re-enable
-                QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval() * 1.0,
+                # timer to re-enable table, smaller interval so that single click above doesn't look too delayed
+                QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval() * 0.75,
                                          partial(self._handleCellClicked, event))
 
         else:
@@ -874,13 +902,50 @@ GuiTable::item::selected {
         super(GuiTable, self).mouseReleaseEvent(event)
 
     def _handleCellClicked(self, event):
-        """handle a single click event, but ignore double click events
+        """handle a single click event, but ignore double click events,
+        with special case for clicking on an already selected item
+
+        The best way is to disable the selection model and then re-enable after a small time interval
         """
+        if self._lastClick == 'click':
+            objs = self.getSelectedObjects()
+            if objs and len(objs) > 1:
+                item = self.currentItem()
+                if item:
+                    self.clearSelection()
+
+                    # re-enable selecting so new item can be picked
+                    if self.multiSelect:
+                        self.setSelectionMode(self.ExtendedSelection)
+                    else:
+                        self.setSelectionMode(self.SingleSelection)
+
+                    # get the newly selected item
+                    self.setCurrentItem(item)
+                    model = self.selectionModel()
+                    selection = [iSelect for iSelect in model.selectedIndexes() if iSelect.row() == item.row()]
+                    obj = self.getSelectedObjects(selection)
+                    obj = obj[0] if obj else None
+
+                    if obj:
+                        self._lastSelection = {'clicked'       : self.currentItem(),
+                                               'selection'     : [obj],
+                                               'modelSelection': self.selectionModel().selectedIndexes(),
+                                               'selected'      : True}
+
+                        # fire the selection callback
+                        self._selectionTableCallback(None, mouseDrag=False)
+
+        # cleanup after double-click
+        self._handleCellClickedExit()
+
+    def _handleCellClickedExit(self):
         # re-enable selecting
         if self.multiSelect:
             self.setSelectionMode(self.ExtendedSelection)
         else:
             self.setSelectionMode(self.SingleSelection)
+
         self._lastClick = None
         self._selectOverride = False            # this may be handled by NoSelection
 
@@ -923,6 +988,9 @@ GuiTable::item::selected {
         action = self.tableMenu.exec_(self.mapToGlobal(pos))
 
     def _raiseHeaderContextMenu(self, pos):
+
+        if not self._dataFrameObject:
+            return
 
         if self._enableSearch and self.searchWidget is None:
             if not attachSearchWidget(self._parent, self):
@@ -1053,20 +1121,26 @@ GuiTable::item::selected {
             yield
 
         finally:
-            # needed after setting the column headings
-            self.setHorizontalHeaderLabels(dataFrameObject.headings)
-            self.showColumns(dataFrameObject)
+            if self._dataFrameObject:
+                # needed after setting the column headings
+                self.setHorizontalHeaderLabels(dataFrameObject.headings)
+                self.showColumns(dataFrameObject)
 
-            # required to make the header visible
-            self.setColumnCount(dataFrameObject.numColumns)
-            self.reindexTableObjects()
+                # required to make the header visible
+                self.setColumnCount(dataFrameObject.numColumns)
+                self._reindexTableObjects()
 
-            # re-sort the table
-            if sortColumn < self.columnCount():
-                self.sortByColumn(sortColumn, sortOrder)
+                # re-sort the table
+                if sortColumn < self.columnCount():
+                    self.sortByColumn(sortColumn, sortOrder)
 
-            # clear the dummy row
-            if dataFrameObject.dataFrame.empty:
+                # clear the dummy row
+                if dataFrameObject.dataFrame.empty:
+                    self.setRowCount(0)
+
+            else:
+                # usually called when clicking on a table header when an empty table
+                self.hideDefaultColumns()
                 self.setRowCount(0)
 
             # resize the columns if required (true by default)
@@ -1135,17 +1209,10 @@ GuiTable::item::selected {
 
         with self._tableBlockSignals('setTableFromDataFrameObject'):
 
+            # get the currently selected objects
             objs = self.getSelectedObjects()
 
             self._dataFrameObject = dataFrameObject
-            #
-            # if dataFrameObject.dataFrame.empty:
-            #   self.clearTable()
-            # else:
-            #   with self._updateTable(self._dataFrameObject):
-            #     self.setData(dataFrameObject.dataFrame.values)
-            #
-            # return
 
             with self._guiTableUpdate(dataFrameObject):
                 if not dataFrameObject.dataFrame.empty:
@@ -1154,44 +1221,11 @@ GuiTable::item::selected {
                     # set a dummy row of the correct length
                     self.setData([list(range(len(dataFrameObject.headings)))])
 
-            self.hide()
-            #self._silenceCallback = True
+                # store the current headings, in case table is cleared, to stop table jumping
+                self._defaultHeadings = dataFrameObject.headings
+                self._defaultHiddenColumns = dataFrameObject.hiddenColumns
 
-            # keep the original sorting method
-            sortOrder = self.horizontalHeader().sortIndicatorOrder()
-            sortColumn = self.horizontalHeader().sortIndicatorSection()
-
-            if not dataFrameObject.dataFrame.empty:
-                # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.ResizeToContents)
-
-                self.setData(dataFrameObject.dataFrame.values)
-            else:
-                # set a dummy row of the correct length
-                self.setData([list(range(len(dataFrameObject.headings)))])
-
-            # needed after setting the column headings
-            self.setHorizontalHeaderLabels(dataFrameObject.headings)
-            self.showColumns(dataFrameObject)
-            # self.resizeColumnsToContents()
-            # self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
-
-            # required to make the header visible
-            self.setColumnCount(dataFrameObject.numColumns)
-            self.reindexTableObjects()
-
-            # re-sort the table
-            if sortColumn < self.columnCount():
-                self.sortByColumn(sortColumn, sortOrder)
-
-            # clear the dummy row
-            if dataFrameObject.dataFrame.empty:
-                self.setRowCount(0)
-
-            #self._silenceCallback = False
-            # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
-            self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
-            self.resizeColumnsToContents()
-
+            # highlight them back again
             self._highLightObjs(objs)
 
         # outside of the with to spawn a repaint
@@ -1509,7 +1543,14 @@ GuiTable::item::selected {
         self.setRowCount(0)
         self.items = []
 
-    def reindexTableObjects(self):
+    def getIndexList(self, classItems, attribute):
+        """Get the list of objects on which to before the indexing
+        """
+        # classItem is usually a type such as PeakList, MultipletList
+        # with an attribute such as peaks/peaks
+        return getattr(classItems, attribute, None)
+
+    def _reindexTableObjects(self):
         """updating to make sure that the index of the item in the table matches the index of the item in the actual list
         """
         # this is for those objects that undo returns back to the table
@@ -1519,9 +1560,14 @@ GuiTable::item::selected {
             tSelect = getattr(self, self._tableData['tableSelection'])
             if tSelect:
 
+                # may need a special getter here
+                # e.g. a Muliplet has Multiplet.peaks
+                # but may want to list peaks from a list of multiplets, so need a new object
+                # currently just error check and skip
+                # OR just subclass this routine!
+
                 multiple = self._tableData['classCallBack']
-                # print(tSelect, multiple)
-                multipleAttr = getattr(tSelect, multiple)
+                multipleAttr = self.getIndexList(tSelect, multiple)
 
                 if multipleAttr:
                     # newIndex = [multipleAttr.index(rr) for rr in self._objects]

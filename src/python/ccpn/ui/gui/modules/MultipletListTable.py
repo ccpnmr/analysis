@@ -49,6 +49,7 @@ from ccpn.core.lib.peakUtils import getPeakPosition, getPeakAnnotation, getPeakL
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.util.OrderedSet import OrderedSet
 
 
 logger = getLogger()
@@ -211,7 +212,7 @@ class MultipletListTableWidget(GuiTable):
                          mainWindow=self.mainWindow,
                          dataFrameObject=None,
                          setLayout=True,
-                         autoResize=True, multiSelect=False,
+                         autoResize=True, multiSelect=True,
                          actionCallback=actionCallback,
                          selectionCallback=selectionCallback,
                          grid=(3, 0), gridSpan=(1, 6))
@@ -429,39 +430,35 @@ class MultipletListTableWidget(GuiTable):
             self._updateMultipletPeaksOnTable()
 
     def _updateMultipletPeaksOnTable(self):
-        if self.current.multiplet:
-            peaks = self.current.multiplet.peaks
-            if len(peaks) > 0:
-                peakList = peaks[-1].peakList  # needed to create the columns in the peak table
+        if self.current.multiplets:
 
-                self.peakListTable._selectedMultipletPeakList = self.current.multiplet
-                self.peakListTable._updateTable(useSelectedPeakList=False, peaks=peaks, peakList=peakList)
+            peaks = OrderedSet()
+            [peaks.add(peak) for mt in self.current.multiplets for peak in mt.peaks]
+            peaks = tuple(peaks)
+            if len(peaks) > 0:
+                peakList = peaks[0].peakList  # needed to create the columns in the peak table
+
+                if peakList:
+                    self.peakListTable._selectedMultipletPeakList = self.current.multiplets
+                    self.peakListTable._updateTable(useSelectedPeakList=False, peaks=peaks, peakList=peakList)
 
     def _populateMultipletPeaksOnTable(self):
         '''populates a dedicate peak table containing peaks of the current multiplet '''
 
-        multiplet = self.current.multiplet
-        if multiplet:
-            if len(multiplet.peaks) > 0:
+        peaks = OrderedSet()
+        [peaks.add(peak) for mt in self.current.multiplets for peak in mt.peaks]
+        peaks = tuple(peaks)
 
-                self.peakListTable.populateTable(rowObjects=multiplet.peaks,
-                                                 columnDefs=self.peakListTable._getTableColumns(
-                                                         multiplet.peaks[-1].peakList)
-                                                 )
+        if peaks:
+            # peakList may not exist for deleted objects
+            peakList = peaks[0].peakList
+            if peakList:
+                self.peakListTable.populateTable(rowObjects=peaks,
+                                                 columnDefs=self.peakListTable._getTableColumns(peakList))
 
-                # self.peakListTable._dataFrameObject = self.getDataFrameFromList(table=self,
-                #                                                                 buildList=multiplet.peaks,
-                #
-                #                                                                 colDefs=self.peakListTable._getTableColumns(
-                #                                                                         multiplet.peaks[-1].peakList),
-                #
-                #                                                                 hiddenColumns=self.peakListTable._hiddenColumns)
-                # # populate from the Pandas dataFrame inside the dataFrameObject
-                # self.peakListTable.setTableFromDataFrameObject(dataFrameObject=self.peakListTable._dataFrameObject)
-
-            else:
-                self.peakListTable.clear()
-                self.peakListTable._selectedMultipletPeakList = None
+        else:
+            self.peakListTable.clear()
+            self.peakListTable._selectedMultipletPeakList = None
 
     def _pulldownUnitsCallback(self, unit):
         # update the table with new units

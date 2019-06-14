@@ -296,7 +296,9 @@ class ResidueTable(GuiTable):
         """
         """
         objs = data[CallBack.OBJECT]
-        if isinstance(objs, (tuple, list)) and objs:
+        if not objs:
+            return
+        if isinstance(objs, (tuple, list)):
             residue = objs[0]
         else:
             residue = objs

@@ -249,8 +249,11 @@ class Multiplet(AbstractWrapperObject):
     @property
     def peaks(self) -> Optional[Tuple[Any]]:
         """List of peaks attached to the multiplet."""
-        return tuple([self._project._data2Obj[pk] for pk in self._wrappedData.sortedPeaks()
+        if self._wrappedData:
+            return tuple([self._project._data2Obj[pk] for pk in self._wrappedData.sortedPeaks()
                       if pk in self._project._data2Obj])
+        else:
+            return ()
 
     @peaks.setter
     @logCommand(get='self', isProperty=True)

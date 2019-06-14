@@ -359,7 +359,9 @@ class RestraintTable(GuiTable):
         Notifier DoubleClick action on item in table
         """
         objs = data[CallBack.OBJECT]
-        if isinstance(objs, (tuple, list)) and objs:
+        if not objs:
+            return
+        if isinstance(objs, (tuple, list)):
             restraint = objs[0]
         else:
             restraint = objs

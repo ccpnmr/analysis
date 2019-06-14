@@ -241,6 +241,7 @@ class ChemicalShiftTable(GuiTable):
                          actionCallback=actionCallback if actionCallback else self._actionCallback,
                          selectionCallback=selectionCallback if selectionCallback else self._selectionCallback,
                          grid=(3, 0), gridSpan=(1, 6),
+                         multiSelect=True
                          )
         self.moduleParent = moduleParent
 
@@ -253,7 +254,7 @@ class ChemicalShiftTable(GuiTable):
                                                                     grid=(1, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
                                                                     showSelectName=True,
                                                                     sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
-                                                                    callback=self._selectionPulldownCallback
+                                                                    callback=self._selectionPulldownCallback,
                                                                     )
 
         self.spacer = Spacer(self._widget, 5, 5,
@@ -269,7 +270,6 @@ class ChemicalShiftTable(GuiTable):
         # TODO: see how to handle peaks as this is too costly at present
         # Notifier object to update the table if the peaks change
         self._peaksNotifier = None
-        self._updateSilence = False  # flag to silence updating of the table
         # self._setNotifiers()
 
         # self.setColumns(self.CScolumns)   # ejb - moved here but doesn't allow changing of the columns
@@ -362,33 +362,15 @@ class ChemicalShiftTable(GuiTable):
                            columnDefs=self.CScolumns
                            )
 
-        # if not self._updateSilence:
-        #     self.project.blankNotification()
-        #     objs = self.getSelectedObjects()
-        #
-        #     self._dataFrameObject = self.getDataFrameFromList(table=self,
-        #                                                       buildList=chemicalShiftList.chemicalShifts,
-        #                                                       colDefs=self.CScolumns,
-        #                                                       hiddenColumns=self._hiddenColumns)
-        #
-        #     # populate from the Pandas dataFrame inside the dataFrameObject
-        #     self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
-        #     self._highLightObjs(objs)
-        #     self.project.unblankNotification()
-
-    def setUpdateSilence(self, silence):
-        """
-        Silences/unsilences the update of the table until switched again
-        """
-        self._updateSilence = silence
-
     def _actionCallback(self, data):
         """
         Notifier DoubleClick action on item in table
         """
         # multiselection table will return a list of objects
         objs = data[CallBack.OBJECT]
-        if isinstance(objs, (tuple, list)) and objs:
+        if not objs:
+            return
+        if isinstance(objs, (tuple, list)):
             obj = objs[0]
         else:
             obj = objs
@@ -404,22 +386,18 @@ class ChemicalShiftTable(GuiTable):
         # getLogger().debug('ChemicalShiftTable>>> selection', obj)
         # return
 
-        selected = data[CallBack.OBJECT]
+        objs = data[CallBack.OBJECT]
+        if not objs:
+            return
+        if isinstance(objs, (tuple, list)):
+            chemicalShift = objs[0]
+        else:
+            chemicalShift = objs
 
-        obj = None
-        if selected:
-            # if self.multiSelect:  #In this case selected is a List!!
-            #     if isinstance(selected, list):
-            #         obj = selected
-            # else:
+        if chemicalShift:
+            self.current.chemicalShift = chemicalShift
+            ChemicalShiftTableModule.currentCallback = {'object': self.chemicalShiftList, 'table': self}
 
-            obj = selected[0]
-
-        self.current.chemicalShift = obj
-        ChemicalShiftTableModule.currentCallback = {'object': self.chemicalShiftList, 'table': self}
-
-        if obj:  # should presumably always be the case
-            chemicalShift = obj
             self.current.nmrAtom = chemicalShift.nmrAtom
             self.current.nmrResidue = chemicalShift.nmrAtom.nmrResidue
 

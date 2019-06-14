@@ -325,7 +325,9 @@ class IntegralTable(GuiTable):
         Notifier DoubleClick action on item in table
         """
         objs = data[CallBack.OBJECT]
-        if isinstance(objs, (tuple, list)) and objs:
+        if not objs:
+            return
+        if isinstance(objs, (tuple, list)):
             integral = objs[0]
         else:
             integral = objs

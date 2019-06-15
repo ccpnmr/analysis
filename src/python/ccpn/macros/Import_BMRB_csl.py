@@ -259,8 +259,8 @@ class BMRBcslToV3(CcpnDialog):
 
 if __name__ == "__main__":
     from ccpn.ui.gui.widgets.Application import TestApplication
-    app = TestApplication()
+    # app = TestApplication()
     popup = BMRBcslToV3()
     popup.show()
     popup.raise_()
-    app.start()
+    # app.start()

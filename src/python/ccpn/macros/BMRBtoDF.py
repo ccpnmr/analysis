@@ -113,7 +113,7 @@ def makeCSLfromDF(df, chemicalShiftListName=None):
     return chemicalShiftList
 
 
-def _peaksFromCSList(csl, targetSpectrum=None, acMap=None ):
+def _simulatedSpectrumFromCSL(csl, axesCodesMap):
     """
     ac = {
         "H":"H",
@@ -121,23 +121,26 @@ def _peaksFromCSList(csl, targetSpectrum=None, acMap=None ):
         "Ca":"C"
         }
 
-    key= NmrAtom name as appears in the CSL ; value = Spectrum AxisCode
+    key= NmrAtom name as appears in the CSL ; value = AxisCode name to Assign to the Spectrum AxisCode
+    E.G. use NmrAtom Ca from CSL (imported from BMRB) and assign to a peak with axisCode named C
+
     :param csl: chemicalShiftList Object
     :param nmrAtomNames: tuple of str containing Atoms of interest
     :return:
     """
-    if acMap is None:
+    if csl is None:
+        print("Provide a Chemical Shift List")
+        return
+    if axesCodesMap is None:
         print("Select NmrAtom to use and axis codes")
         return
 
-    nmrAtomNames = list(acMap.keys())
-    if not targetSpectrum:
-        targetSpectrumAxCodes = list(acMap.values())
-        targetSpectrum = project.createDummySpectrum(axisCodes=targetSpectrumAxCodes, name=None)#, chemicalShiftList=csl)
-    peakList = targetSpectrum.newPeakList()
+    nmrAtomNames = list(axesCodesMap.keys())
+    targetSpectrumAxCodes = list(axesCodesMap.values())
+    targetSpectrum = project.createDummySpectrum(axisCodes=targetSpectrumAxCodes, name=None)#, chemicalShiftList=csl)
+    peakList = targetSpectrum.peakLists[-1]
 
     # filter by NmrAtom of interest
-
     nmrResiduesOD = od()
     for chemicalShift in csl.chemicalShifts:
         na = chemicalShift.nmrAtom
@@ -154,7 +157,6 @@ def _peaksFromCSList(csl, targetSpectrum=None, acMap=None ):
             atoms.append(v[0])
             shifts.append(v[1])
 
-        # try:
         targetSpectrumAxCodes = targetSpectrum.axisCodes
         axisCodes = [n.name for n in atoms]
         i = getAxisCodeMatchIndices(axisCodes,targetSpectrumAxCodes) # get the correct order.
@@ -165,33 +167,25 @@ def _peaksFromCSList(csl, targetSpectrum=None, acMap=None ):
         i = np.array(i)
         shifts = np.array(shifts)
         atoms = np.array(atoms)
-        # try: # trap unknown issues
-        peak = peakList.newPeak(list(shifts[i]))
-        for na, sa in zip(atoms[i],targetSpectrumAxCodes) :
-            print('Assign for',sa, [na])
-            peak.assignDimension(sa, [na])
-        # except Exception as e:
-        #     print('Error assigning NmrResidue %s . %s1' %(nmrResidue,e))
+        try: # trap unknown issues
+            peak = peakList.newPeak(list(shifts[i]))
+            for na, sa in zip(atoms[i],targetSpectrumAxCodes) :
+                peak.assignDimension(sa, [na])
+        except Exception as e:
+            print('Error assigning NmrResidue %s . %s1' %(nmrResidue,e))
 
 
-
-#
-isFromCcpn = True
-# for mybmrb in glob.glob(BmrbPath+'/*')
 #
 acMap = od([
             ("H", "H"),
-            ("N", "N"),
-            ("C", "C")]
-        )
+            ("HA", "H1")]
+            )
 
 mybmrb = '/Users/luca/AnalysisV3/src/python/ccpn/macros/nmrStar3_1Examples/test2'
 lines = _openBmrb(mybmrb)
 df = makeDataFrame(lines)
-if isFromCcpn:
-    with undoBlock():
-        csl = makeCSLfromDF(df, chemicalShiftListName='')
-        sp = project.spectra[-1]
-        _peaksFromCSList(csl,sp, acMap=acMap)
+with undoBlock():
+    csl = makeCSLfromDF(df, chemicalShiftListName='')
+    _simulatedSpectrumFromCSL(csl, axesCodesMap=acMap)
 
 

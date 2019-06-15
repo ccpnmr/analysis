@@ -132,15 +132,14 @@ def _peaksFromCSList(csl, targetSpectrum=None, acMap=None ):
 
     nmrAtomNames = list(acMap.keys())
     if not targetSpectrum:
-        axesCodes = list(acMap.values())
-        targetSpectrum = project.createDummySpectrum(axisCodes=axesCodes, name=None)#, chemicalShiftList=csl)
+        targetSpectrumAxCodes = list(acMap.values())
+        targetSpectrum = project.createDummySpectrum(axisCodes=targetSpectrumAxCodes, name=None)#, chemicalShiftList=csl)
     peakList = targetSpectrum.newPeakList()
 
     # filter by NmrAtom of interest
 
     nmrResiduesOD = od()
     for chemicalShift in csl.chemicalShifts:
-
         na = chemicalShift.nmrAtom
         if na.name in nmrAtomNames:
             try:
@@ -154,56 +153,25 @@ def _peaksFromCSList(csl, targetSpectrum=None, acMap=None ):
         for v in nmrResiduesOD[nmrResidue]:
             atoms.append(v[0])
             shifts.append(v[1])
-        print('NR: ', nmrResidue, atoms, shifts)
+
         # try:
+        targetSpectrumAxCodes = targetSpectrum.axisCodes
         axisCodes = [n.name for n in atoms]
-        i = getAxisCodeMatchIndices(axisCodes,targetSpectrum.axisCodes)
-        print('IND',i, len(i), len(nmrAtomNames))
-        if len(i) != len(nmrAtomNames):
-            diff_len = len(nmrAtomNames) - len(i)
-            axisCodes = axisCodes + [None] * diff_len
-            shifts = shifts + [None] * diff_len
-            atoms  = atoms  + [None] * diff_len
-            i = getAxisCodeMatchIndices(axisCodes, targetSpectrum.axisCodes)
-            print("%%",i)
+        i = getAxisCodeMatchIndices(axisCodes,targetSpectrumAxCodes) # get the correct order.
+        if len(i) != len(nmrAtomNames): #if not all the NmrAtoms are found for a specific CSL cannot make the peak, incomplete assignment/shifts
+            print('Skipping, not enough information to create and assign peak for NmrResidue: %s' %nmrResidue)
+            continue
+
         i = np.array(i)
-        ss = np.array(shifts)
-        ats = np.array(atoms)
-        print(ss,i, ats)
-        # peak = peakList.newPeak(list(ss[i]))
-        #
-        # for na in ats[i]:
-        #     print(na.name[0], [na])
-        #     peak.assignDimension(na.name[0], [na])
+        shifts = np.array(shifts)
+        atoms = np.array(atoms)
+        # try: # trap unknown issues
+        peak = peakList.newPeak(list(shifts[i]))
+        for na, sa in zip(atoms[i],targetSpectrumAxCodes) :
+            print('Assign for',sa, [na])
+            peak.assignDimension(sa, [na])
         # except Exception as e:
-        #     print('Error: ', e)
-
-
-        # shiftList.add(shift[0])
-        # peak = peakList.newPeak(position)
-    #     position = []
-    #     # nmrAtoms = []
-    #     for i in subset:
-    #         nmrAtom, shift = i
-    #         position.append(shift)
-    #         # nmrAtoms.append(nmrAtom)
-    #     # list1, list2 = nmrAtomNames, [n.name for n  in nmrAtoms]
-    #     # sortedNmrAtomNames = sorted(list2, key=lambda x: list1[list2.index(x)])
-    #     try:
-    #         peak = peakList.newPeak(position)
-    #         for nmrAtomName in nmrAtomNames:
-    #             atom = nmrResidue.fetchNmrAtom(name=str(nmrAtomName))
-    #             peak.assignDimension(axisCode=nmrAtomName[0], value=[atom])
-    #
-    #
-    #     except Exception as er:
-    #         print('ER __@@ ', er)
-
-
-
-            # peak = peakList.newPeak([chemicalShift.value])
-            # peak.assignDimension(axisCode=nmrAtom.name[0], value=[nmrAtom])
-
+        #     print('Error assigning NmrResidue %s . %s1' %(nmrResidue,e))
 
 
 
@@ -212,8 +180,8 @@ isFromCcpn = True
 # for mybmrb in glob.glob(BmrbPath+'/*')
 #
 acMap = od([
-            ("H", "Hn"),
-            ("N", "Nh"),
+            ("H", "H"),
+            ("N", "N"),
             ("C", "C")]
         )
 
@@ -223,6 +191,7 @@ df = makeDataFrame(lines)
 if isFromCcpn:
     with undoBlock():
         csl = makeCSLfromDF(df, chemicalShiftListName='')
-        _peaksFromCSList(csl, acMap=acMap)
+        sp = project.spectra[-1]
+        _peaksFromCSList(csl,sp, acMap=acMap)
 
 

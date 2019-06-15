@@ -172,16 +172,20 @@ def _simulatedSpectrumFromCSL(csl, axesCodesMap):
             for na, sa in zip(atoms[i],targetSpectrumAxCodes) :
                 peak.assignDimension(sa, [na])
         except Exception as e:
-            print('Error assigning NmrResidue %s . %s1' %(nmrResidue,e))
+            print('Error assigning NmrResidue %s , NmrAtoms: %s, Spectrum Axes: %s, Shifts: %s . Error: %s'
+                  %(nmrResidue,atoms,targetSpectrumAxCodes,shifts, e))
 
 
 #
 acMap = od([
-            ("H", "H"),
-            ("HA", "H1")]
+
+            ("N",  "N"),
+            ("H",  "H"),
+            ("CA", "C"),
+                ]
             )
 
-mybmrb = '/Users/luca/AnalysisV3/src/python/ccpn/macros/nmrStar3_1Examples/test2'
+mybmrb = '/Users/luca/AnalysisV3/src/python/ccpn/macros/nmrStar3_1Examples/bmr5493.str'
 lines = _openBmrb(mybmrb)
 df = makeDataFrame(lines)
 with undoBlock():

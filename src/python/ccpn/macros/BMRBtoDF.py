@@ -178,14 +178,14 @@ def _simulatedSpectrumFromCSL(csl, axesCodesMap):
 
 #
 acMap = od([
-
             ("N",  "N"),
             ("H",  "H"),
             ("CA", "C"),
-                ]
-            )
+             ])
 
-mybmrb = '/Users/luca/AnalysisV3/src/python/ccpn/macros/nmrStar3_1Examples/bmr5493.str'
+relativePath =os.path.join(mp,'nmrStar3_1Examples')
+fileName =  'bmr5493.str'
+mybmrb = os.path.join(relativePath,fileName)
 lines = _openBmrb(mybmrb)
 df = makeDataFrame(lines)
 with undoBlock():

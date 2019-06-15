@@ -1,4 +1,14 @@
-"""Module Documentation here
+"""
+A Pre-alpha BMRB Chemical Shift List Importer from NMR-STAR v3.1.
+This is not a full BMRB importer to Analysis V3.
+Please, read warnings and info message
+
+Usage:
+    - Menu Menus > Macro > Run... > Select this file.py
+    - select BMRB file  of interest
+    - select entries
+    - Create (click/read info more)
+
 
 """
 #=========================================================================================
@@ -19,7 +29,7 @@ __version__ = "$Revision: 3.0.b5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: CCPN $"
+__author__ = "$Author: Luca M $"
 __date__ = "$Date: 2019-06-12 10:28:40 +0000 (Wed, Jun 12, 2019) $"
 #=========================================================================================
 # Start of code
@@ -27,10 +37,10 @@ __date__ = "$Date: 2019-06-12 10:28:40 +0000 (Wed, Jun 12, 2019) $"
 
 
 
-warn = "Warning: This is only a pre-alpha BMRB Importer. It might not work or work partially. Always inspect the results!"
+Warnings = "Warning: This is only a Pre-alpha BMRB Importer. It might not work or work partially. Always inspect the results!"
 
-msg = """
-        This popup will create a new chemical shift list from the BMRB file selected.
+InfoMessage = """
+        This popup will create a new chemical shift list from the NMR-STAR v3.1 file selected.
         A new simulated Spectrum from the selected axesCodes and new simulated peakList from the selected BMRB Atom_ID. 
         Once the new assigned peaks are correctly imported, copy the new peakList to your target spectrum.
         
@@ -144,17 +154,12 @@ def makeCSLfromDF(df, chemicalShiftListName=None):
 
 def _simulatedSpectrumFromCSL(csl, axesCodesMap):
     """
-    ac = {
-        "H":"H",
-        "N":"N",
-        "Ca":"C"
-        }
 
     key= NmrAtom name as appears in the CSL ; value = AxisCode name to Assign to the Spectrum AxisCode
     E.G. use NmrAtom Ca from CSL (imported from BMRB) and assign to a peak with axisCode named C
 
     :param csl: chemicalShiftList Object
-    :param nmrAtomNames: tuple of str containing Atoms of interest
+    :param axesCodesMap: Ordered Dict containing Atoms of interest and parallel Spectrum Axes Codes
     :return:
     """
     if csl is None:
@@ -241,7 +246,7 @@ class BMRBcslToV3(CcpnDialog):
         self.buttonList = ButtonList(self, ['Info','Cancel', 'Create'], [self._showInfo, self.reject, self._okButton], grid=(row, 1))
 
     def _showInfo(self):
-        showWarning(warn, msg)
+        showWarning(Warnings, InfoMessage)
 
     def _okButton(self):
         self._axesCodesMap.clear()
@@ -262,8 +267,8 @@ class BMRBcslToV3(CcpnDialog):
 
 
 if __name__ == "__main__":
-    from ccpn.ui.gui.widgets.Application import TestApplication
-    app = TestApplication()
+    # from ccpn.ui.gui.widgets.Application import TestApplication
+    # app = TestApplication()
     relativePath = os.path.join(mp, 'nmrStar3_1Examples')
     fileName = 'bmr5493.str'
     mybmrb = os.path.join(relativePath, fileName)
@@ -275,4 +280,4 @@ if __name__ == "__main__":
     popup = BMRBcslToV3(axesCodesMap=exampleAxesCodesMap, bmrbFilePath=mybmrb, directory=relativePath)
     popup.show()
     popup.raise_()
-    app.start()
+    # app.start()

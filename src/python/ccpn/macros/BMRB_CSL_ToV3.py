@@ -184,7 +184,7 @@ def _simulatedSpectrumFromCSL(csl, axesCodesMap):
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.ui.gui.widgets.MessageDialog import showWarning, showInfo
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 
@@ -195,7 +195,7 @@ mybmrb = os.path.join(relativePath,fileName)
 class BMRBcslToV3(CcpnDialog):
 
 
-    def __init__(self, parent=None, title='Import CSL from BMRB (DEMO)', **kw):
+    def __init__(self, parent=None, title='Import CSL from BMRB (Pre-Alpha)', **kw):
         CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
 
 
@@ -212,11 +212,27 @@ class BMRBcslToV3(CcpnDialog):
         bmrbCodes = Label(self, text="BMRB NmrAtoms", grid=(row,0))
         self.bmrbCodesEntry = LineEdit(self, text=','.join(self._axesCodesMap.keys()), grid=(row, 1))
         row += 1
-        assignToSpectumCodes = Label(self, text="Assign To Axes ", grid=(row,0))
+        assignToSpectumCodes = Label(self, text="Assign To Axis", grid=(row,0))
         self.assignToSpectumCodes = LineEdit(self, text=','.join(self._axesCodesMap.values()), grid=(row, 1))
         row += 1
-        self.buttonList = ButtonList(self, ['Cancel', 'Create'], [self.reject, self._okButton], grid=(row, 1))
+        self.buttonList = ButtonList(self, ['Info','Cancel', 'Create'], [self._showInfo, self.reject, self._okButton], grid=(row, 1))
 
+    def _showInfo(self):
+        msg = """
+        This popup will create a new chemical shift list from the BMRB file selected.
+        A new simulated Spectrum from the selected axesCodes and new simulated peakList. 
+        
+        >>> BMRB NmrAtoms: Insert the NmrAtom which you want to import as appears in the BMRB file, comma separated. 
+        >>> Assign To Axis: Insert to which axis you want to assign the corresponding NmrAtom. 1:1
+        
+        Once the new assigned peaks are correctly imported, copy the new peakList on the target spectrum.
+        TBD, import multiple combination of nmrAtoms for same axisCode. 
+        Work-around: import twice.
+        E.g. first H,N,CA after H,N,CB, copy the two peakList to the target spectrum
+        
+        """
+        warn = "Warning: This is only a pre-alpha BMRB Importer. It might not work or work partially."
+        showWarning(warn, msg)
 
     def _okButton(self):
         """
@@ -243,8 +259,8 @@ class BMRBcslToV3(CcpnDialog):
 
 if __name__ == "__main__":
     from ccpn.ui.gui.widgets.Application import TestApplication
-    # app = TestApplication()
+    app = TestApplication()
     popup = BMRBcslToV3()
     popup.show()
     popup.raise_()
-    # app.start()
+    app.start()

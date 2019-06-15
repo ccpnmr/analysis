@@ -461,30 +461,30 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         lastProjectisTemporary = self._isTemporaryProject()
 
         # try and load the new project
-        try:
-            project = self._loadProjectSingleTry(projectDir)
-            return project
+        # try:
+        project = self._loadProjectSingleTry(projectDir)
+        return project
 
-        except Exception as es:
-            MessageDialog.showError('loadProject', 'Error loading project:\n%s\n\n%s\n\nReloading last saved position.' % (str(projectDir), str(es)))
-            Logging.getLogger().warning('Error loading project: %s - Reloading last saved position.' % str(projectDir))
-
-            if not lastProjectisTemporary:
-                # try and load the previous project (only one try)
-                try:
-                    project = self._loadProjectSingleTry(lastValidProject)
-                    return project
-
-                except Exception as es:
-                    MessageDialog.showError('loadProject', 'Error loading last project:\n%s\n\n%s' % (str(lastValidProject), str(es)))
-                    Logging.getLogger().warning('Error loading last project: %s' % str(lastValidProject))
-            else:
-                # open a new project again
-                project = self.application.newProject()
-                project._mainWindow.sideBar.buildTree(project)
-                project._mainWindow.show()
-                QtWidgets.QApplication.setActiveWindow(project._mainWindow)
-                return project
+        # except Exception as es:
+        #     MessageDialog.showError('loadProject', 'Error loading project:\n%s\n\n%s\n\nReloading last saved position.' % (str(projectDir), str(es)))
+        #     Logging.getLogger().warning('Error loading project: %s - Reloading last saved position.' % str(projectDir))
+        #
+        #     if not lastProjectisTemporary:
+        #         # try and load the previous project (only one try)
+        #         try:
+        #             project = self._loadProjectSingleTry(lastValidProject)
+        #             return project
+        #
+        #         except Exception as es:
+        #             MessageDialog.showError('loadProject', 'Error loading last project:\n%s\n\n%s' % (str(lastValidProject), str(es)))
+        #             Logging.getLogger().warning('Error loading last project: %s' % str(lastValidProject))
+        #     else:
+        #         # open a new project again
+        #         project = self.application.newProject()
+        #         project._mainWindow.sideBar.buildTree(project)
+        #         project._mainWindow.show()
+        #         QtWidgets.QApplication.setActiveWindow(project._mainWindow)
+        #         return project
 
     def loadProject(self, projectDir=None):
         """

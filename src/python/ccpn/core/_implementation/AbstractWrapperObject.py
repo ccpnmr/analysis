@@ -923,7 +923,10 @@ class AbstractWrapperObject(NotifierBase):
                         obj = childClass(project, apiObj)
                     else:
                         obj = factoryFunction(project, apiObj)
-                obj._initializeAll()
+                try:
+                    obj._initializeAll()
+                except Exception as er:
+                    getLogger().warn('Error initialising object %s. %s1' %(obj,er))
                 # getLogger().info(str(obj))   # ejb - temp
 
     def _unwrapAll(self):

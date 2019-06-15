@@ -113,7 +113,7 @@ def makeCSLfromDF(df, chemicalShiftListName=None):
     return chemicalShiftList
 
 
-def _peaksFromCSList(csl, targetSpectrum=None, nmrAtomNames:tuple=None, axesCodes=None):
+def _peaksFromCSList(csl, targetSpectrum=None, acMap=None ):
     """
     ac = {
         "H":"H",
@@ -121,14 +121,18 @@ def _peaksFromCSList(csl, targetSpectrum=None, nmrAtomNames:tuple=None, axesCode
         "Ca":"C"
         }
 
-
+    key= NmrAtom name as appears in the CSL ; value = Spectrum AxisCode
     :param csl: chemicalShiftList Object
     :param nmrAtomNames: tuple of str containing Atoms of interest
     :return:
     """
+    if acMap is None:
+        print("Select NmrAtom to use and axis codes")
+        return
 
-
+    nmrAtomNames = list(acMap.keys())
     if not targetSpectrum:
+        axesCodes = list(acMap.values())
         targetSpectrum = project.createDummySpectrum(axisCodes=axesCodes, name=None)#, chemicalShiftList=csl)
     peakList = targetSpectrum.newPeakList()
 
@@ -148,21 +152,29 @@ def _peaksFromCSList(csl, targetSpectrum=None, nmrAtomNames:tuple=None, axesCode
         shifts = []
         atoms = []
         for v in nmrResiduesOD[nmrResidue]:
-            print('IIII',v)
             atoms.append(v[0])
             shifts.append(v[1])
+        print('NR: ', nmrResidue, atoms, shifts)
         # try:
         axisCodes = [n.name for n in atoms]
-        i = np.array(getAxisCodeMatchIndices(nmrAtomNames,targetSpectrum.axisCodes))
-        print('IND',i)
+        i = getAxisCodeMatchIndices(axisCodes,targetSpectrum.axisCodes)
+        print('IND',i, len(i), len(nmrAtomNames))
+        if len(i) != len(nmrAtomNames):
+            diff_len = len(nmrAtomNames) - len(i)
+            axisCodes = axisCodes + [None] * diff_len
+            shifts = shifts + [None] * diff_len
+            atoms  = atoms  + [None] * diff_len
+            i = getAxisCodeMatchIndices(axisCodes, targetSpectrum.axisCodes)
+            print("%%",i)
+        i = np.array(i)
         ss = np.array(shifts)
         ats = np.array(atoms)
-        print(ss, i)
-        peak = peakList.newPeak(list(ss[i]))
-
-        for na in ats[i]:
-            print(na.name[0], [na])
-            peak.assignDimension(na.name[0], [na])
+        print(ss,i, ats)
+        # peak = peakList.newPeak(list(ss[i]))
+        #
+        # for na in ats[i]:
+        #     print(na.name[0], [na])
+        #     peak.assignDimension(na.name[0], [na])
         # except Exception as e:
         #     print('Error: ', e)
 
@@ -199,12 +211,18 @@ def _peaksFromCSList(csl, targetSpectrum=None, nmrAtomNames:tuple=None, axesCode
 isFromCcpn = True
 # for mybmrb in glob.glob(BmrbPath+'/*')
 #
+acMap = od([
+            ("H", "Hn"),
+            ("N", "Nh"),
+            ("C", "C")]
+        )
+
 mybmrb = '/Users/luca/AnalysisV3/src/python/ccpn/macros/nmrStar3_1Examples/test2'
 lines = _openBmrb(mybmrb)
 df = makeDataFrame(lines)
 if isFromCcpn:
     with undoBlock():
         csl = makeCSLfromDF(df, chemicalShiftListName='')
-        _peaksFromCSList(csl, nmrAtomNames=["H","HA"], axesCodes=['H','H1'])
+        _peaksFromCSList(csl, acMap=acMap)
 
 

@@ -176,20 +176,75 @@ def _simulatedSpectrumFromCSL(csl, axesCodesMap):
                   %(nmrResidue,atoms,targetSpectrumAxCodes,shifts, e))
 
 
-#
-acMap = od([
-            ("N",  "N"),
-            ("H",  "H"),
-            ("CA", "C"),
-             ])
+
+
+
+
+
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.popups.Dialog import CcpnDialog
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.ui.gui.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 
 relativePath =os.path.join(mp,'nmrStar3_1Examples')
 fileName =  'bmr5493.str'
 mybmrb = os.path.join(relativePath,fileName)
-lines = _openBmrb(mybmrb)
-df = makeDataFrame(lines)
-with undoBlock():
-    csl = makeCSLfromDF(df, chemicalShiftListName='')
-    _simulatedSpectrumFromCSL(csl, axesCodesMap=acMap)
+
+class BMRBcslToV3(CcpnDialog):
 
 
+    def __init__(self, parent=None, title='Import CSL from BMRB (DEMO)', **kw):
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+
+
+        self._axesCodesMap= od([
+                                    ("N",  "N"),
+                                    ("H",  "H"),
+                                    ("CA", "C"),
+                                    ])
+
+        row = 0
+        bmrbFileLabel = Label(self, text="BMRB File", grid=(row, 0))
+        self.inputDialog = LineEditButtonDialog(self, textLineEdit=mybmrb, directory=relativePath, grid=(row, 1))
+        row +=1
+        bmrbCodes = Label(self, text="BMRB NmrAtoms", grid=(row,0))
+        self.bmrbCodesEntry = LineEdit(self, text=','.join(self._axesCodesMap.keys()), grid=(row, 1))
+        row += 1
+        assignToSpectumCodes = Label(self, text="Assign To Axes ", grid=(row,0))
+        self.assignToSpectumCodes = LineEdit(self, text=','.join(self._axesCodesMap.values()), grid=(row, 1))
+        row += 1
+        self.buttonList = ButtonList(self, ['Cancel', 'Create'], [self.reject, self._okButton], grid=(row, 1))
+
+
+    def _okButton(self):
+        """
+
+        """
+        self._axesCodesMap.clear()
+
+        bmrbFile = self.inputDialog.get()
+        bmrbCodes = self.bmrbCodesEntry.get().replace(" ","").split(',')
+        assignToSpectumCodes = self.assignToSpectumCodes.get().replace(" ","").split(',')
+        for bmrbCode, sac in zip(bmrbCodes,assignToSpectumCodes):
+          self._axesCodesMap[bmrbCode]=sac
+        self._importAndCreateV3Objs(bmrbFile, self._axesCodesMap)
+        self.accept()
+
+
+    def _importAndCreateV3Objs(self, file, acMap):
+       lines = _openBmrb(file)
+       df = makeDataFrame(lines)
+       with undoBlock():
+           csl = makeCSLfromDF(df)
+           _simulatedSpectrumFromCSL(csl, axesCodesMap=acMap)
+
+
+if __name__ == "__main__":
+    from ccpn.ui.gui.widgets.Application import TestApplication
+    # app = TestApplication()
+    popup = BMRBcslToV3()
+    popup.show()
+    popup.raise_()
+    # app.start()

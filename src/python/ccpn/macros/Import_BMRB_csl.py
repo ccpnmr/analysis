@@ -27,6 +27,40 @@ __date__ = "$Date: 2019-06-12 10:28:40 +0000 (Wed, Jun 12, 2019) $"
 
 
 
+warn = "Warning: This is only a pre-alpha BMRB Importer. It might not work or work partially. Always inspect the results!"
+
+msg = """
+        This popup will create a new chemical shift list from the BMRB file selected.
+        A new simulated Spectrum from the selected axesCodes and new simulated peakList from the selected BMRB Atom_ID. 
+        Once the new assigned peaks are correctly imported, copy the new peakList to your target spectrum.
+        
+        >>> BMRB Atom_ID: Insert the NmrAtom which you want to import as appears in the BMRB file, comma separated. 
+            You will find these on the "Assigned chemical shift lists" table in the BMRB 3.1 Star file as:
+             _Atom_chem_shift.Atom_ID e.g. CA or HA 
+
+        >>> Assign To Axis: Insert to which axis you want to assign the corresponding NmrAtom. 1:1
+            These axes will be used to create a Simulated Spectrum. Specifying the axes is important for V3 for creating a new assignment,
+             especially for ambiguous assignemnts: e.g   
+             NmrAtom    -->   Axis Code
+              HA        -->     H1
+              HB        -->     H2
+
+        
+        Limitations: 
+        - Import multiple combination of nmrAtoms for same axisCode. 
+          Work-around: import twice.
+          E.g. first H,N,CA after H,N,CB, copy the two peakList to the target spectrum
+        - Peaks and assignments will be created only if all the selected nmrAtoms are present for the nmrResidue in the BMRB.
+          E.g  if select Atom_ID: N,H for this BMRB entry:
+          >>1 . 1 1   1   1 MET H  C 13  53.890 0.05 . 1 . . . . . . . . 5493 1 >> 
+            4 . 1 1   2   2 ILE N  N 15 126.655 0.04 . 1 . . . . . . . . 5493 1
+            5 . 1 1   2   2 ILE H  H  1  10.051 0.02 . 1 . . . . . . . . 5493 1
+           The residue 1 MET will be skipped as only the Atom_ID H is found.  
+            
+    """
+
+## Start of Macro
+
 import pandas as pd
 import os
 import glob
@@ -35,11 +69,6 @@ from collections import OrderedDict as od
 from ccpn.util.Common import getAxisCodeMatchIndices
 from ccpn.framework.PathsAndUrls import macroPath as mp
 from ccpn.core.lib.ContextManagers import undoBlock
-
-StarPath = 'nmrStar3_1Examples'
-BmrbPath = os.path.join(mp, StarPath)
-
-
 
 _Atom_chem_shift = "_Atom_chem_shift." # used to find the loop of interest in the BMRB and shorten the column header name on the DataFrame
 
@@ -55,7 +84,7 @@ Details = "Details"
 STOP = "stop_"
 Atom_chem_shift = _Atom_chem_shift+ID
 
-
+# NOT IN USE, just to map BMRB nomenclature to V3
 # V3_BMRB_map = {
 #                 "residueType"  : Comp_ID,  # nmrResidue, E.G ALA
 #                 "sequenceCode" : Seq_ID,   # nmrResidue, E.G 1
@@ -178,8 +207,9 @@ def _simulatedSpectrumFromCSL(csl, axesCodesMap):
 
 
 
-
-
+#######################################
+##############  GUI POPUP #############
+#######################################
 
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
@@ -188,28 +218,21 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning, showInfo
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 
-relativePath =os.path.join(mp,'nmrStar3_1Examples')
-fileName =  'bmr5493.str'
-mybmrb = os.path.join(relativePath,fileName)
 
 class BMRBcslToV3(CcpnDialog):
 
-
-    def __init__(self, parent=None, title='Import CSL from BMRB (Pre-Alpha)', **kw):
+    def __init__(self, parent=None, axesCodesMap=None, bmrbFilePath = None, directory=None,
+                 title='Import CSL from BMRB (Pre-Alpha)', **kw):
         CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
-
-
-        self._axesCodesMap= od([
-                                    ("N",  "N"),
-                                    ("H",  "H"),
-                                    ("CA", "C"),
-                                    ])
+        self.bmrbFilePath = bmrbFilePath or ''
+        self._axesCodesMap  = axesCodesMap or od() # Ordered dict as od([("HA","H")]) see info for more
+        self.directory = directory or ''
 
         row = 0
         bmrbFileLabel = Label(self, text="BMRB File", grid=(row, 0))
-        self.inputDialog = LineEditButtonDialog(self, textLineEdit=mybmrb, directory=relativePath, grid=(row, 1))
+        self.inputDialog = LineEditButtonDialog(self,textLineEdit=self.bmrbFilePath, directory=self.directory, grid=(row, 1))
         row +=1
-        bmrbCodes = Label(self, text="BMRB NmrAtoms (Atom_ID)", grid=(row,0))
+        bmrbCodes = Label(self, text="BMRB Atom_ID", grid=(row,0))
         self.bmrbCodesEntry = LineEdit(self, text=','.join(self._axesCodesMap.keys()), grid=(row, 1))
         row += 1
         assignToSpectumCodes = Label(self, text="Assign To Axis", grid=(row,0))
@@ -218,38 +241,10 @@ class BMRBcslToV3(CcpnDialog):
         self.buttonList = ButtonList(self, ['Info','Cancel', 'Create'], [self._showInfo, self.reject, self._okButton], grid=(row, 1))
 
     def _showInfo(self):
-        msg = """
-        This popup will create a new chemical shift list from the BMRB file selected.
-        A new simulated Spectrum from the selected axesCodes and new simulated peakList. 
-        
-        >>> BMRB NmrAtoms: Insert the NmrAtom which you want to import as appears in the BMRB file, comma separated. 
-            You will find these on the Assigned chemical shift lists in the BMRB 3.1 star file as:
-             _Atom_chem_shift.Atom_ID e.g. CA or HA 
-            
-        >>> Assign To Axis: Insert to which axis you want to assign the corresponding NmrAtom. 1:1
-            These axes will be used to create a Simulated Spectrum. Specifying the axes is important for V3 for creating a new assignment,
-             especially for unambiguous assignemnts: e.g   
-             NmrAtom    -->   Axis Code
-              HA        -->     H1
-              HB        -->     H2
-                                    
-        Once the new assigned peaks are correctly imported, copy the new peakList on the target spectrum.
-        Limitations: 
-        - Import multiple combination of nmrAtoms for same axisCode. 
-        Work-around: import twice.
-        E.g. first H,N,CA after H,N,CB, copy the two peakList to the target spectrum
-        - Peaks and assignments will be created only if all the selected nmrAtoms are present for the nmrResidue in the BMRB.
-        
-        """
-        warn = "Warning: This is only a pre-alpha BMRB Importer. It might not work or work partially."
         showWarning(warn, msg)
 
     def _okButton(self):
-        """
-
-        """
         self._axesCodesMap.clear()
-
         bmrbFile = self.inputDialog.get()
         bmrbCodes = self.bmrbCodesEntry.get().replace(" ","").split(',')
         assignToSpectumCodes = self.assignToSpectumCodes.get().replace(" ","").split(',')
@@ -257,7 +252,6 @@ class BMRBcslToV3(CcpnDialog):
           self._axesCodesMap[bmrbCode]=sac
         self._importAndCreateV3Objs(bmrbFile, self._axesCodesMap)
         self.accept()
-
 
     def _importAndCreateV3Objs(self, file, acMap):
        lines = _openBmrb(file)
@@ -270,7 +264,15 @@ class BMRBcslToV3(CcpnDialog):
 if __name__ == "__main__":
     from ccpn.ui.gui.widgets.Application import TestApplication
     app = TestApplication()
-    popup = BMRBcslToV3()
+    relativePath = os.path.join(mp, 'nmrStar3_1Examples')
+    fileName = 'bmr5493.str'
+    mybmrb = os.path.join(relativePath, fileName)
+    exampleAxesCodesMap = od([
+                            ("N", "N"),
+                            ("H", "H"),
+                            ("CA", "C"),
+                            ])
+    popup = BMRBcslToV3(axesCodesMap=exampleAxesCodesMap, bmrbFilePath=mybmrb, directory=relativePath)
     popup.show()
     popup.raise_()
     app.start()

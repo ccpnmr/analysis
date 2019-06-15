@@ -209,7 +209,7 @@ class BMRBcslToV3(CcpnDialog):
         bmrbFileLabel = Label(self, text="BMRB File", grid=(row, 0))
         self.inputDialog = LineEditButtonDialog(self, textLineEdit=mybmrb, directory=relativePath, grid=(row, 1))
         row +=1
-        bmrbCodes = Label(self, text="BMRB NmrAtoms", grid=(row,0))
+        bmrbCodes = Label(self, text="BMRB NmrAtoms (Atom_ID)", grid=(row,0))
         self.bmrbCodesEntry = LineEdit(self, text=','.join(self._axesCodesMap.keys()), grid=(row, 1))
         row += 1
         assignToSpectumCodes = Label(self, text="Assign To Axis", grid=(row,0))
@@ -223,12 +223,22 @@ class BMRBcslToV3(CcpnDialog):
         A new simulated Spectrum from the selected axesCodes and new simulated peakList. 
         
         >>> BMRB NmrAtoms: Insert the NmrAtom which you want to import as appears in the BMRB file, comma separated. 
+            You will find these on the Assigned chemical shift lists in the BMRB 3.1 star file as:
+             _Atom_chem_shift.Atom_ID e.g. CA or HA 
+            
         >>> Assign To Axis: Insert to which axis you want to assign the corresponding NmrAtom. 1:1
-        
+            These axes will be used to create a Simulated Spectrum. Specifying the axes is important for V3 for creating a new assignment,
+             especially for unambiguous assignemnts: e.g   
+             NmrAtom    -->   Axis Code
+              HA        -->     H1
+              HB        -->     H2
+                                    
         Once the new assigned peaks are correctly imported, copy the new peakList on the target spectrum.
-        TBD, import multiple combination of nmrAtoms for same axisCode. 
+        Limitations: 
+        - Import multiple combination of nmrAtoms for same axisCode. 
         Work-around: import twice.
         E.g. first H,N,CA after H,N,CB, copy the two peakList to the target spectrum
+        - Peaks and assignments will be created only if all the selected nmrAtoms are present for the nmrResidue in the BMRB.
         
         """
         warn = "Warning: This is only a pre-alpha BMRB Importer. It might not work or work partially."
@@ -259,8 +269,8 @@ class BMRBcslToV3(CcpnDialog):
 
 if __name__ == "__main__":
     from ccpn.ui.gui.widgets.Application import TestApplication
-    # app = TestApplication()
+    app = TestApplication()
     popup = BMRBcslToV3()
     popup.show()
     popup.raise_()
-    # app.start()
+    app.start()

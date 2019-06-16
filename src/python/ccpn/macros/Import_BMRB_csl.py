@@ -209,6 +209,12 @@ def _simulatedSpectrumFromCSL(csl, axesCodesMap):
             print('Error assigning NmrResidue %s , NmrAtoms: %s, Spectrum Axes: %s, Shifts: %s . Error: %s'
                   %(nmrResidue,atoms,targetSpectrumAxCodes,shifts, e))
 
+def _importAndCreateV3Objs(file, acMap):
+   lines = _openBmrb(file)
+   df = makeDataFrame(lines)
+   with undoBlock():
+       csl = makeCSLfromDF(df)
+       _simulatedSpectrumFromCSL(csl, axesCodesMap=acMap)
 
 
 
@@ -255,29 +261,31 @@ class BMRBcslToV3(CcpnDialog):
         assignToSpectumCodes = self.assignToSpectumCodes.get().replace(" ","").split(',')
         for bmrbCode, sac in zip(bmrbCodes,assignToSpectumCodes):
           self._axesCodesMap[bmrbCode]=sac
-        self._importAndCreateV3Objs(bmrbFile, self._axesCodesMap)
+        _importAndCreateV3Objs(bmrbFile, self._axesCodesMap)
         self.accept()
 
-    def _importAndCreateV3Objs(self, file, acMap):
-       lines = _openBmrb(file)
-       df = makeDataFrame(lines)
-       with undoBlock():
-           csl = makeCSLfromDF(df)
-           _simulatedSpectrumFromCSL(csl, axesCodesMap=acMap)
+
+
+############################################
+##############  INIT the Macro  ############
+############################################
 
 
 if __name__ == "__main__":
-    # from ccpn.ui.gui.widgets.Application import TestApplication
-    # app = TestApplication()
+
+    ui = False # Default open a popup for selecting the input
     relativePath = os.path.join(mp, 'nmrStar3_1Examples')
     fileName = 'bmr5493.str'
-    mybmrb = os.path.join(relativePath, fileName)
-    exampleAxesCodesMap = od([
+
+    mybmrb = os.path.join(relativePath, fileName) # replace with the bmrb file of interest if not using UI
+    exampleAxesCodesMap = od([                    # replace with the atom and axes of interest if not using UI
                             ("N", "N"),
                             ("H", "H"),
                             ("CA", "C"),
                             ])
-    popup = BMRBcslToV3(axesCodesMap=exampleAxesCodesMap, bmrbFilePath=mybmrb, directory=relativePath)
-    popup.show()
-    popup.raise_()
-    # app.start()
+    if ui:
+        popup = BMRBcslToV3(axesCodesMap=exampleAxesCodesMap, bmrbFilePath=mybmrb, directory=relativePath)
+        popup.show()
+        popup.raise_()
+    else:
+        _importAndCreateV3Objs(mybmrb, exampleAxesCodesMap)

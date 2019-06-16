@@ -4,11 +4,19 @@ This is not a full BMRB importer to Analysis V3.
 Please, read warnings and info message
 
 Usage:
+    UI
     - Menu Menus > Macro > Run... > Select this file.py
     - select BMRB file  of interest
     - select entries
-    - Create (click/read info more)
+    - Create
+    Non-UI:
+    - scroll down to "Init the macro section"
+    - replace filename path and axesCodesMap accordingly
+    - run the macro within V3
 
+1) Menu Menus > Macro > Run... > Select this file.py
+2) Menu Menus > View PythonConsole (space-space)
+                %run -i your/path/to/this/file.py (without quotes)
 
 """
 #=========================================================================================
@@ -35,7 +43,7 @@ __date__ = "$Date: 2019-06-12 10:28:40 +0000 (Wed, Jun 12, 2019) $"
 # Start of code
 #=========================================================================================
 
-
+_UI = True  # Default opens a popup for selecting the input and run the macro
 
 Warnings = "Warning: This is only a Pre-alpha BMRB Importer. It might not work or work partially. Always inspect the results!"
 
@@ -273,19 +281,18 @@ class BMRBcslToV3(CcpnDialog):
 
 if __name__ == "__main__":
 
-    ui = False # Default open a popup for selecting the input
     relativePath = os.path.join(mp, 'nmrStar3_1Examples')
     fileName = 'bmr5493.str'
 
-    mybmrb = os.path.join(relativePath, fileName) # replace with the bmrb file of interest if not using UI
-    exampleAxesCodesMap = od([                    # replace with the atom and axes of interest if not using UI
+    mybmrb = os.path.join(relativePath, fileName) # if not using UI:  replace with the full bmrb file path  of interest
+    axesCodesMap = od([                           #                   replace with the atom and axes of interest
                             ("N", "N"),
                             ("H", "H"),
                             ("CA", "C"),
                             ])
-    if ui:
-        popup = BMRBcslToV3(axesCodesMap=exampleAxesCodesMap, bmrbFilePath=mybmrb, directory=relativePath)
+    if _UI:
+        popup = BMRBcslToV3(axesCodesMap=axesCodesMap, bmrbFilePath=mybmrb, directory=relativePath)
         popup.show()
         popup.raise_()
     else:
-        _importAndCreateV3Objs(mybmrb, exampleAxesCodesMap)
+        _importAndCreateV3Objs(mybmrb, axesCodesMap)

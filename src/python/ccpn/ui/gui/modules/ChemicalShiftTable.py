@@ -194,7 +194,7 @@ class ChemicalShiftTable(GuiTable):
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None,
                  actionCallback=None, selectionCallback=None,
-                 chemicalShiftList=None, hiddenColumns=['Pid'], **kwds):
+                 chemicalShiftList=None, hiddenColumns=['Pid', 'NmrChain', 'Sequence Code', 'ResidueType'], **kwds):
         """
         Initialise the widgets for the module.
         """
@@ -217,6 +217,12 @@ class ChemicalShiftTable(GuiTable):
                  ('Pid', lambda cs: cs.pid, 'Pid of chemicalShift', None),
                  ('_object', lambda cs: cs, 'Object', None),
                  ('NmrResidue', lambda cs: cs._key.rsplit('.', 1)[0], 'NmrResidue Id', None),
+
+                 # ('testResidue', lambda cs: ChemicalShiftTable._getNmrResidue(cs), 'NmrResidue: nmrChain', None),  # should be the same as above
+                 ('NmrChain', lambda cs: ChemicalShiftTable._getNmrChain(cs), 'NmrChain containing the nmrResidue linked to this chemicalShift', None),
+                 ('Sequence Code', lambda cs: ChemicalShiftTable._getSequenceCode(cs), 'NmrResidue sequence code', None),
+                 ('ResidueType', lambda cs: ChemicalShiftTable._getResidueType(cs), 'NmrResidue residue type', None),
+
                  ('Name', lambda cs: cs._key.rsplit('.', 1)[-1], 'NmrAtom name', None),
                  ('Shift', lambda cs: '%8.3f' % ChemicalShiftTable._stLamFloat(cs, 'value'), 'Value of chemical shift, in selected ChemicalShiftList', None),
                  ('Std. Dev.', lambda cs: '%6.3f' % ChemicalShiftTable._stLamFloat(cs, 'valueError'),
@@ -430,6 +436,46 @@ class ChemicalShiftTable(GuiTable):
         """
         try:
             return float(getattr(row, name))
+        except:
+            return None
+
+    @staticmethod
+    def _getNmrChain(chemicalShift):
+        """
+        CCPN-INTERNAL: get the nmrChain for the nmrResidue associated with this chemicalShift
+        """
+        try:
+            return chemicalShift.nmrAtom.nmrResidue.nmrChain.id
+        except:
+            return None
+
+    @staticmethod
+    def _getSequenceCode(chemicalShift):
+        """
+        CCPN-INTERNAL: get the sequenceCode for the nmrResidue associated with this chemicalShift
+        """
+        try:
+            return chemicalShift.nmrAtom.nmrResidue.sequenceCode
+        except:
+            return None
+
+    @staticmethod
+    def _getResidueType(chemicalShift):
+        """
+        CCPN-INTERNAL: get the residueType for the nmrResidue associated with this chemicalShift
+        """
+        try:
+            return chemicalShift.nmrAtom.nmrResidue.residueType
+        except:
+            return None
+
+    @staticmethod
+    def _getNmrResidue(chemicalShift):
+        """
+        CCPN-INTERNAL: get the nmrResidue for the nmrResidue associated with this chemicalShift
+        """
+        try:
+            return chemicalShift.nmrAtom.nmrResidue
         except:
             return None
 

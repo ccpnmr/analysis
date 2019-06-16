@@ -1719,10 +1719,10 @@ class Spectrum(AbstractWrapperObject):
         limits = tuple(axisDict.values())
 
         # map from input codes to self, done this way as MAY (but shouldn't) contain any Nones
-        indices = getAxisCodeMatchIndices(codes, self.axisCodes)
+        indices = getAxisCodeMatchIndices(self.axisCodes, codes)
         for n, ind in enumerate(indices):
             if ind is not None:
-                regionToPick[ind] = limits[n]
+                regionToPick[n] = limits[ind]
 
         # convert the region limits to point coordinates with the dataSource
         dataDims = self._apiDataSource.sortedDataDims()
@@ -1814,7 +1814,8 @@ class Spectrum(AbstractWrapperObject):
             for n in range(numDim):
                 start = startPointBuffer[n]
                 end = endPointBuffer[n]
-                npts[n] = dataSource.findFirstDataDim(dim=n + 1).numPointsOrig
+                # npts[n] = dataSource.findFirstDataDim(dim=n + 1).numPointsOrig
+                npts[n] = spectrumReferences[n].numPointsOrig
                 tile0 = start // npts[n]
                 tile1 = (end - 1) // npts[n]
                 region = regions[n] = []

@@ -243,6 +243,11 @@ class SpectrumReference(AbstractWrapperObject):
         """ Point number (float) corresponding to (ppm) value"""
         return self._wrappedData.valueToPoint(value)
 
+    @property
+    def numPointsOrig(self) -> bool:
+        """numPointsOrig"""
+        return self._wrappedData.dataDim.numPointsOrig
+
     #=========================================================================================
     # Implementation functions
     #=========================================================================================

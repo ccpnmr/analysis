@@ -593,6 +593,11 @@ class DoubleSpinBoxCompoundWidget(CompoundBaseWidget):
         "set the value from the DoubleSpinBox"
         return self.doubleSpinBox.setValue(value)
 
+    def setCallback(self, callback):
+        """Set the callback for the doubleSpinBox
+        """
+        self.doubleSpinBox.setCallback(callback)
+
 
 class SelectorWidget(Widget):
 

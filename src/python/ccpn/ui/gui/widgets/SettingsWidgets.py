@@ -35,7 +35,6 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.CheckBoxes import CheckBoxes
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget, DoubleSpinBoxCompoundWidget
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.widgets.HLine import HLine
@@ -47,6 +46,9 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO, \
     SYMBOLTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, ANNOTATIONTYPES
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
+from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_REGIONSHADE
+from ccpn.util.Colour import hexToRgbRatio
+from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 
 
 ALL = '<all>'
@@ -450,8 +452,11 @@ class _commonSettings():
         # add labels for the columns
         spectraRow += 1
         Label(self._spectraWidget, 'Spectrum', grid=(spectraRow, 0))
-        for ii in range(self.maxLen):
-            Label(self._spectraWidget, 'Tolerance', grid=(spectraRow, ii + 1))
+
+        # for ii in range(self.maxLen):
+        #     Label(self._spectraWidget, 'Tolerance', grid=(spectraRow, ii + 1))
+        Label(self._spectraWidget, '(double-width tolerances)', grid=(spectraRow, 1), gridSpan=(1, self.maxLen))
+
         self.spectraStartRow = spectraRow + 1
 
         if self.application:
@@ -634,7 +639,7 @@ class StripPlot(Widget, _commonSettings):
         """
         # can't use setNotifier as not guaranteed a parent abstractWrapperObject
         self._spectrumViewNotifier = Notifier(self.project,
-                                              [Notifier.CREATE, Notifier.DELETE],       # DELETE not registering
+                                              [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],       # DELETE not registering
                                               SpectrumView.className,
                                               self._spectrumViewChanged,
                                               onceOnly=True)
@@ -709,17 +714,25 @@ class _SpectrumRow(Frame):
                     fixedWidths=(30, 50),
                     labelText=axisCode,
                     value=spectrum.assignmentTolerances[ii],
-                    decimals=decimals, step=step, range=(0, None))
+                    decimals=decimals, step=step, range=(0, None),
+                    )
             ds.setObjectName(str(spectrum.pid + axisCode))
             self.spinBoxes.append(ds)
 
             ds.setEnabled(visible)
+            ds.setCallback(partial(self._setAssignmentTolerances, ds, spectrum, ii))
 
         # brush = (*hexToRgbRatio(spectrum.positiveContourColour), CCPNGLWIDGET_REGIONSHADE)
         # self.guiRegion = GLTargetButtonSpinBoxes(parent, application=application,
         #                                          orientation='v', brush=brush,
         #                                          grid=(row, col))
 
+    def _setAssignmentTolerances(self, spinBox, spectrum, ii):
+        """Set the tolerance in the attached spectrum from the spinBox value
+        """
+        assignment = list(spectrum.assignmentTolerances)
+        assignment[ii] = float(spinBox.getValue())
+        spectrum.assignmentTolerances = tuple(assignment)
 
 class SequenceGraphSettings(Widget):  #, _commonSettings):
 

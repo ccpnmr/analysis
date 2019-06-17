@@ -36,6 +36,12 @@ from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.Common import getAxisCodeMatchIndices
 from collections import OrderedDict
+from ccpn.ui.gui.guiSettings import getColours, SOFTDIVIDER
+from ccpn.ui.gui.widgets.HLine import HLine
+from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise, DEFAULTLEVELS, DEFAULTMULTIPLIER, DEFAULTCONTOURBASE
+
+
+COL_WIDTH = 140
 
 
 class EstimateNoisePopup(CcpnDialog):
@@ -74,7 +80,11 @@ class EstimateNoisePopup(CcpnDialog):
         # add a tab for each spectrum in the spectrumDisplay
         self._noiseTab = []
         for specNum, thisSpec in enumerate(self.orderedSpectra):
-            self._noiseTab.append(NoiseTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec, strip=strip))
+            if thisSpec.dimensionCount > 1:
+                self._noiseTab.append(NoiseTabNd(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec, strip=strip))
+            else:
+                self._noiseTab.append(NoiseTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec, strip=strip))
+
             self.tabWidget.addTab(self._noiseTab[specNum], thisSpec.name)
 
         ButtonList(self, ['Close'], [self._accept], grid=(2, 3))
@@ -101,45 +111,50 @@ class EstimateNoisePopup(CcpnDialog):
 
 
 class NoiseTab(Widget):
-
+    """Class to contain the information for a single pectrum in the spectrum display
+    Holds the common values for 1d and Nd spectra
+    """
     def __init__(self, parent=None, mainWindow=None, spectrum=None, strip=None, **kwds):
+        """Initialise the tab settings
+        """
         super().__init__(parent, setLayout=True, **kwds)
 
         self._parent = parent
         self.mainWindow = mainWindow
         self.spectrum = spectrum
         self.strip = strip
+        self.noiseLevel = None
 
-        # set up the widgets
+        # set up the common widgets
         row = 0
 
         self.axisCodes = [i for i in range(len(spectrum.axisCodes))]
         for ii, axis in enumerate(spectrum.axisCodes):
             Label(self, text=axis, grid=(row, 0), vAlign='t', hAlign='l')
-            self.axisCodes[ii] = Label(self, text='<None>', grid=(row, 1), vAlign='t', hAlign='l')
+            self.axisCodes[ii] = Label(self, text='<None>', grid=(row, 1), gridSpan=(1, 2), vAlign='t', hAlign='l')
             row += 1
 
         Label(self, text='Mean', grid=(row, 0), vAlign='t', hAlign='l')
-        self.meanLabel = Label(self, text='<None>', grid=(row, 1), vAlign='t', hAlign='l')
+        self.meanLabel = Label(self, text='<None>', grid=(row, 1), gridSpan=(1, 2), vAlign='t', hAlign='l')
 
         row += 1
         Label(self, text='SD', grid=(row, 0), vAlign='t', hAlign='l')
-        self.SDLabel = Label(self, text='<None>', grid=(row, 1), vAlign='t', hAlign='l')
+        self.SDLabel = Label(self, text='<None>', grid=(row, 1), gridSpan=(1, 2), vAlign='t', hAlign='l')
 
         row += 1
         Label(self, text='Max', grid=(row, 0), vAlign='t', hAlign='l')
-        self.maxLabel = Label(self, text='<None>', grid=(row, 1), vAlign='t', hAlign='l')
+        self.maxLabel = Label(self, text='<None>', grid=(row, 1), gridSpan=(1, 2), vAlign='t', hAlign='l')
 
         row += 1
         Label(self, text='Min', grid=(row, 0), vAlign='t', hAlign='l')
-        self.minLabel = Label(self, text='<None>', grid=(row, 1), vAlign='t', hAlign='l')
+        self.minLabel = Label(self, text='<None>', grid=(row, 1), gridSpan=(1, 2), vAlign='t', hAlign='l')
 
         # row += 1
         # HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
 
         row += 1
         Label(self, text='Current Noise Level', grid=(row, 0), vAlign='t', hAlign='l')
-        self.currentNoiseLabel = Label(self, text='<None>', grid=(row, 1), vAlign='t', hAlign='l')
+        self.currentNoiseLabel = Label(self, text='<None>', grid=(row, 1), gridSpan=(1, 2), vAlign='t', hAlign='l')
         self.currentNoiseLabel.setText(str(self.spectrum.noiseLevel))
 
         row += 1
@@ -147,7 +162,10 @@ class NoiseTab(Widget):
         self.noiseLevelSpinBox = ScientificDoubleSpinBox(self, grid=(row, 1), vAlign='t')
         self.noiseLevelSpinBox.setMaximum(1e12)
         self.noiseLevelSpinBox.setMinimum(0.1)
-        self.noiseLevelButton = Button(self, grid=(row, 2), callback=self._setNoiseLevel, text='Apply')
+        self.noiseLevelButton = Button(self, grid=(row, 2), callback=self._setNoiseLevel, text='Set Noise')
+
+        # remember the row for subclassed Nd below
+        self.row = row
 
         # 20190606:ED This could be moved somewhere more sensible
 
@@ -175,34 +193,104 @@ class NoiseTab(Widget):
         # however, this shouldn't be needed of the range is > valuePrePoint in each dimension
 
         foundRegions = self.spectrum.getRegionData(minimumDimensionSize=1, **axisCodeDict)
-        if not foundRegions:
-            return
 
-        # just use the first region
-        for region in foundRegions[:1]:
-            dataArray, intRegion, *rest = region
+        if foundRegions:
 
-            if dataArray.size:
-                # calculate the noise values
-                flatData = dataArray.flatten()
+            # just use the first region
+            for region in foundRegions[:1]:
+                dataArray, intRegion, *rest = region
 
-                self.SD = np.std(flatData)
-                self.max = np.max(flatData)
-                self.min = np.min(flatData)
-                self.mean = np.mean(flatData)
-                self.noiseLevel = abs(self.mean) + 3.0 * self.SD
+                if dataArray.size:
+                    # calculate the noise values
+                    flatData = dataArray.flatten()
 
-                # populate the widgets
-                for ii, ind in enumerate(indices):
-                    self.axisCodes[ii].setText('(' + ','.join(['%.3f' % rr for rr in sortedSelectedRegion[ind]]) + ')')
+                    self.SD = np.std(flatData)
+                    self.max = np.max(flatData)
+                    self.min = np.min(flatData)
+                    self.mean = np.mean(flatData)
+                    self.noiseLevel = abs(self.mean) + 3.0 * self.SD
 
-                self.meanLabel.setText(str(self.mean))
-                self.SDLabel.setText(str(self.SD))
-                self.maxLabel.setText(str(self.max))
-                self.minLabel.setText(str(self.min))
-                self.noiseLevelSpinBox.setValue(self.noiseLevel)
+                    # populate the widgets
+                    for ii, ind in enumerate(indices):
+                        self.axisCodes[ii].setText('(' + ','.join(['%.3f' % rr for rr in sortedSelectedRegion[ind]]) + ')')
+
+                    self.meanLabel.setText(str(self.mean))
+                    self.SDLabel.setText(str(self.SD))
+                    self.maxLabel.setText(str(self.max))
+                    self.minLabel.setText(str(self.min))
+                    self.noiseLevelSpinBox.setValue(self.noiseLevel)
+
+        else:
+            # no regions so just put the current noise level back into the spinBox
+            self.noiseLevelSpinBox.setValue(self.spectrum.noiseLevel)
 
     def _setNoiseLevel(self):
         """Apply the current noiseLevel to the spectrum
         """
-        self.spectrum.noiseLevel = self.noiseLevel
+        self.spectrum.noiseLevel = float(self.noiseLevelSpinBox.value())
+
+
+class NoiseTabNd(NoiseTab):
+    """Class to contain the information for a single spectrum in the spectrum display
+    Holds the extra widgets for changing Nd contour settings
+    """
+    def __init__(self, parent=None, mainWindow=None, spectrum=None, strip=None, **kwds):
+        """Initialise the tab settings
+        """
+        super().__init__(parent=parent, mainWindow=mainWindow, spectrum=spectrum, strip=strip, **kwds)
+
+        row = self.row
+
+        row += 1
+        HLine(self, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[SOFTDIVIDER], height=15)
+
+        row += 1
+        Label(self, text='Estimate Contour Levels', grid=(row, 0), gridSpan=(1, 3), vAlign='t', hAlign='l')
+
+        from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
+
+        row += 1
+        self.setPositiveContours = CheckBoxCompoundWidget(self, grid=(row, 0), gridSpan=(1, 3),
+                                                          vAlign='top', stretch=(0, 0), hAlign='left',
+                                                          orientation='right', margins=(15, 0, 0, 0),
+                                                          labelText='Set positive contour levels',
+                                                          checked=True
+                                                          )
+
+        row += 1
+        self.setNegativeContours = CheckBoxCompoundWidget(self, grid=(row, 0), gridSpan=(1, 3),
+                                                          vAlign='top', stretch=(0, 0), hAlign='left',
+                                                          orientation='right', margins=(15, 0, 0, 0),
+                                                          labelText='Set negative contour levels',
+                                                          checked=True
+                                                          )
+
+        row += 1
+        self.setUseSameMultiplier = CheckBoxCompoundWidget(self, grid=(row, 0), gridSpan=(1, 3),
+                                                           vAlign='top', stretch=(0, 0), hAlign='left',
+                                                           orientation='right', margins=(15, 0, 0, 0),
+                                                           labelText='Use same (positive) multiplier for negative contours',
+                                                           checked=True
+                                                           )
+
+        row += 1
+        self.setDefaults = CheckBoxCompoundWidget(self, grid=(row, 0), gridSpan=(1, 3),
+                                                  vAlign='top', stretch=(0, 0), hAlign='left',
+                                                  orientation='right', margins=(15, 0, 0, 0),
+                                                  labelText='Use default multiplier (%0.3f)\n and contour level count (%i)' % (
+                                                      DEFAULTMULTIPLIER, DEFAULTLEVELS),
+                                                  checked=True
+                                                  )
+
+        row += 1
+        self.noiseLevelButton = Button(self, grid=(row, 2), callback=self._setContourLevels, text='Set Contours')
+
+    def _setContourLevels(self):
+        """Estimate the contour levels for the current spectrum
+        """
+        setContourLevelsFromNoise(self.spectrum, setNoiseLevel=False,
+                                  setPositiveContours=self.setPositiveContours.isChecked(),
+                                  setNegativeContours=self.setNegativeContours.isChecked(),
+                                  useSameMultiplier=self.setUseSameMultiplier.isChecked(),
+                                  useDefaultLevels=self.setDefaults.isChecked(),
+                                  useDefaultMultiplier=self.setDefaults.isChecked())

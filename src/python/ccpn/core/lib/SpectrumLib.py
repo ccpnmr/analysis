@@ -32,6 +32,7 @@ from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import getExpClassification
 from ccpnmodel.ccpncore.lib.Io import Formats
 
 import numpy as np
+from ccpn.util.Logging import getLogger
 
 
 MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple',
@@ -668,7 +669,7 @@ def _recurseData(ii, dataList, startCondition, endCondition):
 
 def _setApiContourLevelsFromNoise(apiSpectrum, setNoiseLevel=True,
                                   setPositiveContours=True, setNegativeContours=True,
-                                  useSameMultiplier=False):
+                                  useSameMultiplier=True):
     """Calculate the noise level, base contour level and positive/negative multipliers for the given apiSpectrum
     """
 
@@ -679,13 +680,20 @@ def _setApiContourLevelsFromNoise(apiSpectrum, setNoiseLevel=True,
         spectrum = project._data2Obj[apiSpectrum]
         if spectrum.dimensionCount == 1: return
         setContourLevelsFromNoise(spectrum, setNoiseLevel=setNoiseLevel,
-                                      setPositiveContours=setPositiveContours, setNegativeContours=setNegativeContours,
-                                      useSameMultiplier=useSameMultiplier)
+                                  setPositiveContours=setPositiveContours, setNegativeContours=setNegativeContours,
+                                  useSameMultiplier=useSameMultiplier)
+
+
+DEFAULTMULTIPLIER = 1.414214
+DEFAULTLEVELS = 10
+DEFAULTCONTOURBASE = 10000.0
 
 
 def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
                               setPositiveContours=True, setNegativeContours=True,
-                              useSameMultiplier=False):
+                              useDefaultMultiplier=True, useDefaultLevels=True, useDefaultContourBase=False,
+                              useSameMultiplier=True,
+                              defaultMultiplier = DEFAULTMULTIPLIER, defaultLevels=DEFAULTLEVELS, defaultContourBase=DEFAULTCONTOURBASE):
     """Calculate the noise level, base contour level and positive/negative multipliers for the given spectrum
     """
 
@@ -696,8 +704,22 @@ def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
         raise TypeError('setPositiveContours is not boolean.')
     if not isinstance(setNegativeContours, bool):
         raise TypeError('setNegativeContours is not boolean.')
+    if not isinstance(useDefaultMultiplier, bool):
+        raise TypeError('useDefaultMultiplier is not boolean.')
+    if not isinstance(useDefaultLevels, bool):
+        raise TypeError('useDefaultLevels is not boolean.')
+    if not isinstance(useDefaultContourBase, bool):
+        raise TypeError('useDefaultContourBase is not boolean.')
     if not isinstance(useSameMultiplier, bool):
         raise TypeError('useSameMultiplier is not boolean.')
+
+    if not (isinstance(defaultMultiplier, float) and defaultMultiplier > 0):
+        raise TypeError('defaultMultiplier is not a positive float.')
+    if not (isinstance(defaultLevels, int) and defaultLevels > 0):
+        raise TypeError('defaultLevels is not a positive int.')
+    if not (isinstance(defaultContourBase, float) and defaultContourBase > 0):
+        raise TypeError('defaultContourBase is not a positive float.')
+
     if spectrum.dimensionCount == 1:
         return
 
@@ -734,38 +756,65 @@ def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
                 endCondition = []
                 _recurseData(0, dataList, startCondition, endCondition)
 
-                levels = 10
-                base = abs(endCondition[5] + 3.0 * endCondition[6])  # abs(mean) + (3 * noiseLevel)
-                mx = startCondition[3]  # global array max
-                mn = startCondition[4]  # global array min
-
-                # calculate multiplier to give contours across range of spectrum; trap base = 0
-                posMult = pow(abs(mx / base), 1 / levels) if base else 0.0
-                if useSameMultiplier:
-                    negMult = posMult
+                if useDefaultLevels:
+                    posLevels = defaultLevels
+                    negLevels = defaultLevels
                 else:
-                    negMult = pow(abs(mn / base), 1 / levels) if base else 0.0
+                    # get from the spectrum
+                    posLevels = spectrum.positiveContourCount
+                    negLevels = spectrum.negativeContourCount
 
-                # put the new values into the spectrum
-                if setNoiseLevel:
-                    spectrum.noiseLevel = base
+                if useDefaultContourBase:
+                    base = defaultContourBase
+                    if setNoiseLevel:
+                        spectrum.noiseLevel = base
+                else:
+
+                    # calculate the base levels
+                    if setNoiseLevel:
+                        # put the new values into the spectrum
+                        base = abs(endCondition[5] + 3.0 * endCondition[6])  # abs(mean) + (3 * noiseLevel)
+                        spectrum.noiseLevel = base
+                    else:
+                        # get the noise from the spectrum
+                        base = spectrum.noiseLevel
+
+                if useDefaultMultiplier:
+                    # use default as root2
+                    posMult = negMult = defaultMultiplier
+                else:
+                    # calculate multiplier to give contours across range of spectrum; trap base = 0
+                    mx = startCondition[3]  # global array max
+                    mn = startCondition[4]  # global array min
+
+                    posMult = pow(abs(mx / base), 1 / posLevels) if base else 0.0
+                    if useSameMultiplier:
+                        negMult = posMult
+                    else:
+                        negMult = pow(abs(mn / base), 1 / negLevels) if base else 0.0
 
                 if setPositiveContours:
                     try:
                         spectrum.positiveContourBase = base
                         spectrum.positiveContourFactor = posMult
                     except Exception as es:
-                        spectrum.positiveContourBase = 10000  # default values
-                        spectrum.positiveContourFactor = 1.41
 
-                    spectrum.positiveContourCount = levels
+                        # set to defaults if an error occurs
+                        spectrum.positiveContourBase = defaultContourBase
+                        spectrum.positiveContourFactor = defaultMultiplier
+                        getLogger().warning('Error setting contour levels - %s', str(es))
+
+                    spectrum.positiveContourCount = posLevels
 
                 if setNegativeContours:
                     try:
                         spectrum.negativeContourBase = -base
                         spectrum.negativeContourFactor = negMult
                     except Exception as es:
-                        spectrum.negativeContourBase = -10000  # default values
-                        spectrum.negativeContourFactor = 1.41
 
-                    spectrum.negativeContourCount = levels
+                        # set to defaults if an error occurs
+                        spectrum.negativeContourBase = -defaultContourBase
+                        spectrum.negativeContourFactor = defaultMultiplier
+                        getLogger().warning('Error setting contour levels - %s', str(es))
+
+                    spectrum.negativeContourCount = negLevels

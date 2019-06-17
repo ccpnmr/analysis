@@ -144,7 +144,7 @@ def _shareYAxisItem(strip):
 def _contoursItem(strip):
     return _SCMitem(name='Contours...',
                     typeItem=ItemTypes.get(ITEM), icon='icons/contours', toolTip='Change Contour Settings',
-                    callback=strip.spectrumDisplay.adjustContours)
+                    callback=strip.spectrumDisplay.adjustContours, shortcut='CO')
 
 
 def _raiseContoursItem(strip):

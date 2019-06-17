@@ -691,7 +691,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             getLogger().info("estimating noise level for spectrum %s" % str(self.spectrum.pid))
             setContourLevelsFromNoise(self.spectrum, setNoiseLevel=True,
                                       setPositiveContours=True, setNegativeContours=True,
-                                      useSameMultiplier=False)
+                                      useSameMultiplier=True)
 
         if self.spectrum.positiveContourBase is None or self.spectrum.positiveContourBase == 0.0:
             raise RuntimeError('Positive Contour Base is not defined')

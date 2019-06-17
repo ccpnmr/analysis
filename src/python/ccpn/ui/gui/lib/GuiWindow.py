@@ -74,6 +74,7 @@ class GuiWindow():
         addShortCut("f, p", self, partial(navigateToCurrentPeakPosition, self.application), context=context)
         addShortCut("c, a", self, partial(AssignmentLib.propagateAssignments, current=self.application.current), context=context)
         addShortCut("c, z", self, self._clearCurrentPeaks, context=context)
+        addShortCut("c, o", self, self.setContourLevels, context=context)
 
         addShortCut("t, u", self, partial(self.traceScaleUp, self), context=context)
         addShortCut("t, d", self, partial(self.traceScaleDown, self), context=context)
@@ -460,6 +461,14 @@ class GuiWindow():
         """
         # self.application.current.peaks = []
         self.application.current.clearPeaks()
+
+    def setContourLevels(self):
+        """
+        Open the contour settings popup for the current strip
+        """
+        strip = self.application.current.strip
+        if strip:
+            strip.spectrumDisplay.adjustContours()
 
     def toggleCrosshairAll(self):
         """

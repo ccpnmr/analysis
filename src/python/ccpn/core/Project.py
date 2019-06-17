@@ -1203,7 +1203,7 @@ class Project(AbstractWrapperObject):
 
                 setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
                                           setPositiveContours=True, setNegativeContours=True,
-                                          useSameMultiplier=False)
+                                          useSameMultiplier=True)
 
             # set the positive/negative/slice colours
             from ccpn.core.lib.SpectrumLib import getDefaultSpectrumColours
@@ -1316,7 +1316,7 @@ class Project(AbstractWrapperObject):
             if not spectrum.noiseLevel:
                 setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
                                           setPositiveContours=True, setNegativeContours=True,
-                                          useSameMultiplier=False)
+                                          useSameMultiplier=True)
 
     #===========================================================================================
     # new'Object' and other methods

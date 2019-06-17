@@ -506,6 +506,8 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
     spectrum = window.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
     dataSource = spectrum._wrappedData
     project = window._project
+
+    axisOrder = spectrum.getDefaultOrdering(axisOrder)
     spectrumAxisCodes = spectrum.axisCodes
 
     mapIndices = ()

@@ -112,7 +112,7 @@ class Window(AbstractWrapperObject):
         else:
             return windowStore.sortedWindows()
 
-    @logCommand(get='self')
+    @logCommand('mainWindow.')
     def createSpectrumDisplay(self, spectrum, displayAxisCodes: Sequence[str] = (),
                               axisOrder: Sequence[str] = (), title: str = None, positions: Sequence[float] = (),
                               widths: Sequence[float] = (), units: Sequence[str] = (),
@@ -129,8 +129,7 @@ class Window(AbstractWrapperObject):
         """
         from ccpn.ui._implementation.SpectrumDisplay import _createSpectrumDisplay
 
-        axisOrder = spectrum.getDefaultOrdering(axisOrder)
-
+        # axisOrder = spectrum.getDefaultOrdering(axisOrder)
         # if not axisOrder:
         #     axisOption = self.application.preferences.general.axisOrderingOptions
         #

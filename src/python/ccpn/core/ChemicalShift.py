@@ -148,6 +148,11 @@ class ChemicalShift(AbstractWrapperObject):
     # Call appropriate routines in their respective locations
     #===========================================================================================
 
+    def _tryToRecover(self):
+        """Routine to try to recover an object that has not loaded correctly to repair integrity
+        """
+        pass
+
 #=========================================================================================
 # Connections to parents:
 #=========================================================================================
@@ -179,6 +184,14 @@ def _newChemicalShift(self: ChemicalShiftList, value: float, nmrAtom: NmrAtom,
     """
 
     nmrAtom = self.getByPid(nmrAtom) if isinstance(nmrAtom, str) else nmrAtom
+    if not nmrAtom:
+        try:
+            # if there is no nmrAtom, create a new one from the default chain
+            nmrChain = self.project.fetchNmrChain(shortName='@-')
+            nmrResidue = nmrChain.fetchNmrResidue()
+            nmrAtom = nmrResidue.fetchNmrAtom()
+        except Exception as es:
+            raise RuntimeError('chemicalShift: nmrAtom undefined - unable to create associated nmrAtom')
 
     apiShift = self._wrappedData.newShift(value=value,
                                      resonance=nmrAtom._wrappedData, error=valueError,

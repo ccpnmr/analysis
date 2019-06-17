@@ -3,33 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <title>NmrResidues</title>
+    <style >.action {color: #803594; font-weight:bold;}</style>
 </head>
 <body>
 <iframe width=80% height="315" src="https://www.youtube.com/embed/DS9IZzNsBbQ" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-<p>If you add a protein chain to your Analysis project, it will be described as a Chain, which contains Residues, which are of a particular Residue Type and in turn contain Atoms. So equally, looking at it the other way up, you can say that each Atom, is seen as belonging to a particular, Residue, Residue Type and Chain.
-    We write these as Chain.Residue.ResidueType.Atom. This is also referred to as the project ID or PID of an atom. In practice, this might look like this: A.46.Ala.HA</p>
-<p>In parallel to this, we denote an NMRChain, NMRResidue (with residue type) and NMRAtom. We use these as placeholders, or labels, to describe and hold onto the information we have about an atom, from our spectra, before we know which actual atom in our protein chain this corresponds to.
-    <br>The NmrChain can refer to any set of grouped residues. The residues don't have to be connected or ordered in any way. They may just all belong to the same protein. But they may also be small stretches of linked residues. You can have as many NmrChains as you want.
-    <br>An NmrResidue is basically a random temporary number which we use until we know what the real residue number is.
-    <br>The Residue Type may or may not be known, depending on the information we can obtain from our spectra.
-    <br>The NmrAtom may refer to a single atom or to a group of atoms, such as a methylene or methyl group.
-    <br>NmrChains, Residues and Atoms are denoted in the same way as real chains, residues and atom: NmrChain.NmrResidue.ResidueType.NmrAtom. And an example might be @1.@72.Ala.H@34</p>
-<p>If one part of the project ID is not known, such as the residue type, this is simply left blank, e.g. @1.@72..H@34</p>
-<p>We have a number of conventions for NmrChain, Residue and Atom names:
-    <br>@ always denotes something as being temporary: a temporary list or chain of residues, a temporary residue number, or a temporary atom name
-    <br>For NmrAtom names we have quite specific conventions: [Add]
-    <br># refers to a connected or ordered list of residues. So if you are able to link your NmrResidues based on your spectral information, they would be placed in an NmrChain beginning with a #.</p>
-<p>Finally, you can denote an NmrResidue as preceding another one by adding -1 to it. It is important to remember that the "-1" designation is treated as a string, as text, and denotes a connection - it is not a numerical, mathematical link. So you may have your real protein chain.
-And in parallel you have your NmrChain. You may have been able to assign an NmrChain of linked NmrResidues to your real protein chain. Now what happens to your @72-1 NmrResidue? If @72 is in fact Ala46,
-then surely @72-1 must be Lys45! In fact it matched to Ala46-1. That calculation 46-1 isn't actually performed. You can at a later stage (perhaps when you want to deposit your shifts, for example), merge 46-1 with 45. But that is a step that can't be undone. So 46-1 doesn't mean "45", it means "the predecessor of 46".
+<h2>NmrAtoms, NmrResidues and NmrChains</h2>
+<p>If you add a protein chain to your Analysis project, it will be described as a <span class="action">Chain</span>, which contains <span class="action">Residues</span>, which are of a particular <span class="action">Residue Type</span> and in turn contain <span class="action">Atoms</span>. So equally, looking at it the other way up, you can say that each Atom, is seen as belonging to a particular, Residue, Residue Type and Chain.
+    We write these as <span class="action">Chain.Residue.ResidueType.Atom</span>. This is also referred to as the project ID or <span class="action">PID</span> of an atom. In practice, this might look like this: <span class="action">A.46.Ala.HA</span></p>
+<p>In parallel to this, we denote an <span class="action">NmrChain</span>, <span class="action">NmrResidue</span> (with <span class="action">residue type</span>) and <span class="action">NmrAtom</span>. We use these as placeholders, or labels, to describe and hold onto the information we have about an atom, from our spectra, before we know which actual atom in our protein chain this corresponds to.
+    <br>The <span class="action">NmrChain</span> can refer to any set of grouped residues. The residues don't have to be connected or ordered in any way. They may just all belong to the same protein. But they may also be small stretches of linked residues. You can have as many NmrChains as you want.
+    <br>An <span class="action">NmrResidue</span> is basically a random temporary number which we use until we know what the real residue number is.
+    <br>The <span class="action">Residue Type</span> may or may not be known, depending on the information we can obtain from our spectra.
+    <br>The <span class="action">NmrAtom</span> may refer to a single atom or to a group of atoms, such as a methylene or methyl group.
+    <br>NmrChains, Residues and Atoms are denoted in the same way as real chains, residues and atom: <span class="action">NmrChain.NmrResidue.ResidueType.NmrAtom</span>. And an example might be <span class="action">@1.@72.Ala.H@34</span></p>
+<p>If one part of the project ID is not known, such as the residue type, this is simply left blank, e.g. <span class="action">@1.@72..H@34</span></p>
+<p>We have a number of conventions for NmrChain, Residue and Atom names:</p>
+<p><span class="action">@</span> always denotes something as being temporary: a temporary list or chain of residues, a temporary residue number, or a temporary atom name</p>
+<p>For <span class="action">NmrAtom names</span> we have quite specific conventions:
+    <br>NmrAtom names always start with the nucleus, and default names would be e.g. <span class="action">H@31</span> or <span class="action">C@88</span>.
+    <br><span class="action">%</span> means 'any number', so <span class="action">HB%</span> would be a beta methylene or methyl group, <span class="action">H%</span> would be the backbone NH<sub>3</sub> group
+    <br><span class="action">*</span> means 'any string', so <span class="action">H*</span> would be 'any proton in the residue'
+    <br>Names starting with <span class="action">M</span> and <span class="action">Q</span> are (proton) pseudoatom names
+    <br>Number suffixes follow NEF (IUPAC) convention, so serine <span class="action">HB2</span> or <span class="action">HB3</span> denote stereospecific assignments
+    <br>Suffixes <span class="action">x</span> and <span class="action">y</span> are used for non-stereospecific pairs, so the normal assignment to serine beta would use <span class="action">HBx</span> and <span class="action">HBy</span>; for e.g. isopropyl groups the <span class="action">x</span> and <span class="action">y</span> assignments match up between <sup>1</sup>H and <sup>13</sup>C so that <span class="action">Leu HDx%</span> are the methyl protons bound to <span class="action">Leu CDx</span> (NEF convention)</p>
+<p><span class="action">#</span> refers to a connected or ordered list of residues. So if you are able to link your NmrResidues based on your spectral information, they would be placed in an NmrChain beginning with a #.</p>
+<p>Finally, you can denote an NmrResidue as preceding another one by adding <span class="action">-1</span> to it. It is important to remember that the "-1" designation is treated as a string, as text, and denotes a connection - it is not a numerical, mathematical link. So you may have your real protein chain. And in parallel you have your NmrChain. You may have been able to assign an NmrChain of linked NmrResidues to your real protein chain. Now what happens to your @72-1 NmrResidue? If @72 is in fact Ala46, then surely @72-1 must be Lys45! In fact it is matched to Ala46-1. That calculation 46-1 isn't actually performed. You can at a later stage (perhaps when you want to deposit your shifts, for example), merge 46-1 with 45. But that is a step that can't be undone. So 46-1 doesn't mean "45", it means "the predecessor of 46".
     <br>And so when you make your assignments, the NmrAtoms in your NmrChain now become the same as the real protein chain. An NmrAtom is defined as being "assigned", when its label matches an Atom label.</p>
 <p>You can find your Chains and NmrChains in the sidebar with residues and atoms nested beneath them. There are many easy tools to edit existing or create new NmrAtoms, Residues and Chains.</p>
 <p>Remember that NmrAtoms are essentially just labels. They are, however, unique - as one label denotes one real thing (a real atom with a spin and a chemical shift). And so the same label should always be used whenever you know it is the same spin causing a peak (or restraint).</p>
-<p>So how do you work with NmrAtoms and Residues in your spectra and with your peaks? In a spectrum each dimension of a peak is associated with a chemical shift
+<p>So how do you work with NmrAtoms and NmrResidues in your spectra and with your peaks? In a spectrum each dimension of a peak is associated with a chemical shift
 which in turn is associated with one particular atom. So in a 2D HSQC, for example, each peak has one dimension belonging to a hydrogen atom and one to a nitrogen atom. Therefore, in the absence of an assignment, each of these two peak dimensions is associated with one NmrAtom.
 Of course, the HSQC spectrum is such that we know that those two atoms have to be bonded to one another and belong to the same residue. Therefore, the NmrChain and NmrResidue numbers are the same for both dimensions, and only the NmrAtom names differ.
-Analysis would typically abbreviate the peak label for such a peak to "@2.@72..H, N" to save space.
-    <br>Now we may have a second spectrum. And there we may have a peak, one of whose dimensions is associated with the same real atom as our HSQC peak, so it is then given the same NmrAtom label.
-    <br>If several peaks are assigned to the same NmrAtom, then the chemical shifts from these peaks are averaged, to give an average chemical shift for that NmrAtom or once it is assigned, for that atom.</p>
+Analysis would typically abbreviate the peak label for such a peak to <span class="action">@2.@72..H, N</span> to save space. Now we may have a second spectrum (e.g. a 2D Noesy spectrum). And there we may have a peak, one of whose dimensions is associated with the same real atom as our HSQC peak, so it is then given the same NmrAtom label.</p>
+<p>If several peaks are assigned to the same NmrAtom, then the chemical shifts from these peaks are averaged, to give an average chemical shift for that NmrAtom or once it is assigned, for that atom.</p>
 </body>
 </html>

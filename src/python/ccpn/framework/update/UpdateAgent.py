@@ -160,11 +160,12 @@ def uploadFile(serverUser, serverPassword, serverScript, fileName, serverDbRoot,
     try:
         with open(fileName, 'rb') as fp:
             fileData = fp.read()
-    except:
-        getLogger().warning('error reading file, not unicode')
+    except Exception as es:
+        getLogger().warning('error reading file,', str(es))
         fileData = ''
 
-    return uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot, fileStoredAs)
+    if fileData:
+        return uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot, fileStoredAs)
 
 
 class UpdateFile:

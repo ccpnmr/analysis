@@ -449,7 +449,7 @@ class _commonSettings():
 
             self._removeWidget(self._spectraWidget)
 
-        self._spectraWidget = Widget(parent=self, setLayout=True, hPolicy='minimal',
+        self._spectraWidget = Widget(parent=self.spectrumDisplayOptionsFrame, setLayout=True, hPolicy='minimal',
                                      grid=(2, 1), gridSpan=(self._spectraRows, 2), vAlign='top', hAlign='left')
 
         # calculate the maximum number of axes
@@ -474,8 +474,16 @@ class _commonSettings():
         self.axisCodeOptions.setCheckBoxes(texts=self.axisLabels, tipTexts=self.axisLabels)
 
         # set current selection back to the checkboxes
-        if currentSelection:
-            self.axisCodeOptions.setSelectedByText(currentSelection, True, presetAll=True)
+        # if currentSelection:
+        #     self.axisCodeOptions.setSelectedByText(currentSelection, True, presetAll=True)
+
+        # just clear the 'C' axes - this is the usual configuration
+        self.axisCodeOptions.selectAll()
+        for ii, box in enumerate(self.axisCodeOptions.checkBoxes):
+            if box.text().upper().startswith('C'):
+                self.axisCodeOptions.clearIndex(ii)
+
+
 
         # put in a divider
         spectraRow += 1
@@ -633,6 +641,7 @@ class StripPlot(Widget, _commonSettings):
         if self.includeNmrChainPullSelection:
             # add a pulldown to select an nmrChain
             row += 1
+
             self.ncWidget = NmrChainPulldown(parent=self,
                                              project=self.project, default=None,  #first NmrChain in project (if present)
                                              grid=(row, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
@@ -648,8 +657,12 @@ class StripPlot(Widget, _commonSettings):
             # create row's of spectrum information
             self._spectraRows = row + len(texts)
 
+            self.spectrumDisplayOptionsFrame = Frame(self, setLayout=True, showBorder=False, fShape='noFrame',
+                                       grid=(1, 1), gridSpan=(row+2, 1),
+                                       vAlign='top', hAlign='left')
+
             # add a new pullDown to select the active spectrumDisplay
-            self.spectrumDisplayPulldown = SpectrumDisplayPulldown(parent=self,
+            self.spectrumDisplayPulldown = SpectrumDisplayPulldown(parent=self.spectrumDisplayOptionsFrame,
                                                                    project=self.project, default=None,
                                                                    grid=(1, 1), gridSpan=(1, 1),
                                                                    minimumWidths=(0, 100),

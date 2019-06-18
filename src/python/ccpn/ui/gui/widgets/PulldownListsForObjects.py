@@ -334,7 +334,7 @@ def _definedBy(klass):
 
 
 class AtomPulldown(_PulldownABC):
-    """"A PulldownListCompoundWidget class for Atom's
+    """"A PulldownListCompoundWidget class for Atoms
     """
     from ccpn.core.Atom import Atom
 
@@ -343,7 +343,7 @@ class AtomPulldown(_PulldownABC):
 
 
 class CalculationStepPulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for CalculationStep's
+    """A PulldownListCompoundWidget class for CalculationSteps
     """
     from ccpn.core.CalculationStep import CalculationStep
 
@@ -352,7 +352,7 @@ class CalculationStepPulldown(_PulldownABC):
 
 
 class ChainPulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for Chain's
+    """A PulldownListCompoundWidget class for Chains
     """
     from ccpn.core.Chain import Chain
 
@@ -361,7 +361,7 @@ class ChainPulldown(_PulldownABC):
 
 
 class ChemicalShiftPulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for ChemicalShift's
+    """A PulldownListCompoundWidget class for ChemicalShifts
     """
     from ccpn.core.ChemicalShift import ChemicalShift
 
@@ -370,7 +370,7 @@ class ChemicalShiftPulldown(_PulldownABC):
 
 
 class ChemicalShiftListPulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for ChemicalShiftList's
+    """A PulldownListCompoundWidget class for ChemicalShiftLists
     """
     from ccpn.core.ChemicalShiftList import ChemicalShiftList
 
@@ -379,7 +379,7 @@ class ChemicalShiftListPulldown(_PulldownABC):
 
 
 class ComplexPulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for Complex's
+    """A PulldownListCompoundWidget class for Complexs
     """
     from ccpn.core.Complex import Complex
 
@@ -388,7 +388,7 @@ class ComplexPulldown(_PulldownABC):
 
 
 class DataPulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for Data's
+    """A PulldownListCompoundWidget class for Datas
     """
     from ccpn.core.Data import Data
 
@@ -397,7 +397,7 @@ class DataPulldown(_PulldownABC):
 
 
 class DataSetPulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for DataSet's
+    """A PulldownListCompoundWidget class for DataSets
     """
     from ccpn.core.DataSet import DataSet
 
@@ -406,7 +406,7 @@ class DataSetPulldown(_PulldownABC):
 
 
 class IntegralPulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for Integral's
+    """A PulldownListCompoundWidget class for Integrals
     """
     from ccpn.core.Integral import Integral
 
@@ -415,7 +415,7 @@ class IntegralPulldown(_PulldownABC):
 
 
 class IntegralListPulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for IntegralList's
+    """A PulldownListCompoundWidget class for IntegralLists
     """
     from ccpn.core.IntegralList import IntegralList
 
@@ -424,7 +424,7 @@ class IntegralListPulldown(_PulldownABC):
 
 
 class ModelPulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for Model's
+    """A PulldownListCompoundWidget class for Models
     """
     from ccpn.core.Model import Model
 
@@ -433,7 +433,7 @@ class ModelPulldown(_PulldownABC):
 
 
 class MultipletPulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for Multiplet's
+    """A PulldownListCompoundWidget class for Multiplets
     """
     from ccpn.core.Multiplet import Multiplet
 
@@ -442,7 +442,7 @@ class MultipletPulldown(_PulldownABC):
 
 
 class MultipletListPulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for MultipletList's
+    """A PulldownListCompoundWidget class for MultipletLists
     """
     from ccpn.core.MultipletList import MultipletList
 
@@ -451,7 +451,7 @@ class MultipletListPulldown(_PulldownABC):
 
 
 class NmrAtomPulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for NmrAtom's
+    """A PulldownListCompoundWidget class for NmrAtoms
     """
     from ccpn.core.NmrAtom import NmrAtom
 
@@ -460,7 +460,7 @@ class NmrAtomPulldown(_PulldownABC):
 
 
 class NmrChainPulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for NmrChain's
+    """A PulldownListCompoundWidget class for NmrChains
     """
     from ccpn.core.NmrChain import NmrChain
 
@@ -469,7 +469,7 @@ class NmrChainPulldown(_PulldownABC):
 
 
 class NmrResiduePulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for NmrResidue's
+    """A PulldownListCompoundWidget class for NmrResidues
     """
     from ccpn.core.NmrResidue import NmrResidue
 
@@ -478,7 +478,7 @@ class NmrResiduePulldown(_PulldownABC):
 
 
 class NotePulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for Note's
+    """A PulldownListCompoundWidget class for Notes
     """
     from ccpn.core.Note import Note
 
@@ -487,7 +487,7 @@ class NotePulldown(_PulldownABC):
 
 
 class PeakPulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for Peak's
+    """A PulldownListCompoundWidget class for Peaks
     """
     from ccpn.core.Peak import Peak
 
@@ -496,7 +496,7 @@ class PeakPulldown(_PulldownABC):
 
 
 class PeakClusterPulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for PeakCluster's
+    """A PulldownListCompoundWidget class for PeakClusters
     """
     from ccpn.core.PeakCluster import PeakCluster
 
@@ -505,7 +505,7 @@ class PeakClusterPulldown(_PulldownABC):
 
 
 class PeakListPulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for PeakList's
+    """A PulldownListCompoundWidget class for PeakLists
     """
     from ccpn.core.PeakList import PeakList
 
@@ -514,7 +514,7 @@ class PeakListPulldown(_PulldownABC):
 
 
 class PseudoDimensionPulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for PseudoDimension's
+    """A PulldownListCompoundWidget class for PseudoDimensions
     """
     from ccpn.core.PseudoDimension import PseudoDimension
 
@@ -523,7 +523,7 @@ class PseudoDimensionPulldown(_PulldownABC):
 
 
 class ResiduePulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for Residue's
+    """A PulldownListCompoundWidget class for Residues
     """
     from ccpn.core.Residue import Residue
 
@@ -532,7 +532,7 @@ class ResiduePulldown(_PulldownABC):
 
 
 class RestraintPulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for Restraint's
+    """A PulldownListCompoundWidget class for Restraints
     """
     from ccpn.core.Restraint import Restraint
 
@@ -541,7 +541,7 @@ class RestraintPulldown(_PulldownABC):
 
 
 class RestraintContributionPulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for RestraintContribution's
+    """A PulldownListCompoundWidget class for RestraintContributions
     """
     from ccpn.core.RestraintContribution import RestraintContribution
 
@@ -550,7 +550,7 @@ class RestraintContributionPulldown(_PulldownABC):
 
 
 class RestraintListPulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for RestraintList's
+    """A PulldownListCompoundWidget class for RestraintLists
     """
     from ccpn.core.RestraintList import RestraintList
 
@@ -559,7 +559,7 @@ class RestraintListPulldown(_PulldownABC):
 
 
 class SamplePulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for Sample's
+    """A PulldownListCompoundWidget class for Samples
     """
     from ccpn.core.Sample import Sample
 
@@ -568,7 +568,7 @@ class SamplePulldown(_PulldownABC):
 
 
 class SampleComponentPulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for SampleComponent's
+    """A PulldownListCompoundWidget class for SampleComponents
     """
     from ccpn.core.SampleComponent import SampleComponent
 
@@ -577,7 +577,7 @@ class SampleComponentPulldown(_PulldownABC):
 
 
 class SpectrumPulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for Spectrum's
+    """A PulldownListCompoundWidget class for Spectrums
     """
     from ccpn.core.Spectrum import Spectrum
 
@@ -586,7 +586,7 @@ class SpectrumPulldown(_PulldownABC):
 
 
 class SpectrumGroupPulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for SpectrumGroup's
+    """A PulldownListCompoundWidget class for SpectrumGroups
     """
     from ccpn.core.SpectrumGroup import SpectrumGroup
 
@@ -595,7 +595,7 @@ class SpectrumGroupPulldown(_PulldownABC):
 
 
 class SpectrumHitPulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for SpectrumHit's
+    """A PulldownListCompoundWidget class for SpectrumHits
     """
     from ccpn.core.SpectrumHit import SpectrumHit
 
@@ -604,7 +604,7 @@ class SpectrumHitPulldown(_PulldownABC):
 
 
 class SpectrumReferencePulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for SpectrumReference's
+    """A PulldownListCompoundWidget class for SpectrumReferences
     """
     from ccpn.core.SpectrumReference import SpectrumReference
 
@@ -613,7 +613,7 @@ class SpectrumReferencePulldown(_PulldownABC):
 
 
 class StructureEnsemblePulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for StructureEnsemble's
+    """A PulldownListCompoundWidget class for StructureEnsembles
     """
     from ccpn.core.StructureEnsemble import StructureEnsemble
 
@@ -622,9 +622,18 @@ class StructureEnsemblePulldown(_PulldownABC):
 
 
 class SubstancePulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for Substance's
+    """A PulldownListCompoundWidget class for Substances
     """
     from ccpn.core.Substance import Substance
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(Substance)
     _currentAttributeName = 'substances'
+
+
+class SpectrumDisplayPulldown(_PulldownABC):
+    """A PulldownListCompoundWidget class for SpectrumDisplays
+    """
+    from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
+
+    _klass, _className, _shortClassName, _attributeName = _definedBy(SpectrumDisplay)
+    _currentAttributeName = None

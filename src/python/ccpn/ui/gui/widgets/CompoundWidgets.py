@@ -157,6 +157,11 @@ class ListCompoundWidget(CompoundBaseWidget):
     #         self._preSelectCallBack()
     #     return False
 
+    def setLabelText(self, label):
+        """Set the text for the list widget label
+        """
+        self.label.setText(label)
+
     def setItems(self, list):
         """
         set the list of items in the pulldown

@@ -36,9 +36,9 @@ from ccpn.ui.gui.widgets.CheckBoxes import CheckBoxes
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget, DoubleSpinBoxCompoundWidget
-from ccpn.ui.gui.guiSettings import getColours, DIVIDER
+from ccpn.ui.gui.guiSettings import getColours, DIVIDER, SOFTDIVIDER
 from ccpn.ui.gui.widgets.HLine import HLine
-from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
+from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown, SpectrumDisplayPulldown
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui._implementation.SpectrumView import SpectrumView
 from functools import partial
@@ -49,6 +49,8 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_REGIONSHADE
 from ccpn.util.Colour import hexToRgbRatio
 from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
+from ccpn.util.Common import getAxisCodeMatchIndices
+from ccpn.util.OrderedSet import OrderedSet
 
 
 ALL = '<all>'
@@ -270,12 +272,13 @@ class _commonSettings():
     """
     Not to be used as a stand-alone class
     """
+
     # separated from settings widgets below, but only one seems to use it now
 
     def _getSpectraFromDisplays(self, displays):
         """Get the list of active spectra from the spectrumDisplays
         """
-        if not self.application:
+        if not self.application or not displays or len(displays) > 1:
             return 0, None, None, None
 
         from ccpn.util.Common import getAxisCodeMatch, getAxisCodeMatchIndices
@@ -284,6 +287,11 @@ class _commonSettings():
 
         # loop through all the selected displays/spectrumViews that are visible
         for dp in displays:
+
+            # ignore undefined displays
+            if not dp:
+                continue
+
             if dp.strips:
                 for sv in dp.strips[0].spectrumViews:
 
@@ -298,30 +306,55 @@ class _commonSettings():
             refAxisCodes = None
 
             # need a list of all unique axisCodes in the spectra in the selected spectrumDisplays
-
             from ccpn.util.OrderedSet import OrderedSet
 
-            # get list of unique axisCodes
-            visibleAxisCodes = OrderedSet()
-            for spectrum, visible in validSpectrumViews.items():
-                for axis in spectrum.axisCodes:
-                    visibleAxisCodes.add(axis)
+            # have to assume that there is only one display it this point
+            activeDisplay = displays[0]
 
-            # get mapping of each spectrum onto this list
+            # get list of unique axisCodes
+            visibleAxisCodes = {}
             spectrumIndices = {}
             for spectrum, visible in validSpectrumViews.items():
 
-                indices = getAxisCodeMatchIndices(spectrum.axisCodes, visibleAxisCodes, exactMatch=True)
+                indices = getAxisCodeMatchIndices(spectrum.axisCodes, activeDisplay.axisCodes)
                 spectrumIndices[spectrum] = indices
-                maxLen = max(spectrum.dimensionCount, maxLen)
+                for ii, axis in enumerate(spectrum.axisCodes):
+                    ind = indices[ii]
+                    if ind is not None:
+                        if ind in visibleAxisCodes:
+                            visibleAxisCodes[ind].add(axis)
+                        else:
+                            visibleAxisCodes[ind] = OrderedSet([axis])
 
-            # return if nothing to process
-            if not maxLen:
-                return 0, None, None, None
+            ll = len(activeDisplay.axisCodes)
+            axisLabels = [None] * ll
+            for ii in range(ll):
+                axisLabels[ii] = ', '.join(visibleAxisCodes[ii])
 
-            axisLabels = [', '.join(ax) for ax in visibleAxisCodes]
+            return ll, axisLabels, spectrumIndices, validSpectrumViews
 
-            return maxLen, tuple(visibleAxisCodes), spectrumIndices, validSpectrumViews
+            # from ccpn.util.OrderedSet import OrderedSet
+            #
+            # # get list of unique axisCodes
+            # visibleAxisCodes = OrderedSet()
+            # for spectrum, visible in validSpectrumViews.items():
+            #     for axis in spectrum.axisCodes:
+            #         visibleAxisCodes.add(axis)
+            #
+            # # get mapping of each spectrum onto this list
+            # spectrumIndices = {}
+            # for spectrum, visible in validSpectrumViews.items():
+            #     indices = getAxisCodeMatchIndices(spectrum.axisCodes, visibleAxisCodes, exactMatch=False)  #True)
+            #     spectrumIndices[spectrum] = indices
+            #     maxLen = max(spectrum.dimensionCount, maxLen)
+            #
+            # # return if nothing to process
+            # if not maxLen:
+            #     return 0, None, None, None
+            #
+            # axisLabels = [', '.join(ax) for ax in visibleAxisCodes]
+            #
+            # return maxLen, tuple(visibleAxisCodes), spectrumIndices, validSpectrumViews
 
             # for spectrum, visible in validSpectrumViews.items():
             #
@@ -390,6 +423,7 @@ class _commonSettings():
     def _removeWidget(self, widget):
         """Destroy a widget and all it's contents
         """
+
         def deleteItems(layout):
             if layout is not None:
                 while layout.count():
@@ -416,10 +450,12 @@ class _commonSettings():
             self._removeWidget(self._spectraWidget)
 
         self._spectraWidget = Widget(parent=self, setLayout=True, hPolicy='minimal',
-                                     grid=(0, 1), gridSpan=(self._spectraRows, 1), vAlign='top', hAlign='left')
+                                     grid=(2, 1), gridSpan=(self._spectraRows, 2), vAlign='top', hAlign='left')
 
         # calculate the maximum number of axes
         self.maxLen, self.axisLabels, self.spectrumIndex, self.validSpectrumViews = self._getSpectraFromDisplays(displays)
+        if not self.maxLen:
+            return
 
         # modifier for atomCode
         spectraRow = 0
@@ -441,13 +477,10 @@ class _commonSettings():
         if currentSelection:
             self.axisCodeOptions.setSelectedByText(currentSelection, True, presetAll=True)
 
-        if not self.maxLen:
-            return
-
         # put in a divider
         spectraRow += 1
         HLine(self._spectraWidget, grid=(spectraRow, 0), gridSpan=(1, 4),
-              colour=getColours()[DIVIDER], height=15)
+              colour=getColours()[SOFTDIVIDER], height=15)
 
         # add labels for the columns
         spectraRow += 1
@@ -466,11 +499,18 @@ class _commonSettings():
                 f = _SpectrumRow(parent=self._spectraWidget,
                                  application=self.application,
                                  spectrum=spectrum,
-                                 row=spectraRow, col=0,
+                                 spectrumDisplay=displays[0],
+                                 row=spectraRow, startCol=0,
                                  setLayout=True,
                                  visible=self.validSpectrumViews[spectrum])
 
                 spectraWidgets[spectrum.pid] = f
+
+    def _spectrumDisplaySelectionPulldownCallback(self, item):
+        """Notifier Callback for selecting a spectrumDisplay
+        """
+        gid = self.spectrumDisplayPulldown.getText()
+        self._fillSpectrumFrame([self.application.getByGid(gid)])
 
 
 class StripPlot(Widget, _commonSettings):
@@ -483,6 +523,7 @@ class StripPlot(Widget, _commonSettings):
                  includePeakLists=True, includeNmrChains=True, includeNmrChainPullSelection=False,
                  includeSpectrumTable=True,
                  defaultSpectrum=None,
+                 labelText='Display(s):',
                  **kwds):
         super().__init__(parent, setLayout=True, **kwds)
 
@@ -518,7 +559,7 @@ class StripPlot(Widget, _commonSettings):
 
         row += 1
         self.displaysWidget = SpectrumDisplaySelectionWidget(self, mainWindow=self.mainWindow, grid=(row, 0), gridSpan=(1, 1), texts=texts, displayText=[],
-                                                             displayWidgetChangedCallback=self._displayWidgetChanged)
+                                                             displayWidgetChangedCallback=self._displayWidgetChanged, labelText=labelText)
 
         row += 1
         self.sequentialStripsWidget = CheckBoxCompoundWidget(
@@ -606,7 +647,18 @@ class StripPlot(Widget, _commonSettings):
         if includeSpectrumTable:
             # create row's of spectrum information
             self._spectraRows = row + len(texts)
-            self._fillSpectrumFrame(self.displaysWidget._getDisplays())
+
+            # add a new pullDown to select the active spectrumDisplay
+            self.spectrumDisplayPulldown = SpectrumDisplayPulldown(parent=self,
+                                                                   project=self.project, default=None,
+                                                                   grid=(1, 1), gridSpan=(1, 1),
+                                                                   minimumWidths=(0, 100),
+                                                                   showSelectName=True,
+                                                                   sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
+                                                                   callback=self._spectrumDisplaySelectionPulldownCallback
+                                                                   )
+
+            # self._fillSpectrumFrame(self.displaysWidget._getDisplays())
 
         # add a spacer in the bottom-right corner to stop everything moving
         rows = self.getLayout().rowCount()
@@ -617,11 +669,18 @@ class StripPlot(Widget, _commonSettings):
 
         self._registerNotifiers()
 
+    def setLabelText(self, label):
+        """Set the text for the label attached to the list widget
+        """
+        self.displaysWidget.setLabelText(label)
+
     def _displayWidgetChanged(self):
         """Handle adding/removing items from display selection
         """
-        if self.includeSpectrumTable:
-            self._fillSpectrumFrame(self.displaysWidget._getDisplays())
+        pass
+
+        # if self.includeSpectrumTable:
+        #     self._fillSpectrumFrame(self.displaysWidget._getDisplays())
 
     def _changeAxisCode(self):
         """Handle clicking the axis code buttons
@@ -639,7 +698,7 @@ class StripPlot(Widget, _commonSettings):
         """
         # can't use setNotifier as not guaranteed a parent abstractWrapperObject
         self._spectrumViewNotifier = Notifier(self.project,
-                                              [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],       # DELETE not registering
+                                              [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],  # DELETE not registering
                                               SpectrumView.className,
                                               self._spectrumViewChanged,
                                               onceOnly=True)
@@ -654,13 +713,17 @@ class StripPlot(Widget, _commonSettings):
         """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame
         """
         if self.includeSpectrumTable:
-            self._fillSpectrumFrame(self.displaysWidget._getDisplays())
+            # self._fillSpectrumFrame(self.displaysWidget._getDisplays())
+            gid = self.spectrumDisplayPulldown.getText()
+            self._fillSpectrumFrame([self.application.getByGid(gid)])
 
     def _spectrumViewVisibleChanged(self):
         """Respond to a visibleChanged in one of the spectrumViews
         """
         if self.includeSpectrumTable:
-            self._fillSpectrumFrame(self.displaysWidget._getDisplays())
+            # self._fillSpectrumFrame(self.displaysWidget._getDisplays())
+            gid = self.spectrumDisplayPulldown.getText()
+            self._fillSpectrumFrame([self.application.getByGid(gid)])
 
     def doCallback(self):
         """Handle the user callback
@@ -694,7 +757,7 @@ class StripPlot(Widget, _commonSettings):
 class _SpectrumRow(Frame):
     "Class to make a spectrum row"
 
-    def __init__(self, parent, application, spectrum, row=0, col=0, visible=True, **kwds):
+    def __init__(self, parent, application, spectrum, spectrumDisplay, row=0, startCol=0, visible=True, **kwds):
         super().__init__(parent, **kwds)
 
         # col = 0
@@ -702,15 +765,21 @@ class _SpectrumRow(Frame):
         #                                        checked=True, labelText=spectrum.pid,
         #                                        fixedWidths=[100, 50])
 
-        self.checkbox = Label(parent, spectrum.pid, grid=(row, col), gridSpan=(1, 1), hAlign='left')
+        self.checkbox = Label(parent, spectrum.pid, grid=(row, startCol), gridSpan=(1, 1), hAlign='left')
         self.checkbox.setEnabled(visible)
 
         self.spinBoxes = []
+
+        indices = getAxisCodeMatchIndices(spectrum.axisCodes, spectrumDisplay.axisCodes)
+
         for ii, axisCode in enumerate(spectrum.axisCodes):
             decimals, step = (2, 0.01) if axisCode[0:1] == 'H' else (1, 0.1)
-            col += 1
+            # col += 1
+            if indices[ii] is None:
+                continue
+
             ds = DoubleSpinBoxCompoundWidget(
-                    parent, grid=(row, col), gridSpan=(1, 1), hAlign='left',
+                    parent, grid=(row, startCol + indices[ii] + 1), gridSpan=(1, 1), hAlign='left',
                     fixedWidths=(30, 50),
                     labelText=axisCode,
                     value=spectrum.assignmentTolerances[ii],
@@ -733,6 +802,7 @@ class _SpectrumRow(Frame):
         assignment = list(spectrum.assignmentTolerances)
         assignment[ii] = float(spinBox.getValue())
         spectrum.assignmentTolerances = tuple(assignment)
+
 
 class SequenceGraphSettings(Widget):  #, _commonSettings):
 

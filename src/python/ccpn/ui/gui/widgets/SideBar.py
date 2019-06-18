@@ -1161,7 +1161,8 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
 
     def _keyPressEvent(self, event):
         """This functionality is under testing. Used for quickly display spectra via key press on
-        sidebar on large datasets """
+        sidebar on large datasets on the current strip. Only work if spectra are of the same type
+        (previous/next same as currently displayed) Usefull for screening """
         if event.key() == QtCore.Qt.Key_Up:
             super().keyPressEvent(event)
             self._displaySelectedSpectrum()

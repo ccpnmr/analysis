@@ -44,19 +44,20 @@ Run:
 
 """
 WorkingPathDir = ''
-ReferenceSpectraPath = '' # top dir path containing all reference files
-ControlSpectraPath=''
-TargetSpectraPath=''
+ReferenceSpectraPath = '/Users/luca/Desktop/DFCI/cpmg_development/4A_data/NMX_BionetG2_NMR_data' # top dir path containing all reference files
+ControlSpectraPath= '/Users/luca/Desktop/DFCI/cpmg_development/4A_data/4A_H2_SF'
+TargetSpectraPath= '/Users/luca/Desktop/DFCI/cpmg_development/4A_data/4A_H2_SP'
+
 
 ReferenceSpectrumGroupName = 'References'
-ControlSampleName_prefix = 'Control_' # use for creating sample name identifier.
-TargetSampleName_prefix = 'Target_'  # use for creating sample name identifier.
+ControlSampleName_prefix = 'Control_SF' # use for creating sample name identifier.
+TargetSampleName_prefix = 'Target_SP'  # use for creating sample name identifier.
 
 ## Only for Bruker files. The sub directories containing the spectra to import
 Bruker_expNo_SubDirectory = '1' # Default Take the first experiment if multiple
 Bruker_pdata_SubDirectory = '1' # Default Take the first processing file if multiple
 
-outputPath = ''
+outputPath = '/Users/luca/Desktop/DFCI/cpmg_development/4A_data'
 outputName = 'lookupFile.xls'
 
 '''
@@ -75,13 +76,13 @@ outputName = 'lookupFile.xls'
 ReferenceExperimentType = 'H'
 ExperimentTypesMap = {
     'H'     : {'0': None},
-    'CPMG_0': {'01': ('0', 'ms')},
-    'CPMG_1': {'02': ('45', 'ms')},
-    'CPMG_2': {'03': ('50', 'ms')},
-    'CPMG_3': {'04': ('100', 'ms')},
-    'CPMG_4': {'05': ('300', 'ms')},
-    'CPMG_5': {'06': ('500', 'ms')},
-    'CPMG_6': {'07': ('800', 'ms')},
+    'CPMG_0': {'01': (0, 'ms')},
+    'CPMG_1': {'02': (45, 'ms')},
+    'CPMG_2': {'03': (50, 'ms')},
+    'CPMG_3': {'04': (100, 'ms')},
+    'CPMG_4': {'05': (300, 'ms')},
+    'CPMG_5': {'06': (500, 'ms')},
+    'CPMG_6': {'07': (800, 'ms')},
     'ON'    : {'08': None},
     'OFF'   : {'09': None},
     }
@@ -98,10 +99,8 @@ from ccpn.util import ExcelReader as er
 
 
 from ccpn.util.ExcelReader import ExcelReader
-wp = '/Users/luca/Desktop/DFCI/cpmg_development/'
-p = '/Users/luca/Desktop/sp2'
-references = '/Users/luca/Desktop/DFCI/cpmg_development/4A_data/NMX_BionetG2_NMR_data'
-tw = '/Users/luca/AnalysisV3/data/testProjects/AnalysisScreen_Demo1/demoDatasetHDF5/WL'
+
+
 
 def getSpectraNames(topDirPath, fileType):
     """
@@ -116,13 +115,15 @@ def getSpectraNames(topDirPath, fileType):
         names = [n.split('.')[0] for n in os.listdir(topDirPath) if n.endswith(fileType)]
         return names
 
+def get_last_digits(num, last_digits_count=2):
+    return int(str(num)[-last_digits_count:])
 
 
 
-ps = ioFormats._searchSpectraPathsInSubDir(references)
-filteredReferencePaths = er._filterBrukerExperiments(ps, multipleExp=True)
+ref1r = ioFormats._searchSpectraPathsInSubDir(ReferenceSpectraPath)
+filteredReferencePaths = er._filterBrukerExperiments(ref1r, multipleExp=True) #these Bruker Files ahave multiple experiments on the top dir
 referenceExperimentTypes = [ReferenceExperimentType]*len(filteredReferencePaths)
-referenceNames = getSpectraNames(references, '1r')
+referenceNames = getSpectraNames(ReferenceSpectraPath, '1r')
 
 pathMatchesName = all([name in path.split('/') for name, path in zip(referenceNames,filteredReferencePaths) ])
 referenceDataFrame = er.getDefaultSubstancesDF()
@@ -132,20 +133,26 @@ if pathMatchesName:
     setattr(referenceDataFrame, er.SPECTRUM_GROUP_NAME, ReferenceSpectrumGroupName)
     setattr(referenceDataFrame, er.EXP_TYPE, ReferenceExperimentType)
 
-# Create a DataFrame object
-print(referenceDataFrame)
+
+# samplesWithoutTarget
+control1r = ioFormats._searchSpectraPathsInSubDir(ControlSpectraPath)
+controlSpectra =  er._filterBrukerExperiments(control1r, multipleExp=False)
+controlNames = getSpectraNames(ControlSpectraPath, '1r')
+
+for i in controlNames:
+ lastDigit = get_last_digits(int(112),2)
+
+
+print(sorted([int(i) for i in controlNames]))
+
+
 if outputPath:
     outputPath = outputPath + '/' + outputName if not outputPath.endswith('/') else outputPath + outputName
 else:
     outputPath = os.getcwd() + '/' + outputName if not outputPath.endswith('/') else os.getcwd() + outputName
 
-writer = pd.ExcelWriter(outputPath, engine='xlsxwriter')
-referenceDataFrame.to_excel(writer, sheet_name=er.SUBSTANCE)
-writer.save()
-
-
-# for ind in range(len(df.index)):
-# df.loc['c'] = ['Smriti', 26, 'Bangalore',*['' for i in range(1)]]
-
-# wr = er.makeTemplate( '/Users/luca/Desktop')
-
+if True:
+# Create a Excel Writer object
+    writer = pd.ExcelWriter(outputPath, engine='xlsxwriter')
+    referenceDataFrame.to_excel(writer, sheet_name=er.SUBSTANCE)
+    writer.save()

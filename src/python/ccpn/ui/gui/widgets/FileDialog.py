@@ -32,8 +32,7 @@ import os
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.util.Path import aPath
-
-
+from ccpn.util.Common import makeIterableList
 
 
 class FileDialog(QtWidgets.QFileDialog):
@@ -78,7 +77,9 @@ class FileDialog(QtWidgets.QFileDialog):
             }
 
         self.setFileMode(fileMode)
-        self._customMultiSelectedFiles = [] #used to multiselect directories and files at the same time. Available only on Non Native
+        self._customMultiSelectedFiles = []  #used to multiselect directories and files at the same time. Available only on Non Native
+        self._multiSelect = multiSelection
+
         if acceptMode:
             self.setAcceptMode(acceptMode)
         if filter is not None:
@@ -103,6 +104,8 @@ class FileDialog(QtWidgets.QFileDialog):
 
         # self.result is '' (first case) or 0 (second case) if Cancel button selected
         if self.useNative and not sys.platform.lower() == 'linux':
+
+            # get the function name from the dict above
             funcName = staticFunctionDict[(acceptMode, fileMode)]
             self.result = getattr(self, funcName)(caption=text, **kwds)
             if isinstance(self.result, tuple):
@@ -111,15 +114,20 @@ class FileDialog(QtWidgets.QFileDialog):
             self.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
 
             # add a multiselection option - only for non-native dialogs
-            if multiSelection:
-                for view in self.findChildren((QtWidgets.QListView, QtWidgets.QTreeView)):
-                    if isinstance(view.model(), QtWidgets.QFileSystemModel):
+            for view in self.findChildren((QtWidgets.QListView, QtWidgets.QTreeView)):
+                if isinstance(view.model(), QtWidgets.QFileSystemModel):
+
+                    # set the selection mode for the dialog
+                    if multiSelection:
                         view.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
-                btns = self.findChildren(QtWidgets.QPushButton)
-                if btns:
-                    self.openBtn = [x for x in btns if 'open' in str(x.text()).lower()][0]
-                    self.openBtn.clicked.disconnect()
-                    self.openBtn.clicked.connect(self._openClicked)
+                    else:
+                        view.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+
+            btns = self.findChildren(QtWidgets.QPushButton)
+            if btns:
+                self.openBtn = [x for x in btns if 'open' in str(x.text()).lower()][0]
+                self.openBtn.clicked.disconnect()
+                self.openBtn.clicked.connect(self._openClicked)
 
             self.result = self.exec_()
 
@@ -136,33 +144,37 @@ class FileDialog(QtWidgets.QFileDialog):
     def _openClicked(self):
         """
         Custom action to multiselect files and dir at the same time or just Dirs or just Files. Needed to open a top dir
-        containg the spectra. Eg 10 Brukers at once
+        containing the spectra. Eg 10 Brukers at once
         """
-        self.tree = self.findChild(QtGui.QTreeView)
+        self.tree = self.findChild(QtWidgets.QTreeView)
         if self.tree:
             inds = self.tree.selectionModel().selectedIndexes()
             files = []
             for i in inds:
                 if i.column() == 0:
-                    files.append(os.path.join(str(self.directory().absolutePath()),str(i.data())))
+                    files.append(os.path.join(str(self.directory().absolutePath()), str(i.data())))
             self._customMultiSelectedFiles = files
             self.hide()
 
-
     # overrides Qt function, which does not pay any attention to whether Cancel button selected
     def selectedFiles(self):
-
-        if self.result and not self.useNative:
-            # print(self._customMultiSelectedFiles, 'PPP')
-            return QtWidgets.QFileDialog.selectedFiles(self)
-        elif self.result and self.useNative:
-            return [self.result]
+        """Get the list of selected files
+        """
+        if self.useNative:
+            # get the selected files from the native dialog
+            if self.result:
+                return makeIterableList(self.result)
+            else:
+                return []
         else:
-            return []
+            # use our ccpn dialog
+            files = QtWidgets.QFileDialog.selectedFiles(self)
+            return files
 
-    # Qt does not have this but useful if you know you only want one file
     def selectedFile(self):
-
+        """Get the first selected file
+        """
+        # Qt does not have this but useful if you know you only want one file
         files = self.selectedFiles()
         if files and len(files) > 0:
             return files[0]

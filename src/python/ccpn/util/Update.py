@@ -34,9 +34,8 @@ import shutil
 import sys
 import time
 import urllib
-from urllib.parse import urlencode
+from urllib.parse import urlencode, quote
 from urllib.request import urlopen
-
 from datetime import datetime
 
 
@@ -119,7 +118,10 @@ def isBinaryData(data):
     if data:
         # check the first 1024 bytes of the file
         firstData = data[0:max(1024, len(data))]
-        firstData = bytearray(firstData, encoding='utf-8')
+        try:
+            firstData = bytearray(firstData)
+        except:
+            firstData = bytearray(firstData, encoding='utf-8')
 
         # remove all characters that are considered as text
         textchars = bytearray({7, 8, 9, 10, 12, 13, 27} | set(range(0x20, 0x100)) - {0x7f})
@@ -128,27 +130,79 @@ def isBinaryData(data):
         return isBinary
 
 
-def downloadFile(serverScript, serverDbRoot, fileName):
-    import ssl
+# def downloadFile(serverScript, serverDbRoot, fileName):
+#     import ssl
+#
+#     context = ssl._create_unverified_context()
+#
+#     fileName = os.path.join(serverDbRoot, fileName)
+#
+#     addr = '%s?fileName=%s' % (serverScript, fileName)
+#     try:
+#         response = urlopen(addr, context=context)
+#
+#         data = response.read()  # just split for testing
+#
+#         try:
+#             data = data.decode('utf-8')
+#             if data.startswith(BAD_DOWNLOAD):
+#                 raise Exception(data[len(BAD_DOWNLOAD):])
+#
+#         except Exception as es:
+#             # may be a binary file
+#             if not isBinaryData(data):
+#                 raise es
+#
+#         finally:
+#             response.close()
+#             return data
+#
+#     except Exception as es:
+#         return None
 
-    context = ssl._create_unverified_context()
+def downloadFile(serverScript, serverDbRoot, fileName):
+    """Download a file from the server
+    """
+    import ssl
+    import urllib3
+    import certifi
 
     fileName = os.path.join(serverDbRoot, fileName)
 
-    addr = '%s?fileName=%s' % (serverScript, fileName)
+    context = ssl.create_default_context()
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_NONE
+
+    headers = {'Content-type': 'application/x-www-form-urlencoded;charset=UTF-8'}
+    body = urlencode({'fileName': fileName}, quote_via=quote).encode('utf-8')
+
+    urllib3.contrib.pyopenssl.inject_into_urllib3()
+    http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',
+                               ca_certs=certifi.where(),
+                               timeout=urllib3.Timeout(connect=5.0, read=5.0),
+                               retries=urllib3.Retry(1, redirect=False))
+
     try:
-        response = urlopen(addr, context=context)
+        response = http.request('POST', serverScript,
+                                headers=headers,
+                                body=body,
+                                preload_content=False)
+        data = response.read()
+        if isBinaryData(data):
+            result = data
+        else:
+            result = data.decode('utf-8')
 
-        data = response.read()  # just split for testing
-        data = data.decode('utf-8')
-        response.close()
+            if result.startswith(BAD_DOWNLOAD):
+                ll = len(result)
+                bd = len(BAD_DOWNLOAD)
+                print(str(Exception(result[min(ll, bd):min(ll, bd + 50)])))
+                return
 
-        if data.startswith(BAD_DOWNLOAD):
-            raise Exception(data[len(BAD_DOWNLOAD):])
+        return result
 
-        return data
-    except:
-        return None
+    except Exception as es:
+        print(str(es))
 
 
 def installUpdates(version):
@@ -206,16 +260,15 @@ class UpdateFile:
             if not os.path.exists(directory):
                 os.makedirs(directory)
 
-        if isBinaryData(data):
-            with open(fullFilePath, 'wb') as fp:
-                fp.write(data)
-        else:
-            with open(fullFilePath, 'w', encoding='utf-8') as fp:
-                fp.write(data)
-
-        # fp = open(fullFilePath, 'w')
-        # fp.write(data)
-        # fp.close()
+        try:
+            if isBinaryData(data):
+                with open(fullFilePath, 'wb') as fp:
+                    fp.write(data)
+            else:
+                with open(fullFilePath, 'w', encoding='utf-8') as fp:
+                    fp.write(data)
+        except Exception as es:
+            pass
 
     def commitUpdate(self, serverUser, serverPassword):
 

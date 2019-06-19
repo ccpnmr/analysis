@@ -14,7 +14,7 @@ import urllib3.contrib.pyopenssl
 import certifi
 
 from datetime import datetime
-
+from ccpn.util.Update import isBinaryData
 from ccpn.framework.PathsAndUrls import ccpn2Url
 
 from ccpn.util import Path
@@ -97,12 +97,20 @@ def downloadFile(serverScript, serverDbRoot, fileName):
                                 headers=headers,
                                 body=body,
                                 preload_content=False)
-        result = response.read().decode('utf-8')
-
-        if result.startswith(BAD_DOWNLOAD):
-            getLogger().warning(Exception(result[len(BAD_DOWNLOAD):]))
+        data = response.read()
+        if isBinaryData(data):
+            result = data
         else:
-            return result
+            result = data.decode('utf-8')
+
+            if result.startswith(BAD_DOWNLOAD):
+                ll = len(result)
+                bd = len(BAD_DOWNLOAD)
+                getLogger().warning(Exception(result[min(ll, bd):min(ll, bd + 50)]))
+                return
+
+        return result
+
     except Exception as es:
         getLogger().warning('Download error: %s' % str(es))
 
@@ -126,7 +134,7 @@ def uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot,
     context.check_hostname = False
     context.verify_mode = ssl.CERT_NONE
 
-    headers = {'Content-type': 'application/x-www-form-urlencoded;charset=UTF-8',
+    headers = {'Content-type' : 'application/x-www-form-urlencoded;charset=UTF-8',
                'Authorization': authheader}
     body = urlencode({'fileData': fileData, 'fileName': fileStoredAs, 'serverDbRoot': serverDbRoot},
                      quote_via=quote).encode('utf-8')
@@ -144,9 +152,12 @@ def uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot,
                                 preload_content=False)
         result = response.read().decode('utf-8')
 
-        if result.startswith(BAD_DOWNLOAD):
-            getLogger().warning(Exception(result[len(BAD_DOWNLOAD):]))
+        if result.startswith(BAD_DOWNLOAD) or not result.startswith('Ok'):
+            ll = len(result)
+            bd = len(BAD_DOWNLOAD)
+            getLogger().warning(Exception(result[min(ll, bd):min(ll, bd + 50)]))
         else:
+            print(result[0:min(50, len(result))])
             return result
 
     except Exception as es:

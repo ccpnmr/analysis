@@ -270,11 +270,11 @@ class UpdateFile:
         except Exception as es:
             pass
 
-    def commitUpdate(self, serverUser, serverPassword):
-
-        uploadFile(serverUser, serverPassword, self.serverUploadScript, self.fullFilePath, self.serverDbRoot,
-                   self.fileStoredAs)
-        self.fileHashCode = calcHashCode(self.fullFilePath)
+    # def commitUpdate(self, serverUser, serverPassword):
+    #
+    #     uploadFile(serverUser, serverPassword, self.serverUploadScript, self.fullFilePath, self.serverDbRoot,
+    #                self.fileStoredAs)
+    #     self.fileHashCode = calcHashCode(self.fullFilePath)
 
 
 class UpdateAgent(object):

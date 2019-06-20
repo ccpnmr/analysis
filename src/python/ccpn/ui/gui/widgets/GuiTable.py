@@ -189,7 +189,7 @@ GuiTable::item::selected {
                  actionCallback=None, selectionCallback=None, checkBoxCallback=None,
                  multiSelect=False, selectRows=True, numberRows=False, autoResize=False,
                  enableExport=True, enableDelete=True, enableSearch=True,
-                 hideIndex=True, stretchLastSection=True,
+                 hideIndex=True, stretchLastSection=True, applyPostSort=True,
                  **kwds):
         """
         Create a new instance of a TableWidget with an attached Pandas dataFrame
@@ -328,7 +328,11 @@ GuiTable::item::selected {
 
         # self.horizontalHeader().sortIndicatorChanged.connect(self._sortChanged)
         # self.horizontalHeader().sectionPressed.connect(self._preSort)
-        self.horizontalHeader().sectionClicked.connect(self._postSort)
+
+        if applyPostSort:
+            self.horizontalHeader().sectionClicked.connect(self._postSort)
+        else:
+            self.horizontalHeader().sectionClicked.connect(self._postDefaultSort)
 
         # set internal flags
         self._mousePressedPos = None
@@ -374,7 +378,7 @@ GuiTable::item::selected {
             self.blockSignals(True)
             self.selectionModel().blockSignals(True)
             self.setUpdatesEnabled(False)
-            if blanking:
+            if blanking and self.project:
                 self.project.blankNotification()
 
         self._tableBlockingLevel += 1
@@ -387,7 +391,7 @@ GuiTable::item::selected {
 
             # unblock all signals on last exit
             if self._tableBlockingLevel == 0:
-                if blanking:
+                if blanking and self.project:
                     self.project.unblankNotification()
                 self.setUpdatesEnabled(True)
                 self.selectionModel().blockSignals(False)
@@ -431,6 +435,12 @@ GuiTable::item::selected {
                 pass
 
             self._highLightObjs(objs)
+
+    def _postDefaultSort(self, *args):
+        """Catch the click event on a header and ensure headers remain consistent
+        """
+        self.horizontalHeader().setStretchLastSection(True)
+        self.resizeColumnsToContents()
 
     @staticmethod
     def _getCommentText(obj):
@@ -836,9 +846,15 @@ GuiTable::item::selected {
                     self._defaultDoubleClick(self.currentItem())
 
     def enterEvent(self, event):
-        if self.mainWindow.application.preferences.general.focusFollowsMouse:
-            self.setFocus()
-        super(GuiTable, self).enterEvent(event)
+        try:
+            # basic tables may not have preferences defined
+            if self.mainWindow.application.preferences.general.focusFollowsMouse:
+                self.setFocus()
+        except:
+            pass
+
+        finally:
+            super(GuiTable, self).enterEvent(event)
 
     def mouseMoveEvent(self, event):
         event.ignore()

@@ -125,9 +125,10 @@ class FileDialog(QtWidgets.QFileDialog):
 
             btns = self.findChildren(QtWidgets.QPushButton)
             if btns:
-                self.openBtn = [x for x in btns if 'open' in str(x.text()).lower()][0]
-                self.openBtn.clicked.disconnect()
-                self.openBtn.clicked.connect(self._openClicked)
+                self.openBtn = [x for x in btns if 'open' in str(x.text()).lower()]
+                if self.openBtn:
+                    self.openBtn[0].clicked.disconnect()
+                    self.openBtn[0].clicked.connect(self._openClicked)
 
             self.result = self.exec_()
 

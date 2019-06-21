@@ -427,7 +427,7 @@ class ChemicalShiftsMapping(CcpnModule):
       pix.fill(QtGui.QColor(item[0]))
       self.aboveThresholdColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
     try:
-      self.aboveThresholdColourBox.select('light green')
+      self.aboveThresholdColourBox.select('lime')
     except:
       self.aboveThresholdColourBox.select(random.choice(self.aboveThresholdColourBox.texts))
 
@@ -453,7 +453,7 @@ class ChemicalShiftsMapping(CcpnModule):
       pix.fill(QtGui.QColor(item[0]))
       self.disappearedColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
     try:
-      self.disappearedColourBox.select('dark grey')
+      self.disappearedColourBox.select('cyan')
     except:
       self.disappearedColourBox.select(random.choice(self.disappearedColourBox.texts))
 

@@ -31,7 +31,7 @@ from ccpn.util import Common as commonUtil
 from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip
-from ccpn.util.Common import getAxisCodeMatch, reorder
+from ccpn.util.Common import getAxisCodeMatchIndices, reorder
 from ccpn.util.Logging import getLogger
 
 
@@ -65,14 +65,23 @@ def navigateToPositionInStrip(strip, positions: typing.List[float], axisCodes: t
     # if _undo is not None:
     #   _undo.increaseBlocking()
 
+    indices = getAxisCodeMatchIndices(axisCodes, strip.axisCodes)
+
     for ii, axisCode in enumerate(axisCodes):
-        try:
-            stripAxisIndex = strip.axisCodes.index(axisCode)
-        except ValueError as e:
+        if indices[ii] is None:
             continue
-        if len(positions) > ii:  # this used to say 1 rather than ii (coupled with the else below)
-            if positions[ii]:           # and strip.orderedAxes[stripAxisIndex]:
+
+        stripAxisIndex = indices[ii]
+        if positions[ii]:  # and strip.orderedAxes[stripAxisIndex]:
                 strip.orderedAxes[stripAxisIndex].position = positions[ii]
+
+        # try:
+        #     stripAxisIndex = strip.axisCodes.index(axisCode)
+        # except ValueError as e:
+        #     continue
+        # if len(positions) > ii:  # this used to say 1 rather than ii (coupled with the else below)
+        #     if positions[ii]:           # and strip.orderedAxes[stripAxisIndex]:
+        #         strip.orderedAxes[stripAxisIndex].position = positions[ii]
 
         #else: # what in the world is the case this is trying to deal with??
         # why would you want to set all the positions to the same thing??
@@ -102,15 +111,20 @@ def navigateToPositionInStrip(strip, positions: typing.List[float], axisCodes: t
     # OR just copy from the strip axes
     try:
         for ii, axisCode in enumerate(axisCodes):
-            try:
-                stripAxisIndex = strip.axisCodes.index(axisCode)
-            except ValueError as e:
+
+            if indices[ii] is None:
                 continue
 
-            if ii < len(positions) and positions[ii]:
-                strip._CcpnGLWidget.setAxisPosition(axisCode=axisCode, position=positions[ii], update=False)
+            stripAxisIndex = indices[ii]
+            # try:
+            #     stripAxisIndex = strip.axisCodes.index(axisCode)
+            # except ValueError as e:
+            #     continue
 
-            flippedAxisCode = strip.axisCodes[ii]
+            flippedAxisCode = strip.axisCodes[stripAxisIndex]
+            if ii < len(positions) and positions[ii]:
+                strip._CcpnGLWidget.setAxisPosition(axisCode=flippedAxisCode, position=positions[ii], update=False)
+
             if widths is not None:
                 if ii < len(widths) and widths[ii]:
 

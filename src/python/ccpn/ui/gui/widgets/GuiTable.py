@@ -189,7 +189,7 @@ GuiTable::item::selected {
                  actionCallback=None, selectionCallback=None, checkBoxCallback=None,
                  multiSelect=False, selectRows=True, numberRows=False, autoResize=False,
                  enableExport=True, enableDelete=True, enableSearch=True,
-                 hideIndex=True, stretchLastSection=True, applyPostSort=True,
+                 hideIndex=True, stretchLastSection=True, _applyPostSort=True,
                  **kwds):
         """
         Create a new instance of a TableWidget with an attached Pandas dataFrame
@@ -329,7 +329,7 @@ GuiTable::item::selected {
         # self.horizontalHeader().sortIndicatorChanged.connect(self._sortChanged)
         # self.horizontalHeader().sectionPressed.connect(self._preSort)
 
-        if applyPostSort:
+        if _applyPostSort:
             self.horizontalHeader().sectionClicked.connect(self._postSort)
         else:
             self.horizontalHeader().sectionClicked.connect(self._postDefaultSort)

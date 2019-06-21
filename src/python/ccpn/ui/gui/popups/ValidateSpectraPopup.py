@@ -25,7 +25,7 @@ __date__ = "$Date$"
 
 import os
 from functools import partial
-from PyQt5 import QtWidgets, QtGui
+from PyQt5 import QtWidgets, QtGui, QtCore
 from ccpn.core.lib import Util as ccpnUtil
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
@@ -112,36 +112,19 @@ class DataUrlValidator(QtGui.QValidator):
 
         if os.path.isdir(filePath):
 
-            # ed's original
-            # if filePath == self.dataUrl.url.dataLocation:
-            #     palette.setColor(QtGui.QPalette.Base, self.baseColour)
-            #     # palette.setColor(QtGui.QPalette.Base, VALIDROWCOLOUR)
-            # else:
-            #
-            #     # validate dataStores
-            #     localStores = [store for store in self.dataUrl.sortedDataStores()]
-            #     for store in self.dataUrl.sortedDataStores():
-            #         if not os.path.exists(os.path.join(filePath, store.path)):
-            #             palette.setColor(QtGui.QPalette.Base, INVALIDROWCOLOUR)
-            #             break
-            #
-            #     else:
-            #         palette.setColor(QtGui.QPalette.Base, VALIDROWCOLOUR)       # self.baseColour)
-
             # validate dataStores
             localStores = [store for store in self.dataUrl.sortedDataStores()]
             for store in self.dataUrl.sortedDataStores():
                 if not os.path.exists(os.path.join(filePath, store.path)):
                     palette.setColor(QtGui.QPalette.Base, INVALIDROWCOLOUR)
                     break
-
             else:
                 palette.setColor(QtGui.QPalette.Base, self.baseColour)
 
-            state = QtGui.QValidator.Acceptable
+            state = QtGui.QValidator.Acceptable                                 # entry is valid
         else:
             palette.setColor(QtGui.QPalette.Base, INVALIDROWCOLOUR)
-            state = QtGui.QValidator.Intermediate
+            state = QtGui.QValidator.Intermediate                                   # entry is NOT valid, but can continue editing
         self.parent().setPalette(palette)
 
         return state, p_str, p_int
@@ -336,6 +319,10 @@ class ValidateSpectraPopup(CcpnDialog):
         self.setMinimumWidth(600)
         # self.setFixedWidth(self.sizeHint().width()+24)
 
+        # check for any bad urls
+        self._badUrls = False
+        self._validateAll()
+
     def _addUrl(self, widget, dataUrl, urlList, scrollRow, enabled=True):
         """add a url row to the frame
         """
@@ -379,7 +366,8 @@ class ValidateSpectraPopup(CcpnDialog):
             if len(directory) > 0:
                 newUrl = directory[0]
 
-                if dataUrl.url.dataLocation != newUrl:
+                # newUrl cannot be '' otherwise the api cannot re-load the project
+                if newUrl and dataUrl.url.dataLocation != newUrl:
                     dataUrl.url = dataUrl.url.clone(path=newUrl)
 
                     # set the widget text
@@ -393,7 +381,9 @@ class ValidateSpectraPopup(CcpnDialog):
             urlData, urlButton, urlLabel = self.dataUrlData[dataUrl]
 
             newUrl = urlData.text().strip()
-            if dataUrl.url.dataLocation != newUrl:
+
+            # newUrl cannot be '' otherwise the api cannot re-load the project
+            if newUrl and dataUrl.url.dataLocation != newUrl:
                 dataUrl.url = dataUrl.url.clone(path=newUrl)
 
                 # set the widget text
@@ -519,10 +509,16 @@ class ValidateSpectraPopup(CcpnDialog):
     def _validateAll(self):
         """Validate all the objects as the dataUrls may have changed.
         """
+        self._badUrls = False
         for url in self.allUrls:
             self._setUrlData(url)
+            if not url.url.path:
+                self._badUrls = True
+
         for spectrum in self.spectra:
             self._setPathData(spectrum)
+
+        self.applyButtons.getButton('Close').setEnabled(not self._badUrls)
 
     def _closeButton(self):
         self.accept()
@@ -536,3 +532,9 @@ class ValidateSpectraPopup(CcpnDialog):
 
         self.accept()
 
+    def closeEvent(self, event):
+        # don't close if there any empty urls, which cause an api crash
+        if not self._badUrls:
+            super().closeEvent(event)
+        else:
+            event.ignore()

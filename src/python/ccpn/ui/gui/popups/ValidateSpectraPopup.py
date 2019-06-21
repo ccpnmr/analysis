@@ -25,7 +25,7 @@ __date__ = "$Date$"
 
 import os
 from functools import partial
-from PyQt5 import QtWidgets, QtGui, QtCore
+from PyQt5 import QtWidgets, QtGui
 from ccpn.core.lib import Util as ccpnUtil
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
@@ -41,6 +41,7 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Splitter import Splitter
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 
 LINEEDITSMINIMUMWIDTH = 195
@@ -538,3 +539,4 @@ class ValidateSpectraPopup(CcpnDialog):
             super().closeEvent(event)
         else:
             event.ignore()
+            showWarning(str(self.windowTitle()), 'Project contains empty dataUrls')

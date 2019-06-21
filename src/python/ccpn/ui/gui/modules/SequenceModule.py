@@ -242,8 +242,6 @@ class SequenceModule():
 
                 with progressManager(self.mainWindow, 'Assigning %s' % idStr):
 
-                    # try:
-
                     if nmrChain.id == '@-':
                         # assume that it is the only one
                         nmrChain.assignSingleResidue(selectedNmrResidue, residues[0])
@@ -260,15 +258,14 @@ class SequenceModule():
                         except Exception as es:
                             showWarning('Sequence Graph', str(es))
 
-                    for ii, res in enumerate(residues):
-                        if hasattr(self, 'guiChainLabel'):
-                            guiResidue = self.guiChainLabel.residueDict.get(res.sequenceCode)
-                            guiResidue._setStyleAssigned()
-                            # guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % self.colours[GUICHAINRESIDUE_ASSIGNED] +
-                            #                      res.shortName+'</strong></div>')
-
-                    # except Exception as es:
-                    #   getLogger().warning('Sequence Module: %s' % str(es))
+                    # highlight the new items in the chain
+                    thisChain = residues[0].chain
+                    for chainLabel in self.chainLabels:
+                        if chainLabel.chain == thisChain:
+                            for ii, res in enumerate(residues):
+                                guiResidue = chainLabel.residueDict.get(res.sequenceCode)
+                                guiResidue._setStyleAssigned()
+                            break
 
     def populateFromSequenceGraphs(self):
         """
@@ -276,7 +273,7 @@ class SequenceModule():
         """
         # get the list of open sequenceGraphs
 
-        self.moduleParent.predictSequencePosition(self.moduleParent.predictedStretch)
+        # self.moduleParent.predictSequencePosition(self.moduleParent.predictedStretch)
         return
 
         # from ccpn.AnalysisAssign.modules.SequenceGraph import SequenceGraphModule

@@ -1323,25 +1323,25 @@ class NmrResidue(AbstractWrapperObject):
 #                                   "AllNmrResidues corresponding to Residue - E.g. (for MR:A.87)"
 #                                   " NmrResidues NR:A.87, NR:A.87+0, NR:A.88-1, NR:A.82+5, etc.")
 
-def getter(self: NmrChain) -> typing.Tuple[NmrResidue]:
-    if not self._wrappedData:
-        return ()
-
-    result = list(self._project._data2Obj.get(x) for x in self._wrappedData.mainResonanceGroups)
-    if not self.isConnected:
-        result.sort()
-    return tuple(result)
-
-
-def setter(self: NmrChain, value):
-    self._wrappedData.mainResonanceGroups = [x._wrappedData for x in value]
-
-
-NmrChain.mainNmrResidues = property(getter, setter, None, """NmrResidues belonging to NmrChain that are NOT defined relative to another NmrResidue
-  (sequenceCode ending in '-1', '+1', etc.) For connected NmrChains in sequential order, otherwise sorted by assignment""")
-
-del getter
-del setter
+# def getter(self: NmrChain) -> typing.Tuple[NmrResidue]:
+#     if not self._wrappedData:
+#         return ()
+#
+#     result = list(self._project._data2Obj.get(x) for x in self._wrappedData.mainResonanceGroups)
+#     if not self.isConnected:
+#         result.sort()
+#     return tuple(result)
+#
+#
+# def setter(self: NmrChain, value):
+#     self._wrappedData.mainResonanceGroups = [x._wrappedData for x in value]
+#
+#
+# NmrChain.mainNmrResidues = property(getter, setter, None, """NmrResidues belonging to NmrChain that are NOT defined relative to another NmrResidue
+#   (sequenceCode ending in '-1', '+1', etc.) For connected NmrChains in sequential order, otherwise sorted by assignment""")
+#
+# del getter
+# del setter
 
 
 #=========================================================================================

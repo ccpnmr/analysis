@@ -145,6 +145,23 @@ class NmrChain(AbstractWrapperObject):
         """Chain to which NmrChain is assigned"""
         return self._project.getChain(self._id)
 
+    @property
+    def mainNmrResidues(self) -> typing.Tuple['NmrResidue']:
+        """NmrResidues belonging to NmrChain that are NOT defined relative to another NmrResidue
+        (sequenceCode ending in '-1', '+1', etc.) For connected NmrChains in sequential order, otherwise sorted by assignment
+        """
+        if not self._wrappedData:
+            return ()
+
+        result = list(self._project._data2Obj.get(x) for x in self._wrappedData.mainResonanceGroups)
+        if not self.isConnected:
+            result.sort()
+        return tuple(result)
+
+    @mainNmrResidues.setter
+    def mainNmrResidues(self, value):
+        self._wrappedData.mainResonanceGroups = [x._wrappedData for x in value]
+
     # @chain.setter
     # def chain(self, value:Chain):
     #   if value is None:

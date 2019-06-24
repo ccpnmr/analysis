@@ -1255,7 +1255,7 @@ class ContoursTab(Widget):
                                            vAlign='t', hAlign='l')
         self.negativeColourButton.clicked.connect(partial(self._queueChangeNegSpectrumColour, self.spectrum))
 
-        self._contourOptionsFromNoise = _addContourNoiseButtons(self, 11, buttonLabel='Estimate Levels')
+        # self._contourOptionsFromNoise = _addContourNoiseButtons(self, 11, buttonLabel='Estimate Levels')
 
         Spacer(self, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(12, 1), gridSpan=(1, 1))

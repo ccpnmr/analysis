@@ -818,3 +818,118 @@ def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
                         getLogger().warning('Error setting contour levels - %s', str(es))
 
                     spectrum.negativeContourCount = negLevels
+
+def getContourLevelsFromNoise(spectrum, setNoiseLevel=False,
+                              setPositiveContours=False, setNegativeContours=False,
+                              useDefaultMultiplier=True, useDefaultLevels=True, useDefaultContourBase=False,
+                              useSameMultiplier=True,
+                              defaultMultiplier = DEFAULTMULTIPLIER, defaultLevels=DEFAULTLEVELS, defaultContourBase=DEFAULTCONTOURBASE):
+    """Calculate the noise level, base contour level and positive/negative multipliers for the given spectrum
+    """
+
+    # parameter error checking
+    if not isinstance(setNegativeContours, bool):
+        raise TypeError('setNoiseLevel is not boolean.')
+    if not isinstance(setPositiveContours, bool):
+        raise TypeError('setPositiveContours is not boolean.')
+    if not isinstance(setNegativeContours, bool):
+        raise TypeError('setNegativeContours is not boolean.')
+    if not isinstance(useDefaultMultiplier, bool):
+        raise TypeError('useDefaultMultiplier is not boolean.')
+    if not isinstance(useDefaultLevels, bool):
+        raise TypeError('useDefaultLevels is not boolean.')
+    if not isinstance(useDefaultContourBase, bool):
+        raise TypeError('useDefaultContourBase is not boolean.')
+    if not isinstance(useSameMultiplier, bool):
+        raise TypeError('useSameMultiplier is not boolean.')
+
+    if not (isinstance(defaultMultiplier, float) and defaultMultiplier > 0):
+        raise TypeError('defaultMultiplier is not a positive float.')
+    if not (isinstance(defaultLevels, int) and defaultLevels > 0):
+        raise TypeError('defaultLevels is not a positive int.')
+    if not (isinstance(defaultContourBase, float) and defaultContourBase > 0):
+        raise TypeError('defaultContourBase is not a positive float.')
+
+    if spectrum.dimensionCount == 1:
+        return [None] * 6
+
+    # # exit if nothing set
+    # if not (setNoiseLevel or setPositiveContours or setNegativeContours):
+    #     return [None] * 5
+
+    # get specLimits for all dimensions
+    specLimits = list(spectrum.spectrumLimits)
+    dims = spectrum.dimensionCount
+    valsPerPoint = spectrum.valuesPerPoint
+
+    # set dimensions above 1 to just the centre of the spectrum +- 1/2 the values per point
+    # the ensures that at least 1 point is returned in each dimension
+    for ii in range(2, dims):
+        k = np.mean(specLimits[ii])
+        specLimits[ii] = (k - (valsPerPoint[ii] / 2), k + (valsPerPoint[ii] / 2))
+
+    axisCodeDict = dict((k, v) for k, v in zip(spectrum.axisCodes, specLimits))
+    # exclusionBuffer = [1] * len(axisCodeDict)
+
+    foundRegions = spectrum.getRegionData(minimumDimensionSize=1, **axisCodeDict)
+    if foundRegions:
+
+        # just use the first region
+        for region in foundRegions[:1]:
+            dataArray, intRegion, *rest = region
+
+            if dataArray.size:
+
+                # iterate over the array to calculate noise at each level
+                dataList = [dataArray]
+                startCondition = []
+                endCondition = []
+                _recurseData(0, dataList, startCondition, endCondition)
+
+                if useDefaultLevels:
+                    posLevels = defaultLevels
+                    negLevels = defaultLevels
+                else:
+                    # get from the spectrum
+                    posLevels = spectrum.positiveContourCount
+                    negLevels = spectrum.negativeContourCount
+
+                if useDefaultContourBase:
+                    posBase = defaultContourBase
+                    # if setNoiseLevel:
+                    #     spectrum.noiseLevel = base
+                else:
+
+                    # calculate the base levels
+                    if setNoiseLevel:
+                        # put the new values into the spectrum
+                        posBase = abs(endCondition[5] + 3.0 * endCondition[6])  # abs(mean) + (3 * noiseLevel)
+                        # spectrum.noiseLevel = base
+                    else:
+                        # get the noise from the spectrum
+                        posBase = spectrum.noiseLevel
+                negBase = -posBase
+
+                if useDefaultMultiplier:
+                    # use default as root2
+                    posMult = negMult = defaultMultiplier
+                else:
+                    # calculate multiplier to give contours across range of spectrum; trap base = 0
+                    mx = startCondition[3]  # global array max
+                    mn = startCondition[4]  # global array min
+
+                    posMult = pow(abs(mx / posBase), 1 / posLevels) if posBase else 0.0
+                    if useSameMultiplier:
+                        negMult = posMult
+                    else:
+                        negMult = pow(abs(mn / negBase), 1 / negLevels) if negBase else 0.0
+
+                if not setPositiveContours:
+                    posBase = posMult = posLevels =  None
+
+                if not setNegativeContours:
+                    negBase = negMult = negLevels = None
+
+                return posBase, negBase, posMult, negMult, posLevels, negLevels
+
+    return [None] * 6

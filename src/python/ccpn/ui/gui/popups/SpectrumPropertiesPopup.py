@@ -57,6 +57,8 @@ from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
 from ccpn.core.lib.ContextManagers import undoStackBlocking
+from ccpn.ui.gui.popups.EstimateNoisePopup import _addContourNoiseButtons
+from ccpn.core.lib.SpectrumLib import getContourLevelsFromNoise
 
 
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
@@ -791,10 +793,10 @@ class DimensionsTab(Widget):
 
             value = spectrum.axisCodes[i]
             self.axisCodeEdits[i] = LineEdit(self,
-                                         text='<None>' if value is None else str(value),
-                                         grid=(row, i + 1), vAlign='t', hAlign='l')
+                                             text='<None>' if value is None else str(value),
+                                             grid=(row, i + 1), vAlign='t', hAlign='l')
             self.axisCodeEdits[i].textChanged.connect(partial(self._queueSetAxisCodes,
-                                                          self.axisCodeEdits[i].text, i))
+                                                              self.axisCodeEdits[i].text, i))
 
             row += 1
             # Label(self, text=str(spectrum.isotopeCodes[i]), grid=(row, i + 1), hAlign='l', vAlign='t', )
@@ -1102,7 +1104,7 @@ class DimensionsTab(Widget):
 
     def _queueSetFoldingModes(self, valueGetter, dim):
         self._changes['foldingModes{}'.format(dim)] = partial(self._setFoldingModes,
-                                                             self.spectrum, dim, valueGetter())
+                                                              self.spectrum, dim, valueGetter())
 
     def _setFoldingModes(self, spectrum, dim, value):
         dd = {True: 'mirror', False: 'circular', None: None}
@@ -1116,7 +1118,7 @@ class DimensionsTab(Widget):
 
     def _queueSetDisplayFoldedContours(self, valueGetter):
         self._changes['displayFoldedContours'] = partial(self._setDisplayFoldedContours,
-                                                        self.spectrum, valueGetter())
+                                                         self.spectrum, valueGetter())
 
     def _setDisplayFoldedContours(self, spectrum, value):
         spectrum.displayFoldedContours = bool(value)
@@ -1155,25 +1157,25 @@ class ContoursTab(Widget):
         positiveContoursCheckBox.stateChanged.connect(self._queueChangePositiveContourDisplay)
 
         positiveBaseLevelLabel = Label(self, text="Positive Base Level", grid=(2, 0), vAlign='c', hAlign='l')
-        positiveBaseLevelData = ScientificDoubleSpinBox(self, grid=(2, 1), vAlign='t')
-        positiveBaseLevelData.setMaximum(1e12)
-        positiveBaseLevelData.setMinimum(0.1)
-        positiveBaseLevelData.setValue(self.spectrum.positiveContourBase)
-        positiveBaseLevelData.valueChanged.connect(partial(self._queueChangePositiveBaseLevel, self.spectrum))
-        # positiveBaseLevelData.setSingleStep(positiveBaseLevelData.value()*(positiveMultiplierData.value()-1))
+        self.positiveBaseLevelData = ScientificDoubleSpinBox(self, grid=(2, 1), vAlign='t')
+        self.positiveBaseLevelData.setMaximum(1e12)
+        self.positiveBaseLevelData.setMinimum(0.1)
+        self.positiveBaseLevelData.setValue(self.spectrum.positiveContourBase)
+        self.positiveBaseLevelData.valueChanged.connect(partial(self._queueChangePositiveBaseLevel, self.spectrum))
+        # self.positiveBaseLevelData.setSingleStep(self.positiveBaseLevelData.value()*(self.positiveMultiplierData.value()-1))
         # Changed to get less quickly to zero - but DoubleSpinBox is NOT right for this
-        positiveBaseLevelData.setSingleStep(positiveBaseLevelData.value() * 0.1)
+        self.positiveBaseLevelData.setSingleStep(self.positiveBaseLevelData.value() * 0.1)
 
         positiveMultiplierLabel = Label(self, text="Positive Multiplier", grid=(3, 0), vAlign='c', hAlign='l')
-        positiveMultiplierData = DoubleSpinbox(self, grid=(3, 1), vAlign='t')
-        positiveMultiplierData.setSingleStep(0.1)
-        positiveMultiplierData.setValue(float(self.spectrum.positiveContourFactor))
-        positiveMultiplierData.valueChanged.connect(partial(self._queueChangePositiveContourMultiplier, self.spectrum))
+        self.positiveMultiplierData = DoubleSpinbox(self, grid=(3, 1), vAlign='t')
+        self.positiveMultiplierData.setSingleStep(0.1)
+        self.positiveMultiplierData.setValue(float(self.spectrum.positiveContourFactor))
+        self.positiveMultiplierData.valueChanged.connect(partial(self._queueChangePositiveContourMultiplier, self.spectrum))
 
         positiveContourCountLabel = Label(self, text="Number of positive contours", grid=(4, 0), vAlign='c', hAlign='l')
-        positiveContourCountData = Spinbox(self, grid=(4, 1), vAlign='t')
-        positiveContourCountData.setValue(int(self.spectrum._apiDataSource.positiveContourCount))
-        positiveContourCountData.valueChanged.connect(partial(self._queueChangePositiveContourCount, self.spectrum))
+        self.positiveContourCountData = Spinbox(self, grid=(4, 1), vAlign='t')
+        self.positiveContourCountData.setValue(int(self.spectrum._apiDataSource.positiveContourCount))
+        self.positiveContourCountData.valueChanged.connect(partial(self._queueChangePositiveContourCount, self.spectrum))
         positiveContourColourLabel = Label(self, text="Positive Contour Colour", grid=(5, 0), vAlign='c', hAlign='l')
 
         self.positiveColourBox = PulldownList(self, grid=(5, 1), vAlign='t')
@@ -1214,25 +1216,25 @@ class ContoursTab(Widget):
         negativeContoursCheckBox.stateChanged.connect(self._queueChangeNegativeContourDisplay)
 
         negativeBaseLevelLabel = Label(self, text="Negative Base Level", grid=(7, 0), vAlign='c', hAlign='l')
-        negativeBaseLevelData = ScientificDoubleSpinBox(self, grid=(7, 1), vAlign='t')
-        negativeBaseLevelData.setMaximum(-0.1)
-        negativeBaseLevelData.setMinimum(-1e12)
-        negativeBaseLevelData.setValue(self.spectrum.negativeContourBase)
-        negativeBaseLevelData.valueChanged.connect(partial(self._queueChangeNegativeBaseLevel, self.spectrum))
-        # negativeBaseLevelData.setSingleStep((negativeBaseLevelData.value()*-1)*negativeMultiplierData.value()-1)
+        self.negativeBaseLevelData = ScientificDoubleSpinBox(self, grid=(7, 1), vAlign='t')
+        self.negativeBaseLevelData.setMaximum(-0.1)
+        self.negativeBaseLevelData.setMinimum(-1e12)
+        self.negativeBaseLevelData.setValue(self.spectrum.negativeContourBase)
+        self.negativeBaseLevelData.valueChanged.connect(partial(self._queueChangeNegativeBaseLevel, self.spectrum))
+        # self.negativeBaseLevelData.setSingleStep((self.negativeBaseLevelData.value()*-1)*self.negativeMultiplierData.value()-1)
         # Changed to get less quickly to zero - but DoubleSpinBox is NOT right for this
-        negativeBaseLevelData.setSingleStep((negativeBaseLevelData.value() * -1) * 0.1)
+        self.negativeBaseLevelData.setSingleStep((self.negativeBaseLevelData.value() * -1) * 0.1)
 
         negativeMultiplierLabel = Label(self, text="Negative Multiplier", grid=(8, 0), vAlign='c', hAlign='l')
-        negativeMultiplierData = DoubleSpinbox(self, grid=(8, 1), vAlign='t')
-        negativeMultiplierData.setValue(self.spectrum.negativeContourFactor)
-        negativeMultiplierData.setSingleStep(0.1)
-        negativeMultiplierData.valueChanged.connect(partial(self._queueChangeNegativeContourMultiplier, self.spectrum))
+        self.negativeMultiplierData = DoubleSpinbox(self, grid=(8, 1), vAlign='t')
+        self.negativeMultiplierData.setValue(self.spectrum.negativeContourFactor)
+        self.negativeMultiplierData.setSingleStep(0.1)
+        self.negativeMultiplierData.valueChanged.connect(partial(self._queueChangeNegativeContourMultiplier, self.spectrum))
 
         negativeContourCountLabel = Label(self, text="Number of negative contours", grid=(9, 0), vAlign='c', hAlign='l')
-        negativeContourCountData = Spinbox(self, grid=(9, 1), vAlign='t')
-        negativeContourCountData.setValue(self.spectrum.negativeContourCount)
-        negativeContourCountData.valueChanged.connect(partial(self._queueChangeNegativeContourCount, self.spectrum))
+        self.negativeContourCountData = Spinbox(self, grid=(9, 1), vAlign='t')
+        self.negativeContourCountData.setValue(self.spectrum.negativeContourCount)
+        self.negativeContourCountData.valueChanged.connect(partial(self._queueChangeNegativeContourCount, self.spectrum))
         negativeContourColourLabel = Label(self, text="Negative Contour Colour", grid=(10, 0), vAlign='c', hAlign='l')
 
         # self.negativeColourBox = PulldownList(self, grid=(10, 1), vAlign='t')
@@ -1253,8 +1255,34 @@ class ContoursTab(Widget):
                                            vAlign='t', hAlign='l')
         self.negativeColourButton.clicked.connect(partial(self._queueChangeNegSpectrumColour, self.spectrum))
 
+        self._contourOptionsFromNoise = _addContourNoiseButtons(self, 11, buttonLabel='Estimate Levels')
+
         Spacer(self, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(12, 1), gridSpan=(1, 1))
+
+    def _setContourLevels(self):
+        """Estimate the contour levels for the current spectrum
+        """
+        posBase, negBase, posMult, negMult, posLevels, negLevels = getContourLevelsFromNoise(self.spectrum, setNoiseLevel=False,
+                                                                                 setPositiveContours=self.setPositiveContours.isChecked(),
+                                                                                 setNegativeContours=self.setNegativeContours.isChecked(),
+                                                                                 useSameMultiplier=self.setUseSameMultiplier.isChecked(),
+                                                                                 useDefaultLevels=self.setDefaults.isChecked(),
+                                                                                 useDefaultMultiplier=self.setDefaults.isChecked())
+
+        # put the new values into the widgets (will queue changes)
+        if posBase:
+            self.positiveBaseLevelData.setValue(posBase)
+        if negBase:
+            self.negativeBaseLevelData.setValue(negBase)
+        if posMult:
+            self.positiveMultiplierData.setValue(posMult)
+        if negMult:
+            self.negativeMultiplierData.setValue(negMult)
+        if posLevels:
+            self.positiveContourCountData.setValue(posLevels)
+        if negLevels:
+            self.negativeContourCountData.setValue(negLevels)
 
     def _repopulate(self):
         # don't need anything here as can't generate any errors

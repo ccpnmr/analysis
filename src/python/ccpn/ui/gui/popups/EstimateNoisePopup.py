@@ -174,68 +174,6 @@ class NoiseTab(Widget):
 
         self._calculateLevels()
 
-        # 20190606:ED This could be moved somewhere more sensible
-
-        # # calculate the region over which to estimate the noise
-        # selectedRegion = [[self.strip._CcpnGLWidget.axisL, self.strip._CcpnGLWidget.axisR],
-        #                   [self.strip._CcpnGLWidget.axisB, self.strip._CcpnGLWidget.axisT]]
-        # for n in self.strip.orderedAxes[2:]:
-        #     selectedRegion.append((n.region[0], n.region[1]))
-        # sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]
-        #
-        # # get indexing for spectrum onto strip.axisCodes
-        # indices = getAxisCodeMatchIndices(self.spectrum.axisCodes, self.strip.axisCodes)
-        #
-        # if None in indices:
-        #     return
-        #
-        # # map the spectrum selectedRegions to the strip
-        # axisCodeDict = OrderedDict((code, sortedSelectedRegion[indices[ii]])
-        #                            for ii, code in enumerate(self.spectrum.axisCodes) if indices[ii] is not None)
-        #
-        # # add an exclusion buffer to ensure that getRegionData always returns a region,
-        # # otherwise region may be 1 plain thick which will contradict error trapping for peak fitting
-        # # (which requires at least 3 points in each dimension)
-        # # exclusionBuffer = [1] * self.spectrum.dimensionCount
-        # # however, this shouldn't be needed of the range is > valuePrePoint in each dimension
-        #
-        # foundRegions = self.spectrum.getRegionData(minimumDimensionSize=1, **axisCodeDict)
-        #
-        # if foundRegions:
-        #
-        #     # just use the first region
-        #     for region in foundRegions[:1]:
-        #         dataArray, intRegion, *rest = region
-        #
-        #         if dataArray.size:
-        #             # calculate the noise values
-        #             flatData = dataArray.flatten()
-        #
-        #             self.SD = np.std(flatData)
-        #             self.max = np.max(flatData)
-        #             self.min = np.min(flatData)
-        #             self.mean = np.mean(flatData)
-        #             self.noiseLevel = abs(self.mean) + 3.0 * self.SD
-        #
-        #             # populate the widgets
-        #             for ii, ind in enumerate(indices):
-        #                 self.axisCodes[ii].setText('(' + ','.join(['%.3f' % rr for rr in sortedSelectedRegion[ind]]) + ')')
-        #
-        #             self.meanLabel.setText(str(self.mean))
-        #             self.SDLabel.setText(str(self.SD))
-        #             self.maxLabel.setText(str(self.max))
-        #             self.minLabel.setText(str(self.min))
-        #             self.noiseLevelSpinBox.setValue(self.noiseLevel)
-        #
-        # else:
-        #     # no regions so just put the current noise level back into the spinBox
-        #     self.noiseLevelSpinBox.setValue(self.spectrum.noiseLevel)
-
-    def _setNoiseLevel(self):
-        """Apply the current noiseLevel to the spectrum
-        """
-        self.spectrum.noiseLevel = float(self.noiseLevelSpinBox.value())
-
     def _calculateLevels(self):
         # calculate the region over which to estimate the noise
         selectedRegion = [[self.strip._CcpnGLWidget.axisL, self.strip._CcpnGLWidget.axisR],
@@ -291,6 +229,11 @@ class NoiseTab(Widget):
         else:
             # no regions so just put the current noise level back into the spinBox
             self.noiseLevelSpinBox.setValue(self.spectrum.noiseLevel)
+
+    def _setNoiseLevel(self):
+        """Apply the current noiseLevel to the spectrum
+        """
+        self.spectrum.noiseLevel = float(self.noiseLevelSpinBox.value())
 
 
 def _addContourNoiseButtons(self, row, buttonLabel='Set Contours'):
@@ -351,50 +294,6 @@ class NoiseTabNd(NoiseTab):
 
         row = self.row
         _addContourNoiseButtons(self, self.row)
-
-        # row += 1
-        # HLine(self, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[SOFTDIVIDER], height=15)
-        #
-        # row += 1
-        # Label(self, text='Estimate Contour Levels', grid=(row, 0), gridSpan=(1, 3), vAlign='t', hAlign='l')
-        #
-        # from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
-        #
-        # row += 1
-        # self.setPositiveContours = CheckBoxCompoundWidget(self, grid=(row, 0), gridSpan=(1, 3),
-        #                                                   vAlign='top', stretch=(0, 0), hAlign='left',
-        #                                                   orientation='right', margins=(15, 0, 0, 0),
-        #                                                   labelText='Set positive contour levels',
-        #                                                   checked=True
-        #                                                   )
-        #
-        # row += 1
-        # self.setNegativeContours = CheckBoxCompoundWidget(self, grid=(row, 0), gridSpan=(1, 3),
-        #                                                   vAlign='top', stretch=(0, 0), hAlign='left',
-        #                                                   orientation='right', margins=(15, 0, 0, 0),
-        #                                                   labelText='Set negative contour levels',
-        #                                                   checked=True
-        #                                                   )
-        #
-        # row += 1
-        # self.setUseSameMultiplier = CheckBoxCompoundWidget(self, grid=(row, 0), gridSpan=(1, 3),
-        #                                                    vAlign='top', stretch=(0, 0), hAlign='left',
-        #                                                    orientation='right', margins=(15, 0, 0, 0),
-        #                                                    labelText='Use same (positive) multiplier for negative contours',
-        #                                                    checked=True
-        #                                                    )
-        #
-        # row += 1
-        # self.setDefaults = CheckBoxCompoundWidget(self, grid=(row, 0), gridSpan=(1, 3),
-        #                                           vAlign='top', stretch=(0, 0), hAlign='left',
-        #                                           orientation='right', margins=(15, 0, 0, 0),
-        #                                           labelText='Use default multiplier (%0.3f)\n and contour level count (%i)' % (
-        #                                               DEFAULTMULTIPLIER, DEFAULTLEVELS),
-        #                                           checked=True
-        #                                           )
-        #
-        # row += 1
-        # self.noiseLevelButton = Button(self, grid=(row, 2), callback=self._setContourLevels, text='Set Contours')
 
     def _setContourLevels(self):
         """Estimate the contour levels for the current spectrum

@@ -242,9 +242,11 @@ class SequenceModule():
 
                 with progressManager(self.mainWindow, 'Assigning %s' % idStr):
 
+                    update = False
                     if nmrChain.id == '@-':
                         # assume that it is the only one
                         nmrChain.assignSingleResidue(selectedNmrResidue, residues[0])
+                        update = True
                     else:
 
                         # toAssign is the list of mainNmrResidues of the chain
@@ -255,17 +257,19 @@ class SequenceModule():
 
                         try:
                             nmrChain.assignConnectedResidues(residues[0])
+                            update = True
                         except Exception as es:
                             showWarning('Sequence Graph', str(es))
 
                     # highlight the new items in the chain
-                    thisChain = residues[0].chain
-                    for chainLabel in self.chainLabels:
-                        if chainLabel.chain == thisChain:
-                            for ii, res in enumerate(residues):
-                                guiResidue = chainLabel.residueDict.get(res.sequenceCode)
-                                guiResidue._setStyleAssigned()
-                            break
+                    if update:
+                        thisChain = residues[0].chain
+                        for chainLabel in self.chainLabels:
+                            if chainLabel.chain == thisChain:
+                                for ii, res in enumerate(residues):
+                                    guiResidue = chainLabel.residueDict.get(res.sequenceCode)
+                                    guiResidue._setStyleAssigned()
+                                break
 
     def populateFromSequenceGraphs(self):
         """

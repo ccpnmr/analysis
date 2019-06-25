@@ -71,7 +71,7 @@ def isInterOnlyExpt(experimentType: str) -> bool:
     return False
 
 
-def assignAlphas(nmrResidue: NmrResidue, peaks: typing.List[Peak]):
+def assignAlphas(nmrResidue: NmrResidue, peaks: typing.List[Peak], axisCode='C'):
     """
     Assigns CA and CA-1 NmrAtoms to dimensions of pairs of specified peaks, assuming that one has
     a height greater than the other, e.g. in an HNCA or HNCACB experiment.
@@ -82,16 +82,16 @@ def assignAlphas(nmrResidue: NmrResidue, peaks: typing.List[Peak]):
         a3 = newNmrResidue.fetchNmrAtom(name='CA')
         a4 = nmrResidue.fetchNmrAtom(name='CA')
         if peaks[0].height > peaks[1].height:
-            peaks[0].assignDimension(axisCode='C', value=[a4])
-            peaks[1].assignDimension(axisCode='C', value=[a3])
+            peaks[0].assignDimension(axisCode=axisCode, value=[a4])
+            peaks[1].assignDimension(axisCode=axisCode, value=[a3])
         if peaks[0].height < peaks[1].height:
-            peaks[0].assignDimension(axisCode='C', value=[a3])
-            peaks[1].assignDimension(axisCode='C', value=[a4])
+            peaks[0].assignDimension(axisCode=axisCode, value=[a3])
+            peaks[1].assignDimension(axisCode=axisCode, value=[a4])
     elif len(peaks) == 1:
-        peaks[0].assignDimension(axisCode='C', value=[nmrResidue.fetchNmrAtom(name='CA')])
+        peaks[0].assignDimension(axisCode=axisCode, value=[nmrResidue.fetchNmrAtom(name='CA')])
 
 
-def assignBetas(nmrResidue: NmrResidue, peaks: typing.List[Peak]):
+def assignBetas(nmrResidue: NmrResidue, peaks: typing.List[Peak], axisCode='C'):
     """
     Assigns CB and CB-1 NmrAtoms to dimensions of specified peaks.
     """
@@ -101,15 +101,15 @@ def assignBetas(nmrResidue: NmrResidue, peaks: typing.List[Peak]):
         a3 = newNmrResidue.fetchNmrAtom(name='CB')
         a4 = nmrResidue.fetchNmrAtom(name='CB')
         if abs(peaks[0].height) > abs(peaks[1].height):
-            peaks[0].assignDimension(axisCode='C', value=[a4])
-            peaks[1].assignDimension(axisCode='C', value=[a3])
+            peaks[0].assignDimension(axisCode=axisCode, value=[a4])
+            peaks[1].assignDimension(axisCode=axisCode, value=[a3])
 
         if abs(peaks[0].height) < abs(peaks[1].height):
-            peaks[0].assignDimension(axisCode='C', value=[a3])
-            peaks[1].assignDimension(axisCode='C', value=[a4])
+            peaks[0].assignDimension(axisCode=axisCode, value=[a3])
+            peaks[1].assignDimension(axisCode=axisCode, value=[a4])
 
     elif len(peaks) == 1:
-        peaks[0].assignDimension(axisCode='C', value=[nmrResidue.fetchNmrAtom(name='CB')])
+        peaks[0].assignDimension(axisCode=axisCode, value=[nmrResidue.fetchNmrAtom(name='CB')])
 
 
 def getNmrResiduePrediction(nmrResidue: NmrResidue, chemicalShiftList: ChemicalShiftList, prior: float = 0.05) -> list:

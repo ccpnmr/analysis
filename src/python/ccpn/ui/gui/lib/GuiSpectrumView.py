@@ -227,8 +227,7 @@ def _createdSpectrumView(data):
     # Set Z widgets for nD strips
     strip = self.strip
     if not spectrumDisplay.is1D:
-        if not strip.haveSetupZWidgets:
-            strip._setZWidgets()
+        strip._setZWidgets()
 
     spectrumDisplay.spectrumToolBar._addSpectrumViewToolButtons(self)
 

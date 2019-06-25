@@ -1995,5 +1995,8 @@ def _deletedSpectrumView(project: Project, apiSpectrumView):
         spectrumDisplay.spectrumToolBar.removeAction(action)
         del spectrumDisplay.spectrumActionDict[apiDataSource]
 
+    if not spectrumDisplay.is1D:
+        for strip in spectrumDisplay.strips:
+            strip._setZWidgets()
 
 GuiSpectrumDisplay.processSpectrum = GuiSpectrumDisplay.displaySpectrum  # ejb - from SpectrumDisplay

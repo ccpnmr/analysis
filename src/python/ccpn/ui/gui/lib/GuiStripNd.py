@@ -629,7 +629,6 @@ class GuiStripNd(GuiStrip):
         # CCPN INTERNAL - called in _changedBoundDisplayAxisOrdering function of SpectrumDisplayNd.py
         Sets values for the widgets in the plane toolbar.
         """
-
         for n, zAxis in enumerate(self.orderedAxes[2:]):
             minZPlaneSize = None
             minAliasedFrequency = maxAliasedFrequency = None

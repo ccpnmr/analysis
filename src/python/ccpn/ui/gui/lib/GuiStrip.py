@@ -37,7 +37,7 @@ from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.util.Logging import getLogger
-from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME
+from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME, AXIS_ACTIVEAXES
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO, \
     SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS
@@ -431,7 +431,7 @@ class GuiStrip(Frame):
                             for strip in spectrumDisplay.strips:
                                 if strip != currentStrip:
                                     toolTip = 'Show cursor in strip %s at Peak position %s' % (str(strip.id), str([round(x, 3) for x in position]))
-                                    if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 3:
+                                    if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
                                         self.navigateToPeakMenu.addItem(text=strip.pid,
                                                                         callback=partial(navigateToPositionInStrip, strip=strip,
                                                                                          positions=self.current.peak.position,
@@ -452,7 +452,9 @@ class GuiStrip(Frame):
         if self.navigateCursorMenu:
             self.navigateCursorMenu.clear()
             currentStrip = self.current.strip
-            position = self.current.cursorPosition
+            # position = self.current.cursorPosition
+            position = [self.current.mouseMovedDict[AXIS_FULLATOMNAME][ax] for ax in self.axisCodes]
+
             if currentStrip:
                 if len(self.current.project.spectrumDisplays) > 1:
                     self.navigateCursorMenu.setEnabled(True)
@@ -460,7 +462,7 @@ class GuiStrip(Frame):
                         for strip in spectrumDisplay.strips:
                             if strip != currentStrip:
                                 toolTip = 'Show cursor in strip %s at Cursor position %s' % (str(strip.id), str([round(x, 3) for x in position]))
-                                if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 3:
+                                if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
                                     self.navigateCursorMenu.addItem(text=strip.pid,
                                                                     callback=partial(navigateToPositionInStrip, strip=strip,
                                                                                      positions=position, axisCodes=currentStrip.axisCodes, ),
@@ -487,7 +489,7 @@ class GuiStrip(Frame):
                             for strip in spectrumDisplay.strips:
                                 if strip != currentStrip:
                                     toolTip = 'Show cursor in strip %s at Peak position %s' % (str(strip.id), str([round(x, 3) for x in position]))
-                                    if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 3:
+                                    if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
                                         self.markInPeakMenu.addItem(text=strip.pid,
                                                                     callback=partial(self._createMarkAtPosition,
                                                                                      positions=self.current.peak.position,
@@ -508,6 +510,7 @@ class GuiStrip(Frame):
             self.markInCursorMenu.clear()
             currentStrip = self.current.strip
             position = self.current.cursorPosition
+
             if currentStrip:
                 if len(self.current.project.spectrumDisplays) > 1:
                     self.markInCursorMenu.setEnabled(True)
@@ -515,7 +518,7 @@ class GuiStrip(Frame):
                         for strip in spectrumDisplay.strips:
                             if strip != currentStrip:
                                 toolTip = 'Show cursor in strip %s at Cursor position %s' % (str(strip.id), str([round(x, 3) for x in position]))
-                                if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 3:
+                                if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
                                     self.markInCursorMenu.addItem(text=strip.pid,
                                                                   callback=partial(self._createMarkAtPosition,
                                                                                    positions=position, axisCodes=currentStrip.axisCodes, ),

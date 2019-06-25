@@ -68,12 +68,12 @@ def navigateToPositionInStrip(strip, positions: typing.List[float], axisCodes: t
     indices = getAxisCodeMatchIndices(axisCodes, strip.axisCodes)
 
     for ii, axisCode in enumerate(axisCodes):
-        if indices[ii] is None:
+        if indices[ii] is None or ii >= len(positions):
             continue
 
         stripAxisIndex = indices[ii]
         if positions[ii]:  # and strip.orderedAxes[stripAxisIndex]:
-                strip.orderedAxes[stripAxisIndex].position = positions[ii]
+            strip.orderedAxes[stripAxisIndex].position = positions[ii]
 
         # try:
         #     stripAxisIndex = strip.axisCodes.index(axisCode)

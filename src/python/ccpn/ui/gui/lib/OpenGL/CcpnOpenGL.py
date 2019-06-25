@@ -2348,13 +2348,13 @@ class CcpnGLWidget(QOpenGLWidget):
                 activeX = axisCode  #[0]
 
                 # double cursor
-                dxPos = dPos = self.cursorCoordinate[1]
+                dPos = self.cursorCoordinate[1]
             elif n == 1:
                 yPos = pos = self.cursorCoordinate[1]
                 activeY = axisCode  #[0]
 
                 # double cursor
-                dyPos = dPos = self.cursorCoordinate[0]
+                dPos = self.cursorCoordinate[0]
 
             else:
                 dPos = pos = self._orderedAxes[n].position  # if n in self._orderedAxes else 0

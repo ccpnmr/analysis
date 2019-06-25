@@ -1997,6 +1997,6 @@ def _deletedSpectrumView(project: Project, apiSpectrumView):
 
     if not spectrumDisplay.is1D:
         for strip in spectrumDisplay.strips:
-            strip._setZWidgets()
+            strip._setZWidgets(ignoreSpectrumView=apiSpectrumView)
 
 GuiSpectrumDisplay.processSpectrum = GuiSpectrumDisplay.displaySpectrum  # ejb - from SpectrumDisplay

@@ -624,7 +624,7 @@ class GuiStripNd(GuiStrip):
         #GuiStrip._mouseMoved(self, positionPixel)
         self._updateTraces()
 
-    def _setZWidgets(self):
+    def _setZWidgets(self, ignoreSpectrumView=None):
         """
         # CCPN INTERNAL - called in _changedBoundDisplayAxisOrdering function of SpectrumDisplayNd.py
         Sets values for the widgets in the plane toolbar.
@@ -633,6 +633,11 @@ class GuiStripNd(GuiStrip):
             minZPlaneSize = None
             minAliasedFrequency = maxAliasedFrequency = None
             for spectrumView in self.spectrumViews:
+
+                if ignoreSpectrumView and spectrumView._wrappedData and \
+                        ignoreSpectrumView is spectrumView._wrappedData.spectrumView:
+                    continue
+
                 # spectrum = spectrumView.spectrum
                 # zDim = spectrum.axisCodes.index(zAxis.code)
 

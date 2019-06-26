@@ -781,48 +781,9 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         # showInfo(title='Mark nmrResidue "%s"' % nmrResidue.pid, message='mark nmrResidue in strips')
 
-        from ccpn.AnalysisAssign.modules.BackboneAssignmentModule import nmrAtomsFromResidue, markNmrAtoms
+        from ccpn.AnalysisAssign.modules.BackboneAssignmentModule import nmrAtomsFromResidue, nmrAtomsFromOffsets, markNmrAtoms
 
-        # get the strips
-        # nmrResidue = nmrResidue.mainNmrResidue
-        # nmrResidues = []
-        # previousNmrResidue = nmrResidue.previousNmrResidue
-        # if previousNmrResidue:
-        #   nmrResidues.append(previousNmrResidue)
-        # nmrResidues.append(nmrResidue)
-        # nextNmrResidue = nmrResidue.nextNmrResidue
-        # if nextNmrResidue:
-        #   nmrResidues.append(nextNmrResidue)
-        #
-        # nmrAtoms=[]
-        #
-        # for nr in nmrResidues:
-        #   nmrAtoms.extend(nr.nmrAtoms)
-
-        # ejb - just a test, could pass data: if data['shiftLeftMouse']: then clear marks first
-
-        # the below commented code matches backboneassignment, but don't want to do this
-        # want to just show what's actually in the nmrResidue
-        # if '-1' in nmrResidue.pid:
-        #   # -1 residue so need to split the CA, CB from thr N, H
-        #   nmrAtomsMinus = nmrAtomsFromResidue(nmrResidue)
-        #   nmrAtomsCentre = nmrAtomsFromResidue(nmrResidue.mainNmrResidue)
-        #
-        #   nmrAtoms = []
-        #   # this should check the experiment type and choose the correct atoms
-        #   for nac in nmrAtomsMinus:
-        #     if '..CA' in nac.pid or '..CB' in nac.pid:
-        #       nmrAtoms.append(nac)
-        #   for nac in nmrAtomsCentre:
-        #     if '..N' in nac.pid or '..H' in nac.pid:
-        #       nmrAtoms.append(nac)
-        #
-        #   markNmrAtoms(mainWindow=self.mainWindow, nmrAtoms=nmrAtoms)
-        # else:
-        #   nmrAtoms = nmrAtomsFromResidue(nmrResidue.mainNmrResidue)
-        #   markNmrAtoms(mainWindow=self.mainWindow, nmrAtoms=nmrAtoms)
-
-        nmrAtoms = nmrAtomsFromResidue(nmrResidue)
+        nmrAtoms = nmrAtomsFromOffsets(nmrResidue)
         if nmrAtoms:
             markNmrAtoms(self.mainWindow, nmrAtoms)
 

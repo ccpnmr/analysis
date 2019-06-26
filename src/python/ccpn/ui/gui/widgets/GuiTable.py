@@ -1685,9 +1685,8 @@ GuiTable::item::selected {
 
         with self._tableBlockSignals('_updateRowCallback'):
             row = data[Notifier.OBJECT]
-            trigger = data[Notifier.TRIGGER]
 
-            if not self._dataFrameObject:
+            if not self._dataFrameObject or not row:
                 return
 
             #self._silenceCallback = True
@@ -1705,6 +1704,7 @@ GuiTable::item::selected {
             # sortOrder = self.horizontalHeader().sortIndicatorOrder()
             # sortColumn = self.horizontalHeader().sortIndicatorSection()
 
+            trigger = data[Notifier.TRIGGER]
             if trigger == Notifier.DELETE:
 
                 # remove item from self._dataFrameObject and table

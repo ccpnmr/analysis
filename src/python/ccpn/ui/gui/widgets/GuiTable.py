@@ -1338,28 +1338,29 @@ GuiTable::item::selected {
                                     False, export only the visible table
         """
         if not (self._dataFrameObject and self._dataFrameObject.dataFrame is not None):
-            showWarning('Export Table to File', 'Table does no contain a dataFrame')
-            return
-
-        rowList = None
-        if exportAll:
-            colList = self._dataFrameObject.userHeadings
-            rowList = list(self._dataFrameObject.dataFrame.index)
+            # export the data from here
+            self._exportTableDialog(None)
 
         else:
-            colList = self._dataFrameObject.visibleColumnHeadings
+            rowList = None
+            if exportAll:
+                colList = self._dataFrameObject.userHeadings
+                rowList = list(self._dataFrameObject.dataFrame.index)
 
-            # export contents of dataFrame based on the visible rows and columns
-            if self.searchWidget and self.searchWidget._listRows and self.columnCount():
-
-                # retrieve the correct item, checking that it is in the bounds of the table
-                count = min(len(self.searchWidget._listRows), self.rowCount())
-                rowList = [list(self.searchWidget._listRows)[self.item(row, 0).index] for row in range(count)]
             else:
-                if self.rowCount() and self.columnCount():
-                    rowList = [self.item(row, 0).index for row in range(self.rowCount())]
+                colList = self._dataFrameObject.visibleColumnHeadings
 
-        self._exportTableDialog(self._dataFrameObject.dataFrame, rowList=rowList, colList=colList)
+                # export contents of dataFrame based on the visible rows and columns
+                if self.searchWidget and self.searchWidget._listRows and self.columnCount():
+
+                    # retrieve the correct item, checking that it is in the bounds of the table
+                    count = min(len(self.searchWidget._listRows), self.rowCount())
+                    rowList = [list(self.searchWidget._listRows)[self.item(row, 0).index] for row in range(count)]
+                else:
+                    if self.rowCount() and self.columnCount():
+                        rowList = [self.item(row, 0).index for row in range(self.rowCount())]
+
+            self._exportTableDialog(self._dataFrameObject.dataFrame, rowList=rowList, colList=colList)
 
     def _exportTableDialog(self, dataFrame, rowList=None, colList=None):
         self.saveDialog = FileDialog(directory='ccpn_Table.xlsx',  #default saving name

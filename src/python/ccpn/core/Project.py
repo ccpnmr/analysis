@@ -1346,8 +1346,6 @@ class Project(AbstractWrapperObject):
             return _newMark(self, colour=colour, positions=positions, axisCodes=axisCodes,
                             style=style, units=units, labels=labels
                             )
-        else:
-            getLogger().warning('Mark already exists')
 
     @logCommand('project.')
     def findMark(self, colour: str, positions: Sequence[float], axisCodes: Sequence[str], labels: Sequence[str] = ()):

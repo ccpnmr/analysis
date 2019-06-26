@@ -526,7 +526,7 @@ def _fitExpDecayCurve(bindingCurves, aFunc=exponenial_func, xfStep=0.01, xfPerce
 
 
 def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: int = 3,
-                   fitMethod: str = GAUSSIANMETHOD):
+                   minDropFactor: float = 0.1, fitMethod: str = PARABOLICMETHOD):
     """Snap the position of the peak the nearest extremum.
     Assumes called with an existing peak, will fit within a box ±halfBoxSearchWidth about the current peak position.
     """
@@ -590,7 +590,6 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
     exclusionBuffer = [1] * numDim
 
     nonAdj = 0
-    minDropfactor = 0.1
     minLinewidth = [0.0] * numDim
 
     excludedRegionsList = []
@@ -599,7 +598,7 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
 
     peakPoints = CPeak.findPeaks(dataArray, doNeg, doPos,
                                  negLevel, posLevel, exclusionBuffer,
-                                 nonAdj, minDropfactor, minLinewidth,
+                                 nonAdj, minDropFactor, minLinewidth,
                                  excludedRegionsList, excludedDiagonalDimsList, excludedDiagonalTransformList)
 
     if not peakPoints:

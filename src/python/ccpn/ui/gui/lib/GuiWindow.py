@@ -625,24 +625,28 @@ class GuiWindow():
 
     def snapCurrentPeaksToExtremum(self, parent=None):
         """
-           Snaps selected peaks. If more then one, pops up a Yes/No.
+        Snaps selected peaks. If more then one, pops up a Yes/No.
+        Uses the minDropFactor from the preferences, and applies a parabolic fit to give first-estimate of lineWidths
         """
         peaks = self.current.peaks
         if not peaks:
             return
 
+        # get the default from the preferences
+        minDropFactor = self.application.preferences.general.peakDropFactor
+
         with undoBlock():
             n = len(peaks)
 
             if n == 1:
-                peaks[0].snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4)
+                peaks[0].snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4, minDropFactor=minDropFactor)
             elif n > 1:
                 title = 'Snap Peak%s to extremum' % ('' if n == 1 else 's')
                 msg = 'Snap %sselected peak%s?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
                 if MessageDialog.showYesNo(title, msg, parent):
                     with progressManager(self, 'Snapping peaks to extrema'):
                         for peak in peaks:
-                            peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4)
+                            peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4, minDropFactor=minDropFactor)
             else:
                 getLogger().warning('No selected peak/s. Select a peak first.')
 

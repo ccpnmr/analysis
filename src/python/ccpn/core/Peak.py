@@ -34,7 +34,7 @@ from ccpn.util import Common as commonUtil
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.SpectrumReference import SpectrumReference
-from ccpn.core.PeakList import PeakList
+from ccpn.core.PeakList import PeakList, PARABOLICMETHOD
 from ccpn.core.NmrAtom import NmrAtom
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 #from ccpnmodel.ccpncore.lib import Util as modelUtil
@@ -570,9 +570,11 @@ class Peak(AbstractWrapperObject):
             values = self.reorderValues(values, axisCodes)
         setattr(self, attributeName, values)
 
-    def snapToExtremum(self, halfBoxSearchWidth: int = 4, halfBoxFitWidth: int = 4):
+    def snapToExtremum(self, halfBoxSearchWidth: int = 4, halfBoxFitWidth: int = 4,
+                       minDropFactor: float = 0.1, fitMethod: str = PARABOLICMETHOD):
         """Snap the Peak to the closest local extrema, if within range."""
-        peakUtilsSnapToExtremum(self, halfBoxSearchWidth=halfBoxSearchWidth, halfBoxFitWidth=halfBoxFitWidth)
+        peakUtilsSnapToExtremum(self, halfBoxSearchWidth=halfBoxSearchWidth, halfBoxFitWidth=halfBoxFitWidth,
+                                minDropFactor=minDropFactor, fitMethod=fitMethod)
 
     # def fitPositionHeightLineWidths(self):
     #     """Set the position, height and lineWidth of the Peak."""

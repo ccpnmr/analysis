@@ -361,20 +361,37 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         for num, w in enumerate(self._allChildren):
             if w.__class__.__name__ in CommonWidgets:
                 allStorableWidgets.append(w)
-        widgtesWithinSelf = []
+        widgetsWithinSelf = []
+
         for varName, varObj in vars(self).items():
             if varObj.__class__.__name__ in CommonWidgets.keys():
-                widgtesWithinSelf.append(varObj)
-        nestedWidgtes = [widget for widget in allStorableWidgets if widget not in widgtesWithinSelf]
-        nestedWidgts = [widget for widget in nestedWidgtes if widget.parent() not in widgtesWithinSelf]
-        nestedWidgts.sort(key=lambda x: str(type(x)), reverse=False)
-        grouppedNestedWidgtes = [list(v) for k, v in itertools.groupby(nestedWidgts, lambda x: str(type(x)), )]
-        for widgetsGroup in grouppedNestedWidgtes:
-            for count, widget in enumerate(widgetsGroup):
-                if widget.objectName():
-                    setattr(self, DoubleUnderscore + widget.objectName(), widget)
-                else:
-                    setattr(self, DoubleUnderscore + widget.__class__.__name__ + str(count), widget)
+                widgetsWithinSelf.append(varObj)
+
+        try:
+            nestedWidgets = [widget for widget in allStorableWidgets if widget not in widgetsWithinSelf]
+
+            # nestedWidgs = [widget for widget in nestedWidgets if widget.parent() not in widgetsWithinSelf]
+
+            nestedWidgs = []
+            for widg in nestedWidgets:
+                try:
+                    if widg.parent() not in widgetsWithinSelf:
+                        nestedWidgs.append(widg)
+                except Exception as es:
+                    getLogger().debug2('ignoring bad widget %s - %s' % (str(widg), str(es)))
+
+            nestedWidgs.sort(key=lambda x: str(type(x)), reverse=False)
+            groupednestedWidgets = [list(v) for k, v in itertools.groupby(nestedWidgs, lambda x: str(type(x)), )]
+            for widgetsGroup in groupednestedWidgets:
+                for count, widget in enumerate(widgetsGroup):
+                    if widget.objectName():
+                        setattr(self, DoubleUnderscore + widget.objectName(), widget)
+                    else:
+                        setattr(self, DoubleUnderscore + widget.__class__.__name__ + str(count), widget)
+
+        except Exception as es:
+            # trap here is good for a breakpoint to spot the bad widget
+            raise
 
     @widgetsState.getter
     def widgetsState(self):

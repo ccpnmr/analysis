@@ -97,6 +97,17 @@ def _calibrateXND(spectrum, strip, currentPosition, newPosition):
     spectrum.referenceValues = spectrumReferencing
 
 
+def _calibrateNDAxis(spectrum, axisIndex, currentPosition, newPosition):
+    from ccpn.util.Common import getAxisCodeMatchIndices
+
+    # map the X change to the correct spectrum axis
+    spectrumReferencing = list(spectrum.referenceValues)
+
+    # as modifying the spectrum, spectrum needs to be the second argument of getAxisCodeMatchIndices
+    spectrumReferencing[axisIndex] = float(spectrumReferencing[axisIndex] + (newPosition - currentPosition))
+    spectrum.referenceValues = spectrumReferencing
+
+
 def _calibrateYND(spectrum, strip, currentPosition, newPosition):
     from ccpn.util.Common import getAxisCodeMatchIndices
 

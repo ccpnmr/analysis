@@ -2835,6 +2835,9 @@ class Framework(NotifierBase):
             self.updatePopup.show()
             self.updatePopup.exec_()
 
+            if self.updatePopup._numUpdatesInstalled > 0:
+                self.ui.mainWindow._closeWindowFromUpdate(disableCancel=True)
+
         else:
             MessageDialog.showWarning('Check For Updates',
                                       'Could not connect to the update server, please check your internet connection.')

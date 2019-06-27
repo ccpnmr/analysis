@@ -48,7 +48,7 @@ from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.ui.gui.popups.Dialog import handleDialogApply
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 from functools import partial
-from ccpn.core.lib.SpectrumLib import _calibrateXND, _calibrateYND, _calibrateX1D, _calibrateY1D
+from ccpn.core.lib.SpectrumLib import _calibrateXND, _calibrateYND, _calibrateX1D, _calibrateY1D, _calibrateNDAxis
 from ccpn.util.Common import getAxisCodeMatchIndices
 
 
@@ -102,8 +102,8 @@ class CalibrateSpectraFromPeaksPopupNd(CcpnDialog):
         Label(self.scrollAreaWidgetContents, text=title, bold=True, grid=(row, 0), gridSpan=(1, 3))
 
         row += 1
-        self.primaryPeakPulldown = PulldownListCompoundWidget(self.scrollAreaWidgetContents, labelText="Set Primary Peak",
-                                                              grid=(row, 0), gridSpan=(1, 3), vAlign='t',
+        self.primaryPeakPulldown = PulldownListCompoundWidget(self.scrollAreaWidgetContents, labelText="Fixed Peak",
+                                                              grid=(row, 0), gridSpan=(1, 3), hAlign='r',
                                                               callback=self._setPrimaryPeak)
         # self.primaryPeakPulldown.setPreSelect(self._fillPreferredWidget)
         self._fillPreferredWidget()
@@ -204,23 +204,27 @@ class CalibrateSpectraFromPeaksPopupNd(CcpnDialog):
             Label(spectrumFrame, text='Peak: %s' % str(peak.id), grid=(specRow, 0), gridSpan=(1, 6), bold=True)
             numDim = peak.peakList.spectrum.dimensionCount
 
-            indices = getAxisCodeMatchIndices(self.strip.axisCodes, peak.peakList.spectrum.axisCodes)
+            thisSpec = peak.peakList.spectrum
+            primarySpec = self.primaryPeak.peakList.spectrum
 
-            for ind in range(2):
+            # indices = getAxisCodeMatchIndices(primarySpec.axisCodes, thisSpec.axisCodes)
+            indices = getAxisCodeMatchIndices(thisSpec.axisCodes, primarySpec.axisCodes)
+
+            for ind in range(len(thisSpec.axisCodes)):
 
                 dim = indices[ind]
-
-                if not dim:
-                    continue
+                # if dim is None:
+                #     print('>>>bad dim: ', peak, ind, dim)
+                #     continue
 
                 specRow += 1
-                axisLabel = Label(spectrumFrame, text=peak.peakList.spectrum.axisCodes[dim], grid=(specRow, 1))
-                isoLabel = Label(spectrumFrame, text=peak.peakList.spectrum.isotopeCodes[dim], grid=(specRow, 2))
-                ppmLabel = Label(spectrumFrame, text='%.3f' % peak.ppmPositions[dim], grid=(specRow, 3))
+                axisLabel = Label(spectrumFrame, text=thisSpec.axisCodes[ind], grid=(specRow, 1))
+                isoLabel = Label(spectrumFrame, text=thisSpec.isotopeCodes[ind], grid=(specRow, 2))
+                ppmLabel = Label(spectrumFrame, text='%.3f' % peak.ppmPositions[ind], grid=(specRow, 3))
 
-                if (peak != self.primaryPeak):
+                if (peak != self.primaryPeak) and dim is not None:
                     Label(spectrumFrame, text='%.3f' % self.primaryPeak.ppmPositions[dim], grid=(specRow, 4))
-                    Label(spectrumFrame, text='%.3f' % (self.primaryPeak.ppmPositions[dim] - peak.ppmPositions[dim]), grid=(specRow, 5))
+                    Label(spectrumFrame, text='%.3f' % (self.primaryPeak.ppmPositions[dim] - peak.ppmPositions[ind]), grid=(specRow, 5))
 
                     self._spectraCheckBoxes[str(peak.id) + str(ind)] = CheckBox(spectrumFrame, grid=(specRow, 0), vAlign='t', hAlign='c', checked=True)
 
@@ -235,14 +239,39 @@ class CalibrateSpectraFromPeaksPopupNd(CcpnDialog):
             # add an undo item to the stack
             with undoStackBlocking() as addUndoItem:
                 # get the list of visible spectra in this strip
-                spectra = [(specView, specView.spectrum,
-                            self.spectrumCount[specView.spectrum].position, fromPos,
-                            self._spectraCheckBoxes[str(self.spectrumCount[specView.spectrum].id) + str(0)].isChecked(),
-                            self._spectraCheckBoxes[str(self.spectrumCount[specView.spectrum].id) + str(1)].isChecked())
-                           for specView in self.strip.spectrumViews
-                           if specView.isVisible()
-                           and specView.spectrum in self.spectrumCount
-                           and self.spectrumCount[specView.spectrum] is not self.primaryPeak]
+
+                spectra = []
+                for peak in self.peaks:
+                    if peak != self.primaryPeak:
+                        checkBoxes = []
+                        indices = list(getAxisCodeMatchIndices(peak.axisCodes, self.primaryPeak.axisCodes))
+                        peakFromPos = [fromPos[indices[ii]] if indices[ii] is not None else None for ii in range(len(peak.position))]
+
+                        for ii in range(len(peak.axisCodes)):
+                            idStr = str(peak.id) + str(ii)
+                            if idStr in self._spectraCheckBoxes:
+                                peakFromPos[ii] = peakFromPos[ii] if self._spectraCheckBoxes[idStr].isChecked() else None
+                                # checkBoxes.append(self._spectraCheckBoxes[idStr].isChecked())
+                            else:
+                                # checkBoxes.append(False)
+                                peakFromPos[ii] = None
+
+                        spectra.append((None, peak.peakList.spectrum,
+                                        peak.position, peakFromPos))
+
+                # checkBoxes = []
+                # for ii in range(len(specView.spectrum.axisCodes)):
+                #     idStr = str(self.spectrumCount[specView.spectrum].id) + str(0)
+                #
+                # checkBoxes = [box for box in self._spectraCheckBoxes]
+                # spectra = [(specView, specView.spectrum,
+                #             self.spectrumCount[specView.spectrum].position, fromPos,
+                #             self._spectraCheckBoxes[str(self.spectrumCount[specView.spectrum].id) + str(0)].isChecked(),
+                #             self._spectraCheckBoxes[str(self.spectrumCount[specView.spectrum].id) + str(1)].isChecked())
+                #            for specView in self.strip.spectrumViews
+                #            if specView.isVisible()
+                #            and specView.spectrum in self.spectrumCount
+                #            and self.spectrumCount[specView.spectrum] is not self.primaryPeak]
 
                 self._calibrateSpectra(spectra, self.strip, 1.0)
 
@@ -260,20 +289,25 @@ class CalibrateSpectraFromPeaksPopupNd(CcpnDialog):
 
     def _calibrateSpectra(self, spectra, strip, direction=1.0):
 
-        for specView, spectrum, fromPeakPos, toPeakPos, doX, doY in spectra:
+        for specView, spectrum, fromPeakPos, toPeakPos in spectra:
 
             if direction > 0:
                 fromPos, toPos = fromPeakPos, toPeakPos
             else:
                 toPos, fromPos = fromPeakPos, toPeakPos
 
-            if doX:
-                _calibrateXND(spectrum, strip, fromPos[0], toPos[0])
-            if doY:
-                _calibrateYND(spectrum, strip, fromPos[1], toPos[1])
+            for ii in range(len(fromPos)):
+                if fromPos[ii] is not None and toPos[ii] is not None:
+                    _calibrateNDAxis(spectrum, ii, fromPos[ii], toPos[ii])
 
-            if specView and not specView.isDeleted:
-                specView.buildContours = True
+            # if doX:
+            #     _calibrateXND(spectrum, strip, fromPos[0], toPos[0])
+            # if doY:
+            #     _calibrateYND(spectrum, strip, fromPos[1], toPos[1])
+
+            # # need o find which spectrumViews can see this spectrum NOT pass it in
+            # if specView and not specView.isDeleted:
+            #     specView.buildContours = True
 
 
 class CalibrateSpectraFromPeaksPopup1d(CalibrateSpectraFromPeaksPopupNd):

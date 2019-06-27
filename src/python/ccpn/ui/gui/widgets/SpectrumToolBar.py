@@ -447,8 +447,8 @@ class SpectrumToolBar(ToolBar):
                 # self._addSpectrumViewToolButtons(specView)
                 spectrum = specView.spectrum
                 spectrumName = spectrum.name
-                if len(spectrumName) > 12:
-                    spectrumName = spectrumName[:12] + '.....'
+                # if len(spectrumName) > 12:
+                #     spectrumName = spectrumName[:12] + '.....'
 
                 for act in actionList:
                     if act.text() == spectrumName:

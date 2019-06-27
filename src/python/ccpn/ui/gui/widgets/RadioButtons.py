@@ -153,6 +153,8 @@ class RadioButtons(QtWidgets.QWidget, Base):
         for rb in self.radioButtons:
             if rb.text() == text:
                 return rb
+        else:
+            raise ValueError('radioButton %s not found in the list' % text)
 
     def get(self):
 

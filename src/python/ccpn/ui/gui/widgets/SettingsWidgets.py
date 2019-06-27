@@ -420,10 +420,9 @@ class _commonSettings():
         else:
             return 0, None, None, None
 
-    def _removeWidget(self, widget):
+    def _removeWidget(self, widget, removeTopWidget=False):
         """Destroy a widget and all it's contents
         """
-
         def deleteItems(layout):
             if layout is not None:
                 while layout.count():
@@ -433,11 +432,10 @@ class _commonSettings():
                         widget.setVisible(False)
                         widget.setParent(None)
                         del widget
-                    else:
-                        deleteItems(item.layout())
 
         deleteItems(widget.getLayout())
-        del widget
+        if removeTopWidget:
+            del widget
 
     def _fillSpectrumFrame(self, displays):
         """Populate then spectrumFrame with the selectable spectra
@@ -445,9 +443,7 @@ class _commonSettings():
         if self._spectraWidget:
             self._spectraWidget.hide()
             self._spectraWidget.setParent(None)
-            # self._spectraWidget.deleteLater()
-
-            self._removeWidget(self._spectraWidget)
+            self._removeWidget(self._spectraWidget, removeTopWidget=True)
 
         self._spectraWidget = Widget(parent=self.spectrumDisplayOptionsFrame, setLayout=True, hPolicy='minimal',
                                      grid=(2, 1), gridSpan=(self._spectraRows, 2), vAlign='top', hAlign='left')

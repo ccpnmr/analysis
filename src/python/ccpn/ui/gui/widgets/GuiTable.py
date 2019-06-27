@@ -599,7 +599,7 @@ GuiTable::item::selected {
 
                     objIndex = item.index
                     data = CallBack(theObject=self._dataFrameObject,
-                                    object=objList if self.multiSelect else obj,       # single object or multi-selection
+                                    object=objList if self.multiSelect else obj,  # single object or multi-selection
                                     index=objIndex,
                                     targetName=obj.className,
                                     trigger=CallBack.DOUBLECLICK,
@@ -963,7 +963,7 @@ GuiTable::item::selected {
             self.setSelectionMode(self.SingleSelection)
 
         self._lastClick = None
-        self._selectOverride = False            # this may be handled by NoSelection
+        self._selectOverride = False  # this may be handled by NoSelection
 
     def _setHeaderContextMenu(self):
         """Set up the context menu for the table header
@@ -1398,7 +1398,8 @@ GuiTable::item::selected {
             if not h.isSectionHidden(i) and h.sectionViewportPosition(i) >= 0:
                 if self.getSelectedRows():
                     self.scrollTo(self.model().index(self.getSelectedRows()[0], i),
-                                  self.EnsureVisible)  #PositionAtCenter)
+                                  # self.EnsureVisible)
+                                  self.PositionAtCenter)
                     break
 
     def getSelectedRows(self):

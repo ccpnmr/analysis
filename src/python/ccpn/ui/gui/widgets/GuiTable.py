@@ -1506,21 +1506,18 @@ GuiTable::item::selected {
             if selection:
                 uniqObjs = set(selection)
 
-                rowObjs = []
-                for obj in uniqObjs:
-                    if obj in self._dataFrameObject.objects:
-                        rowObjs.append(obj)
+                rows = [self._dataFrameObject.find(self, str(obj.pid)) for obj in uniqObjs if obj in self._dataFrameObject.objects]
+                rows = [row for row in rows if row is not None]
+                if rows:
+                    rows.sort(key=lambda c: int(c))
 
-                selectionModel.clearSelection()
-                for obj in rowObjs:
-                    row = self._dataFrameObject.find(self, str(obj.pid))
+                    selectionModel.clearSelection()
+                    for row in rows:
+                        rowIndex = self.model().index(row, 0)
+                        self.setCurrentIndex(rowIndex)
 
-                    if row is not None:
-                        selectionModel.select(self.model().index(row, 0),
-                                              selectionModel.Select | selectionModel.Rows)
-
-                if scrollToSelection and not self._scrollOverride:
-                    self.scrollToSelectedIndex()
+                    if scrollToSelection and not self._scrollOverride:
+                        self.scrollToSelectedIndex()
 
     def clearTable(self):
         "remove all objects from the table"

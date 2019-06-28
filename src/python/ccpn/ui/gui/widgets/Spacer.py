@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-05-17 13:51:05 +0000 (Wed, May 17, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt5 import QtWidgets
 
 
 class Spacer(QtWidgets.QSpacerItem):
@@ -40,7 +40,7 @@ class Spacer(QtWidgets.QSpacerItem):
         :param args: passed to SpacerItem
         :param kwds: grid
         """
-        QtWidgets.QSpacerItem.__init__(self, width, height, *args)
+        super().__init__(width, height, *args)
 
         if parent is None:
             raise ValueError('Spacer: parent parameter cannot be None')

@@ -362,36 +362,27 @@ class CcpnModule(Dock, DropBase, NotifierBase):
             if w.__class__.__name__ in CommonWidgets:
                 allStorableWidgets.append(w)
         widgetsWithinSelf = []
-
         for varName, varObj in vars(self).items():
             if varObj.__class__.__name__ in CommonWidgets.keys():
                 widgetsWithinSelf.append(varObj)
 
-        try:
-            nestedWidgets = [widget for widget in allStorableWidgets if widget not in widgetsWithinSelf]
+        nestedWidgets = [widget for widget in allStorableWidgets if widget not in widgetsWithinSelf]
+        nestedWidgs = []
+        for widg in nestedWidgets:
+            try:
+                if widg.parent() not in widgetsWithinSelf:
+                    nestedWidgs.append(widg)
+            except Exception as es:
+                getLogger().debug2('ignoring bad widget %s - %s' % (str(widg), str(es)))
 
-            # nestedWidgs = [widget for widget in nestedWidgets if widget.parent() not in widgetsWithinSelf]
-
-            nestedWidgs = []
-            for widg in nestedWidgets:
-                try:
-                    if widg.parent() not in widgetsWithinSelf:
-                        nestedWidgs.append(widg)
-                except Exception as es:
-                    getLogger().debug2('ignoring bad widget %s - %s' % (str(widg), str(es)))
-
-            nestedWidgs.sort(key=lambda x: str(type(x)), reverse=False)
-            groupednestedWidgets = [list(v) for k, v in itertools.groupby(nestedWidgs, lambda x: str(type(x)), )]
-            for widgetsGroup in groupednestedWidgets:
-                for count, widget in enumerate(widgetsGroup):
-                    if widget.objectName():
-                        setattr(self, DoubleUnderscore + widget.objectName(), widget)
-                    else:
-                        setattr(self, DoubleUnderscore + widget.__class__.__name__ + str(count), widget)
-
-        except Exception as es:
-            # trap here is good for a breakpoint to spot the bad widget
-            raise
+        nestedWidgs.sort(key=lambda x: str(type(x)), reverse=False)
+        groupednestedWidgets = [list(v) for k, v in itertools.groupby(nestedWidgs, lambda x: str(type(x)), )]
+        for widgetsGroup in groupednestedWidgets:
+            for count, widget in enumerate(widgetsGroup):
+                if widget.objectName():
+                    setattr(self, DoubleUnderscore + widget.objectName(), widget)
+                else:
+                    setattr(self, DoubleUnderscore + widget.__class__.__name__ + str(count), widget)
 
     @widgetsState.getter
     def widgetsState(self):

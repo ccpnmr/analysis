@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
@@ -37,6 +37,10 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.MessageDialog import showInfo
+from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
+
+
+COLWIDTH = 140
 
 
 class PeakFindPopup(CcpnDialog):
@@ -46,7 +50,7 @@ class PeakFindPopup(CcpnDialog):
     """
 
     def __init__(self, parent=None, mainWindow=None, **kwds):
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='', **kwds)
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='Pick ND peaks', **kwds)
 
         self.mainWindow = mainWindow
         self.project = self.mainWindow.project
@@ -92,19 +96,41 @@ class PeakFindPopup(CcpnDialog):
             self.checkBoxWidget.getLayout().addWidget(self.checkBox3Label, 0, 5)
             self.checkBox3.setChecked(True)
 
+            self.limitsFrame = Frame(parent=self, setLayout=True, spacing=(5, 0),
+                                       showBorder=False, fShape='noFrame',
+                                       grid=(2, 0), gridSpan=(1,6))
 
             self.estimateFrame = Frame(parent=self, setLayout=True, spacing=(5, 0),
                                        showBorder=False, fShape='noFrame',
-                                       grid=(7, 0), gridSpan=(1,2))
-            self.estimateLineWidthLabel = Label(self.estimateFrame, 'Estimate Line Widths', grid=(0, 1))
-            self.estimateLineWidthData = CheckBox(self.estimateFrame, grid=(0, 0), checked=True, vAlign='t', hAlign='l')
-            self.estimateLineWidthData.setChecked(True)
+                                       grid=(3, 0), gridSpan=(1,6))
+            # self.estimateLineWidthLabel = Label(self.estimateFrame, 'Estimate Line Widths', grid=(0, 1))
+            # self.estimateLineWidthData = CheckBox(self.estimateFrame, grid=(0, 0), checked=True, vAlign='t', hAlign='l')
+            # self.estimateLineWidthData.setChecked(True)
+
+            self.estimateLineWidthData = CheckBoxCompoundWidget(self.estimateFrame,
+                    grid=(0, 0), vAlign='top', stretch=(0, 0), hAlign='left',
+                    fixedWidths=(COLWIDTH, 30),
+                    orientation='right',
+                    labelText='Estimate Line Widths',
+                    checked=True
+                    )
+            self.estimateVolume = CheckBoxCompoundWidget(self.estimateFrame,
+                    grid=(0, 1), vAlign='top', stretch=(0, 0), hAlign='left',
+                    fixedWidths=(COLWIDTH, 30),
+                    orientation='right',
+                    labelText='Estimate Peak Volumes',
+                    checked=True
+                    )
+
             self._updateContents()
 
-            self.addSpacer(0, 10, grid=(8,0))
-
-            self.buttonBox = ButtonList(self, grid=(9, 0), gridSpan=(1, 4), texts=['Cancel', 'Find Peaks'],
+            self.addSpacer(4, 5, expandX=True, expandY=True, grid=(8,0))
+            self.buttonBox = ButtonList(self, grid=(5, 3), gridSpan=(1, 3), texts=['Cancel', 'Find Peaks'],
                                         callbacks=[self.reject, self._pickPeaks])
+
+            # restrict popup size
+            # self.adjustSize()
+            self.setFixedSize(QtCore.QSize(400, 240))
         else:
             self.close()
 
@@ -141,6 +167,8 @@ class PeakFindPopup(CcpnDialog):
         self.accept()
 
     def _updateContents(self):
+
+        layout = self.limitsFrame.getLayout()
 
         rowCount = self.layout().rowCount()
         colCount = self.layout().columnCount()

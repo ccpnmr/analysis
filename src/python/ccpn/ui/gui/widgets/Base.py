@@ -263,8 +263,8 @@ class Base(DropBase):
         """
         return self.parent()
 
-    def addSpacer(self, width, height, grid, gridSpan=(1, 1)):
-        """Convience to insert spacer
+    def addSpacer(self, width, height, grid, gridSpan=(1, 1), expandX=False, expandY=False):
+        """Convenience to insert spacer
         width, height: in pixels
         grid=(row,col): tuple or list defining row, column
         gridSpan: tuple or list defining grid-span along row, column
@@ -273,4 +273,7 @@ class Base(DropBase):
         """
         from ccpn.ui.gui.widgets.Spacer import Spacer
 
-        return Spacer(self, width=width, height=height, grid=grid, gridSpan=gridSpan)
+        expandingX = QtWidgets.QSizePolicy.MinimumExpanding if expandX else QtWidgets.QSizePolicy.Fixed
+        expandingY = QtWidgets.QSizePolicy.MinimumExpanding if expandY else QtWidgets.QSizePolicy.Fixed
+
+        return Spacer(self, width, height, expandingX, expandingY, grid=grid, gridSpan=gridSpan)

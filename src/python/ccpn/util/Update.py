@@ -164,8 +164,8 @@ def downloadFile(serverScript, serverDbRoot, fileName):
     """Download a file from the server
     """
     import ssl
-    import urllib3
     import certifi
+    import urllib3.contrib.pyopenssl
 
     fileName = os.path.join(serverDbRoot, fileName)
 

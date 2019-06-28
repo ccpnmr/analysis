@@ -406,7 +406,7 @@ class CcpnModuleArea(ModuleArea, DropBase):  #, DropBase):
                 for i in range(obj.count()):
                     try:
                         widg = obj.widget(i)
-                        childList = self.childState(obj.widget(i))
+                        childList = self.childState(widg)
                         childs.append(childList)
                     except Exception as es:
                         getLogger().warning('Error accessing widget: %s - %s - %s' % (str(es), widg, obj))

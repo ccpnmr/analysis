@@ -742,19 +742,13 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         info = MessageDialog.showInfo('Not implemented yet',
                                       'This function has not been implemented in the current version')
 
-    def _closeWindowFromUpdate(self, event=None, disableCancel=True, sourceWindow=None):
-        # # close the update window
-        # if sourceWindow:
-        #     del sourceWindow
-
+    def _closeWindowFromUpdate(self, event=None, disableCancel=True):
         # set the active window to mainWindow so that the quit popup centres correctly.
-        QtWidgets.QApplication.setActiveWindow(self)
         self._closeWindow(event=event, disableCancel=disableCancel)
         os._exit(0)
 
     def _closeEvent(self, event=None, disableCancel=False):
         # set the active window to mainWindow so that the quit popup centres correctly.
-        QtWidgets.QApplication.setActiveWindow(self)
         self._closeWindow(event=event, disableCancel=disableCancel)
 
     def _closeWindow(self, event=None, disableCancel=False):
@@ -777,8 +771,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
         # prefFile.close()
 
-        # # set the active window to mainWindow so that the quit popup centres correctly.
-        # QtWidgets.QApplication.setActiveWindow(self)
+        # set the active window to mainWindow so that the quit popup centres correctly.
+        QtWidgets.QApplication.setActiveWindow(self)
 
         if disableCancel:
             reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",

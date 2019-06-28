@@ -2195,7 +2195,6 @@ class Framework(NotifierBase):
 
                 popup = PickPeak1DPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
                 popup.exec_()
-                popup.raise_()
             else:
                 getLogger().warning('Peak Picking: Project has no 1d Specta.')
                 MessageDialog.showWarning('Peak Picking', 'Project has no 1d Spectra.')
@@ -2215,7 +2214,6 @@ class Framework(NotifierBase):
                 if self.current.strip:
                     popup = PeakFindPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
                     popup.exec_()
-                    popup.raise_()
                 else:
                     getLogger().warning('Pick Nd Peaks, no strip selected')
                     MessageDialog.showWarning('Pick Nd Peaks', 'No strip selected')
@@ -2792,7 +2790,6 @@ class Framework(NotifierBase):
 
         popup = AboutPopup(parent=self.ui.mainWindow)
         popup.exec_()
-        popup.raise_()
 
     def showAboutCcpn(self):
         from ccpn.framework.PathsAndUrls import ccpnUrl
@@ -2835,6 +2832,7 @@ class Framework(NotifierBase):
             self.updatePopup.show()
             self.updatePopup.exec_()
 
+            # if updates have been installed then popup the quit dialog with no cancel button
             if self.updatePopup._numUpdatesInstalled > 0:
                 self.ui.mainWindow._closeWindowFromUpdate(disableCancel=True)
 

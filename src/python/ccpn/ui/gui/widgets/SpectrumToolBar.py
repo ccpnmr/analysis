@@ -463,6 +463,8 @@ class SpectrumToolBar(ToolBar):
         # paint event sets visibility of actions...
         return
 
+        # kept for the minute, but can be removed when the toolbar is changed to a tab bar
+
         # self.removeChild(self._extButton)
         # return
         #

@@ -201,7 +201,7 @@ class ExcludeRegions(Widget):
 
 
 class PickPeak1DPopup(CcpnDialog):
-    def __init__(self, parent=None, mainWindow=None, title='Pick 1D Peak', **kwds):
+    def __init__(self, parent=None, mainWindow=None, title='Pick 1D Peaks', **kwds):
         CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kwds)
 
         self.mainWindow = mainWindow

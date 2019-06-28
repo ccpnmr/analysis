@@ -1178,6 +1178,8 @@ class Framework(NotifierBase):
                             )),
             ("Copy PeakList...", self.showCopyPeakListPopup, [('shortcut', 'cl')]),
             ("Copy Peaks...", self.showCopyPeaks, [('shortcut', 'cp')]),
+            ("Estimate Volumes...", self.showEstimateVolumesPopup, [('shortcut', 'ev')]),
+            (),
             ("Make Strip Plot...", self.makeStripPlotPopup, [('shortcut', 'sp')]),
 
             (),
@@ -2186,8 +2188,8 @@ class Framework(NotifierBase):
         Displays Peak Picking 1D Popup.
         """
         if not self.project.peakLists:
-            getLogger().warning('Peak Picking: Project has no Specta.')
-            MessageDialog.showWarning('Peak Picking', 'Project has no Spectra.')
+            getLogger().warning('Peak Picking: Project has no peakLists.')
+            MessageDialog.showWarning('Peak Picking', 'Project has no peakLists.')
         else:
             spectra = [spec for spec in self.project.spectra if spec.dimensionCount == 1]
             if spectra:
@@ -2204,8 +2206,8 @@ class Framework(NotifierBase):
         Displays Peak Picking ND Popup.
         """
         if not self.project.peakLists:
-            getLogger().warning('Peak Picking: Project has no Specta.')
-            MessageDialog.showWarning('Peak Picking', 'Project has no Spectra.')
+            getLogger().warning('Peak Picking: Project has no peakLists.')
+            MessageDialog.showWarning('Peak Picking', 'Project has no peakLists.')
         else:
             spectra = [spec for spec in self.project.spectra if spec.dimensionCount > 1]
             if spectra:
@@ -2245,6 +2247,29 @@ class Framework(NotifierBase):
             popup._selectPeaks(peaks)
             popup.exec()
             popup.raise_()
+
+    def showEstimateVolumesPopup(self):
+        """
+        Displays Estimate Volumes Popup.
+        """
+        if not self.project.peakLists:
+            getLogger().warning('Estimate Volumes: Project has no peakLists.')
+            MessageDialog.showWarning('Estimate Volumes', 'Project has no peakLists.')
+        else:
+            from ccpn.ui.gui.popups.EstimateVolumes import EstimateVolumes
+
+            if self.current.strip:
+                spectra = [specView.spectrum for specView in self.current.strip.spectrumDisplay.spectrumViews]
+            else:
+                spectra = self.project.spectra
+
+            if spectra:
+                popup = EstimateVolumes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+                popup.exec_()
+            else:
+                getLogger().warning('Peak Picking: no specta selected.')
+                MessageDialog.showWarning('Peak Picking', 'no specta selected.')
+
 
     def makeStripPlotPopup(self, includePeakLists=True, includeNmrChains=True, includeNmrChainPullSelection=True):
         if not self.project.peaks and not self.project.nmrResidues and not self.project.nmrChains:

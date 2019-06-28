@@ -866,7 +866,8 @@ class PeakList(AbstractWrapperObject):
                         minLinewidth=None, exclusionBuffer=None,
                         minDropFactor: float = 0.1, checkAllAdjacent: bool = True,
                         fitMethod: str = PARABOLICMETHOD, excludedRegions=None,
-                        excludedDiagonalDims=None, excludedDiagonalTransform=None):
+                        excludedDiagonalDims=None, excludedDiagonalTransform=None,
+                        estimateLineWidths=True):
 
         with undoBlock():
             peaks = self._pickPeaksRegion(regionToPick=regionToPick,
@@ -874,7 +875,8 @@ class PeakList(AbstractWrapperObject):
                                           minLinewidth=minLinewidth, exclusionBuffer=exclusionBuffer,
                                           minDropFactor=minDropFactor, checkAllAdjacent=checkAllAdjacent,
                                           fitMethod=fitMethod, excludedRegions=excludedRegions,
-                                          excludedDiagonalDims=excludedDiagonalDims, excludedDiagonalTransform=excludedDiagonalTransform)
+                                          excludedDiagonalDims=excludedDiagonalDims, excludedDiagonalTransform=excludedDiagonalTransform,
+                                          estimateLineWidths=estimateLineWidths)
         return peaks
 
     def _pickPeaksRegion(self, regionToPick: dict = {},
@@ -882,7 +884,8 @@ class PeakList(AbstractWrapperObject):
                          minLinewidth=None, exclusionBuffer=None,
                          minDropFactor: float = 0.1, checkAllAdjacent: bool = True,
                          fitMethod: str = PARABOLICMETHOD, excludedRegions=None,
-                         excludedDiagonalDims=None, excludedDiagonalTransform=None):
+                         excludedDiagonalDims=None, excludedDiagonalTransform=None,
+                         estimateLineWidths=True):
         """Pick peaks in the region defined by the regionToPick dict.
 
         Axis limits are passed in as a dict containing the axis codes and the required limits.
@@ -1123,7 +1126,8 @@ class PeakList(AbstractWrapperObject):
 
                         position = center + startPointBufferActual
                         peak = self.newPickedPeak(pointPositions=position, height=height,
-                                                  lineWidths=linewidth, fitMethod=fitMethod)
+                                                  lineWidths=linewidth if estimateLineWidths else None,
+                                                  fitMethod=fitMethod)
                         peaks.append(peak)
 
                     if fitMethod != PARABOLICMETHOD:

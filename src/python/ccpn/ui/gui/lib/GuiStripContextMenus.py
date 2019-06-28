@@ -303,6 +303,12 @@ def _snapToExtremaItem(strip):
                     callback=strip.mainWindow.snapCurrentPeaksToExtremum)
 
 
+def _estimateVolumesItem(strip):
+    return _SCMitem(name='Estimate Volume(s)',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Estimate peak volume(s)', shortcut='EV',
+                    callback=strip.mainWindow.estimateVolumes)
+
+
 def _makeStripPlotItem(strip):
     return _SCMitem(name='Make Strip Plot...',
                     typeItem=ItemTypes.get(ITEM), toolTip='Make Strip Plot from Selected Peaks', shortcut='SP',
@@ -655,6 +661,8 @@ def _getNdPeakMenu(guiStripNd) -> Menu:
         _refitPeakItem(guiStripNd),
         _refitPeakGroupItem(guiStripNd),
         _snapToExtremaItem(guiStripNd),
+        _estimateVolumesItem(guiStripNd),
+        _separator(),
         _makeStripPlotItem(guiStripNd),
         _calibrateFromPeaks(guiStripNd),
         _separator(),

@@ -27,6 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from PyQt5 import QtCore
 from ccpn.core.lib import AssignmentLib
+from ccpn.core.lib.peakUtils import estimateVolumes
 from ccpn.core.IntegralList import IntegralList
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.lib.SpectrumDisplay import navigateToCurrentPeakPosition, navigateToCurrentNmrResiduePosition
@@ -330,6 +331,14 @@ class GuiWindow():
 
         with undoBlock():
             AssignmentLib.refitPeaks(peaks, singularMode=singularMode)
+
+    def estimateVolumes(self):
+        peaks = self.application.current.peaks
+        if not peaks:
+            return
+
+        with undoBlock():
+            estimateVolumes(peaks)
 
         # project = peaks[0].project
         # undo = project._undo

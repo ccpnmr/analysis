@@ -22,12 +22,14 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+from typing import Sequence, Union
 import numpy as np
 from ccpn.util.Logging import getLogger
 from collections import OrderedDict
 from scipy.optimize import curve_fit
 from collections import OrderedDict
 from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD
+from ccpn.util.Common import makeIterableList
 
 
 POSITIONS = 'positions'
@@ -718,3 +720,31 @@ def getSpectrumData(peak: 'Peak', halfBoxWidth: int = 3):
         return
 
     return (dataArray, intRegion, list(position - startPoint), list(np.round(position).astype(np.int32)))
+
+
+def estimateVolumes(peaks: Sequence[Union[str, 'Peak']]):
+    """Estimate the volumes for the peaks
+    """
+    # move to peakList
+
+    from ccpn.core.Peak import Peak
+    from ccpn.framework.Application import getApplication
+
+    if not getApplication() and not getApplication().project:
+        raise RuntimeError('There is no project')
+
+    getByPid = getApplication().project.getByPid
+
+    # error checking - that the peaks are valid
+    peakList = makeIterableList(peaks)
+    pks = [getByPid(peak) if isinstance(peak, str) else peak for peak in peakList]
+
+    for pp in pks:
+        if not isinstance(pp, Peak):
+            raise TypeError('%s is not of type Peak' % pp)
+
+    # estimate the volume for each peak
+    for pp in pks:
+        lineWidths = pp.lineWidths
+        if lineWidths and None not in lineWidths:
+            pp.estimateVolume()

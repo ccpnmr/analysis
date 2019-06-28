@@ -146,6 +146,12 @@ if __name__ == '__main__':
         return (h / np.sqrt(4 * (np.pi ** 2) * (sigmax * sigmay))) * ex
 
 
+    def make_gauss(N, sigma, mu, height):
+        k = height     # / (sigma * np.sqrt(2 * np.pi))
+        s = -1.0 / (2 * sigma * sigma)
+
+        return k * np.exp(s * (N - mu) * (N - mu))
+
     print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
     # print('SHOULD BE:', res, h, x0, y0, sigma2fwhm(sigmax), sigma2fwhm(sigmay))
 
@@ -161,6 +167,8 @@ if __name__ == '__main__':
 
         sigmax, sigmay, mx, my, h = thisPeak
 
+        print('>>>testPeak', sigmax, sigmay, mx, my, h)
+
         peakArrayFWHM = np.array(_gaussFWHM(xm, ym, sigmax=sigmax, sigmay=sigmay, mx=mx, my=my, h=h), dtype=np.float32)
         dataArray = np.add(dataArray, peakArrayFWHM)
 
@@ -175,11 +183,57 @@ if __name__ == '__main__':
         position, height = peak
         print('position of peak = %s, height = %s' % (position, height))
 
+    # make a plot
+    # okay, make  2d plot of xxSig, the gauss curve between +-3 sigma
+
+    # testing the calculation of the area under a gaussian curve
+    # convert the sigma into a FWHM and plot between volumeIntegralLimits * FWHM
+    sigmax = 1.0
+    mx = 0.0
+    height = 1.0
+    integralLimit = 4.0
+    numPoints=45
+    lx = numPoints-1
+    ly = numPoints-1
+    lxx = numPoints-1
+
+    thisFWHM = sigma2fwhm(sigmax)
+    lim = integralLimit * thisFWHM / 2.0
+
+    fig = plt.figure(figsize=(10, 8), dpi=100)
+    ax0 = fig.gca(projection='3d')
+    plotSigmaRange = ((0, lim), (0, lim))
+    xxS = np.linspace(*plotSigmaRange[0], numPoints)
+    yyS = np.linspace(*plotSigmaRange[1], numPoints)
+    xmS, ymS = np.meshgrid(xxS, yyS)
+    peakArrayFWHM = np.array(_gaussFWHM(xmS, ymS, sigmax=sigmax, sigmay=sigmax, mx=mx, my=mx, h=height), dtype=np.float32)
+    ax0.plot_wireframe(xmS, ymS, peakArrayFWHM)
+
+    # only need to use quadrant
+    area2d = 4.0*np.trapz(np.trapz(peakArrayFWHM, xxS), yyS)/height        # why does this work?
+    print('>>>area3D', area2d)
+
+    xxSig = np.linspace(0, lim, numPoints)
+    vals = list(make_gauss(xxSig, sigmax, mx, height))
+    fig = plt.figure(figsize=(10, 8), dpi=100)
+    axS = fig.gca()
+    axS.plot(xxSig, vals)
+    axS.grid()
+
+    # only need to use half
+    area = 2.0*np.trapz(vals, xxSig)/height     # THIS WORKS! - uses the correct x points for the trapz area
+    print('>>>', vals, list(xxSig))
+    print('>>>area', area, np.power(area, 2), np.power(area, 2)/area2d)
+
+    # actually area will be area * FWHM * height / thisFWHM
+
+    # make a plot
     fig = plt.figure(figsize=(10, 8), dpi=100)
     ax = fig.gca(projection='3d')
 
     ax.plot_wireframe(xm, ym, dataArray)
 
+    # make a plot
     fig = plt.figure(figsize=(10, 8), dpi=100)
     ax2 = fig.gca(projection='3d')
 
@@ -189,6 +243,11 @@ if __name__ == '__main__':
 
     allPeaksArray = None
     regionArray = None
+
+
+
+
+
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # fit all peaks in single operation

@@ -29,9 +29,8 @@ from PyQt5 import QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.RadioButton import RadioButton
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
@@ -67,34 +66,17 @@ class PeakFindPopup(CcpnDialog):
                             str(self.current.strip.spectra[0].peakLists[0].pid)))
 
             self.peakListLabel = Label(self, text="PeakList ", grid=(0, 0))
-            self.peakListPulldown = PulldownList(self, grid=(0, 1), gridSpan=(1, 1), hAlign='l', callback=self._selectPeakList)
-            self.peakListPulldown.setData([peakList.pid for peakList in self.project.peakLists
-                                           if peakList.spectrum.dimensionCount != 1])
-            if self.current is not None and self.current.strip is not None and len(self.current.strip.spectra) > 0:
-                self.peakListPulldown.select(self.current.strip.spectra[-1].peakLists[-1].pid)
-            self.peakList = self.project.getByPid(self.peakListPulldown.currentText())
+            self.peakListPulldown = PulldownList(self, grid=(0, 1), gridSpan=(1, 2), hAlign='l', callback=self._selectPeakList)
 
-            # self.checkBoxWidget = QtWidgets.QWidget()
-            # layout = QtWidgets.QGridLayout()
-            # self.checkBoxWidget.setLayout(layout)
-            # self.layout().addWidget(self.checkBoxWidget, 1, 0, 1, 4)
+            self.checkBoxWidget = Frame(self, setLayout=True, grid=(1,0), gridSpan=(1,6))
 
-            Label(self, 'Pick', grid=(1,0))
-            self.checkBoxWidget = Frame(self, setLayout=True, grid=(1,1), gridSpan=(1,3))
-
-            self.checkBox1 = RadioButton(self)
-            self.checkBoxWidget.getLayout().addWidget(self.checkBox1, 0, 0)
-            self.checkBox1Label = Label(self, 'Positive only')
-            self.checkBoxWidget.getLayout().addWidget(self.checkBox1Label, 0, 1)
-            self.checkBox2 = RadioButton(self)
-            self.checkBoxWidget.getLayout().addWidget(self.checkBox2, 0, 2)
-            self.checkBox2Label = Label(self, 'Negative only')
-            self.checkBoxWidget.getLayout().addWidget(self.checkBox2Label, 0, 3)
-            self.checkBox3 = RadioButton(self)
-            self.checkBoxWidget.getLayout().addWidget(self.checkBox3, 0, 4)
-            self.checkBox3Label = Label(self, 'Both')
-            self.checkBoxWidget.getLayout().addWidget(self.checkBox3Label, 0, 5)
-            self.checkBox3.setChecked(True)
+            Label(self.checkBoxWidget, 'Pick', grid=(0, 0))
+            self.spectrumContourSelect = RadioButtons(self.checkBoxWidget, grid=(0, 1), texts=['Positive only', 'Negative only', 'Both'],
+                                                      selectedInd=2, callback=None, direction='h',
+                                                      hAlign='l',
+                                                      tipTexts=['Only pick positive peaks', 'Only pick negative peaks', 'Pick all peaks'],
+                                                      )
+            self.checkBox1, self.checkBox2, self.checkBox3 = self.spectrumContourSelect.radioButtons
 
             self.limitsFrame = Frame(parent=self, setLayout=True, spacing=(5, 0),
                                        showBorder=False, fShape='noFrame',
@@ -103,34 +85,33 @@ class PeakFindPopup(CcpnDialog):
             self.estimateFrame = Frame(parent=self, setLayout=True, spacing=(5, 0),
                                        showBorder=False, fShape='noFrame',
                                        grid=(3, 0), gridSpan=(1,6))
-            # self.estimateLineWidthLabel = Label(self.estimateFrame, 'Estimate Line Widths', grid=(0, 1))
-            # self.estimateLineWidthData = CheckBox(self.estimateFrame, grid=(0, 0), checked=True, vAlign='t', hAlign='l')
-            # self.estimateLineWidthData.setChecked(True)
 
-            self.estimateLineWidthData = CheckBoxCompoundWidget(self.estimateFrame,
-                    grid=(0, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                    fixedWidths=(COLWIDTH, 30),
-                    orientation='right',
-                    labelText='Estimate Line Widths',
-                    checked=True
-                    )
-            self.estimateVolume = CheckBoxCompoundWidget(self.estimateFrame,
-                    grid=(0, 1), vAlign='top', stretch=(0, 0), hAlign='left',
-                    fixedWidths=(COLWIDTH, 30),
-                    orientation='right',
-                    labelText='Estimate Peak Volumes',
-                    checked=True
-                    )
+            self.estimateLineWidths = CheckBoxCompoundWidget(self.estimateFrame,
+                                                             grid=(0, 0), vAlign='top', stretch=(0, 0), hAlign='left',
+                                                             fixedWidths=(COLWIDTH, 30),
+                                                             orientation='right',
+                                                             labelText='Estimate Line Widths',
+                                                             checked=True
+                                                             )
+            self.estimateVolumes = CheckBoxCompoundWidget(self.estimateFrame,
+                                                          grid=(0, 1), vAlign='top', stretch=(0, 0), hAlign='left',
+                                                          fixedWidths=(COLWIDTH, 30),
+                                                          orientation='right',
+                                                          labelText='Estimate Peak Volumes',
+                                                          checked=True
+                                                          )
 
-            self._updateContents()
-
-            self.addSpacer(4, 5, expandX=True, expandY=True, grid=(8,0))
+            self.addSpacer(5, 5, expandX=True, expandY=True, grid=(4,5))
             self.buttonBox = ButtonList(self, grid=(5, 3), gridSpan=(1, 3), texts=['Cancel', 'Find Peaks'],
                                         callbacks=[self.reject, self._pickPeaks])
 
-            # restrict popup size
-            # self.adjustSize()
-            self.setFixedSize(QtCore.QSize(400, 240))
+            self.peakListPulldown.setData([peakList.pid for peakList in self.project.peakLists
+                                           if peakList.spectrum.dimensionCount != 1])
+            if self.current is not None and self.current.strip is not None and len(self.current.strip.spectra) > 0:
+                self.peakListPulldown.select(self.current.strip.spectra[-1].peakLists[-1].pid)
+            self.peakList = self.project.getByPid(self.peakListPulldown.currentText())
+
+            self.setFixedSize(QtCore.QSize(450, 220))
         else:
             self.close()
 
@@ -150,6 +131,9 @@ class PeakFindPopup(CcpnDialog):
         elif self.checkBox2.isChecked():
             # negative only
             doPos = False
+        doLineWidths = self.estimateLineWidths.isChecked()
+        doVolumes = self.estimateVolumes.isChecked()
+
         # Checking the third box turns the others off and sets both. Hence default
         # peakList.pickPeaksNd(positions, doPos=doPos, doNeg=doNeg, fitMethod='gaussian')
 
@@ -159,7 +143,10 @@ class PeakFindPopup(CcpnDialog):
         #     log('pickPeaksRegion')
 
         peaks = peakList.pickPeaksRegion(regionToPick=axisCodeDict, doPos=doPos, doNeg=doNeg,
-                                     minDropFactor = self.application.preferences.general.peakDropFactor)
+                                     minDropFactor = self.application.preferences.general.peakDropFactor,
+                                         estimateLineWidths=doLineWidths
+                                         )
+
 
             # for strip in self.project.strips:
             #     strip.showPeaks(peakList)
@@ -168,31 +155,32 @@ class PeakFindPopup(CcpnDialog):
 
     def _updateContents(self):
 
+        # updat the contents of the limits frame to the new spectrum
         layout = self.limitsFrame.getLayout()
 
-        rowCount = self.layout().rowCount()
-        colCount = self.layout().columnCount()
+        rowCount = layout.rowCount()
+        colCount = layout.columnCount()
 
         for r in range(2, 7):
             for m in range(0, colCount):
-                item = self.layout().itemAtPosition(r, m)
+                item = layout.itemAtPosition(r, m)
                 if item:
                     if item.widget():
                         item.widget().hide()
-                self.layout().removeItem(item)
+                layout.removeItem(item)
 
         self.minPositionBoxes = []
         self.maxPositionBoxes = []
 
         if self.peakList is not None:
             for ii in range(self.peakList.spectrum.dimensionCount):
-                dim1MinLabel = Label(self, text='F%s ' % str(ii + 1) + self.peakList.spectrum.axisCodes[ii] + ' min', grid=(2 + ii, 0), vAlign='t')
-                dim1MinDoubleSpinBox = DoubleSpinbox(self, grid=(2 + ii, 1), vAlign='t')
+                dim1MinLabel = Label(self.limitsFrame, text='F%s ' % str(ii + 1) + self.peakList.spectrum.axisCodes[ii] + ' min', grid=(2 + ii, 0), vAlign='t')
+                dim1MinDoubleSpinBox = DoubleSpinbox(self.limitsFrame, grid=(2 + ii, 1), vAlign='t')
                 dim1MinDoubleSpinBox.setMinimum(self.peakList.spectrum.aliasingLimits[ii][0])
                 dim1MinDoubleSpinBox.setMaximum(self.peakList.spectrum.aliasingLimits[ii][1])
                 dim1MinDoubleSpinBox.setValue(self.peakList.spectrum.aliasingLimits[ii][0])
-                dim1MaxLabel = Label(self, text='F%s ' % str(ii + 1) + self.peakList.spectrum.axisCodes[ii] + ' max', grid=(2 + ii, 2), vAlign='t')
-                dim1MaxDoubleSpinBox = DoubleSpinbox(self, grid=(2 + ii, 3))
+                dim1MaxLabel = Label(self.limitsFrame, text='F%s ' % str(ii + 1) + self.peakList.spectrum.axisCodes[ii] + ' max', grid=(2 + ii, 2), vAlign='t')
+                dim1MaxDoubleSpinBox = DoubleSpinbox(self.limitsFrame, grid=(2 + ii, 3))
                 dim1MaxDoubleSpinBox.setMinimum(self.peakList.spectrum.aliasingLimits[ii][0])
                 dim1MaxDoubleSpinBox.setMaximum(self.peakList.spectrum.aliasingLimits[ii][1])
                 dim1MaxDoubleSpinBox.setValue(self.peakList.spectrum.aliasingLimits[ii][1])

@@ -51,7 +51,8 @@
         "focusFollowsMouse" : true,
         "currentStripFollowsMouse" : false,
         "automaticNoiseContoursOnLoadSpectrum" : false,
-        "automaticNoiseContoursOnFirstShow" : true
+        "automaticNoiseContoursOnFirstShow" : true,
+        "volumeIntegralLimit" : 2.0
     },
 
     "externalPrograms": {

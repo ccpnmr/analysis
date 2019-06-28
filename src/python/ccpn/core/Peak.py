@@ -471,6 +471,20 @@ class Peak(AbstractWrapperObject):
         dimensionNmrAtoms[index] = value
         self.dimensionNmrAtoms = dimensionNmrAtoms
 
+    def estimateVolume(self):
+        """estimate the volume of the peak by a gaussian method
+        """
+        lineWidths = self.lineWidths
+        if not lineWidths or None in lineWidths:
+            raise ValueError('cannot estimate volume, lineWidths not defined or contain None.')
+
+        # estimate here
+        vol = 0.0
+        for lw in lineWidths:
+
+            # sum up values here
+            pass
+
     #=========================================================================================
     # Implementation functions
     #=========================================================================================
@@ -770,7 +784,7 @@ def _newPickedPeak(self: PeakList, pointPositions: Sequence[float] = None, heigh
         else:
             peakDim.position = float(pointPositions[i] + 1)
 
-        if fitMethod and lineWidths[i] is not None:
+        if fitMethod and lineWidths and lineWidths[i] is not None:
             peakDim.lineWidth = dataDim.valuePerPoint * lineWidths[i]  # conversion from points to Hz
 
     apiPeak.height = apiDataSource.scale * height

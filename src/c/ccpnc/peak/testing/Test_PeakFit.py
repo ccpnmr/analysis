@@ -191,16 +191,18 @@ if __name__ == '__main__':
     # convert the sigma into a FWHM and plot between volumeIntegralLimits * FWHM
     sigmax = 1.0
     mx = 0.0
-    height = 3.0
-    integralLimit = 1.0
+    # height = 3.0
+    integralLimit = 2.0
     numPoints=45
     lx = numPoints-1
     ly = numPoints-1
     lxx = numPoints-1
 
     thisFWHM = sigma2fwhm(sigmax)
-    limX = 2.0 * integralLimit * thisFWHM / 2.0
-    limY = 3.0 * integralLimit * thisFWHM / 2.0
+    height, (l1, l2) = (-40069.83984375, (18.269018037244678 / thisFWHM, 2.781543880701065 / thisFWHM))
+
+    limX = l1 * integralLimit * thisFWHM / 2.0
+    limY = l2 * integralLimit * thisFWHM / 2.0
 
     fig = plt.figure(figsize=(10, 8), dpi=100)
     ax0 = fig.gca(projection='3d')
@@ -208,7 +210,7 @@ if __name__ == '__main__':
     xxS = np.linspace(*plotSigmaRange[0], numPoints)
     yyS = np.linspace(*plotSigmaRange[1], numPoints)
     xmS, ymS = np.meshgrid(xxS, yyS)
-    peakArrayFWHM = np.array(_gaussFWHM(xmS, ymS, sigmax=2.0*sigmax, sigmay=3.0*sigmax, mx=mx, my=mx, h=height), dtype=np.float32)
+    peakArrayFWHM = np.array(_gaussFWHM(xmS, ymS, sigmax=l1*sigmax, sigmay=l2*sigmax, mx=mx, my=mx, h=height), dtype=np.float32)
     ax0.plot_wireframe(xmS, ymS, peakArrayFWHM)
 
     # only need to use quadrant

@@ -503,8 +503,9 @@ class Peak(AbstractWrapperObject):
         mu = 0.0
         height = 1.0
         numPoints = 39  # area estimate area < 1e-8 for this number of points
+
+        # calculate integral limit from FWHM - only need positive half
         sigmaFWHM = sigma2fwhm(sigmaX)
-        # calulate integral limit from FWHM - only need positive half
         lim = volumeIntegralLimit * sigmaFWHM / 2.0
         xxSig = np.linspace(0, lim, numPoints)
         vals = make_gauss(xxSig, sigmaX, mu, height)

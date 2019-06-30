@@ -38,7 +38,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.PulldownListsForObjects import SpectrumPulldown
 from ccpn.util.Common import makeIterableList
 from ccpn.core.lib.peakUtils import estimateVolumes
-from ccpn.core.lib.ContextManagers import undoBlock
+from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar
 
 
 class EstimateVolumes(CcpnDialog):
@@ -67,7 +67,7 @@ class EstimateVolumes(CcpnDialog):
         self.spectrumPullDown = SpectrumPulldown(self, self.project, grid=(row, 0), gridSpan=(1, 3), callback=self._changePeakLists)
 
         row += 1
-        self._label = Label(self, grid=(row, 0), gridSpan=(1, 3), text='Select peakLists from the table')
+        self._label = Label(self, grid=(row, 0), gridSpan=(1, 3), text='Select peakLists:')
 
         row += 1
         self.peakListWidget = ListWidget(self, multiSelect=True, callback=self._selectPeakLists, tipText='Select PeakLists',
@@ -90,10 +90,11 @@ class EstimateVolumes(CcpnDialog):
         """Estimate the volumes for the peaks in the peakLists highlighted in the listWidget
         """
         peakLists = self.peakListWidget.getSelectedObjects()
-        peaks = [peak for peakList in peakLists for peak in peakList.peaks]
+        volumeIntegralLimit = self.application.preferences.general.volumeIntegralLimit
 
-        # estimate the volumes for the list
-        with undoBlock():
-            estimateVolumes(peaks)
+        # estimate the volumes for the peakLists
+        with undoBlockWithoutSideBar(self.application):
+            for peakList in peakLists:
+                peakList.estimateVolumes(volumeIntegralLimit=volumeIntegralLimit)
 
         self.accept()

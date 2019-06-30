@@ -722,8 +722,10 @@ def getSpectrumData(peak: 'Peak', halfBoxWidth: int = 3):
     return (dataArray, intRegion, list(position - startPoint), list(np.round(position).astype(np.int32)))
 
 
-def estimateVolumes(peaks: Sequence[Union[str, 'Peak']]):
+def estimateVolumes(peaks: Sequence[Union[str, 'Peak']], volumeIntegralLimit=2.0):
     """Estimate the volumes for the peaks
+    :param peaks: list of peaks as pids or strings
+    :param volumeIntegralLimit: integral width as a multiple of lineWidth (FWHM)
     """
     # move to peakList
 
@@ -745,6 +747,7 @@ def estimateVolumes(peaks: Sequence[Union[str, 'Peak']]):
 
     # estimate the volume for each peak
     for pp in pks:
+        height = pp.height
         lineWidths = pp.lineWidths
-        if lineWidths and None not in lineWidths:
-            pp.estimateVolume()
+        if lineWidths and None not in lineWidths and height:
+            pp.estimateVolume(volumeIntegralLimit=volumeIntegralLimit)

@@ -30,14 +30,13 @@ from typing import Sequence, List, Optional
 from ccpn.util.Common import percentage
 from scipy.ndimage import maximum_filter, minimum_filter
 from ccpn.util import Common as commonUtil
-
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Spectrum import Spectrum
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakList as ApiPeakList
 from ccpn.core.lib.SpectrumLib import _oldEstimateNoiseLevel1D
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import pickNewPeaks
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, undoBlock
+from ccpn.core.lib.ContextManagers import newObject, undoBlock, undoBlockWithoutSideBar
 from ccpn.util.Logging import getLogger
 
 
@@ -527,6 +526,21 @@ class PeakList(AbstractWrapperObject):
             lineWidth = abs(i[0] - i[1])
             widths.append(lineWidth)
         return np.std(widths)
+
+    @logCommand(get='self')
+    def estimateVolumes(self, volumeIntegralLimit=2.0):
+        """Estimate the volumes for the peaks in this peakList
+        The width of the volume integral in each dimension is the lineWidth * volumeIntegralLimit,
+        the default is 2.0 * FWHM of the peak.
+        :param volumeIntegralLimit: integral width as a multiple of lineWidth (FWHM)
+        """
+        with undoBlockWithoutSideBar():
+            for pp in self.peaks:
+                # estimate the volume for each peak
+                height = pp.height
+                lineWidths = pp.lineWidths
+                if lineWidths and None not in lineWidths and height:
+                    pp.estimateVolume(volumeIntegralLimit=volumeIntegralLimit)
 
     # def automatic1dPeakPicking(self, sizeFactor=3, negativePeaks=True, minimalLineWidth=None, ignoredRegions=None):
     #   '''

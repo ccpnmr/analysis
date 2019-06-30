@@ -27,6 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from operator import itemgetter
 import numpy as np
+import sys
 # from ccpnmodel.ccpncore.testing.CoreTesting import CoreTesting
 # from ccpnmodel.ccpncore.lib.ccp.nmr.Nmr import DataSource
 from ccpnc.peak import Peak
@@ -190,40 +191,65 @@ if __name__ == '__main__':
     # convert the sigma into a FWHM and plot between volumeIntegralLimits * FWHM
     sigmax = 1.0
     mx = 0.0
-    height = 1.0
-    integralLimit = 4.0
+    height = 3.0
+    integralLimit = 1.0
     numPoints=45
     lx = numPoints-1
     ly = numPoints-1
     lxx = numPoints-1
 
     thisFWHM = sigma2fwhm(sigmax)
-    lim = integralLimit * thisFWHM / 2.0
+    limX = 2.0 * integralLimit * thisFWHM / 2.0
+    limY = 3.0 * integralLimit * thisFWHM / 2.0
 
     fig = plt.figure(figsize=(10, 8), dpi=100)
     ax0 = fig.gca(projection='3d')
-    plotSigmaRange = ((0, lim), (0, lim))
+    plotSigmaRange = ((0, limX), (0, limY))
     xxS = np.linspace(*plotSigmaRange[0], numPoints)
     yyS = np.linspace(*plotSigmaRange[1], numPoints)
     xmS, ymS = np.meshgrid(xxS, yyS)
-    peakArrayFWHM = np.array(_gaussFWHM(xmS, ymS, sigmax=sigmax, sigmay=sigmax, mx=mx, my=mx, h=height), dtype=np.float32)
+    peakArrayFWHM = np.array(_gaussFWHM(xmS, ymS, sigmax=2.0*sigmax, sigmay=3.0*sigmax, mx=mx, my=mx, h=height), dtype=np.float32)
     ax0.plot_wireframe(xmS, ymS, peakArrayFWHM)
 
     # only need to use quadrant
-    area2d = 4.0*np.trapz(np.trapz(peakArrayFWHM, xxS), yyS)/height        # why does this work?
+    area2d = 4.0*np.trapz(np.trapz(peakArrayFWHM, xxS), yyS)        # why does this work?
     print('>>>area3D', area2d)
 
+    # make a 2d peak of unit height
+    lim = -integralLimit * thisFWHM / 2.0
     xxSig = np.linspace(0, lim, numPoints)
-    vals = list(make_gauss(xxSig, sigmax, mx, height))
+    vals = make_gauss(xxSig, sigmax, mx, 1.0)
     fig = plt.figure(figsize=(10, 8), dpi=100)
     axS = fig.gca()
     axS.plot(xxSig, vals)
     axS.grid()
 
+    # test from peakTable
+    # height = 1.32e6                           # sign doesn't matter
+    # l1 = 21.9 / thisFWHM
+    # l2 = 11.7 / thisFWHM
+
+    # height, (l1, l2) = (1317701.0, (21.94079803302884 / thisFWHM, 11.697283014655113 / thisFWHM))
+    height, (l1, l2) = (-40069.83984375, (18.269018037244678 / thisFWHM, 2.781543880701065 / thisFWHM))
+    # estimated 2305274.18593
+
     # only need to use half
-    area = 2.0*np.trapz(vals, xxSig)/height     # THIS WORKS! - uses the correct x points for the trapz area
-    print('>>>', vals, list(xxSig))
-    print('>>>area', area, np.power(area, 2), np.power(area, 2)/area2d)
+    area = 2.0*np.trapz(vals, xxSig)     # THIS WORKS! - uses the correct x points for the trapz area
+    print('>>>area', area, height * np.power(area, 2), np.power(area, 2)/area2d)
+    print('>>>area new', abs(height * np.power(area, 2) * l1 * l2))
+    # estimated = 382919751.28
+
+    # lastArea=None
+    # for numPoints in range(9, 99):
+    #     xxSig = np.linspace(0, lim, numPoints)
+    #     vals = list(make_gauss(xxSig, sigmax, mx, height))
+    #     area = 2.0*np.trapz(vals, xxSig)/height     # THIS WORKS! - uses the correct x points for the trapz area
+    #     if lastArea:
+    #         diff = area-lastArea
+    #         print('>>>', numPoints, area, diff)
+    #         if diff < 1e-8:
+    #             break
+    #     lastArea = area
 
     # actually area will be area * FWHM * height / thisFWHM
 

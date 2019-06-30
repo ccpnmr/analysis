@@ -25,20 +25,15 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import itertools
-import collections
 import operator
+import numpy as np
 from typing import Optional, Tuple, Union, Sequence, TypeVar, Any
-
-from ccpn.core.lib import Undo
 from ccpn.util import Common as commonUtil
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
-from ccpn.core.SpectrumReference import SpectrumReference
 from ccpn.core.PeakList import PeakList, PARABOLICMETHOD
 from ccpn.core.NmrAtom import NmrAtom
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
-#from ccpnmodel.ccpncore.lib import Util as modelUtil
-from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr import Peak as LibPeak
 from ccpn.core.lib.peakUtils import snapToExtremum as peakUtilsSnapToExtremum
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, undoBlock
@@ -198,7 +193,6 @@ class Peak(AbstractWrapperObject):
     #         peakDim.value = value[ii]
     #         peakDim.realValue = None
 
-
     @property
     def positionError(self) -> Tuple[Optional[float], ...]:
         """Peak position error in ppm (or other relevant unit)."""
@@ -253,7 +247,7 @@ class Peak(AbstractWrapperObject):
         """Aliasing for the peak in each dimension.
         Defined as integer number of spectralWidths added or subtracted along each dimension
         """
-        return tuple(-1* x.numAliasing for x in self._wrappedData.sortedPeakDims())
+        return tuple(-1 * x.numAliasing for x in self._wrappedData.sortedPeakDims())
 
     @aliasing.setter
     @logCommand(get='self', isProperty=True)
@@ -265,7 +259,7 @@ class Peak(AbstractWrapperObject):
             raise ValueError("Aliasing values must be integer.")
 
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-            peakDim.numAliasing = -1* value[ii]
+            peakDim.numAliasing = -1 * value[ii]
 
     @property
     def dimensionNmrAtoms(self) -> Tuple[Tuple['NmrAtom', ...], ...]:
@@ -406,7 +400,7 @@ class Peak(AbstractWrapperObject):
                     ll[ii] = resonance
 
                 elif atom is not None:
-                    raise TypeError('Error assigning NmrAtom %s to dimension %s' % (str(atom), ii+1))
+                    raise TypeError('Error assigning NmrAtom %s to dimension %s' % (str(atom), ii + 1))
 
         # set assignments
         apiPeak.assignByContributions(resonances)
@@ -421,6 +415,7 @@ class Peak(AbstractWrapperObject):
         return tuple([self._project._data2Obj[mt] for mt in self._wrappedData.sortedMultiplets()
                       if mt in self._project._data2Obj])
 
+    @logCommand(get='self')
     def addAssignment(self, value: Sequence[Union[str, 'NmrAtom']]):
         """Add a peak assignment - a list of one NmrAtom or Pid for each dimension"""
 
@@ -449,6 +444,7 @@ class Peak(AbstractWrapperObject):
             assignedNmrAtoms.append(value)
             self.assignedNmrAtoms = assignedNmrAtoms
 
+    @logCommand(get='self')
     def assignDimension(self, axisCode: str, value: Union[Union[str, 'NmrAtom'],
                                                           Sequence[Union[str, 'NmrAtom']]] = None):
         """Assign dimension with axisCode to value (NmrAtom, or Pid or sequence of either, or None)."""
@@ -471,19 +467,58 @@ class Peak(AbstractWrapperObject):
         dimensionNmrAtoms[index] = value
         self.dimensionNmrAtoms = dimensionNmrAtoms
 
-    def estimateVolume(self):
-        """estimate the volume of the peak by a gaussian method
+    @logCommand(get='self')
+    def estimateVolume(self, volumeIntegralLimit=2.0):
+        """Estimate the volume of the peak from a gaussian distribution.
+        The width of the volume integral in each dimension is the lineWidth * volumeIntegralLimit,
+        the default is 2.0 * FWHM of the peak.
+        :param volumeIntegralLimit: integral width as a multiple of lineWidth (FWHM)
         """
+
+        def sigma2fwhm(sigma):
+            """Convert sigma to FWHM for gaussian distribution
+            """
+            return sigma * np.sqrt(8 * np.log(2))
+
+        def fwhm2sigma(fwhm):
+            """Convert FWHM to sigma for gaussian distribution
+            """
+            return fwhm / np.sqrt(8 * np.log(2))
+
+        def make_gauss(N, sigma, mu, height):
+            """Generate a gaussian distribution from given parameters
+            """
+            k = height  # / (sigma * np.sqrt(2 * np.pi)) - to give unit area at infinite bounds
+            s = -1.0 / (2 * sigma * sigma)
+            return k * np.exp(s * (N - mu) * (N - mu))
+
         lineWidths = self.lineWidths
         if not lineWidths or None in lineWidths:
             raise ValueError('cannot estimate volume, lineWidths not defined or contain None.')
+        if not self.height:
+            raise ValueError('cannot estimate volume, height not defined.')
 
-        # estimate here
-        vol = 0.0
+        # parameters for a unit height/sigma gaussian
+        sigmaX = 1.0
+        mu = 0.0
+        height = 1.0
+        numPoints = 39  # area estimate area < 1e-8 for this number of points
+        sigmaFWHM = sigma2fwhm(sigmaX)
+        # calulate integral limit from FWHM - only need positive half
+        lim = volumeIntegralLimit * sigmaFWHM / 2.0
+        xxSig = np.linspace(0, lim, numPoints)
+        vals = make_gauss(xxSig, sigmaX, mu, height)
+        area = 2.0*np.trapz(vals, xxSig)
+
+        vol = self.height
         for lw in lineWidths:
+            # multiply the values for the gaussian in each dimension
+            vol *= (area * (lw / sigmaFWHM))
 
-            # sum up values here
-            pass
+        self.volume = abs(vol)
+
+        # do I need to set the volume error?
+        # self.volumeError = 1e-8
 
     #=========================================================================================
     # Implementation functions
@@ -646,17 +681,18 @@ class Peak(AbstractWrapperObject):
         return peaks
 
     def _getSNRatio(self, ratio=2.5):
-        from ccpn.core.PeakList import  estimateSNR_1D
+        from ccpn.core.PeakList import estimateSNR_1D
+
         spectrum = self._parent.spectrum
         noiseLevel = spectrum.noiseLevel
         negativeNoiseLevel = spectrum.negativeNoiseLevel
         if noiseLevel is None:
-            getLogger().warning('Spectrum noise level not defined for %s' %spectrum.pid)
+            getLogger().warning('Spectrum noise level not defined for %s' % spectrum.pid)
             return None
         if negativeNoiseLevel is None:
-            getLogger().warning('Spectrum negative noise level not defined %s' %spectrum.pid)
+            getLogger().warning('Spectrum negative noise level not defined %s' % spectrum.pid)
             return None
-        snr = estimateSNR_1D(noiseLevels=[noiseLevel,negativeNoiseLevel], signalPoints=[self.height], ratio=ratio)
+        snr = estimateSNR_1D(noiseLevels=[noiseLevel, negativeNoiseLevel], signalPoints=[self.height], ratio=ratio)
         return snr[0]
     #===========================================================================================
     # new'Object' and other methods
@@ -737,9 +773,10 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
 
     return result
 
+
 @newObject(Peak)
 def _newPickedPeak(self: PeakList, pointPositions: Sequence[float] = None, height: float = None,
-             lineWidths: Sequence[float] = (), fitMethod: str = 'gaussian', serial: int = None) -> Peak:
+                   lineWidths: Sequence[float] = (), fitMethod: str = 'gaussian', serial: int = None) -> Peak:
     """Create a new Peak within a peakList from a picked peak
 
     See the Peak class for details.
@@ -790,6 +827,7 @@ def _newPickedPeak(self: PeakList, pointPositions: Sequence[float] = None, heigh
     apiPeak.height = apiDataSource.scale * height
 
     return result
+
 
 # Additional Notifiers:
 #

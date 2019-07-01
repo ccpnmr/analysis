@@ -136,11 +136,16 @@ def getPeakAnnotation(peak, dim, separator=', '):
 
 
 def getPeakLinewidth(peak, dim):
-    if dim < len(peak.lineWidths):
+    """Return the lineWidth in dimension 'dim' for the peakTable entries
+    """
+    lineWidths = peak.lineWidths
+    if lineWidths and dim < len(lineWidths):
         lw = peak.lineWidths[dim]
-        if lw:
+        if lw is not None:
             return float(lw)
 
+    # need to return this as a string otherwise the table changes between 'None' and 'nan'
+    return 'None'
 
 def _get1DPeaksPosAndHeightAsArray(peakList):
     import numpy as np

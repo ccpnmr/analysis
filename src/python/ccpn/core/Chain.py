@@ -306,6 +306,17 @@ class Chain(AbstractWrapperObject):
             addUndoItem(undo=partial(self.rename, oldName),
                         redo=partial(self.rename, value))
 
+    # def delete(self):
+    #     print('>>>deleting - need to delete apiMolecules')
+    #
+    #     # self.substances
+    #     # apiMolecule = substance._apiSubstance.molecule
+    #
+    #     for sub in self.substances:
+    #         print('>>>molecule', sub._apiSubstance.molecule)
+    #
+    #     super().delete()
+
 #=========================================================================================
 
 @newObject(Chain)

@@ -1084,7 +1084,8 @@ class Project(AbstractWrapperObject):
                 return thisSpec
 
             elif hasattr(self, funcname):
-                pids = getattr(self, funcname)(usePath, subType)
+                with undoBlock():
+                    pids = getattr(self, funcname)(usePath, subType)
                 return pids
             else:
                 # print("Skipping: project has no function %s" % funcname)

@@ -882,6 +882,10 @@ def _createPolymerSubstance(self: Project, sequence: typing.Sequence[str], name:
 
     result = self._data2Obj[apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(
             apiMolecule, labeling=apiLabeling)]
+
+    # print('>>>create substance:', apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(apiMolecule))
+    # print('>>>result          :', result)
+
     if result is None:
         raise RuntimeError('Unable to generate new PolymerSubstance item')
 

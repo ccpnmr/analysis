@@ -743,7 +743,7 @@ def estimateVolumes(peaks: Sequence[Union[str, 'Peak']], volumeIntegralLimit=2.0
 
     for pp in pks:
         if not isinstance(pp, Peak):
-            raise TypeError('%s is not of type Peak' % pp)
+            raise TypeError('%s is not of type Peak' % str(pp))
 
     # estimate the volume for each peak
     for pp in pks:

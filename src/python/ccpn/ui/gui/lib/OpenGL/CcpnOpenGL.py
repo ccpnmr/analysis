@@ -5678,26 +5678,28 @@ class CcpnGLWidget(QOpenGLWidget):
             # check other menu items before raising menues
             strip._checkMenuItems()
 
-            # set the correct rightMouseMenu for the clicked object (must be selected)
+            # set the correct rightMouseMenu for the clicked object (must be selected?)
             objs = self._mouseInPeak(xPosition, yPosition, firstOnly=False)
+            strip._lastClickedObjects = None
+
             if objs:
                 strip.contextMenuMode = PeakMenu
                 menu = strip._contextMenus.get(strip.contextMenuMode)
-                strip._lastSelectedObjects = objs
+                strip._lastClickedObjects = objs
 
             else:
                 objs = self._mouseInIntegral(xPosition, yPosition, firstOnly=False)
                 if objs:
                     strip.contextMenuMode = IntegralMenu
                     menu = strip._contextMenus.get(strip.contextMenuMode)
-                    strip._lastSelectedObjects = objs
+                    strip._lastClickedObjects = objs
 
                 else:
                     objs = self._mouseInMultiplet(xPosition, yPosition, firstOnly=False)
                     if objs:
                         strip.contextMenuMode = MultipletMenu
                         menu = strip._contextMenus.get(strip.contextMenuMode)
-                        strip._lastSelectedObjects = objs
+                        strip._lastClickedObjects = objs
 
             # elif self._mouseInIntegral(xPosition, yPosition, firstOnly=True):
             #     strip.contextMenuMode = IntegralMenu

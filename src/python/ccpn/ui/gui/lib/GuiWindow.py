@@ -39,7 +39,7 @@ from ccpn.ui.gui.popups.ShortcutsPopup import UserShortcuts
 from ccpn.ui.gui.widgets.MessageDialog import progressManager
 from ccpn.ui.gui.lib.mouseEvents import MouseModes, setCurrentMouseMode, getCurrentMouseMode
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import undoBlock
+from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar
 
 
 #TODO:WAYNE: incorporate most functionality in GuiMainWindow. See also MainMenu
@@ -329,16 +329,27 @@ class GuiWindow():
         if not peaks:
             return
 
-        with undoBlock():
+        with undoBlockWithoutSideBar():
             AssignmentLib.refitPeaks(peaks, singularMode=singularMode)
 
     def estimateVolumes(self):
-        peaks = self.application.current.peaks
-        if not peaks:
+        """Estimate volumes of peaks selected by right-mouse menu
+        If clicking on a selected peak then apply to all selected, otherwise apply to clicked peaks
+        """
+        current = self.application.current
+        peaks = current.peaks
+        clickedPeaks = current.strip._lastClickedObjects if current.strip else None
+
+        # return if both the lists are empty
+        if not (peaks or clickedPeaks):
             return
 
-        with undoBlock():
-            estimateVolumes(peaks)
+        with undoBlockWithoutSideBar():
+            if (set(peaks or []) & set(clickedPeaks or [])):
+                # if any of clickedPeaks are in current.peaks then apply to all selected
+                estimateVolumes(peaks)
+            else:
+                estimateVolumes(clickedPeaks)
 
         # project = peaks[0].project
         # undo = project._undo
@@ -564,7 +575,7 @@ class GuiWindow():
 
                 # with logCommandBlock(get='self') as log:
                 #     log('markPositions')
-                with undoBlock():
+                with undoBlockWithoutSideBar():
                     # GWV 20181030: changed from atomName to id
                     if colour:
                         project.newMark(colour, [chemicalShift.value], [axisCode], labels=[atomId])

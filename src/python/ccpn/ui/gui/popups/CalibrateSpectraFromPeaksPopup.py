@@ -69,11 +69,11 @@ class CalibrateSpectraFromPeaksPopupNd(CcpnDialog):
         self._spectrumFrame = None
 
         # the last item that was clicked
-        self._lastSelectedObjects = strip._lastSelectedObjects
+        self._lastClickedObjects = strip._lastClickedObjects
 
-        if not (self._lastSelectedObjects and isinstance(self._lastSelectedObjects, Sequence)):
+        if not (self._lastClickedObjects and isinstance(self._lastClickedObjects, Sequence)):
             raise TypeError('last selected objects must be a list')
-        if len(self._lastSelectedObjects) > 1:
+        if len(self._lastClickedObjects) > 1:
             raise TypeError('Too many objects selected')
 
         self.spPulldowns = []
@@ -112,23 +112,20 @@ class CalibrateSpectraFromPeaksPopupNd(CcpnDialog):
         self.buttonBox = ButtonList(self, grid=(1, 0), texts=['Close', 'Ok'],
                                     callbacks=[self._reject, self._accept], hAlign='r', vAlign='b')
 
-        # self.setWindowTitle(title)
-
-        self.setFixedHeight(self.sizeHint().height() + 24)
-        self.setFixedWidth(self.sizeHint().width() + 24)
+        self.adjustSize()
+        self.setFixedHeight(self.size().height() + 24)
+        self.setFixedWidth(self.size().width() + 24)
 
     def _fillPreferredWidget(self):
-        """Fill the pullDown with the currently available permutations of the axis codes
+        """Fill the pullDown with the currently available peak ids when the popup is initialised
         """
         ll = [peak.id for peak in self.peaks]
         self.primaryPeakPulldown.pulldownList.setData(ll)
 
-        # specIndex = ll.index(self.peaks[0].id)
-        specIndex = ll.index(self._lastSelectedObjects[0].id)
-
-        self.primaryPeakPulldown.setIndex(specIndex)
-
-        self.primaryPeak = self.peaks[specIndex]
+        if ll and self._lastClickedObjects:
+            specIndex = ll.index(self._lastClickedObjects[0].id)
+            self.primaryPeakPulldown.setIndex(specIndex)
+            self.primaryPeak = self.peaks[specIndex]
 
     def _setPrimaryPeak(self, value):
         """Set the preferred axis ordering from the pullDown selection
@@ -228,13 +225,13 @@ class CalibrateSpectraFromPeaksPopupNd(CcpnDialog):
                             redo=partial(self._calibrateSpectra, spectra, self.strip, 1.0))
 
         # clear the last selected items
-        self.strip._lastSelectedObjects = None
+        self.strip._lastClickedObjects = None
 
     def _reject(self):
         self.reject()
 
         # clear the last selected items
-        self.strip._lastSelectedObjects = None
+        self.strip._lastClickedObjects = None
 
     def _calibrateSpectra(self, spectra, strip, direction=1.0):
 
@@ -284,7 +281,7 @@ class CalibrateSpectraFromPeaksPopup1d(CalibrateSpectraFromPeaksPopupNd):
                             redo=partial(self._calibrateSpectra, spectra, self.strip, 1.0))
 
         # clear the last selected items
-        self.strip._lastSelectedObjects = None
+        self.strip._lastClickedObjects = None
 
     def _calibrateSpectra(self, spectra, strip, direction=1.0):
 

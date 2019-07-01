@@ -41,9 +41,12 @@ from ccpn.core.lib.peakUtils import estimateVolumes
 from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar
 
 
+SHOWALLSPECTRA = True
+
+
 class EstimateVolumes(CcpnDialog):
 
-    def __init__(self, parent=None, mainWindow=None, title='Estimate Volumes', **kwds):
+    def __init__(self, parent=None, mainWindow=None, title='Estimate Volumes', spectra=None, **kwds):
         CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
         if mainWindow:
@@ -51,6 +54,7 @@ class EstimateVolumes(CcpnDialog):
             self.application = mainWindow.application
             self.current = self.application.current
             self.project = mainWindow.project
+            self.spectra = spectra if spectra else self.project.spectra
         else:
             self.mainWindow = None
             self.application = None
@@ -58,13 +62,19 @@ class EstimateVolumes(CcpnDialog):
             self.project = None
 
         self._createWidgets()
+
+        if self.current is not None and self.current.strip is not None and len(self.current.strip.spectra) > 0:
+            self.spectrumPullDown.select(self.current.strip.spectra[0].pid)
+
         self._changePeakLists()
         self.setFixedSize(self.sizeHint())
 
     def _createWidgets(self):
 
         row = 0
-        self.spectrumPullDown = SpectrumPulldown(self, self.project, grid=(row, 0), gridSpan=(1, 3), callback=self._changePeakLists)
+        self.spectrumPullDown = SpectrumPulldown(self, self.project, grid=(row, 0), gridSpan=(1, 3),
+                                                 callback=self._changePeakLists,
+                                                 filterFunction=self._filterToStrip)
 
         row += 1
         self._label = Label(self, grid=(row, 0), gridSpan=(1, 3), text='Select peakLists:')
@@ -72,6 +82,7 @@ class EstimateVolumes(CcpnDialog):
         row += 1
         self.peakListWidget = ListWidget(self, multiSelect=True, callback=self._selectPeakLists, tipText='Select PeakLists',
                                          grid=(row, 0), gridSpan=(1, 3))
+        self.peakListWidget.setSelectContextMenu()
 
         row += 1
         self.buttonBox = ButtonList(self, grid=(row, 1), gridSpan=(1, 2), texts=['Close', 'Estimate Volumes'],
@@ -83,7 +94,18 @@ class EstimateVolumes(CcpnDialog):
         if isinstance(obj, Spectrum):
             self.peakListWidget.setObjects(obj.peakLists, name='pid')
 
+    def _filterToStrip(self, values):
+        """Filter the pulldown list to the spectra in the current strip;
+        however, need to be able to select all spectra
+        (this is currently overriding self.spectra)
+        """
+        if not SHOWALLSPECTRA and self.current.strip:
+            return [specView.spectrum.pid for specView in self.current.strip.spectrumDisplay.spectrumViews]
+        else:
+            return values
+
     def _selectPeakLists(self, *args):
+        # nothing required yet
         pass
 
     def _estimateVolumes(self):

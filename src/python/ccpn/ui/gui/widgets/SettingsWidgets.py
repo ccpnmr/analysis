@@ -664,7 +664,8 @@ class StripPlot(Widget, _commonSettings):
                                                                    minimumWidths=(0, 100),
                                                                    showSelectName=True,
                                                                    sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
-                                                                   callback=self._spectrumDisplaySelectionPulldownCallback
+                                                                   callback=self._spectrumDisplaySelectionPulldownCallback,
+                                                                   labelText='Pick Peaks in Display:'
                                                                    )
 
             # self._fillSpectrumFrame(self.displaysWidget._getDisplays())

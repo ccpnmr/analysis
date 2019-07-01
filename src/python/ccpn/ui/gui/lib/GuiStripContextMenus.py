@@ -381,7 +381,7 @@ def _enableAllItems(menu):
 def _hidePeaksSingleActionItems(strip, menu):
     """ Greys out items that should appear only if one single peak is selected"""
     hideItems = [
-        _editPeakAssignmentItem(strip).name if _editPeakAssignmentItem(strip) else None,
+        # _editPeakAssignmentItem(strip).name if _editPeakAssignmentItem(strip) else None,
         _integrate1DItem(strip).name if _integrate1DItem(strip) else None
         ]
     hideItems = [itm for itm in hideItems if itm is not None]

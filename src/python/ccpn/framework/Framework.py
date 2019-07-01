@@ -1562,11 +1562,11 @@ class Framework(NotifierBase):
         spectraPaths = []
         for path in paths:
             path = str(path)
-            subPaths = ioFormats._searchSpectraPathsInSubDir(path) # Filter only spectra files
-            if len(subPaths)>0:
-                spectraPaths+=subPaths
+            subPaths = ioFormats._searchSpectraPathsInSubDir(path)  # Filter only spectra files
+            if len(subPaths) > 0:
+                spectraPaths += subPaths
 
-        if len(spectraPaths)<len(paths):
+        if len(spectraPaths) < len(paths):
             notRecognised = [i for i in paths if i not in spectraPaths if not os.path.isdir(i)]
             getLogger().warning('Not valid spectrum Path(s): ' + str(notRecognised))
 
@@ -2264,12 +2264,11 @@ class Framework(NotifierBase):
                 spectra = self.project.spectra
 
             if spectra:
-                popup = EstimateVolumes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+                popup = EstimateVolumes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra)
                 popup.exec_()
             else:
                 getLogger().warning('Peak Picking: no specta selected.')
                 MessageDialog.showWarning('Peak Picking', 'no specta selected.')
-
 
     def makeStripPlotPopup(self, includePeakLists=True, includeNmrChains=True, includeNmrChainPullSelection=True):
         if not self.project.peaks and not self.project.nmrResidues and not self.project.nmrChains:

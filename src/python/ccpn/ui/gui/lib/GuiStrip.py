@@ -172,7 +172,7 @@ class GuiStrip(Frame):
         self._storedPhasingData = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
         self.showActivePhaseTrace = True
         self.pivotLine = None
-        self._lastSelectedObjects = None
+        self._lastClickedObjects = None
 
         # set the axis units from the current settings
         self._CcpnGLWidget.xUnits = settings[AXISXUNITS]
@@ -332,11 +332,11 @@ class GuiStrip(Frame):
     def calibrateFromPeaks(self):
         if self.current.peaks and len(self.current.peaks) > 1:
 
-            if not (self._lastSelectedObjects and isinstance(self._lastSelectedObjects, typing.Sequence)):
+            if not (self._lastClickedObjects and isinstance(self._lastClickedObjects, typing.Sequence)):
                 MessageDialog.showMessage('Calibrate error', 'Select a single peak as the peak to calibrate to.')
                 return
             else:
-                if len(self._lastSelectedObjects) > 1:
+                if len(self._lastClickedObjects) > 1:
                     MessageDialog.showMessage('Too Many Peaks', 'Select a single peak as the peak to calibrate to.')
                     return
 

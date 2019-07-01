@@ -338,6 +338,15 @@ class PreferencesPopup(CcpnDialog):
         self.dropFactorData.editingFinished.connect(self._setDropFactor)
 
         row += 1
+        volumeIntegralLimit = self.preferences.general.volumeIntegralLimit
+        self.volumeIntegralLimitLabel = Label(parent, text="Volume Integral Limit", grid=(row, 0))
+        self.volumeIntegralLimitData = DoubleSpinbox(parent, step=0.05, decimals=2,
+                                                       min=1.0, max=5.0, grid=(row, 1), hAlign='l')
+        self.volumeIntegralLimitData.setValue(int(volumeIntegralLimit))
+        self.volumeIntegralLimitData.setMinimumWidth(LineEditsMinimumWidth)
+        self.volumeIntegralLimitData.editingFinished.connect(self._setVolumeIntegralLimit)
+
+        row += 1
         self.peakFittingMethodLabel = Label(parent, text="Peak Region Fitting Method", grid=(row, 0))
         peakFittingMethod = self.preferences.general.peakFittingMethod
         self.peakFittingMethod = RadioButtons(parent, texts=PEAKFITTINGDEFAULTS,
@@ -962,3 +971,14 @@ class PreferencesPopup(CcpnDialog):
         except:
             return
         self.preferences.general.multipletAveraging = symbol
+
+    def _setVolumeIntegralLimit(self):
+        """
+        Set the value for increasing/decreasing width of strips
+        """
+        try:
+            volumeIntegralLimit = float(self.volumeIntegralLimitData.text())
+        except:
+            return
+        self.preferences.general.volumeIntegralLimit = volumeIntegralLimit
+

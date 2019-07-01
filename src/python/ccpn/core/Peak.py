@@ -467,60 +467,6 @@ class Peak(AbstractWrapperObject):
         dimensionNmrAtoms[index] = value
         self.dimensionNmrAtoms = dimensionNmrAtoms
 
-    @logCommand(get='self')
-    def estimateVolume(self, volumeIntegralLimit=2.0):
-        """Estimate the volume of the peak from a gaussian distribution.
-        The width of the volume integral in each dimension is the lineWidth * volumeIntegralLimit,
-        the default is 2.0 * FWHM of the peak.
-        :param volumeIntegralLimit: integral width as a multiple of lineWidth (FWHM)
-        """
-
-        def sigma2fwhm(sigma):
-            """Convert sigma to FWHM for gaussian distribution
-            """
-            return sigma * np.sqrt(8 * np.log(2))
-
-        def fwhm2sigma(fwhm):
-            """Convert FWHM to sigma for gaussian distribution
-            """
-            return fwhm / np.sqrt(8 * np.log(2))
-
-        def make_gauss(N, sigma, mu, height):
-            """Generate a gaussian distribution from given parameters
-            """
-            k = height  # / (sigma * np.sqrt(2 * np.pi)) - to give unit area at infinite bounds
-            s = -1.0 / (2 * sigma * sigma)
-            return k * np.exp(s * (N - mu) * (N - mu))
-
-        lineWidths = self.lineWidths
-        if not lineWidths or None in lineWidths:
-            raise ValueError('cannot estimate volume, lineWidths not defined or contain None.')
-        if not self.height:
-            raise ValueError('cannot estimate volume, height not defined.')
-
-        # parameters for a unit height/sigma gaussian
-        sigmaX = 1.0
-        mu = 0.0
-        height = 1.0
-        numPoints = 39  # area estimate area < 1e-8 for this number of points
-
-        # calculate integral limit from FWHM - only need positive half
-        sigmaFWHM = sigma2fwhm(sigmaX)
-        lim = volumeIntegralLimit * sigmaFWHM / 2.0
-        xxSig = np.linspace(0, lim, numPoints)
-        vals = make_gauss(xxSig, sigmaX, mu, height)
-        area = 2.0*np.trapz(vals, xxSig)
-
-        vol = self.height
-        for lw in lineWidths:
-            # multiply the values for the gaussian in each dimension
-            vol *= (area * (lw / sigmaFWHM))
-
-        self.volume = abs(vol)
-
-        # do I need to set the volume error?
-        # self.volumeError = 1e-8
-
     #=========================================================================================
     # Implementation functions
     #=========================================================================================
@@ -695,6 +641,61 @@ class Peak(AbstractWrapperObject):
             return None
         snr = estimateSNR_1D(noiseLevels=[noiseLevel, negativeNoiseLevel], signalPoints=[self.height], ratio=ratio)
         return snr[0]
+
+    @logCommand(get='self')
+    def estimateVolume(self, volumeIntegralLimit=2.0):
+        """Estimate the volume of the peak from a gaussian distribution.
+        The width of the volume integral in each dimension is the lineWidth (FWHM) * volumeIntegralLimit,
+        the default is 2.0 * FWHM of the peak.
+        :param volumeIntegralLimit: integral width as a multiple of lineWidth (FWHM)
+        """
+
+        def sigma2fwhm(sigma):
+            """Convert sigma to FWHM for gaussian distribution
+            """
+            return sigma * np.sqrt(8 * np.log(2))
+
+        def fwhm2sigma(fwhm):
+            """Convert FWHM to sigma for gaussian distribution
+            """
+            return fwhm / np.sqrt(8 * np.log(2))
+
+        def make_gauss(N, sigma, mu, height):
+            """Generate a gaussian distribution from given parameters
+            """
+            k = height  # 1.0 / (sigma * np.sqrt(2 * np.pi)) - to give unit area at infinite bounds
+            s = -1.0 / (2 * sigma * sigma)
+            return k * np.exp(s * (N - mu) * (N - mu))
+
+        lineWidths = self.lineWidths
+        if not lineWidths or None in lineWidths:
+            raise ValueError('cannot estimate volume, lineWidths not defined or contain None.')
+        if not self.height:
+            raise ValueError('cannot estimate volume, height not defined.')
+
+        # parameters for a unit height/sigma gaussian
+        sigmaX = 1.0
+        mu = 0.0
+        height = 1.0
+        numPoints = 39  # area estimate area < 1e-8 for this number of points
+
+        # calculate integral limit from FWHM - only need positive half
+        FWHM = sigma2fwhm(sigmaX)
+        lim = volumeIntegralLimit * FWHM / 2.0
+        xxSig = np.linspace(0, lim, numPoints)
+        vals = make_gauss(xxSig, sigmaX, mu, height)
+        area = 2.0*np.trapz(vals, xxSig)
+
+        vol = self.height
+        for lw in lineWidths:
+            # multiply the values for the gaussian in each dimension
+            vol *= (area * (lw / FWHM))
+
+        self.volume = abs(vol)
+
+        # do I need to set the volume error?
+        # self.volumeError = 1e-8
+
     #===========================================================================================
     # new'Object' and other methods
     # Call appropriate routines in their respective locations

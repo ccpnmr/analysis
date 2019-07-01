@@ -35,7 +35,7 @@ from ccpn.ui.gui.widgets.ViewBox import ViewBox
 from ccpn.ui.gui.widgets.ViewBox import CrossHair
 from ccpn.ui.gui.widgets.CcpnGridItem import CcpnGridItem
 from ccpn.ui.gui.lib.mouseEvents import rightMouse
-
+from ccpn.util.Constants import MOUSEDICTSTRIP
 from ccpn.util.Colour import Colour
 
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
@@ -248,7 +248,7 @@ class PlotWidget(pg.PlotWidget):
                     self.crossHair2.setHline(yPos + yOffset)
                     self.crossHair2.hLine.show()
 
-        if self.strip != mouseMovedDict['strip']:
+        if self.strip != mouseMovedDict[MOUSEDICTSTRIP]:
             # hide the mouse label if the event comes form a different window
             self.mouseLabel.hide()
 

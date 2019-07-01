@@ -58,6 +58,8 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.AssignmentLib import _assignNmrAtomsToPeaks, _assignNmrResiduesToPeaks
+from ccpn.util.Constants import MOUSEDICTSTRIP
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import PEAKSELECT
 
 from ccpn.util.Logging import getLogger
 from ccpn.core.NmrAtom import NmrAtom
@@ -710,6 +712,31 @@ class GuiSpectrumDisplay(CcpnModule):
         self._handleNmrResidues(nmrResidues, showDialog=False)
 
     def _handleNmrResidues(self, nmrResidues, showDialog=True):
+
+        # # need to get the strip that was destination of drop
+        # destStrip = self.current.mouseMovedDict[MOUSEDICTSTRIP]
+        #
+        # # need to get widget under mouse - destStrip doesn't update during drag
+        #
+        # if destStrip:
+        #     objectsClicked = destStrip.getObjectsUnderMouse()
+        #
+        #     if PEAKSELECT in objectsClicked:
+        #         # dropped onto a peak
+        #
+        #         print ('>>>dropped peaks')
+        #         # Assign nmrResidues atoms to peaks
+        #         peaks = set(self.current.peaks)
+        #         for mult in self.current.multiplets:
+        #             peaks = peaks | set(mult.peaks)
+        #         print(peaks)
+        #         _assignNmrResiduesToPeaks(peaks=list(peaks), nmrResidues=nmrResidues)
+        #
+        #     elif not objectsClicked:
+        #         print ('>>>dropped marks')
+        #         # mark all nmrResidues.nmrAtoms to the window
+        #         for nmrResidue in nmrResidues:
+        #             self._createNmrResidueMarks(nmrResidue)
 
         if (self.current.peaks or self.current.multiplets) and showDialog:
             dialogResult = showMulti('nmrResidue', 'What do you want to do with the nmrResidues?',

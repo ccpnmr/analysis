@@ -30,7 +30,7 @@ import re
 from collections import namedtuple
 from collections import OrderedDict
 
-
+MOUSEDICTSTRIP = 'strip'
 AXIS_MATCHATOMTYPE = 0
 AXIS_FULLATOMNAME = 1
 AXIS_ACTIVEAXES = 'activeAxes'

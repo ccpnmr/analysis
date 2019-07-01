@@ -136,7 +136,7 @@ import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
 from ccpn.util.Common import getAxisCodeMatch, getAxisCodeMatchIndices
 from typing import Tuple
 from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE, AXIS_ACTIVEAXES, \
-    DOUBLEAXIS_ACTIVEAXES, DOUBLEAXIS_FULLATOMNAME, DOUBLEAXIS_MATCHATOMTYPE
+    DOUBLEAXIS_ACTIVEAXES, DOUBLEAXIS_FULLATOMNAME, DOUBLEAXIS_MATCHATOMTYPE, MOUSEDICTSTRIP
 from ccpn.ui.gui.guiSettings import textFont, getColours, STRIPHEADER_BACKGROUND, \
     STRIPHEADER_FOREGROUND, GUINMRRESIDUE
 
@@ -2337,7 +2337,7 @@ class CcpnGLWidget(QOpenGLWidget):
             mouseMovedDict = self.current.mouseMovedDict
         except:
             # initialise a new mouse moved dict
-            mouseMovedDict = {'strip'                 : self.strip,
+            mouseMovedDict = {MOUSEDICTSTRIP          : self.strip,
                               AXIS_MATCHATOMTYPE      : {},
                               AXIS_FULLATOMNAME       : {},
                               AXIS_ACTIVEAXES         : (),

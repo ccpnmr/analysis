@@ -1006,6 +1006,11 @@ class GuiStrip(Frame):
     #         for apiRuler in apiMark.rulers:
     #             self.plotWidget._addRulerLine(apiRuler)
 
+    def getObjectsUnderMouse(self):
+        """Get the selected objects currently under the mouse
+        """
+        return self._CcpnGLWidget.getObjectsUnderMouse()
+
     def _showMousePosition(self, pos: QtCore.QPointF):
         """Displays mouse position for both axes by axis code.
         """

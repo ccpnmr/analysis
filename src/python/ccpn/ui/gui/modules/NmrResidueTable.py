@@ -44,6 +44,7 @@ from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrAtom import NmrAtom
+from ccpn.core.Peak import Peak
 from PyQt5 import QtWidgets
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.DropBase import DropBase
@@ -325,9 +326,9 @@ class NmrResidueTable(GuiTable):
 
         self.setTableNotifiers(tableClass=NmrChain,
                                className=self.attributeName,
-                               tableSelection='_nmrChain',  # _nmrChain.nmrResidues
+                               tableSelection='_nmrChain',
                                rowClass=NmrResidue,
-                               cellClassNames=[(NmrAtom, 'nmrResidue')],  # doesn't change anything
+                               cellClassNames=[(NmrAtom, 'nmrResidue')],            #, (Peak, 'assignments')],
                                tableName='nmrChain', rowName='nmrResidue',
                                changeFunc=self.displayTableForNmrChain,
                                updateFunc=self._update,
@@ -622,7 +623,7 @@ class NmrResidueTable(GuiTable):
         """
         Returns peak list count
         """
-        l1 = [peak for atom in nmrResidue.nmrAtoms if not atom._flaggedForDelete for peak in atom.assignedPeaks]
+        l1 = [peak for atom in nmrResidue.nmrAtoms if not atom._flaggedForDelete for peak in atom.assignedPeaks if not peak._flaggedForDelete]
         return len(set(l1))
 
     # @staticmethod

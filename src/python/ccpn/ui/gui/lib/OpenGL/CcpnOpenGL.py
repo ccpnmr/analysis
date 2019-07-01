@@ -82,7 +82,9 @@ from PyQt5.QtWidgets import QApplication, QOpenGLWidget
 from ccpn.util.Logging import getLogger
 from pyqtgraph import functions as fn
 from ccpn.core.PeakList import PeakList
+from ccpn.core.Peak import Peak
 from ccpn.core.Integral import Integral
+from ccpn.core.Multiplet import Multiplet
 # from ccpn.core.IntegralList import IntegralList
 from ccpn.ui.gui.lib.mouseEvents import getCurrentMouseMode
 from ccpn.ui.gui.lib.GuiStrip import DefaultMenu, PeakMenu, IntegralMenu, \
@@ -158,6 +160,11 @@ ZOOMMAXSTORE = 1
 ZOOMHISTORYSTORE = 10
 
 removeTrailingZero = re.compile(r'^(\d*[\d.]*?)\.?0*$')
+
+PEAKSELECT = Peak._pluralLinkName
+INTEGRALSELECT = Integral._pluralLinkName
+MULTIPLETSELECT = Multiplet._pluralLinkName
+SELECTOBJECTS = [PEAKSELECT, INTEGRALSELECT, MULTIPLETSELECT]
 
 
 class CcpnGLWidget(QOpenGLWidget):
@@ -5580,6 +5587,37 @@ class CcpnGLWidget(QOpenGLWidget):
         self._dragRegions = set()
         self.update()
 
+    def getObjectsUnderMouse(self):
+        """Return a list of objects under the mouse position as a dict
+        dict is of the form: {object plural name: list, ...}
+            e.g. {'peaks': []}
+        Current objects returned are: peaks, integrals, multiplets
+        :return: dict of objects
+        """
+        def _addObjects(objDict, attrName):
+            """Add the selected objects to the dict
+            """
+            objSelected = (set(objs or []) & set(getattr(self.current, attrName, None) or []))
+            if objSelected:
+                objDict[attrName] = objs
+
+        xPosition = self.cursorCoordinate[0]  # self.mapSceneToView(event.pos()).x()
+        yPosition = self.cursorCoordinate[1]  # self.mapSceneToView(event.pos()).y()
+        objDict = {}
+
+        # add objects to the dict
+        objs = self._mouseInPeak(xPosition, yPosition, firstOnly=False)
+        _addObjects(objDict, PEAKSELECT)
+
+        objs = self._mouseInIntegral(xPosition, yPosition, firstOnly=False)
+        _addObjects(objDict, INTEGRALSELECT)
+
+        objs = self._mouseInMultiplet(xPosition, yPosition, firstOnly=False)
+        _addObjects(objDict, MULTIPLETSELECT)
+
+        # return the list of objects
+        return objDict
+
     def _mouseClickEvent(self, event: QtGui.QMouseEvent, axis=None):
         """handle the mouse click event
         """
@@ -5658,56 +5696,93 @@ class CcpnGLWidget(QOpenGLWidget):
             event.accept()
             self._resetBoxes()
 
-            # Search if the event is in a range of a selected peak.
-            peaks = list(self.current.peaks)
-            strip._addItemsToNavigateToCursorPosMenu()
-            strip._addItemsToMarkInCursorPosMenu()
+            # # Search if the event is in a range of a selected peak.
+            # peaks = list(self.current.peaks)
+            # strip._addItemsToNavigateToCursorPosMenu()
+            # strip._addItemsToMarkInCursorPosMenu()
+            #
+            # from ccpn.ui.gui.lib.GuiStripContextMenus import _hidePeaksSingleActionItems, _enableAllItems
+            #
+            # ii = strip._contextMenus.get(PeakMenu)
+            # if len(peaks) > 1:
+            #     _hidePeaksSingleActionItems(strip, ii)
+            # else:
+            #     _enableAllItems(ii)
+            #
+            # # will only work for self.current.peak
+            # strip._addItemsToNavigateToPeakMenu()
+            # strip._addItemsToMarkInPeakMenu()
 
-            from ccpn.ui.gui.lib.GuiStripContextMenus import _hidePeaksSingleActionItems, _enableAllItems
+            # # check other menu items before raising menues
+            # strip._checkMenuItems()
 
-            ii = strip._contextMenus.get(PeakMenu)
-            if len(peaks) > 1:
-                _hidePeaksSingleActionItems(strip, ii)
-            else:
-                _enableAllItems(ii)
+            # # set the correct rightMouseMenu for the clicked object (must be selected?)
+            # objs = self._mouseInPeak(xPosition, yPosition, firstOnly=False)
+            # strip._lastClickedObjects = None
+            #
+            # if (set(objs or []) & set(self.current.peaks or [])):
+            #     strip.contextMenuMode = PeakMenu
+            #     menu = strip._contextMenus.get(strip.contextMenuMode)
+            #     strip._lastClickedObjects = objs
+            #
+            # else:
+            #     objs = self._mouseInIntegral(xPosition, yPosition, firstOnly=False)
+            #
+            #     if (set(objs or []) & set(self.current.integrals or [])):
+            #         strip.contextMenuMode = IntegralMenu
+            #         menu = strip._contextMenus.get(strip.contextMenuMode)
+            #         strip._lastClickedObjects = objs
+            #
+            #     else:
+            #         objs = self._mouseInMultiplet(xPosition, yPosition, firstOnly=False)
+            #
+            #         if (set(objs or []) & set(self.current.multiplets or [])):
+            #             strip.contextMenuMode = MultipletMenu
+            #             menu = strip._contextMenus.get(strip.contextMenuMode)
+            #             strip._lastClickedObjects = objs
 
-            # will only work for self.current.peak
-            strip._addItemsToNavigateToPeakMenu()
-            strip._addItemsToMarkInPeakMenu()
 
-            # check other menu items before raising menues
-            strip._checkMenuItems()
+            #~~~~~~~
 
-            # set the correct rightMouseMenu for the clicked object (must be selected?)
-            objs = self._mouseInPeak(xPosition, yPosition, firstOnly=False)
-            strip._lastClickedObjects = None
+            # strip._addItemsToNavigateToCursorPosMenu()
+            # strip._addItemsToMarkInCursorPosMenu()
 
-            if objs:
+            selectedDict = self.getObjectsUnderMouse()
+            if PEAKSELECT in selectedDict:
+
+                # Search if the event is in a range of a selected peak.
+                peaks = list(self.current.peaks)
+
+                from ccpn.ui.gui.lib.GuiStripContextMenus import _hidePeaksSingleActionItems, _enableAllItems
+
+                ii = strip._contextMenus.get(PeakMenu)
+                if len(peaks) > 1:
+                    _hidePeaksSingleActionItems(strip, ii)
+                else:
+                    _enableAllItems(ii)
+
+                # will only work for self.current.peak
+                strip._addItemsToNavigateToPeakMenu(selectedDict[PEAKSELECT])
+                strip._addItemsToMarkInPeakMenu(selectedDict[PEAKSELECT])
+
                 strip.contextMenuMode = PeakMenu
                 menu = strip._contextMenus.get(strip.contextMenuMode)
-                strip._lastClickedObjects = objs
+                strip._lastClickedObjects = selectedDict[PEAKSELECT]
 
-            else:
-                objs = self._mouseInIntegral(xPosition, yPosition, firstOnly=False)
-                if objs:
-                    strip.contextMenuMode = IntegralMenu
-                    menu = strip._contextMenus.get(strip.contextMenuMode)
-                    strip._lastClickedObjects = objs
+            elif INTEGRALSELECT in selectedDict:
+                strip.contextMenuMode = IntegralMenu
+                menu = strip._contextMenus.get(strip.contextMenuMode)
+                strip._lastClickedObjects = selectedDict[INTEGRALSELECT]
 
-                else:
-                    objs = self._mouseInMultiplet(xPosition, yPosition, firstOnly=False)
-                    if objs:
-                        strip.contextMenuMode = MultipletMenu
-                        menu = strip._contextMenus.get(strip.contextMenuMode)
-                        strip._lastClickedObjects = objs
+            elif MULTIPLETSELECT in selectedDict:
+                strip.contextMenuMode = MultipletMenu
+                menu = strip._contextMenus.get(strip.contextMenuMode)
+                strip._lastClickedObjects = selectedDict[MULTIPLETSELECT]
 
-            # elif self._mouseInIntegral(xPosition, yPosition, firstOnly=True):
-            #     strip.contextMenuMode = IntegralMenu
-            #     menu = strip._contextMenus.get(strip.contextMenuMode)
-            #
-            # elif self._mouseInMultiplet(xPosition, yPosition, firstOnly=True):
-            #     strip.contextMenuMode = MultipletMenu
-            #     menu = strip._contextMenus.get(strip.contextMenuMode)
+            # check other menu items before raising menues
+            strip._addItemsToNavigateToCursorPosMenu()
+            strip._addItemsToMarkInCursorPosMenu()
+            strip._checkMenuItems()
 
             if menu is not None:
                 strip.viewStripMenu = menu

@@ -412,7 +412,7 @@ class GuiStrip(Frame):
         """
         pass
 
-    def _addItemsToNavigateToPeakMenu(self):
+    def _addItemsToNavigateToPeakMenu(self, peaks):
         """Adds item to navigate to peak position from context menu.
         """
         # TODO, merge the two menu (cursor and peak) in one single menu to avoid code duplication. Issues: when tried, only one menu at the time worked!
@@ -422,20 +422,21 @@ class GuiStrip(Frame):
         if self.navigateToPeakMenu:
             self.navigateToPeakMenu.clear()
             currentStrip = self.current.strip
-            position = self.current.cursorPosition
+
             if currentStrip:
-                if self.current.peak:
+                if peaks:
                     if len(self.current.project.spectrumDisplays) > 1:
                         self.navigateToPeakMenu.setEnabled(True)
                         for spectrumDisplay in self.current.project.spectrumDisplays:
                             for strip in spectrumDisplay.strips:
                                 if strip != currentStrip:
-                                    toolTip = 'Show cursor in strip %s at Peak position %s' % (str(strip.id), str([round(x, 3) for x in position]))
+                                    toolTip = 'Show cursor in strip %s at Peak position %s' % (str(strip.id), str([round(x, 3) for x in peaks[0].position]))
                                     if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
+
                                         self.navigateToPeakMenu.addItem(text=strip.pid,
                                                                         callback=partial(navigateToPositionInStrip, strip=strip,
-                                                                                         positions=self.current.peak.position,
-                                                                                         axisCodes=self.current.peak.axisCodes),
+                                                                                         positions=peaks[0].position,
+                                                                                         axisCodes=peaks[0].axisCodes),
                                                                         toolTip=toolTip)
                             self.navigateToPeakMenu.addSeparator()
                     else:
@@ -463,6 +464,7 @@ class GuiStrip(Frame):
                             if strip != currentStrip:
                                 toolTip = 'Show cursor in strip %s at Cursor position %s' % (str(strip.id), str([round(x, 3) for x in position]))
                                 if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
+
                                     self.navigateCursorMenu.addItem(text=strip.pid,
                                                                     callback=partial(navigateToPositionInStrip, strip=strip,
                                                                                      positions=position, axisCodes=currentStrip.axisCodes, ),
@@ -471,7 +473,7 @@ class GuiStrip(Frame):
                 else:
                     self.navigateCursorMenu.setEnabled(False)
 
-    def _addItemsToMarkInPeakMenu(self):
+    def _addItemsToMarkInPeakMenu(self, peaks):
         """Adds item to mark peak position from context menu.
         """
         # TODO, merge the two menu (cursor and peak) in one single menu to avoid code duplication. Issues: when tried, only one menu at the time worked!
@@ -480,20 +482,21 @@ class GuiStrip(Frame):
         if self.markInPeakMenu:
             self.markInPeakMenu.clear()
             currentStrip = self.current.strip
-            position = self.current.cursorPosition
+
             if currentStrip:
-                if self.current.peak:
+                if peaks:
                     if len(self.current.project.spectrumDisplays) > 1:
                         self.markInPeakMenu.setEnabled(True)
                         for spectrumDisplay in self.current.project.spectrumDisplays:
                             for strip in spectrumDisplay.strips:
                                 if strip != currentStrip:
-                                    toolTip = 'Show cursor in strip %s at Peak position %s' % (str(strip.id), str([round(x, 3) for x in position]))
+                                    toolTip = 'Show cursor in strip %s at Peak position %s' % (str(strip.id), str([round(x, 3) for x in peaks[0].position]))
                                     if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
+
                                         self.markInPeakMenu.addItem(text=strip.pid,
                                                                     callback=partial(self._createMarkAtPosition,
-                                                                                     positions=self.current.peak.position,
-                                                                                     axisCodes=self.current.peak.axisCodes),
+                                                                                     positions=peaks[0].position,
+                                                                                     axisCodes=peaks[0].axisCodes),
                                                                     toolTip=toolTip)
                             self.markInPeakMenu.addSeparator()
                     else:
@@ -519,6 +522,7 @@ class GuiStrip(Frame):
                             if strip != currentStrip:
                                 toolTip = 'Show cursor in strip %s at Cursor position %s' % (str(strip.id), str([round(x, 3) for x in position]))
                                 if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
+
                                     self.markInCursorMenu.addItem(text=strip.pid,
                                                                   callback=partial(self._createMarkAtPosition,
                                                                                    positions=position, axisCodes=currentStrip.axisCodes, ),
@@ -979,7 +983,7 @@ class GuiStrip(Frame):
             self._project.newMark(defaultColour, positions, axisCodes)
 
         except Exception as es:
-            getLogger().warning('Error setting mark at current cursor position')
+            getLogger().warning('Error setting mark at position')
             raise (es)
 
     def _createMarkAtCursorPosition(self):

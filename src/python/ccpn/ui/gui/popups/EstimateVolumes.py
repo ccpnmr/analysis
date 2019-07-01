@@ -23,29 +23,24 @@ __date__ = "$Date$"
 # Start of code
 #=========================================================================================
 
-from typing import List, Tuple, Optional
-from ccpn.util.Logging import getLogger
 from ccpn.core.Spectrum import Spectrum
-from ccpn.core.Peak import Peak
-from ccpn.core.Project import Project
-from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.PulldownListsForObjects import SpectrumPulldown
-from ccpn.util.Common import makeIterableList
-from ccpn.core.lib.peakUtils import estimateVolumes
-from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 
 
 SHOWALLSPECTRA = True
 
 
 class EstimateVolumes(CcpnDialog):
-
+    """
+    Popup to estimate volumes of peaks in peakList from selected spectrum.
+    Spectra are all those in the project.
+    A spectrum is selected from the spectra in the current.strip if current.strip exists.
+    """
     def __init__(self, parent=None, mainWindow=None, title='Estimate Volumes', spectra=None, **kwds):
         CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
@@ -70,7 +65,8 @@ class EstimateVolumes(CcpnDialog):
         self.setFixedSize(self.sizeHint())
 
     def _createWidgets(self):
-
+        """Create the widgets for the popup
+        """
         row = 0
         self.spectrumPullDown = SpectrumPulldown(self, self.project, grid=(row, 0), gridSpan=(1, 3),
                                                  callback=self._changePeakLists,
@@ -89,6 +85,8 @@ class EstimateVolumes(CcpnDialog):
                                     callbacks=[self.reject, self._estimateVolumes])
 
     def _changePeakLists(self, *args):
+        """Update the peakLists in the table from the current spectrum in the pulldown.
+        """
         obj = self.spectrumPullDown.getSelectedObject()
 
         if isinstance(obj, Spectrum):

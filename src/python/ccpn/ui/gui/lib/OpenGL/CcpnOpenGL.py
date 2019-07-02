@@ -4060,19 +4060,17 @@ class CcpnGLWidget(QOpenGLWidget):
                                         obj=None)
             self._mouseCoords = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
-            # check that the string is actually visible, or move to the other side of tha axis
-            ox = oy = 0.0
+            # check that the string is actually visible, or constraint to the bounds of the strip
             _offset = self.pixelX * 80.0
-            _mouseOffset = valueToRatio(self.cursorCoordinate[0] + _offset, self.axisL, self.axisR)
-            if _mouseOffset > 1.0:
-                ox = - (80.0 / self.w)
+            _mouseOffsetR = valueToRatio(self.cursorCoordinate[0] + _offset, self.axisL, self.axisR)
+            _mouseOffsetL = valueToRatio(self.cursorCoordinate[0], self.axisL, self.axisR)
+            ox = -min(max(_mouseOffsetR-1.0, 0.0), _mouseOffsetL)
 
             _offset = self.pixelY * self.mouseString.height
-            _mouseOffset = valueToRatio(self.cursorCoordinate[1] + _offset, self.axisB, self.axisT)
-            if _mouseOffset > 1.0:
-                oy = - (self.mouseString.height + 6) / self.h
+            _mouseOffsetT = valueToRatio(self.cursorCoordinate[1] + _offset, self.axisB, self.axisT)
+            oy = -(max(_mouseOffsetT-1.0, 0.0))
 
-            self.mouseString.setStringOffset((ox, oy))       # okay, this works as 10% of screen width
+            self.mouseString.setStringOffset((ox, oy))
             self.mouseString.updateTextArrayVBOAttribs(enableVBO=True)
 
             if self._drawDeltaOffset:

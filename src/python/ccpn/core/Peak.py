@@ -668,7 +668,7 @@ class Peak(AbstractWrapperObject):
             return k * np.exp(s * (N - mu) * (N - mu))
 
         lineWidths = self.lineWidths
-        if not lineWidths or None in lineWidths or len(lineWidths):
+        if not lineWidths or None in lineWidths:
             raise ValueError('cannot estimate volume, lineWidths not defined or contain None.')
         if not self.height:
             raise ValueError('cannot estimate volume, height not defined.')

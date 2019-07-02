@@ -150,9 +150,9 @@ class PeakFindPopup(CcpnDialog):
                                          estimateLineWidths=doLineWidths
                                          )
 
-
-            # for strip in self.project.strips:
-            #     strip.showPeaks(peakList)
+        # estimate the peak volumes
+        if doVolumes:
+            peakList.estimateVolumes(volumeIntegralLimit=self.application.preferences.general.volumeIntegralLimit)
 
         self.accept()
 

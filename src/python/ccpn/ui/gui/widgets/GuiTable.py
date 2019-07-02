@@ -807,10 +807,18 @@ GuiTable::item::selected {
         # verticalHeader->setSectionResizeMode(QHeaderView::Fixed);
         # verticalHeader->setDefaultSectionSize(24);
 
+    def pressingModifiers(self):
+        """Is the user clicking while holding a modifier
+        """
+        allKeyModifers = [QtCore.Qt.ShiftModifier, QtCore.Qt.ControlModifier, QtCore.Qt.AltModifier, QtCore.Qt.MetaModifier]
+        keyMod = QtWidgets.QApplication.keyboardModifiers()
+
+        return keyMod in allKeyModifers
+
     def keyPressEvent(self, event):
         """Handle keyPress events on the table
         """
-        super(GuiTable, self).keyPressEvent(event)
+        super().keyPressEvent(event)
 
         cursors = [QtCore.Qt.Key_Up, QtCore.Qt.Key_Down, QtCore.Qt.Key_Left, QtCore.Qt.Key_Right]
         enter = [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return]
@@ -905,9 +913,14 @@ GuiTable::item::selected {
 
                 self._selectOverride = True
 
-                # timer to re-enable table, smaller interval so that single click above doesn't look too delayed
-                QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval() * 0.75,
-                                         partial(self._handleCellClicked, event))
+                if self.pressingModifiers():
+                    # timer to re-enable table, smaller interval so that single click above doesn't look too delayed
+                    # don't respond to selection if modifiers pressed
+                    QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval() * 0.75,
+                                             self._handleCellClickedExit)
+                else:
+                    QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval() * 0.75,
+                                             partial(self._handleCellClicked, event))
 
         else:
             event.ignore()
@@ -927,6 +940,7 @@ GuiTable::item::selected {
             objs = self.getSelectedObjects()
             if objs and len(objs) > 1:
                 item = self.currentItem()
+
                 if item:
                     self.clearSelection()
 
@@ -1506,6 +1520,19 @@ GuiTable::item::selected {
 
             if selection:
                 uniqObjs = set(selection)
+
+                # rowObjs = []
+                # for obj in uniqObjs:
+                #     if obj in self._dataFrameObject.objects:
+                #         rowObjs.append(obj)
+                #
+                # selectionModel.clearSelection()
+                # for obj in rowObjs:
+                #     row = self._dataFrameObject.find(self, str(obj.pid))
+                #
+                #     if row is not None:
+                #         selectionModel.select(self.model().index(row, 0),
+                #                               selectionModel.Select | selectionModel.Rows)
 
                 rows = [self._dataFrameObject.find(self, str(obj.pid)) for obj in uniqObjs if obj in self._dataFrameObject.objects]
                 rows = [row for row in rows if row is not None]

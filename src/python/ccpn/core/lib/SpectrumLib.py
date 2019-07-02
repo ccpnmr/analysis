@@ -806,7 +806,7 @@ def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
 
                 if setPositiveContours:
                     try:
-                        spectrum.positiveContourBase = base
+                        spectrum.positiveContourBase = base         # do
                         spectrum.positiveContourFactor = posMult
                     except Exception as es:
 

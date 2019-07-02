@@ -842,21 +842,35 @@ class CcpnGLWidget(QOpenGLWidget):
         self.h = h
 
         if self._axisLocked:
-            ax0 = self._getValidAspectRatio(self._axisCodes[0])
-            ax1 = self._getValidAspectRatio(self._axisCodes[1])
+            print('>>>change resizeGL', self.strip)
 
-            if (self.h / self.w) > 1:
-                mby = 0.5 * (self.axisT + self.axisB)
+            # check which is the primary axis and update the opposite axis - similar to wheelEvent
+            if self.spectrumDisplay.stripArrangement == 'Y':
 
-                ratio = (self.h / self.w) * 0.5 * abs(self.axisL - self.axisR) * ax1 / ax0
-                self.axisB = mby + ratio * self.sign(self.axisB - mby)
-                self.axisT = mby - ratio * self.sign(mby - self.axisT)
-            else:
-                mbx = 0.5 * (self.axisR + self.axisL)
+                # strips are arranged in a row
+                self._scaleToYAxis(rescale=False)
 
-                ratio = (self.w / self.h) * 0.5 * abs(self.axisT - self.axisB) * ax0 / ax1
-                self.axisL = mbx + ratio * self.sign(self.axisL - mbx)
-                self.axisR = mbx - ratio * self.sign(mbx - self.axisR)
+            elif self.spectrumDisplay.stripArrangement == 'X':
+
+                # strips are arranged in a column
+                self._scaleToXAxis(rescale=False)
+
+        #     ax0 = self._getValidAspectRatio(self._axisCodes[0])
+        #     ax1 = self._getValidAspectRatio(self._axisCodes[1])
+        #
+        #     if (self.h / self.w) > 1:
+        #         mby = 0.5 * (self.axisT + self.axisB)
+        #
+        #         ratio = (self.h / self.w) * 0.5 * abs(self.axisL - self.axisR) * ax1 / ax0
+        #         self.axisB = mby + ratio * self.sign(self.axisB - mby)
+        #         self.axisT = mby - ratio * self.sign(mby - self.axisT)
+        #     else:
+        #         mbx = 0.5 * (self.axisR + self.axisL)
+        #
+        #         ratio = (self.w / self.h) * 0.5 * abs(self.axisT - self.axisB) * ax0 / ax1
+        #         self.axisL = mbx + ratio * self.sign(self.axisL - mbx)
+        #         self.axisR = mbx - ratio * self.sign(mbx - self.axisR)
+        #
 
         self.rescale()
 
@@ -1016,20 +1030,12 @@ class CcpnGLWidget(QOpenGLWidget):
                 self._storeZoomHistory()
 
             else:
-                mby = 0.5 * (self.axisT + self.axisB)
-
-                ax0 = self._getValidAspectRatio(self._axisCodes[0])
-                ax1 = self._getValidAspectRatio(self._axisCodes[1])
-
-                ratio = (self.h / self.w) * 0.5 * abs(self.axisL - self.axisR) * ax1 / ax0
-                self.axisB = mby + ratio * self.sign(self.axisB - mby)
-                self.axisT = mby - ratio * self.sign(mby - self.axisT)
+                self._scaleToXAxis()
 
                 self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
                                                    axisB=self.axisB, axisT=self.axisT,
                                                    axisL=self.axisL, axisR=self.axisR)
 
-                self._rescaleAllAxes()
                 self._storeZoomHistory()
 
         elif self.between(mx, ra[0], ra[2]) and self.between(my, ra[1], ra[3]):
@@ -1064,40 +1070,49 @@ class CcpnGLWidget(QOpenGLWidget):
                 self._storeZoomHistory()
 
             else:
-                mbx = 0.5 * (self.axisR + self.axisL)
-
-                ax0 = self._getValidAspectRatio(self._axisCodes[0])
-                ax1 = self._getValidAspectRatio(self._axisCodes[1])
-
-                ratio = (self.w / self.h) * 0.5 * abs(self.axisT - self.axisB) * ax0 / ax1
-                self.axisL = mbx + ratio * self.sign(self.axisL - mbx)
-                self.axisR = mbx - ratio * self.sign(mbx - self.axisR)
+                self._scaleToYAxis()
 
                 self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
                                                    axisB=self.axisB, axisT=self.axisT,
                                                    axisL=self.axisL, axisR=self.axisR)
 
-                self._rescaleAllAxes()
                 self._storeZoomHistory()
 
         event.accept()
 
-    def _scaleToYAxis(self):
+    def _scaleToXAxis(self, rescale=True):
+        if self._axisLocked:
+            mby = 0.5 * (self.axisT + self.axisB)
+
+            ax0 = self._getValidAspectRatio(self._axisCodes[0])
+            ax1 = self._getValidAspectRatio(self._axisCodes[1])
+
+            width = (self.w - self.AXIS_MARGINRIGHT) if self._drawRightAxis else self.w
+            height = (self.h - self.AXIS_MARGINBOTTOM) if self._drawBottomAxis else self.h
+
+            ratio = (height / width) * 0.5 * abs(self.axisL - self.axisR) * ax1 / ax0
+            self.axisB = mby + ratio * self.sign(self.axisB - mby)
+            self.axisT = mby - ratio * self.sign(mby - self.axisT)
+
+        if rescale:
+            self._rescaleAllAxes()
+
+    def _scaleToYAxis(self, rescale=True):
         if self._axisLocked:
             mbx = 0.5 * (self.axisR + self.axisL)
 
             ax0 = self._getValidAspectRatio(self._axisCodes[0])
             ax1 = self._getValidAspectRatio(self._axisCodes[1])
 
-            ratio = (self.w / self.h) * 0.5 * abs(self.axisT - self.axisB) * ax0 / ax1
+            width = (self.w - self.AXIS_MARGINRIGHT) if self._drawRightAxis else self.w
+            height = (self.h - self.AXIS_MARGINBOTTOM) if self._drawBottomAxis else self.h
+
+            ratio = (width / height) * 0.5 * abs(self.axisT - self.axisB) * ax0 / ax1
             self.axisL = mbx + ratio * self.sign(self.axisL - mbx)
             self.axisR = mbx - ratio * self.sign(mbx - self.axisR)
 
-            # self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
-            #                                    axisB=self.axisB, axisT=self.axisT,
-            #                                    axisL=self.axisL, axisR=self.axisR)
-
-        self._rescaleAllAxes()
+        if rescale:
+            self._rescaleAllAxes()
 
     def _rescaleXAxis(self, update=True):
         self._testAxisLimits()
@@ -1851,6 +1866,13 @@ class CcpnGLWidget(QOpenGLWidget):
         """Toggle the axis locked button
         """
         self._axisLocked = not self._axisLocked
+
+        # create a dict and event to update this strip first
+        aDict = {GLNotifier.GLSOURCE : None,
+                 GLNotifier.GLSPECTRUMDISPLAY : self.spectrumDisplay,
+                 GLNotifier.GLVALUES : self._axisLocked
+                 }
+        self._glAxisLockChanged(aDict)
         self.GLSignals._emitAxisLockChanged(source=self, strip=self.strip, lock=self._axisLocked)
 
     def mousePressInCornerButtons(self, mx, my):
@@ -5219,7 +5241,22 @@ class CcpnGLWidget(QOpenGLWidget):
 
         if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.spectrumDisplay:
             self._axisLocked = aDict[GLNotifier.GLVALUES]
-            self.update()
+
+            if self._axisLocked:
+
+                # check which is the primary axis and update the opposite axis - similar to wheelEvent
+                if self.spectrumDisplay.stripArrangement == 'Y':
+
+                    # strips are arranged in a row
+                    self._scaleToYAxis()
+
+                elif self.spectrumDisplay.stripArrangement == 'X':
+
+                    # strips are arranged in a column
+                    self._scaleToXAxis()
+            else:
+                # paint to update lock button colours
+                self.update()
 
     @pyqtSlot(dict)
     def _glAxisUnitsChanged(self, aDict):
@@ -5236,7 +5273,12 @@ class CcpnGLWidget(QOpenGLWidget):
                 self._xUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISXUNITS]
                 self._yUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISYUNITS]
                 self._axisLocked = aDict[GLNotifier.GLVALUES][GLDefs.AXISLOCKASPECTRATIO]
-            self._rescaleAllAxes()
+
+                aDict = {GLNotifier.GLSOURCE         : None,
+                         GLNotifier.GLSPECTRUMDISPLAY: self.spectrumDisplay,
+                         GLNotifier.GLVALUES         : self._axisLocked
+                         }
+                self._glAxisLockChanged(aDict)
 
     def setAxisPosition(self, axisCode, position, update=True):
         # if not self.glReady: return

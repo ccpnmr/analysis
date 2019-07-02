@@ -136,7 +136,7 @@ class SpectrumDisplaySettings(Widget):
         row += 1
         self.lockAspect = Label(parent, text="Lock Aspect Ratio", grid=(row, 0))
         self.lockAspectCheckBox = CheckBox(parent, grid=(row, 1), checked=lockAspect, objectName='SDS_lockAspect')
-        self.lockAspectCheckBox.toggled.connect(self._settingsChanged)
+        self.lockAspectCheckBox.clicked.connect(self._settingsChanged)
 
         if not self._spectrumDisplay.is1D:
             row += 1

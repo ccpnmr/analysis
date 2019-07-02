@@ -686,12 +686,13 @@ class Peak(AbstractWrapperObject):
         vals = make_gauss(xxSig, sigmaX, mu, height)
         area = 2.0*np.trapz(vals, xxSig)
 
-        vol = self.height
+        # note that negative height will give negative volume
+        vol = 1.0
         for lw in lineWidths:
             # multiply the values for the gaussian in each dimension
             vol *= (area * (lw / FWHM))
 
-        self.volume = abs(vol)
+        self.volume = self.height * abs(vol)
 
         # do I need to set the volume error?
         # self.volumeError = 1e-8

@@ -57,10 +57,8 @@ class GuiNdWidget(CcpnGLWidget):
         """Find the peaks under the mouse.
         If firstOnly is true, return only the first item, else an empty list
         """
-        xPeakWidth = abs(self.pixelX) * self.peakWidthPixels
-        yPeakWidth = abs(self.pixelY) * self.peakWidthPixels
-        xPositions = [xPosition - 0.5 * xPeakWidth, xPosition + 0.5 * xPeakWidth]
-        yPositions = [yPosition - 0.5 * yPeakWidth, yPosition + 0.5 * yPeakWidth]
+        xPositions = [xPosition - self.symbolX, xPosition + self.symbolX]
+        yPositions = [yPosition - self.symbolY, yPosition + self.symbolY]
         if len(self._orderedAxes) > 2:
             zPositions = self._orderedAxes[2].region
         else:
@@ -107,10 +105,9 @@ class GuiNdWidget(CcpnGLWidget):
         """Find the multiplets under the mouse.
         If firstOnly is true, return only the first item, else an empty list
         """
-        xMultipletWidth = abs(self.pixelX) * self.peakWidthPixels
-        yMultipletWidth = abs(self.pixelY) * self.peakWidthPixels
-        xPositions = [xPosition - 0.5 * xMultipletWidth, xPosition + 0.5 * xMultipletWidth]
-        yPositions = [yPosition - 0.5 * yMultipletWidth, yPosition + 0.5 * yMultipletWidth]
+        xPositions = [xPosition - self.symbolX, xPosition + self.symbolX]
+        yPositions = [yPosition - self.symbolY, yPosition + self.symbolY]
+
         if len(self._orderedAxes) > 2:
             zPositions = self._orderedAxes[2].region
         else:
@@ -222,10 +219,8 @@ class Gui1dWidget(CcpnGLWidget):
         """Find the peaks under the mouse.
         If firstOnly is true, return only the first item, else an empty list
         """
-        xPeakWidth = abs(self.pixelX) * self.peakWidthPixels
-        yPeakWidth = abs(self.pixelY) * self.peakWidthPixels
-        xPositions = [xPosition - 0.5 * xPeakWidth, xPosition + 0.5 * xPeakWidth]
-        yPositions = [yPosition - 0.5 * yPeakWidth, yPosition + 0.5 * yPeakWidth]
+        xPositions = [xPosition - self.symbolX, xPosition + self.symbolX]
+        yPositions = [yPosition - self.symbolY, yPosition + self.symbolY]
 
         peaks = []
         for spectrumView in self.strip.spectrumViews:
@@ -266,10 +261,8 @@ class Gui1dWidget(CcpnGLWidget):
         """Find the multiplets under the mouse.
         If firstOnly is true, return only the first item, else an empty list
         """
-        xMultipletWidth = abs(self.pixelX) * self.peakWidthPixels
-        yMultipletWidth = abs(self.pixelY) * self.peakWidthPixels
-        xPositions = [xPosition - 0.5 * xMultipletWidth, xPosition + 0.5 * xMultipletWidth]
-        yPositions = [yPosition - 0.5 * yMultipletWidth, yPosition + 0.5 * yMultipletWidth]
+        xPositions = [xPosition - self.symbolX, xPosition + self.symbolX]
+        yPositions = [yPosition - self.symbolY, yPosition + self.symbolY]
 
         multiplets = []
         for spectrumView in self.strip.spectrumViews:

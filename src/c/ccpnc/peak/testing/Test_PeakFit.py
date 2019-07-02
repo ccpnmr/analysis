@@ -191,15 +191,13 @@ if __name__ == '__main__':
     # convert the sigma into a FWHM and plot between volumeIntegralLimits * FWHM
     sigmax = 1.0
     mx = 0.0
-    # height = 3.0
     integralLimit = 2.0
     numPoints=45
-    lx = numPoints-1
-    ly = numPoints-1
-    lxx = numPoints-1
 
     thisFWHM = sigma2fwhm(sigmax)
-    height, (l1, l2) = (-40069.83984375, (18.269018037244678 / thisFWHM, 2.781543880701065 / thisFWHM))
+    # height, (l1, l2) = (-40069.83984375, (18.269018037244678 / thisFWHM, 2.781543880701065 / thisFWHM))
+    height, (l1, l2) = (1317701.0, (21.94079803302884 / thisFWHM, 11.697283014655113 / thisFWHM))
+    # estimated 2305274.18593
 
     limX = l1 * integralLimit * thisFWHM / 2.0
     limY = l2 * integralLimit * thisFWHM / 2.0
@@ -214,11 +212,11 @@ if __name__ == '__main__':
     ax0.plot_wireframe(xmS, ymS, peakArrayFWHM)
 
     # only need to use quadrant
-    area2d = 4.0*np.trapz(np.trapz(peakArrayFWHM, xxS), yyS)        # why does this work?
-    print('>>>area3D', area2d)
+    vol = 4.0*np.trapz(np.trapz(peakArrayFWHM, xxS), yyS)        # why does this work?
+    print('>>>volume', vol)
 
     # make a 2d peak of unit height
-    lim = -integralLimit * thisFWHM / 2.0
+    lim = integralLimit * thisFWHM / 2.0
     xxSig = np.linspace(0, lim, numPoints)
     vals = make_gauss(xxSig, sigmax, mx, 1.0)
     fig = plt.figure(figsize=(10, 8), dpi=100)
@@ -231,14 +229,9 @@ if __name__ == '__main__':
     # l1 = 21.9 / thisFWHM
     # l2 = 11.7 / thisFWHM
 
-    # height, (l1, l2) = (1317701.0, (21.94079803302884 / thisFWHM, 11.697283014655113 / thisFWHM))
-    height, (l1, l2) = (-40069.83984375, (18.269018037244678 / thisFWHM, 2.781543880701065 / thisFWHM))
-    # estimated 2305274.18593
-
     # only need to use half
     area = 2.0*np.trapz(vals, xxSig)     # THIS WORKS! - uses the correct x points for the trapz area
-    print('>>>area', area, height * np.power(area, 2), np.power(area, 2)/area2d)
-    print('>>>area new', abs(height * np.power(area, 2) * l1 * l2))
+    print('>>>volume new', abs(height * np.power(area, 2) * l1 * l2))
     # estimated = 382919751.28
 
     # lastArea=None

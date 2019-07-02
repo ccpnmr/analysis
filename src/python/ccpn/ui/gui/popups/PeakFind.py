@@ -111,6 +111,9 @@ class PeakFindPopup(CcpnDialog):
                 self.peakListPulldown.select(self.current.strip.spectra[-1].peakLists[-1].pid)
             self.peakList = self.project.getByPid(self.peakListPulldown.currentText())
 
+            # populate the estimateFrame
+            self._updateContents()
+
             self.setFixedSize(QtCore.QSize(450, 220))
         else:
             self.close()

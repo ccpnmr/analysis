@@ -756,3 +756,5 @@ def estimateVolumes(peaks: Sequence[Union[str, 'Peak']], volumeIntegralLimit=2.0
         lineWidths = pp.lineWidths
         if lineWidths and None not in lineWidths and height:
             pp.estimateVolume(volumeIntegralLimit=volumeIntegralLimit)
+        else:
+            getLogger().warning('Peak %s contains undefined height/lineWidths' % str(pp))

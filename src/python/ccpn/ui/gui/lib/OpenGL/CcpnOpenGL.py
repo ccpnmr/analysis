@@ -2299,6 +2299,23 @@ class CcpnGLWidget(QOpenGLWidget):
         super().leaveEvent(ev)
         self._clearAndUpdate()
 
+    def getMousePosition(self):
+        """Get the coordinates of the mouse in the window (in ppm) based on the current axes
+        """
+        point = self.mapFromGlobal(QtGui.QCursor.pos())
+
+        # calculate mouse coordinate within the mainView
+        _mouseX = point.x()
+        if self._drawBottomAxis:
+            _mouseY = self.height() - point.y() - self.AXIS_MARGINBOTTOM
+            _top = self.height() - self.AXIS_MARGINBOTTOM
+        else:
+            _mouseY = self.height() - point.y()
+            _top = self.height()
+
+        # translate from screen (0..w, 0..h) to NDC (-1..1, -1..1) to axes (axisL, axisR, axisT, axisB)
+        return self.mouseTransform.dot([_mouseX, _mouseY, 0.0, 1.0])
+
     def mouseMoveEvent(self, event):
         if self.strip.isDeleted:
             return
@@ -5601,8 +5618,14 @@ class CcpnGLWidget(QOpenGLWidget):
             if objSelected:
                 objDict[attrName] = objs
 
-        xPosition = self.cursorCoordinate[0]  # self.mapSceneToView(event.pos()).x()
-        yPosition = self.cursorCoordinate[1]  # self.mapSceneToView(event.pos()).y()
+        if self.strip.isDeleted:
+            return
+        if abs(self.axisL - self.axisR) < 1.0e-6 or abs(self.axisT - self.axisB) < 1.0e-6:
+            return
+
+        cursorPos = self.getMousePosition()
+        xPosition = cursorPos[0]
+        yPosition = cursorPos[1]
         objDict = {}
 
         # add objects to the dict

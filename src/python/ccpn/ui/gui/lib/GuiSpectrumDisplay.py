@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 # import importlib, os
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from functools import partial
 from copy import deepcopy
 
@@ -59,7 +59,8 @@ from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.AssignmentLib import _assignNmrAtomsToPeaks, _assignNmrResiduesToPeaks
 from ccpn.util.Constants import MOUSEDICTSTRIP
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import PEAKSELECT
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import PEAKSELECT, MULTIPLETSELECT
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget
 
 from ccpn.util.Logging import getLogger
 from ccpn.core.NmrAtom import NmrAtom
@@ -77,6 +78,7 @@ from ccpn.util.Common import makeIterableList
 from ccpn.core.lib import Undo
 from ccpn.ui.gui.widgets.MessageDialog import showMulti
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+
 
 STRIP_SPACING = 5
 AXIS_WIDTH = 30
@@ -246,7 +248,6 @@ class GuiSpectrumDisplay(CcpnModule):
                                                grid=(spectrumRow, 0), gridSpan=(1, 7))
         self.spectrumToolBar.setFixedHeight(30)
 
-
         # spectrumGroupsToolBar
         self.spectrumGroupToolBar = SpectrumGroupToolBar(parent=self.qtParent, spectrumDisplay=self,
                                                          grid=(spectrumRow, 0), gridSpan=(1, 7))
@@ -311,9 +312,9 @@ class GuiSpectrumDisplay(CcpnModule):
         self.stripScaleFactor = 1.0
 
         self._spectrumRenameNotifier = self.setNotifier(self.project,
-                                               [Notifier.RENAME],
-                                               'Spectrum',
-                                               self._spectrumRenameChanged)
+                                                        [Notifier.RENAME],
+                                                        'Spectrum',
+                                                        self._spectrumRenameChanged)
 
         self._toolbarNotifier = self.setNotifier(self.project,
                                                  [Notifier.CHANGE],
@@ -465,7 +466,7 @@ class GuiSpectrumDisplay(CcpnModule):
             return arrangement
 
         # set default values in the ccpnInternal store
-        arrangement = self._wrappedData.stripDirection                       # SHOULD always be 'Y', if it makes a difference
+        arrangement = self._wrappedData.stripDirection  # SHOULD always be 'Y', if it makes a difference
         AbstractWrapperObject.setParameter(self, SPECTRUMDISPLAY, STRIPARRANGEMENT, arrangement)
         return arrangement
 
@@ -480,8 +481,6 @@ class GuiSpectrumDisplay(CcpnModule):
 
         AbstractWrapperObject.setParameter(self, SPECTRUMDISPLAY, STRIPARRANGEMENT, value)
         # leave the _wrappedData as it's initialised value
-
-
 
     def _getSpectrumGroups(self):
         """Return the groups contained in the spectrumDisplay
@@ -555,7 +554,6 @@ class GuiSpectrumDisplay(CcpnModule):
         theObject = data.get('theObject')
 
         if DropBase.URLS in data:
-
             # process dropped items but don't open any spectra
             self.mainWindow._processDroppedItems(data)
 
@@ -713,94 +711,73 @@ class GuiSpectrumDisplay(CcpnModule):
 
     def _handleNmrResidues(self, nmrResidues, showDialog=True):
 
-        # # need to get the strip that was destination of drop
-        # destStrip = self.current.mouseMovedDict[MOUSEDICTSTRIP]
-        #
-        # # need to get widget under mouse - destStrip doesn't update during drag
-        #
-        # if destStrip:
-        #     objectsClicked = destStrip.getObjectsUnderMouse()
-        #
-        #     if PEAKSELECT in objectsClicked:
-        #         # dropped onto a peak
-        #
-        #         print ('>>>dropped peaks')
-        #         # Assign nmrResidues atoms to peaks
-        #         peaks = set(self.current.peaks)
-        #         for mult in self.current.multiplets:
-        #             peaks = peaks | set(mult.peaks)
-        #         print(peaks)
-        #         _assignNmrResiduesToPeaks(peaks=list(peaks), nmrResidues=nmrResidues)
-        #
-        #     elif not objectsClicked:
-        #         print ('>>>dropped marks')
-        #         # mark all nmrResidues.nmrAtoms to the window
-        #         for nmrResidue in nmrResidues:
-        #             self._createNmrResidueMarks(nmrResidue)
+        # get the widget that is under the cursor, SHOULD be guiWidget
+        point = QtGui.QCursor.pos()
+        destStrip = QtWidgets.QApplication.widgetAt(point)
 
-        if (self.current.peaks or self.current.multiplets) and showDialog:
-            dialogResult = showMulti('nmrResidue', 'What do you want to do with the nmrResidues?',
-                               texts=['Cancel', 'Mark and Assign', 'Assign NmrResidues to selected peaks/multiplets', 'Create Marks'])
-        else:
-            dialogResult = 'Mark'
+        if destStrip and isinstance(destStrip, CcpnGLWidget):
+            objectsClicked = destStrip.getObjectsUnderMouse()
 
-        # mark all nmrResidues.nmrAtoms to the window
-        if 'Mark' in dialogResult:
-            for nmrResidue in nmrResidues:
-                self._createNmrResidueMarks(nmrResidue)
+            if objectsClicked is None:
+                return
 
-        # Assign nmrResidues atoms to peaks
-        if self.current.strip and 'Assign' in dialogResult:
-            peaks = set(self.current.peaks)
-            for mult in self.current.multiplets:
-                peaks = peaks | set(mult.peaks)
-            print(peaks)
-            _assignNmrResiduesToPeaks(peaks=list(peaks), nmrResidues=nmrResidues)
+            if PEAKSELECT in objectsClicked or MULTIPLETSELECT in objectsClicked:
+                # dropped onto a peak or multiplet
+                # dropping onto a multiplet will apply to all attached peaks
+
+                # dialogResult = showMulti('nmrResidue', 'What do you want to do with the nmrResidues?',
+                #                          texts=['Mark and Assign', 'Assign NmrResidues to selected peaks/multiplets'])
+
+                # Assign nmrResidues atoms to peaks
+                peaks = set(self.current.peaks)
+                for mult in self.current.multiplets:
+                    peaks = peaks | set(mult.peaks)
+                _assignNmrResiduesToPeaks(peaks=list(peaks), nmrResidues=nmrResidues)
+
+                # # mark all nmrResidues.nmrAtoms to the window
+                # if 'Mark' in dialogResult:
+                #     for nmrResidue in nmrResidues:
+                #         self._createNmrResidueMarks(nmrResidue)
+
+            elif not objectsClicked:
+                # mark all nmrResidues.nmrAtoms to the window
+                for nmrResidue in nmrResidues:
+                    self._createNmrResidueMarks(nmrResidue)
 
     def _handleNmrAtoms(self, nmrAtoms):
 
-        if (self.current.peaks or self.current.multiplets):
-            dialogResult = showMulti('nmrAtoms', 'What do you want to do with the nmrAtoms?',
-                               texts=['Cancel', 'Mark and Assign', 'Assign NmrAtoms to selected peaks/multiplets', 'Create Marks'])
-        else:
-            dialogResult = 'Mark'
+        # get the widget that is under the cursor, SHOULD be guiWidget
+        point = QtGui.QCursor.pos()
+        destStrip = QtWidgets.QApplication.widgetAt(point)
 
-        # mark all nmrAtoms to the window
-        if 'Mark' in dialogResult:
-            for nmrAtom in nmrAtoms:
-                self._markNmrAtom(nmrAtom)
+        if destStrip and isinstance(destStrip, CcpnGLWidget):
+            objectsClicked = destStrip.getObjectsUnderMouse()
 
-        # Assign nmrAtoms to peaks
-        if self.current.strip and 'Assign' in dialogResult:
-            peaks = set(self.current.peaks)
-            for mult in self.current.multiplets:
-                peaks = peaks | set(mult.peaks)
-            _assignNmrAtomsToPeaks(nmrAtoms=nmrAtoms, peaks=list(peaks))
+            if objectsClicked is None:
+                return
 
-    def _processDragEnterEvent(self, data):
+            if PEAKSELECT in objectsClicked or MULTIPLETSELECT in objectsClicked:
+                # dropped onto a peak or multiplet
+                # dropping onto a multiplet will apply to all attached peaks
 
-        # linked to notifier in strips, possibly for dragging peaks?
-        pass
-        # event = data['event']
-        # mousePosition = event.pos()
-        # if self.current.strip:
-        #   position = list(self.current.strip._CcpnGLWidget.mapMouseToAxis(mousePosition))
-        #   orderedAxes = self.current.strip.orderedAxes
-        #   if self.current.peak:
-        #     peakPosition = self.current.peak.position
-        #     minPeakPos = min(peakPosition)
-        #     bw = self.current.strip._CcpnGLWidget.boxWidth
-        #     bh = self.current.strip._CcpnGLWidget.boxHeight
-        #     pW = 0
-        #     pH = 0
-        #     if len(peakPosition) > 0:
-        #       pW = peakPosition[0]
-        #     if len(peakPosition)>1:
-        #       pH = peakPosition[1]
-        #     boxW = (pW + bw, pW - bw)
-        #     boxH = (pH + bh, pH - bh)
-        #     if pW + bw>position[0]>pW - bw and  pH + bh >position[1]>pH - bh:
-        #      print('NOT IMPLEMENTED YET')
+                # dialogResult = showMulti('nmrAtoms', 'What do you want to do with the nmrAtoms?',
+                #                          texts=['Mark and Assign', 'Assign NmrAtoms to selected peaks/multiplets'])
+
+                # Assign nmrAtoms to peaks
+                peaks = set(self.current.peaks)
+                for mult in self.current.multiplets:
+                    peaks = peaks | set(mult.peaks)
+                _assignNmrAtomsToPeaks(nmrAtoms=nmrAtoms, peaks=list(peaks))
+
+                # # mark all nmrAtoms to the window
+                # if 'Mark' in dialogResult:
+                #     for nmrAtom in nmrAtoms:
+                #         self._markNmrAtom(nmrAtom)
+
+            elif not objectsClicked:
+                # mark all nmrResidues.nmrAtoms to the window
+                for nmrAtom in nmrAtoms:
+                    self._markNmrAtom(nmrAtom)
 
     def _createNmrResidueMarks(self, nmrResidue):
         """
@@ -1452,7 +1429,6 @@ class GuiSpectrumDisplay(CcpnModule):
                 #             )
 
                 with notificationBlanking():
-
                     # get the visibility of strip to be copied
                     copyVisible = self.strips[index].header.headerVisible
 
@@ -1490,16 +1466,16 @@ class GuiSpectrumDisplay(CcpnModule):
                 addUndoItem(redo=partial(self._redrawAxes, index))
 
             # do axis redrawing
-            self._redrawAxes(index)         # this might be getting confused with the ordering
+            self._redrawAxes(index)  # this might be getting confused with the ordering
 
         return result
 
     def setColumnStretches(self, stretchValue=False, scaleFactor=1.0, widths=True, minimumWidth=None):
         """Set the column widths of the strips so that the last strip accommodates the axis bar
                 if necessary."""
-        
+
         if self.stripArrangement == 'Y':
-            
+
             # strips are arranged in a row
             self._setColumnStretches(stretchValue=stretchValue, scaleFactor=scaleFactor, widths=widths, minimumWidth=minimumWidth)
 
@@ -1510,7 +1486,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
         else:
             getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(self))
-            
+
     def _setColumnStretches(self, stretchValue=False, scaleFactor=1.0, widths=True, minimumWidth=None):
         """Set the column widths of the strips so that the last strip accommodates the axis bar
         if necessary."""
@@ -1568,7 +1544,7 @@ class GuiSpectrumDisplay(CcpnModule):
             else:
 
                 # set the correct widths for the strips
-                maxCol = thisLayout.count()-1
+                maxCol = thisLayout.count() - 1
                 firstWidth = scaleFactor * (thisLayoutWidth - AXIS_WIDTH - (maxCol * AXIS_PADDING)) / (maxCol + 1)
 
                 if minimumWidth:
@@ -1656,7 +1632,7 @@ class GuiSpectrumDisplay(CcpnModule):
             else:
 
                 # set the correct heights for the strips
-                maxRow = thisLayout.count()-1
+                maxRow = thisLayout.count() - 1
                 firstHeight = scaleFactor * (thisLayoutHeight - AXIS_HEIGHT - (maxRow * AXIS_PADDING)) / (maxRow + 1)
 
                 if minimumHeight:
@@ -1720,7 +1696,6 @@ class GuiSpectrumDisplay(CcpnModule):
 
         for strip in self.strips:
             strip._restoreZoom()
-
 
     def _storeZoom(self):
         """Saves zoomed region of current strip."""
@@ -1854,7 +1829,6 @@ class GuiSpectrumDisplay(CcpnModule):
                 index += (newInd,)
                 self.setOrderedSpectrumViewsIndex(tuple(index))
 
-
     def _removeSpectrum(self, spectrum):
         try:
             # self._orderedSpectra.remove(spectrum)
@@ -1986,5 +1960,6 @@ def _deletedSpectrumView(project: Project, apiSpectrumView):
     if not spectrumDisplay.is1D:
         for strip in spectrumDisplay.strips:
             strip._setZWidgets(ignoreSpectrumView=apiSpectrumView)
+
 
 GuiSpectrumDisplay.processSpectrum = GuiSpectrumDisplay.displaySpectrum  # ejb - from SpectrumDisplay

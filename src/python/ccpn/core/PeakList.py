@@ -541,6 +541,8 @@ class PeakList(AbstractWrapperObject):
                 lineWidths = pp.lineWidths
                 if lineWidths and None not in lineWidths and height:
                     pp.estimateVolume(volumeIntegralLimit=volumeIntegralLimit)
+                else:
+                    getLogger().warning('Peak %s contains undefined height/lineWidths' % str(pp))
 
     # def automatic1dPeakPicking(self, sizeFactor=3, negativePeaks=True, minimalLineWidth=None, ignoredRegions=None):
     #   '''

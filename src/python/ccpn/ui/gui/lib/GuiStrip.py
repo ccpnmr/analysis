@@ -218,8 +218,6 @@ class GuiStrip(Frame):
         # For now, all dropEvents are not strip specific, use spectrumDisplay's handling
         self.setGuiNotifier(self, [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
                             self.spectrumDisplay._processDroppedItems)
-        self.setGuiNotifier(self, [GuiNotifier.DRAGMOVEEVENT], [DropBase.URLS, DropBase.PIDS],
-                            self.spectrumDisplay._processDragEnterEvent)
 
     def viewRange(self):
         return self._CcpnGLWidget.viewRange()

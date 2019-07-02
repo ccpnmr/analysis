@@ -309,7 +309,10 @@ class PlaneToolbar(ToolBar):
             self.prevPlaneButton = Button(self, '<', callback=partial(callbacks[0], i))
             self.prevPlaneButton.setFixedWidth(19)
             self.prevPlaneButton.setFixedHeight(19)
-            planeLabel = DoubleSpinbox(self, showButtons=False, objectName="PlaneToolbar_planeLabel" + str(i))
+            planeLabel = DoubleSpinbox(self, showButtons=False, objectName="PlaneToolbar_planeLabel" + str(i),
+                                       )
+            planeLabel.setToolTip('axisCode: %s' % str(strip.axisCodes[i+2]))
+
             # planeLabel.setFixedHeight(19)
 
             # force the minimum width of the planeLabel

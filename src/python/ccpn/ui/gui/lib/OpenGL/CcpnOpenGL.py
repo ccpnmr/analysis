@@ -4068,7 +4068,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
             _offset = self.pixelY * self.mouseString.height
             _mouseOffsetT = valueToRatio(self.cursorCoordinate[1] + _offset, self.axisB, self.axisT)
-            oy = -(max(_mouseOffsetT-1.0, 0.0))
+            _mouseOffsetB = valueToRatio(self.cursorCoordinate[1], self.axisB, self.axisT)
+            oy = -min(max(_mouseOffsetT-1.0, 0.0), _mouseOffsetB)
 
             self.mouseString.setStringOffset((ox, oy))
             self.mouseString.updateTextArrayVBOAttribs(enableVBO=True)

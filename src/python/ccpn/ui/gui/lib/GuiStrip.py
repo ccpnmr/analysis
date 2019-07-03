@@ -1521,6 +1521,9 @@ class GuiStrip(Frame):
         # get the new strip order
         _widgets = list(spectrumDisplay.orderedStrips)
 
+        if len(_widgets) != len(spectrumDisplay.strips):
+            raise RuntimeError('bad ordered stripCount')
+
         # remember necessary layout info and create a new layout - ensures clean for new widgets
         margins = layout.getContentsMargins()
         space = layout.spacing()

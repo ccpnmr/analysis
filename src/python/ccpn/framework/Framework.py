@@ -733,6 +733,10 @@ class Framework(NotifierBase):
             strips = spectrumDisplay.orderedStrips
             for si, strip in enumerate(strips):
 
+                # temporary to catch bad strips from ordering bug
+                if not strip:
+                    continue
+
                 # move to the correct place in the widget - check stripDirection to display as row or column
                 if spectrumDisplay.stripArrangement == 'Y':
                     spectrumDisplay.stripFrame.layout().addWidget(strip, 0, si)  #stripIndex)

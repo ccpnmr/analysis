@@ -1169,8 +1169,15 @@ class GuiSpectrumDisplay(CcpnModule):
         with undoBlock():
             with undoStackBlocking() as addUndoItem:
                 # retrieve list of created items from the api
-                # strangely, this modifies _wrappedData.orderedStrips, and removes the boundStrip
+                # strangely, this modifies _wrappedData.orderedStrips, and 'removes' the boundStrip by changing the indexing
+                # if it is at the end of apiBoundStrips then it confuses the indexing
+                indexing = [st.stripIndex() for st in self.strips]
+
                 apiObjectsCreated = strip._getApiObjectTree()
+
+                # reset indexing again SHOULD now be okay; i.e. nothing has been 'removed' from apiBoundStrips yet
+                for ii, ind in enumerate(indexing):
+                    self.strips[ii]._setStripIndex(ind)
 
                 index = strip.stripIndex()
 

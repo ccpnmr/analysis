@@ -256,6 +256,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         self._crosshairVisible = True
         self._axesVisible = True
         self._axisLocked = False
+        self._useFixedAspect = True
         self._showSpectraOnPhasing = False
         self._xUnits = 0
         self._yUnits = 0

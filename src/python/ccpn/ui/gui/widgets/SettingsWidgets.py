@@ -44,7 +44,7 @@ from ccpn.ui._implementation.SpectrumView import SpectrumView
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO, \
-    SYMBOLTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, ANNOTATIONTYPES
+    SYMBOLTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, ANNOTATIONTYPES, AXISUSEFIXEDASPECTRATIO
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_REGIONSHADE
 from ccpn.util.Colour import hexToRgbRatio
@@ -74,7 +74,8 @@ class SpectrumDisplaySettings(Widget):
                  callback=None, returnCallback=None, applyCallback=None,
                  xAxisUnits=0, xTexts=[], showXAxis=True,
                  yAxisUnits=0, yTexts=[], showYAxis=True,
-                 lockAspect=False,
+                 lockAspectRatio=False,
+                 useFixedAspectRatio=True,
                  symbolType=0, annotationType=0, symbolSize=9, symbolThickness=2,
                  stripArrangement=0,
                  **kwds):
@@ -135,8 +136,14 @@ class SpectrumDisplaySettings(Widget):
 
         row += 1
         self.lockAspect = Label(parent, text="Lock Aspect Ratio", grid=(row, 0))
-        self.lockAspectCheckBox = CheckBox(parent, grid=(row, 1), checked=lockAspect, objectName='SDS_lockAspect')
+        self.lockAspectCheckBox = CheckBox(parent, grid=(row, 1), checked=lockAspectRatio, objectName='SDS_lockAspect')
         self.lockAspectCheckBox.clicked.connect(self._settingsChanged)
+
+        row += 1
+        self.useFixedAspect = Label(parent, text="Use Fixed Aspect Ratio", grid=(row, 0))
+        self.useFixedAspectCheckBox = CheckBox(parent, grid=(row, 1), checked=useFixedAspectRatio, objectName='SDS_useFixedAspect')
+        self.useFixedAspectCheckBox.clicked.connect(self._settingsChanged)
+        # self.useFixedAspectCheckBox.setEnabled(lockAspectRatio)
 
         if not self._spectrumDisplay.is1D:
             row += 1
@@ -206,13 +213,14 @@ class SpectrumDisplaySettings(Widget):
     def getValues(self):
         """Return a dict containing the current settings
         """
-        return {AXISXUNITS         : self.xAxisUnitsButtons.getIndex(),
-                AXISYUNITS         : self.yAxisUnitsButtons.getIndex(),
-                AXISLOCKASPECTRATIO: self.lockAspectCheckBox.isChecked(),
-                SYMBOLTYPES        : self.symbol.getIndex() if not self._spectrumDisplay.is1D else 0,
-                ANNOTATIONTYPES    : self.annotationsData.getIndex() if not self._spectrumDisplay.is1D else 0,
-                SYMBOLSIZE         : int(self.symbolSizePixelData.text()),
-                SYMBOLTHICKNESS    : int(self.symbolThicknessData.text())
+        return {AXISXUNITS             : self.xAxisUnitsButtons.getIndex(),
+                AXISYUNITS             : self.yAxisUnitsButtons.getIndex(),
+                AXISLOCKASPECTRATIO    : self.lockAspectCheckBox.isChecked(),
+                AXISUSEFIXEDASPECTRATIO: self.useFixedAspectCheckBox.isChecked(),
+                SYMBOLTYPES            : self.symbol.getIndex() if not self._spectrumDisplay.is1D else 0,
+                ANNOTATIONTYPES        : self.annotationsData.getIndex() if not self._spectrumDisplay.is1D else 0,
+                SYMBOLSIZE             : int(self.symbolSizePixelData.text()),
+                SYMBOLTHICKNESS        : int(self.symbolThicknessData.text())
                 }
 
     @pyqtSlot()
@@ -226,7 +234,8 @@ class SpectrumDisplaySettings(Widget):
         """Respond to an external change in the lock status of a strip
         """
         if aDict[GLNotifier.GLSPECTRUMDISPLAY] == self._spectrumDisplay:
-            self.lockAspectCheckBox.setChecked(aDict[GLNotifier.GLVALUES])
+            self.lockAspectCheckBox.setChecked(aDict[GLNotifier.GLVALUES][0])
+            self.useFixedAspectCheckBox.setChecked(aDict[GLNotifier.GLVALUES][1])
 
     @pyqtSlot()
     def _symbolsChanged(self):
@@ -423,6 +432,7 @@ class _commonSettings():
     def _removeWidget(self, widget, removeTopWidget=False):
         """Destroy a widget and all it's contents
         """
+
         def deleteItems(layout):
             if layout is not None:
                 while layout.count():
@@ -478,8 +488,6 @@ class _commonSettings():
         for ii, box in enumerate(self.axisCodeOptions.checkBoxes):
             if box.text().upper().startswith('C'):
                 self.axisCodeOptions.clearIndex(ii)
-
-
 
         # put in a divider
         spectraRow += 1
@@ -654,8 +662,8 @@ class StripPlot(Widget, _commonSettings):
             self._spectraRows = row + len(texts)
 
             self.spectrumDisplayOptionsFrame = Frame(self, setLayout=True, showBorder=False, fShape='noFrame',
-                                       grid=(1, 1), gridSpan=(row+2, 1),
-                                       vAlign='top', hAlign='left')
+                                                     grid=(1, 1), gridSpan=(row + 2, 1),
+                                                     vAlign='top', hAlign='left')
 
             # add a new pullDown to select the active spectrumDisplay
             self.spectrumDisplayPulldown = SpectrumDisplayPulldown(parent=self.spectrumDisplayOptionsFrame,

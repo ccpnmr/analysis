@@ -322,6 +322,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self._axesVisible = True
         self._axisLocked = False
+        self._useFixedAspect = True
+        self._fixedAspectX = 1.0
+        self._fixedAspectY = 1.0
+        
         self._showSpectraOnPhasing = False
         self._xUnits = 0
         self._yUnits = 0
@@ -1071,13 +1075,17 @@ class CcpnGLWidget(QOpenGLWidget):
         if self._axisLocked:
             mby = 0.5 * (self.axisT + self.axisB)
 
-            ax0 = self._getValidAspectRatio(self._axisCodes[0])
-            ax1 = self._getValidAspectRatio(self._axisCodes[1])
-
+            if self._useFixedAspect:
+                ax0 = self._getValidAspectRatio(self._axisCodes[0])
+                ax1 = self._getValidAspectRatio(self._axisCodes[1])
+            else:
+                ax0 = self.pixelX
+                ax1 = self.pixelY
+                
             width = (self.w - self.AXIS_MARGINRIGHT) if self._drawRightAxis else self.w
             height = (self.h - self.AXIS_MARGINBOTTOM) if self._drawBottomAxis else self.h
 
-            ratio = (height / width) * 0.5 * abs(self.axisL - self.axisR) * ax1 / ax0
+            ratio = (height / width) * 0.5 * abs((self.axisL - self.axisR) * ax1 / ax0)
             self.axisB = mby + ratio * self.sign(self.axisB - mby)
             self.axisT = mby - ratio * self.sign(mby - self.axisT)
 
@@ -1088,13 +1096,17 @@ class CcpnGLWidget(QOpenGLWidget):
         if self._axisLocked:
             mbx = 0.5 * (self.axisR + self.axisL)
 
-            ax0 = self._getValidAspectRatio(self._axisCodes[0])
-            ax1 = self._getValidAspectRatio(self._axisCodes[1])
+            if self._useFixedAspect:
+                ax0 = self._getValidAspectRatio(self._axisCodes[0])
+                ax1 = self._getValidAspectRatio(self._axisCodes[1])
+            else:
+                ax0 = self.pixelX
+                ax1 = self.pixelY
 
             width = (self.w - self.AXIS_MARGINRIGHT) if self._drawRightAxis else self.w
             height = (self.h - self.AXIS_MARGINBOTTOM) if self._drawBottomAxis else self.h
 
-            ratio = (width / height) * 0.5 * abs(self.axisT - self.axisB) * ax0 / ax1
+            ratio = (width / height) * 0.5 * abs((self.axisT - self.axisB) * ax0 / ax1)
             self.axisL = mbx + ratio * self.sign(self.axisL - mbx)
             self.axisR = mbx - ratio * self.sign(mbx - self.axisR)
 
@@ -1761,9 +1773,13 @@ class CcpnGLWidget(QOpenGLWidget):
         # self.viewports.addViewport(GLDefs.AXISCORNER, self, (-self.AXIS_MARGINRIGHT, 'w'), (0, 'a'), (0, 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
 
         # set strings for the overlay text
-        self._lockStringFalse = GLString(text='Lock', font=self.globalGL.glSmallFont, x=0, y=0,
+        self._lockStringFalse = GLString(text=GLDefs.LOCKSTRING, font=self.globalGL.glSmallFont, x=0, y=0,
                                          colour=(0.5, 0.5, 0.5, 1.0), GLContext=self)
-        self._lockStringTrue = GLString(text='Lock', font=self.globalGL.glSmallFont, x=0, y=0,
+        self._lockStringTrue = GLString(text=GLDefs.LOCKSTRING, font=self.globalGL.glSmallFont, x=0, y=0,
+                                        colour=self.highlightColour, GLContext=self)
+        self._useFixedStringFalse = GLString(text=GLDefs.USEFIXEDASPECTSTRING, font=self.globalGL.glSmallFont, x=0, y=0,
+                                         colour=(0.5, 0.5, 0.5, 1.0), GLContext=self)
+        self._useFixedStringTrue = GLString(text=GLDefs.USEFIXEDASPECTSTRING, font=self.globalGL.glSmallFont, x=0, y=0,
                                         colour=self.highlightColour, GLContext=self)
 
         self.stripIDString = GLString(text='', font=self.globalGL.glSmallFont, x=0, y=0, GLContext=self, obj=None)
@@ -1811,7 +1827,11 @@ class CcpnGLWidget(QOpenGLWidget):
         self._setColourScheme()
 
         # change the colour of the selected 'Lock' string
-        self._lockStringTrue = GLString(text='Lock', font=self.globalGL.glSmallFont, x=0, y=0,
+        self._lockStringTrue = GLString(text=GLDefs.LOCKSTRING, font=self.globalGL.glSmallFont, x=0, y=0,
+                                        colour=self.highlightColour, GLContext=self)
+
+        # change the colour of the selected 'Fixed' string
+        self._useFixedStringTrue = GLString(text=GLDefs.USEFIXEDASPECTSTRING, font=self.globalGL.glSmallFont, x=36, y=0,
                                         colour=self.highlightColour, GLContext=self)
 
         # set the new limits
@@ -1860,16 +1880,30 @@ class CcpnGLWidget(QOpenGLWidget):
         # create a dict and event to update this strip first
         aDict = {GLNotifier.GLSOURCE : None,
                  GLNotifier.GLSPECTRUMDISPLAY : self.spectrumDisplay,
-                 GLNotifier.GLVALUES : self._axisLocked
+                 GLNotifier.GLVALUES : (self._axisLocked, self._useFixedAspect)
                  }
         self._glAxisLockChanged(aDict)
-        self.GLSignals._emitAxisLockChanged(source=self, strip=self.strip, lock=self._axisLocked)
+        self.GLSignals._emitAxisLockChanged(source=self, strip=self.strip, lockValues=(self._axisLocked, self._useFixedAspect))
+
+    def _toggleUseFixedAspect(self):
+        """Toggle the use fixed aspect button
+        """
+        self._useFixedAspect = not self._useFixedAspect
+
+        # create a dict and event to update this strip first
+        aDict = {GLNotifier.GLSOURCE : None,
+                 GLNotifier.GLSPECTRUMDISPLAY : self.spectrumDisplay,
+                 GLNotifier.GLVALUES : (self._axisLocked, self._useFixedAspect)
+                 }
+        self._glAxisLockChanged(aDict)
+        self.GLSignals._emitAxisLockChanged(source=self, strip=self.strip, lockValues=(self._axisLocked, self._useFixedAspect))
 
     def mousePressInCornerButtons(self, mx, my):
         """Check if the mouse has been pressed in the lock button
         """
         if self.AXISLOCKEDBUTTON:
-            buttons = ((14, 6, 14, 6, self._toggleAxisLocked),)
+            buttons = ((14, 6, 14, 6, self._toggleAxisLocked),
+                       (44, 6, 16, 6, self._toggleUseFixedAspect))
             for button in buttons:
                 minDiff = abs(mx - button[0])
                 maxDiff = abs(my - button[1])
@@ -3707,12 +3741,20 @@ class CcpnGLWidget(QOpenGLWidget):
         self.stripIDString.drawTextArrayVBO(enableVBO=True)
 
         if self.AXISLOCKEDBUTTON:
+            if self._useFixedAspect:
+                # self._lockStringTrue.setStringOffset((self.axisL, self.axisB))
+                self._useFixedStringTrue.drawTextArrayVBO(enableVBO=True)
+            else:
+                # self._lockStringFalse.setStringOffset((self.axisL, self.axisB))
+                self._useFixedStringFalse.drawTextArrayVBO(enableVBO=True)
+
             if self._axisLocked:
                 # self._lockStringTrue.setStringOffset((self.axisL, self.axisB))
                 self._lockStringTrue.drawTextArrayVBO(enableVBO=True)
             else:
                 # self._lockStringFalse.setStringOffset((self.axisL, self.axisB))
                 self._lockStringFalse.drawTextArrayVBO(enableVBO=True)
+
 
     def _rescaleRegions(self):
         self._externalRegions._rescale()
@@ -3910,6 +3952,15 @@ class CcpnGLWidget(QOpenGLWidget):
     @axisLocked.setter
     def axisLocked(self, axisLocked):
         self._axisLocked = axisLocked
+        self._rescaleAllAxes()
+
+    @property
+    def fixedAspect(self):
+        return self._useFixedAspect
+
+    @fixedAspect.setter
+    def fixedAspect(self, useFixedAspect):
+        self._useFixedAspect = useFixedAspect
         self._rescaleAllAxes()
 
     @property
@@ -5238,7 +5289,8 @@ class CcpnGLWidget(QOpenGLWidget):
             return
 
         if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.spectrumDisplay:
-            self._axisLocked = aDict[GLNotifier.GLVALUES]
+            self._axisLocked = aDict[GLNotifier.GLVALUES][0]
+            self._useFixedAspect = aDict[GLNotifier.GLVALUES][1]
 
             if self._axisLocked:
 
@@ -5267,16 +5319,21 @@ class CcpnGLWidget(QOpenGLWidget):
         if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.spectrumDisplay:
 
             # read values from dataDict and set units
-            if aDict[GLNotifier.GLVALUES]:
-                self._xUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISXUNITS]
-                self._yUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISYUNITS]
-                self._axisLocked = aDict[GLNotifier.GLVALUES][GLDefs.AXISLOCKASPECTRATIO]
+            if aDict[GLNotifier.GLVALUES]:      # and aDict[GLNotifier.GLVALUES][GLDefs.AXISLOCKASPECTRATIO]:
 
-                aDict = {GLNotifier.GLSOURCE         : None,
-                         GLNotifier.GLSPECTRUMDISPLAY: self.spectrumDisplay,
-                         GLNotifier.GLVALUES         : self._axisLocked
-                         }
-                self._glAxisLockChanged(aDict)
+                if self._axisLocked != aDict[GLNotifier.GLVALUES][GLDefs.AXISLOCKASPECTRATIO] or \
+                        self._useFixedAspect != aDict[GLNotifier.GLVALUES][GLDefs.AXISUSEFIXEDASPECTRATIO]:
+
+                    self._xUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISXUNITS]
+                    self._yUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISYUNITS]
+                    self._axisLocked = aDict[GLNotifier.GLVALUES][GLDefs.AXISLOCKASPECTRATIO]
+                    self._useFixedAspect = aDict[GLNotifier.GLVALUES][GLDefs.AXISUSEFIXEDASPECTRATIO]
+
+                    aDict = {GLNotifier.GLSOURCE         : None,
+                             GLNotifier.GLSPECTRUMDISPLAY: self.spectrumDisplay,
+                             GLNotifier.GLVALUES         : (self._axisLocked, self._useFixedAspect)
+                             }
+                    self._glAxisLockChanged(aDict)
 
     def setAxisPosition(self, axisCode, position, update=True):
         # if not self.glReady: return

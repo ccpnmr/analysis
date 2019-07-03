@@ -170,11 +170,11 @@ class GLNotifier(QtWidgets.QWidget):
                  }
         self.glYAxisChanged.emit(aDict)
 
-    def _emitAxisLockChanged(self, source=None, strip=None, lock=False):
+    def _emitAxisLockChanged(self, source=None, strip=None, lockValues=None):
         aDict = {GLNotifier.GLSOURCE         : source,
                  GLNotifier.GLSTRIP          : strip,
                  GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay,
-                 GLNotifier.GLVALUES         : lock
+                 GLNotifier.GLVALUES         : lockValues,
                  }
         self.glAxisLockChanged.emit(aDict)
 

@@ -142,7 +142,7 @@ class SpectrumDisplaySettings(Widget):
         row += 1
         self.useFixedAspect = Label(parent, text="Use Fixed Aspect Ratio", grid=(row, 0))
         self.useFixedAspectCheckBox = CheckBox(parent, grid=(row, 1), checked=useFixedAspectRatio, objectName='SDS_useFixedAspect')
-        self.useFixedAspectCheckBox.clicked.connect(self._settingsChanged)
+        self.useFixedAspectCheckBox.clicked.connect(self._settingsUseFixedChanged)
         # self.useFixedAspectCheckBox.setEnabled(lockAspectRatio)
 
         if not self._spectrumDisplay.is1D:
@@ -222,6 +222,18 @@ class SpectrumDisplaySettings(Widget):
                 SYMBOLSIZE             : int(self.symbolSizePixelData.text()),
                 SYMBOLTHICKNESS        : int(self.symbolThicknessData.text())
                 }
+
+    def _settingsUseFixedChanged(self):
+        """If useFixed enabled and lock is disabled then enable lock
+        """
+        # aL = self.lockAspectCheckBox.isChecked()
+        # uFA = self.useFixedAspectCheckBox.isChecked()
+        #
+        # # enable lockAspect
+        # if uFA and not aL:
+        #     self.lockAspectCheckBox.setChecked(True)
+
+        self._settingsChanged()
 
     @pyqtSlot()
     def _settingsChanged(self):

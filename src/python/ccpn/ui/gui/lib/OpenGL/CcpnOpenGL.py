@@ -1900,6 +1900,10 @@ class CcpnGLWidget(QOpenGLWidget):
         """
         self._useFixedAspect = not self._useFixedAspect
 
+        # turn on axis locking if enabling fixedAspect
+        # if self._useFixedAspect and not self._axisLocked:
+        #     self._axisLocked = True
+
         # create a dict and event to update this strip first
         aDict = {GLNotifier.GLSOURCE : None,
                  GLNotifier.GLSPECTRUMDISPLAY : self.spectrumDisplay,
@@ -5329,17 +5333,18 @@ class CcpnGLWidget(QOpenGLWidget):
             # read values from dataDict and set units
             if aDict[GLNotifier.GLVALUES]:      # and aDict[GLNotifier.GLVALUES][GLDefs.AXISLOCKASPECTRATIO]:
 
-                if self._axisLocked != aDict[GLNotifier.GLVALUES][GLDefs.AXISLOCKASPECTRATIO] or \
-                        self._useFixedAspect != aDict[GLNotifier.GLVALUES][GLDefs.AXISUSEFIXEDASPECTRATIO]:
+                aL = aDict[GLNotifier.GLVALUES][GLDefs.AXISLOCKASPECTRATIO]
+                uFA = aDict[GLNotifier.GLVALUES][GLDefs.AXISUSEFIXEDASPECTRATIO]
+                if self._axisLocked != aL or self._useFixedAspect != uFA:
 
                     self._xUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISXUNITS]
                     self._yUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISYUNITS]
-                    self._axisLocked = aDict[GLNotifier.GLVALUES][GLDefs.AXISLOCKASPECTRATIO]
-                    self._useFixedAspect = aDict[GLNotifier.GLVALUES][GLDefs.AXISUSEFIXEDASPECTRATIO]
+                    self._axisLocked = aL
+                    self._useFixedAspect = uFA
 
                     aDict = {GLNotifier.GLSOURCE         : None,
                              GLNotifier.GLSPECTRUMDISPLAY: self.spectrumDisplay,
-                             GLNotifier.GLVALUES         : (self._axisLocked, self._useFixedAspect)
+                             GLNotifier.GLVALUES         : (aL, uFA)
                              }
                     self._glAxisLockChanged(aDict)
 

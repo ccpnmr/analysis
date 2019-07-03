@@ -311,7 +311,7 @@ class PlaneToolbar(ToolBar):
             self.prevPlaneButton.setFixedHeight(19)
             planeLabel = DoubleSpinbox(self, showButtons=False, objectName="PlaneToolbar_planeLabel" + str(i),
                                        )
-            planeLabel.setToolTip('axisCode: %s' % str(strip.axisCodes[i+2]))
+            planeLabel.setToolTip(str(strip.axisCodes[i+2]))
 
             # planeLabel.setFixedHeight(19)
 

@@ -140,7 +140,7 @@ class SpectrumDisplaySettings(Widget):
         self.lockAspectCheckBox.clicked.connect(self._settingsChanged)
 
         row += 1
-        self.useFixedAspect = Label(parent, text="Use Fixed Aspect Ratio", grid=(row, 0))
+        self.useFixedAspect = Label(parent, text="     - and Fixed Aspect Ratio", grid=(row, 0))
         self.useFixedAspectCheckBox = CheckBox(parent, grid=(row, 1), checked=useFixedAspectRatio, objectName='SDS_useFixedAspect')
         self.useFixedAspectCheckBox.clicked.connect(self._settingsUseFixedChanged)
         # self.useFixedAspectCheckBox.setEnabled(lockAspectRatio)

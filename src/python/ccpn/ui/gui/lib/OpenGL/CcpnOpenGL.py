@@ -316,8 +316,9 @@ class CcpnGLWidget(QOpenGLWidget):
         self.gridList = []
         self._gridVisible = self._preferences.showGrid
         self._crosshairVisible = self._preferences.showCrosshair
-        # self._doubleCrosshairVisible = self._preferences.showDoubleCrosshair
+
         self.diagonalGLList = None
+        self._updateAxes = True
 
         self._axesVisible = True
         self._axisLocked = False
@@ -837,7 +838,9 @@ class CcpnGLWidget(QOpenGLWidget):
     def resizeGL(self, w, h):
         # must be set here to catch the change of screen
         self.refreshDevicePixelRatio()
+        self._resizeGL(w, h)
 
+    def _resizeGL(self, w, h):
         self.w = w
         self.h = h
 
@@ -854,31 +857,16 @@ class CcpnGLWidget(QOpenGLWidget):
                 # strips are arranged in a column
                 self._scaleToXAxis(rescale=False)
 
-        #     ax0 = self._getValidAspectRatio(self._axisCodes[0])
-        #     ax1 = self._getValidAspectRatio(self._axisCodes[1])
-        #
-        #     if (self.h / self.w) > 1:
-        #         mby = 0.5 * (self.axisT + self.axisB)
-        #
-        #         ratio = (self.h / self.w) * 0.5 * abs(self.axisL - self.axisR) * ax1 / ax0
-        #         self.axisB = mby + ratio * self.sign(self.axisB - mby)
-        #         self.axisT = mby - ratio * self.sign(mby - self.axisT)
-        #     else:
-        #         mbx = 0.5 * (self.axisR + self.axisL)
-        #
-        #         ratio = (self.w / self.h) * 0.5 * abs(self.axisT - self.axisB) * ax0 / ax1
-        #         self.axisL = mbx + ratio * self.sign(self.axisL - mbx)
-        #         self.axisR = mbx - ratio * self.sign(mbx - self.axisR)
-        #
-
         self.rescale()
 
         # put stuff in here that will change on a resize
-        for li in self.gridList:
-            li.renderMode = GLRENDERMODE_REBUILD
+        self._updateAxes = True
+        for gr in self.gridList:
+            gr.renderMode = GLRENDERMODE_REBUILD
         self._GLPeaks.rescale()
         self._GLMultiplets.rescale()
 
+        self._clearAndUpdate(clearKeys=True)
         self.update()
 
     def viewRange(self):
@@ -1118,6 +1106,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.rescale(rescaleStaticHTraces=False)
 
         # spawn rebuild event for the grid
+        self._updateAxes = True
         if self.gridList:
             for gr in self.gridList:
                 gr.renderMode = GLRENDERMODE_REBUILD
@@ -1147,6 +1136,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.rescale(rescaleStaticVTraces=False)
 
         # spawn rebuild event for the grid
+        self._updateAxes = True
         if self.gridList:
             for gr in self.gridList:
                 gr.renderMode = GLRENDERMODE_REBUILD
@@ -1216,8 +1206,9 @@ class CcpnGLWidget(QOpenGLWidget):
         self.rescale(rescaleStaticHTraces=True, rescaleStaticVTraces=True)
 
         # spawn rebuild event for the grid
-        for li in self.gridList:
-            li.renderMode = GLRENDERMODE_REBUILD
+        self._updateAxes = True
+        for gr in self.gridList:
+            gr.renderMode = GLRENDERMODE_REBUILD
 
         # if self._axisLocked:
         # ratios have changed so rescale the peak/multiplet symbols
@@ -3048,6 +3039,11 @@ class CcpnGLWidget(QOpenGLWidget):
         """Build the grids for the mainGrid and the bottom/right axes
         """
 
+        # only call if the axes have changed
+        if not self._updateAxes:
+            return
+        self._updateAxes = False
+
         # determine whether the isotopeCodes of the first two visible axes are matching
         self._matchingIsotopeCodes = False
 
@@ -3069,7 +3065,7 @@ class CcpnGLWidget(QOpenGLWidget):
                         break
 
         # build the axes
-        self.axisLabelling, self.labelsChanged = self._buildAxes(self.gridList[0], axisList=[0, 1],
+        self.axisLabelling, self.axesChanged = self._buildAxes(self.gridList[0], axisList=[0, 1],
                                                                  scaleGrid=[1, 0],
                                                                  r=self.foreground[0],
                                                                  g=self.foreground[1],
@@ -3078,27 +3074,28 @@ class CcpnGLWidget(QOpenGLWidget):
                                                                  _includeDiagonal=self._matchingIsotopeCodes,
                                                                  _diagonalList=self.diagonalGLList)
 
-        if self.highlighted:
-            self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1, 0], r=self.highlightColour[0],
-                            g=self.highlightColour[1],
-                            b=self.highlightColour[2], transparency=32.0)
-            self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1, 0], r=self.highlightColour[0],
-                            g=self.highlightColour[1],
-                            b=self.highlightColour[2], transparency=32.0)
-        else:
-            self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1, 0], r=self.foreground[0],
-                            g=self.foreground[1],
-                            b=self.foreground[2], transparency=32.0)
-            self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1, 0], r=self.foreground[0],
-                            g=self.foreground[1],
-                            b=self.foreground[2], transparency=32.0)
+        if self.axesChanged:
+            if self.highlighted:
+                self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1, 0], r=self.highlightColour[0],
+                                g=self.highlightColour[1],
+                                b=self.highlightColour[2], transparency=32.0)
+                self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1, 0], r=self.highlightColour[0],
+                                g=self.highlightColour[1],
+                                b=self.highlightColour[2], transparency=32.0)
+            else:
+                self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1, 0], r=self.foreground[0],
+                                g=self.foreground[1],
+                                b=self.foreground[2], transparency=32.0)
+                self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1, 0], r=self.foreground[0],
+                                g=self.foreground[1],
+                                b=self.foreground[2], transparency=32.0)
 
-        # buffer the lists to VBOs
-        for gr in self.gridList:
-            gr.defineIndexVBO(enableVBO=True)
+            # buffer the lists to VBOs
+            for gr in self.gridList:
+                gr.defineIndexVBO(enableVBO=True)
 
-        # buffer the diagonal GL line
-        self.diagonalGLList.defineIndexVBO(enableVBO=True)
+            # buffer the diagonal GL line
+            self.diagonalGLList.defineIndexVBO(enableVBO=True)
 
     def drawGrid(self):
         # set to the mainView and draw the grid
@@ -3165,7 +3162,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def buildAxisLabels(self, refresh=False):
         # build axes labelling
-        if refresh or self.labelsChanged:
+        if refresh or self.axesChanged:
 
             self._axisXLabelling = []
             self._axisScaleLabelling = []
@@ -3804,8 +3801,8 @@ class CcpnGLWidget(QOpenGLWidget):
         """
         self._drawRightAxis = rightAxisVisible
         self._drawBottomAxis = bottomAxisVisible
-        self.rescale()
-        self.update()
+
+        self._resizeGL(self.width(), self.height())
 
     @property
     def axesVisible(self):
@@ -4883,6 +4880,7 @@ class CcpnGLWidget(QOpenGLWidget):
         if current:
             self.highlighted = True
 
+            self._updateAxes = True
             for gr in self.gridList:
                 gr.renderMode = GLRENDERMODE_REBUILD
             # self.buildGrid()
@@ -4898,6 +4896,7 @@ class CcpnGLWidget(QOpenGLWidget):
         else:
             self.highlighted = False
 
+            self._updateAxes = True
             for gr in self.gridList:
                 gr.renderMode = GLRENDERMODE_REBUILD
             # self.buildGrid()
@@ -4929,7 +4928,7 @@ class CcpnGLWidget(QOpenGLWidget):
             return (val - x0) / (x1 - x0)
 
         labelling = {'0': [], '1': []}
-        labelsChanged = False
+        axesChanged = False
 
         # check if the width is too small to draw too many grid levels
         boundX = (self.w - self.AXIS_MARGINRIGHT) if self._drawRightAxis else self.w
@@ -5044,7 +5043,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 br = np.array([maxX, maxY])
 
                 gridGLList.renderMode = GLRENDERMODE_DRAW
-                labelsChanged = True
+                axesChanged = True
 
                 gridGLList.clearArrays()
 
@@ -5198,7 +5197,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 #             # remove the item
                 #             labelling['1'].remove(ll)
 
-        return labelling, labelsChanged
+        return labelling, axesChanged
 
     def _widthsChangedEnough(self, r1, r2, tol=1e-5):
         # r1 = sorted(r1)

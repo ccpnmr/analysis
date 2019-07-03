@@ -656,16 +656,23 @@ class GuiSpectrumDisplay(CcpnModule):
         """Move a strip within a spectrumDisplay by dragging the strip label to another strip
         """
         if moveStrip.spectrumDisplay == self:
+            self.stripFrame.blockSignals(True)
+            self.stripFrame.setUpdatesEnabled(False)
+
             strips = self.orderedStrips
             stripInd = strips.index(dropStrip)
 
             if stripInd != strips.index(moveStrip):
                 moveStrip.moveTo(stripInd)
 
+            self.stripFrame.blockSignals(False)
+            self.stripFrame.setUpdatesEnabled(True)
+
     def _handlePeakList(self, peakList):
-        "See if peaklist can be copied"
+        """See if peaklist can be copied
+        """
         spectrum = peakList.spectrum
-        #TODO:GEERTEN: Ask rasmus how to match axis codes
+
         if spectrum.dimensionCount != self.strips[0].spectra[0].dimensionCount or \
                 not True:  # peakList.spectrum.axisCodes match
             showWarning('Dropped PeakList "%s"' % peakList.pid, 'Cannot copy: Axes do not match')

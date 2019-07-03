@@ -1548,7 +1548,7 @@ class GuiStrip(Frame):
                 layout.addWidget(widgStrip, m, 0)
 
         # rebuild the axes for strips
-        self.spectrumDisplay.showAxes(stretchValue=True, widths=False)
+        spectrumDisplay.showAxes(stretchValue=True, widths=False)
 
     def navigateToPosition(self, positions: typing.List[float],
                            axisCodes: typing.List[str] = None,

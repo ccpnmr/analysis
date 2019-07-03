@@ -842,7 +842,6 @@ class CcpnGLWidget(QOpenGLWidget):
         self.h = h
 
         if self._axisLocked:
-            print('>>>change resizeGL', self.strip)
 
             # check which is the primary axis and update the opposite axis - similar to wheelEvent
             if self.spectrumDisplay.stripArrangement == 'Y':

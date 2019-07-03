@@ -1782,6 +1782,16 @@ class CcpnGLWidget(QOpenGLWidget):
         self._useFixedStringTrue = GLString(text=GLDefs.USEFIXEDASPECTSTRING, font=self.globalGL.glSmallFont, x=0, y=0,
                                         colour=self.highlightColour, GLContext=self)
 
+        cornerButtons = ((self._lockStringTrue, self._toggleAxisLocked),
+                         (self._useFixedStringTrue, self._toggleUseFixedAspect))
+
+        self._buttonCentres = ()
+        for button, callBack in cornerButtons:
+            w = (button.width / 2)
+            h = (button.height / 2)
+            # define a slightly wider, lower box
+            self._buttonCentres += ((w + 2, h - 2, w, h - 3, callBack),)
+
         self.stripIDString = GLString(text='', font=self.globalGL.glSmallFont, x=0, y=0, GLContext=self, obj=None)
 
         # This is the correct blend function to ignore stray surface blending functions
@@ -1902,14 +1912,13 @@ class CcpnGLWidget(QOpenGLWidget):
         """Check if the mouse has been pressed in the lock button
         """
         if self.AXISLOCKEDBUTTON:
-            buttons = ((14, 6, 14, 6, self._toggleAxisLocked),
-                       (44, 6, 16, 6, self._toggleUseFixedAspect))
-            for button in buttons:
+            for button in self._buttonCentres:
                 minDiff = abs(mx - button[0])
                 maxDiff = abs(my - button[1])
 
                 if (minDiff < button[2]) and (maxDiff < button[3]):
                     button[4]()
+                    break
 
     def mousePressInLabel(self, mx, my, ty):
         """Check if the mouse has been pressed in the stripIDlabel
@@ -3754,7 +3763,6 @@ class CcpnGLWidget(QOpenGLWidget):
             else:
                 # self._lockStringFalse.setStringOffset((self.axisL, self.axisB))
                 self._lockStringFalse.drawTextArrayVBO(enableVBO=True)
-
 
     def _rescaleRegions(self):
         self._externalRegions._rescale()

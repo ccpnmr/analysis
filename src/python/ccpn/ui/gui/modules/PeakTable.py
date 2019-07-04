@@ -248,7 +248,7 @@ class PeakListTableWidget(GuiTable):
         """
 
         columnDefs = []
-        hiddenDefs = []
+
         # Serial column
         columnDefs.append(('#', 'serial', 'Peak serial number', None))
         columnDefs.append(('Pid', lambda pk: pk.pid, 'Pid of the Peak', None))

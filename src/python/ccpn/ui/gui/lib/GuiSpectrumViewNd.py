@@ -1246,6 +1246,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 # pass in a smaller valuePerPoint - if there are differences in the z-resolution, otherwise just use local valuePerPoint
                 minZWidth = 3 * valuePerPoint
                 zWidth = (planeCount+2) * minimumValuePerPoint[dim-2] if minimumValuePerPoint else (planeCount+2) * valuePerPoint
+
+                print('>>>zWidths', minZWidth, zWidth, spectrum)
                 zWidth = max(zWidth, minZWidth)
 
                 zRegionValue = (zPosition + 0.5 * zWidth, zPosition - 0.5 * zWidth)  # Note + and - (axis backwards)

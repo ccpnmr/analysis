@@ -1211,7 +1211,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                             planeData = spectrum.getPlaneData(position, xDim=xDim + 1, yDim=yDim + 1)
                             yield position, planeData
 
-    def _getVisiblePlaneList(self, firstVisible):
+    def _getVisiblePlaneList(self, firstVisible=None, minimumValuePerPoint=None):
 
         # NBNB TODO FIXME - Wayne, please check through the modified code
 
@@ -1242,7 +1242,13 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
                 # now get the z bounds for this spectrum
                 valuePerPoint, zTotalPointCount, minAliasedFrequency, maxAliasedFrequency, zDataDim = self._getSpectrumViewParams(dim)
-                zRegionValue = (zPosition + 0.5 * (planeCount+2) * valuePerPoint, zPosition - 0.5 * (planeCount+2) * valuePerPoint)  # Note + and - (axis backwards)
+
+                # pass in a smaller valuePerPoint - if there are differences in the z-resolution, otherwise just use local valuePerPoint
+                minZWidth = 3 * valuePerPoint
+                zWidth = (planeCount+2) * minimumValuePerPoint[dim-2] if minimumValuePerPoint else (planeCount+2) * valuePerPoint
+                zWidth = max(zWidth, minZWidth)
+
+                zRegionValue = (zPosition + 0.5 * zWidth, zPosition - 0.5 * zWidth)  # Note + and - (axis backwards)
 
                 if not (minAliasedFrequency <= zPosition <= maxAliasedFrequency):
                     return
@@ -1265,6 +1271,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                         zPoint1 += 1
 
                 if (zPoint1 - zPoint0) >= zTotalPointCount:
+                    # set to the full range
                     zPoint0 = 0
                     zPoint1 = zTotalPointCount
                 else:

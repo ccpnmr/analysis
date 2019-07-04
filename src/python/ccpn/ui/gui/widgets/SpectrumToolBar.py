@@ -221,7 +221,9 @@ class SpectrumToolBar(ToolBar):
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
         GLSignals = GLNotifier(parent=self)
-        GLSignals.emitPaintEvent()
+
+        # GLSignals.emitPaintEvent()
+        GLSignals._emitAxisUnitsChanged(source=None, strip=self.widget.strips[0], dataDict={})
 
     def _getSpectrumViewFromButton(self, button):
         spvs = []

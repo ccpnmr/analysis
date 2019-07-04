@@ -5127,11 +5127,13 @@ class CcpnGLWidget(QOpenGLWidget):
 
                     for ax in axisList:  #   range(0,2):  ## Draw grid for both axes
 
-                        # skip grid lines for point grids - not sure this is working
-                        if d[0] < 0.1 and ax == 0 and self.XMode == self._intFormat:
-                            continue
-                        if d[1] < 0.1 and ax == 1 and self.YMode == self._intFormat:
-                            continue
+                        # # skip grid lines for point grids - not sure this is working
+                        # if d[0] <= 0.1 and ax == 0 and self.XMode == self._intFormat:
+                        #     print('>>>', d[0], d[1])
+                        #     continue
+                        # if d[1] <= 0.1 and ax == 1 and self.YMode == self._intFormat:
+                        #     print('>>>', d[0], d[1])
+                        #     continue
 
                         # # ignore narrow grids
                         # if self.w * (scaleOrder+1) < 250 or self.h * (scaleOrder+1) < 250:
@@ -5154,30 +5156,37 @@ class CcpnGLWidget(QOpenGLWidget):
                                 d[0] = self._round_sig(d[0], sig=4)
                                 d[1] = self._round_sig(d[1], sig=4)
 
-                                if '%.5f' % p1[0] == '%.5f' % p2[0]:  # check whether a vertical line - x axis
-
-                                    # xLabel = str(int(p1[0])) if d[0] >=1 else self.XMode % p1[0]
-                                    labelling[str(ax)].append((i, ax, valueToRatio(p1[0], axisLimitL, axisLimitR),
-                                                               p1[0], d[0]))
+                                if ax == 0:
+                                    includeGrid = not (self.XMode == self._intFormat and d[0] < 1 and abs(p1[0]-int(p1[0])) > d[0]/2.0)
                                 else:
-                                    # num = int(p1[1]) if d[1] >=1 else self.XMode % p1[1]
-                                    labelling[str(ax)].append((i, ax, valueToRatio(p1[1], axisLimitB, axisLimitT),
-                                                               p1[1], d[1]))
+                                    includeGrid = not (self.YMode == self._intFormat and d[1] < 1 and abs(p1[1]-int(p1[1])) > d[1]/2.0)
+                                # includeGrid = True
 
-                            # append the new points to the end of nparray, ignoring narrow grids
-                            if scaleBounds[ax] * (scaleOrder + 1) > 225:
-                                indexList += (index, index + 1)
-                                vertexList += (valueToRatio(p1[0], axisLimitL, axisLimitR),
-                                               valueToRatio(p1[1], axisLimitB, axisLimitT),
-                                               valueToRatio(p2[0], axisLimitL, axisLimitR),
-                                               valueToRatio(p2[1], axisLimitB, axisLimitT))
+                                if includeGrid:
+                                    if '%.5f' % p1[0] == '%.5f' % p2[0]:  # check whether a vertical line - x axis
 
-                                alpha = min([1.0, c / transparency])
-                                # gridGLList.colors = np.append(gridGLList.colors, (r, g, b, alpha, r, g, b, alpha))
-                                colorList += (r, g, b, alpha, r, g, b, alpha)
+                                        # xLabel = str(int(p1[0])) if d[0] >=1 else self.XMode % p1[0]
+                                        labelling[str(ax)].append((i, ax, valueToRatio(p1[0], axisLimitL, axisLimitR),
+                                                                   p1[0], d[0]))
+                                    else:
+                                        # num = int(p1[1]) if d[1] >=1 else self.XMode % p1[1]
+                                        labelling[str(ax)].append((i, ax, valueToRatio(p1[1], axisLimitB, axisLimitT),
+                                                                   p1[1], d[1]))
 
-                                gridGLList.numVertices += 2
-                                index += 2
+                                    # append the new points to the end of nparray, ignoring narrow grids
+                                    if scaleBounds[ax] * (scaleOrder + 1) > 225:
+                                        indexList += (index, index + 1)
+                                        vertexList += (valueToRatio(p1[0], axisLimitL, axisLimitR),
+                                                       valueToRatio(p1[1], axisLimitB, axisLimitT),
+                                                       valueToRatio(p2[0], axisLimitL, axisLimitR),
+                                                       valueToRatio(p2[1], axisLimitB, axisLimitT))
+
+                                        alpha = min([1.0, c / transparency])
+                                        # gridGLList.colors = np.append(gridGLList.colors, (r, g, b, alpha, r, g, b, alpha))
+                                        colorList += (r, g, b, alpha, r, g, b, alpha)
+
+                                        gridGLList.numVertices += 2
+                                        index += 2
 
                 # draw the diagonal x=y if required - need to determine the origin
                 # OR draw on the spectrum bounding box
@@ -5333,12 +5342,15 @@ class CcpnGLWidget(QOpenGLWidget):
             # read values from dataDict and set units
             if aDict[GLNotifier.GLVALUES]:      # and aDict[GLNotifier.GLVALUES][GLDefs.AXISLOCKASPECTRATIO]:
 
+                self._xUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISXUNITS]
+                self._yUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISYUNITS]
+
                 aL = aDict[GLNotifier.GLVALUES][GLDefs.AXISLOCKASPECTRATIO]
                 uFA = aDict[GLNotifier.GLVALUES][GLDefs.AXISUSEFIXEDASPECTRATIO]
                 if self._axisLocked != aL or self._useFixedAspect != uFA:
 
-                    self._xUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISXUNITS]
-                    self._yUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISYUNITS]
+                    # self._xUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISXUNITS]
+                    # self._yUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISYUNITS]
                     self._axisLocked = aL
                     self._useFixedAspect = uFA
 
@@ -5347,6 +5359,13 @@ class CcpnGLWidget(QOpenGLWidget):
                              GLNotifier.GLVALUES         : (aL, uFA)
                              }
                     self._glAxisLockChanged(aDict)
+
+            # spawn rebuild event for the grid
+            self._updateAxes = True
+            if self.gridList:
+                for gr in self.gridList:
+                    gr.renderMode = GLRENDERMODE_REBUILD
+            self.update()
 
     def setAxisPosition(self, axisCode, position, update=True):
         # if not self.glReady: return

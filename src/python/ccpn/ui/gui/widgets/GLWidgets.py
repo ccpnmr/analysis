@@ -30,7 +30,7 @@ import numpy as np
 from PyQt5 import QtWidgets
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget, GLVertexArray, GLRENDERMODE_DRAW, \
     GLRENDERMODE_REBUILD, GLRENDERMODE_RESCALE
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import YAXISUNITS1D
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import YAXISUNITS1D, SPECTRUM_VALUEPERPOINT
 import ccpn.util.Phasing as Phasing
 
 
@@ -187,8 +187,18 @@ class GuiNdWidget(CcpnGLWidget):
         self._firstVisible = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[
             0].isDeleted else None
         self.visiblePlaneList = {}
+
+        minList = [self._spectrumSettings[sp][SPECTRUM_VALUEPERPOINT] for sp in self._ordering if sp in self._spectrumSettings]
+        minimumValuePerPoint = None
+        for val in minList:
+            if minimumValuePerPoint:
+                minimumValuePerPoint = [min(ii, jj) for ii, jj in zip(minimumValuePerPoint, val)]
+            else:
+                minimumValuePerPoint = val
+
         for visibleSpecView in self._ordering:
-            self.visiblePlaneList[visibleSpecView] = visibleSpecView._getVisiblePlaneList(self._firstVisible)
+            self.visiblePlaneList[visibleSpecView] = visibleSpecView._getVisiblePlaneList(firstVisible=self._firstVisible,
+                                                                                          minimumValuePerPoint=minimumValuePerPoint)
 
         # update the labelling lists
         self._GLPeaks.setListViews(self._ordering)

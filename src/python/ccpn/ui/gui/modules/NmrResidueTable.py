@@ -274,6 +274,7 @@ class NmrResidueTable(GuiTable):
             # ('NmrChain',   lambda nmrResidue: nmrResidue.nmrChain.id, 'NmrChain id', None),
             ('Pid', lambda nmrResidue: nmrResidue.pid, 'Pid of NmrResidue', None),
             ('_object', lambda nmrResidue: nmrResidue, 'Object', None),
+            ('NmrChain', lambda nmrResidue: nmrResidue.nmrChain.id, 'NmrChain containing the nmrResidue', None),        # just add the nmrChain for clarity
             ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None),
             ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None),
             ('NmrAtoms', lambda nmrResidue: NmrResidueTable._getNmrAtomNames(nmrResidue), 'NmrAtoms in NmrResidue', None),
@@ -301,7 +302,7 @@ class NmrResidueTable(GuiTable):
         self._setWidgetHeight(35)
 
         # initialise the currently attached dataFrame
-        self._hiddenColumns = ['Pid']
+        self._hiddenColumns = ['Pid', 'NmrChain']
         self.dataFrameObject = None
 
         # initialise the table

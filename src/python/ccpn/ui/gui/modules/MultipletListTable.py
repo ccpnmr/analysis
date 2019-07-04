@@ -203,7 +203,7 @@ class MultipletListTableWidget(GuiTable):
                              grid=(row, gridHPos + 1), gridSpan=(1, 1))
         self._widgetScrollArea.setFixedHeight(35)  # needed for the correct sizing of the table
 
-        self._hiddenColumns = ['Pid']
+        self._hiddenColumns = ['Pid', 'Spectrum', 'MultipletList', 'Id']
         self.dataFrameObject = None
         selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
         actionCallback = self._actionCallback if actionCallback is None else actionCallback
@@ -263,6 +263,10 @@ class MultipletListTableWidget(GuiTable):
         columnDefs.append(('#', 'serial', 'Multiplet serial number', None))
         columnDefs.append(('Pid', lambda ml: ml.pid, 'Pid of the Multiplet', None))
         columnDefs.append(('_object', lambda ml: ml, 'Object', None))
+
+        columnDefs.append(('Spectrum', lambda multiplet: multiplet.multipletList.spectrum.id, 'Spectrum containing the Multiplet', None))
+        columnDefs.append(('MultipletList', lambda multiplet: multiplet.multipletList.serial, 'MultipletList containing the Multiplet', None))
+        columnDefs.append(('Id', lambda multiplet: multiplet.serial, 'Multiplet serial', None))
 
         # # Assignment column
         # for i in range(multipletList.spectrum.dimensionCount):

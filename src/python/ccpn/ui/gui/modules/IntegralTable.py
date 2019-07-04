@@ -152,6 +152,11 @@ class IntegralTable(GuiTable):
             ('#', lambda integral: integral.serial, '', None),
             ('Pid', lambda integral: integral.pid, 'Pid of integral', None),
             ('_object', lambda integral: integral, 'Object', None),
+
+            ('Spectrum', lambda integral: integral.integralList.spectrum.id, 'Spectrum containing the Integral', None),
+            ('IntegralList', lambda integral: integral.integralList.serial, 'IntegralList containing the Integral', None),
+            ('Id', lambda integral: integral.serial, 'Integral serial', None),
+
             ('Value', lambda integral: integral.value, '', None),
             ('Lower Limit', lambda integral: IntegralTable._getLowerLimit(integral), '', None),
             ('Higher Limit', lambda integral: IntegralTable._getHigherLimit(integral), '', None),
@@ -179,7 +184,7 @@ class IntegralTable(GuiTable):
         self._widgetScrollArea.setFixedHeight(35)
 
         # initialise the currently attached dataFrame
-        self._hiddenColumns = ['Pid']
+        self._hiddenColumns = ['Pid', 'Spectrum', 'IntegralList', 'Id']
         self.dataFrameObject = None
 
         # initialise the table

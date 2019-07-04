@@ -181,6 +181,7 @@ class ResidueTable(GuiTable):
             ('Index', lambda residue: ResidueTable._nmrIndex(residue), 'Index of Residue in the Chain', None),
             ('Pid', lambda residue: residue.pid, 'Pid of Residue', None),
             ('_object', lambda residue: residue, 'Object', None),
+            ('Chain', lambda residue: residue.chain.id, 'Chain containing the Residue', None),
             ('Sequence', lambda residue: residue.sequenceCode, 'Sequence code of Residue', None),
             ('Type', lambda residue: residue.residueType, 'Residue type', None),
             ('Atoms', lambda residue: ResidueTable._getAtomNames(residue), 'Atoms in Residue', None),
@@ -204,7 +205,7 @@ class ResidueTable(GuiTable):
         self.cWidget.setFixedSize(self.cWidget.sizeHint())
 
         # initialise the currently attached dataFrame
-        self._hiddenColumns = ['Pid']
+        self._hiddenColumns = ['Pid', 'Chain']
         self.dataFrameObject = None
 
         # initialise the table

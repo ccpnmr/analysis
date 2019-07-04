@@ -79,7 +79,7 @@ class MultipletPeakListTableWidget(PeakListTableWidget):
             [peaks.add(peak) for mt in self._selectedMultipletPeakList for peak in mt.peaks]
             peaks = tuple(peaks)
 
-            if peaks and peaks[0].PeakList:
+            if peaks and peaks[0].peakList:
                 self.populateTable(rowObjects=peaks,
                                    columnDefs=self._getTableColumns(peaks[0].peakList),
                                    selectedObjects=self.current.peaks)

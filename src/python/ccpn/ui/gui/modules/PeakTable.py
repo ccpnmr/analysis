@@ -195,7 +195,7 @@ class PeakListTableWidget(GuiTable):
                              grid=(row, gridHPos + 1), gridSpan=(1, 1))
         self._widgetScrollArea.setFixedHeight(35)  # needed for the correct sizing of the table
 
-        self._hiddenColumns = ['Pid']
+        self._hiddenColumns = ['Pid', 'Spectrum', 'PeakList', 'Id']
         self.dataFrameObject = None
         selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
         actionCallback = self._actionCallback if actionCallback is None else actionCallback
@@ -248,17 +248,29 @@ class PeakListTableWidget(GuiTable):
         """
 
         columnDefs = []
-
+        hiddenDefs = []
         # Serial column
         columnDefs.append(('#', 'serial', 'Peak serial number', None))
         columnDefs.append(('Pid', lambda pk: pk.pid, 'Pid of the Peak', None))
         columnDefs.append(('_object', lambda pk: pk, 'Object', None))
+
+        columnDefs.append(('Spectrum', lambda pk: pk.peakList.spectrum.id, 'Spectrum containing the Peak', None))
+        columnDefs.append(('PeakList', lambda pk: pk.peakList.serial, 'PeakList containing the Peak', None))
+        columnDefs.append(('Id', lambda pk: pk.serial, 'Peak serial', None))
 
         # Assignment column
         for i in range(peakList.spectrum.dimensionCount):
             assignTipText = 'NmrAtom assignments of peak in dimension %s' % str(i + 1)
             columnDefs.append(
                     ('Assign F%s' % str(i + 1), lambda pk, dim=i: getPeakAnnotation(pk, dim), assignTipText, None))
+
+        # # Expanded Assignment columns
+        # for i in range(peakList.spectrum.dimensionCount):
+        #     assignTipText = 'NmrAtom assignments of peak in dimension %s' % str(i + 1)
+        #     columnDefs.append(('Assign F%s' % str(i + 1), lambda pk, dim=i: self._getNmrChain(pk, dim), assignTipText, None))
+        #     columnDefs.append(('Assign F%s' % str(i + 1), lambda pk, dim=i: self._getSequenceCode(pk, dim), assignTipText, None))
+        #     columnDefs.append(('Assign F%s' % str(i + 1), lambda pk, dim=i: self._getResidueType(pk, dim), assignTipText, None))
+        #     columnDefs.append(('Assign F%s' % str(i + 1), lambda pk, dim=i: self._getAtomType(pk, dim), assignTipText, None))
 
         # Peak positions column
         for i in range(peakList.spectrum.dimensionCount):
@@ -537,3 +549,44 @@ class PeakListTableWidget(GuiTable):
     def _setPositionUnit(self, value):
         if value in UNITS:
             self.positionsUnit = value
+
+    # @staticmethod
+    # def _getNmrChain(nmrAtom, dim):
+    #     """
+    #     CCPN-INTERNAL: get the nmrChain
+    #     """
+    #     try:
+    #         # nmrAtoms = separator.join([dna.pid.id for dna in peak.dimensionNmrAtoms[dim]])
+    #         return nmrAtom.nmrResidue.nmrChain.id
+    #     except:
+    #         return None
+    #
+    # @staticmethod
+    # def _getSequenceCode(nmrAtom, dim):
+    #     """
+    #     CCPN-INTERNAL: get the sequenceCode
+    #     """
+    #     try:
+    #         return nmrAtom.nmrResidue.sequenceCode
+    #     except:
+    #         return None
+    #
+    # @staticmethod
+    # def _getResidueType(nmrAtom, dim):
+    #     """
+    #     CCPN-INTERNAL: get the residueType
+    #     """
+    #     try:
+    #         return nmrAtom.nmrResidue.residueType
+    #     except:
+    #         return None
+    #
+    # @staticmethod
+    # def _getAtomType(nmrAtom, dim):
+    #     """
+    #     CCPN-INTERNAL: get the atomType
+    #     """
+    #     try:
+    #         return nmrAtom.shortClassName
+    #     except:
+    #         return None

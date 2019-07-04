@@ -1841,7 +1841,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                         colour=self.highlightColour, GLContext=self)
 
         # change the colour of the selected 'Fixed' string
-        self._useFixedStringTrue = GLString(text=GLDefs.USEFIXEDASPECTSTRING, font=self.globalGL.glSmallFont, x=36, y=0,
+        self._useFixedStringTrue = GLString(text=GLDefs.USEFIXEDASPECTSTRING, font=self.globalGL.glSmallFont, x=0, y=0,
                                         colour=self.highlightColour, GLContext=self)
 
         # set the new limits

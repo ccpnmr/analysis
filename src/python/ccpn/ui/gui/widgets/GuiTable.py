@@ -1537,6 +1537,7 @@ GuiTable::item::selected {
         with self._tableBlockSignals('_highLightObjs'):
 
             selectionModel = self.selectionModel()
+            model = self.model()
 
             if selection:
                 uniqObjs = set(selection)
@@ -1551,7 +1552,7 @@ GuiTable::item::selected {
                 #     row = self._dataFrameObject.find(self, str(obj.pid))
                 #
                 #     if row is not None:
-                #         selectionModel.select(self.model().index(row, 0),
+                #         selectionModel.select(model.index(row, 0),
                 #                               selectionModel.Select | selectionModel.Rows)
 
                 rows = [self._dataFrameObject.find(self, str(obj.pid)) for obj in uniqObjs if obj in self._dataFrameObject.objects]
@@ -1560,9 +1561,12 @@ GuiTable::item::selected {
                     rows.sort(key=lambda c: int(c))
 
                     selectionModel.clearSelection()
-                    for row in rows:
-                        rowIndex = self.model().index(row, 0)
-                        self.setCurrentIndex(rowIndex)
+                    rowIndex = model.index(rows[0], 0)
+                    self.setCurrentIndex(rowIndex)
+
+                    for row in rows[1:]:
+                        rowIndex = model.index(row, 0)
+                        selectionModel.select(rowIndex, selectionModel.Select | selectionModel.Rows)
 
                     if scrollToSelection and not self._scrollOverride:
                         self.scrollToSelectedIndex()

@@ -299,15 +299,15 @@ class GuiWindow():
                                 spectrumView.spectrum.newIntegralList()
 
                             # stupid bug! mixing views and lists
-                            validIntegralLists = [il.integralList for il in spectrumView.integralListViews]
+                            validIntegralLists = [ilv.integralList for ilv in spectrumView.integralListViews if ilv.isVisible()]
 
-                            if len(validIntegralLists) > 1:  # make a integralView always visible if there is only one and are creating a new integral
-                                validIntegralLists = [il for il in validIntegralLists if il.isVisible()]
+                            # if len(validIntegralLists) > 1:  # make a integralView always visible if there is only one and are creating a new integral
+                            #     validIntegralLists = [il for il in validIntegralLists if il.isVisible()]
 
-                            if len(validIntegralLists) == 1:
-                                for il in spectrumView.peakListViews:
-                                    if isinstance(il.peakList, IntegralList):
-                                        il.setVisible(True)
+                            # if len(validIntegralLists) == 1:
+                            #     for il in spectrumView.integralListViews:
+                            #         if il in validIntegralLists:
+                            #             il.setVisible(True)
 
                             for integralList in validIntegralLists:
                                 integral = integralList.newIntegral(value=None, limits=[limits, ])

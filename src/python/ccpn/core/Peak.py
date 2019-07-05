@@ -177,6 +177,8 @@ class Peak(AbstractWrapperObject):
             peakDim.value = value[ii]
             peakDim.realValue = None
 
+        # aliasing values may have changed here - check new range for spectrum and update aliasingRange?
+
     ppmPositions = position
 
     # @property

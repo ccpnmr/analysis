@@ -96,6 +96,7 @@ SPECTRUMAXES = 'spectrumAxesOrdering'
 SPECTRUMPREFERREDAXISORDERING = 'spectrumPreferredAxisOrdering'
 SPECTRUMALIASING = 'spectrumAliasing'
 ALIASINGLIMITS = 'aliasingLimits'
+CURRENTALIASINGLIMITS = 'currentAliasingLimits'
 UPDATEALIASINGRANGE = '_updateAliasingRange'
 DISPLAYFOLDEDCONTOURS = 'displayFoldedContours'
 MAXALIASINGRANGE = 3
@@ -1325,6 +1326,43 @@ class Spectrum(AbstractWrapperObject):
                                  (MAXALIASINGRANGE, MAXALIASINGRANGE))
 
         self.setParameter(SPECTRUMALIASING, ALIASINGLIMITS, values)
+
+    @property
+    def currentAliasingRange(self) -> Optional[Tuple[Tuple, ...]]:
+        """Return a tuple of the aliasing range in each dimension, or None of not set
+        """
+        alias = self.getParameter(SPECTRUMALIASING, CURRENTALIASINGLIMITS)
+        if alias is not None:
+            return tuple(tuple(rr) for rr in alias)
+
+        # set default values in the ccpnInternal store
+        alias = ((0, 0),) * self.dimensionCount
+        self.setParameter(SPECTRUMALIASING, CURRENTALIASINGLIMITS, alias)
+        return alias
+
+    @currentAliasingRange.setter
+    def currentAliasingRange(self, values: Tuple[Tuple, ...]):
+        """Set the currentAliasingRange for each of the spectrum dimensions
+        Must be a tuple matching the number of dimension.
+        Each element is a tuple of the form (min, max)
+        where min/max are integer in the range -3 -> +3
+
+            e.g. aliasingRange = ((0, 0), (-1, 1), ...)
+        """
+
+        # error checking that the tuples are correctly defined
+        if len(values) != self.dimensionCount:
+            raise ValueError("Length of %s does not match number of dimensions." % str(values))
+        if not all(isinstance(dimVal, Tuple) and len(dimVal) == 2 for dimVal in values):
+            raise ValueError("Aliasing values must be tuple(min, max).")
+
+        for alias in values:
+            if not (isinstance(alias[0], int) and isinstance(alias[1], int)
+                    and alias[0] >= -MAXALIASINGRANGE and alias[1] <= MAXALIASINGRANGE and alias[0] <= alias[1]):
+                raise ValueError("Aliasing values must be tuple(min >= -%i, max <= %i) of integer." % \
+                                 (MAXALIASINGRANGE, MAXALIASINGRANGE))
+
+        self.setParameter(SPECTRUMALIASING, CURRENTALIASINGLIMITS, values)
 
     # @property
     # def folding(self) -> Tuple:

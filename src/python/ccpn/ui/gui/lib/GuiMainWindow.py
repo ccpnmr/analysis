@@ -667,34 +667,16 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         pluginsMenu = self.getMenuAction('Plugins')
         pluginsMenu.clear()
-
-        # Plugins = getPlugins(pluginPath)        # ejb - original
-        # Plugins = sorted(Plugins, key=lambda p:p.PLUGINNAME)
-        # for Plugin in Plugins:
-        #   self._addPluginSubMenu(Plugin)
-        #
-        # pluginsMenu.addSeparator()
-        # Plugins = getPlugins(self.application.preferences.general.userPluginPath)
-        # Plugins = sorted(Plugins, key=lambda p:p.PLUGINNAME)
-        # for Plugin in Plugins:
-        #   self._addPluginSubMenu(Plugin)
-
-        # Plugins = getPlugins(pluginPath)                      # already a set
-        # Plugins = sorted(Plugins, key=lambda p:p.PLUGINNAME)
-        # # for Plugin in Plugins:
-        # #   self._addPluginSubMenu(Plugin)
-        #
-        # Plugins2 = getPlugins(self.application.preferences.general.userPluginPath)
-        # Plugins2 = sorted(Plugins2, key=lambda p:p.PLUGINNAME)
-        #
-        # Plugins += Plugins2
-
         for Plugin in loadedPlugins:
             self._addPluginSubMenu(Plugin)
-
         pluginsMenu.addSeparator()
         pluginsMenu.addAction(Action(pluginsMenu, text='Reload',
-                                     callback=self._fillPluginsMenu))
+                                     callback=self._reloadPlugins))
+    def _reloadPlugins(self):
+        from ccpn import plugins
+        from importlib import reload
+        reload(plugins)
+        self._fillPluginsMenu()
 
     def startPlugin(self, Plugin):
         plugin = Plugin(application=self.application)

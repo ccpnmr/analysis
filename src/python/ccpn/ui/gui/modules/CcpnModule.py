@@ -568,14 +568,16 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         super().close()
 
     def enterEvent(self, event):
-        if self.mainWindow.application.preferences.general.focusFollowsMouse:
-            self.setFocus()
-            self.label.setModuleHighlight(True)
+        if self.mainWindow:
+            if self.mainWindow.application.preferences.general.focusFollowsMouse:
+                self.setFocus()
+                self.label.setModuleHighlight(True)
         super().enterEvent(event)
 
     def leaveEvent(self, event):
-        if self.mainWindow.application.preferences.general.focusFollowsMouse:
-            self.label.setModuleHighlight(False)
+        if self.mainWindow:
+            if self.mainWindow.application.preferences.general.focusFollowsMouse:
+                self.label.setModuleHighlight(False)
         super().enterEvent(event)
 
     def dragMoveEvent(self, *args):

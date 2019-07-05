@@ -33,6 +33,8 @@ loadedPlugins = []
 
 import pkgutil as _pkgutil
 
+def _loader():
+    for loader, name, isPpkg in _pkgutil.walk_packages(__path__):
+        module = loader.find_module(name).load_module(name)
 
-for loader, name, isPpkg in _pkgutil.walk_packages(__path__):
-    module = loader.find_module(name).load_module(name)
+_loader()

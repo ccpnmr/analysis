@@ -33,7 +33,7 @@ from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
 
 class PythonConsoleModule(CcpnModule):
     """
-    This class implements the module by wrapping a PeakListTable instance
+    Gui module to display the Ipyhton console within the program
     """
 
     includeSettingsWidget = True

@@ -379,7 +379,8 @@ GuiTable::item::selected {
             self.selectionModel().blockSignals(True)
             self.setUpdatesEnabled(False)
             if blanking and self.project:
-                self.project.blankNotification()
+                if self.project:
+                    self.project.blankNotification()
 
         self._tableBlockingLevel += 1
 
@@ -392,7 +393,8 @@ GuiTable::item::selected {
             # unblock all signals on last exit
             if self._tableBlockingLevel == 0:
                 if blanking and self.project:
-                    self.project.unblankNotification()
+                    if self.project:
+                        self.project.unblankNotification()
                 self.setUpdatesEnabled(True)
                 self.selectionModel().blockSignals(False)
                 self.blockSignals(False)
@@ -429,12 +431,13 @@ GuiTable::item::selected {
         """
         with self._tableBlockSignals('_postSort'):
             # keep highlighted objects
-            objs = self.getSelectedObjects()
-            with self._guiTableUpdate(self._dataFrameObject):
-                # context manager performs the necessary operations to keep headers consistent - empty dataFrameObject is handled there
-                pass
+            if self._dataFrameObject:
+                objs = self.getSelectedObjects()
+                with self._guiTableUpdate(self._dataFrameObject):
+                    # context manager performs the necessary operations to keep headers consistent - empty dataFrameObject is handled there
+                    pass
 
-            self._highLightObjs(objs)
+                self._highLightObjs(objs)
 
     def _postDefaultSort(self, *args):
         """Catch the click event on a header and ensure headers remain consistent
@@ -856,8 +859,9 @@ GuiTable::item::selected {
     def enterEvent(self, event):
         try:
             # basic tables may not have preferences defined
-            if self.mainWindow.application.preferences.general.focusFollowsMouse:
-                self.setFocus()
+            if self.mainWindow:
+                if self.mainWindow.application.preferences.general.focusFollowsMouse:
+                    self.setFocus()
         except:
             pass
 
@@ -1167,6 +1171,10 @@ GuiTable::item::selected {
                 # clear the dummy row
                 if dataFrameObject.dataFrame.empty:
                     self.setRowCount(0)
+            elif self._rawData:
+                if sortColumn < self.columnCount():
+                    self.sortByColumn(sortColumn, sortOrder)
+
 
             else:
                 # usually called when clicking on a table header when an empty table
@@ -1344,6 +1352,13 @@ GuiTable::item::selected {
                                hiddenColumns=hiddenColumns,
                                table=table)
 
+    def rawDataToDF(self):
+        try:
+            df = pd.DataFrame(self._rawData)
+            return df
+        except:
+            return pd.DataFrame()
+
     def exportTableDialog(self, exportAll=True):
         """export the contents of the table to a file
         The actual data values are exported, not the visible items which may be rounded due to the table settings
@@ -1352,8 +1367,12 @@ GuiTable::item::selected {
                                     False, export only the visible table
         """
         if not (self._dataFrameObject and self._dataFrameObject.dataFrame is not None):
-            # export the data from here
-            self._exportTableDialog(None)
+            if self._rawData:
+                self._exportTableDialog(self.rawDataToDF())
+                return
+            else:
+                showWarning('Export Table to File', 'Table does not contain a dataFrame')
+                return
 
         else:
             rowList = None
@@ -1448,20 +1467,21 @@ GuiTable::item::selected {
             for iSelect in selection:
                 row = iSelect.row()
                 col = iSelect.column()
-                colName = self.horizontalHeaderItem(col).text()
-                if colName == 'Pid':
+                if self._dataFrameObject:
+                    colName = self.horizontalHeaderItem(col).text()
+                    if colName == 'Pid':
 
-                    if row not in rows:
-                        rows.append(row)
-                        objIndex = model.model().data(iSelect)
+                        if row not in rows:
+                            rows.append(row)
+                            objIndex = model.model().data(iSelect)
 
-                        # if str(objIndex) in self._dataFrameObject.indexList:
-                        # obj = self._dataFrameObject.indexList[str(objIndex)]  # item.index needed
-                        # selectedObjects.append(obj)
+                            # if str(objIndex) in self._dataFrameObject.indexList:
+                            # obj = self._dataFrameObject.indexList[str(objIndex)]  # item.index needed
+                            # selectedObjects.append(obj)
 
-                        obj = self.project.getByPid(objIndex)
-                        if obj:
-                            selectedObjects.append(obj)
+                            obj = self.project.getByPid(objIndex)
+                            if obj:
+                                selectedObjects.append(obj)
 
             return selectedObjects
         else:

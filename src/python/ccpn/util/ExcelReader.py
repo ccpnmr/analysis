@@ -45,6 +45,10 @@ SPECTRUM_GROUP_NAME = 'spectrumGroupName'
 EXP_TYPE = 'experimentType'
 SPECTRUM_PATH = 'spectrumPath'
 SUBSTANCE_NAME = 'substanceName'
+# added from beta6
+SPECTRUM_NAME = 'spectrumName'
+SPECTRUMGROUP = 'SpectrumGroup'
+
 
 ### Substance properties: # do not change these names
 comment = 'comment'
@@ -87,7 +91,7 @@ SUBSTANCE_PROPERTIES = [comment, smiles, synonyms, molecularMass, empiricalFormu
                         logPartitionCoefficient, userCode, ]
 
 SUBSTANCES_SHEET_COLUMNS =  [SUBSTANCE_NAME,SPECTRUM_PATH,SPECTRUM_GROUP_NAME,EXP_TYPE]+SUBSTANCE_PROPERTIES
-SAMPLE_SHEET_COLUMNS =  [SAMPLE_NAME,SPECTRUM_GROUP_NAME,SPECTRUM_PATH]+SUBSTANCE_PROPERTIES
+SAMPLE_SHEET_COLUMNS = [SAMPLE_NAME, SPECTRUM_GROUP_NAME, SPECTRUM_PATH, SPECTRUM_NAME]
 
 
 def makeTemplate(path,fileName='lookupTemplate.xlsx',):
@@ -371,8 +375,11 @@ class ExcelReader(object):
         :param dct:  dict with information for the spectrum. eg EXP type
         :obj: obj to link the spectrum to. E.g. Sample or Substance,
         '''
+        name = dct.get(SPECTRUM_NAME)
+        if not name:
+            name = obj.name
         if filePath.endswith('1r'): # a try to make a loader faster down the model, skipping the loops
-            data = self._project.loadSpectrum(filePath, 'Bruker', obj.name )
+            data = self._project.loadSpectrum(filePath, 'Bruker',name )
         else:
             data = self._project.loadData(filePath)
         if data is not None:

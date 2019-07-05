@@ -191,16 +191,14 @@ class GuiNdWidget(CcpnGLWidget):
         minList = [self._spectrumSettings[sp][SPECTRUM_VALUEPERPOINT] for sp in self._ordering if sp in self._spectrumSettings]
         minimumValuePerPoint = None
         for val in minList:
-            try:
-                if minimumValuePerPoint and val is not None:
-                    minimumValuePerPoint = [min(ii, jj) for ii, jj in zip(minimumValuePerPoint, val)]
-                elif minimumValuePerPoint:
-                    pass
-
-                else:
-                    minimumValuePerPoint = val
-            except Exception as es:
+            if minimumValuePerPoint and val is not None:
+                minimumValuePerPoint = [min(ii, jj) for ii, jj in zip(minimumValuePerPoint, val)]
+            elif minimumValuePerPoint:
+                # val is None so ignore
                 pass
+            else:
+                # set the first value
+                minimumValuePerPoint = val
 
         for visibleSpecView in self._ordering:
             self.visiblePlaneList[visibleSpecView] = visibleSpecView._getVisiblePlaneList(firstVisible=self._firstVisible,

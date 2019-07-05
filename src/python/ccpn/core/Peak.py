@@ -261,6 +261,8 @@ class Peak(AbstractWrapperObject):
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
             peakDim.numAliasing = -1 * value[ii]
 
+        # self.peakList.spectrum._updateAliasingLimits()
+
     @property
     def dimensionNmrAtoms(self) -> Tuple[Tuple['NmrAtom', ...], ...]:
         """Peak dimension assignment - a tuple of tuples with the assigned NmrAtoms for each dimension.

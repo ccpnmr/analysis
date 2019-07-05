@@ -40,7 +40,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.GuiTable import GuiTable
 from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay
+from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay, navigateToNmrAtomsInStrip
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrAtom import NmrAtom
@@ -66,6 +66,7 @@ class NmrResidueTableModule(CcpnModule):
     maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
     settingsPosition = 'left'
 
+    includeDisplaySettings = False
     includePeakLists = False
     includeNmrChains = False
     includeSpectrumTable = False
@@ -92,6 +93,7 @@ class NmrResidueTableModule(CcpnModule):
             self.current = None
 
         self.nmrResidueTableSettings = StripPlot(parent=self.settingsWidget, mainWindow=self.mainWindow,
+                                                 includeDisplaySettings=self.includeDisplaySettings,
                                                  includePeakLists=self.includePeakLists,
                                                  includeNmrChains=self.includeNmrChains,
                                                  includeSpectrumTable=self.includeSpectrumTable,
@@ -131,12 +133,14 @@ class NmrResidueTableModule(CcpnModule):
         """
         displays = []
         # check for valid displays
-        gids = self.nmrResidueTableSettings.displaysWidget.getTexts()
-        if len(gids) == 0: return displays
-        if ALL in gids:
-            displays = self.application.ui.mainWindow.spectrumDisplays
-        else:
-            displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
+        if self.nmrResidueTableSettings.displaysWidget:
+            gids = self.nmrResidueTableSettings.displaysWidget.getTexts()
+            if len(gids) == 0: return displays
+            if ALL in gids:
+                displays = self.application.ui.mainWindow.spectrumDisplays
+            else:
+                displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
+
         return displays
 
     # def navigateToNmrResidue(self, nmrResidue, row=None, col=None):
@@ -157,7 +161,7 @@ class NmrResidueTableModule(CcpnModule):
         logger.debug('nmrResidue=%s' % str(nmrResidue.id if nmrResidue else None))
 
         displays = self._getDisplays()
-        if len(displays) == 0:
+        if len(displays) == 0 and self.nmrResidueTableSettings.displaysWidget:
             logger.warning('Undefined display module(s); select in settings first')
             showWarning('startAssignment', 'Undefined display module(s);\nselect in settings first')
             return
@@ -169,16 +173,33 @@ class NmrResidueTableModule(CcpnModule):
             if self.nmrResidueTableSettings.autoClearMarksWidget.checkBox.isChecked():
                 self.application.ui.mainWindow.clearMarks()
 
-            # navigate the displays
-            for display in displays:
-                if len(display.strips) > 0:
-                    newWidths = []  #_getCurrentZoomRatio(display.strips[0].viewBox.viewRange())
-                    navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0,
-                                                  widths=newWidths,  #['full'] * len(display.strips[0].axisCodes),
-                                                  showSequentialResidues=(len(display.axisCodes) > 2) and
-                                                                         self.nmrResidueTableSettings.sequentialStripsWidget.checkBox.isChecked(),
-                                                  markPositions=self.nmrResidueTableSettings.markPositionsWidget.checkBox.isChecked()
-                                                  )
+            newWidths = []
+
+            if self.current.strip:
+                specDisplay = self.current.strip.spectrumDisplay
+
+                navigateToNmrAtomsInStrip(self.current.strip,
+                                          nmrResidue.nmrAtoms,
+                                          widths=newWidths,
+                                          markPositions=self.nmrResidueTableSettings.markPositionsWidget.checkBox.isChecked(),
+                                          setNmrResidueLabel=True)
+
+                # open the other headers to match
+                for strip in specDisplay.strips:
+                    if strip != self.current.strip and not strip.header.headerVisible:
+                        strip.header.reset()
+                        strip.header.headerVisible = True
+
+            # # navigate the displays
+            # for display in displays:
+            #     if len(display.strips) > 0:
+            #         newWidths = []  #_getCurrentZoomRatio(display.strips[0].viewBox.viewRange())
+            #         navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0,
+            #                                       widths=newWidths,  #['full'] * len(display.strips[0].axisCodes),
+            #                                       showSequentialResidues=(len(display.axisCodes) > 2) and
+            #                                                              self.nmrResidueTableSettings.sequentialStripsWidget.checkBox.isChecked(),
+            #                                       markPositions=self.nmrResidueTableSettings.markPositionsWidget.checkBox.isChecked()
+            #                                       )
 
     def _closeModule(self):
         """CCPN-INTERNAL: used to close the module

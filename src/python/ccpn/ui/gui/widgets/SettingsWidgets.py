@@ -544,6 +544,7 @@ class StripPlot(Widget, _commonSettings):
                  callback=None,
                  returnCallback=None,
                  applyCallback=None,
+                 includeDisplaySettings=True,
                  includePeakLists=True, includeNmrChains=True, includeNmrChainPullSelection=False,
                  includeSpectrumTable=True,
                  defaultSpectrum=None,
@@ -581,9 +582,12 @@ class StripPlot(Widget, _commonSettings):
 
         texts = [defaultSpectrum.pid] if (defaultSpectrum and defaultSpectrum is not NO_STRIP) else ([ALL] + displayText)
 
-        row += 1
-        self.displaysWidget = SpectrumDisplaySelectionWidget(self, mainWindow=self.mainWindow, grid=(row, 0), gridSpan=(1, 1), texts=texts, displayText=[],
-                                                             displayWidgetChangedCallback=self._displayWidgetChanged, labelText=labelText)
+        if includeDisplaySettings:
+            row += 1
+            self.displaysWidget = SpectrumDisplaySelectionWidget(self, mainWindow=self.mainWindow, grid=(row, 0), gridSpan=(1, 1), texts=texts, displayText=[],
+                                                                 displayWidgetChangedCallback=self._displayWidgetChanged, labelText=labelText)
+        else:
+            self.displaysWidget = None
 
         row += 1
         self.sequentialStripsWidget = CheckBoxCompoundWidget(
@@ -702,7 +706,7 @@ class StripPlot(Widget, _commonSettings):
     def setLabelText(self, label):
         """Set the text for the label attached to the list widget
         """
-        self.displaysWidget.setLabelText(label)
+        self.displaysWidget.setLabelText(label) if self.displaysWidget else None
 
     def _displayWidgetChanged(self):
         """Handle adding/removing items from display selection

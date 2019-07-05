@@ -1352,6 +1352,13 @@ GuiTable::item::selected {
                                hiddenColumns=hiddenColumns,
                                table=table)
 
+    def rawDataToDF(self):
+        try:
+            df = pd.DataFrame(self._rawData)
+            return df
+        except:
+            return pd.DataFrame()
+
     def exportTableDialog(self, exportAll=True):
         """export the contents of the table to a file
         The actual data values are exported, not the visible items which may be rounded due to the table settings
@@ -1360,8 +1367,12 @@ GuiTable::item::selected {
                                     False, export only the visible table
         """
         if not (self._dataFrameObject and self._dataFrameObject.dataFrame is not None):
-            # export the data from here
-            self._exportTableDialog(None)
+            if self._rawData:
+                self._exportTableDialog(self.rawDataToDF())
+                return
+            else:
+                showWarning('Export Table to File', 'Table does not contain a dataFrame')
+                return
 
         else:
             rowList = None

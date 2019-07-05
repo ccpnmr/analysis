@@ -235,7 +235,7 @@ class _StripLabel(Label):           #  VerticalLabel): could use Vertical label 
         contextMenu.addSeparator()
         contextMenu.addAction('Close Strip Header', self._closeStrip)
         contextMenu.addAction('Close All Strip Headers in SpectrumDisplay', self._closeSpectrumDisplay)
-        contextMenu.addAction('Close All', self._closeAll)
+        contextMenu.addAction('Close All Headers in All SpectrumDisplays', self._closeAll)
         return contextMenu
 
     def _closeStrip(self):

@@ -32,7 +32,7 @@ from functools import partial
 import json
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
-from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.Label import Label, VerticalLabel
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.Widget import Widget
@@ -54,7 +54,7 @@ SINGLECLICK = 'click'
 DOUBLECLICK = 'doubleClick'
 
 
-class _StripLabel(Label):
+class _StripLabel(Label):           #  VerticalLabel): could use Vertical label so that the strips can flip
     """
     Specific Label to be used in Strip displays
     """
@@ -485,7 +485,7 @@ class StripHeader(Widget):
         """
         self.hide()
         for stripPos in STRIPPOSITIONS:
-            self._labels[stripPos].setText('')
+            self.setLabelText(text='', position=stripPos)
             self._labels[stripPos].obj = None
             self._labels[stripPos]._connectDir = STRIPCONNECT_NONE
             self._labels[stripPos].setVisible(True)

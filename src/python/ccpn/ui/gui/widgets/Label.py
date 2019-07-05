@@ -25,34 +25,29 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets, QtCore
-
-
-Qt = QtCore.Qt
-
+from PyQt5 import QtWidgets
+from pyqtgraph.widgets.VerticalLabel import VerticalLabel as pyqtVerticalLabel
 from ccpn.ui.gui.widgets.Base import Base
-#from ccpn.ui.gui.guiSettings import getColours
 from ccpn.framework.Translation import translator
 import ccpn.ui.gui.guiSettings as guiSettings
 
 
 class Label(QtWidgets.QLabel, Base):
     _styleSheet = """
-  QLabel {
-    font-size: %spt;
-    font-weight: %s;
-    color: %s;
-    margin-left: %dpx;
-    margin-top: %dpx;
-    margin-right: %dpx;
-    margin-bottom: %dpx;
-    border: 0px;
-  }
-  """
+    QLabel {
+            font-size: %spt;
+            font-weight: %s;
+            color: %s;
+            margin-left: %dpx;
+            margin-top: %dpx;
+            margin-right: %dpx;
+            margin-bottom: %dpx;
+            border: 0px;
+            }
+    """
 
     def __init__(self, parent=None, text='', textColour=None, textSize=12, bold=False,
                  margins=[2, 1, 2, 1], **kwds):
-
         super().__init__(parent)
         Base._init(self, **kwds)
 
@@ -87,15 +82,75 @@ class Label(QtWidgets.QLabel, Base):
         self.setText(text)
 
     def _setStyleSheet(self):
-        self.setStyleSheet(self._styleSheet % (
-            self._textSize,
-            self._bold,
-            self._colour,
-            self._margins[0],
-            self._margins[1],
-            self._margins[2],
-            self._margins[3],
-            )
+        self.setStyleSheet(self._styleSheet % (self._textSize,
+                                               self._bold,
+                                               self._colour,
+                                               self._margins[0],
+                                               self._margins[1],
+                                               self._margins[2],
+                                               self._margins[3],
+                                               )
+                           )
+
+
+class VerticalLabel(pyqtVerticalLabel, Base):
+    _styleSheet = """
+    QLabel {
+            font-size: %spt;
+            font-weight: %s;
+            color: %s;
+            margin-left: %dpx;
+            margin-top: %dpx;
+            margin-right: %dpx;
+            margin-bottom: %dpx;
+            border: 0px;
+            }
+    """
+
+    def __init__(self, parent=None, text='', textColour=None, textSize=12, bold=False,
+                 margins=[2, 1, 2, 1], orientation='horizontal', **kwds):
+        super().__init__(parent, orientation=orientation, forceWidth=False)
+        Base._init(self, **kwds)
+
+        text = translator.translate(text)
+        self.setText(text)
+
+        # if textColor:
+        #   self.setStyleSheet('QLabel {color: %s}' % textColor)
+        # if textSize and textColor:
+        #   self.setStyleSheet('QLabel {font-size: %s; color: %s;}' % (textSize, textColor))
+        # if bold:
+        #   self.setStyleSheet('QLabel {font-weight: bold;}')
+
+        self._textSize = textSize
+        self._bold = 'bold' if bold else 'normal'
+        self._margins = margins
+
+        # this appears not to pick up the colour as set by the stylesheet!
+        # self._colour = textColor if textColor else self.palette().color(QtGui.QPalette.WindowText).name()
+
+        colours = guiSettings.getColours()
+        self._colour = textColour if textColour else colours[guiSettings.LABEL_FOREGROUND]
+        self._setStyleSheet()
+
+    def get(self):
+        "get the label text"
+        return self.text()
+
+    def set(self, text=''):
+        "set label text, applying translator"
+        text = translator.translate(text)
+        self.setText(text)
+
+    def _setStyleSheet(self):
+        self.setStyleSheet(self._styleSheet % (self._textSize,
+                                               self._bold,
+                                               self._colour,
+                                               self._margins[0],
+                                               self._margins[1],
+                                               self._margins[2],
+                                               self._margins[3],
+                                               )
                            )
 
 

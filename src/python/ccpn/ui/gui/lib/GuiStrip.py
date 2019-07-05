@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import typing
 from PyQt5 import QtWidgets, QtCore, QtGui
 from ccpn.core.Project import Project
+from ccpn.core.Peak import Peak
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.guiSettings import getColours, GUISTRIP_PIVOT
 from ccpn.ui.gui.widgets.PlaneToolbar import StripHeader
@@ -183,6 +184,9 @@ class GuiStrip(Frame):
 
         # initialise the notifiers
         self.setStripNotifiers()
+
+        # test aliasing notifiers
+        self._aliasingRange = {}
 
         # respond to values changed in the containing spectrumDisplay settings widget
         self.spectrumDisplay._spectrumDisplaySettings.symbolsChanged.connect(self._symbolsChangedInSettings)
@@ -388,6 +392,28 @@ class GuiStrip(Frame):
         """Callback when peaks have changed
         """
         self._CcpnGLWidget._processPeakNotifier(data)
+
+        # # check whether the aliasing range has changed
+        # triggers = data[Notifier.TRIGGER]
+        # obj = data[Notifier.OBJECT]
+        #
+        # if isinstance(obj, Peak):
+        #
+        #     # update the peak labelling
+        #     if Notifier.DELETE in triggers or Notifier.CREATE in triggers:
+        #         # need to update the aliasing limits
+        #         pass
+        #
+        #     spectrum = obj.peakList.spectrum
+        #     newAliasingRange = spectrum.aliasingRange
+        #     if not self._aliasingRange:
+        #         self._aliasingRange[spectrum] = newAliasingRange
+        #         # update
+        #         print('>>>_aliasingRange set first', newAliasingRange)
+        #
+        #     if spectrum in self._aliasingRange and self._aliasingRange[spectrum] != newAliasingRange:
+        #         # update
+        #         print('>>>_aliasingRange update', newAliasingRange)
 
     def _updateDisplayedNmrAtoms(self, data):
         """Callback when nmrAtoms have changed

@@ -1328,7 +1328,7 @@ class Spectrum(AbstractWrapperObject):
         self.setParameter(SPECTRUMALIASING, ALIASINGLIMITS, values)
 
     @property
-    def currentAliasingRange(self) -> Optional[Tuple[Tuple, ...]]:
+    def _currentAliasingRange(self) -> Optional[Tuple[Tuple, ...]]:
         """Return a tuple of the aliasing range in each dimension, or None of not set
         """
         alias = self.getParameter(SPECTRUMALIASING, CURRENTALIASINGLIMITS)
@@ -1340,8 +1340,8 @@ class Spectrum(AbstractWrapperObject):
         self.setParameter(SPECTRUMALIASING, CURRENTALIASINGLIMITS, alias)
         return alias
 
-    @currentAliasingRange.setter
-    def currentAliasingRange(self, values: Tuple[Tuple, ...]):
+    @_currentAliasingRange.setter
+    def _currentAliasingRange(self, values: Tuple[Tuple, ...]):
         """Set the currentAliasingRange for each of the spectrum dimensions
         Must be a tuple matching the number of dimension.
         Each element is a tuple of the form (min, max)

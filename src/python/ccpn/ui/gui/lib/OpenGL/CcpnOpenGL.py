@@ -2178,9 +2178,9 @@ class CcpnGLWidget(QOpenGLWidget):
                 yPosition = self.cursorCoordinate[1]  #
                 objs = self._mouseInPeak(xPosition, yPosition, firstOnly=True)
                 if objs:
-                    indices = getAxisCodeMatchIndices(self._axisCodes, objs[0].axisCodes)
-                    self._startCoordinate[0] = objs[0].position[indices[0]]
-                    self._startCoordinate[1] = objs[0].position[indices[1]]
+
+                    # move from the centre of the clicked peak
+                    self.getPeakPositionFromMouse(objs[0], self._startCoordinate, self.cursorCoordinate)
 
                     # set the flags for middle mouse dragging
                     self._startMiddleDrag = True
@@ -6167,31 +6167,6 @@ class CcpnGLWidget(QOpenGLWidget):
             event.ignore()
 
         self.update()
-
-    def _movePeak(self, peak, deltaPosition):
-        # oldPosition = peak.position
-        # orderedAxes = peak.orderedAxes
-
-        indices = getAxisCodeMatchIndices(self.axisCodes, peak.axisCodes)
-
-        # get the correct coordinates based on the axisCodes
-        p0 = list(peak.position)  # [0.0] * 2            #len(self.axisOrder)
-        for ii in range(0, 2):
-            if indices[ii] is not None:
-                p0[indices[ii]] += deltaPosition[ii]
-
-        # axisCount = 0
-        # for ps, psCode in enumerate(self.axisOrder[:2]):  # display x, y
-        #     for pp, ppCode in enumerate(peak.axisCodes):
-        #
-        #         # if self._preferences.matchAxisCode == 0:  # default - match atom type, first letter
-        #         if ppCode[0] == psCode[0]:
-        #             p0[pp] += deltaPosition[ps]
-        #             axisCount += 1
-
-        if self.is1D:
-            peak.height = peak.height + deltaPosition[1]
-        peak.position = p0
 
     def exportToPDF(self, filename='default.pdf', params=None):
         return GLExporter(self, self.strip, filename, params)

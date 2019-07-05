@@ -924,7 +924,7 @@ GuiTable::item::selected {
                                              self._handleCellClickedExit)
                 else:
                     QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval() * 0.75,
-                                             partial(self._handleCellClicked, event))
+                                             partial(self._handleCellClicked, event.pos()))
 
         else:
             event.ignore()
@@ -934,7 +934,7 @@ GuiTable::item::selected {
         self._mousePressedPos = None
         super(GuiTable, self).mouseReleaseEvent(event)
 
-    def _handleCellClicked(self, event):
+    def _handleCellClicked(self, eventPos):
         """handle a single click event, but ignore double click events,
         with special case for clicking on an already selected item
 
@@ -943,10 +943,13 @@ GuiTable::item::selected {
         if self._lastClick == 'click':
             objs = self.getSelectedObjects()
             if objs and len(objs) > 1:
-                item = self.currentItem()
 
+                # current item or item clicked?
+                item = self.itemAt(eventPos)
+                # item = self.currentItem()
+
+                self.clearSelection()
                 if item:
-                    self.clearSelection()
 
                     # re-enable selecting so new item can be picked
                     if self.multiSelect:
@@ -1614,7 +1617,9 @@ GuiTable::item::selected {
         """
         # classItem is usually a type such as PeakList, MultipletList
         # with an attribute such as peaks/peaks
-        return getattr(classItems, attribute, None)
+
+        # this is a step towards making guiTableABC and subclass for each table
+        return getattr(classItems, attribute, [])
 
     def _reindexTableObjects(self):
         """updating to make sure that the index of the item in the table matches the index of the item in the actual list
@@ -1627,7 +1632,7 @@ GuiTable::item::selected {
             if tSelect:
 
                 # may need a special getter here
-                # e.g. a Muliplet has Multiplet.peaks
+                # e.g. a Multiplet has Multiplet.peaks
                 # but may want to list peaks from a list of multiplets, so need a new object
                 # currently just error check and skip
                 # OR just subclass this routine!
@@ -1776,7 +1781,8 @@ GuiTable::item::selected {
 
                         # multiple attribute name, i.e. added 's' - and get tSelect.objs
                         multiple = self._tableData['classCallBack']
-                        multipleAttr = getattr(tSelect, multiple)
+                        # multipleAttr = getattr(tSelect, multiple)
+                        multipleAttr = self.getIndexList(tSelect, multiple)
 
                         # if item is in the list, then create
                         if row in multipleAttr:

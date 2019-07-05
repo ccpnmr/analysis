@@ -32,7 +32,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget, GLVertexArray, GLREN
     GLRENDERMODE_REBUILD, GLRENDERMODE_RESCALE
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import YAXISUNITS1D, SPECTRUM_VALUEPERPOINT
 import ccpn.util.Phasing as Phasing
-
+from ccpn.util.Common import getAxisCodeMatchIndices
 
 try:
     from OpenGL import GL, GLU, GLUT
@@ -208,6 +208,29 @@ class GuiNdWidget(CcpnGLWidget):
         self._GLPeaks.setListViews(self._ordering)
         self._GLIntegrals.setListViews(self._ordering)
         self._GLMultiplets.setListViews(self._ordering)
+
+    def getPeakPositionFromMouse(self, peak, lastStartCoordinate, cursorPosition=None):
+        """Get the centre position of the clicked peak
+        """
+        indices = getAxisCodeMatchIndices(self._axisCodes, peak.axisCodes)
+        for ii, ind in enumerate(indices[:2]):
+            if ind is not None:
+                lastStartCoordinate[ii] = peak.position[ind]
+            else:
+                lastStartCoordinate[ii] = cursorPosition[ii]
+
+    def _movePeak(self, peak, deltaPosition):
+        """Move the peak to new position
+        """
+        indices = getAxisCodeMatchIndices(self.axisCodes, peak.axisCodes)
+
+        # get the correct coordinates based on the axisCodes
+        p0 = list(peak.position)
+        for ii, ind in enumerate(indices[:2]):
+            if ind is not None:
+                p0[ind] += deltaPosition[ii]
+
+        peak.position = p0
 
 
 class Gui1dWidget(CcpnGLWidget):
@@ -491,6 +514,39 @@ class Gui1dWidget(CcpnGLWidget):
         self._GLIntegrals.setListViews(self._ordering)
         self._GLMultiplets.setListViews(self._ordering)
 
+    def getPeakPositionFromMouse(self, peak, lastStartCoordinate, cursorPosition=None):
+        """Get the centre position of the clicked 1d peak
+        """
+        indices = getAxisCodeMatchIndices(self._axisCodes, peak.axisCodes)
+
+        # check that the mappings are okay
+        for ii, ind in enumerate(indices[:2]):
+            if ind is not None:
+                lastStartCoordinate[ii] = peak.position[ind]
+            else:
+                lastStartCoordinate[ii] = peak.height
+
+    def _movePeak(self, peak, deltaPosition):
+        """Move the peak to new position
+        """
+        indices = getAxisCodeMatchIndices(self.axisCodes, peak.axisCodes)
+
+        # get the correct coordinates based on the axisCodes
+        p0 = list(peak.position)
+        for ii, ind in enumerate(indices[:2]):
+            if ind is not None:
+                p0[ind] += deltaPosition[ii]
+
+        # update height - taken from peakPickPosition
+        spectrum = peak.peakList.spectrum
+        pp = spectrum.mainSpectrumReferences[0].valueToPoint(p0[0])
+        frac = pp % 1
+        if spectrum.intensities is not None and spectrum.intensities.size != 0:
+            # need to interpolate between pp-1, and pp
+            peak.height = spectrum.intensities[int(pp) - 1] + \
+                        frac * (spectrum.intensities[int(pp)] - spectrum.intensities[int(pp) - 1])
+
+        peak.position = p0
 
 class Gui1dWidgetAxis(Gui1dWidget):
     pass

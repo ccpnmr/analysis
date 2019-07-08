@@ -97,7 +97,7 @@ SPECTRUMPREFERREDAXISORDERING = 'spectrumPreferredAxisOrdering'
 SPECTRUMALIASING = 'spectrumAliasing'
 ALIASINGLIMITS = 'aliasingLimits'
 CURRENTALIASINGLIMITS = 'currentAliasingLimits'
-UPDATEALIASINGRANGE = '_updateAliasingRange'
+UPDATEALIASINGRANGEFLAG = '_updateAliasingRangeFlag'
 DISPLAYFOLDEDCONTOURS = 'displayFoldedContours'
 MAXALIASINGRANGE = 3
 
@@ -1267,31 +1267,31 @@ class Spectrum(AbstractWrapperObject):
         self.setParameter(SPECTRUMALIASING, DISPLAYFOLDEDCONTOURS, value)
 
     @property
-    def _updateAliasingRange(self):
+    def _updateAliasingRangeFlag(self):
         """Return whether the aliasingRange needs to be updated when aliasing
         of peaks has changed
         """
-        alias = self.getParameter(SPECTRUMALIASING, UPDATEALIASINGRANGE)
+        alias = self.getParameter(SPECTRUMALIASING, UPDATEALIASINGRANGEFLAG)
         if alias is not None:
             return alias
 
         # set default values in the ccpnInternal store
         alias = True
-        self.setParameter(SPECTRUMALIASING, UPDATEALIASINGRANGE, alias)
+        self.setParameter(SPECTRUMALIASING, UPDATEALIASINGRANGEFLAG, alias)
         return alias
 
-    @_updateAliasingRange.setter
-    def _updateAliasingRange(self, value):
+    @_updateAliasingRangeFlag.setter
+    def _updateAliasingRangeFlag(self, value):
         """Set whether the aliasingRange needs to be updated when aliasing
         of peaks has changed
         """
         if not isinstance(value, bool):
-            raise ValueError("_updateAliasingRange must be True/False.")
+            raise ValueError("_updateAliasingRangeFlag must be True/False.")
 
-        self.setParameter(SPECTRUMALIASING, UPDATEALIASINGRANGE, value)
+        self.setParameter(SPECTRUMALIASING, UPDATEALIASINGRANGEFLAG, value)
 
     @property
-    def aliasingRange(self) -> Optional[Tuple[Tuple, ...]]:
+    def visibleAliasingRange(self) -> Optional[Tuple[Tuple, ...]]:
         """Return a tuple of the aliasing range in each dimension, or None of not set
         """
         alias = self.getParameter(SPECTRUMALIASING, ALIASINGLIMITS)
@@ -1303,33 +1303,35 @@ class Spectrum(AbstractWrapperObject):
         self.setParameter(SPECTRUMALIASING, ALIASINGLIMITS, alias)
         return alias
 
-    @aliasingRange.setter
-    def aliasingRange(self, values: Tuple[Tuple, ...]):
+    @visibleAliasingRange.setter
+    def visibleAliasingRange(self, values: Tuple[Tuple, ...]):
         """Set the aliasing range for each of the spectrum dimensions
         Must be a tuple matching the number of dimension.
         Each element is a tuple of the form (min, max)
         where min/max are integer in the range -3 -> +3
 
-            e.g. aliasingRange = ((0, 0), (-1, 1), ...)
+            e.g. visibleAliasingRange = ((0, 0), (-1, 1), ...)
         """
 
         # error checking that the tuples are correctly defined
         if len(values) != self.dimensionCount:
             raise ValueError("Length of %s does not match number of dimensions." % str(values))
         if not all(isinstance(dimVal, Tuple) and len(dimVal) == 2 for dimVal in values):
-            raise ValueError("Aliasing values must be tuple(min, max).")
+            raise ValueError("Visible aliasing values must be tuple(min, max).")
 
         for alias in values:
             if not (isinstance(alias[0], int) and isinstance(alias[1], int)
                     and alias[0] >= -MAXALIASINGRANGE and alias[1] <= MAXALIASINGRANGE and alias[0] <= alias[1]):
-                raise ValueError("Aliasing values must be tuple(min >= -%i, max <= %i) of integer." % \
+                raise ValueError("Visible aliasing values must be tuple(min >= -%i, max <= %i) of integer." % \
                                  (MAXALIASINGRANGE, MAXALIASINGRANGE))
 
         self.setParameter(SPECTRUMALIASING, ALIASINGLIMITS, values)
 
     @property
-    def _currentAliasingRange(self) -> Optional[Tuple[Tuple, ...]]:
+    def aliasingRange(self) -> Optional[Tuple[Tuple, ...]]:
         """Return a tuple of the aliasing range in each dimension, or None of not set
+        Note, this is an attribute, not a property;
+        to get the property use spectrum._getAliasingRange, or peakList._getAliasingRange
         """
         alias = self.getParameter(SPECTRUMALIASING, CURRENTALIASINGLIMITS)
         if alias is not None:
@@ -1340,8 +1342,8 @@ class Spectrum(AbstractWrapperObject):
         self.setParameter(SPECTRUMALIASING, CURRENTALIASINGLIMITS, alias)
         return alias
 
-    @_currentAliasingRange.setter
-    def _currentAliasingRange(self, values: Tuple[Tuple, ...]):
+    @aliasingRange.setter
+    def aliasingRange(self, values: Tuple[Tuple, ...]):
         """Set the currentAliasingRange for each of the spectrum dimensions
         Must be a tuple matching the number of dimension.
         Each element is a tuple of the form (min, max)
@@ -2058,43 +2060,6 @@ class Spectrum(AbstractWrapperObject):
         """
         pass
 
-    @logCommand(get='self')
-    def delete(self):
-        """Delete Spectrum"""
-        with undoBlock():
-            self._clearCache()
-
-            # handle spectrumView ordering - this should be moved to spectrumView or spectrumDisplay via notifier?
-            specDisplays = []
-            specViews = []
-            for sp in self.spectrumViews:
-                if sp._parent.spectrumDisplay not in specDisplays:
-                    specDisplays.append(sp._parent.spectrumDisplay)
-                    specViews.append((sp._parent, sp._parent.spectrumViews.index(sp)))
-
-            listsToDelete = tuple(self.peakLists)
-            listsToDelete += tuple(self.integralLists)
-            listsToDelete += tuple(self.multipletLists)
-
-            # delete the connected lists, should undo in the correct order
-            for obj in listsToDelete:
-                obj.delete()
-
-            with undoStackBlocking() as addUndoItem:
-                # notify spectrumViews of delete/create
-                addUndoItem(undo=partial(self._notifySpectrumViews, 'create'),
-                            redo=partial(self._notifySpectrumViews, 'delete'))
-
-            # delete the _wrappedData
-            self._delete()
-
-            # with undoStackBlocking() as addUndoItem:
-            #     # notify spectrumViews of delete
-            #     addUndoItem(redo=self._finaliseSpectrumViews, '')
-
-            for sd in specViews:
-                sd[0]._removeOrderedSpectrumViewIndex(sd[1])
-
     def _notifySpectrumViews(self, action):
         for sv in self.spectrumViews:
             sv._finaliseAction(action)
@@ -2163,6 +2128,24 @@ class Spectrum(AbstractWrapperObject):
             if n and all(pCode[0] == cCode[0] for pCode, cCode in zip(perm[:n], checkCodes[:n])):
                 return axisOrder[ii]
 
+    def _getAliasingRange(self):
+        """Return the min/max aliasing range for the peakLists in the spectrum, if there are no peakLists with peaks, return None
+        """
+        # get the aliasingRanges for non-empty peakLists
+        aliasRanges = [peakList._getAliasingRange() for peakList in self.peakLists if peakList.peaks]
+
+        if aliasRanges:
+            # if there is only one then return it (for clarity)
+            if len(aliasRanges) == 1:
+                return aliasRanges[0]
+
+            # get the range from all the peakLists
+            newRange = list(aliasRanges[0])
+            for ii, alias in enumerate(aliasRanges[1:]):
+                newRange = tuple((min(minL, minR), max(maxL, maxR)) for (minL, maxL), (minR, maxR) in zip(alias, newRange))
+
+            return newRange
+
     #=========================================================================================
     # Implementation functions
     #=========================================================================================
@@ -2204,6 +2187,43 @@ class Spectrum(AbstractWrapperObject):
         if action in ['create', 'delete']:
             for integralList in self.integralLists:
                 integralList._finaliseAction(action=action)
+
+    @logCommand(get='self')
+    def delete(self):
+        """Delete Spectrum"""
+        with undoBlock():
+            self._clearCache()
+
+            # handle spectrumView ordering - this should be moved to spectrumView or spectrumDisplay via notifier?
+            specDisplays = []
+            specViews = []
+            for sp in self.spectrumViews:
+                if sp._parent.spectrumDisplay not in specDisplays:
+                    specDisplays.append(sp._parent.spectrumDisplay)
+                    specViews.append((sp._parent, sp._parent.spectrumViews.index(sp)))
+
+            listsToDelete = tuple(self.peakLists)
+            listsToDelete += tuple(self.integralLists)
+            listsToDelete += tuple(self.multipletLists)
+
+            # delete the connected lists, should undo in the correct order
+            for obj in listsToDelete:
+                obj.delete()
+
+            with undoStackBlocking() as addUndoItem:
+                # notify spectrumViews of delete/create
+                addUndoItem(undo=partial(self._notifySpectrumViews, 'create'),
+                            redo=partial(self._notifySpectrumViews, 'delete'))
+
+            # delete the _wrappedData
+            self._delete()
+
+            # with undoStackBlocking() as addUndoItem:
+            #     # notify spectrumViews of delete
+            #     addUndoItem(redo=self._finaliseSpectrumViews, '')
+
+            for sd in specViews:
+                sd[0]._removeOrderedSpectrumViewIndex(sd[1])
 
     #=========================================================================================
     # CCPN functions

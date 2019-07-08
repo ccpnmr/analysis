@@ -110,8 +110,8 @@ class SetPeakAliasingPopup(CcpnDialog):
                                                                           # fixedWidths=(COLWIDTH, 30),
                                                                           orientation='left',
                                                                           labelText='Update spectrum aliasing parameters:',
-                                                                          checked=spectrum._updateAliasingRange,
-                                                                          callback=partial(self._updateAliasingRange, spectrum)
+                                                                          checked=spectrum._updateAliasingRangeFlag,
+                                                                          callback=partial(self._updateAliasingRangeFlag, spectrum)
                                                                           )
                 specRow += 1
 
@@ -160,11 +160,11 @@ class SetPeakAliasingPopup(CcpnDialog):
 
         self.GLSignals = GLNotifier(parent=self)
 
-    def _updateAliasingRange(self, spectrum, updateValue):
+    def _updateAliasingRangeFlag(self, spectrum, updateValue):
         """Set the upateAliasingRange flag for spectra
         """
         if spectrum:
-            spectrum._updateAliasingRange = updateValue
+            spectrum._updateAliasingRangeFlag = updateValue
 
     def _refreshGLItems(self):
 
@@ -179,28 +179,33 @@ class SetPeakAliasingPopup(CcpnDialog):
 
         for spectrum in self.project.spectra:
 
-            # check whether the aliasingRange needs to be updated
-            if not spectrum._updateAliasingRange:
+            # check whether the visibleAliasingRange needs to be updated
+            if not spectrum._updateAliasingRangeFlag:
                 continue
 
-            # calculate the min/max aliasing values for the spectrum
-            dims = spectrum.dimensionCount
-
-            aliasMin = [0] * dims
-            aliasMax = [0] * dims
-
-            alias = None
-            for peakList in spectrum.peakLists:
-                for peak in peakList.peaks:
-                    alias = peak.aliasing
-                    aliasMax = np.maximum(aliasMax, alias)
-                    aliasMin = np.minimum(aliasMin, alias)
-
+            alias = spectrum._getAliasingRange()
             if alias:
-                # set min/max in spectrum here if a peak has been found
-                aliasRange = tuple((int(mn), int(mx)) for mn, mx in zip(aliasMin, aliasMax))
-                spectrum.aliasingRange = aliasRange
+                spectrum.visibleAliasingRange = alias
                 spectrum.displayFoldedContours = True
+
+            # # calculate the min/max aliasing values for the spectrum
+            # dims = spectrum.dimensionCount
+            #
+            # aliasMin = [0] * dims
+            # aliasMax = [0] * dims
+            #
+            # alias = None
+            # for peakList in spectrum.peakLists:
+            #     for peak in peakList.peaks:
+            #         alias = peak.aliasing
+            #         aliasMax = np.maximum(aliasMax, alias)
+            #         aliasMin = np.minimum(aliasMin, alias)
+            #
+            # if alias:
+            #     # set min/max in spectrum here if a peak has been found
+            #     aliasRange = tuple((int(mn), int(mx)) for mn, mx in zip(aliasMin, aliasMax))
+            #     spectrum.visibleAliasingRange = aliasRange
+            #     spectrum.displayFoldedContours = True
 
         # emit a signal to rebuild all peaks
         self.GLSignals.emitEvent(triggers=[GLNotifier.GLALLPEAKS, GLNotifier.GLALLMULTIPLETS])

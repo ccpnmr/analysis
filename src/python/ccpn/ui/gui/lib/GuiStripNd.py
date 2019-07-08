@@ -56,6 +56,7 @@ from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, IntegralMe
 from ccpn.ui.gui.lib.GuiStripContextMenus import _getNdPhasingMenu, _getNdDefaultMenu, _getNdPeakMenu, \
     _getNdIntegralMenu, _getNdMultipletMenu
 from ccpn.ui.gui.lib.Strip import copyStripPosition
+from ccpn.util.Common import getAxisCodeMatchIndices
 
 
 class GuiStripNd(GuiStrip):
@@ -648,15 +649,26 @@ class GuiStripNd(GuiStrip):
                 if not viewParams:
                     continue
 
+                indices = getAxisCodeMatchIndices(self.axisCodes, spectrumView.spectrum.axisCodes)
+                alais = spectrumView.spectrum.aliasingRange
+
                 minFrequency = viewParams.minAliasedFrequency
+                maxFrequency = viewParams.maxAliasedFrequency
+                freqRange = maxFrequency - minFrequency
+
+                # sign is in the aliasingRange - wrong dim
+                minFrequency += (freqRange * alais[indices[n + 2]][0])
+                maxFrequency += (freqRange * alais[indices[n + 2]][1])
+
                 if minFrequency is not None:
                     if minAliasedFrequency is None or minFrequency < minAliasedFrequency:
                         minAliasedFrequency = minFrequency
 
-                maxFrequency = viewParams.maxAliasedFrequency
                 if maxFrequency is not None:
-                    if maxAliasedFrequency is None or maxFrequency < maxAliasedFrequency:
+                    if maxAliasedFrequency is None or maxFrequency > maxAliasedFrequency:
                         maxAliasedFrequency = maxFrequency
+
+                print('>>>', minAliasedFrequency, maxAliasedFrequency)
 
                 width = viewParams.valuePerPoint
                 if minZPlaneSize is None or width < minZPlaneSize:

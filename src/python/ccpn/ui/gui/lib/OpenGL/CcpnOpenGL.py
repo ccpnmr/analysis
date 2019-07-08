@@ -322,7 +322,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self._axesVisible = True
         self._axisLocked = False
-        self._useFixedAspect = True
+        self._useFixedAspect = False
         self._fixedAspectX = 1.0
         self._fixedAspectY = 1.0
         
@@ -2942,7 +2942,7 @@ class CcpnGLWidget(QOpenGLWidget):
                             specSettings = self._spectrumSettings[spectrumView]
 
                             # should move this to buildSpectrumDSettings
-                            # and emit a signal when aliasingRange or foldingModes are changed
+                            # and emit a signal when visibleAliasingRange or foldingModes are changed
 
                             fx0 = specSettings[GLDefs.SPECTRUM_MAXXALIAS]
                             fx1 = specSettings[GLDefs.SPECTRUM_MINXALIAS]
@@ -2955,7 +2955,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
                             specMatrix = np.array(specSettings[GLDefs.SPECTRUM_MATRIX], dtype=np.float32)
 
-                            alias = spectrumView.spectrum.aliasingRange
+                            alias = spectrumView.spectrum.visibleAliasingRange
                             folding = spectrumView.spectrum.foldingModes
                             pIndex = specSettings[GLDefs.SPECTRUM_POINTINDEX]
 

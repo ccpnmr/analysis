@@ -75,7 +75,7 @@ class SpectrumDisplaySettings(Widget):
                  xAxisUnits=0, xTexts=[], showXAxis=True,
                  yAxisUnits=0, yTexts=[], showYAxis=True,
                  lockAspectRatio=False,
-                 useFixedAspectRatio=True,
+                 useFixedAspectRatio=False,
                  symbolType=0, annotationType=0, symbolSize=9, symbolThickness=2,
                  stripArrangement=0,
                  **kwds):

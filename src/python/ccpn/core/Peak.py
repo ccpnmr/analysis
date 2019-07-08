@@ -173,11 +173,17 @@ class Peak(AbstractWrapperObject):
     @ccpNmrV3CoreSetter()
     def position(self, value: Sequence):
         # call api changes
+        currentAlias = []
+        newAlias = []
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+            currentAlias.append(peakDim.numAliasing)
             peakDim.value = value[ii]
             peakDim.realValue = None
+            newAlias.append(peakDim.numAliasing)
 
-        # aliasing values may have changed here - check new range for spectrum and update aliasingRange?
+        # aliasing may have changed here
+        if currentAlias != newAlias:
+            self._checkAliasing()
 
     ppmPositions = position
 
@@ -216,8 +222,16 @@ class Peak(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
     def pointPosition(self, value: Sequence):
+        currentAlias = []
+        newAlias = []
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+            currentAlias.append(peakDim.numAliasing)
             peakDim.position = value[ii]
+            newAlias.append(peakDim.numAliasing)
+
+        # aliasing may have changed here
+        if currentAlias != newAlias:
+            self._checkAliasing()
 
     @property
     def boxWidths(self) -> Tuple[Optional[float], ...]:
@@ -260,10 +274,16 @@ class Peak(AbstractWrapperObject):
         if not all(isinstance(dimVal, int) for dimVal in value):
             raise ValueError("Aliasing values must be integer.")
 
+        currentAlias = []
+        newAlias = []
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+            currentAlias.append(peakDim.numAliasing)
             peakDim.numAliasing = -1 * value[ii]
+            newAlias.append(peakDim.numAliasing)
 
-        # self.peakList.spectrum._updateAliasingLimits()
+        # aliasing may/may not have changed here
+        if currentAlias != newAlias:
+            self._checkAliasing()
 
     @property
     def dimensionNmrAtoms(self) -> Tuple[Tuple['NmrAtom', ...], ...]:
@@ -700,6 +720,14 @@ class Peak(AbstractWrapperObject):
 
         # do I need to set the volume error?
         # self.volumeError = 1e-8
+
+    def _checkAliasing(self):
+        """Recalculate the aliasing range for all peaks in the parent spectrum
+        """
+        spectrum = self.peakList.spectrum
+        alias = spectrum._getAliasingRange()
+        if alias:
+            spectrum.aliasingRange = alias
 
     #===========================================================================================
     # new'Object' and other methods

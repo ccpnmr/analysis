@@ -885,7 +885,7 @@ class DimensionsTab(Widget):
             # self.foldingModesCheckBox[i].setEnabled(False)
 
             # pullDown for min/max aliasing
-            aliasLim = spectrum.aliasingRange
+            aliasLim = spectrum.visibleAliasingRange
             aliasMaxRange = list(range(MAXALIASINGRANGE, -1, -1))
             aliasMinRange = list(range(0, -MAXALIASINGRANGE - 1, -1))
             aliasMaxText = [str(aa) for aa in aliasMaxRange]
@@ -1076,14 +1076,14 @@ class DimensionsTab(Widget):
             self.maxAliasingPullDowns[dim].select(str(minValue))
 
     def _setMinAliasing(self, spectrum, dim, value):
-        alias = list(spectrum.aliasingRange)
+        alias = list(spectrum.visibleAliasingRange)
         value = int(value)
 
         alias[dim] = (value, max(alias[dim][1], value))
-        spectrum.aliasingRange = tuple(alias)
+        spectrum.visibleAliasingRange = tuple(alias)
 
-        self.pythonConsole.writeConsoleCommand("spectrum.aliasingRange = {0}".format(tuple(alias)), spectrum=spectrum)
-        self._writeLoggingMessage("spectrum.aliasingRange = {0}".format(tuple(alias)))
+        self.pythonConsole.writeConsoleCommand("spectrum.visibleAliasingRange = {0}".format(tuple(alias)), spectrum=spectrum)
+        self._writeLoggingMessage("spectrum.visibleAliasingRange = {0}".format(tuple(alias)))
 
     def _queueSetMaxAliasing(self, valueGetter, dim):
         self._changes['maxAliasing{}'.format(dim)] = partial(self._setMaxAliasing,
@@ -1094,12 +1094,12 @@ class DimensionsTab(Widget):
             self.minAliasingPullDowns[dim].select(str(maxValue))
 
     def _setMaxAliasing(self, spectrum, dim, value):
-        alias = list(spectrum.aliasingRange)
+        alias = list(spectrum.visibleAliasingRange)
         value = int(value)
         alias[dim] = (min(alias[dim][0], value), value)
-        spectrum.aliasingRange = tuple(alias)
+        spectrum.visibleAliasingRange = tuple(alias)
 
-        self.pythonConsole.writeConsoleCommand("spectrum.aliasingRange = {0}".format(tuple(alias)), spectrum=spectrum)
+        self.pythonConsole.writeConsoleCommand("spectrum.visibleAliasingRange = {0}".format(tuple(alias)), spectrum=spectrum)
         self._writeLoggingMessage("spectrum.aliasingLimits = {0}".format(tuple(alias)))
 
     def _queueSetFoldingModes(self, valueGetter, dim):

@@ -1345,6 +1345,28 @@ class PeakList(AbstractWrapperObject):
 
                 peak.height = dataSource.scale * height
 
+    def _getAliasingRange(self):
+        """Return the min/max aliasing range for the peaks in the list, if there are no peaks, return None
+        """
+        if not self.peaks:
+            return None
+
+        # calculate the min/max aliasing values for the spectrum
+        dims = self.spectrum.dimensionCount
+
+        aliasMin = [0] * dims
+        aliasMax = [0] * dims
+
+        for peak in self.peaks:
+            alias = peak.aliasing
+            aliasMax = np.maximum(aliasMax, alias)
+            aliasMin = np.minimum(aliasMin, alias)
+
+        # set min/max in spectrum here if peaks have been found
+        aliasRange = tuple((int(mn), int(mx)) for mn, mx in zip(aliasMin, aliasMax))
+
+        return aliasRange
+
     #===========================================================================================
     # new'Object' and other methods
     # Call appropriate routines in their respective locations

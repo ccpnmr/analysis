@@ -1081,7 +1081,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             width = orderedAxes[2].width
 
             if not (minAliasedFrequency <= zPosition <= maxAliasedFrequency):
-                return
+                getLogger().debug2('skipping plane depth out-of-range test')
+                # return
 
             zRegionValue = (zPosition + 0.5 * width, zPosition - 0.5 * width)  # Note + and - (axis backwards)
             # zPoint0, zPoint1 = spectrum.getDimPointFromValue(zDim, zRegionValue)
@@ -1097,6 +1098,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 else:
                     zPoint1 += 1
 
+            # ensures that the plane valueToPoint is always positive - but conflicts with aliasing in the zPlane
             if (zPoint1 - zPoint0) >= zTotalPointCount:
                 zPoint0 = 0
                 zPoint1 = zTotalPointCount
@@ -1129,7 +1131,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             width = orderedAxes[2].width
 
             if not (minAliasedFrequency <= zPosition <= maxAliasedFrequency):
-                return
+                getLogger().debug2('skipping plane depth out-of-range test')
+                # return
 
             zRegionValue = (zPosition + 0.5 * width, zPosition - 0.5 * width)  # Note + and - (axis backwards)
             # zPoint0, zPoint1 = spectrum.getDimPointFromValue(zDim, zRegionValue)
@@ -1250,7 +1253,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
                 zRegionValue = (zPosition + 0.5 * zWidth, zPosition - 0.5 * zWidth)  # Note + and - (axis backwards)
                 if not (minAliasedFrequency <= zPosition <= maxAliasedFrequency):
-                    return
+                    getLogger().debug('skipping plane depth out-of-range test')
+                    # return
 
                 if hasattr(zDataDim, 'primaryDataDimRef'):
                     ddr = zDataDim.primaryDataDimRef
@@ -1269,15 +1273,16 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                     else:
                         zPoint1 += 1
 
-                if (zPoint1 - zPoint0) >= zTotalPointCount:
-                    # set to the full range
-                    zPoint0 = 0
-                    zPoint1 = zTotalPointCount
-                else:
-                    zPoint0 %= zTotalPointCount
-                    zPoint1 %= zTotalPointCount
-                    if zPoint1 < zPoint0:
-                        zPoint1 += zTotalPointCount
+                # ensures that the plane valueToPoint is always positive - but conflicts with aliasing in the zPlane
+                # if (zPoint1 - zPoint0) >= zTotalPointCount:
+                #     # set to the full range
+                #     zPoint0 = 0
+                #     zPoint1 = zTotalPointCount
+                # else:
+                #     zPoint0 %= zTotalPointCount
+                #     zPoint1 %= zTotalPointCount
+                #     if zPoint1 < zPoint0:
+                #         zPoint1 += zTotalPointCount
 
                 zPointOffset = zDataDim.pointOffset if hasattr(zDataDim, "pointOffset") else 0
                 zPointCount = zDataDim.numPoints

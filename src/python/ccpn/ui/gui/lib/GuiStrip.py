@@ -393,27 +393,30 @@ class GuiStrip(Frame):
         """
         self._CcpnGLWidget._processPeakNotifier(data)
 
-        # # check whether the aliasing range has changed
-        # triggers = data[Notifier.TRIGGER]
-        # obj = data[Notifier.OBJECT]
-        #
-        # if isinstance(obj, Peak):
-        #
-        #     # update the peak labelling
-        #     if Notifier.DELETE in triggers or Notifier.CREATE in triggers:
-        #         # need to update the aliasing limits
-        #         pass
-        #
-        #     spectrum = obj.peakList.spectrum
-        #     newAliasingRange = spectrum.aliasingRange
-        #     if not self._aliasingRange:
-        #         self._aliasingRange[spectrum] = newAliasingRange
-        #         # update
-        #         print('>>>_aliasingRange set first', newAliasingRange)
-        #
-        #     if spectrum in self._aliasingRange and self._aliasingRange[spectrum] != newAliasingRange:
-        #         # update
-        #         print('>>>_aliasingRange update', newAliasingRange)
+        # check whether the aliasing range has changed
+        triggers = data[Notifier.TRIGGER]
+        obj = data[Notifier.OBJECT]
+
+        if isinstance(obj, Peak):
+
+            # update the peak labelling
+            if Notifier.DELETE in triggers or Notifier.CREATE in triggers:
+                # need to update the aliasing limits
+                pass
+
+            spectrum = obj.peakList.spectrum
+            newAliasingRange = spectrum.aliasingRange
+            if not self._aliasingRange:
+                self._aliasingRange[spectrum] = newAliasingRange
+                # update
+                if not self.spectrumDisplay.is1D:
+                    self._setZWidgets()
+
+            if spectrum in self._aliasingRange and self._aliasingRange[spectrum] != newAliasingRange:
+                # update
+                self._aliasingRange[spectrum] = newAliasingRange
+                if not self.spectrumDisplay.is1D:
+                    self._setZWidgets()
 
     def _updateDisplayedNmrAtoms(self, data):
         """Callback when nmrAtoms have changed

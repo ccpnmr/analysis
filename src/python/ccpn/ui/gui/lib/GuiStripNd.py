@@ -656,7 +656,7 @@ class GuiStripNd(GuiStrip):
                 maxFrequency = viewParams.maxAliasedFrequency
                 freqRange = maxFrequency - minFrequency
 
-                # sign is in the aliasingRange - wrong dim
+                # sign is in the aliasingRange - wrong dim - check indices defined
                 minFrequency += (freqRange * alais[indices[n + 2]][0])
                 maxFrequency += (freqRange * alais[indices[n + 2]][1])
 
@@ -667,8 +667,6 @@ class GuiStripNd(GuiStrip):
                 if maxFrequency is not None:
                     if maxAliasedFrequency is None or maxFrequency > maxAliasedFrequency:
                         maxAliasedFrequency = maxFrequency
-
-                print('>>>', minAliasedFrequency, maxAliasedFrequency)
 
                 width = viewParams.valuePerPoint
                 if minZPlaneSize is None or width < minZPlaneSize:

@@ -1091,7 +1091,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             zPointFloat0 = valueToPoint(zRegionValue[0]) - 1
             zPointFloat1 = valueToPoint(zRegionValue[1]) - 1
 
-            zPoint0, zPoint1 = (int(zPointFloat0 + 1), int(zPointFloat1 + 1))  # this gives first and 1+last integer in range
+            zPoint0, zPoint1 = (int(zPointFloat0 + (1 if zPointFloat0 >= 0 else 0)),        # this gives first and 1+last integer in range
+                                int(zPointFloat1 + (1 if zPointFloat1 >= 0 else 0)))        # and take into account negative valueToPoint
             if zPoint0 == zPoint1:
                 if zPointFloat0 - (zPoint0 - 1) < zPoint1 - zPointFloat1:  # which is closest to an integer
                     zPoint0 -= 1
@@ -1141,7 +1142,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             zPointFloat0 = valueToPoint(zRegionValue[0]) - 1
             zPointFloat1 = valueToPoint(zRegionValue[1]) - 1
 
-            zPoint0, zPoint1 = (int(zPointFloat0 + 1), int(zPointFloat1 + 1))  # this gives first and 1+last integer in range
+            zPoint0, zPoint1 = (int(zPointFloat0 + (1 if zPointFloat0 >= 0 else 0)),        # this gives first and 1+last integer in range
+                                int(zPointFloat1 + (1 if zPointFloat1 >= 0 else 0)))        # and take into account negative valueToPoint
             if zPoint0 == zPoint1:
                 if zPointFloat0 - (zPoint0 - 1) < zPoint1 - zPointFloat1:  # which is closest to an integer
                     zPoint0 -= 1
@@ -1266,7 +1268,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 zPointFloat0 = valueToPoint(zRegionValue[0]) - 1
                 zPointFloat1 = valueToPoint(zRegionValue[1]) - 1
 
-                zPoint0, zPoint1 = (int(zPointFloat0 + 1), int(zPointFloat1 + 1))   # this gives first and 1+last integer in range
+                zPoint0, zPoint1 = (int(zPointFloat0 + (1 if zPointFloat0 >= 0 else 0)),  # this gives first and 1+last integer in range
+                                    int(zPointFloat1 + (1 if zPointFloat1 >= 0 else 0)))  # and take into account negative valueToPoint
                 if zPoint0 == zPoint1:
                     if zPointFloat0 - (zPoint0 - 1) < zPoint1 - zPointFloat1:       # which is closest to an integer
                         zPoint0 -= 1

@@ -540,7 +540,8 @@ class NmrResidueTable(GuiTable):
         # # self.show()
 
         self.populateTable(rowObjects=nmrChain.nmrResidues,
-                           columnDefs=self.NMRcolumns
+                           columnDefs=self.NMRcolumns,
+                           selectedObjects=self.current.nmrResidues
                            )
 
         # self.project.blankNotification()

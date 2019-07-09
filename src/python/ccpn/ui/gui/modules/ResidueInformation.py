@@ -26,12 +26,13 @@ from PyQt5 import QtGui, QtWidgets
 
 from ccpn.core.lib.AssignmentLib import CCP_CODES
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+from ccpn.ui.gui.guiSettings import getColours
+from ccpn.ui.gui.guiSettings import LABEL_SELECTEDBACKGROUND, LABEL_SELECTEDFOREGROUND, LABEL_HIGHLIGHT
 
 
 class ResidueInformation(CcpnModule):
@@ -100,16 +101,42 @@ class ResidueInformation(CcpnModule):
         self.selectedResidueType = value
         self._getResidues()
 
+    def _setWidgetColour(self, widget):
+        """Set the colour for the label
+        """
+        palette = widget.palette()
+        palette.setColor(QtGui.QPalette.Foreground, QtGui.QColor(LABEL_SELECTEDFOREGROUND))
+        palette.setColor(QtGui.QPalette.Background, QtGui.QColor(LABEL_SELECTEDBACKGROUND))
+        widget.setPalette(palette)
+
     def _getResidues(self):
         """
         Finds all residues of the selected type along with one flanking residue either side and displays
         this information in the module.
         """
-        if self.colourScheme == 'dark':
-            stylesheet = 'Label {background-color: #f7ffff; color: #2a3358;}'
-        elif self.colourScheme == 'light':
-            stylesheet = 'Label {background-color: #bd8413; color: #fdfdfc;}'
+        colours = getColours()
+        stylesheet = """Label { background-color: %s; color: %s;}
+                     Label::hover { background-color: %s}""" % (colours[LABEL_SELECTEDBACKGROUND],
+                                                                colours[LABEL_SELECTEDFOREGROUND],
+                                                                colours[LABEL_HIGHLIGHT])
+
+        # # self.setDefaultTextColor(QtGui.QColor(self.colours[GUINMRRESIDUE]))
+        #
+        # if self.colourScheme == 'dark':
+        #     # stylesheet = 'Label {background-color: #f7ffff; color: #2a3358;}'
+        #     stylesheet = """Label { background-color: %s; color: %s;}
+        #                  Label::hover { background-color: %s}""" % (colours[LABEL_SELECTEDBACKGROUND],
+        #                                                                colours[LABEL_SELECTEDFOREGROUND],
+        #                                                                colours[LABEL_SELECTEDFOREGROUND])
+        # elif self.colourScheme == 'light':
+        #     # stylesheet = 'Label {background-color: #bd8413; color: #fdfdfc;}'
+        #     stylesheet = """Label { background-color: %s; color: %s;}
+        #                  Label::hover { background-color: %s}""" % (colours[LABEL_SELECTEDBACKGROUND],
+        #                                                                colours[LABEL_SELECTEDFOREGROUND],
+        #                                                                colours[LABEL_SELECTEDFOREGROUND])
+
         foundResidues = []
+
         if self.selectedChain == 'All':
             residues = self.project.residues
         else:
@@ -140,6 +167,7 @@ class ResidueInformation(CcpnModule):
                     label1.setMaximumHeight(30)
                     if checkResidues[0].nmrResidue is not None:
                         label1.setStyleSheet(stylesheet)
+                        # self._setWidgetColour(label1)
 
                     self.residueWidget.layout().addWidget(label1, j + i, 0)
                     
@@ -148,6 +176,8 @@ class ResidueInformation(CcpnModule):
                                    hAlign='c')
                     if checkResidues[1].nmrResidue is not None:
                         label2.setStyleSheet(stylesheet)
+                        # self._setWidgetColour(label2)
+
                     label2.setMaximumHeight(30)
                     self.residueWidget.layout().addWidget(label2, j + i, 1)
                     
@@ -156,5 +186,7 @@ class ResidueInformation(CcpnModule):
                                    hAlign='c')
                     if checkResidues[2].nmrResidue is not None:
                         label3.setStyleSheet(stylesheet)
+                        # self._setWidgetColour(label3)
+
                     self.residueWidget.layout().addWidget(label3, j + i, 2)
                     label3.setMaximumHeight(30)

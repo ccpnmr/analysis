@@ -173,6 +173,10 @@ GUINMRRESIDUE = 'GUINMRRESIDUE'
 GUISTRIP_PIVOT = 'GUISTRIP_PIVOT'
 
 LABEL_FOREGROUND = 'LABEL_FOREGROUND'
+LABEL_BACKGROUND = 'LABEL_BACKGROUND'
+LABEL_SELECTEDBACKGROUND = 'LABEL_SELECTEDBACKGROUND'
+LABEL_SELECTEDFOREGROUND = 'LABEL_SELECTEDFOREGROUND'
+LABEL_HIGHLIGHT = 'LABEL_HIGHLIGHT'
 DIVIDER = 'DIVIDER'
 SOFTDIVIDER = 'SOFTDIVIDER'
 
@@ -256,6 +260,9 @@ colourSchemes = {
         LABEL_FOREGROUND                 : TEXT_COLOUR,
         DIVIDER                          : TEXT_COLOUR,
         SOFTDIVIDER                      : SOFT_DIVIDER_COLOUR,
+        LABEL_SELECTEDBACKGROUND         : 'mediumseagreen',
+        LABEL_SELECTEDFOREGROUND         : 'black',
+        LABEL_HIGHLIGHT                  : 'palegreen',
 
         SEQUENCEGRAPHMODULE_LINE         : 'black',
         SEQUENCEGRAPHMODULE_TEXT         : TEXT_COLOUR,
@@ -295,6 +302,10 @@ colourSchemes = {
         SPECTRUM_HEXCOLOURS       : spectrumHexLightColours,
         SPECTRUM_HEXMEDIUMCOLOURS : spectrumHexMediumColours,
         SPECTRUM_HEXDEFAULTCOLOURS: spectrumHexDefaultLightColours,
+
+        LABEL_SELECTEDBACKGROUND         : 'mediumseagreen',
+        LABEL_SELECTEDFOREGROUND         : 'black',
+        LABEL_HIGHLIGHT                  : 'palegreen',
         },
 
     # Overridden for light colour scheme

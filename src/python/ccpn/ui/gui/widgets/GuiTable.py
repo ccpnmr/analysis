@@ -608,7 +608,8 @@ GuiTable::item::selected {
                                     trigger=CallBack.DOUBLECLICK,
                                     row=row,
                                     col=col,
-                                    rowItem=data)
+                                    rowItem=data,
+                                    rowObject=obj)
 
                     if self._actionCallback and self._dataFrameObject and not \
                             self._dataFrameObject.columnDefinitions.setEditValues[col]:  # ejb - editable fields don't actionCallback

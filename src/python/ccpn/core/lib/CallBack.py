@@ -51,6 +51,7 @@ class CallBack(OrderedDict):
     ROW = 'row'
     COL = 'col'
     ROWITEM = 'rowItem'
+    ROWOBJECT = 'rowObject'
 
     _callbackwords = (CLICK, DOUBLECLICK, CURRENT)
 
@@ -62,6 +63,7 @@ class CallBack(OrderedDict):
                  row: int = None,
                  col: int = None,
                  rowItem: dict = None,
+                 rowObject : Any = None,
                  # callback: Callable[..., str],
                  *args, **kwargs):
         """
@@ -79,4 +81,5 @@ class CallBack(OrderedDict):
         _dict[self.ROW] = row
         _dict[self.COL] = col
         _dict[self.ROWITEM] = rowItem
+        _dict[self.ROWOBJECT] = rowObject
         self.update(_dict)

@@ -1874,7 +1874,9 @@ class GLpeakListMethods():
                     return False, False, 0, 1.0
 
                 settings = self._spectrumSettings[spectrumView]
-                actualPlane = int(settings[GLDefs.SPECTRUM_VALUETOPOINT][ii](zPosition) + 0.5) - 1
+                zPointFloat0 = settings[GLDefs.SPECTRUM_VALUETOPOINT][ii](zPosition)
+                actualPlane = int(zPointFloat0 + 0.5) - (1 if zPointFloat0 >= 0 else 2)
+
                 thisVPL = self._GLParent.visiblePlaneList[spectrumView]
                 if not thisVPL:
                     return False, False, 0, 1.0

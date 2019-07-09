@@ -51,7 +51,7 @@ class LegendItem(pg.LegendItem):
         p.setBrush(pg.functions.mkBrush(100,100,100,10))
         p.drawRect(self.boundingRect())
 
-    def addItem(self, item, name, showLine=False):
+    def addItem(self, item, name, showLine=True):
         """
 
         """
@@ -97,8 +97,8 @@ class CustomItemSample(ItemSample):
 
         if self.showLine:
             if not isinstance(self.item, pg.ScatterPlotItem):
-                p.setPen(fn.mkPen(opts['pen']))
-                p.drawLine(0, 18, 0, 0)
+                p.setPen(fn.mkPen(opts['pen'],))
+                p.drawLine(30, 0 , 0, 0)
 
         symbol = opts.get('symbol', None)
         if symbol is not None:

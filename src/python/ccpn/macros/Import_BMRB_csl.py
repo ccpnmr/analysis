@@ -1,5 +1,5 @@
 """
-A Pre-alpha BMRB Chemical Shift List Importer from NMR-STAR v3.1.
+BMRB Chemical Shift List Importer from NMR-STAR v3.1.
 This is not a full BMRB importer to Analysis V3.
 Please, read warnings and info message
 
@@ -11,7 +11,7 @@ Usage:
     - Create
     Non-UI:
     - scroll down to "Init the macro section"
-    - replace filename path and axesCodesMap accordingly
+    - replace filename path
     - run the macro within V3
 
 1) Menu Menus > Macro > Run... > Select this file.py

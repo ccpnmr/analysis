@@ -201,7 +201,8 @@ class SequenceModule():
 
         # selectedNmrResidue = self.mainWindow.project.getByPid(data[1])   # ejb - new, pass in selected nmrResidue
         residues = [guiRes.residue]
-        toAssign = [nmrResidue for nmrResidue in nmrChain.nmrResidues if '-1' not in nmrResidue.sequenceCode]
+        # toAssign = [nmrResidue for nmrResidue in nmrChain.nmrResidues if '-1' not in nmrResidue.sequenceCode]
+        toAssign = nmrChain.mainNmrResidues
         chainRes = guiRes.residue
 
         if toAssign:
@@ -213,16 +214,39 @@ class SequenceModule():
                 try:
                     selectedNmrResidue = selectedNmrResidue.mainNmrResidue
 
-                    # get the first residue of the chain
-                    for resLeft in range(toAssign.index(selectedNmrResidue)):
-                        chainRes = chainRes.previousResidue
+                    # get the connected nmrResidues
+                    if selectedNmrResidue in toAssign:
+                        indL = indR = toAssign.index(selectedNmrResidue)
 
-                    endRes = chainRes
-                    for resRight in range(len(toAssign) - 1):
-                        endRes = endRes.nextResidue
+                        while toAssign[indL].previousNmrResidue and indL > 0 and chainRes:
+                            indL -= 1
+                            chainRes = chainRes.previousResidue
 
-                except:
-                    showWarning('Sequence Graph', 'Too close to the start of the chain')
+                        endRes = chainRes
+                        while toAssign[indR].nextNmrResidue and indR < len(toAssign) and endRes:
+                            indR += 1
+                            endRes = endRes.nextResidue
+
+                        toAssign = toAssign[indL:indR + 1]
+
+                    else:
+                        showWarning('Sequence Graph', 'nmrResidue %s does not belong to nmrChain' % str(selectedNmrResidue.pid))
+                        return
+
+                    # # get the first residue of the chain
+                    # leftAssignNum = toAssign.index(selectedNmrResidue)
+                    # for resLeft in range(leftAssignNum):
+                    #     if not selectedNmrResidue.previousNmrResidue:
+                    #         break
+                    #     leftAssignNum -= 1
+                    #     chainRes = chainRes.previousResidue
+                    #
+                    # endRes = chainRes
+                    # for resRight in range(len(toAssign) - 1):
+                    #     endRes = endRes.nextResidue
+
+                except Exception as es:
+                    showWarning('Sequence Graph', str(es))
                     return
 
                 if not chainRes:
@@ -245,8 +269,12 @@ class SequenceModule():
                     update = False
                     if nmrChain.id == '@-':
                         # assume that it is the only one
-                        nmrChain.assignSingleResidue(selectedNmrResidue, residues[0])
-                        update = True
+                        try:
+                            nmrChain.assignSingleResidue(selectedNmrResidue, residues[0])
+                            update = True
+                        except Exception as es:
+                            showWarning('Sequence Graph', str(es))
+                            return
                     else:
 
                         # toAssign is the list of mainNmrResidues of the chain

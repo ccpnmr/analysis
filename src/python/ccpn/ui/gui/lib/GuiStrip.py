@@ -1429,6 +1429,11 @@ class GuiStrip(Frame):
             for action in actions:
                 action.setChecked(value)
 
+    @property
+    def visibleSpectra(self):
+        "List of spectra currently visible in the strip. The order might not be as the toolBar"
+        return [sv.spectrum for sv in self.spectrumViews if sv.isVisible()]
+
     def _invertSelectedSpectra(self):
 
         if not self.spectrumDisplay.isGrouped:

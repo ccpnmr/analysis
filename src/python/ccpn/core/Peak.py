@@ -519,9 +519,8 @@ class Peak(AbstractWrapperObject):
             # NOTE:ED does integral need to be notified? - and reverse notifiers in multiplet/integral
 
         if action in ['change']:
-            # check whether the peak aliasing has changed and check containing spectrum
+            # check whether the peak aliasing has changed and notify containing spectrum
             if getattr(self, ALIASINGCHANGED, None):
-                print('>>>aliasing changed - notify spectrum')
                 self._aliasingChanged = False
                 self.peakList.spectrum._finaliseAction(action=action)
 

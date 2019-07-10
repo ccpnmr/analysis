@@ -53,7 +53,8 @@
         "currentStripFollowsMouse" : false,
         "automaticNoiseContoursOnLoadSpectrum" : false,
         "automaticNoiseContoursOnFirstShow" : true,
-        "volumeIntegralLimit" : 2.0
+        "volumeIntegralLimit" : 2.0,
+        "autoUpdateAliasing" : false
     },
 
     "externalPrograms": {

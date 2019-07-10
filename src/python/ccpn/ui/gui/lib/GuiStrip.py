@@ -42,7 +42,7 @@ from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME, AXIS_ACTI
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO, \
     SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, AXISUSEFIXEDASPECTRATIO
-from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock
+from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock, notificationBlanking
 from ccpn.util.decorators import logCommand
 
 
@@ -101,13 +101,10 @@ class GuiStrip(Frame):
         self._CcpnGLWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
                                          QtWidgets.QSizePolicy.MinimumExpanding)
 
-
-
         # # test to see if a single axis widget can be added
         # from ccpn.ui.gui.widgets.GLWidgets import GuiNdWidgetAxis
         # self._CcpnGLWidgetAxis = GuiNdWidgetAxis(strip=self, mainWindow=self.mainWindow)
         # self.getLayout().addWidget(self._CcpnGLWidgetAxis, 1, 1)
-
 
         # set the ID label in the new widget
         self._CcpnGLWidget.setStripID('.'.join(self.id.split('.')))
@@ -186,7 +183,8 @@ class GuiStrip(Frame):
         self.setStripNotifiers()
 
         # test aliasing notifiers
-        self._aliasingRange = {}
+        self._currentVisibleAliasingRange = {}
+        self._currentAliasingRange = {}
 
         # respond to values changed in the containing spectrumDisplay settings widget
         self.spectrumDisplay._spectrumDisplaySettings.symbolsChanged.connect(self._symbolsChangedInSettings)
@@ -388,6 +386,46 @@ class GuiStrip(Frame):
         """
         self._CcpnGLWidget._processSpectrumNotifier(data)
 
+    def _checkAliasingRange(self, spectrum):
+        """check whether the local aliasingRange has changed and entend the visible range if needed
+        """
+        newAliasingRange = spectrum.aliasingRange
+        if not self._currentAliasingRange:
+            self._currentAliasingRange[spectrum] = newAliasingRange
+
+            # update
+            with notificationBlanking():
+                vARange = spectrum.visibleAliasingRange
+                newRange = tuple((min(minL, minR), max(maxL, maxR))
+                                 for (minL, maxL), (minR, maxR) in zip(vARange, newAliasingRange))
+                spectrum.visibleAliasingRange = newRange
+
+        if spectrum in self._currentAliasingRange and self._currentAliasingRange[spectrum] != newAliasingRange:
+            self._currentAliasingRange[spectrum] = newAliasingRange
+
+            # update
+            with notificationBlanking():
+                vARange = spectrum.visibleAliasingRange
+                newRange = tuple((min(minL, minR), max(maxL, maxR))
+                                 for (minL, maxL), (minR, maxR) in zip(vARange, newAliasingRange))
+                spectrum.visibleAliasingRange = newRange
+
+    def _checkVisibleAliasingRange(self, spectrum):
+        """check whether the local visibleAliasingRange has changed and update the limits of the plane toolbar
+        """
+        newVisibleAliasingRange = spectrum.visibleAliasingRange
+        if not self._currentVisibleAliasingRange:
+            self._currentVisibleAliasingRange[spectrum] = newVisibleAliasingRange
+            # update
+            if not self.spectrumDisplay.is1D:
+                self._setZWidgets()
+
+        if spectrum in self._currentVisibleAliasingRange and self._currentVisibleAliasingRange[spectrum] != newVisibleAliasingRange:
+            # update
+            self._currentVisibleAliasingRange[spectrum] = newVisibleAliasingRange
+            if not self.spectrumDisplay.is1D:
+                self._setZWidgets()
+
     def _updateDisplayedPeaks(self, data):
         """Callback when peaks have changed
         """
@@ -405,18 +443,7 @@ class GuiStrip(Frame):
                 pass
 
             spectrum = obj.peakList.spectrum
-            newAliasingRange = spectrum.aliasingRange
-            if not self._aliasingRange:
-                self._aliasingRange[spectrum] = newAliasingRange
-                # update
-                if not self.spectrumDisplay.is1D:
-                    self._setZWidgets()
-
-            if spectrum in self._aliasingRange and self._aliasingRange[spectrum] != newAliasingRange:
-                # update
-                self._aliasingRange[spectrum] = newAliasingRange
-                if not self.spectrumDisplay.is1D:
-                    self._setZWidgets()
+            self._checkVisibleAliasingRange(spectrum)
 
     def _updateDisplayedNmrAtoms(self, data):
         """Callback when nmrAtoms have changed
@@ -459,7 +486,6 @@ class GuiStrip(Frame):
                                 if strip != currentStrip:
                                     toolTip = 'Show cursor in strip %s at Peak position %s' % (str(strip.id), str([round(x, 3) for x in peaks[0].position]))
                                     if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
-
                                         self.navigateToPeakMenu.addItem(text=strip.pid,
                                                                         callback=partial(navigateToPositionInStrip, strip=strip,
                                                                                          positions=peaks[0].position,
@@ -491,7 +517,6 @@ class GuiStrip(Frame):
                             if strip != currentStrip:
                                 toolTip = 'Show cursor in strip %s at Cursor position %s' % (str(strip.id), str([round(x, 3) for x in position]))
                                 if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
-
                                     self.navigateCursorMenu.addItem(text=strip.pid,
                                                                     callback=partial(navigateToPositionInStrip, strip=strip,
                                                                                      positions=position, axisCodes=currentStrip.axisCodes, ),
@@ -519,7 +544,6 @@ class GuiStrip(Frame):
                                 if strip != currentStrip:
                                     toolTip = 'Show cursor in strip %s at Peak position %s' % (str(strip.id), str([round(x, 3) for x in peaks[0].position]))
                                     if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
-
                                         self.markInPeakMenu.addItem(text=strip.pid,
                                                                     callback=partial(self._createMarkAtPosition,
                                                                                      positions=peaks[0].position,
@@ -549,7 +573,6 @@ class GuiStrip(Frame):
                             if strip != currentStrip:
                                 toolTip = 'Show cursor in strip %s at Cursor position %s' % (str(strip.id), str([round(x, 3) for x in position]))
                                 if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
-
                                     self.markInCursorMenu.addItem(text=strip.pid,
                                                                   callback=partial(self._createMarkAtPosition,
                                                                                    positions=position, axisCodes=currentStrip.axisCodes, ),
@@ -748,7 +771,6 @@ class GuiStrip(Frame):
             spectrumDisplay = self.spectrumDisplay
             for strip in spectrumDisplay.strips:
                 if strip != self:
-
                     # set the pivotPosition in the other strips
                     strip._updatePivotLine(self._newPosition)
 
@@ -1467,7 +1489,6 @@ class GuiStrip(Frame):
             spectrumViews = self.spectrumDisplay.orderedSpectrumViews(self.spectrumViews)
             for specView in spectrumViews:
                 specView.setVisible(specView.spectrum in spectra)
-
 
     def report(self):
         """Generate a drawing object that can be added to reports

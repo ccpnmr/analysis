@@ -166,27 +166,27 @@ class SetPeakAliasingPopup(CcpnDialog):
         if spectrum:
             spectrum._updateAliasingRangeFlag = updateValue
 
-    def _refreshGLItems(self):
+    def _refreshGLItems(self, spectrumUpdateList):
+        """update the display for the changed aliasing range
+        """
+        for spectrum, updateFlag in spectrumUpdateList:
+            if updateFlag:
+                alias = spectrum._getAliasingRange()
+                if alias is not None:
 
-        # change aliasing contour limits for selected peaks
+                    # notifier handles spectrumDisplay change
+                    spectrum.visibleAliasingRange = alias
 
-        # iterate through spectra
-        # through peaks
-        # get aliasing limits for each peak
-        # set aliasing limits in spectrum properties
-
-        # update values in strips
-
-        for spectrum in self.project.spectra:
-
-            # check whether the visibleAliasingRange needs to be updated
-            if not spectrum._updateAliasingRangeFlag:
-                continue
-
-            alias = spectrum._getAliasingRange()
-            if alias:
-                spectrum.visibleAliasingRange = alias
-                spectrum.displayFoldedContours = True
+        # for spectrum in self.project.spectra:
+        #
+        #     # check whether the visibleAliasingRange needs to be updated
+        #     if not spectrum._updateAliasingRangeFlag:
+        #         continue
+        #
+        #     alias = spectrum._getAliasingRange()
+        #     if alias is not None:
+        #         spectrum.visibleAliasingRange = alias
+        #         spectrum.displayFoldedContours = True
 
             # # calculate the min/max aliasing values for the spectrum
             # dims = spectrum.dimensionCount
@@ -208,7 +208,7 @@ class SetPeakAliasingPopup(CcpnDialog):
             #     spectrum.displayFoldedContours = True
 
         # emit a signal to rebuild all peaks
-        self.GLSignals.emitEvent(triggers=[GLNotifier.GLALLPEAKS, GLNotifier.GLALLMULTIPLETS])
+        # self.GLSignals.emitEvent(triggers=[GLNotifier.GLALLPEAKS, GLNotifier.GLALLMULTIPLETS])
 
     def _okButton(self):
         """
@@ -216,11 +216,15 @@ class SetPeakAliasingPopup(CcpnDialog):
         """
         with handleDialogApply(self):
 
+            spectrumUpdateList = tuple((spec,
+                                        spec._updateAliasingRangeFlag) for spec in self.spectra.keys())
+
             # add item here to redraw items
             with undoStackBlocking() as addUndoItem:
-                addUndoItem(undo=self._refreshGLItems)
+                addUndoItem(undo=partial(self._refreshGLItems, spectrumUpdateList))
 
             for spec in self.spectra.keys():
+                # set the aliasing for the peaks
                 newAlias = tuple([int(pullDown.get()) for pullDown in self.spectraPulldowns[spec]])
 
                 for peak in self.spectra[spec]:
@@ -228,9 +232,9 @@ class SetPeakAliasingPopup(CcpnDialog):
 
             # add item here to redraw items
             with undoStackBlocking() as addUndoItem:
-                addUndoItem(redo=self._refreshGLItems)
+                addUndoItem(redo=partial(self._refreshGLItems, spectrumUpdateList))
 
             # redraw the items
-            self._refreshGLItems()
+            self._refreshGLItems(spectrumUpdateList)
 
         self.accept()

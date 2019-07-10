@@ -40,6 +40,9 @@ from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreS
 from ccpn.util.Logging import getLogger
 
 
+ALIASINGCHANGED = '_aliasingChanged'
+
+
 class Peak(AbstractWrapperObject):
     """Peak object, holding position, intensity, and assignment information
 
@@ -184,6 +187,7 @@ class Peak(AbstractWrapperObject):
         # aliasing may have changed here
         if currentAlias != newAlias:
             self._checkAliasing()
+            setattr(self, ALIASINGCHANGED, True)
 
     ppmPositions = position
 
@@ -232,6 +236,7 @@ class Peak(AbstractWrapperObject):
         # aliasing may have changed here
         if currentAlias != newAlias:
             self._checkAliasing()
+            setattr(self, ALIASINGCHANGED, True)
 
     @property
     def boxWidths(self) -> Tuple[Optional[float], ...]:
@@ -284,6 +289,7 @@ class Peak(AbstractWrapperObject):
         # aliasing may/may not have changed here
         if currentAlias != newAlias:
             self._checkAliasing()
+            setattr(self, ALIASINGCHANGED, True)
 
     @property
     def dimensionNmrAtoms(self) -> Tuple[Tuple['NmrAtom', ...], ...]:
@@ -512,6 +518,13 @@ class Peak(AbstractWrapperObject):
                 mt._finaliseAction(action='change')
             # NOTE:ED does integral need to be notified? - and reverse notifiers in multiplet/integral
 
+        if action in ['change']:
+            # check whether the peak aliasing has changed and check containing spectrum
+            if getattr(self, ALIASINGCHANGED, None):
+                print('>>>aliasing changed - notify spectrum')
+                self._aliasingChanged = False
+                self.peakList.spectrum._finaliseAction(action=action)
+
     #=========================================================================================
     # CCPN functions
     #=========================================================================================
@@ -726,7 +739,7 @@ class Peak(AbstractWrapperObject):
         """
         spectrum = self.peakList.spectrum
         alias = spectrum._getAliasingRange()
-        if alias:
+        if alias is not None:
             spectrum.aliasingRange = alias
 
     #===========================================================================================

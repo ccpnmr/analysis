@@ -650,7 +650,7 @@ class GuiStripNd(GuiStrip):
                     continue
 
                 indices = getAxisCodeMatchIndices(self.axisCodes, spectrumView.spectrum.axisCodes)
-                alais = spectrumView.spectrum.aliasingRange
+                alais = spectrumView.spectrum.visibleAliasingRange
 
                 minFrequency = viewParams.minAliasedFrequency
                 maxFrequency = viewParams.maxAliasedFrequency

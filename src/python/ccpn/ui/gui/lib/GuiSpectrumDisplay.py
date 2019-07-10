@@ -1943,11 +1943,17 @@ def _spectrumHasChanged(data):
             # update toolbar button name
             action.setText(spectrum.name)
 
-    # force redraw of the spectra
-    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+        # check the visibleAliasing here and update planeToolbar
+        for strip in spectrumDisplay.strips:
+            print('>>>checking spectrum aliasing')
+            strip._checkAliasingRange(spectrum)
+            strip._checkVisibleAliasingRange(spectrum)
 
+    # force redraw of the spectra
     for specView in spectrum.spectrumViews:
         specView.buildContours = True
+
+    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
     # fire refresh event to repaint the screen
     GLSignals = GLNotifier(parent=spectrum)

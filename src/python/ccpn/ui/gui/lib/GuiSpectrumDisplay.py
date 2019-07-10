@@ -1945,7 +1945,6 @@ def _spectrumHasChanged(data):
 
         # check the visibleAliasing here and update planeToolbar
         for strip in spectrumDisplay.strips:
-            print('>>>checking spectrum aliasing')
             strip._checkAliasingRange(spectrum)
             strip._checkVisibleAliasingRange(spectrum)
 

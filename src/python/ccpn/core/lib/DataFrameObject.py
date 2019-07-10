@@ -341,13 +341,9 @@ class DataFrameObject(object):
 
             # store to the table
             with self._table._guiTableUpdate(self):
+                appendDataFrame = pd.DataFrame([listDict], columns=self.headings)
+                self._dataFrame = self._dataFrame.append(appendDataFrame)
                 self._table.setRow(row, list(listDict.values()))
-
-            # store the actual object in the dataFrame
-            # if DATAFRAME_PID in listDict.keys():
-            #   listDict[DATAFRAME_PID] = obj
-            appendDataFrame = pd.DataFrame([listDict], columns=self.headings)
-            self._dataFrame = self._dataFrame.append(appendDataFrame)
 
             # except Exception as es:
             #   getLogger().warning(str(es))

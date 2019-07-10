@@ -1741,7 +1741,7 @@ GuiTable::item::selected {
         with self._tableBlockSignals('_updateRowCallback'):
             row = data[Notifier.OBJECT]
 
-            if not self._dataFrameObject or not row:
+            if not self._dataFrameObject or row is None:
                 return
 
             #self._silenceCallback = True

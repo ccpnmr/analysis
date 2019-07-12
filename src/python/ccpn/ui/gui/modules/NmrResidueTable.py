@@ -135,11 +135,17 @@ class NmrResidueTableModule(CcpnModule):
         # check for valid displays
         if self.nmrResidueTableSettings.displaysWidget:
             gids = self.nmrResidueTableSettings.displaysWidget.getTexts()
-            if len(gids) == 0: return displays
-            if ALL in gids:
-                displays = self.application.ui.mainWindow.spectrumDisplays
-            else:
-                displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
+            if len(gids) == 0:
+                return displays
+
+            if self.includeDisplaySettings:
+                if ALL in gids:
+                    displays = self.application.ui.mainWindow.spectrumDisplays
+                else:
+                    displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
+        else:
+            if self.current.strip:
+                displays.append(self.current.strip.spectrumDisplay)
 
         return displays
 
@@ -175,14 +181,26 @@ class NmrResidueTableModule(CcpnModule):
 
             newWidths = []
 
-            if self.current.strip:
-                specDisplay = self.current.strip.spectrumDisplay
+            for specDisplay in displays:
+                if self.current.strip in specDisplay.strips:
 
-                navigateToNmrAtomsInStrip(self.current.strip,
-                                          nmrResidue.nmrAtoms,
-                                          widths=newWidths,
-                                          markPositions=self.nmrResidueTableSettings.markPositionsWidget.checkBox.isChecked(),
-                                          setNmrResidueLabel=True)
+                    # just navigate to this strip
+                    navigateToNmrAtomsInStrip(self.current.strip,
+                                              nmrResidue.nmrAtoms,
+                                              widths=newWidths,
+                                              markPositions=self.nmrResidueTableSettings.markPositionsWidget.checkBox.isChecked(),
+                                              setNmrResidueLabel=True)
+
+                else:
+                    #navigate to the specDisplay (and remove excess strips)
+                    if len(specDisplay.strips) > 0:
+                        newWidths = []
+                        navigateToNmrResidueInDisplay(nmrResidue, specDisplay, stripIndex=0,
+                                                      widths=newWidths,  #['full'] * len(display.strips[0].axisCodes),
+                                                      showSequentialResidues=(len(specDisplay.axisCodes) > 2) and
+                                                                             self.nmrResidueTableSettings.sequentialStripsWidget.checkBox.isChecked(),
+                                                      markPositions=self.nmrResidueTableSettings.markPositionsWidget.checkBox.isChecked()
+                                                      )
 
                 # open the other headers to match
                 for strip in specDisplay.strips:

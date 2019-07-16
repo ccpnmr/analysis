@@ -165,7 +165,7 @@ class BMRBcslToV3(CcpnDialog):
         bmrbFileLabel = Label(self, text="BMRB File", grid=(row, 0))
         self.inputDialog = LineEditButtonDialog(self,textLineEdit=self.bmrbFilePath, directory=self.directory, grid=(row, 1))
         row += 1
-        self.buttonList = ButtonList(self, ['Info','Cancel', 'Create'], [self._showInfo, self.reject, self._okButton], grid=(row, 1))
+        self.buttonList = ButtonList(self, ['Info','Cancel', 'Import'], [self._showInfo, self.reject, self._okButton], grid=(row, 1))
 
     def _showInfo(self):
         showWarning(Warnings, InfoMessage)

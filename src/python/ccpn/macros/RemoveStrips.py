@@ -1,4 +1,4 @@
-# Macro to change the tolerances of all (or a selection of?) spectra in one go
+# Macro to remove all but the current strip from a SpectrumDisplay
 
 # What the macro ultimately needs to do:
 # Check whether Spectrum display contains current.strip
@@ -15,7 +15,7 @@ if numberOfStrips > 1:
     # Check whether Spectrum display contains current.strip
     if current.strip in spectrumDisplay:
         for ii in range(numberOfStrips):
-          # Check whether that the last strip is not the current strip
+          # Check that the last strip is not the current strip
             if last strip is not current.strip:
                 spectrumDisplay.deleteStrip(spectrumDisplay.strips[-1])
             else

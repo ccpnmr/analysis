@@ -1,6 +1,6 @@
 # Macro to change the tolerances of all (or a selection of?) spectra in one go
 
-# What the macro ulitmately needs to do
+# What the macro ultimately needs to do:
 # (User specifies which spectra to apply change to)
 # User specifies new tolerances for H, N and C dims
 # For each spectrum

@@ -60,6 +60,8 @@ class Strip(AbstractWrapperObject):
     #: List of child classes.
     _childClasses = []
 
+    _isGuiClass = True
+
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiBoundStrip._metaclass.qualifiedName()
 

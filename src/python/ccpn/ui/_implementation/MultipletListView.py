@@ -55,6 +55,8 @@ class MultipletListView(AbstractWrapperObject):
     #: List of child classes.
     _childClasses = []
 
+    _isGuiClass = True
+
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiStripMultipletListView._metaclass.qualifiedName()
 

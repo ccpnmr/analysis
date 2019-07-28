@@ -195,7 +195,10 @@ class PeakListTableWidget(GuiTable):
                              grid=(row, gridHPos + 1), gridSpan=(1, 1))
         self._widgetScrollArea.setFixedHeight(35)  # needed for the correct sizing of the table
 
-        self._hiddenColumns = ['Pid']
+        #TODO: this dhould be part of the definitions; extracted from there and paased to the
+        #TODO constructor of the GuiTable module.
+        self._hiddenColumns = ['Pid', 'HeightError', 'VolumeError']
+
         self.dataFrameObject = None
         selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
         actionCallback = self._actionCallback if actionCallback is None else actionCallback
@@ -258,38 +261,46 @@ class PeakListTableWidget(GuiTable):
         for i in range(peakList.spectrum.dimensionCount):
             assignTipText = 'NmrAtom assignments of peak in dimension %s' % str(i + 1)
             columnDefs.append(
-                    ('Assign F%s' % str(i + 1), lambda pk, dim=i: getPeakAnnotation(pk, dim), assignTipText, None))
+                    ('Assign F%s' % str(i + 1), lambda pk, dim=i: getPeakAnnotation(pk, dim), assignTipText, None)
+            )
 
         # Peak positions column
         for i in range(peakList.spectrum.dimensionCount):
             positionTipText = 'Peak position in dimension %s' % str(i + 1)
-            columnDefs.append(('Pos F%s' % str(i + 1),
+            columnDefs.append(
+                    ('Pos F%s' % str(i + 1),
                                lambda pk, dim=i, unit=self.positionsUnit: getPeakPosition(pk, dim, unit),
-                               positionTipText, None))
+                               positionTipText, None)
+            )
 
         # linewidth column TODO remove hardcoded Hz unit
         for i in range(peakList.spectrum.dimensionCount):
             linewidthTipTexts = 'Peak line width %s' % str(i + 1)
             columnDefs.append(
-                    ('LW F%s (Hz)' % str(i + 1), lambda pk, dim=i: getPeakLinewidth(pk, dim), linewidthTipTexts, None))
+                    ('LW F%s (Hz)' % str(i + 1), lambda pk, dim=i: getPeakLinewidth(pk, dim), linewidthTipTexts, None)
+            )
 
         # height column
         heightTipText = 'Magnitude of spectrum intensity at peak center (interpolated), unless user edited'
         columnDefs.append(('Height', lambda pk: pk.height, heightTipText, None))
+        columnDefs.append(('HeightError', lambda pk: pk.heightError, 'Error of the height', None))
 
         # volume column
         volumeTipText = 'Integral of spectrum intensity around peak location, according to chosen volume method'
         columnDefs.append(('Volume', lambda pk: pk.volume, volumeTipText, None))
+        columnDefs.append(('VolumeError', lambda pk: pk.volumeError, 'Error of the volume', None))
 
         # figureOfMerit column
         figureOfMeritTipText = 'Figure of merit'
         columnDefs.append(('Merit', lambda pk: pk.figureOfMerit, figureOfMeritTipText,
-                           lambda pk, value: self._setFigureOfMerit(pk, value)))
+                           lambda pk, value: self._setFigureOfMerit(pk, value))
+        )
 
         # comment column
         commentsTipText = 'Textual notes about the peak'
         columnDefs.append(('Comment', lambda pk: self._getCommentText(pk), commentsTipText,
-                           lambda pk, value: self._setComment(pk, value)))
+                           lambda pk, value: self._setComment(pk, value))
+        )
 
         return ColumnClass(columnDefs)
 

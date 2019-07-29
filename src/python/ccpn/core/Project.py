@@ -1186,7 +1186,9 @@ class Project(AbstractWrapperObject):
         # #TODO:RASMUS FIXME check for rename
 
         try:
-            apiDataSource = self._wrappedData.loadDataSource(path, subType, name)
+            apiDataSource = self._wrappedData.loadDataSource(
+                            filePath=path, dataFileFormat=subType, name=name
+            )
         except Exception as es:
             getLogger().warning(es)
             raise es
